@@ -40,18 +40,33 @@ const LAYER_PATTERNS: Array[Array] = [
 	["res://core", "references core infrastructure"],
 ]
 
+## The bare forms are the global RNG. `rng.randf_range()` on a named stream is
+## exactly what code *should* write, so these must not match a call that has a
+## receiver — hence "not preceded by a dot" rather than a plain word boundary.
+##
+## `shuffle()` and `pick_random()` are the other way round: they are Array
+## methods, always written with a receiver, and they draw from the global
+## generator regardless.
+const NO_RECEIVER: String = "(^|[^_a-zA-Z0-9.])"
+
 const RNG_PATTERNS: Array[Array] = [
-	["\\brandomize\\s*\\(", "calls randomize()"],
-	["\\brandi\\s*\\(", "calls randi()"],
-	["\\brandf\\s*\\(", "calls randf()"],
-	["\\brandi_range\\s*\\(", "calls randi_range()"],
-	["\\brandf_range\\s*\\(", "calls randf_range()"],
-	["\\brand_from_seed\\s*\\(", "calls rand_from_seed()"],
+	[NO_RECEIVER + "randomize\\s*\\(", "calls randomize()"],
+	[NO_RECEIVER + "randi\\s*\\(", "calls randi()"],
+	[NO_RECEIVER + "randf\\s*\\(", "calls randf()"],
+	[NO_RECEIVER + "randi_range\\s*\\(", "calls randi_range()"],
+	[NO_RECEIVER + "randf_range\\s*\\(", "calls randf_range()"],
+	[NO_RECEIVER + "rand_from_seed\\s*\\(", "calls rand_from_seed()"],
 	["\\.shuffle\\s*\\(", "calls shuffle(), which uses the global RNG"],
 	["\\.pick_random\\s*\\(", "calls pick_random(), which uses the global RNG"],
 ]
 
 const HASH_PATTERN: String = "(^|[^_a-zA-Z0-9.])hash\\s*\\("
+
+## Seam A and Seam B. Only the sim writes sim state, and inside the sim that
+## means a phase or an executor consuming an Intent (#4). An effect handler or a
+## UI path that reached `apply()` would be writing the world directly, which is
+## exactly what "Orders are never writes" forbids.
+const APPLY_PATTERN: String = "\\.apply\\s*\\("
 
 ## Files allowed to hold the thing they are the exception for.
 const RNG_EXEMPT: PackedStringArray = ["res://sim/rng/rng_streams.gd"]
@@ -98,6 +113,9 @@ func _check(path: String) -> void:
 		if not RNG_EXEMPT.has(path):
 			for rule in RNG_PATTERNS:
 				_match(path, index, line, rule[0], rule[1])
+
+		if not in_sim:
+			_match(path, index, line, APPLY_PATTERN, "calls apply() outside sim/ — only the sim writes sim state (Seam A, Seam B)")
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")
