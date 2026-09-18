@@ -1,0 +1,5 @@
+[
+  { "id": "portrait.marshal", "path": "res://icon.svg" },
+  { "id": "portrait.chancellor", "path": "res://icon.svg" },
+  { "id": "portrait.steward", "path": "res://icon.svg" }
+]
