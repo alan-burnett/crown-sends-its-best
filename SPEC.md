@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v1.6: Under Author ownership but not ready for PO or developers.
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v1.7: Under Author ownership but not ready for PO or developers.
 
 ---
 
@@ -172,7 +172,7 @@ Each turn is **one month** and represents one exchange of correspondence with th
 6. **Closing cutscenes** (optional).  
 7. **Resolution.** The world simulation runs, and it may trigger a fail condition or the 50-year retirement. Otherwise the next turn begins.
 
-**🔒 Order of time:** letters sent this turn are acted on during the *next* simulation step, and their effects appear in the next turn's playback and letters. Nothing the player writes changes the world instantly.
+**🔒 Nothing the player writes changes the world instantly.** The world month loop describes in detail how the player’s correspondence affects the world and influences next month’s correspondence. 
 
 **🔒 Only the desk has decisions.** The map, the ledger, and cutscenes show information only.
 
