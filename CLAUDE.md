@@ -102,6 +102,24 @@ All six of the spec's decision points go through one kernel, never a bespoke
   Adding natives is not complete until governors, commanders and the director
   can all feel them.
 
+### The world month
+
+Nine phases wrapping SPEC §11.3's Colony Month, which is phase 4 of the nine.
+See `docs/mechanics/world-month.md`.
+
+**The timing rule: an Intent committed in month N executes in phase 2 of month
+N+1.** One month to hear back, two months to see it happen.
+
+SPEC §7 says letters are "acted on during the next simulation step." They are —
+read, relationships updated, new Intent produced. It does **not** mean the
+physical consequence lands in that step. Implementing one-month physical effects
+destroys the announce-then-act property the whole loop depends on.
+
+It follows that **consequential actions should be multi-month, so a letter can
+interrupt them.** A single-month action cannot be countermanded, which is where
+arriving too late is supposed to sting; if everything were single-month the
+player would be a spectator.
+
 ### Determinism
 
 - **Named RNG streams per system** (mapgen, letters, sim resolution, contacts),
