@@ -101,9 +101,9 @@ static func choose(actor: DeliberationActor, candidates: Array, context: Deliber
 		for consideration in considerations:
 			if not consideration.applies_to(candidate):
 				continue
-			var raw := consideration.scored(actor, candidate, context)
+			var raw: float = consideration.scored(actor, candidate, context)
 			var weight := actor.weight_for(consideration.id)
-			var weighted := raw * weight
+			var weighted: float = raw * weight
 			total += weighted
 			scored.append({
 				"id": String(consideration.id),

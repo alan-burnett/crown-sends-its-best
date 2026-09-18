@@ -32,9 +32,16 @@ func run_all() -> Dictionary:
 	for method_name in _test_methods():
 		_current = method_name
 		_failures = PackedStringArray()
+		var before_count := _assertions
 		before_each()
 		call(method_name)
 		after_each()
+		# A GDScript runtime error aborts the method without raising anything a
+		# runner can catch, so a test that blew up looks exactly like a test that
+		# passed. A method that recorded no assertion did not run, and saying so
+		# is the only way this runner can go red on an error rather than green.
+		if _assertions == before_count:
+			fail("no assertions ran — the method aborted, or it asserts nothing")
 		if _failures.is_empty():
 			passed += 1
 		else:

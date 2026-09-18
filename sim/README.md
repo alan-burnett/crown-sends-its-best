@@ -31,6 +31,46 @@ not a polish item.
 | `world/world_diff.gd` | What changed between two states |
 | `world/world_phase.gd` | The nine World Month phase names, from `docs/mechanics/world-month.md` |
 | `serialization/canonical.gd` | One canonical text form, so equal states hash equally |
+| `deliberation/` | The one kernel every actor that chooses goes through |
+| `intent/` | What an actor committed to, and the executors that carry it out |
+
+## Seam C — will is not a write
+
+Deliberation produces **will**. Will does not change the world. It becomes an
+**Intent**, and the simulation executes the Intent over months.
+
+```
+player letter -> Order -> compliance --+
+                                       +--> Intent -> executed over months -> events
+NPC deliberation -> will --------------+
+```
+
+"The contact complied" and "the contact acted on his own and informed the PC
+afterward" (SPEC §8.5) are the same code path with different origins.
+
+**The timing rule lives on `Intent.committed_month`.** An Intent committed in
+month N executes in phase 2 of month N+1, so an executor refuses to advance an
+Intent in the month it was committed. On the player's clock: an order written on
+turn T is **acknowledged** in turn T+1's letters, and its **physical
+consequence** happens during turn T+1's resolution, which the player watches in
+turn T+2's map playback. See `docs/mechanics/world-month.md` §3.
+
+That one month of separation is the announce-then-act property, and the reason a
+player can never countermand an announced intent.
+
+**Executors are the only thing that writes sim state.** `tools/lint.gd` enforces
+the outer half — nothing above `sim/` may call `apply()` at all.
+
+## Deliberation
+
+All six of the spec's decision points go through `Deliberation.choose()`, never a
+bespoke `if` chain. Personality is a **weight vector** over considerations, not
+code. Rules the spec locks are **filters** applied before scoring, not weights
+that could lose a close vote. `choose()` always emits its scoring trace.
+
+**A milestone that adds a system ships that system's considerations with it.**
+Adding natives is not complete until governors, commanders and the director can
+all feel them.
 
 ## Determinism
 

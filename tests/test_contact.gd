@@ -2,9 +2,7 @@ extends TestCase
 
 ## The contact model, personality and Relationship (#12).
 
-const CONSIDERATIONS: PackedStringArray = PackedStringArray([
-	"native_threat", "quality_of_life", "revenue",
-])
+const CONSIDERATIONS: PackedStringArray = ["native_threat", "quality_of_life", "revenue"]
 
 
 # --- Personality -----------------------------------------------------------
