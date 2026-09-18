@@ -70,6 +70,38 @@ creates an Order addressed to a contact. The contact resolves it — comply,
 partial, delay, reinterpret, refuse, or act unilaterally — into intents the sim
 consumes on the *next* step.
 
+### Seam C — will is not a write either
+
+The same rule binds NPCs. A contact, governor or tribe **deliberates** and
+produces will; will becomes an **Intent**; the sim executes the Intent over
+months.
+
+```
+player letter -> Order -> compliance --+
+                                       +--> Intent -> executed over months -> events
+NPC deliberation -> will --------------+
+```
+
+"The contact complied" and "the contact acted on his own and informed the PC
+afterward" (§8.5) are therefore the same code path with different origins.
+
+An Intent carries a source, a target, progress, and a resolution — completed,
+stalled, abandoned, or overtaken by events. Intents persist across months and
+can be delayed, contradicted by a later letter, or invalidated meanwhile. **The
+Intent model is fixed early; later milestones add executors, not a new model.**
+
+### Deliberation
+
+All six of the spec's decision points go through one kernel, never a bespoke
+`if` chain. See `docs/mechanics/deliberation.md`.
+
+- Personality is a **weight vector** over considerations, not code.
+- Rules the spec locks are **filters** applied before scoring, not weights.
+- `choose()` always emits its **scoring trace** to the event log.
+- **A milestone that adds a system ships that system's considerations with it.**
+  Adding natives is not complete until governors, commanders and the director
+  can all feel them.
+
 ### Determinism
 
 - **Named RNG streams per system** (mapgen, letters, sim resolution, contacts),
