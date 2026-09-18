@@ -1,0 +1,38 @@
+{
+  "id": "pc.request_troops",
+  "type": "request",
+  "purpose": "Ask for Crown troops",
+  "to_roles": ["crown_officer"],
+  "params": { "to": "contact", "payment": "gold" },
+  "compose_defaults": {
+    "payment": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.5, "minimum": 100, "maximum": 2000 }
+  },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        { "tone": "dutiful", "text": "in the Crown's service" },
+        { "tone": "desperate", "text": "in some want of help" },
+        { "tone": "annoyed", "text": "having waited long enough" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "payment",
+        "prompt": "The purse",
+        "options": [
+          { "id": "full", "label": "pay the full {param:payment}",
+            "text": "You shall have {param:payment} for the trouble, and gladly{insert:warmth}.",
+            "insert": { "warmth": { "dutiful": ", as is only proper" } },
+            "effect": { "request_troops": { "to": "{to}", "payment": "{payment}" } } },
+          { "id": "nothing", "label": "offer nothing",
+            "text": "I trust the Crown's own interest is payment enough.",
+            "effect": { "request_troops": { "to": "{to}", "payment": 0 } } }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant,", "tone": { "annoyed": "Awaiting your answer," } }
+    ]
+  }
+}

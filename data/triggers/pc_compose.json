@@ -1,0 +1,10 @@
+[
+  {
+    "id": "trigger.pc.request_troops",
+    "letter": "pc.request_troops",
+    "offers_composition": true,
+    "conditions": [
+      { "loyalty_above": { "value": 20 } }
+    ]
+  }
+]
