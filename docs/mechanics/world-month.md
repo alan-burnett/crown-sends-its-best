@@ -126,7 +126,40 @@ do it.
 
 ## 3. The timing rule
 
+### Turns and months are different clocks
+
+A **Turn** (SPEC §4) is the player's unit: one round trip of correspondence. A
+**World Month** is the simulation's unit: the nine phases above. They interleave,
+and **they are not the same index.**
+
+Within turn T, per SPEC §7:
+
+| Turn T step | What the player sees |
+| :--- | :--- |
+| Date card | |
+| Map playback | the world month that ran at the end of turn T-1 |
+| Desk | letters dispatched by that same world month, in its phase 9 |
+| Send the post | |
+| Resolution | **a new world month runs** |
+
+**The desk is not inside the month it is reading about.** It sits between the
+month just reported and the month about to run. A dev who reads "the current
+month" as "the month I am looking at on the desk" is off by one, because the
+month being looked at has already finished and the next has not started.
+
+This is the most common way to misread the timing rule, so ticket acceptance
+criteria should say **acknowledgment** or **physical consequence** explicitly and
+should count in **turns**, never in bare "months".
+
+### The rule
+
 **An Intent committed in month N executes in phase 2 of month N+1.**
+
+Stated in the player's clock, which is how tickets should phrase it:
+
+> An order written on turn T is **acknowledged** in turn T+1's letters, and its
+> **physical consequence** happens during turn T+1's resolution, which the player
+> watches in turn T+2's map playback.
 
 Trace a player order through the cycle:
 
