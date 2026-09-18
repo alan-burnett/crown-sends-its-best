@@ -3,12 +3,85 @@
     "id": "trigger.steward.revenue_report",
     "letter": "steward.revenue_report",
     "urgency": 0.1,
-    "cooldown": 2,
+    "cooldown": 3,
     "params": {
-      "amount": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.2, "minimum": 10, "maximum": 4000 }
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "colony_revenue",
+        "factor": 0.2,
+        "minimum": 10,
+        "maximum": 4000
+      }
     },
     "conditions": [
-      { "always": {} }
+      {
+        "always": {}
+      }
     ]
+  },
+  {
+    "id": "trigger.steward.request_tax_rise",
+    "letter": "steward.request_tax_rise",
+    "urgency": 0.4,
+    "cooldown": 6,
+    "params": {
+      "resource": {
+        "from": "literal",
+        "value": "cloth"
+      },
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "colony_revenue",
+        "factor": 0.35,
+        "minimum": 30,
+        "maximum": 3000
+      }
+    },
+    "conditions": [
+      {
+        "world_value_below": {
+          "key": "colony_revenue",
+          "value": 1100
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.steward.question_tea",
+    "letter": "steward.question_tea",
+    "urgency": 0.2,
+    "cooldown": 8,
+    "params": {
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "colony_revenue",
+        "factor": 0.12,
+        "minimum": 20,
+        "maximum": 900
+      }
+    },
+    "conditions": [
+      {
+        "year_at_least": {
+          "year": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.steward.ack_partial",
+    "letter": "steward.ack_partial",
+    "acknowledges": "partial",
+    "urgency": 0.4,
+    "cooldown": 0,
+    "conditions": []
+  },
+  {
+    "id": "trigger.steward.ack_reinterpreted",
+    "letter": "steward.ack_reinterpreted",
+    "acknowledges": "reinterpret",
+    "urgency": 0.4,
+    "cooldown": 0,
+    "conditions": []
   }
 ]

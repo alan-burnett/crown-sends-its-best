@@ -1,0 +1,79 @@
+name: checks
+
+# Runs on pull requests against main. **Non-blocking to begin with**: nothing
+# here is a required check, so a red run is a signal to the dev rather than a
+# gate. Making it required later is a branch-protection setting and no change to
+# this file.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# A second push to the same branch cancels the first. CI that queues behind
+# itself gets ignored.
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: 4.7.1
+
+jobs:
+  checks:
+    name: validator, lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT_VERSION }}
+
+      - name: Install Godot
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot
+          curl -sSL -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip -d ~/godot
+          mv ~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64 ~/godot/godot
+          chmod +x ~/godot/godot
+
+      - name: Put Godot on PATH
+        run: echo "$HOME/godot" >> "$GITHUB_PATH"
+
+      # Godot registers `class_name` globals during a project scan, so on a
+      # fresh checkout with no .godot/ every type is missing until one runs.
+      # Without this step everything below fails with "Could not find type".
+      - name: Import the project
+        run: godot --headless --import --quit 2>&1 | tail -5
+
+      - name: Content validator
+        run: godot --headless --script res://tools/validate_content.gd
+
+      - name: Architecture lint
+        run: godot --headless --script res://tools/lint.gd
+
+      - name: Tests
+        run: godot --headless --script res://tools/run_tests.gd
+
+      # The across-processes half of "same seed, same decisions, same result".
+      # A test cannot check this for itself, so CI plays the same scripted run
+      # twice in two processes and compares the hashes.
+      - name: Determinism across processes
+        run: |
+          first=$(godot --headless --script res://tools/determinism.gd | grep '^seed=')
+          second=$(godot --headless --script res://tools/determinism.gd | grep '^seed=')
+          echo "first:  $first"
+          echo "second: $second"
+          if [ -z "$first" ]; then echo "::error::the determinism run produced no hash"; exit 1; fi
+          if [ "$first" != "$second" ]; then
+            echo "::error::the same seed and decisions produced different runs"
+            exit 1
+          fi
+          echo "identical: $first"

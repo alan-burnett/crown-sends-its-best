@@ -1,0 +1,14 @@
+{
+  "id": "steward.ack_reinterpreted",
+  "sender": "steward",
+  "type": "report",
+  "skippable": false,
+  "body": [
+    { "text": "I have done what you asked, as I understood it." },
+    { "text": "Your letter admitted of more than one reading, and I chose the one that seemed likeliest to serve the Crown." },
+    { "text": "If I have chosen wrongly, a plainer instruction would settle it.",
+      "only_tones": ["dutiful", "pleased", "desperate"] },
+    { "text": "If that was not your meaning, you had the whole of the page in which to say so.",
+      "only_tones": ["annoyed", "hateful"] }
+  ]
+}

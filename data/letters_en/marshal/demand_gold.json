@@ -1,0 +1,114 @@
+{
+  "id": "marshal.demand_gold",
+  "sender": "marshal",
+  "type": "demand",
+  "skippable": false,
+  "params": {
+    "amount": "gold"
+  },
+  "perception": {
+    "front": {
+      "measure": "crown_war_intensity",
+      "ladder": [
+        "quiet",
+        "wearisome",
+        "hard-pressed",
+        "desperate"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "The northern front is {perception:front}, and the Treasury has been plain with me: {param:amount} in coin, from the colonies, before the thaw."
+    },
+    {
+      "text": "I am told your people are prospering. I am told a great many things.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I would not ask if there were anywhere else left to ask.",
+      "only_tones": [
+        "desperate"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "at the Crown's disposal, as always"
+        },
+        {
+          "tone": "pleased",
+          "text": "glad of the chance to be useful"
+        },
+        {
+          "tone": "annoyed",
+          "text": "weary of being asked"
+        },
+        {
+          "tone": "desperate",
+          "text": "scraping the bottom of the chest"
+        },
+        {
+          "tone": "hateful",
+          "text": "astonished at your nerve"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "coin",
+        "prompt": "The demand",
+        "options": [
+          {
+            "id": "pay",
+            "label": "pay the {param:amount} in full",
+            "text": "The {param:amount} is pledged, and will be with you before the thaw{insert:grace}.",
+            "insert": {
+              "grace": {
+                "pleased": ", with my compliments",
+                "dutiful": ", as is owed"
+              }
+            },
+            "effect": {
+              "promise_gold": {
+                "to": "marshal",
+                "amount": "{amount}"
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "refuse the demand outright",
+            "text": "The colony will send nothing this season{insert:sting}.",
+            "insert": {
+              "sting": {
+                "hateful": ", and you may tell the Treasury I said so"
+              }
+            },
+            "effect": {
+              "refuse": {
+                "to": "marshal"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,",
+        "tone": {
+          "pleased": "Ever your friend in this,",
+          "hateful": "I have nothing further to say to you."
+        }
+      }
+    ]
+  }
+}

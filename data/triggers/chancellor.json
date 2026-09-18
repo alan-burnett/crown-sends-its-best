@@ -5,10 +5,75 @@
     "urgency": 0.8,
     "cooldown": 5,
     "params": {
-      "amount": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.1, "minimum": 5, "maximum": 2000 }
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "colony_revenue",
+        "factor": 0.1,
+        "minimum": 5,
+        "maximum": 2000
+      }
     },
     "conditions": [
-      { "world_value_below": { "key": "colony_revenue", "value": 1400 } }
+      {
+        "world_value_below": {
+          "key": "colony_revenue",
+          "value": 1400
+        }
+      }
     ]
+  },
+  {
+    "id": "trigger.chancellor.warning_standing",
+    "letter": "chancellor.warning_standing",
+    "urgency": 0.9,
+    "cooldown": 9,
+    "params": {
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "colony_revenue",
+        "factor": 2,
+        "minimum": 100,
+        "maximum": 9000
+      }
+    },
+    "conditions": [
+      {
+        "world_value_below": {
+          "key": "colony_revenue",
+          "value": 820
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.news_defeat",
+    "letter": "chancellor.news_defeat",
+    "urgency": 0.4,
+    "cooldown": 6,
+    "params": {
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "crown_war_intensity",
+        "factor": 7,
+        "minimum": 30,
+        "maximum": 700
+      }
+    },
+    "conditions": [
+      {
+        "world_value_rose_by": {
+          "path": "values.crown_war_intensity",
+          "amount": 7
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.ack_acted_alone",
+    "letter": "chancellor.ack_acted_alone",
+    "acknowledges": "act_alone",
+    "urgency": 0.5,
+    "cooldown": 0,
+    "conditions": []
   }
 ]

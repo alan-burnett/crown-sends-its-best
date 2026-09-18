@@ -22,6 +22,9 @@ static func register_all() -> void:
 		"world_value", {"key": "string"}, M1ParamSources.world_value
 	)
 	ContentRegistry.register_param_source(
+		"order_param", {"name": "string", "fallback": "string"}, M1ParamSources.order_param
+	)
+	ContentRegistry.register_param_source(
 		"scaled_world_value",
 		{"key": "string", "factor": "number", "minimum": "number", "maximum": "number"},
 		M1ParamSources.scaled_world_value,
@@ -40,6 +43,14 @@ static func world_value(args: Dictionary, context: LetterContext) -> Variant:
 	if context.state == null:
 		return 0
 	return context.state.get_value(String(args["key"]), 0.0)
+
+
+## A value out of the Order being acknowledged, so a letter can name what it was
+## you asked for. Falls back when there is no order in hand.
+static func order_param(args: Dictionary, context: LetterContext) -> Variant:
+	if context.data_order == null:
+		return args["fallback"]
+	return context.data_order.get_param(String(args["name"]), args["fallback"])
 
 
 ## A whole number scaled off a world value, which is how a demand grows with the
