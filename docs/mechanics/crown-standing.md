@@ -116,7 +116,9 @@ WARNED           Chancellor's final warning. Promises are STILL HONORED.
    |         no  -> continue
    v
 REFUSING         All gold promises break. The Crown honors nothing.
-   |  standing rises above 35
+   |             Entering this state costs a grade: the restore
+   |             threshold rises for the rest of the run.
+   |  standing rises above the current restore threshold
    v
 SOLVENT
 ```
@@ -157,15 +159,38 @@ countdown begins. Once per run.
 Implemented as a repeatable cycle rather than a warning counter, so further
 perks or quirks that grant grace need no new machinery.
 
-### Hysteresis
+### Hysteresis, and the grade
 
 Refusal begins when standing falls below **20**. It ends when standing rises
-above **35**. The gap is the grace: a PC restored at 35 has real runway before
-returning to lost standing, rather than teetering on the boundary.
+above the **restore threshold**, which starts at **35**. The gap is the grace: a
+PC restored at 35 has real runway before returning to lost standing, rather than
+teetering on the boundary.
 
-The warning gate reinforces this at no extra cost. Even a PC who drops straight
-back below 20 gets a fresh Chancellor warning and a fresh countdown before
-payments stop again, so restoration is never immediately undone.
+**The restore threshold rises each time the Crown cuts the PC off.** It is a
+credit rating losing a grade on every default: the arithmetic of recovery does
+not change, but the Crown requires more proof each time before it reopens the
+faucet.
+
+```
+first cutoff    restore above 35
+second cutoff   restore above 45
+third cutoff    restore above 55
+...             capped at 65
+```
+
+The cap exists so recovery stays theoretically possible, not to be merciful. A PC
+on his fourth collapse must climb nearly to the Content band before the Crown
+will pay a penny on his word, which is punishing by design.
+
+**The grade drops on entering `REFUSING`, not on falling below 20.** A PC who
+dips into lost standing and claws back before the countdown expires has not
+defaulted, and his rating is untouched. That is the whole purpose of the warning
+window, and charging him for a near miss would blunt it. See open items — the
+alternative reading is one line to flip.
+
+The warning gate reinforces the hysteresis at no extra cost. Even a PC who drops
+straight back below 20 gets a fresh Chancellor warning and a fresh countdown
+before payments stop again, so restoration is never immediately undone.
 
 ## 4. What breaks, and what does not
 
@@ -224,17 +249,18 @@ balance harness and revised from playtest.
 
 ## 8. Open items
 
-- **Repeat collapses.** Unspecified: whether a second or third fall below 20
-  grants the same two-turn window as the first. Granting it every time is
-  exploitable — a player can cycle deliberately to harvest two turns of honored
-  promises per collapse. **Recommendation: the countdown decays, two turns the
-  first time and one thereafter**, so each collapse is worse than the last. An
-  alternative worth considering is raising the restore threshold each time, so
-  the Crown's patience visibly shortens. Needs an Author decision.
+- **What drops the grade.** Currently entering `REFUSING`, on the reasoning that a
+  dip corrected inside the warning window is a near miss rather than a default.
+  The alternative is any fall below 20, which is harsher and makes the warning
+  window less valuable. One line either way.
+- **Whether the grade ever recovers.** Currently permanent for the run. Real
+  credit ratings improve with a long clean record, and a 50-year run (§6.2)
+  carrying damage from year 3 may be too unforgiving. Needs playtest before
+  adding the state.
 - Whether taxes raised under duress should count toward revenue at full value, or
   be discounted because the Crown knows what they cost politically.
 - Whether standing should decay passively at all. Current model says no: only
   profit moves it, because passive recovery would undercut the Squeeze.
-- **Gold's share of prestige remains SPEC §17's open question.** This model makes
-  `net_position` at retirement the obvious candidate, but that is the Author's
-  call and is deliberately not settled here.
+- **Gold's share of prestige (SPEC §17) is deliberately not approached here.**
+  Anything written now would be invalidated by iteration on this model. It waits
+  until crown standing has been through playtest and stabilized.
