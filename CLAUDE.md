@@ -178,6 +178,25 @@ and silent breakage is expensive:**
 anything expected to iterate. A test written against a moving value will be
 rejected.
 
+## Running things
+
+```bash
+./tools/godot.sh --script res://tools/run_tests.gd    # tests
+./tools/godot.sh --script res://tools/lint.gd         # architecture lint
+./tools/godot.sh --editor --quit                      # reimport after adding a class_name
+```
+
+`tools/godot.sh` finds Godot, runs it headless, and streams the output. On
+Windows the standard Godot build prints nothing to a terminal without it.
+
+**Reimport after adding a `class_name`.** Godot only registers those during a
+project scan, so a script added outside the editor is invisible until one runs.
+The failure reads `Could not find type "X" in the current scope`.
+
+The lint enforces two rules that are cheap now and expensive to retrofit:
+nothing under `sim/` touches a Godot node, and nothing anywhere draws from the
+global RNG or the engine's built-in `hash()`.
+
 ## Platform and presentation
 
 - **Portrait-first.** Mobile is portrait; reply options overlay the bottom of

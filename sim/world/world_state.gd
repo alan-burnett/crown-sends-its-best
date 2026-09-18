@@ -72,7 +72,7 @@ func value_keys() -> PackedStringArray:
 ## `changes` maps value key to its new value. The emitted payload carries both
 ## the old and new value of each, so a consumer can render "revenue fell by 40"
 ## without holding the previous state.
-func apply(log: EventLog, type: StringName, subject: StringName, changes: Dictionary) -> SimEvent:
+func apply(log: EventLog, type: StringName, subject: StringName, changes: Dictionary, phase: StringName = &"") -> SimEvent:
 	var keys: Array = changes.keys()
 	keys.sort_custom(func(a: Variant, b: Variant) -> bool: return String(a) < String(b))
 	var recorded: Dictionary = {}
@@ -82,7 +82,7 @@ func apply(log: EventLog, type: StringName, subject: StringName, changes: Dictio
 		var after: Variant = changes[key]
 		values[key_text] = after
 		recorded[key_text] = {"from": before, "to": after}
-	return log.emit(type, subject, month, {"changes": recorded})
+	return log.emit(type, subject, month, {"changes": recorded}, phase)
 
 
 ## Advance to the next month. The turn machine (#7) owns when this is called.

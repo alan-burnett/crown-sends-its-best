@@ -17,8 +17,8 @@ var _next_seq: int = 0
 
 
 ## Record an event and return it, `seq` already stamped.
-func emit(type: StringName, subject: StringName, month: int, payload: Dictionary = {}) -> SimEvent:
-	var event := SimEvent.new(type, subject, month, payload)
+func emit(type: StringName, subject: StringName, month: int, payload: Dictionary = {}, phase: StringName = &"") -> SimEvent:
+	var event := SimEvent.new(type, subject, month, payload, phase)
 	event.seq = _next_seq
 	_next_seq += 1
 	_events.append(event)
@@ -37,6 +37,14 @@ func for_month(month: int) -> Array[SimEvent]:
 	var out: Array[SimEvent] = []
 	for event in _events:
 		if event.month == month:
+			out.append(event)
+	return out
+
+
+func for_phase(phase: StringName) -> Array[SimEvent]:
+	var out: Array[SimEvent] = []
+	for event in _events:
+		if event.phase == phase:
 			out.append(event)
 	return out
 

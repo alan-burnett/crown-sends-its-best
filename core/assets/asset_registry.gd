@@ -1,3 +1,4 @@
+class_name AssetRegistry
 extends Node
 
 ## Asset references resolved through an indirection layer, as an autoload
@@ -13,6 +14,8 @@ extends Node
 ## reports once, because losing a run to a typo in an art path would be a poor
 ## trade (SPEC §16.2 — ironman).
 
+const AUTOLOAD_PATH: NodePath = ^"/root/Content"
+
 const COLLECTION: String = "assets"
 const PATH_KEY: String = "path"
 
@@ -26,16 +29,28 @@ var _placeholder: Texture2D = null
 
 ## Where registrations are read from. Defaults to the `Content` autoload; tests
 ## set their own so they do not depend on autoloads being instantiated.
-var content_source: Node = null
+##
+## Looked up through the tree rather than by the autoload's global name, because
+## that global only exists when the project boots normally. A `--script` run —
+## the validator, the lint, the tests, CI — has its own main loop and no such
+## identifier, and naming it here would stop this file compiling in all four.
+var content_source: ContentDatabase = null
 
 
-func _content() -> Node:
-	return content_source if content_source != null else Content
+func _content() -> ContentDatabase:
+	if content_source != null:
+		return content_source
+	var autoload := get_node_or_null(AUTOLOAD_PATH)
+	return autoload as ContentDatabase
 
 
 ## The resource path registered for `id`, or "" when there is none.
 func resolve(id: String) -> String:
-	var records: Dictionary = _content().collection(COLLECTION)
+	var content := _content()
+	if content == null:
+		push_error("AssetRegistry has no content source.")
+		return ""
+	var records: Dictionary = content.collection(COLLECTION)
 	if not records.has(id):
 		return ""
 	return String(records[id].get(PATH_KEY, ""))
@@ -47,7 +62,8 @@ func has(id: String) -> bool:
 
 ## Ids currently registered, sorted.
 func ids() -> PackedStringArray:
-	return _content().ids(COLLECTION)
+	var content := _content()
+	return content.ids(COLLECTION) if content != null else PackedStringArray()
 
 
 ## A texture for `id`, falling back to the placeholder.

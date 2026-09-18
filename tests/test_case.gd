@@ -107,6 +107,14 @@ func assert_almost_eq(actual: float, expected: float, tolerance: float = 0.0001,
 		fail("expected %f +/- %f, got %f. %s" % [expected, tolerance, actual, message])
 
 
+## Object identity. `assert_eq` compares through the canonical encoding, which
+## is for plain data — an Object has no meaningful encoding there.
+func assert_same(actual: Object, expected: Object, message: String = "") -> void:
+	_assertions += 1
+	if actual != expected:
+		fail("expected the same object. %s" % message)
+
+
 func assert_has(container: Variant, key: Variant, message: String = "") -> void:
 	_assertions += 1
 	if not container.has(key):

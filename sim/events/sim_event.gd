@@ -20,12 +20,20 @@ var month: int = 0
 var seq: int = 0
 var payload: Dictionary = {}
 
+## Which of the nine World Month phases emitted this (`WorldPhase`), or empty
+## where nothing was running the loop. Every phase emits
+## (`docs/mechanics/world-month.md` §4), and several of that document's rules are
+## orderings, so playback and the ledger need to know which phase an event
+## belongs to rather than inferring it from position.
+var phase: StringName = &""
 
-func _init(p_type: StringName = &"", p_subject: StringName = &"", p_month: int = 0, p_payload: Dictionary = {}) -> void:
+
+func _init(p_type: StringName = &"", p_subject: StringName = &"", p_month: int = 0, p_payload: Dictionary = {}, p_phase: StringName = &"") -> void:
 	type = p_type
 	subject = p_subject
 	month = p_month
 	payload = p_payload
+	phase = p_phase
 
 
 func to_dict() -> Dictionary:
@@ -34,6 +42,7 @@ func to_dict() -> Dictionary:
 		"subject": String(subject),
 		"month": month,
 		"seq": seq,
+		"phase": String(phase),
 		"payload": payload,
 	}
 
@@ -44,10 +53,12 @@ static func from_dict(data: Dictionary) -> SimEvent:
 		StringName(data.get("subject", "")),
 		int(data.get("month", 0)),
 		data.get("payload", {}),
+		StringName(data.get("phase", "")),
 	)
 	event.seq = int(data.get("seq", 0))
 	return event
 
 
 func _to_string() -> String:
-	return "[%d] m%d %s/%s %s" % [seq, month, type, subject, payload]
+	var where := "" if phase.is_empty() else "/%s" % phase
+	return "[%d] m%d%s %s/%s %s" % [seq, month, where, type, subject, payload]

@@ -11,6 +11,9 @@ extends SceneTree
 
 const TESTS_ROOT: String = "res://tests"
 
+## The base class shares the `test_` prefix but is not itself a test.
+const BASE_CLASS: String = "test_case.gd"
+
 
 func _init() -> void:
 	var files := _discover(TESTS_ROOT)
@@ -26,10 +29,14 @@ func _init() -> void:
 	var started := Time.get_ticks_msec()
 
 	for path in files:
+		# A test file with a parse error must fail the run, not end it. Letting
+		# the error propagate would skip the `quit()` below and leave the process
+		# running forever, which in CI reads as a hang rather than a failure.
 		var script: Script = load(path)
-		if script == null:
-			failures.append("%s: could not be loaded" % path)
+		if script == null or not script.can_instantiate():
+			failures.append("%s: could not be loaded (see the parse errors above)" % path)
 			total_failed += 1
+			print("FAIL  %s  could not be loaded" % path.get_file().get_basename())
 			continue
 		var test_case: TestCase = script.new()
 		var result: Dictionary = test_case.run_all()
@@ -80,7 +87,7 @@ func _walk(dir_path: String, found: PackedStringArray) -> void:
 		var full_path: String = dir_path.path_join(entry)
 		if dir.current_is_dir():
 			directories.append(full_path)
-		elif entry.begins_with("test_") and entry.ends_with(".gd"):
+		elif entry.begins_with("test_") and entry.ends_with(".gd") and entry != BASE_CLASS:
 			found.append(full_path)
 		entry = dir.get_next()
 	dir.list_dir_end()

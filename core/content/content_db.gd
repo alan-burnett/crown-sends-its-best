@@ -1,3 +1,4 @@
+class_name ContentDatabase
 extends Node
 
 ## The loaded content of `data/`, as an autoload (`Content`).

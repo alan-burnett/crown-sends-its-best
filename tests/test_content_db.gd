@@ -5,14 +5,14 @@ extends TestCase
 ## Runs against the real `data/` tree rather than a fixture, so it also answers
 ## "does the content currently in the repo load".
 
-var db: Node = null
-var assets: Node = null
+var db: ContentDatabase = null
+var assets: AssetRegistry = null
 
 
 func before_each() -> void:
-	db = load("res://core/content/content_db.gd").new()
+	db = ContentDatabase.new()
 	db.load_all("en")
-	assets = load("res://core/assets/asset_registry.gd").new()
+	assets = AssetRegistry.new()
 	assets.content_source = db
 
 
@@ -28,19 +28,19 @@ func test_real_data_tree_loads_clean() -> void:
 func test_language_suffix_becomes_the_collection_name() -> void:
 	# `data/letters_en/` is the collection `letters`. A second language is a
 	# copied folder where only `text` fields change — no code, no new name.
-	var names := db.collection_names()
+	var names: PackedStringArray = db.collection_names()
 	assert_true(names.has("letters"), "expected a 'letters' collection, got %s" % names)
 	assert_false(names.has("letters_en"), "the language suffix must not leak into the name")
 
 
 func test_unsuffixed_directories_keep_their_name() -> void:
-	var names := db.collection_names()
+	var names: PackedStringArray = db.collection_names()
 	assert_true(names.has("assets"), "got %s" % names)
 	assert_true(names.has("triggers"), "got %s" % names)
 
 
 func test_other_languages_are_not_loaded() -> void:
-	var other: Node = load("res://core/content/content_db.gd").new()
+	var other := ContentDatabase.new()
 	other.load_all("fr")
 	# No `letters_fr` folder exists yet, so selecting French yields no letters
 	# rather than silently falling back to the English prose.
@@ -49,8 +49,8 @@ func test_other_languages_are_not_loaded() -> void:
 
 
 func test_collection_names_and_ids_are_sorted() -> void:
-	var names := db.collection_names()
-	var sorted_names := names.duplicate()
+	var names: PackedStringArray = db.collection_names()
+	var sorted_names: PackedStringArray = names.duplicate()
 	sorted_names.sort()
 	assert_eq(names, sorted_names)
 
@@ -71,4 +71,4 @@ func test_missing_asset_falls_back_to_a_placeholder() -> void:
 	# A typo in an art path must not cost a run (SPEC §16.2, ironman).
 	var texture: Texture2D = assets.texture("portrait.nobody")
 	assert_true(texture != null, "a missing asset must still return a texture")
-	assert_eq(texture, assets.placeholder())
+	assert_same(texture, assets.placeholder())

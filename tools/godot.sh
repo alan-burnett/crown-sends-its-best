@@ -24,9 +24,16 @@ if [[ -z "$GODOT_BIN" ]]; then
 fi
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Streamed through a file rather than run directly, because the Windows build
+# is a GUI-subsystem binary and writes nothing to an attached terminal. Tailing
+# it as it goes means a hang shows where it hung instead of printing nothing.
 OUT="$(mktemp)"
-"$GODOT_BIN" --headless --path "$PROJECT_DIR" "$@" >"$OUT" 2>&1
+"$GODOT_BIN" --headless --path "$PROJECT_DIR" "$@" >"$OUT" 2>&1 &
+GODOT_PID=$!
+tail -n +1 -f --pid="$GODOT_PID" "$OUT" 2>/dev/null &
+TAIL_PID=$!
+wait "$GODOT_PID"
 STATUS=$?
-cat "$OUT"
+wait "$TAIL_PID" 2>/dev/null
 rm -f "$OUT"
 exit $STATUS
