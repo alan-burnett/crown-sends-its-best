@@ -27,4 +27,5 @@ outside the editor is invisible until one runs, and the failure looks like
 | Script | What it does |
 | :--- | :--- |
 | `run_tests.gd` | Runs every `tests/test_*.gd`. A test file that fails to parse is a failure, not a hang. |
-| `lint.gd` | `sim/` references no node type; nothing uses the global RNG or the engine's `hash()`. |
+| `lint.gd` | `sim/` references no node type; nothing uses the global RNG or the engine's `hash()`; nothing above `sim/` writes sim state. |
+| `validate_content.gd` | Every id resolves, every effect is registered, every tone key is known, no dangling slots, every `{param:}` declared. |
