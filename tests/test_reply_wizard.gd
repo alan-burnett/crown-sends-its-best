@@ -69,6 +69,14 @@ func test_each_letter_phrases_the_tone_question_in_its_own_words() -> void:
 	assert_not_empty(marshal.tone_prompt())
 
 
+func test_the_tone_prompt_reads_as_a_blank_to_fill() -> void:
+	# The insertion point is the mad-libs blank. The raw token must never reach
+	# the player — it did, until somebody looked at the screen.
+	var wizard := _wizard("chancellor.how_to_answer", &"chancellor")
+	assert_false(wizard.tone_prompt().contains(LetterSchema.CHOICE_TOKEN), wizard.tone_prompt())
+	assert_true(wizard.tone_prompt().contains(ReplyWizard.BLANK), wizard.tone_prompt())
+
+
 func test_a_letter_may_offer_any_subset_of_the_five() -> void:
 	var marshal := _wizard("marshal.request_supplies", &"marshal")
 	var chancellor := _wizard("chancellor.how_to_answer", &"chancellor")

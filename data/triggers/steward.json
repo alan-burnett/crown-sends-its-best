@@ -3,6 +3,7 @@
     "id": "trigger.steward.revenue_report",
     "letter": "steward.revenue_report",
     "urgency": 0.1,
+    "cooldown": 2,
     "params": {
       "amount": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.2, "minimum": 10, "maximum": 4000 }
     },

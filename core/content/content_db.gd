@@ -125,8 +125,25 @@ func record(collection_name: String, id: String) -> Dictionary:
 
 # --- Errors ----------------------------------------------------------------
 
+## Whether the content is loaded **and** loaded cleanly.
+##
+## Both halves matter. An empty database has no errors, so a plain "no errors"
+## check reports success for content that was never read — which is how the desk
+## came up with no letters and no complaint.
 func ok() -> bool:
-	return _errors.is_empty()
+	return _loaded and _errors.is_empty()
+
+
+func is_loaded() -> bool:
+	return _loaded
+
+
+## Load once, if nobody has yet. Safe to call from anywhere that needs the
+## content to be there, whatever ran first.
+func ensure_loaded(p_language: String = "") -> bool:
+	if _loaded:
+		return ok()
+	return load_all(p_language)
 
 
 func errors() -> Array[JsonLoader.LoadError]:

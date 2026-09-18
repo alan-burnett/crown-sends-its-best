@@ -32,6 +32,16 @@ func after_each() -> void:
 	content.free()
 
 
+## A run of its own, because the director's cooldown makes a second
+## `compose_inbox` in the same month deliberately different from the first.
+func _fresh_run(world_values: Dictionary = {}) -> RunState:
+	var fresh := RunState.new_run(SEED)
+	ContactRoster.load_into(fresh, content)
+	for key in world_values:
+		fresh.world.values[key] = world_values[key]
+	return fresh
+
+
 func _letter_of(inbound: InboundLetter) -> Letter:
 	return Letter.from_record(content.record("letters", inbound.letter_id))
 
@@ -65,12 +75,13 @@ func test_a_trigger_whose_conditions_hold_fires() -> void:
 
 func test_selection_is_deterministic() -> void:
 	var first: PackedStringArray = PackedStringArray()
-	for inbound in machine.director.compose_inbox(run):
+	for inbound in machine.director.compose_inbox(_fresh_run()):
 		first.append(inbound.letter_id)
 	var second: PackedStringArray = PackedStringArray()
-	for inbound in machine.director.compose_inbox(run):
+	for inbound in machine.director.compose_inbox(_fresh_run()):
 		second.append(inbound.letter_id)
 	assert_eq(first, second)
+	assert_not_empty(first)
 
 
 # --- The params contract ---------------------------------------------------
@@ -88,10 +99,14 @@ func test_every_declared_param_is_supplied_at_the_right_type() -> void:
 func test_the_director_supplies_values_the_letter_never_decides() -> void:
 	# The letter declares; the director supplies. Change the world and the same
 	# letter arrives carrying different values.
-	run.world.values["crown_war_intensity"] = 40.0
-	var low := _find(machine.director.compose_inbox(run), "marshal.request_supplies")
-	run.world.values["crown_war_intensity"] = 90.0
-	var high := _find(machine.director.compose_inbox(run), "marshal.request_supplies")
+	var low := _find(
+		machine.director.compose_inbox(_fresh_run({"crown_war_intensity": 40.0})),
+		"marshal.request_supplies",
+	)
+	var high := _find(
+		machine.director.compose_inbox(_fresh_run({"crown_war_intensity": 90.0})),
+		"marshal.request_supplies",
+	)
 
 	assert_true(low != null and high != null, "the Marshal did not write in both months")
 	assert_true(int(high.params["amount"]) > int(low.params["amount"]),
@@ -163,6 +178,40 @@ func test_volume_tracks_the_targets_across_a_run() -> void:
 		for inbound in run.inbox:
 			inbound.status = InboundLetter.SET_ASIDE
 		machine.send_post()
+
+
+# --- Cooldown --------------------------------------------------------------
+
+func test_the_same_letter_does_not_arrive_every_month() -> void:
+	# Without a cooldown the same three triggers fire every month and the Author
+	# reads the same correspondence twelve times, which is the failure #20 warns
+	# about — and it lands on the director, not on the world.
+	var arrivals: Dictionary = {}
+	for turn in 8:
+		machine.begin_turn()
+		for inbound in run.inbox:
+			arrivals[inbound.letter_id] = int(arrivals.get(inbound.letter_id, 0)) + 1
+			inbound.status = InboundLetter.SET_ASIDE
+		machine.send_post()
+
+	for letter_id in arrivals:
+		assert_true(int(arrivals[letter_id]) < 8,
+			"'%s' arrived in all 8 months" % letter_id)
+
+
+func test_a_trigger_may_set_its_own_cooldown() -> void:
+	# A standing report comes round often; a crisis letter rarely.
+	var steward: Dictionary = content.record("triggers", "trigger.steward.revenue_report")
+	var chancellor: Dictionary = content.record("triggers", "trigger.chancellor.how_to_answer")
+	assert_true(int(steward["cooldown"]) < int(chancellor["cooldown"]))
+
+
+func test_the_cooldown_survives_a_reload() -> void:
+	# A resumed run that forgot would start repeating itself.
+	machine.begin_turn()
+	assert_not_empty(run.letters_sent)
+	var restored := RunState.from_dict(run.to_dict())
+	assert_eq(restored.letters_sent, run.letters_sent)
 
 
 # --- Culling ---------------------------------------------------------------

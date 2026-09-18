@@ -23,6 +23,14 @@ const EARLY_BUDGET: int = 6
 const MID_BUDGET: int = 12
 const LATE_BUDGET: int = 20
 
+## Months before the same letter may arrive again.
+##
+## Without this the same three triggers fire every month and the Author reads the
+## same correspondence twelve times — which is the failure #20 warns about, and
+## it lands on the director rather than on the world. A trigger may set its own
+## `cooldown`; a standing report wants a short one, a crisis letter a long one.
+const DEFAULT_COOLDOWN: int = 3
+
 const EVENT_CULLED: StringName = &"letter_culled"
 const EVENT_DISPATCHED: StringName = &"letter_dispatched"
 
@@ -58,6 +66,7 @@ func compose_inbox(run: RunState, outcomes: Array = []) -> Array[InboundLetter]:
 	var letters := _cull(fired, acknowledging, run)
 
 	for letter in letters:
+		run.letters_sent[letter.letter_id] = run.world.month
 		run.log.emit(EVENT_DISPATCHED, letter.sender, run.world.month, {
 			"letter": letter.letter_id,
 			"tone": String(letter.tone),
@@ -75,6 +84,9 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 		if not content.has_record("letters", letter_id):
 			continue
 
+		if _too_soon(trigger, letter_id, run):
+			continue
+
 		var letter := Letter.from_record(content.record("letters", letter_id))
 		var contact := run.contact(StringName(letter.sender))
 		if contact == null:
@@ -86,6 +98,14 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 
 		fired.append(_inbound(trigger, letter, contact, context, run))
 	return fired
+
+
+## Whether this letter arrived too recently to arrive again.
+func _too_soon(trigger: Dictionary, letter_id: String, run: RunState) -> bool:
+	if not run.letters_sent.has(letter_id):
+		return false
+	var cooldown := int(trigger.get("cooldown", DEFAULT_COOLDOWN))
+	return run.world.month - int(run.letters_sent[letter_id]) < cooldown
 
 
 func _conditions_hold(trigger: Dictionary, context: LetterContext) -> bool:
