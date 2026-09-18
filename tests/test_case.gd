@@ -77,6 +77,9 @@ func _class_label() -> String:
 # --- Assertions ------------------------------------------------------------
 
 func fail(message: String) -> void:
+	# Counts as an assertion, so a deliberate failure does not also trip the
+	# "no assertions ran" guard and get reported twice.
+	_assertions += 1
 	_failures.append(message)
 
 
