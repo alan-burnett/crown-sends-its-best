@@ -1,0 +1,18 @@
+{
+  "id": "steward.revenue_report",
+  "sender": "steward",
+  "type": "report",
+  "skippable": true,
+  "params": { "amount": "gold" },
+  "perception": {
+    "purse": {
+      "measure": "colony_revenue",
+      "ladder": ["ruinous", "thin", "tolerable", "handsome"]
+    }
+  },
+  "body": [
+    { "text": "The month's returns are {perception:purse}, at {param:amount} in duties." },
+    { "text": "I say again what I said in the spring: a firmer rate on tea would answer.",
+      "only_tones": ["annoyed", "hateful"] }
+  ]
+}

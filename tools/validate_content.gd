@@ -33,6 +33,7 @@ func _init() -> void:
 	var validator := ContentValidator.new()
 	validator.validate(content)
 	validator.check_trigger_targets(content)
+	validator.check_trigger_params(content)
 	print(validator.report())
 
 	var ok := validator.ok()

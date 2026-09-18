@@ -2,6 +2,11 @@
   {
     "id": "trigger.marshal.request_supplies",
     "letter": "marshal.request_supplies",
+    "urgency": 0.5,
+    "params": {
+      "resource": { "from": "literal", "value": "iron" },
+      "amount": { "from": "scaled_world_value", "key": "crown_war_intensity", "factor": 4, "minimum": 20, "maximum": 400 }
+    },
     "conditions": [
       { "world_value_above": { "key": "crown_war_intensity", "value": 30 } },
       { "months_silent_at_least": { "months": 0 } }

@@ -64,6 +64,12 @@ var orders: OrderDriver = null
 ## Settles promises, in phase 5.
 var promise_driver: PromiseDriver = null
 
+## Reads the letters the PC did not answer, in phase 7.
+var silence: SilenceDriver = null
+
+## Decides who writes to the PC, and about what.
+var director: Director = null
+
 
 func _init(p_run: RunState) -> void:
 	run = p_run
@@ -76,7 +82,10 @@ func _init(p_run: RunState) -> void:
 	month_runner = WorldMonth.new(run.intents, run.streams)
 	# Order matters only where the mechanics doc says it does; each driver
 	# answers for its own phase.
-	month_runner.drivers = [StubWorld.new(), promise_driver, orders]
+	silence = SilenceDriver.new()
+	silence.run = run
+
+	month_runner.drivers = [StubWorld.new(), promise_driver, orders, silence]
 	month_runner.executors = [StubIntentExecutor.new()]
 
 
@@ -84,6 +93,13 @@ func _init(p_run: RunState) -> void:
 
 ## Begin a turn: the date card, the stubbed cutscene and playback slots, and then
 ## the desk. Stops there, because **only the desk has decisions**.
+## Supply the letter content, and with it the director that reads it.
+func use_content(p_content: ContentDatabase) -> void:
+	content = p_content
+	silence.content = p_content
+	director = Director.new(p_content)
+
+
 func begin_turn() -> void:
 	run.phase = DATE_CARD
 	run.log.emit(EVENT_TURN_BEGAN, &"run", run.world.month, {
@@ -97,6 +113,10 @@ func begin_turn() -> void:
 			break
 		run.phase = phase
 	run.phase = DESK
+
+	# The month's letters arrive, acknowledging what became of last month's post.
+	if director != null:
+		run.inbox = director.compose_inbox(run, orders.results)
 
 
 func at_desk() -> bool:
@@ -130,6 +150,13 @@ func send_post() -> bool:
 		return false
 
 	run.phase = SENDING
+
+	# Whatever the player set aside travels with the post as silence, and is read
+	# next month in the same phase a reply would have been.
+	for inbound in run.inbox:
+		if inbound.status == InboundLetter.SET_ASIDE:
+			silence.pending.append(inbound)
+
 	issued_orders = _build_orders()
 	# The post goes aboard. It is read next month, in phase 7.
 	for order in issued_orders:

@@ -27,11 +27,13 @@ static func register_all() -> void:
 	register_conditions()
 	register_measures()
 	register_considerations()
+	M1ParamSources.register_all()
 
 
 ## **A milestone that adds a system ships that system's considerations with it.**
 static func register_considerations() -> void:
 	ComplianceConsiderations.register_all()
+	UnansweredConsiderations.register_all()
 
 
 # --- Effects ---------------------------------------------------------------
