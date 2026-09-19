@@ -46,6 +46,12 @@ Deliberate, because it sets up the taxation crisis:
 2. **Tea** — second cheapest, and **it can never be produced** (§10.1).
 3. Rum, cigars, and the raw luxuries above them.
 
+**The rule behind the ordering, which is what must not break:** *tea is the
+cheapest pleasure a town can never make for itself.* Any luxury priced below tea
+must be one the colony can produce, or a town will buy that instead and tea stops
+being the place taxation bites. State it this way because a later price change
+can honour the ordering by accident and still break the design.
+
 A growing town supplements itself with beer, then rum once it has sugar. **Tea is
 the cheapest luxury a town must always buy**, which makes it the point where
 taxation breaks first — not because anything favours it, but because it is the
@@ -85,10 +91,14 @@ never sells below it. One breakpoint per resource, no granularity.
 
 ### Size
 
-Base is roughly **three months of consumption**, scaled with population — "do I
-have what I need for the next three turns". For resources a town does not
-consume, such as stone or guns, the base is therefore near zero, and the
-modifiers below are what create the demand.
+Per-resource, in months of consumption, scaled with population. The shipped
+baseline is **food 2, clothing 1, everything else 0.5**, which is a better
+starting point than a single global figure and is what the tuning should move
+from.
+
+For resources a town does not consume — stone, guns, tools — months of
+consumption is zero, so the base is zero and **the modifiers below are the only
+thing that creates demand.**
 
 ### Modified by objective and intent
 
@@ -99,6 +109,11 @@ modifiers below are what create the demand.
 This is what makes reserve an **economic driver** rather than a safety buffer. A
 military intent does not protect guns the town already has — it creates demand
 for guns it does not have, and the town goes shopping.
+
+**A hoarding posture reserves everything.** An objective to stockpile or harvest
+a resource sets its reserve high enough that Relief and Sell both find nothing to
+give away. That is the correct reading of an order to hoard, and it is the
+strongest form the modifier takes.
 
 ### Who respects it
 
@@ -178,8 +193,11 @@ trading. It never falls because a trade went badly.
 
 ## 7. Pinned: production and conversion
 
-**Production is a larger mechanic than this doc covers, and it is deferred by the
-Author.** It will take in tiles, improvements, building bonuses, experts, and the
+**The minimum M2 needed is built** — #64 shipped conversion in the Work phase and
+`sim/colony/conversion.gd` exists, so the six conversions of §10.1 all happen and
+clothing no longer has to be bought. The blocker recorded here is closed.
+
+**The larger mechanic remains deferred by the Author** (#92). It will take in tiles, improvements, building bonuses, experts, and the
 allocation of workers between working tiles and converting raw resources into
 processed ones.
 

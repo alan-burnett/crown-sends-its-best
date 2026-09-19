@@ -61,6 +61,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_reopened_the_faucet", {}, ColonyConditions.crown_reopened_the_faucet
 	)
+	ContentRegistry.register_condition(
+		"i_was_let_down", {"within": "integer"}, ColonyConditions.i_was_let_down
+	)
 
 
 ## Whether the town could not cover a need out of its own stores this month.
@@ -157,6 +160,21 @@ static func crown_closed_the_faucet(_args: Dictionary, context: LetterContext) -
 static func crown_reopened_the_faucet(_args: Dictionary, context: LetterContext) -> bool:
 	var refusal := context.refusal
 	return refusal != null and refusal.state == CrownRefusal.SOLVENT and refusal.cutoffs > 0
+
+
+## Whether the PC's word to this contact was recently not kept.
+##
+## **The letter the cascade needs.** A loyalty drop nobody mentions is a number
+## moving in the dark; this is how the injured party comes to write about it, and
+## how the player watches a run come apart rather than merely reading that it
+## has (SPEC §9.5, #70).
+static func i_was_let_down(args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.sender.relationship == null:
+		return false
+	var when := context.sender.relationship.last_promise_broken_month
+	if when < 0:
+		return false
+	return context.month - when <= maxi(1, int(args.get("within", 2)))
 
 
 static func town_measure_below(args: Dictionary, context: LetterContext) -> bool:
