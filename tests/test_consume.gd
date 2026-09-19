@@ -174,6 +174,36 @@ func test_a_brief_shortfall_kills_nobody() -> void:
 	assert_empty(harness["context"].log.of_type(ConsumePhase.EVENT_FAMINE))
 
 
+func test_a_famine_takes_lives_one_at_a_time() -> void:
+	# **🔒 No single event ever costs a town more than one population**
+	# (CLAUDE.md). A bad month may take several, but each is its own resolution
+	# and its own event — never one event saying three died. The Diplomat's death
+	# roll and everything else per-population hangs off that.
+	var town := _town(60)
+	var harness := _harness(town)
+	var before := town.population()
+	for _month in ConsumePhase.FAMINE_MONTHS:
+		_eat(harness)
+
+	var deaths: Array = harness["context"].log.of_type(ConsumePhase.EVENT_FAMINE)
+	assert_not_empty(deaths, "sixty people starved for three months and nobody died")
+	assert_eq(deaths.size(), before - town.population(),
+		"%d died and %d events were emitted" % [before - town.population(), deaths.size()])
+
+	for event in deaths:
+		# Each names one person, not a count.
+		assert_true(typeof(event.payload["lost"]) == TYPE_STRING,
+			"a famine event carried a tally rather than a single loss")
+
+
+func test_a_famine_never_takes_more_than_the_town_has() -> void:
+	var town := _town(2)
+	var harness := _harness(town)
+	for _month in ConsumePhase.FAMINE_MONTHS + 4:
+		_eat(harness)
+	assert_true(town.population() >= 0, "the town was taken below empty")
+
+
 func test_famine_takes_workers_before_experts() -> void:
 	# A colony loses its skilled men last.
 	var town := _town(4)
