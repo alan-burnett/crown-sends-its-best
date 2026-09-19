@@ -46,7 +46,7 @@ Mapped onto the World Month:
 | World phase | What happens |
 | :--- | :--- |
 | 1 Arrivals | the post reaches the colony |
-| 4 Colony Month, step 8 Settle | the town reconsiders its objective (§5) |
+| 4 Colony Month, step 8 Settle | the town reconsiders its objective (§7) |
 | 7 Reckoning | the governor reads the post; compliance sets his posture |
 | 8 Intent | the governor commits to an intent |
 | 9 Dispatch | he writes, announcing what he means to do |
@@ -135,7 +135,55 @@ When translating intent into objective, the governor picks the tile for an
 improvement — the best available for the purpose. The PC may state preferences by
 letter but never names a tile, consistent with §11.4's lock.
 
-## 6. Reconsideration
+## 6. How the PC influences a town
+
+**The PC addresses intent. He almost never names an objective.**
+
+This is characterisation before it is mechanics. The PC is a pampered aristocrat
+who has never seen a dock. *"You must build a dock before the warehouse"* is not
+an utterance he is capable of. *"You must care for your population's survival,
+not your iron production"* is exactly what he would write.
+
+So the governor's letter purposes are pronouncements on priority, each mapping to
+an intent:
+
+| What the PC writes | Intent |
+| :--- | :--- |
+| attend to the colony's profit | increase economic output |
+| see that the town grows | grow the population |
+| see to your defences | strengthen defences |
+| plant a new settlement | settle a new town |
+| your people's survival must come first | secure survival |
+
+### Naming an objective is possible, and usually a mistake
+
+The PC *can* name a specific objective. He should rarely want to, and when he
+does it should usually go badly — which is correct rather than a punishment.
+
+The governor's objective selection is deterministic and well informed. The PC's
+is neither: everything he knows about the town arrived through one man's
+perception ladders, a month late. A specific instruction replaces a good
+optimiser with a worse one.
+
+**Reinterpretation at the objective level is the competent subordinate quietly
+protecting the PC from himself.** He builds what his advisors would have chosen
+and reports that His Grace's wishes have been attended to. Whether the PC ever
+finds out depends on the governor's personality.
+
+### What compliance means at each level
+
+| Level | Comply | Refuse or reinterpret |
+| :--- | :--- | :--- |
+| **Intent** | he adopts the intent the PC urges | he keeps his own, and may say so |
+| **Objective** | he builds the named thing | he builds what the town actually needed |
+
+### The Mandate is an intent-level instruction
+
+§6.1's Mandate is the Crown's stated goal for the colony, which is an intent. The
+PC relaying or pressing the mandate is an ordinary intent-level order. One
+mechanism, not two.
+
+## 7. Reconsideration
 
 Every Settle, the town runs a **reconsider step**. It is deterministic — no
 personality, no dice. It asks three questions:
@@ -169,7 +217,7 @@ the governor's intent turns to defence, the town must not spend eleven more
 months on a dock. The crisis intent should be able to override deep sunk
 progress, and that is the case to tune against.
 
-## 7. How this feeds Quality of Life
+## 8. How this feeds Quality of Life
 
 `docs/mechanics/quality-of-life.md` defines **hope** as mostly the *fitness* of
 the objective — is anyone addressing what the town actually needs — with progress
@@ -189,7 +237,7 @@ objective. That is rule by correspondence working as designed.
 There is no cycle. This month's QoL reads the objective set last month; next
 month's intent reads this month's QoL. One month apart, never within a month.
 
-## 8. Where personality lives, and where it must not
+## 9. Where personality lives, and where it must not
 
 | Decision | Personality? |
 | :--- | :--- |
@@ -203,7 +251,7 @@ A dev adding a personality weight to any row marked *no* has broken the design.
 The governor is not incompetent, and a town that builds badly reads as a bug
 rather than as character.
 
-## 9. Open items
+## 10. Open items
 
 - The full intent set, and whether "serve the Crown" belongs in it as distinct
   from economic output.
@@ -213,7 +261,3 @@ rather than as character.
 - How hard a crisis intent should override sunk progress.
 - Whether an intent, once abandoned, should be less attractive for a while, so a
   governor does not oscillate between two intents on alternate months.
-- Whether the PC can address intent directly by letter ("think of the harvest,
-  not the harbour") or only indirectly by ordering objectives. The former is far
-  better correspondence and is probably what §11.3's "setting objectives and
-  policies" means.
