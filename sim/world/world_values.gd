@@ -27,6 +27,10 @@ const FOOD: String = "food_security"
 ## nothing else changes.
 const MANDATE: String = "crown_mandate"
 
+## **How the colony is living**, weighted by where the people are (#50). Settle
+## computes each town's and this is what the Crown's officers see of it.
+const QUALITY_OF_LIFE: String = "quality_of_life"
+
 
 static func initial_state() -> WorldState:
 	var state := WorldState.new(0, {
@@ -36,6 +40,7 @@ static func initial_state() -> WorldState:
 		FOOD: 1.1,
 		CAMPAIGN_MONTHS_LEFT: 0,
 		MANDATE: GovernorIntent.ECONOMY,
+		QUALITY_OF_LIFE: 0.5,
 	})
 	for key in TaxRates.initial_values():
 		state.values[key] = TaxRates.initial_values()[key]
@@ -49,5 +54,6 @@ static func measures(state: WorldState) -> Dictionary:
 		REVENUE: float(state.get_value(REVENUE, 0.0)),
 		SUPPLY: float(state.get_value(SUPPLY, 0.0)),
 		FOOD: float(state.get_value(FOOD, 0.0)),
+		QUALITY_OF_LIFE: float(state.get_value(QUALITY_OF_LIFE, 0.0)),
 		"tax_burden": TaxRates.burden(state),
 	}

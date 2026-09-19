@@ -51,7 +51,7 @@ const HEALTHY_REVENUE: float = 80.0
 static func register_all() -> void:
 	var kinds: Array = [DecisionKind.GOVERNOR_INTENT]
 	Deliberation.register_consideration(FoodSecurity.new(), kinds)
-	Deliberation.register_consideration(QualityOfLife.new(), kinds)
+	Deliberation.register_consideration(Comfort.new(), kinds)
 	Deliberation.register_consideration(Revenue.new(), kinds)
 	Deliberation.register_consideration(NativeThreat.new(), kinds)
 	Deliberation.register_consideration(RoomToGrow.new(), kinds)
@@ -102,11 +102,10 @@ class FoodSecurity extends Consideration:
 
 ## How well the town is living, and what that argues for.
 ##
-## Reads `quality_of_life`, which #50 computes in Settle. Until then it is zero
-## for every town, so this contributes equally to every candidate and decides
-## nothing — which is the correct behaviour for a measure that does not exist
-## yet, rather than a bug to be worked around.
-class QualityOfLife extends Consideration:
+## Reads `quality_of_life`, which Settle computes from
+## `docs/mechanics/quality-of-life.md`. It is already a `[0, 1]` value, so there
+## is no scale to apply here.
+class Comfort extends Consideration:
 	func _init() -> void:
 		super(IntentConsiderations.COMFORT)
 
@@ -114,7 +113,7 @@ class QualityOfLife extends Consideration:
 		var town: Town = context.get_value("town")
 		if town == null:
 			return 0.0
-		var lack := clampf(1.0 - town.quality_of_life / QualityOfLife.COMFORTABLE, 0.0, 1.0)
+		var lack := clampf(1.0 - town.quality_of_life, 0.0, 1.0)
 
 		match candidate.id:
 			GovernorIntent.POPULATION:
@@ -125,10 +124,6 @@ class QualityOfLife extends Consideration:
 				# A miserable town is in no condition to send its best men away.
 				return -lack
 		return 0.0
-
-	## Where quality of life stops being a worry. #50 owns the scale; this is the
-	## one number this consideration needs from it.
-	const COMFORTABLE: float = 5.0
 
 
 ## What the colony is returning to the Crown.

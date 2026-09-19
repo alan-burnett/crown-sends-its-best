@@ -47,7 +47,19 @@ var buildings: PackedStringArray = PackedStringArray()
 var quality_of_life: float = 0.0
 
 ## Rising sentiment is M3; the field exists so the town is whole.
+##
+## **🔒 Quality of life may never read this.** QoL feeds sentiment, so sentiment
+## reading back would close the loop inside a single month
+## (`docs/mechanics/quality-of-life.md` §7). The multi-month spiral of SPEC §12.3
+## runs through things that actually happened instead.
 var rebel_sentiment: float = 0.0
+
+## Births owed but not yet born.
+##
+## **Natural growth starts slowly and snowballs** (SPEC §12.1), which for a town
+## of twelve means a fraction of a person a month. Carrying the fraction is what
+## stops a small town growing not at all while a large one grows smoothly.
+var growth_accrued: float = 0.0
 
 ## **What the governor wants for the town** — a standing goal that may hold for
 ## twenty months (`GovernorIntent`). He chooses it; the town works out what to
@@ -206,6 +218,19 @@ func can_afford(amount: float) -> bool:
 	return _gold >= amount
 
 
+## How well off the town is against a target per head, as `0.0` to `1.0`.
+##
+## **The nearest thing to reading the gold that exists**, and it comes back as a
+## judgement rather than a number. Quality of life needs to know whether the town
+## can buy what it wants when the ship docks (SPEC §11.3); it does not need the
+## balance, and nothing that does not need the balance gets it.
+func prosperity(target_per_head: float) -> float:
+	var target := target_per_head * maxf(1.0, float(population()))
+	if target <= 0.0:
+		return 0.0
+	return clampf(_gold / target, 0.0, 1.0)
+
+
 # --- The objective ---------------------------------------------------------
 
 func invested(resource: StringName) -> float:
@@ -257,6 +282,7 @@ func to_dict() -> Dictionary:
 		"buildings": buildings.duplicate(),
 		"quality_of_life": quality_of_life,
 		"rebel_sentiment": rebel_sentiment,
+		"growth_accrued": growth_accrued,
 		"intent": String(intent),
 		"intent_since": intent_since,
 		"urged_intent": String(urged_intent),
@@ -289,6 +315,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.buildings = PackedStringArray(data.get("buildings", []))
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
+	town.growth_accrued = float(data.get("growth_accrued", 0.0))
 	town.intent = StringName(data.get("intent", ""))
 	town.intent_since = int(data.get("intent_since", 0))
 	town.urged_intent = StringName(data.get("urged_intent", ""))

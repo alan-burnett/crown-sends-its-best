@@ -201,6 +201,10 @@ static func register_measures() -> void:
 	# large the colony is, which is the PO's to settle.
 	MeasureRegistry.register_linear("colony_revenue", 0.0, 120.0)
 	MeasureRegistry.register_linear("supply_situation", 0.0, 100.0)
+	# Quality of life is already a share (`quality-of-life.md` §1), so there is
+	# no scale to apply. **The player never sees the number** — only a governor
+	# who sounds comfortable or wretched.
+	MeasureRegistry.register_linear("quality_of_life", 0.0, 1.0)
 	# How heavily the colony is taxed, which is what the Steward writes about and
 	# what his lean shades.
 	MeasureRegistry.register_linear("tax_burden", 0.0, TaxRates.MAX_RATE)
