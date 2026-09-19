@@ -102,6 +102,18 @@ static func slaughter_yield_of(id: StringName) -> float:
 	return kind.slaughter_yield if kind != null else 0.0
 
 
+## How much raw resource one unit of this takes to make.
+static func input_per_unit_of(id: StringName) -> float:
+	var kind := get_kind(id)
+	return kind.input_per_unit if kind != null else 1.0
+
+
+## How much of this one worker makes in a month.
+static func per_worker_of(id: StringName) -> float:
+	var kind := get_kind(id)
+	return kind.per_worker if kind != null else 0.0
+
+
 static func is_livestock(id: StringName) -> bool:
 	var kind := get_kind(id)
 	return kind != null and kind.livestock

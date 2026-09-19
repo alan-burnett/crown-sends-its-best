@@ -45,6 +45,13 @@ var feed: float = 0.0
 ## Food one head yields when a hungry town kills it (SPEC §12.2).
 var slaughter_yield: float = 0.0
 
+## How much raw resource one unit of this takes to make (#64).
+var input_per_unit: float = 1.0
+
+## How much of this one worker makes in a month, in the town rather than the
+## fields. **Every conversion costs a worked tile** (SPEC §11.3 step 1).
+var per_worker: float = 0.0
+
 
 func is_processed() -> bool:
 	return not converts_from.is_empty()
@@ -70,6 +77,8 @@ static func from_data(record: Dictionary) -> ResourceKind:
 	kind.price = float(record.get("price", 1.0))
 	kind.feed = float(record.get("feed", 0.0))
 	kind.slaughter_yield = float(record.get("slaughter_yield", 0.0))
+	kind.input_per_unit = float(record.get("input_per_unit", 1.0))
+	kind.per_worker = float(record.get("per_worker", 0.0))
 	return kind
 
 
@@ -84,6 +93,8 @@ func to_dict() -> Dictionary:
 		"price": price,
 		"feed": feed,
 		"slaughter_yield": slaughter_yield,
+		"input_per_unit": input_per_unit,
+		"per_worker": per_worker,
 	}
 
 

@@ -56,6 +56,21 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		var monthly := mouths * ColonyNeeds.per_head(StringName(resource))
 		reckoning.reserve[resource] = monthly * (ColonyNeeds.reserve_months(StringName(resource)) + extra_months)
 
+	# **A need's reserve extends to what the need is made of** (#64). Clothing is
+	# woven from furs, so a town that sold every fur it trapped would stand at an
+	# idle loom in a cold month and buy cloth from the Crown instead — which is
+	# what it did before conversion existed, and would go on doing with a loom
+	# standing in the town.
+	for resource in ColonyNeeds.needed_resources():
+		var making := StringName(resource)
+		var inputs := ResourceCatalogue.inputs_for(making)
+		if inputs.is_empty():
+			continue
+		var monthly := mouths * ColonyNeeds.per_head(making)
+		var raw := monthly * ResourceCatalogue.input_per_unit_of(making) 			* (1.0 + ColonyNeeds.reserve_months(making))
+		for input in inputs:
+			reckoning.reserve[input] = maxf(reckoning.reserve_of(StringName(input)), raw)
+
 	# A standing posture to stockpile or harvest something means the town parts
 	# with none of it. Reserving all of it is how that becomes true everywhere at
 	# once, rather than in each of the four phases that might have moved it.
