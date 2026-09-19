@@ -124,7 +124,7 @@ func _params_for(letter: Letter, run: RunState, to: StringName) -> Dictionary:
 	var contact := run.contact(to)
 	var context := LetterContext.new(run.world, contact, &"")
 	context.diff = run.last_diff
-	context.measures = StubWorld.measures(run.world)
+	context.measures = WorldValues.measures(run.world)
 
 	# The recipient is chosen in the flow, not declared with a default, so
 	# `{to}` in an effect resolves to whoever the player picked.

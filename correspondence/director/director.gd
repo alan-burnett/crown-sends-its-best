@@ -128,7 +128,7 @@ func _conditions_hold(trigger: Dictionary, context: LetterContext) -> bool:
 func _context(run: RunState, contact: Contact) -> LetterContext:
 	var context := LetterContext.new(run.world, contact, &"")
 	context.diff = run.last_diff
-	context.measures = StubWorld.measures(run.world)
+	context.measures = WorldValues.measures(run.world)
 	return context
 
 

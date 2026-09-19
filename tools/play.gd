@@ -50,9 +50,9 @@ func _init() -> void:
 			run.turn + 1, run.world.year_index(), run.world.month_of_year(),
 		])
 		print("  the war %.0f · supply %.0f · revenue %.0f" % [
-			run.world.get_value(StubWorld.WAR, 0.0),
-			run.world.get_value(StubWorld.SUPPLY, 0.0),
-			run.world.get_value(StubWorld.REVENUE, 0.0),
+			run.world.get_value(WorldValues.WAR, 0.0),
+			run.world.get_value(WorldValues.SUPPLY, 0.0),
+			run.world.get_value(WorldValues.REVENUE, 0.0),
 		])
 
 		if run.inbox.is_empty():

@@ -1,23 +1,42 @@
 extends TestCase
 
-## The stub world (#20). Its only job is to produce enough month-to-month
-## variety that letters genuinely differ.
+## The world's drivers: the Crown's month (#20, still a stand-in) and the colony
+## month runner (#43).
+##
+## Their only job between them is to produce enough month-to-month variety that
+## letters genuinely differ. If the world were static the playtest would test
+## nothing.
 
 const SEED: int = 20_260_918
 
 
+## A colony driver with the drifting placeholder in Settle, which is what keeps
+## the colony's numbers moving until #44 to #50 land.
+func _colony_driver() -> ColonyDriver:
+	# A colony with no towns is the Colony Overrun ending, not a normal state
+	# (SPEC §13.1), so the fixture has one.
+	var colony := Colony.new()
+	var town := Town.new(&"ashmere", "Ashmere", Vector2i(4, 4))
+	town.workers = 12
+	colony.add(town)
+
+	var driver := ColonyDriver.new(colony, null, SEED)
+	driver.month.set_handler(ColonyMonth.SETTLE, DriftingSettle.new())
+	return driver
+
+
 func _run(months: int, seed_value: int = SEED) -> Dictionary:
-	var state := StubWorld.initial_state()
+	var state := WorldValues.initial_state()
 	var log := EventLog.new()
 	var streams := RngStreams.new(seed_value)
 	var month := WorldMonth.new(IntentBook.new(), streams)
-	month.drivers = [StubWorld.new()]
+	month.drivers = [CrownAffairs.new(), _colony_driver()]
 	month.executors = [StubIntentExecutor.new()]
 
 	var history: Array = []
 	for i in months:
 		month.run(state, log)
-		history.append(StubWorld.measures(state))
+		history.append(WorldValues.measures(state))
 	return {"state": state, "log": log, "history": history, "month": month, "streams": streams}
 
 
@@ -38,7 +57,7 @@ func test_the_situation_gets_better_and_worse() -> void:
 	var rose := false
 	var fell := false
 	for index in range(1, history.size()):
-		var change: float = history[index][StubWorld.SUPPLY] - history[index - 1][StubWorld.SUPPLY]
+		var change: float = history[index][WorldValues.SUPPLY] - history[index - 1][WorldValues.SUPPLY]
 		if change > 0.0:
 			rose = true
 		if change < 0.0:
@@ -55,7 +74,7 @@ func test_values_push_on_each_other() -> void:
 	# whether the coupling exists rather than whether a tuning value landed in a
 	# particular band.
 	var history: Array = _run(48)["history"]
-	history.sort_custom(func(a, b): return float(a[StubWorld.WAR]) < float(b[StubWorld.WAR]))
+	history.sort_custom(func(a, b): return float(a[WorldValues.WAR]) < float(b[WorldValues.WAR]))
 
 	var third: int = history.size() / 3
 	var calm := _mean_supply(history.slice(0, third))
@@ -70,14 +89,14 @@ func _mean_supply(months: Array) -> float:
 		return 0.0
 	var total: float = 0.0
 	for snapshot in months:
-		total += float(snapshot[StubWorld.SUPPLY])
+		total += float(snapshot[WorldValues.SUPPLY])
 	return total / float(months.size())
 
 
 func test_a_campaign_begins_and_ends() -> void:
 	var log: EventLog = _run(36)["log"]
-	assert_not_empty(log.of_type(StubWorld.EVENT_CAMPAIGN_BEGAN), "no campaign ever began")
-	assert_not_empty(log.of_type(StubWorld.EVENT_CAMPAIGN_ENDED), "no campaign ever ended")
+	assert_not_empty(log.of_type(CrownAffairs.EVENT_CAMPAIGN_BEGAN), "no campaign ever began")
+	assert_not_empty(log.of_type(CrownAffairs.EVENT_CAMPAIGN_ENDED), "no campaign ever ended")
 
 
 func test_it_is_deterministic_for_a_seed() -> void:
@@ -92,53 +111,53 @@ func test_it_emits_real_events_in_real_phases() -> void:
 	# The correspondence layer must not be able to tell it is a stub, so the
 	# events and their phases are the ones the real sim will use.
 	var log: EventLog = _run(3)["log"]
-	assert_not_empty(log.of_type(StubWorld.EVENT_WAR_MOVED))
-	assert_not_empty(log.of_type(StubWorld.EVENT_COLONY_SETTLED))
-	assert_eq(log.of_type(StubWorld.EVENT_WAR_MOVED)[0].phase, WorldPhase.CROWNS_MONTH)
-	assert_eq(log.of_type(StubWorld.EVENT_COLONY_SETTLED)[0].phase, WorldPhase.COLONY_MONTH)
+	assert_not_empty(log.of_type(CrownAffairs.EVENT_WAR_MOVED))
+	assert_not_empty(log.of_type(DriftingSettle.EVENT_SETTLED))
+	assert_eq(log.of_type(CrownAffairs.EVENT_WAR_MOVED)[0].phase, WorldPhase.CROWNS_MONTH)
+	assert_eq(log.of_type(DriftingSettle.EVENT_SETTLED)[0].phase, WorldPhase.COLONY_MONTH)
 
 
 func test_it_produces_a_real_diff() -> void:
-	var state := StubWorld.initial_state()
+	var state := WorldValues.initial_state()
 	var log := EventLog.new()
 	var month := WorldMonth.new(IntentBook.new(), RngStreams.new(SEED))
-	month.drivers = [StubWorld.new()]
+	month.drivers = [CrownAffairs.new(), _colony_driver()]
 	var diff := month.run(state, log)
 	assert_false(diff.is_empty())
 	assert_true(diff.has_change("month"))
 
 
 func test_it_supplies_the_measures_the_letters_judge() -> void:
-	var measures := StubWorld.measures(StubWorld.initial_state())
-	for id in [StubWorld.WAR, StubWorld.REVENUE, StubWorld.SUPPLY, StubWorld.FOOD]:
+	var measures := WorldValues.measures(WorldValues.initial_state())
+	for id in [WorldValues.WAR, WorldValues.REVENUE, WorldValues.SUPPLY, WorldValues.FOOD]:
 		assert_true(measures.has(id), "no measure '%s'" % id)
 
 
 func test_a_decision_changes_the_following_month() -> void:
 	# An Intent committed in one month executes in the next, so a player decision
 	# is acknowledged before it takes effect.
-	var state := StubWorld.initial_state()
+	var state := WorldValues.initial_state()
 	var log := EventLog.new()
 	var book := IntentBook.new()
 	var month := WorldMonth.new(book, RngStreams.new(SEED))
-	month.drivers = [StubWorld.new()]
+	month.drivers = [CrownAffairs.new(), _colony_driver()]
 	month.executors = [StubIntentExecutor.new()]
 
-	var untouched := StubWorld.initial_state()
+	var untouched := WorldValues.initial_state()
 	var untouched_log := EventLog.new()
 	var untouched_month := WorldMonth.new(IntentBook.new(), RngStreams.new(SEED))
-	untouched_month.drivers = [StubWorld.new()]
+	untouched_month.drivers = [CrownAffairs.new(), _colony_driver()]
 	untouched_month.executors = [StubIntentExecutor.new()]
 
 	book.commit(Intent.new(
-		&"", StubIntentExecutor.KIND, &"marshal", StubWorld.SUPPLY, 1, {"per_month": 25.0}
+		&"", StubIntentExecutor.KIND, &"marshal", WorldValues.SUPPLY, 1, {"per_month": 25.0}
 	), log, state.month)
 
 	month.run(state, log)
 	untouched_month.run(untouched, untouched_log)
 
 	assert_ne(
-		float(state.get_value(StubWorld.SUPPLY)),
-		float(untouched.get_value(StubWorld.SUPPLY)),
+		float(state.get_value(WorldValues.SUPPLY)),
+		float(untouched.get_value(WorldValues.SUPPLY)),
 		"the decision left no mark on the world",
 	)
