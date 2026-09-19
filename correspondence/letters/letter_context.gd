@@ -32,6 +32,10 @@ var measures: Dictionary = {}
 ## from it.
 var tone: StringName = &""
 
+## The Order an acknowledgement is about, where there is one. Lets a letter say
+## what it was you asked for without the director having to flatten it first.
+var data_order: Order = null
+
 
 func _init(p_state: WorldState = null, p_sender: Contact = null, p_tone: StringName = &"") -> void:
 	state = p_state

@@ -3,13 +3,111 @@
     "id": "trigger.marshal.request_supplies",
     "letter": "marshal.request_supplies",
     "urgency": 0.5,
+    "cooldown": 4,
     "params": {
-      "resource": { "from": "literal", "value": "iron" },
-      "amount": { "from": "scaled_world_value", "key": "crown_war_intensity", "factor": 4, "minimum": 20, "maximum": 400 }
+      "resource": {
+        "from": "literal",
+        "value": "iron"
+      },
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "crown_war_intensity",
+        "factor": 4,
+        "minimum": 20,
+        "maximum": 400
+      }
     },
     "conditions": [
-      { "world_value_above": { "key": "crown_war_intensity", "value": 30 } },
-      { "months_silent_at_least": { "months": 0 } }
+      {
+        "world_value_above": {
+          "key": "crown_war_intensity",
+          "value": 30
+        }
+      }
     ]
+  },
+  {
+    "id": "trigger.marshal.demand_gold",
+    "letter": "marshal.demand_gold",
+    "urgency": 0.8,
+    "cooldown": 7,
+    "params": {
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "crown_war_intensity",
+        "factor": 12,
+        "minimum": 200,
+        "maximum": 1500
+      }
+    },
+    "conditions": [
+      {
+        "world_value_above": {
+          "key": "crown_war_intensity",
+          "value": 62
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.marshal.news_victory",
+    "letter": "marshal.news_victory",
+    "urgency": 0.2,
+    "cooldown": 6,
+    "params": {
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "crown_war_intensity",
+        "factor": 9,
+        "minimum": 40,
+        "maximum": 900
+      }
+    },
+    "conditions": [
+      {
+        "world_value_fell_by": {
+          "path": "values.crown_war_intensity",
+          "amount": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.marshal.ack_complied",
+    "letter": "marshal.ack_complied",
+    "acknowledges": "comply",
+    "urgency": 0.3,
+    "cooldown": 0,
+    "params": {
+      "what": {
+        "from": "order_param",
+        "name": "resource",
+        "fallback": "consignment"
+      }
+    },
+    "conditions": []
+  },
+  {
+    "id": "trigger.marshal.ack_refused",
+    "letter": "marshal.ack_refused",
+    "acknowledges": "refuse",
+    "urgency": 0.6,
+    "cooldown": 0,
+    "params": {
+      "what": {
+        "from": "order_param",
+        "name": "resource",
+        "fallback": "consignment"
+      }
+    },
+    "conditions": []
+  },
+  {
+    "id": "trigger.marshal.ack_delayed",
+    "letter": "marshal.ack_delayed",
+    "acknowledges": "delay",
+    "urgency": 0.4,
+    "cooldown": 0,
+    "conditions": []
   }
 ]

@@ -1,0 +1,14 @@
+{
+  "id": "marshal.ack_delayed",
+  "sender": "marshal",
+  "type": "report",
+  "skippable": false,
+  "body": [
+    { "text": "Your instruction is in hand. It is not yet done." },
+    { "text": "There is a difference between a thing refused and a thing waiting on the weather, and I should like you to hold that difference in mind before you write again." },
+    { "text": "You will have it by the spring, or you will have my reasons.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "You will have it when the roads allow, which is not a thing a letter can hurry.",
+      "only_tones": ["annoyed", "hateful", "desperate"] }
+  ]
+}

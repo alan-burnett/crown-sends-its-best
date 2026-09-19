@@ -42,4 +42,19 @@ content validator exists to prevent.
 | :--- | :--- | :--- |
 | `assets/` | `assets` | Asset indirection, `id` -> `res://` path (SPEC §16.3) |
 | `letters_en/` | `letters` | Letter prose and reply structure (#8) |
+| `contacts/` | `contacts` | The Crown Officers, fixed in every run (SPEC §8.1) |
 | `triggers/` | `triggers` | When a letter fires. **No prose** (#14) |
+
+## Triggers
+
+A trigger names a letter and says when it fires. Three kinds, and the kind is
+what the trigger declares rather than where it lives:
+
+| Declares | Fires |
+| :--- | :--- |
+| *(nothing special)* | In the ordinary monthly sweep, when its conditions hold |
+| `acknowledges: "<outcome>"` | Only when an order came to that outcome. **Never culled** |
+| `offers_composition: true` | Only when the player chooses to write (#19) |
+
+A `cooldown` keeps the same letter from arriving every month. Without one the
+same few letters fill every turn and the correspondence reads as a loop.

@@ -80,6 +80,15 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 	var fired: Array[InboundLetter] = []
 	for trigger_id in content.ids("triggers"):
 		var trigger: Dictionary = content.collection("triggers")[trigger_id]
+
+		# A trigger that answers an outcome fires only when that outcome happens,
+		# and one that offers a purpose fires only when the player composes. Left
+		# in the ordinary sweep they fire on their own — and being unskippable,
+		# acknowledgements then crowd out every real letter with news of orders
+		# nobody gave.
+		if trigger.has("acknowledges") or bool(trigger.get(Composer.OFFERS_KEY, false)):
+			continue
+
 		var letter_id := String(trigger.get("letter", ""))
 		if not content.has_record("letters", letter_id):
 			continue
@@ -206,6 +215,10 @@ static func tone_for(contact: Contact, urgency: float = 0.0) -> StringName:
 ## passing silently — #24 writes that content, and this is its checklist.
 func _acknowledgements(run: RunState, outcomes: Array) -> Array[InboundLetter]:
 	var letters: Array[InboundLetter] = []
+	# One acknowledgement per letter per turn. Two orders that came to the same
+	# end are one piece of news, and the same paragraph twice on one desk reads
+	# as a bug because it is one.
+	var already: Dictionary = {}
 	for result in outcomes:
 		var order: Order = result["order"]
 		var outcome := String(result["outcome"])
@@ -213,21 +226,29 @@ func _acknowledgements(run: RunState, outcomes: Array) -> Array[InboundLetter]:
 		if contact == null:
 			continue
 
-		var letter_id := _acknowledgement_letter(String(order.addressed_to), outcome)
-		if letter_id.is_empty():
+		var trigger := _acknowledgement_trigger(String(order.addressed_to), outcome)
+		if trigger.is_empty():
 			unacknowledged.append("%s/%s" % [order.addressed_to, outcome])
 			continue
 
+		var letter_id := String(trigger["letter"])
+		if already.has(letter_id):
+			continue
+		already[letter_id] = true
+
 		var letter := Letter.from_record(content.record("letters", letter_id))
 		var context := _context(run, contact)
-		var inbound := _inbound({}, letter, contact, context, run)
+		# The order that provoked it is a param source in its own right, so an
+		# acknowledgement can say what it was you asked for.
+		context.data_order = order
+		var inbound := _inbound(trigger, letter, contact, context, run)
 		inbound.id = StringName("inbound_%d_ack_%s" % [run.turn, order.id])
 		letters.append(inbound)
 	return letters
 
 
-## A trigger marked `"acknowledges"` for this sender and outcome, or "".
-func _acknowledgement_letter(sender: String, outcome: String) -> String:
+## The trigger marked `"acknowledges"` for this sender and outcome, or {}.
+func _acknowledgement_trigger(sender: String, outcome: String) -> Dictionary:
 	for trigger_id in content.ids("triggers"):
 		var trigger: Dictionary = content.collection("triggers")[trigger_id]
 		if String(trigger.get("acknowledges", "")) != outcome:
@@ -236,8 +257,8 @@ func _acknowledgement_letter(sender: String, outcome: String) -> String:
 		if not content.has_record("letters", letter_id):
 			continue
 		if String(content.record("letters", letter_id).get("sender", "")) == sender:
-			return letter_id
-	return ""
+			return trigger
+	return {}
 
 
 # --- Culling ---------------------------------------------------------------

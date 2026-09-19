@@ -371,10 +371,7 @@ func test_set_aside_letters_are_read_as_silence_next_month() -> void:
 
 # --- Acknowledgement -------------------------------------------------------
 
-func test_unacknowledged_outcomes_are_reported_not_swallowed() -> void:
-	# SPEC §9.1 requires each month's letters to acknowledge last month's post.
-	# No acknowledgement content exists yet (#24 writes it), so the director keeps
-	# the checklist rather than passing over it silently.
+func _send_an_order() -> void:
 	machine.begin_turn()
 	for inbound in run.inbox:
 		inbound.status = InboundLetter.SET_ASIDE
@@ -385,6 +382,64 @@ func test_unacknowledged_outcomes_are_reported_not_swallowed() -> void:
 	run.post.add(outgoing)
 	machine.send_post()
 
+
+func test_an_outcome_is_acknowledged_the_following_month() -> void:
+	# **Each month's letters acknowledge the decisions sent in last month's
+	# post** (SPEC §9.1). The player always learns what became of what he wrote.
+	_send_an_order()
 	machine.begin_turn()
-	assert_not_empty(machine.director.unacknowledged,
-		"an order was resolved and nothing acknowledged it")
+
+	var senders: Array[StringName] = []
+	for inbound in run.inbox:
+		senders.append(inbound.sender)
+	assert_true(senders.has(&"marshal"), "the Marshal did not write back at all: %s" % [senders])
+	assert_empty(machine.director.unacknowledged,
+		"an outcome went unacknowledged: %s" % [machine.director.unacknowledged])
+
+
+func test_an_acknowledgement_is_never_culled() -> void:
+	# Whatever the budget. Being told what happened is not optional.
+	_send_an_order()
+	var acknowledging := machine.director._acknowledgements(run, machine.orders.results)
+	assert_not_empty(acknowledging)
+	var kept := machine.director._cull([], acknowledging, run)
+	assert_eq(kept.size(), acknowledging.size())
+
+
+func test_one_acknowledgement_per_letter_per_turn() -> void:
+	# Two orders that came to the same end are one piece of news, and the same
+	# paragraph twice on one desk reads as a bug because it is one.
+	_send_an_order()
+	var seen: Dictionary = {}
+	for inbound in machine.director._acknowledgements(run, machine.orders.results):
+		assert_false(seen.has(inbound.letter_id), "'%s' acknowledged twice" % inbound.letter_id)
+		seen[inbound.letter_id] = true
+
+
+func test_an_outcome_with_no_content_is_reported_not_swallowed() -> void:
+	# Where the Author has not written the acknowledgement yet, the director
+	# keeps the checklist rather than passing over it in silence.
+	var stranger := Contact.from_data({"id": "provost", "name": "Marchmont", "role": "crown_officer"})
+	run.add_contact(stranger)
+	var order := Order.new(M1Registrations.ORDER_REFUSE, &"provost", {"to": "provost"}, run.world.month)
+	order.id = &"order_1"
+
+	machine.director._acknowledgements(run, [{"order": order, "outcome": Compliance.REFUSE}])
+	assert_not_empty(machine.director.unacknowledged)
+
+
+func test_an_acknowledgement_trigger_does_not_fire_on_its_own() -> void:
+	# It answers an outcome. Left in the ordinary sweep it fires every month with
+	# news of orders nobody gave — and being unskippable, crowds out every real
+	# letter on the desk.
+	machine.begin_turn()
+	for inbound in run.inbox:
+		var record: Dictionary = content.record("letters", inbound.letter_id)
+		assert_false(String(record.get("id", "")).contains(".ack_"),
+			"'%s' arrived before any order was given" % inbound.letter_id)
+
+
+func test_a_composable_letter_does_not_arrive_on_its_own() -> void:
+	machine.begin_turn()
+	for inbound in run.inbox:
+		assert_ne(inbound.letter_id, "pc.request_troops")

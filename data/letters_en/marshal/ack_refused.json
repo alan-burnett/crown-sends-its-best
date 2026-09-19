@@ -1,0 +1,14 @@
+{
+  "id": "marshal.ack_refused",
+  "sender": "marshal",
+  "type": "report",
+  "skippable": false,
+  "params": { "what": "resource" },
+  "body": [
+    { "text": "So there is to be no {param:what} after all. I have struck the colony from my accounting and will not trouble you again this season." },
+    { "text": "I do not blame you for it. I blame the arithmetic.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "Others will draw their own conclusions, and I shall not be at pains to correct them.",
+      "only_tones": ["annoyed", "hateful"] }
+  ]
+}

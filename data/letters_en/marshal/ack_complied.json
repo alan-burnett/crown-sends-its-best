@@ -1,0 +1,14 @@
+{
+  "id": "marshal.ack_complied",
+  "sender": "marshal",
+  "type": "report",
+  "skippable": false,
+  "params": { "what": "resource" },
+  "body": [
+    { "text": "Your {param:what} reached the quartermasters, and is already gone again into the wagons." },
+    { "text": "It was well done, and I have said so where it will be heard.",
+      "only_tones": ["pleased", "dutiful"] },
+    { "text": "It was late, and less than was asked, but it came.",
+      "only_tones": ["annoyed", "hateful", "desperate"] }
+  ]
+}

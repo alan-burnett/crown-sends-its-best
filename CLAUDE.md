@@ -184,6 +184,7 @@ rejected.
 ./tools/godot.sh --script res://tools/run_tests.gd    # tests
 ./tools/godot.sh --script res://tools/lint.gd         # architecture lint
 ./tools/godot.sh --script res://tools/validate_content.gd   # content validator
+./tools/godot.sh --script res://tools/play.gd -- 12          # read twelve turns of post
 ./tools/godot.sh --editor --quit                      # reimport after adding a class_name
 ```
 

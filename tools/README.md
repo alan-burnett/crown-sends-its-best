@@ -5,6 +5,7 @@ them.
 
 ```bash
 ./tools/godot.sh --script res://tools/run_tests.gd    # tests
+./tools/godot.sh --script res://tools/play.gd -- 12   # read twelve turns of post
 ./tools/godot.sh --script res://tools/lint.gd         # architecture lint
 ./tools/godot.sh --editor --quit                      # reimport (see below)
 ```
@@ -29,3 +30,6 @@ outside the editor is invisible until one runs, and the failure looks like
 | `run_tests.gd` | Runs every `tests/test_*.gd`. A test file that fails to parse is a failure, not a hang. |
 | `lint.gd` | `sim/` references no node type; nothing uses the global RNG or the engine's `hash()`; nothing above `sim/` writes sim state. |
 | `validate_content.gd` | Every id resolves, every effect is registered, every tone key is known, no dangling slots, every `{param:}` declared. |
+| `determinism.gd` | Plays a scripted run and prints its state hash. CI runs it twice and compares — the across-processes half a test cannot do for itself. |
+| `play.gd` | Plays a run headless and prints the correspondence. The Author's way to read the letters without a screen. |
+| `screenshot.gd` | Captures the desk at any size. Not headless; opens a window briefly. Development only. |

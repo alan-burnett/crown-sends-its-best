@@ -1,0 +1,47 @@
+{
+  "id": "chancellor.warning_standing",
+  "sender": "chancellor",
+  "type": "warning",
+  "skippable": false,
+  "params": { "amount": "gold" },
+  "perception": {
+    "books": { "measure": "colony_revenue",
+               "ladder": ["a scandal", "a disappointment", "unremarkable", "quite respectable"] }
+  },
+  "body": [
+    { "text": "It falls to me, as it so often does, to tell you that your accounts are {perception:books}." },
+    { "text": "The Treasury has honoured {param:amount} on your word this year. It has begun to ask me what it is buying." },
+    { "text": "I have defended you. I want you to understand what that cost me.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "I have not defended you. I did not think it would survive the attempt.",
+      "only_tones": ["annoyed", "hateful"] }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I receive your warning {choice}.",
+      "options": [
+        { "tone": "dutiful",   "text": "with the seriousness it deserves" },
+        { "tone": "annoyed",   "text": "and note the pleasure you took in writing it" },
+        { "tone": "desperate", "text": "and confess I had hoped for longer" },
+        { "tone": "hateful",   "text": "as I receive everything from you: badly" }
+      ]
+    },
+    "steps": [
+      { "id": "posture", "prompt": "Your answer to the court", "options": [
+        { "id": "retrench", "label": "promise economy, and mean it",
+          "text": "The colony will retrench. You may tell the Treasury as much over your own name{insert:barb}.",
+          "insert": { "barb": { "hateful": ", since you are so fond of carrying news" } },
+          "effect": { "set_policy": { "policy": "spending", "value": "retrench" } } },
+        { "id": "favour", "label": "grant the Chancellor a favour for his trouble",
+          "text": "Your trouble on my account is noted, and shall be repaid in kind.",
+          "effect": { "grant_favor": { "to": "chancellor", "favor": "a word in the right ear" } } },
+        { "id": "nothing", "label": "say nothing to the court",
+          "text": "The court may think what it likes. It generally does.",
+          "effect": { "refuse": { "to": "chancellor" } } }
+      ] }
+    ],
+    "closing": [
+      { "text": "Yours,", "tone": { "hateful": "Do not write again unless the news is good." } }
+    ]
+  }
+}

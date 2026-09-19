@@ -1,0 +1,14 @@
+{
+  "id": "steward.ack_partial",
+  "sender": "steward",
+  "type": "report",
+  "skippable": false,
+  "body": [
+    { "text": "Your instruction has been carried out, after a fashion." },
+    { "text": "Not the whole of it. The whole of it was not possible, and I judged a part better than a quarrel." },
+    { "text": "I trust that was the judgement you would have made, had you been here to make it.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "I did not trouble you for permission, since you did not trouble to be clear.",
+      "only_tones": ["annoyed", "hateful"] }
+  ]
+}
