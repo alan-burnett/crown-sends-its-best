@@ -63,6 +63,9 @@ static func load_resources(content: ContentDatabase) -> void:
 	if content.has_record("colony", "objectives"):
 		Objective.load_from(content.record("colony", "objectives"))
 
+	if content.has_record("crown", "demands"):
+		DemandSchedule.load_from(content.record("crown", "demands"))
+
 
 static func register_all() -> void:
 	register_effects()

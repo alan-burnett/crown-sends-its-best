@@ -68,6 +68,13 @@ var standing: CrownStanding = null
 ## the political process may not.
 var refusal: CrownRefusal = null
 
+## How hard the Crown is leaning, and how far the bar has moved (#69).
+##
+## **Serialised in full.** The bucket's contents and the draw order are part of
+## the run's future, and a reload that changed them would break SPEC §16.1's
+## seeded generation just as surely as regenerating the map would.
+var demands: DemandGrowth = null
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -123,6 +130,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.knowledge = MapKnowledge.new()
 	run.standing = CrownStanding.new()
 	run.refusal = CrownRefusal.new()
+	run.demands = DemandGrowth.new()
 	run.found_first_town()
 
 	# **A town knows the ground it was built on.** Territory is recomputed in
@@ -235,6 +243,7 @@ func to_dict() -> Dictionary:
 		"knowledge": knowledge.to_dict() if knowledge != null else {},
 		"standing": standing.to_dict() if standing != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
+		"demands": demands.to_dict() if demands != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -261,6 +270,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.knowledge = MapKnowledge.from_dict(data.get("knowledge", {}))
 	run.standing = CrownStanding.from_dict(data.get("standing", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
+	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 

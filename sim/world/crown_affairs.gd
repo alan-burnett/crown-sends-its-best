@@ -12,6 +12,16 @@ extends RefCounted
 ## A campaign begins, runs for some months, and ends. That is what keeps the war
 ## moving in runs rather than wandering, and what gives the Marshal something to
 ## write about that is not the same letter twice.
+##
+## ## The bar moves here too
+##
+## From year four the Crown leans harder, along one axis a year
+## (`crown-demands.md` §§1, 7). It belongs in this phase because it is the
+## Crown's own business rather than the colony's: nothing the player did that
+## month causes it, and nothing in the colony can prevent it.
+##
+## It runs **before** standing is judged in phase 6, so the month the bar moves
+## is judged against the bar as it now stands rather than as it was.
 
 const EVENT_WAR_MOVED: StringName = &"crown_war_moved"
 const EVENT_CAMPAIGN_BEGAN: StringName = &"crown_campaign_began"
@@ -29,9 +39,16 @@ const WAR_COOLING: float = 4.5
 const WAR_NOISE: float = 3.0
 
 
+## The run's growth state. Set by the turn machine; absent in the tests that
+## only care about the war, which is why this is checked rather than assumed.
+var growth: DemandGrowth = null
+
+
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if phase != WorldPhase.CROWNS_MONTH:
 		return
+	if growth != null:
+		growth.advance(state.year_index(), streams, log, state.month)
 	_advance_war(state, log, streams.stream("sim"))
 
 
