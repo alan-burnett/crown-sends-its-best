@@ -43,6 +43,11 @@ static func load_resources(content: ContentDatabase) -> void:
 			terrains.append(record)
 	Terrain.load_from(terrains, levels)
 
+	var improvements: Array = []
+	for id in content.ids("improvements"):
+		improvements.append(content.collection("improvements")[id])
+	Improvement.load_from(improvements)
+
 
 static func register_all() -> void:
 	register_effects()

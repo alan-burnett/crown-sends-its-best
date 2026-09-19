@@ -37,6 +37,7 @@ not a polish item.
 | `world/stub_world.gd` | M1's stand-in world (#20). M2 replaces this file, not the runner |
 | `economy/` | The resources everything is denominated in, and the tax rates on them |
 | `map/` | The New World as a tile grid, generated from the run seed |
+| `colony/` | The towns, and everything one is |
 
 ## Seam C — will is not a write
 
@@ -75,6 +76,19 @@ that could lose a close vote. `choose()` always emits its scoring trace.
 **A milestone that adds a system ships that system's considerations with it.**
 Adding natives is not complete until governors, commanders and the director can
 all feel them.
+
+## Two things the presentation layer may not touch
+
+Both are locked in the spec and both are checked by `tools/lint.gd`, because a
+rule that only lives in a comment is a rule that gets broken by somebody who
+never read it.
+
+- **A town's gold is invisible to the player** (SPEC §11.3), and the player's own
+  gold is not a wallet (§10.2). `Town` has no getter; a caller gets `can_afford`,
+  which is a question rather than a balance.
+- **The map only shows what the colony knows** (SPEC §11.2). Presentation reads
+  `MapKnowledge`, never `WorldMap`. M5 moves rivals and tribes about outside
+  vision, and a layer that held the real map would leak them.
 
 ## Determinism
 

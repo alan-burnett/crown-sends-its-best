@@ -17,6 +17,13 @@ var height: int = 0
 ## Row-major, `width * height` terrain ids.
 var tiles: PackedStringArray = PackedStringArray()
 
+## Row-major, one improvement id per tile. Empty means a bare tile.
+##
+## **A tile holds one improvement.** Building a farm where a mine stood replaces
+## it, and nothing has to be unwound, because every improvement computes its
+## yields from the terrain rather than from what was there before.
+var improvements: PackedStringArray = PackedStringArray()
+
 
 func _init(p_width: int = 0, p_height: int = 0, fill: StringName = &"ocean") -> void:
 	width = p_width
@@ -24,6 +31,9 @@ func _init(p_width: int = 0, p_height: int = 0, fill: StringName = &"ocean") -> 
 	tiles = PackedStringArray()
 	tiles.resize(width * height)
 	tiles.fill(String(fill))
+	improvements = PackedStringArray()
+	improvements.resize(width * height)
+	improvements.fill("")
 
 
 func in_bounds(x: int, y: int) -> bool:
@@ -73,7 +83,12 @@ func land_count() -> int:
 ## What a tile yields of a resource, before any improvement.
 func yield_at(x: int, y: int, resource: StringName) -> float:
 	var terrain := Terrain.find(terrain_at(x, y))
-	return terrain.yield_of(resource) if terrain != null else 0.0
+	if terrain == null:
+		return 0.0
+	var improvement := Improvement.find(improvement_at(x, y))
+	if improvement != null:
+		return improvement.yield_of(terrain, resource)
+	return terrain.yield_of(resource)
 
 
 ## What a tile and its neighbours together yield of a resource.
@@ -87,10 +102,63 @@ func yield_around(x: int, y: int, resource: StringName) -> float:
 	return total
 
 
+# --- Improvements ----------------------------------------------------------
+
+func improvement_at(x: int, y: int) -> StringName:
+	if not in_bounds(x, y):
+		return &""
+	return StringName(improvements[index_of(x, y)])
+
+
+## Whether an improvement may be built here at all.
+func can_build(x: int, y: int, id: StringName) -> bool:
+	var improvement := Improvement.find(id)
+	if improvement == null or not is_land(x, y):
+		return false
+	return improvement.can_build_on(terrain_at(x, y))
+
+
+## Build, replacing whatever was there. Returns the improvement displaced, or "".
+##
+## Emits, because map playback and the letters both want to know (Seam A).
+func build(x: int, y: int, id: StringName, log: EventLog = null, month: int = 0, by: StringName = &"") -> StringName:
+	if not can_build(x, y, id):
+		push_error("Cannot build '%s' at %d,%d." % [id, x, y])
+		return &""
+
+	var displaced := improvement_at(x, y)
+	improvements[index_of(x, y)] = String(id)
+
+	if log != null:
+		log.emit(&"improvement_built", by, month, {
+			"improvement": String(id),
+			"displaced": String(displaced),
+			"at": Vector2i(x, y),
+			"terrain": String(terrain_at(x, y)),
+		}, WorldPhase.COLONY_MONTH)
+	return displaced
+
+
+func clear_improvement(x: int, y: int) -> void:
+	if in_bounds(x, y):
+		improvements[index_of(x, y)] = ""
+
+
+## Livestock this tile can support without their eating (SPEC §11.1).
+func livestock_capacity_at(x: int, y: int) -> int:
+	var improvement := Improvement.find(improvement_at(x, y))
+	return improvement.capacity_on(terrain_at(x, y)) if improvement != null else 0
+
+
 # --- Serialisation ---------------------------------------------------------
 
 func to_dict() -> Dictionary:
-	return {"width": width, "height": height, "tiles": tiles.duplicate()}
+	return {
+		"width": width,
+		"height": height,
+		"tiles": tiles.duplicate(),
+		"improvements": improvements.duplicate(),
+	}
 
 
 static func from_dict(data: Dictionary) -> WorldMap:
@@ -98,6 +166,9 @@ static func from_dict(data: Dictionary) -> WorldMap:
 	map.width = int(data.get("width", 0))
 	map.height = int(data.get("height", 0))
 	map.tiles = PackedStringArray(data.get("tiles", []))
+	map.improvements = PackedStringArray(data.get("improvements", []))
+	if map.improvements.size() != map.tiles.size():
+		map.improvements.resize(map.tiles.size())
 	return map
 
 

@@ -20,6 +20,7 @@ extends SceneTree
 ## ships on desktop and mobile (SPEC §16.1).
 
 const SIM_ROOT: String = "res://sim"
+const PRESENTATION_ROOT: String = "res://presentation"
 const SCAN_ROOTS: PackedStringArray = ["res://sim", "res://correspondence", "res://presentation", "res://core", "res://game"]
 
 ## Node types and node-only APIs. `sim/` may use RefCounted and plain data.
@@ -62,6 +63,40 @@ const RNG_PATTERNS: Array[Array] = [
 
 const HASH_PATTERN: String = "(^|[^_a-zA-Z0-9.])hash\\s*\\("
 
+## **A town's gold is invisible to the player** (SPEC §11.3), and the player's own
+## gold is not a wallet (§10.2). Neither is a number on the desk, so nothing in
+## `presentation/` may reach the town's balance — by the field, by the accessors,
+## or by digging it out of the serialised form.
+##
+## The Ledger shows Crown-side transactions, which is a different thing and has
+## its own screen (#51).
+## **A town's gold is invisible to the player** (SPEC §11.3), and the player's own
+## gold is not a wallet (§10.2). Neither is a number on the desk, so nothing in
+## `presentation/` may reach a town's balance — by the field, by the accessors, or
+## by digging it out of the serialised form.
+##
+## The Ledger shows Crown-side transactions, which is a different thing and has
+## its own screen (#51).
+##
+## Plain substrings rather than patterns: the question is whether presentation
+## mentions these at all, and a substring answers it without anybody having to
+## reason about escaping.
+const TOWN_GOLD_NAMES: Array[Array] = [
+	["_gold", "reads a town's hidden gold"],
+	["receive_gold", "moves a town's hidden gold"],
+	["spend_gold", "moves a town's hidden gold"],
+	["can_afford", "asks after a town's hidden gold"],
+]
+
+## **🔒 The map only shows what the colony knows** (SPEC §11.2).
+## Presentation reads `MapKnowledge`, never the real map — otherwise the first
+## debug overlay leaks every rival's position the moment M5 puts them on it.
+const MAP_TRUTH_NAMES: Array[Array] = [
+	["WorldMap", "reads the real map instead of MapKnowledge"],
+	["MapGenerator", "reaches into map generation"],
+	["Territory", "reads territory directly instead of MapKnowledge"],
+]
+
 ## Seam A and Seam B. Only the sim writes sim state, and inside the sim that
 ## means a phase or an executor consuming an Intent (#4). An effect handler or a
 ## UI path that reached `apply()` would be writing the world directly, which is
@@ -97,6 +132,7 @@ func _check(path: String) -> void:
 		return
 	var lines := source.split("\n")
 	var in_sim := path.begins_with(SIM_ROOT)
+	var in_presentation := path.begins_with(PRESENTATION_ROOT)
 
 	for index in lines.size():
 		var line := _strip(lines[index])
@@ -116,6 +152,14 @@ func _check(path: String) -> void:
 
 		if not in_sim:
 			_match(path, index, line, APPLY_PATTERN, "calls apply() outside sim/ — only the sim writes sim state (Seam A, Seam B)")
+
+		if in_presentation:
+			for rule in TOWN_GOLD_NAMES:
+				if line.contains(rule[0]):
+					_report(path, index, "presentation/ %s (SPEC 11.3: it is invisible to the player)" % rule[1])
+			for rule in MAP_TRUTH_NAMES:
+				if line.contains(rule[0]):
+					_report(path, index, "presentation/ %s (SPEC 11.2 is locked)" % rule[1])
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")
