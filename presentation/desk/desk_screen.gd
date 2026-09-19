@@ -87,7 +87,7 @@ func _build() -> void:
 	inner.add_child(compose)
 
 	# **Look, do not touch.** Both of these show information and neither has a
-	# decision on it; only the desk does (SPEC §7). The Ledger arrives with #51.
+	# decision on it; only the desk does (SPEC §7).
 	var elsewhere := HBoxContainer.new()
 	elsewhere.add_theme_constant_override("separation", DeskTheme.GAP)
 	inner.add_child(elsewhere)
@@ -98,8 +98,8 @@ func _build() -> void:
 	elsewhere.add_child(map_button)
 
 	var ledger := DeskTheme.button("Ledger")
-	ledger.disabled = true
 	ledger.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	ledger.pressed.connect(_open_ledger)
 	elsewhere.add_child(ledger)
 
 	_send_reason = DeskTheme.label("", DeskTheme.SIZE_SMALL, DeskTheme.PAPER)
@@ -129,6 +129,18 @@ func _open_map() -> void:
 	var screen := MapScreen.new()
 	add_child(screen)
 	screen.begin(run.knowledge, refresh)
+
+
+## Open the Ledger over the desk, and put the desk back when it closes.
+##
+## **Read off the event log every time it is opened** rather than kept
+## alongside it: a second running tally would be a second thing to keep in step,
+## and the first month the two disagreed the player would be reading a lie about
+## their own money.
+func _open_ledger() -> void:
+	var screen := LedgerScreen.new()
+	add_child(screen)
+	screen.begin(Ledger.of(run.log), refresh)
 
 
 ## Keep the letter column readable: full width on a phone, capped and centred on
