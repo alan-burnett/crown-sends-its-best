@@ -4,3 +4,7 @@
 
 # Local screenshots from tools/screenshot.gd
 .screens/
+
+# Balance harness output. Regenerate with tools/balance.gd.
+balance_out/
+*.png
