@@ -188,6 +188,9 @@ func _settle_the_colony(context: ColonyContext) -> void:
 	state.apply(context.log, EVENT_SETTLED, &"colony", {
 		WorldValues.SUPPLY: clampf(supply, 0.0, 100.0),
 		WorldValues.REVENUE: context.crown_tax,
+		# What a month lately brings, so a judgement about the returns is made
+		# against this colony rather than against a constant (#63).
+		WorldValues.REVENUE_BASELINE: WorldValues.followed_baseline(state, context.crown_tax),
 		WorldValues.FOOD: _food_security(context),
 		WorldValues.QUALITY_OF_LIFE: _colony_quality_of_life(context),
 	}, WorldPhase.COLONY_MONTH)

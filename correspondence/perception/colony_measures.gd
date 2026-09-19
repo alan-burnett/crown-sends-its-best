@@ -38,8 +38,12 @@ const TRADE_VOLUME: String = "trade_volume"
 ## `docs/mechanics/perception.md` §4 so the two read alike.
 const HEALTHY_MONTHS: float = 3.0
 
-## A month's trade for one town in good order. Tuning.
-const BUSY_TRADE: float = 250.0
+## Where an average town sits on the trade scale. A town trading its share of
+## the colony's business reads here.
+const AVERAGE_TOWN: float = 1.0
+
+## The top of the trade scale: twice its share is as busy as the ladder goes.
+const BUSY_TOWN: float = 2.0
 
 
 ## What this contact is in a position to judge.
@@ -59,8 +63,29 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	measures[WorldValues.QUALITY_OF_LIFE] = town.quality_of_life
 	measures[OBJECTIVE_PROGRESS] = Objective.progress_fraction(town)
 	measures[STOCKPILE_HEALTH] = stockpile_health(town)
-	measures[TRADE_VOLUME] = town.traded_value
+	measures[TRADE_VOLUME] = trade_standing(run.colony, town)
 	return measures
+
+
+## How busy this town has been against the colony's average, where `1.0` is a
+## town pulling its weight.
+##
+## **A ratio rather than gold** (`docs/mechanics/perception.md` §4a). A hundred
+## gold of business is a busy month for a hamlet and nothing at all for a port,
+## and a governor calling his month brisk means brisk for the place he governs.
+##
+## The reference is this month's colony, not a stored average, so it needs no
+## state of its own and cannot drift out of step with the towns it describes.
+static func trade_standing(colony: Colony, town: Town) -> float:
+	if colony == null or colony.is_empty():
+		return 0.0
+	var across := 0.0
+	for each in colony.in_order():
+		across += each.traded_value
+	if across <= 0.0:
+		return 0.0
+	var share := across / float(colony.size())
+	return town.traded_value / maxf(0.001, share)
 
 
 ## Months of food in the larder, per mouth.
