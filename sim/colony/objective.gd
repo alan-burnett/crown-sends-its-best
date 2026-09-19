@@ -86,6 +86,7 @@ static func load_from(record: Dictionary) -> void:
 			_intents[intent] = {
 				"name": String(entry.get("name", intent)),
 				"pursuing": String(entry.get("pursuing", "")),
+				"stocks": entry.get("stocks", {}).duplicate(),
 			}
 
 
@@ -103,6 +104,19 @@ static func intent_name(id: StringName) -> String:
 ## What a governor says he is doing, as a clause: "seeing that nobody starves".
 static func intent_pursuing(id: StringName) -> String:
 	return String(_intents.get(String(id), {}).get("pursuing", ""))
+
+
+## What a governor holding this intent wants kept on hand, per head.
+##
+## **The modifiers are the only thing that creates demand** for a resource a town
+## does not eat (`docs/mechanics/town-economy.md` §3). Months of consumption is
+## zero for stone and guns, so their reserve is zero and nothing would ever buy
+## them — a military intent would protect the guns a town already had and never
+## send it shopping for guns it did not.
+##
+## Per head rather than absolute, so the demand grows with the town.
+static func intent_stocks(intent: StringName) -> Dictionary:
+	return _intents.get(String(intent), {}).get("stocks", {})
 
 
 ## Intent ids that carry prose, sorted.

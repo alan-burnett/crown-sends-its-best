@@ -59,7 +59,18 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	for resource in required_ids:
 		_shop(town, StringName(resource), float(required[resource]), context, spent_on)
 
-	# 3. Tier 3, wants: comforts, last and only with what is left. Cheapest first
+	# 3a. Tier 3, the governor's ambitions: guns for a military intent, timber
+	#     and stone for a builder. **What makes an intent reach the economy** —
+	#     without it, the only thing a letter changes is which project is picked.
+	var stocked: PackedStringArray = PackedStringArray()
+	for resource in reckoning.wants:
+		if not ResourceCatalogue.is_luxury(StringName(resource)):
+			stocked.append(String(resource))
+	stocked.sort()
+	for resource in stocked:
+		_shop(town, StringName(resource), reckoning.want_of(StringName(resource)), context, spent_on)
+
+	# 3b. Tier 3, comforts, last and only with what is left. Cheapest first
 	#    — a town buying comfort gets more of it per coin from beer than from tea.
 	var purse := _comfort_budget(town)
 	for resource in _luxuries_by_price():

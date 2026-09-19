@@ -25,6 +25,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := Reckoning.new(town.id)
 	var mouths := float(town.population())
 
+	# What this governor's intent wants kept on hand, per head. Used twice: as a
+	# reserve the town will not sell below, and as a want it goes shopping for.
+	var stocks := Objective.intent_stocks(town.intent)
+
 	# The month's trading account opens here, before Exchange and Sell write to
 	# it, so what a governor reports is this month and not the run so far.
 	town.traded_value = 0.0
@@ -38,6 +42,14 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# Tier 2, the objective: the rest of what it is building, over what has
 	# already gone into the frame. Never more urgent than a need.
 	reckoning.objective = Objective.still_to_gather(town)
+
+	# Tier 3 also carries what the governor's intent wants laid in, which is the
+	# demand side of the reserve above. Bought after the project and before the
+	# rum: a governor bent on defence wants powder more than he wants a drink.
+	for resource in stocks:
+		var wanted := mouths * float(stocks[resource]) - before.held(town.id, StringName(resource))
+		if wanted > 0.0:
+			reckoning.wants[resource] = wanted
 
 	# Tier 3, wants: comforts, bought with whatever survives the first two.
 	# Worked out here rather than in Exchange so that all three tiers are
@@ -74,6 +86,25 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		var raw := monthly * ResourceCatalogue.input_per_unit_of(making) 			* (1.0 + ColonyNeeds.reserve_months(making))
 		for input in inputs:
 			reckoning.reserve[input] = maxf(reckoning.reserve_of(StringName(input)), raw)
+
+	# **The objective raises the reserve on what it consumes.** The reserve exists
+	# to serve the project, so what the project still needs is held back from
+	# Relief and from Sell rather than being counted as spare.
+	for resource in Objective.outstanding(town):
+		reckoning.reserve[resource] = maxf(
+			reckoning.reserve_of(StringName(resource)),
+			float(Objective.outstanding(town)[resource]),
+		)
+
+	# **The intent raises it more broadly**, and this is one of the few ways a
+	# governor's intent reaches the economy at all. A military intent does not
+	# protect the guns the town has — it creates demand for guns it does not,
+	# and sends the town shopping (`town-economy.md` §3).
+	for resource in stocks:
+		reckoning.reserve[resource] = maxf(
+			reckoning.reserve_of(StringName(resource)),
+			mouths * float(stocks[resource]),
+		)
 
 	# A standing posture to stockpile or harvest something means the town parts
 	# with none of it. Reserving all of it is how that becomes true everywhere at
