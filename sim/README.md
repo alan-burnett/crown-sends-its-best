@@ -35,6 +35,8 @@ not a polish item.
 | `intent/` | What an actor committed to, and the executors that carry it out |
 | `world/world_month.gd` | The nine phases, run in order |
 | `world/stub_world.gd` | M1's stand-in world (#20). M2 replaces this file, not the runner |
+| `economy/` | The resources everything is denominated in, and the tax rates on them |
+| `map/` | The New World as a tile grid, generated from the run seed |
 
 ## Seam C — will is not a write
 

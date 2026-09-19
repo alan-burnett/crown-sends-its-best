@@ -30,6 +30,15 @@ var streams: RngStreams = null
 ## alongside state, because people react to change as much as to conditions.
 var last_diff: WorldDiff = null
 
+## The New World. Generated from the run seed, and carried by the save rather
+## than regenerated — a map rebuilt from a seed is a map that changes the day
+## generation is tuned.
+var map: WorldMap = null
+
+## Where the colony began. Site selection among several regions is Run Setup in
+## M3; M2 places one town.
+var starting_site: Vector2i = Vector2i(-1, -1)
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -75,6 +84,8 @@ static func new_run(seed_value: int) -> RunState:
 	run.post = Post.new()
 	run.promises = PromiseBook.new()
 	run.last_diff = WorldDiff.new()
+	run.map = MapGenerator.generate(run.streams.stream("mapgen"))
+	run.starting_site = MapGenerator.choose_starting_site(run.map)
 	return run
 
 
@@ -139,6 +150,8 @@ func to_dict() -> Dictionary:
 		"promises": promises.to_dict(),
 		"streams": streams.to_dict(),
 		"last_diff": last_diff.to_dict(),
+		"map": map.to_dict() if map != null else {},
+		"starting_site": [starting_site.x, starting_site.y],
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -158,6 +171,9 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.promises = PromiseBook.from_dict(data.get("promises", {}))
 	run.streams = RngStreams.from_dict(data.get("streams", {}))
 	run.last_diff = WorldDiff.from_dict(data.get("last_diff", {}))
+	run.map = WorldMap.from_dict(data.get("map", {}))
+	var site: Array = data.get("starting_site", [-1, -1])
+	run.starting_site = Vector2i(int(site[0]), int(site[1]))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 

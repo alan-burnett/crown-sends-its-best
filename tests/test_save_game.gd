@@ -9,12 +9,25 @@ const SEED: int = 4815
 const PATH: String = "user://test_run.save"
 
 
+var content: ContentDatabase = null
+
+
 func before_each() -> void:
 	SaveGame.delete_save(PATH)
+	ResourceCatalogue.reset()
+	Terrain.reset()
+	# A run carries a map, and a map needs its terrain, so the save test loads
+	# the world it is going to round-trip.
+	content = ContentDatabase.new()
+	content.load_all("en")
+	M1Registrations.load_resources(content)
 
 
 func after_each() -> void:
 	SaveGame.delete_save(PATH)
+	ResourceCatalogue.reset()
+	Terrain.reset()
+	content.free()
 
 
 func _run_with_history() -> RunState:
@@ -174,6 +187,15 @@ func test_a_damaged_save_is_reported_not_crashed() -> void:
 func test_no_save_is_its_own_answer() -> void:
 	assert_eq(SaveGame.load_run(PATH)["result"], SaveGame.Result.NO_SAVE)
 	assert_false(SaveGame.has_save(PATH))
+
+
+func test_the_map_survives() -> void:
+	var run := _run_with_history()
+	assert_true(run.map.land_count() > 0, "the run has no map to save")
+	SaveGame.save(run, PATH)
+	var restored: RunState = SaveGame.load_run(PATH)["run"]
+	assert_eq(restored.map.map_hash(), run.map.map_hash())
+	assert_eq(restored.starting_site, run.starting_site)
 
 
 func test_the_event_log_survives() -> void:

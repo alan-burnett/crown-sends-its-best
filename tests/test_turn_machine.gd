@@ -13,11 +13,14 @@ var content: ContentDatabase = null
 func before_each() -> void:
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
+	ResourceCatalogue.reset()
+	Terrain.reset()
 	M1Registrations.register_all()
 	SaveGame.delete_save(PATH)
 
 	content = ContentDatabase.new()
 	content.load_all("en")
+	M1Registrations.load_resources(content)
 
 	run = RunState.new_run(SEED)
 	run.add_contact(Contact.from_data({"id": "marshal", "name": "Vane", "role": "crown_officer"}))
@@ -165,7 +168,7 @@ func test_answering_the_same_letter_twice_is_findable() -> void:
 	_open_desk()
 	var outgoing := _queue_a_reply()
 	outgoing.in_reply_to = &"inbound_1"
-	assert_eq(run.post.reply_to(&"inbound_1"), outgoing)
+	assert_same(run.post.reply_to(&"inbound_1"), outgoing)
 
 
 # --- Sending the post ------------------------------------------------------

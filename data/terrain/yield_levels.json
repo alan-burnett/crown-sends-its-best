@@ -1,0 +1,4 @@
+{
+  "id": "yield_levels",
+  "levels": { "none": 0, "low": 1, "medium": 3, "high": 6 }
+}

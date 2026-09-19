@@ -37,6 +37,11 @@ static func encode(value: Variant) -> String:
 			return "f%s" % String.num(value, FLOAT_PRECISION)
 		TYPE_STRING, TYPE_STRING_NAME:
 			return "s%s" % String(value)
+		TYPE_VECTOR2I:
+			# Tile coordinates. Plain data, and about to be everywhere.
+			return "v%d,%d" % [value.x, value.y]
+		TYPE_VECTOR2:
+			return "V%s,%s" % [String.num(value.x, FLOAT_PRECISION), String.num(value.y, FLOAT_PRECISION)]
 		TYPE_ARRAY, TYPE_PACKED_STRING_ARRAY, TYPE_PACKED_INT32_ARRAY, TYPE_PACKED_INT64_ARRAY, TYPE_PACKED_FLOAT32_ARRAY, TYPE_PACKED_FLOAT64_ARRAY:
 			var items: PackedStringArray = PackedStringArray()
 			for item in value:

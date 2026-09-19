@@ -23,7 +23,7 @@ const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
 const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
 
 
-## Populate the resource catalogue from loaded content.
+## Populate the resource catalogue and the terrain table from loaded content.
 ##
 ## Separate from `register_all()` because it needs the content database, and the
 ## registries deliberately do not.
@@ -32,6 +32,16 @@ static func load_resources(content: ContentDatabase) -> void:
 	for id in content.ids("resources"):
 		records.append(content.collection("resources")[id])
 	ResourceCatalogue.load_from(records)
+
+	var terrains: Array = []
+	var levels: Dictionary = {}
+	for id in content.ids("terrain"):
+		var record: Dictionary = content.collection("terrain")[id]
+		if record.has("levels"):
+			levels = record["levels"]
+		else:
+			terrains.append(record)
+	Terrain.load_from(terrains, levels)
 
 
 static func register_all() -> void:
