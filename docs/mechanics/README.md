@@ -38,4 +38,9 @@ In roughly the order they are needed.
 | **Native trust** | §12.5 gives tribes an invisible trust value and their own diplomacy. | M5 |
 | **Rival pressure** | §12.4 says pressure grows as a run goes on. | M5 |
 | **Battles** | Deferred by the Author. §12.6 says the simulation resolves them and nothing more. | M6 |
+| **The Marshal** | Troop requests: payment tier drives loyalty cost drives refusal odds, plus his own wars stretching him thin late in a run. Sketched in conversation, never written down. | M6 |
+| **Commanders** | §8.6 gives them troop objectives and §12.6 lets them refuse orders against Crown interests. | M6 |
+| **The Provost** | Immigration policy, supplying experts, trade specialisation advice. | M4 |
+| **Patrons** | Requests, trades, ventures, and the major source of prestige. | M7 |
+| **Institutional contacts** | How a building yields a contact and how he pushes his town. **One doc for the pattern** — clergyman versus quartermaster is content, authored in data. | M7 |
 | **Prestige** | Gated on SPEC §17 and on crown standing stabilising in playtest. | M3+ |

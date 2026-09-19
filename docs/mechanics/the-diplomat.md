@@ -43,8 +43,15 @@ level.** He sees one town's problem and proposes the obvious remedy for it,
 taking no account of the PC's whole situation — the Crown's demands, the other
 towns, what a tax cut would do to standing.
 
-He is right about the problem and frequently wrong about the answer, and the
-player has to learn the difference.
+**His suggestions are locally correct and globally naive.** They would genuinely
+work for the problem he named. Shipping the town rum really would raise its
+quality of life — it is simply not a responsible way to run a colony, and he has
+no view of the Crown's demands, the other towns, or what a tax cut does to
+standing.
+
+**He never suggests something mechanically false.** He will not propose raising
+taxes to quell rebellion. That would be confusing rather than characterful, and
+it would teach the player to stop reading him.
 
 ### On his home town only
 
@@ -109,14 +116,27 @@ rebellion is the likeliest way to lose.
 
 ## 6. His death
 
-He is killed **only** if:
+Two ways, and only two.
 
-- the PC **refuses to move him** out of a town that then rebels, or
-- **every town rebels** and there is nowhere friendly left.
+**Rebellion kills him outright.** If his town flips to rebellion he dies, full
+stop. No roll. This is what gives the rehoming request its teeth: the letter is
+the warning, and ignoring it is how the man is lost.
 
-His death is the consequence of a decision, never ambient bad luck. Afterwards the
-run continues with **no Diplomat and no replacement** — SPEC §8.1 is clear that
-nobody will take the post.
+**Enemy attack may kill him.** Every time his town loses population to an enemy
+attack, he dies with probability `1 / new_population`. Going from ten to nine is
+a long shot; going from two to one is certain. A town reduced to nothing takes
+him with it.
+
+Note what this excludes: **population lost to famine does not endanger him.** Only
+enemies do.
+
+Between them these cover both halves of SPEC §8.1's intent — towns that rebel and
+towns that suffer at the hands of rivals and natives — while keeping his death a
+consequence of something the PC can see coming. The "every town rebels" case
+needs no special rule: wherever he is will flip, and that kills him.
+
+Afterwards the run continues with **no Diplomat and no replacement** — SPEC §8.1
+is clear that nobody will take the post.
 
 ## 7. Tuning targets
 
@@ -128,9 +148,9 @@ nobody will take the post.
 
 ## 8. Open items
 
-- Whether his suggestions should ever be actively bad rather than merely narrow.
-  Narrow is already interesting; wrong might be funnier, but it risks the player
-  learning to ignore him entirely.
+- Whether a larger population loss should be deadlier than a small one ending at
+  the same size. The rule as written keys only on how thin the town now is, which
+  is simple and probably enough.
 - Whether a second rehoming costs more than the first.
 - Whether he reports on rival or native activity at all, or only on the colony.
   Currently only the colony.
