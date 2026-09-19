@@ -16,7 +16,8 @@ func _init() -> void:
 	var width: int = int(arguments[1]) if arguments.size() > 1 else 540
 	var height: int = int(arguments[2]) if arguments.size() > 2 else 960
 	# "open" opens the first letter, "reply" also walks the wizard to the end,
-	# "map" opens the map over the desk.
+	# "map" opens the map over the desk, "ledger" opens the Ledger, and
+	# "ledger:N" turns to its Nth page.
 	var mode: String = arguments[3] if arguments.size() > 3 else ""
 
 	var window := get_root()
@@ -38,7 +39,11 @@ func _init() -> void:
 	for i in SETTLE_FRAMES:
 		await process_frame
 
-	if mode == "map":
+	if mode.begins_with("ledger"):
+		_open_the_ledger(instance, mode)
+		for i in SETTLE_FRAMES:
+			await process_frame
+	elif mode == "map":
 		_open_the_map(instance)
 		for i in SETTLE_FRAMES:
 			await process_frame
@@ -53,6 +58,22 @@ func _init() -> void:
 		"ok" if error == OK else "FAILED", out_path, width, height, image.get_width(), image.get_height(),
 	])
 	quit(0 if error == OK else 1)
+
+
+## Open the Ledger, optionally turned to a page.
+func _open_the_ledger(instance: Node, mode: String) -> void:
+	for child in instance.get_children():
+		if not (child is DeskScreen):
+			continue
+		var desk := child as DeskScreen
+		desk._open_ledger()
+		var turns: int = int(mode.split(":")[1]) if mode.contains(":") else 0
+		for screen in desk.get_children():
+			if screen is LedgerScreen:
+				for i in turns:
+					(screen as LedgerScreen)._turn(1)
+		return
+	print("no desk to open the ledger from")
 
 
 ## Open the map over the desk, so it can be looked at.

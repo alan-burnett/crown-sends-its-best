@@ -30,6 +30,12 @@ const MAP_TOWN: Color = Color(0.90, 0.24, 0.20)
 ## Remembered ground is hatched, so it reads as stale even in one colour.
 const MAP_STALE: Color = Color(0.0, 0.0, 0.0, 0.35)
 
+## The Ledger. In and out are separate colours rather than one net line,
+## because a net line hides whether a bad month was a collapse in trade or a
+## spree.
+const LEDGER_IN: Color = Color(0.26, 0.45, 0.27)
+const LEDGER_OUT: Color = Color(0.60, 0.20, 0.17)
+
 ## Type sizes, in the order they matter: the letter first.
 const SIZE_BODY: int = 20
 const SIZE_LABEL: int = 17
