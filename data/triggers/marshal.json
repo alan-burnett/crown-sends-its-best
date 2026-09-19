@@ -109,5 +109,19 @@
     "urgency": 0.4,
     "cooldown": 0,
     "conditions": []
+  },
+  {
+    "id": "trigger.marshal.let_down",
+    "letter": "marshal.let_down",
+    "urgency": 0.85,
+    "cooldown": 3,
+    "params": {},
+    "conditions": [
+      {
+        "i_was_let_down": {
+          "within": 2
+        }
+      }
+    ]
   }
 ]

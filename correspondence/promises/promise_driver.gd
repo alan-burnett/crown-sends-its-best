@@ -23,3 +23,14 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 	if phase != WorldPhase.CROWNS_MONTH or promises == null:
 		return
 	promises.settle_due(contacts, log, state.month, can_crown_pay)
+
+
+## Repudiate everything the Crown owes, the month it stops paying.
+##
+## Called by the standing driver in phase 6, **after** this phase has already
+## settled what fell due — so a promise that came due during the warning window
+## was paid before the faucet shut, which is what the window is for.
+func repudiate(log: EventLog, month: int) -> Array[Promise]:
+	if promises == null:
+		return []
+	return promises.repudiate(contacts, log, month)

@@ -129,13 +129,30 @@ func add_promise(promise_id: String) -> void:
 		outstanding_promises.append(promise_id)
 
 
+## How many times the PC's word has not been kept to this contact, and when it
+## last happened.
+##
+## **Counted, not just felt.** The loyalty drop is immediate; the letter that
+## says so comes next month, and needs to know there is something to say.
+var promises_broken: int = 0
+var last_promise_broken_month: int = -1
+
+
 ## Clear a promise. `kept` false records the broken-promise deed, which costs
 ## loyalty whether it broke through lack of means or a Crown refusal
 ## (SPEC §9.5, §10.3).
-func settle_promise(promise_id: String, kept: bool) -> float:
+##
+## The month is remembered so the injured party can **write about it** rather
+## than merely thinking less of the PC. A loyalty drop nobody mentions is a
+## number moving in the dark, and the cascade this feeds is supposed to be
+## watchable (#70).
+func settle_promise(promise_id: String, kept: bool, month: int = -1) -> float:
 	var index := outstanding_promises.find(promise_id)
 	if index >= 0:
 		outstanding_promises.remove_at(index)
+	if not kept:
+		promises_broken += 1
+		last_promise_broken_month = month
 	return record_deed(DELIVERED if kept else PROMISE_BROKEN)
 
 
@@ -145,6 +162,8 @@ func to_dict() -> Dictionary:
 	return {
 		"contact_id": String(contact_id),
 		"loyalty": loyalty,
+		"promises_broken": promises_broken,
+		"last_promise_broken_month": last_promise_broken_month,
 		"outstanding_promises": outstanding_promises.duplicate(),
 		"deeds": deeds.duplicate(),
 		"last_written_month": last_written_month,
@@ -159,4 +178,6 @@ static func from_dict(data: Dictionary) -> Relationship:
 	relationship.outstanding_promises = PackedStringArray(data.get("outstanding_promises", []))
 	relationship.deeds = data.get("deeds", {}).duplicate()
 	relationship.last_written_month = int(data.get("last_written_month", -1))
+	relationship.promises_broken = int(data.get("promises_broken", 0))
+	relationship.last_promise_broken_month = int(data.get("last_promise_broken_month", -1))
 	return relationship

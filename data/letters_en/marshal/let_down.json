@@ -1,0 +1,86 @@
+{
+  "id": "marshal.let_down",
+  "sender": "marshal",
+  "type": "report",
+  "skippable": true,
+  "params": {},
+  "body": [
+    {
+      "text": "The money did not come."
+    },
+    {
+      "text": "I told my quartermasters it would, because you told me it would. I have had to go back and tell them otherwise, in front of the men, and I will not pretend that was a small thing."
+    },
+    {
+      "text": "I am not asking what happened. I am telling you that it happened, and that I know how to count.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I assume there is a reason. I should have liked to hear it from you first.",
+      "only_tones": [
+        "dutiful",
+        "desperate"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "On the money that did not come, I am {choice}.",
+      "options": [
+        {
+          "tone": "desperate",
+          "text": "sorrier than this letter can carry"
+        },
+        {
+          "tone": "dutiful",
+          "text": "aware, and working on it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "not accustomed to being dunned"
+        },
+        {
+          "tone": "hateful",
+          "text": "uninterested in your quartermasters"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "amends",
+        "prompt": "What is to be said to the Marshal",
+        "options": [
+          {
+            "id": "favour",
+            "label": "grant him a favour against the debt",
+            "text": "Take this against it, and my word that the rest follows.",
+            "effect": {
+              "grant_favor": {
+                "to": "marshal",
+                "favor": "first call on the next consignment"
+              }
+            }
+          },
+          {
+            "id": "nothing",
+            "label": "offer nothing",
+            "text": "There is nothing to be done about it this month.",
+            "effect": {
+              "refuse": {
+                "to": "marshal"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

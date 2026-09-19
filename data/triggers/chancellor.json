@@ -115,5 +115,19 @@
         "crown_reopened_the_faucet": {}
       }
     ]
+  },
+  {
+    "id": "trigger.chancellor.let_down",
+    "letter": "chancellor.let_down",
+    "urgency": 0.6,
+    "cooldown": 4,
+    "params": {},
+    "conditions": [
+      {
+        "i_was_let_down": {
+          "within": 2
+        }
+      }
+    ]
   }
 ]

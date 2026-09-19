@@ -139,6 +139,39 @@ PLEASURE_LIFT 0.45
 FITNESS_SHARE 0.65   PROGRESS_SHARE 0.35
 ```
 
+### While safety is inert, drop it and renormalise
+
+Safety is pinned at 1.0 until M5 (§4). Left in the sum it contributes a flat
+`0.25` every month, which **puts a floor of 0.25 under every town in the colony**
+and compresses the usable range into the top three quarters of the scale. The
+harness confirms it: quality of life never left 0.91–0.98 across 400 runs, so the
+perception ladders had one reachable rung and every governor letter about it said
+the same word.
+
+So **until safety is a live component, exclude it and renormalise the other
+three:**
+
+```
+w_health 0.40   w_means 0.267   w_hope 0.333
+```
+
+Same relative balance between them, full 0–1 range reachable. The worked example
+below then reads 0.91 / 0.21 / 0.56 for thriving, struggling and starving-drunk,
+against 0.93 / 0.41 / 0.58 with safety pinned in.
+
+**This widens the range; it does not by itself create variation.** A town whose
+health, means and hope all sit near 1.0 still scores near 1.0. Movement needs the
+colony to actually struggle, which is M3's pressures landing (#90).
+
+When M5 brings safety alive, put it back and renormalise again — and revisit the
+weighting as a whole at that point rather than simply restoring these numbers,
+since combat reaches quality of life through more than one component.
+
+These use the **full five-component weights**, because the raided rows are what
+demonstrate why substance is a sum rather than a product. Under the interim
+weights above, safety is absent and the raided rows collapse into their
+unraided ones.
+
 | Town | health | safety | means | hope | pleasure | substance | **QoL** |
 | :--- | --: | --: | --: | --: | --: | --: | --: |
 | Thriving | 1.0 | 1.0 | 0.8 | 0.7 | 0.9 | 0.89 | **0.93** |
@@ -201,9 +234,10 @@ town is more immediately effective than supplying it. That seems right — it is
 rule by correspondence — but if it is *too* strong, lower `FITNESS_SHARE` before
 touching anything else.
 
-**Safety is inert until M5.** Two milestones of tuning will happen with a
-constant pinned at 1.0, and then a whole component will come alive at once.
-Expect the weights to need revisiting when it does.
+**Safety is inert until M5**, and is excluded from the sum until then (§5). Two
+milestones of tuning will happen without it, and then a whole component comes
+alive at once. The Author has asked that this be treated as a fresh look at how
+combat reaches quality of life, rather than a restoration of the old weights.
 
 ## 9. Open items
 

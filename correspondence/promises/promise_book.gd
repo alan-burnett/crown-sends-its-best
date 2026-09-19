@@ -89,6 +89,31 @@ func settle_due(contacts: Dictionary, log: EventLog, month: int, can_crown_pay: 
 	return settled
 
 
+## **The Crown repudiates everything it owes on the PC's word** (#70, SPEC §10.3).
+##
+## Not the promises that happen to fall due — *every* outstanding one. When the
+## Treasury stops, it stops for all of them at once, and because the PC typically
+## owes several people this lands as a broad collapse in goodwill rather than a
+## single penalty. That breadth is intended and is the head of the failure
+## spiral: broken promises lower loyalty, lower loyalty worsens compliance
+## (SPEC §8.5), worse compliance raises rebel sentiment (§12.3).
+##
+## **Only gold drawn on the Crown.** A promise the colony fulfils from its own
+## stockpiles is not the Crown's to refuse — a governor sending resources to a
+## neighbour is unaffected.
+##
+## Returns what was broken, so the caller can say who was let down.
+func repudiate(contacts: Dictionary, log: EventLog, month: int) -> Array[Promise]:
+	var broken: Array[Promise] = []
+	for promise in outstanding():
+		if promise.payer != Promise.PAYER_CROWN or promise.kind != &"gold":
+			continue
+		_break(promise, contacts.get(String(promise.to)), log, month,
+			"the Crown has stopped honouring what you pledged")
+		broken.append(promise)
+	return broken
+
+
 ## Break a promise for a reason other than the Crown's refusal — lack of means,
 ## or an Intent that never completed.
 func break_promise(promise: Promise, contact: Contact, log: EventLog, month: int, reason: String) -> void:
@@ -99,7 +124,7 @@ func _keep(promise: Promise, contact: Contact, log: EventLog, month: int) -> voi
 	promise.status = Promise.KEPT
 	promise.settled_month = month
 	if contact != null:
-		contact.relationship.settle_promise(String(promise.id), true)
+		contact.relationship.settle_promise(String(promise.id), true, month)
 	log.emit(EVENT_KEPT, promise.to, month, promise.to_dict(), WorldPhase.CROWNS_MONTH)
 
 
@@ -109,7 +134,7 @@ func _break(promise: Promise, contact: Contact, log: EventLog, month: int, reaso
 	promise.broken_reason = reason
 	# **A broken promise costs loyalty**, however it broke.
 	if contact != null:
-		contact.relationship.settle_promise(String(promise.id), false)
+		contact.relationship.settle_promise(String(promise.id), false, month)
 	var payload := promise.to_dict()
 	payload["reason"] = reason
 	log.emit(EVENT_BROKEN, promise.to, month, payload, WorldPhase.CROWNS_MONTH)

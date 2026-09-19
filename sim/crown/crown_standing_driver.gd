@@ -84,5 +84,26 @@ func _react(state: WorldState, log: EventLog) -> void:
 			payload, WorldPhase.RUN_END_CHECK,
 		)
 
-	if promises != null:
-		promises.can_crown_pay = refusal.pays()
+	if promises == null:
+		return
+	promises.can_crown_pay = refusal.pays()
+
+	# **The month it stops, it stops for everything.** Not only what fell due.
+	if String(happened.get("event", "")) == String(CrownRefusal.EVENT_REFUSING):
+		var broken := promises.repudiate(log, state.month)
+		log.emit(CrownRefusal.EVENT_REFUSING, &"crown", state.month, {
+			"state": String(refusal.state),
+			"repudiated": broken.size(),
+			# Who was let down, so the grievances #71 reads are already on the
+			# record and nothing has to be reconstructed later.
+			"let_down": _names(broken),
+		}, WorldPhase.RUN_END_CHECK)
+
+
+static func _names(broken: Array) -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	for promise in broken:
+		if not out.has(String(promise.to)):
+			out.append(String(promise.to))
+	out.sort()
+	return out

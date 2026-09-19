@@ -1,0 +1,18 @@
+{
+  "id": "chancellor.let_down",
+  "sender": "chancellor",
+  "type": "report",
+  "skippable": true,
+  "params": {},
+  "body": [
+    {
+      "text": "You will have gathered that what you pledged on my account was not paid."
+    },
+    {
+      "text": "I had staked a little of myself on it. Not much — I am not a fool — but a little, and that little is gone."
+    },
+    {
+      "text": "I mention it only so that you know the ledger between us has a new entry, and that I keep it."
+    }
+  ]
+}
