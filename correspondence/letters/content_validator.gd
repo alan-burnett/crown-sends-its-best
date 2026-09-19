@@ -396,6 +396,53 @@ func check_trigger_params(content: ContentDatabase) -> void:
 				_problem("params", "'%s' declares param '%s', which this trigger does not supply" % [letter_id, name])
 
 
+## Report any registered effect that no letter uses.
+##
+## ## 🔒 An effect nobody uses is an instrument the player cannot reach
+##
+## This exists because of a real one. `set_tax_rate` was registered, carried a
+## builder that worked out the world key and the step, and had its own entry in
+## the turn loop's executor table — and **no letter used it**. Every letter about
+## a rate used `set_policy`, which the table maps to nothing.
+##
+## So SPEC §10.2's main economic instrument was disconnected for the whole of M1
+## and M2, and the trade-protest backfire built on top of it (#115) rested on a
+## lever the player could not pull. Nothing failed, because nothing checked.
+##
+## **Conditions and param sources are deliberately not checked.** An unused
+## condition is vocabulary waiting for a letter to want it; an unused effect is a
+## verb the game claims to have and does not.
+func check_effects_are_reachable(content: ContentDatabase) -> void:
+	var used: Dictionary = {}
+	for id in content.ids("letters"):
+		_collect_effects(content.collection("letters")[id], used)
+
+	_file = "registered effects"
+	for id in ContentRegistry.effect_ids():
+		if not used.has(String(id)):
+			_problem("effects", (
+				"'%s' is registered and no letter uses it, so the player cannot "
+				+ "reach it — give it a letter, or stop registering it"
+			) % id)
+
+
+## Every effect id named anywhere in a letter record.
+##
+## Walks the record rather than matching text, so a resource called "refuse"
+## could never be mistaken for the effect of the same name.
+func _collect_effects(node: Variant, into: Dictionary) -> void:
+	match typeof(node):
+		TYPE_DICTIONARY:
+			for key in node:
+				if String(key) == "effect" and typeof(node[key]) == TYPE_DICTIONARY:
+					for effect_id in node[key]:
+						into[String(effect_id)] = true
+				_collect_effects(node[key], into)
+		TYPE_ARRAY:
+			for entry in node:
+				_collect_effects(entry, into)
+
+
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
 func check_trigger_targets(content: ContentDatabase) -> void:

@@ -35,6 +35,7 @@ func _init() -> void:
 	validator.validate(content)
 	validator.check_trigger_targets(content)
 	validator.check_trigger_params(content)
+	validator.check_effects_are_reachable(content)
 	print(validator.report())
 
 	var ok := validator.ok()
