@@ -1,12 +1,12 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v1.7: Under Author ownership but not ready for PO or developers.
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v1.8: Under Author ownership but not ready for PO or developers.
 
 ---
 
 ## 0\. How to Use This Document
 
-- **This spec describes the game as a whole.** It covers what the game is, how its systems relate, and the rules that must stay true. It does not cover exact numbers, balance values, content lists, or implementation details. Those belong in tickets, data files, and code. Where the spec gives numbers, they are **design targets** for tuning to aim at.  
+- **This spec describes the game as a whole.** It covers what the game is, instanhow its systems relate, and the rules that must stay true. It does not cover exact numbers, balance values, content lists, or implementation details. Those belong in tickets, data files, and code. Where the spec gives numbers, they are **design targets** for tuning to aim at.  
 - **When the spec and a ticket conflict, the spec wins.** If a ticket would break something written here, it gets the `author` label and waits until the Author changes either the spec or the ticket.  
 - **Invariants** (marked **🔒**) are rules that must hold for the whole of development. Any feature or mechanic added later must fit inside them.  
 - **Only the Author edits this file.** Examples in this document show intent. They are not exhaustive lists.  
@@ -87,6 +87,7 @@ The spec uses a small set of words precisely. Most are defined where their mecha
 | Governor | §8.2, elected for a new town in §11.4 |
 | Immigration | §12.1 |
 | Improvement | §11.1 |
+| Intent | §8.2 |
 | Ledger | §10.4 |
 | Lost Town | §12.3 |
 | Loyalty | §8.5 |
@@ -108,11 +109,13 @@ The spec uses a small set of words precisely. Most are defined where their mecha
 | Resources | §10.1 |
 | Retirement | §13.2 |
 | Rivals, Dukes | §8.4, §12.4 |
+| Stall | §11.3 |
 | Tax Rates | §10.2 |
 | Tile | §11.1 |
 | Town | §11.3 |
 | Trade Protest | §10.2 |
 | Trust | §12.5 |
+| Wants | §11.3 |
 
 **🔒 Terminology is stable.** These words keep these meanings throughout the spec, the tickets, and the code. A ticket that needs a concept not named here goes to the Author.
 
@@ -137,7 +140,7 @@ The spec uses a small set of words precisely. Most are defined where their mecha
 A run opens with a short **introductory cutscene** that sets up the PC's appointment. The player customizes his PC and chooses other presentations that add flavor (such as portrait or colony color) without affecting any mechanics of the run. The player then makes a series of **starting decisions** that shape the colony, not the PC. Examples:
 
 - **Colony site:** a choice among a few generated regions, each with different terrain, native neighbors, and rival proximity.  
-- **Mandate:** the Crown's stated goal for the colony, such as profit, a strategic foothold, or settlement. This has an effect on the objectives the Governor will select for the town, especially in the early game. This includes the decision to grow one town large or plan to expand early.  
+- **Mandate:** the Crown's stated goal for the colony, such as profit, a strategic foothold, or settlement. It is the founding governor's starting intent, and it shapes his early objectives. As the run goes on it is increasingly likely to be displaced by an intent born of his own circumstances.  
 - **Starting assets:** how the initial grant is split between the town’s population, the town’s gold, and the town’s resources.
 
 Choices unlocked through meta-progression (§14) show up here. Each run is generated from a **seed**.
@@ -198,7 +201,7 @@ These five contacts are the same in every run and are **not randomized**. Each o
 
 ### 8.2 Colony Contacts (semi-random)
 
-- **Governors:** one per town, and the main contact for that town's affairs.  
+- **Governors:** one per town, and the main contact for that town's affairs. A governor holds an **Intent**: a standing goal such as growing the town, raising its defenses, increasing its output, or settling a new town. Intent is his, not the town's, and it comes from his personality, his circumstances, the Crown's mandate early in a run, and the PC's letters. An intent can hold for many months while the town works through several objectives under it.  
 - **Institutional contacts:** some buildings bring a new contact, such as a church bringing a clergyman or an armory bringing a quartermaster. Each has their own agenda and loyalty.  
 - Personalities are **generated semi-randomly** for each run.  
 - Colony contacts can change during a run through death, replacement, promotion, or defection.
@@ -222,7 +225,8 @@ These five contacts are the same in every run and are **not randomized**. Each o
   - Examples: a town close to rebellion ignores an order to stop making guns. A Crown officer ignores a request to lower taxes and announces a decision "on your behalf."  
 - The PC's letters raise or lower loyalty over time, so goodwill works like a currency.  
 - Costly requests will reduce the contact’s loyalty unless you make it up to them. If you request troops from the Marshal and pay generously, his loyalty will not shrink. If you make a smaller payment or don’t pay anything, it will cost you loyalty.   
-- **🔒 Deeds outweigh words.** What the PC grants, refuses, promises, and delivers moves loyalty far more than the tone of his letters (§9.2). Silence has its own effect (§9.3).
+- **🔒 Deeds outweigh words.** What the PC grants, refuses, promises, and delivers moves loyalty far more than the tone of his letters (§9.2). Silence has its own effect (§9.3).  
+- **🔒 An order reaches the governor's intent, never the town's objective.** The PC can argue for a goal; he cannot name the project, the tile, or the month. Compliance (above) decides how far the governor's intent bends toward the letter; what the town then builds is the governor's to choose.
 
 ### 8.6 Commanders (random)
 
@@ -344,7 +348,8 @@ A typical run will only have so many letters per turn, increasing as the game go
 - When non-luxury resources are taxed, colonists will spend the same amount of money, and receive less of the resource, which gives the town fewer resources to work with. Towns increase rebel sentiment as they pay taxes on these resources. When **luxury resources** are taxed, there is much less rebel sentiment as a result, but the town will spend less money on the resources. This reflects that they can more easily go without luxury resources than other resources.  
 - When a town decides to do so, they will hold a trade protest. They decide based on  
   - The rebel sentiment of the town  
-  - The governor’s loyalty, satisfaction, and temperament.   
+  - The governor’s loyalty and temperament.  
+  - The town’s quality of life.  
   - The tax rate of this particular resource. Trade protests are increasingly likely in response to a tax increase.  
   - Whether or not it’s a luxury resource (luxury resources are more likely to trigger a trade protest since the town can do without it more easily)  
   - The number of existing trade protests to ensure that you will only get one trade protest at a time, and only continued pressure on the town would cause them to have another trade protest on a later turn.  
@@ -410,10 +415,21 @@ Each town has:
 - **Current objective,** such as building a church, stockpiling food, harvesting resources, or fortifying.  
 - **A governor** (§8.2).
 
+**Intent and Objective.** The governor's intent is the goal; the town's objective is the project. Each month, if the town has no objective — because the last one completed or stalled, or because the governor's intent changed — the governor **selects the objective that best serves his intent** given the state of the town and the world around it. That selection is deterministic and competent: he has advisors, and he picks well.
+
+- An objective is specific, and names its target: build a church, build a farm on a particular tile, raise a militia, fortify a particular tile, amass resources for an expedition. **The governor chooses the tile**, never the PC.  
+- An intent of "increase economic output" might produce a plantation this year and a dock the next. The intent did not change; the best way to serve it did.  
+- **🔒 An intent might not serve the town's welfare.** A governor bent on driving off a tribe will pursue that at his people's expense. This is his to judge and the PC's to argue with.
+
+**Reconsideration.** A town holds its objective until it completes or **stalls** — the governor judges it can no longer be advanced, as when a militia needs guns the town can no longer forge. The stall check runs every month and is deterministic, not a matter of temperament: a governor who has not stalled does not waver.
+
 **The Colony Month.** The month resolves in phases. **🔒 Every town completes a phase before any town begins the next**, and every choice in a phase is made from the colony's state as it stood when that phase began. No town benefits from being simulated first, and ties are broken by a rule fixed by the seed.
 
 1. **Work.** Each town assigns its population to tiles in its influence area, chosen by its objective, each tile's potential, and what the town needs. Yields go into the stockpile.  
-2. **Reckon.** Each town works out what it needs and wants this month: food and other consumption, what its objective requires, the reserve it wants to keep, and what it can spare. Needs are resources that would threaten the town’s survival (clothes, food), wants are what it needs to reach its objectives.   
+2. **Reckon.** Each town works out, in priority order, what it must have, what its objective requires, and what it would like:  
+   1. **Needs** are what survival demands: food, clothing. The citizens will meet these with the town's gold whatever the governor wants.  
+   2. **The objective** comes next: the resources the town's current project requires (§11.3, Intent and Objective). This is the tier the governor directs.  
+   3. **Wants** are discretionary comforts bought with what's left: luxuries, and anything that lifts quality of life without serving the objective.  
 3. **Relief.** Towns holding more than their reserve give to towns in deficit, free and expecting nothing in return. Need is served worst-first, and needs come before wants. A town who repeatedly gives more than it receives resents the crown for its mismanagement. Towns trade resources without any loss or delay. Towns will not give luxury resources as relief.   
 4. **Exchange.** Each town covers what it still lacks, first by trading with natives, then by buying from the Crown, which is taxed. It also buys to improve quality of life and to advance its objective. (exceptions: towns will enforce their trade protests, and rebelling towns will not trade with the crown)  
 5. **Consume.** Population and livestock eat. Clothing and luxuries are used. Shortages hurt quality of life and can cost population.  
@@ -421,7 +437,7 @@ Each town has:
 7. **Sell.** Surplus above the reserve is sold to the Crown, which is taxed. (same exceptions as step 4\)  
 8. **Settle.** Quality of life, population, and rebel sentiment update, and the town may take a new objective.
 
-**🔒 Needs before wants.** A town covers its needs before it spends on its objective or on luxuries. A town typically keeps a reserve before it sells anything to the Crown. 
+**🔒 Needs, then the objective, then wants.** A town covers survival before it spends on its project, and its project before it spends on comforts. A town typically keeps a reserve before it sells anything to the Crown.
 
 **🔒 Towns run themselves** under leadership of the Governor. The PC shapes things through letters to the Governor (setting objectives and policies, and sending resources) but never manages them directly. The governor has authority over what the town actually does, not the player. 
 
