@@ -101,7 +101,13 @@ var turn: int = 0
 var phase: StringName = &"date_card"
 
 
-static func new_run(seed_value: int) -> RunState:
+## Start a run.
+##
+## `site` founds the first town somewhere other than the best ground on the map.
+## SPEC §6.1's Run Setup will pass it when the player is offered a choice of
+## regions; until then the balance harness passes it to study a colony that
+## cannot feed itself, which is not otherwise reachable (#90, #116).
+static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunState:
 	var run := RunState.new()
 	run.run_seed = seed_value
 	run.streams = RngStreams.new(seed_value)
@@ -112,7 +118,7 @@ static func new_run(seed_value: int) -> RunState:
 	run.promises = PromiseBook.new()
 	run.last_diff = WorldDiff.new()
 	run.map = MapGenerator.generate(run.streams.stream("mapgen"))
-	run.starting_site = MapGenerator.choose_starting_site(run.map)
+	run.starting_site = site if site.x >= 0 else MapGenerator.choose_starting_site(run.map)
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
 	run.standing = CrownStanding.new()

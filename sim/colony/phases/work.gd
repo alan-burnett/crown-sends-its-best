@@ -18,26 +18,37 @@ extends ColonyPhase
 ## people sends hands to the loom; a town with good land and nothing to process
 ## does not.
 ##
-## ## What the score means
+## ## What the score means, and what it deliberately leaves out
 ##
 ## Every piece of work is scored as **the weighted resources it adds this
-## month**. A recipe subtracts what it consumes, so brewing the last of the grain
-## into beer scores terribly in a hungry town — without anything in code knowing
-## what beer is.
+## month**, where the weight is what the thing is worth and **triple that if the
+## objective calls for it** (`town-economy.md` §4). A recipe subtracts what it
+## consumes, so brewing the last of the grain into beer scores terribly in a
+## hungry town — without anything in code knowing what beer is.
 ##
-## Weights, in order of how much they matter:
+## **Hunger is not a weight.** It was one, and it is the reason this phase had to
+## be rewritten: a weight that rises as the stores fall re-ranks every tile in
+## the town every month, so a town near the edge reshuffles its whole workforce
+## as its granary crosses a line and back. Measured over 25 seeds and five years,
+## towns gave up 0.25 to 0.67 tiles a month, and the worst seeds three — a fifth
+## of the workforce moved every month. With the weight taken out the same figure
+## is 0.01 to 0.15. The churn was the weight (#116).
 ##
-## 1. **Need outranks everything.** A town short of something it will die
-##    without weights that thing far above anything else, and the shorter it is
-##    the heavier the weight. **Food and clothing are lockstep** (SPEC §11.3
-##    step 2), so this is one rule over both rather than a hunger rule and a
-##    separate afterthought about cloth.
-## 2. **Then what its objective calls for.** A construction wants its remaining
-##    cost; a standing posture wants its focus resources and goes on wanting them.
-## 3. **Then what the thing is worth**, so a town with nothing pressing still
-##    works its best ground rather than standing about — and so that a recipe,
-##    which always takes more raw than it makes processed, can be seen for the
-##    gain it is.
+## ## The survival check, applied after scoring
+##
+## Need is handled instead as a **redirection with a stopping condition**, which
+## is what SPEC §11.3's food-and-clothing lockstep actually asks for. If the
+## chosen assignment cannot meet the town's **food and clothing**, take the hand
+## off the work closing least of the gap and put it on the work closing most.
+## Repeat.
+##
+## **If no swap would improve matters, the town does nothing and accepts the
+## deficit.** It does not thrash, and it does not pretend. A town on poor ground
+## settles into a sensible assignment and goes hungry, rather than sending men to
+## tiles that yield one food for a gain that does not prevent the famine.
+##
+## Each hand moves at most once, so the loop terminates on its own rather than on
+## a guard.
 ##
 ## One worker to a tile or a recipe, best first. Everything is scored from the
 ## colony as it stood when the phase began, never from what this town has already
@@ -46,17 +57,31 @@ extends ColonyPhase
 const EVENT_WORKED: StringName = &"town_worked"
 const EVENT_CONVERTED: StringName = &"town_converted"
 
-## How heavily an unmet need outranks everything else when a town is at nothing.
-const NEED_WEIGHT: float = 8.0
-
 ## What the objective's needs are worth beside general value.
+##
+## ## Added, where `town-economy.md` §4 says tripled
+##
+## **The doc's `favour = 3` assumes its own scoring, which counts a tile's yields
+## and nothing else.** Against a bare count, tripling is decisive. Against the
+## weights actually used here it is not, because `value_of` already spreads a
+## resource's worth over a five-to-one range and six furs outweigh six of
+## anything cheap before any favour is applied at all. On the standard forest and
+## plains fixture, a town ordered to stockpile food still goes to the forest at
+## ×3; the multiplier would have to exceed 3.5 to turn it round, and choosing a
+## number that clears one fixture is tuning rather than a rule.
+##
+## Added instead, because favour is a **tier** — needs, then the objective, then
+## what the thing is worth — and a tier should mean the same thing to a cheap
+## material as to a dear one. An objective wanting forty wood wants forty wood;
+## it does not want it three times as much for wood being valuable.
 const OBJECTIVE_WEIGHT: float = 2.5
 
-## What an input is worth against the need it becomes.
+## What a month spent fetching an input is worth against the need it becomes.
 ##
 ## Less than the need itself, because it still costs a worker and a month to turn
 ## one into the other — but most of it, or a cold town would never send anybody
-## to the traplines.
+## to the traplines, the loom would stand idle for want of furs, and the clothing
+## half of the survival check could never be worked towards at all.
 const INPUT_SHARE: float = 0.6
 
 ## Each expert raises his resource by this much, before diminishing returns.
@@ -73,25 +98,14 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# forever.
 	var wanted := Objective.still_to_gather(town)
 	var focus := Objective.posture_focus(town)
-	# Two readings of what a resource is worth, and the difference matters.
-	#
-	# `worth` is what the town wants of a thing in itself. `gathering` adds what
-	# it is worth as an *input* to something the town needs, which is what sends
-	# trappers out for furs when the people are cold.
-	#
-	# **Tiles are scored against `gathering`; a recipe pays `worth` for what it
-	# consumes.** Charging the recipe the gathering price would double-count: furs
-	# are dear precisely because they become cloth, so making the loom pay that
-	# price makes weaving look barely worth doing and the cloth never gets woven.
-	var worth := _worth(town, before, wanted, focus)
-	var gathering := _gathering(town, before, worth)
+	var worth := _worth(wanted, focus)
 	var tiles := context.tiles_of(town)
 
 	# Tiles and recipes, scored the same way and ranked together. Ties break on a
 	# fixed rule, so the choice is the colony's rather than the iteration order's.
 	var work: Array = []
 	for at in tiles:
-		work.append({"kind": "tile", "at": at, "score": _score_tile(context, at, gathering)})
+		work.append({"kind": "tile", "at": at, "score": _score_tile(context, at, worth)})
 	for recipe in Conversion.all():
 		work.append({"kind": "convert", "recipe": recipe, "score": _score_recipe(recipe, town, worth)})
 
@@ -106,6 +120,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		var right: Vector2i = b["at"]
 		return left.y < right.y or (left.y == right.y and left.x < right.x))
 
+	# **The survival check, after scoring and before anybody goes out.** It may
+	# reorder the list; it never rescores it.
+	_redirect(town, before, context, work)
+
 	var produced: Dictionary = {}
 	var converted: Dictionary = {}
 	# **The start-of-month stockpile**, spent down as recipes claim from it, so
@@ -114,6 +132,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var available: Dictionary = {}
 	var tiles_worked := 0
 	var hands := 0
+	# **Which ground, not merely how much of it** (Seam A). Map playback wants
+	# it, and so does any question about whether a town's assignment is settled
+	# or reshuffling month to month (#116) — neither is answerable from a count.
+	var worked: PackedStringArray = PackedStringArray()
 
 	for entry in work:
 		if hands >= town.workable_tiles():
@@ -123,7 +145,9 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		if String(entry["kind"]) == "tile":
 			hands += 1
 			tiles_worked += 1
-			_harvest(town, context, entry["at"], produced)
+			var at: Vector2i = entry["at"]
+			worked.append("%d,%d" % [at.x, at.y])
+			_harvest(town, context, at, produced)
 		elif _convert(town, before, entry["recipe"], available, converted):
 			hands += 1
 
@@ -133,6 +157,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	context.log.emit(EVENT_WORKED, town.id, context.state.month, {
 		"town": String(town.id),
 		"tiles_worked": tiles_worked,
+		"tiles": worked,
 		"tiles_available": tiles.size(),
 		"converting": hands - tiles_worked,
 		"workers": town.workable_tiles(),
@@ -150,13 +175,14 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 
 ## How much a unit of each resource is worth to this town this month.
 ##
-## **Read from the snapshot**, so every town in this phase judges itself against
-## the same month rather than against whatever the town before it did.
-func _worth(town: Town, before: ColonySnapshot, wanted: Dictionary, focus: PackedStringArray) -> Dictionary:
+## **What the thing is worth, plus what the objective calls for**, and nothing
+## else. There is deliberately no term here for hunger: need is a
+## redirection applied afterwards, not a thumb on the scale, because a weight
+## that moves with the stores re-ranks the whole town every month (#116).
+func _worth(wanted: Dictionary, focus: PackedStringArray) -> Dictionary:
 	var weights: Dictionary = {}
 	for resource in ResourceCatalogue.ids():
 		var weight := value_of(StringName(resource))
-		weight += _urgency_of(town, before, StringName(resource)) * NEED_WEIGHT
 		if wanted.has(resource) or focus.has(resource):
 			weight += OBJECTIVE_WEIGHT
 		weights[resource] = weight
@@ -181,50 +207,188 @@ static func value_of(resource: StringName) -> float:
 	return maxf(0.0, ResourceCatalogue.price_of(resource) / grain)
 
 
-## What a resource is worth to go out and fetch.
-##
-## **A town short of cloth values furs.** Urgency flows back along the conversion
-## chains, or a need that is not a tile yield can never be worked towards: the
-## loom stands idle for want of furs, and nobody traps furs because raw furs are
-## not a need. That circle is exactly what SPEC §11.3's food-and-clothing
-## lockstep requires be broken, and it is why the flow-back is part of the rule
-## rather than a refinement of it.
-func _gathering(town: Town, before: ColonySnapshot, worth: Dictionary) -> Dictionary:
-	var weights := worth.duplicate()
-	for output in ResourceCatalogue.processed():
-		var urgency := _urgency_of(town, before, StringName(output))
-		if urgency <= 0.0:
-			continue
-		for input in ResourceCatalogue.inputs_for(StringName(output)):
-			weights[input] = maxf(
-				float(weights.get(input, 1.0)),
-				value_of(StringName(input)) + urgency * NEED_WEIGHT * INPUT_SHARE,
-			)
-	return weights
+# --- The survival check -----------------------------------------------------
 
-
-## How badly the town wants something it will die without, as `0.0` to `1.0`.
+## What a recipe may take of its input, after the month's needs are set aside.
 ##
-## **Food and clothing are lockstep.** Both are needs and both are measured the
-## same way — not "is there any" but "how many months of it", which is the
-## question a governor actually asks. This is what lets labour be redirected
-## towards cloth, which it could not be while hunger was the only urgency in the
-## phase and cloth was not a tile yield.
-##
-## A resource that is not a need scores zero and is left to its general value.
-func _urgency_of(town: Town, before: ColonySnapshot, resource: StringName) -> float:
+## **A filter, not a weight** (CLAUDE.md). SPEC §11.3 step 2 locks food and
+## clothing ahead of everything, so a town does not brew its last grain into
+## beer — and that has to be a rule about what the loom is *allowed* to take,
+## because it used to be an effect of the hunger weight and the hunger weight is
+## what was causing towns to reshuffle every month (#116). A filter is stable:
+## it changes what is possible, not how everything else ranks.
+func _spare(town: Town, before: ColonySnapshot, resource: StringName) -> float:
+	var held := before.held(town.id, resource)
 	var per_head := ColonyNeeds.per_head(resource)
 	if per_head <= 0.0:
+		return held
+	return maxf(0.0, held - maxf(1.0, float(town.population())) * per_head)
+
+
+## What share of a month's batch this recipe could actually run.
+func _feasible(town: Town, before: ColonySnapshot, recipe: Conversion) -> float:
+	if recipe.consumed <= 0.0:
 		return 0.0
-	var monthly := maxf(1.0, float(town.population())) * per_head
-	var months_held := before.held(town.id, resource) / maxf(0.001, monthly)
-	var short_by := clampf(1.0 - months_held / ColonyNeeds.comfortable_months(), 0.0, 1.0)
-	# **Scaled by how fast going without it kills you.** Hunger and cold are both
-	# needs and both are counted, but they are not the same emergency.
-	return short_by * ColonyNeeds.severity(resource)
+	return clampf(_spare(town, before, recipe.input) / recipe.consumed, 0.0, 1.0)
 
 
-# --- Scoring ----------------------------------------------------------------
+
+## Move hands onto need, one at a time, and stop when moving another would not
+## help (`town-economy.md` §4).
+##
+## **The stopping condition is the whole point.** A town that cannot close its
+## food gap is supposed to settle into a sensible assignment and go hungry. The
+## alternative — a hunger term inside the score — keeps biasing toward food
+## whether or not more food is actually to be had, so a town on poor ground gives
+## up the ore it was raising for one more grain that does not prevent the famine,
+## and does it again the following month in the other direction (#116).
+##
+## ## Judged on the whole assignment, not on what is left of the gap
+##
+## The obvious reading of the doc — take the hand closing least of the *remaining*
+## shortfall and move it to the work closing most — swaps back and forth within a
+## single month. Once the food is covered, the tile covering it is the one
+## contributing least to what remains, so the next pass moves that hand onto furs
+## and re-opens the hunger it had just closed.
+##
+## So a swap is accepted only when it lowers the town's **total unmet need**, over
+## food and clothing together (SPEC §11.3 step 2). That is strictly decreasing and
+## bounded below, so the loop ends on its own and lands somewhere it will land
+## again next month from the same position.
+func _redirect(
+	town: Town,
+	before: ColonySnapshot,
+	context: ColonyContext,
+	work: Array,
+) -> void:
+	var hands := town.workable_tiles()
+	if hands <= 0 or work.size() <= hands:
+		return  # Every hand is already on the best there is; there is nothing to swap.
+
+	var needs := ColonyNeeds.needed_resources()
+	var gives: Array = []
+	for entry in work:
+		gives.append(_contribution(town, before, context, entry, needs))
+
+	# What the town is short of, before any of this month's work is counted.
+	var owed: Dictionary = {}
+	var mouths := maxf(1.0, float(town.population()))
+	for resource in needs:
+		# **Measured against a comfortable store, not against this month's meal.**
+		# A town producing exactly what it eats and holding nothing is one bad
+		# month from famine, and a check that called that "needs met" would let a
+		# town quarry while it lived hand to mouth.
+		owed[resource] = mouths * ColonyNeeds.per_head(StringName(resource)) \
+			* ColonyNeeds.comfortable_months() \
+			- before.held(town.id, StringName(resource))
+
+	var balance: Dictionary = owed.duplicate()
+	for i in hands:
+		for resource in needs:
+			balance[resource] = float(balance[resource]) - float(gives[i][resource])
+
+	for _move in hands:
+		var unmet := _unmet(balance, needs)
+		if unmet <= 0.000001:
+			return  # Needs are met. The assignment stands.
+
+		var take := -1
+		var put := -1
+		var best := unmet
+		for i in hands:
+			for j in range(hands, work.size()):
+				var after := 0.0
+				for resource in needs:
+					after += maxf(0.0, float(balance[resource])
+						+ float(gives[i][resource]) - float(gives[j][resource]))
+				if after < best - 0.000001:
+					best = after
+					take = i
+					put = j
+
+		# **No swap would improve matters. Do nothing and accept the deficit.**
+		if take < 0:
+			return
+
+		for resource in needs:
+			balance[resource] = float(balance[resource]) \
+				+ float(gives[take][resource]) - float(gives[put][resource])
+
+		var moved: Dictionary = work[take]
+		work[take] = work[put]
+		work[put] = moved
+		var swapped: Dictionary = gives[take]
+		gives[take] = gives[put]
+		gives[put] = swapped
+
+
+## How much of the town's total need is still unmet.
+##
+## A surplus of grain does not feed anybody cloth, so each need is counted at
+## zero or worse and never against another.
+func _unmet(balance: Dictionary, needs: PackedStringArray) -> float:
+	var total := 0.0
+	for resource in needs:
+		total += maxf(0.0, float(balance[resource]))
+	return total
+
+
+## What a month of this work adds towards each of the town's needs.
+##
+## Counts what the work fetches *towards* a need as well as the need itself: a
+## cold town values furs, or the loom stands idle and the clothing half of the
+## check can never be worked towards, since cloth is not a tile yield. Discounted
+## by `INPUT_SHARE`, because it still costs another worker and another month to
+## turn one into the other.
+func _contribution(
+	town: Town,
+	before: ColonySnapshot,
+	context: ColonyContext,
+	entry: Dictionary,
+	needs: PackedStringArray,
+) -> Dictionary:
+	var gives: Dictionary = {}
+	for resource in needs:
+		gives[resource] = 0.0
+
+	if String(entry["kind"]) == "convert":
+		# **Scaled by what the town can actually feed it.** A loom with no furs
+		# makes no cloth, and moving a hand onto it would give up good ground for
+		# work that will not happen.
+		var recipe: Conversion = entry["recipe"]
+		var share := _feasible(town, before, recipe)
+		if share > 0.0:
+			var output := String(recipe.output)
+			if gives.has(output):
+				gives[output] = float(gives[output]) + recipe.made_by(town) * share
+			var input := String(recipe.input)
+			if gives.has(input):
+				gives[input] = float(gives[input]) - recipe.consumed * share
+		return gives
+
+	var at: Vector2i = entry["at"]
+	for resource in needs:
+		gives[resource] = float(gives[resource]) + _yield_of(context, town, at, StringName(resource))
+	for output in ResourceCatalogue.processed():
+		if not gives.has(String(output)):
+			continue
+		var per_unit := maxf(0.001, ResourceCatalogue.input_per_unit_of(StringName(output)))
+		for input in ResourceCatalogue.inputs_for(StringName(output)):
+			var fetched := _yield_of(context, town, at, StringName(input)) / per_unit
+			gives[String(output)] = float(gives[String(output)]) + fetched * INPUT_SHARE
+	return gives
+
+
+## What a tile gives this town of one resource, experts and buildings included.
+func _yield_of(context: ColonyContext, town: Town, at: Vector2i, resource: StringName) -> float:
+	var amount := context.map.yield_at(at.x, at.y, resource)
+	if amount <= 0.0 or town == null:
+		return amount
+	return amount * expert_multiplier(town, resource) \
+		* (1.0 + Building.yield_bonus_for(town, resource))
+
+
+# --- Scoring ---# --- Scoring ----------------------------------------------------------------
 
 func _score_tile(context: ColonyContext, at: Vector2i, weights: Dictionary) -> float:
 	var score := 0.0
@@ -270,7 +434,9 @@ func _convert(
 ) -> bool:
 	var key := String(recipe.input)
 	if not available.has(key):
-		available[key] = before.held(town.id, recipe.input)
+		# **The month's needs come off the top.** A town with two days of grain
+		# has none to spare for the brewhouse, whatever beer is worth.
+		available[key] = _spare(town, before, recipe.input)
 
 	var on_hand := float(available[key])
 	if on_hand <= 0.0:

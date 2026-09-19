@@ -6,6 +6,10 @@
 >
 > **Serves:** SPEC §10.2 (the Crown demands gold), §10.3 (Crown Standing), §6.2
 > (the difficulty curve), §3.1 (the Crown at its peak), and the Squeeze pillar.
+>
+> **Scope note:** despite the title this covers **every demand made on the PC**,
+> including a rival duke's tribute (§8.4), which is not the Crown's and costs
+> prestige rather than standing. The Crown is the main source, not the only one.
 
 ---
 
@@ -98,6 +102,10 @@ promise, and the player has to judge his own colony to know which he is making.
 Iron, guns, food, and whatever else his wars need (§8.1). These are physical goods
 sitting in a town's stockpile, which is where delivery stops being simple (§5).
 
+**These should be uncommon.** A resource demand costs two letters, a payment
+decision and a governor's compliance. Gold is the routine; resources are for when
+the Marshal's war genuinely needs a thing the colony makes.
+
 ### Funding — the Provost
 
 Gold promised for a policy: education, immigration. Drawn on the Crown, so it
@@ -138,6 +146,59 @@ acceptance, two enemies.
 This is rule by correspondence at its sharpest. **The PC's only power over the
 thing he has already promised is another letter.**
 
+### The shipment letter
+
+Accepting names a town: *yes, my colony will send this — collect it at Ashmere.*
+That prompts a second letter to that town's governor, asking him to prepare the
+resource for shipment.
+
+**The PC sets what the Crown will pay**, from nothing at all to double for a
+shipment he calls vital.
+
+Two things about that gold:
+
+- **It never generates tax income.** This is a requisition, not a trade — there
+  are no merchants in the middle to tax. So a shipment is pure cost on the
+  Crown's side, unlike ordinary trade, which always profits it
+  (`town-economy.md` §5).
+- **The town receives it.** It lands in the town's hidden balance, so paying
+  double genuinely enriches the place. Gold raises `means`, which raises quality
+  of life, which lowers rebel sentiment.
+
+That makes overpayment a deliberate lever: **the PC can spend Crown Standing to
+buy a town's contentment**, laundered through a shipment the Marshal wanted
+anyway. Which is the Squeeze's central tension in one letter, and is exactly why
+the range is bounded at double rather than open-ended.
+
+### Compliance is a choice of tier
+
+The governor's answer maps straight onto §11.3's Reckon tiers, which is what
+makes it precise rather than a mood:
+
+| His answer | The shipment enters at | What it costs his town |
+| :--- | :--- | :--- |
+| *"I will treat this as a need"* | **Needs** | It outranks his own project. The town buys to fulfil it and goes without. |
+| *"We will ship what we can"* | **Spare**, after objective and reserve | Only genuine surplus leaves. |
+| *"I am giving you nothing"* | — | Nothing leaves. |
+
+**Full compliance damages his own town**, which is why it costs his loyalty
+unless the payment makes it up to him — the same payment-for-loyalty model §8.5
+describes for the Marshal's troops. Pay nothing and the governor bears the whole
+cost himself. Pay double and his town is richer for it.
+
+The middle tier — *"I will put it on par with our own project"* — is available if
+a fourth gradation is wanted later. Three is enough to start.
+
+### Large shipments arrive over months
+
+A demand for a great many horses is not refused for being large; the Marshal will
+take them **across a year** as the town shifts production toward them.
+
+So a shipment is a **multi-month Intent**: it reshapes the town's economy while
+it runs, the PC can watch it progress, and the governor can fall behind. That
+fits the world month's rule that consequential actions should be multi-month so a
+letter can still reach them.
+
 ### Which argues for asking first
 
 A careful player writes to the governor *before* accepting, and learns whether
@@ -148,6 +209,16 @@ turns a blind bet into an informed one.
 demands must carry a deadline of **more than one turn**. A demand answered by
 return of post makes the careful play impossible and reduces the whole thing to a
 coin toss.
+
+### Which is also why gold is the norm
+
+Two letters, a payment decision and a tier of compliance is a great deal of
+machinery for one demand. **Gold demands should be the routine and resource
+demands the exception**, or every turn becomes a logistics exercise and SPEC
+§9.6's promise that the desk will not become a chore is broken.
+
+Resource demands are for when the Marshal's war genuinely needs a thing the
+colony makes.
 
 ## 6. The four dimensions of growth
 
@@ -287,19 +358,46 @@ Tied to SPEC §6.2:
 - A negligent run should be failing by year 4–5, which is the specific thing #90
   says cannot happen today.
 
-## 10. Open items
+## 10. The Squeeze is defined without its relief
+
+**Nothing here loosens.** No dimension reverses, no source withdraws, no year
+brings respite. That is deliberate and it is the method, not an oversight:
+
+> **Define the pressure first, purely. Relief is the business of other systems,
+> and each of them earns its place partly by how it loosens or circumvents this.**
+
+Patrons who bring help, tribes whose trust yields resources, a specialised colony
+that outgrows its targets, a rival distracted by easier prey — all of those are
+relief, and all of them get to be designed against a Squeeze that is already
+known to squeeze. A pressure defined with its own escape hatches built in cannot
+be reasoned about, and neither can the features that were supposed to provide
+them.
+
+So when a later mechanic removes a source or softens an axis, it does so as a
+**stated interaction with this document**, and the interaction is the feature.
+
+## 11. Open items
 
 - The size of the year-one gap between demand and output. This single number sets
   how hard the first three years feel and is the most load-bearing value here.
 - Per-dimension magnitudes, pending harness calibration (§6).
-- Whether dimension 4 should ever *remove* a source — a patron losing interest, an
-  officer's attention moving elsewhere, a rival turned to easier prey — so the
-  axis can breathe.
 - How long a resource demand's deadline should be. It must exceed one turn (§5)
   or the ask-the-governor-first play is impossible, but too long and it stops
   being a decision.
 - Whether a rival's tribute demand scales with how prosperous the colony looks,
   per §8.4's note that they covet it especially when it prospers.
+- The payment ceiling on shipments. Double is the stated bound and the reason for
+  a bound is sound — unbounded, buying a town's contentment with Crown Standing
+  becomes a dominant strategy rather than a trade. Whether double is the right
+  number is a harness question.
+- How often a resource demand should arrive relative to a gold one. Too often and
+  the desk becomes logistics (§9.6).
+- **Whether growth saturates.** At one draw a year from year four, a run reaching
+  SPEC §13.2's fifty-year cap sees some forty-odd growth events. The ramp is
+  *supposed* to become impossible — §13.2 calls fifty years extraordinary — but
+  there is a difference between impossible and farcical, and a demand grown a
+  hundredfold stops reading as a Crown and starts reading as a bug. Whether the
+  axes cap, and where, is unanswered.
 - Whether the Chancellor repeats his announcement in later years, or whether it
   is once per run. Once is cleaner; a second one when the run has gone badly long
   might be funnier.

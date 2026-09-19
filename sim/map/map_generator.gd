@@ -165,18 +165,35 @@ static func _cut_shallows(map: WorldMap) -> void:
 ## Ties break on position, so the choice is the map's rather than the
 ## dictionary's.
 static func choose_starting_site(map: WorldMap) -> Vector2i:
-	var best := Vector2i(-1, -1)
-	var best_score: float = -INF
+	var ranked := sites_by_score(map)
+	return ranked[0] if not ranked.is_empty() else Vector2i(-1, -1)
 
+
+## Every land tile, best site first.
+##
+## **The seam SPEC §6.1 needs**, where Run Setup offers a choice of regions
+## rather than dropping the town on the best ground on the map. It exists now
+## because the balance harness needs the other end of the list: no colony has
+## ever gone hungry (#90), and a colony that always starts on the best food in
+## reach never will, so there is no evidence about how a town behaves on ground
+## it cannot live on.
+##
+## Ties break on position, so the order is the map's rather than the traversal's.
+static func sites_by_score(map: WorldMap) -> Array[Vector2i]:
+	var scored: Array = []
 	for y in map.height:
 		for x in map.width:
-			if not map.is_land(x, y):
-				continue
-			var score := site_score(map, x, y)
-			if score > best_score:
-				best_score = score
-				best = Vector2i(x, y)
-	return best
+			if map.is_land(x, y):
+				scored.append([site_score(map, x, y), y, x])
+	scored.sort_custom(func(a: Array, b: Array) -> bool:
+		if not is_equal_approx(float(a[0]), float(b[0])):
+			return float(a[0]) > float(b[0])
+		return int(a[1]) < int(b[1]) or (int(a[1]) == int(b[1]) and int(a[2]) < int(b[2])))
+
+	var out: Array[Vector2i] = []
+	for entry in scored:
+		out.append(Vector2i(int(entry[2]), int(entry[1])))
+	return out
 
 
 ## How good a site is. Food first, then the makings of a town, then the sea.

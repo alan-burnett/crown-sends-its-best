@@ -115,6 +115,29 @@ func _init() -> void:
 
 # --- One seed ---------------------------------------------------------------
 
+## Where this policy wants the town founded.
+##
+## **`ground: poor` is how the harness asks a hard question.** The generator
+## picks the best food in reach so that M2 is playable rather than a famine
+## simulator, with the result that no colony has ever gone hungry (#90) and
+## there is no evidence at all about a town that cannot feed itself — which is
+## precisely the case #116 is about. A quantile rather than the very worst tile,
+## because the worst land on a map is often a one-tile desert island and a town
+## that dies in month two answers nothing.
+func _site(seed_value: int, policy: Dictionary) -> Vector2i:
+	var ground := String(policy.get("ground", "best"))
+	if ground == "best":
+		return Vector2i(-1, -1)
+
+	var streams := RngStreams.new(seed_value)
+	var ranked := MapGenerator.sites_by_score(MapGenerator.generate(streams.stream("mapgen")))
+	if ranked.is_empty():
+		return Vector2i(-1, -1)
+	var quantile := float(policy.get("ground_quantile", 0.85))
+	return ranked[clampi(int(float(ranked.size() - 1) * quantile), 0, ranked.size() - 1)]
+
+
+
 ## Play a whole run under a policy. Returns `{rows}` or `{error, turn}`.
 func _play(
 	seed_value: int,
@@ -123,7 +146,7 @@ func _play(
 	content: ContentDatabase,
 	influence: Dictionary,
 ) -> Dictionary:
-	var run := RunState.new_run(seed_value)
+	var run := RunState.new_run(seed_value, _site(seed_value, policy))
 	# **A policy may start the run with duties already set.** Some questions are
 	# about a rate rather than about how letters are answered — what raising the
 	# duty on tea does to what towns buy (#115) cannot be asked any other way,
@@ -144,6 +167,9 @@ func _play(
 	var seen_traces := 0
 	var letters := 0
 	var counted := 0
+	# Where each town had its hands last month, so the next month can be compared
+	# against it (#116).
+	var last_worked: Dictionary = {}
 
 	for turn in turns:
 		machine.begin_turn()
@@ -160,7 +186,7 @@ func _play(
 			return {"error": wrong, "turn": turn, "rows": rows}
 
 		if run.world.month % MONTHS_PER_YEAR == 0:
-			rows.append(_row(seed_value, run, letters, run.log.since(counted)))
+			rows.append(_row(seed_value, run, letters, run.log.since(counted), last_worked))
 			counted = run.log.next_seq()
 			letters = 0
 
@@ -242,7 +268,13 @@ func _preferred_tone(options: Array, wanted: StringName) -> StringName:
 
 # --- A year's row -----------------------------------------------------------
 
-func _row(seed_value: int, run: RunState, letters: int, fresh: Array) -> Dictionary:
+func _row(
+	seed_value: int,
+	run: RunState,
+	letters: int,
+	fresh: Array,
+	last_worked: Dictionary,
+) -> Dictionary:
 	var towns := run.colony.in_order()
 	var people := 0
 	var quality := 0.0
@@ -300,6 +332,30 @@ func _row(seed_value: int, run: RunState, letters: int, fresh: Array) -> Diction
 			var column := "bought_%s" % id
 			if row.has(column):
 				row[column] = float(row[column]) + float(bought[id])
+
+	# **Whether the assignment is settled or reshuffling** (#116). A town that
+	# cannot feed itself is supposed to reach a stable, sensible assignment and
+	# go hungry — not move hands about every month for a gain that never closes
+	# the gap.
+	#
+	# Counted as ground **abandoned**: worked last month, not worked this one. An
+	# addition on its own is only a town that grew and has another pair of hands;
+	# a tile given up is a worker actually moved, which is the thing in question.
+	var moves := 0
+	var months := 0
+	for event in fresh:
+		if event.type != WorkPhase.EVENT_WORKED:
+			continue
+		months += 1
+		var now: Dictionary = {}
+		for at in PackedStringArray(event.payload.get("tiles", [])):
+			now[at] = true
+		var then: Dictionary = last_worked.get(String(event.subject), {})
+		for at in then:
+			if not now.has(at):
+				moves += 1
+		last_worked[String(event.subject)] = now
+	row["tile_moves"] = 0.0 if months == 0 else float(moves) / float(months)
 	return row
 
 
@@ -307,7 +363,7 @@ const COLUMNS: PackedStringArray = [
 	"seed", "year", "towns", "population", "quality_of_life", "food_held",
 	"months_hungry", "food_security", "supply", "revenue", "tax_base",
 	"tax_burden", "net_position", "standing", "standing_band", "letters",
-	"promises_outstanding",
+	"promises_outstanding", "tile_moves",
 ]
 
 ## The fixed columns, then one per comfort, then the wide text last so a

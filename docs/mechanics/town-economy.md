@@ -184,6 +184,12 @@ This simplifies `crown-standing.md`: `monthly_net` falls only through the PC's
 spending, through rates too low to collect, or through a colony that has stopped
 trading. It never falls because a trade went badly.
 
+**One transaction is not a trade.** A resource shipment requisitioned for the
+Crown (`crown-demands.md` §5) moves gold from the Crown to a town and generates
+**no tax at all** — there are no merchants in the middle to tax. It is a cost on
+the Crown's side with no offsetting revenue, which is precisely why the PC can
+use an overpaid shipment to spend Crown Standing on a town's contentment.
+
 ## 6. Tuning targets
 
 - The **price table**, with beer cheapest and tea second.
