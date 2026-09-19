@@ -189,7 +189,7 @@ func test_needs_are_by_population() -> void:
 	assert_almost_eq(reckoning.need_of(&"clothing"), 10.0 * ColonyNeeds.per_head(&"clothing"))
 
 
-func test_wants_are_what_the_objective_still_costs() -> void:
+func test_the_objective_tier_is_what_it_still_costs() -> void:
 	var harness := _harness()
 	harness["town"].objective = &"storehouse"
 	harness["town"].store(&"wood", 10.0)
@@ -197,8 +197,8 @@ func test_wants_are_what_the_objective_still_costs() -> void:
 
 	var reckoning: Reckoning = harness["context"].reckoning_for(harness["town"])
 	var building := Building.find(&"storehouse")
-	assert_true(reckoning.want_of(&"wood") > 0.0)
-	assert_true(reckoning.want_of(&"wood") < building.cost_of(&"wood"),
+	assert_true(reckoning.objective_of(&"wood") > 0.0)
+	assert_true(reckoning.objective_of(&"wood") < building.cost_of(&"wood"),
 		"what it already holds should count against what it still wants")
 
 

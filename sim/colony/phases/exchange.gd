@@ -6,11 +6,14 @@ extends ColonyPhase
 ##
 ## ## The order is the rule
 ##
-## **Needs, then the objective, then luxuries.** Not a preference — the order the
-## town spends in *is* "needs before wants", because gold runs out. A town that
-## bought rum first and found it could not afford grain would be a town that
-## starves for want of a drink, and no amount of commentary elsewhere would make
-## that not have happened.
+## **Needs, then the objective, then wants** — SPEC §11.3's three tiers, in
+## order. Not a preference: the order the town spends in *is* the rule, because
+## gold runs out. A town that bought rum first and found it could not afford
+## grain would be a town that starves for want of a drink, and no amount of
+## commentary elsewhere would make that not have happened.
+##
+## All three quantities come from Reckon. Exchange decides what to buy first, not
+## how much of it the town wanted.
 ##
 ## Within needs, **worst first**: the resource the town is deepest short of is
 ## bought before the one it is merely light on. A town that cannot cover
@@ -25,41 +28,47 @@ extends ColonyPhase
 
 const EVENT_SHOPPED: StringName = &"town_exchanged"
 
-## How much luxury a town will lay in, as months of what it can consume.
-const LUXURY_MONTHS: float = 1.0
+## How much comfort a town lays in altogether.
+##
+## Reckon says how much of *each* luxury the town would like; this is what it
+## will actually carry home in one month, across all of them. Set to several
+## kinds' worth rather than one, because **variety is worth something**
+## (`quality-of-life.md` §4): a town with beer, rum and tea is happier than a
+## town with the same quantity of beer alone, and a town that only ever bought
+## the cheapest thing on the list would never find that out.
+func _comfort_budget(town: Town) -> float:
+	return float(town.population()) * ColonyNeeds.luxury_per_head() * QualityOfLife.VARIETY_TARGET
 
 
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := context.reckoning_for(town)
 	var spent_on: Dictionary = {}
 
-	# 1. Needs, worst first. Reckon fixed *how much* is needed; what the town
-	#    still lacks is measured against its stores as this phase began, since
-	#    Relief may have covered some of it already.
+	# 1. Tier 1, needs, worst first. Reckon fixed *how much* is needed; what the
+	#    town still lacks is measured against its stores as this phase began,
+	#    since Relief may have covered some of it already.
 	for resource in reckoning.shortages():
 		var lacking := reckoning.need_of(StringName(resource)) - before.held(town.id, StringName(resource))
 		if lacking > 0.0:
 			_shop(town, StringName(resource), lacking, context, spent_on)
 
-	# 2. The objective. Wants, and they wait.
-	var wanted := Objective.still_to_gather(town)
-	var want_ids: PackedStringArray = PackedStringArray(wanted.keys())
-	want_ids.sort()
-	for resource in want_ids:
-		_shop(town, StringName(resource), float(wanted[resource]), context, spent_on)
+	# 2. Tier 2, the objective. It waits behind survival and nothing else.
+	var required := reckoning.objective
+	var required_ids: PackedStringArray = PackedStringArray(required.keys())
+	required_ids.sort()
+	for resource in required_ids:
+		_shop(town, StringName(resource), float(required[resource]), context, spent_on)
 
-	# 3. Luxuries, last and only with what is left. Cheapest first — a town
-	#    buying comfort gets more of it per coin from beer than from tea.
-	var appetite := float(town.population()) * ColonyNeeds.luxury_per_head() * LUXURY_MONTHS
+	# 3. Tier 3, wants: comforts, last and only with what is left. Cheapest first
+	#    — a town buying comfort gets more of it per coin from beer than from tea.
+	var purse := _comfort_budget(town)
 	for resource in _luxuries_by_price():
-		if appetite <= 0.0:
+		if purse <= 0.0:
 			break
-		var already := before.held(town.id, StringName(resource))
-		var room := minf(appetite, maxf(0.0, appetite - already))
+		var room := reckoning.want_of(StringName(resource))
 		if room <= 0.0:
 			continue
-		var got := _shop(town, StringName(resource), room, context, spent_on)
-		appetite -= got
+		purse -= _shop(town, StringName(resource), minf(room, purse), context, spent_on)
 
 	if spent_on.is_empty():
 		return

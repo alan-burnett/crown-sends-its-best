@@ -119,9 +119,9 @@ func test_a_town_keeps_its_own_reserve_before_it_gives() -> void:
 	assert_empty(_gifts(harness))
 
 
-# --- Needs before wants -----------------------------------------------------
+# --- Needs before the objective -----------------------------------------------------
 
-func test_needs_are_covered_before_wants() -> void:
+func test_needs_are_covered_before_the_objective() -> void:
 	# One giver with five spare, two takers: one that is hungry and one that is
 	# building something out of food. **The hungry town gets all five.**
 	Building.load_from([{"id": "granary_of_sorts", "months": 2, "cost": {"food": 20}}])
@@ -138,7 +138,7 @@ func test_needs_are_covered_before_wants() -> void:
 	assert_almost_eq(builder.held(&"food"), 12.0, 0.001, "a want was served while a need went unmet")
 
 
-func test_a_want_is_served_once_every_need_is_met() -> void:
+func test_the_objective_is_served_once_every_need_is_met() -> void:
 	# Same shape, but with enough to go round. Wants are not forbidden, only
 	# second.
 	Building.load_from([{"id": "granary_of_sorts", "months": 2, "cost": {"food": 20}}])

@@ -15,8 +15,9 @@ extends ColonyPhase
 ##
 ## - **Worst-first.** The town in the deepest trouble is served before the town
 ##   that is merely short (SPEC §11.3).
-## - **Needs before wants.** Every need in the colony is covered before one
-##   town's objective gets a plank. A town half-built is not an emergency.
+## - **Needs before the objective.** Every need in the colony is covered before
+##   one town's objective gets a plank. A town half-built is not an emergency.
+##   Comforts — SPEC §11.3's third tier — are never given at all.
 ## - **Never luxuries.** Rum is not relief. A town short of rum is not in
 ##   distress, and a town sending its rum away has not helped anybody.
 ##
@@ -53,9 +54,12 @@ func run(_town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	if not claim_month(context):
 		return
 
-	# **Needs, then wants**, each pass worst-first. The second pass spends only
-	# what the first left behind, which is what makes the ordering locked rather
-	# than merely usual.
+	# **Needs, then the objective**, each pass worst-first. The second pass spends
+	# only what the first left behind, which is what makes the ordering locked
+	# rather than merely usual.
+	#
+	# There is no third pass. Tier 3 is comforts, and **a town does not send its
+	# neighbour rum** — relief is for distress, not for hospitality.
 	var available := _spare_by_town(before, context)
 	var transfers: Array = []
 	_serve(_deficits(context, true), available, transfers, context)
@@ -105,7 +109,7 @@ func _deficits(context: ColonyContext, needs: bool) -> Array:
 	ids.sort()
 	for id in ids:
 		var reckoning: Reckoning = context.reckonings[id]
-		var source: Dictionary = reckoning.shortfall if needs else reckoning.wants
+		var source: Dictionary = reckoning.shortfall if needs else reckoning.objective
 		for resource in source:
 			if ResourceCatalogue.is_luxury(StringName(resource)):
 				continue
