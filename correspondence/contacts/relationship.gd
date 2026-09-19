@@ -98,6 +98,16 @@ func record_tone(tone: StringName) -> float:
 	return _move_loyalty(float(TONE_WEIGHT[tone]))
 
 
+## Move regard with the world rather than with a deed (#126).
+##
+## **Separate from `record_deed` on purpose.** A deed is a thing the PC did and
+## belongs in the count that letters read back; drift is the weather, and adding
+## it to the deed tally would have a contact remembering a bad winter as though
+## the PC had refused him something.
+func drift(delta: float) -> float:
+	return _move_loyalty(delta)
+
+
 func _move_loyalty(delta: float) -> float:
 	var before := loyalty
 	loyalty = clampf(loyalty + delta, MIN_LOYALTY, MAX_LOYALTY)
