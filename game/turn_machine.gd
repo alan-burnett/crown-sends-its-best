@@ -67,6 +67,9 @@ var promise_driver: PromiseDriver = null
 ## Reads the letters the PC did not answer, in phase 7.
 var silence: SilenceDriver = null
 
+## Recomputes borders, influence and vision, in phase 3.
+var territory: TerritoryDriver = null
+
 ## Decides who writes to the PC, and about what.
 var director: Director = null
 
@@ -88,7 +91,11 @@ func _init(p_run: RunState) -> void:
 	silence = SilenceDriver.new()
 	silence.run = run
 
-	month_runner.drivers = [StubWorld.new(), promise_driver, orders, silence]
+	territory = TerritoryDriver.new(run.map, run.colony, run.knowledge)
+
+	# Order within the list does not decide anything — each driver answers for its
+	# own phase, and the phases are the mechanics doc's.
+	month_runner.drivers = [StubWorld.new(), territory, promise_driver, orders, silence]
 	month_runner.executors = [executor]
 
 

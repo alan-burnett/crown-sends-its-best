@@ -39,6 +39,12 @@ var map: WorldMap = null
 ## M3; M2 places one town.
 var starting_site: Vector2i = Vector2i(-1, -1)
 
+## Everything the PC administers (SPEC §4).
+var colony: Colony = null
+
+## **What the colony knows**, which is all the map view may read (SPEC §11.2).
+var knowledge: MapKnowledge = null
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -86,6 +92,8 @@ static func new_run(seed_value: int) -> RunState:
 	run.last_diff = WorldDiff.new()
 	run.map = MapGenerator.generate(run.streams.stream("mapgen"))
 	run.starting_site = MapGenerator.choose_starting_site(run.map)
+	run.colony = Colony.new()
+	run.knowledge = MapKnowledge.new()
 	return run
 
 
@@ -152,6 +160,8 @@ func to_dict() -> Dictionary:
 		"last_diff": last_diff.to_dict(),
 		"map": map.to_dict() if map != null else {},
 		"starting_site": [starting_site.x, starting_site.y],
+		"colony": colony.to_dict() if colony != null else {},
+		"knowledge": knowledge.to_dict() if knowledge != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -174,6 +184,8 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.map = WorldMap.from_dict(data.get("map", {}))
 	var site: Array = data.get("starting_site", [-1, -1])
 	run.starting_site = Vector2i(int(site[0]), int(site[1]))
+	run.colony = Colony.from_dict(data.get("colony", {}))
+	run.knowledge = MapKnowledge.from_dict(data.get("knowledge", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 
