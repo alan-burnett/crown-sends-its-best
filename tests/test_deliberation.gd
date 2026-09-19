@@ -257,3 +257,41 @@ func test_ties_break_without_consuming_rng() -> void:
 
 	assert_eq(decision.chosen_id(), &"fortify", "ties break on the lower candidate id")
 	assert_eq(streams.to_dict(), state_before, "a tie must not consume from the stream")
+
+
+# --- 🔒 A trade protest is not a deliberation -------------------------------
+
+func test_nothing_can_register_a_consideration_against_a_trade_protest() -> void:
+	# **It is a calculation, not a decision** (#131). No actor chooses it: a
+	# score per town per resource is recomputed each month and crosses a
+	# threshold, the same shape as rebellion in SPEC §12.3, which is a protest's
+	# larger sibling.
+	#
+	# **It is the people's decision, not the governor's.** He is an input — his
+	# loyalty and temperament colour his town's mood — but the refusal is the
+	# town's. A declared kind is an invitation to register a weight against it,
+	# so the kind is gone and `_append` rejects what it does not know.
+	#
+	# A governor who wants to hurt the Crown has his own route, and it is intent
+	# (#128), not this.
+	assert_false(DecisionKind.is_kind(&"trade_protest"),
+		"trade_protest is a decision kind again, so a personality can weigh it")
+	assert_empty(Deliberation.considerations_for(&"trade_protest"),
+		"something registered a consideration against a trade protest")
+
+
+func test_every_declared_kind_is_one_an_actor_actually_chooses() -> void:
+	# The list is short on purpose. Each of these is a moment where somebody
+	# weighs options and could have chosen otherwise; anything that is worked out
+	# rather than decided does not belong here.
+	var expected: Array[StringName] = [
+		DecisionKind.GOVERNOR_INTENT,
+		DecisionKind.ORDER_COMPLIANCE,
+		DecisionKind.UNANSWERED,
+		DecisionKind.DIRECTOR_URGENCY,
+		DecisionKind.FACTION_POSTURE,
+	]
+	assert_eq(DecisionKind.ALL.size(), expected.size(),
+		"a decision kind was added or removed without this test being considered")
+	for kind in expected:
+		assert_true(DecisionKind.is_kind(kind), "%s is no longer a decision kind" % kind)
