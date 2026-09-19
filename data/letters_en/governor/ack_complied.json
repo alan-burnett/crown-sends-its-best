@@ -1,0 +1,22 @@
+{
+  "id": "governor.ack_complied",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "what": "intent",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "It shall be as you say. I have turned {param:town} to {param:what}, and the men know it."
+    },
+    {
+      "text": "I had my own view and I have set it aside. That is what the office is.",
+      "only_tones": [
+        "dutiful",
+        "annoyed"
+      ]
+    }
+  ]
+}

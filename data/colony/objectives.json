@@ -37,5 +37,32 @@
         "tools"
       ]
     }
+  ],
+  "intents": [
+    {
+      "id": "increase_economic_output",
+      "name": "the colony's profit",
+      "pursuing": "getting more out of this country"
+    },
+    {
+      "id": "grow_the_population",
+      "name": "the growth of the town",
+      "pursuing": "seeing that more people come, and stay"
+    },
+    {
+      "id": "strengthen_defences",
+      "name": "our defences",
+      "pursuing": "seeing that we can hold what we have"
+    },
+    {
+      "id": "settle_a_new_town",
+      "name": "a new settlement",
+      "pursuing": "gathering what an expedition would need"
+    },
+    {
+      "id": "secure_survival",
+      "name": "your people's survival",
+      "pursuing": "seeing that nobody here starves"
+    }
   ]
 }

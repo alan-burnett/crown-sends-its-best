@@ -1,0 +1,18 @@
+{
+  "id": "governor.ack_refused",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "what": "intent",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "I have your letter about {param:what}, and I will not."
+    },
+    {
+      "text": "I am sorry for it. You shall have my reasons at length if you want them, and my place if you do not."
+    }
+  ]
+}

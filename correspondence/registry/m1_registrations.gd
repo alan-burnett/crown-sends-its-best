@@ -70,6 +70,10 @@ static func register_all() -> void:
 	register_measures()
 	register_considerations()
 	M1ParamSources.register_all()
+	# **A milestone that adds a system ships that system's content hooks with
+	# it.** The colony's conditions and param sources arrive with the colony.
+	ColonyConditions.register_all()
+	ColonyParamSources.register_all()
 
 
 ## **A milestone that adds a system ships that system's considerations with it.**
@@ -205,6 +209,11 @@ static func register_measures() -> void:
 	# no scale to apply. **The player never sees the number** — only a governor
 	# who sounds comfortable or wretched.
 	MeasureRegistry.register_linear("quality_of_life", 0.0, 1.0)
+	# A governor's own affairs (#54). Progress and stockpile health are already
+	# shares; trade is in gold and needs a scale.
+	MeasureRegistry.register_linear(ColonyMeasures.OBJECTIVE_PROGRESS, 0.0, 1.0)
+	MeasureRegistry.register_linear(ColonyMeasures.STOCKPILE_HEALTH, 0.0, 1.0)
+	MeasureRegistry.register_linear(ColonyMeasures.TRADE_VOLUME, 0.0, ColonyMeasures.BUSY_TRADE)
 	# How heavily the colony is taxed, which is what the Steward writes about and
 	# what his lean shades.
 	MeasureRegistry.register_linear("tax_burden", 0.0, TaxRates.MAX_RATE)

@@ -98,6 +98,7 @@ static func buy(town: Town, resource: StringName, desired: float, context: Colon
 	var tax := spent - received * price
 
 	town.store(resource, received)
+	town.traded_value += spent
 	_collect(context, tax)
 
 	context.log.emit(EVENT_BOUGHT, town.id, context.state.month, {
@@ -149,6 +150,7 @@ static func sell(town: Town, resource: StringName, quantity: float, context: Col
 	var earned := gross - tax
 
 	town.receive_gold(earned)
+	town.traded_value += gross
 	_collect(context, tax)
 
 	context.log.emit(EVENT_SOLD, town.id, context.state.month, {

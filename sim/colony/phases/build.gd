@@ -129,4 +129,7 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 		payload["unlocks"] = Building.unlocked_by(finished)
 
 	town.clear_objective()
+	# Remembered past the clearing, so the governor can write home about it.
+	town.last_completed = finished
+	town.last_completed_month = context.state.month
 	context.log.emit(EVENT_COMPLETED, town.id, context.state.month, payload, WorldPhase.COLONY_MONTH)

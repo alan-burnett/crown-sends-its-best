@@ -142,6 +142,18 @@ static func cost_of(order: Order) -> float:
 			return 0.0
 		M1Registrations.ORDER_REFUSE:
 			return 0.0
+		M1Registrations.ORDER_URGE_INTENT:
+			# **Being told what matters costs a governor nothing to carry out.**
+			# He is governing either way, and the town pays for its own projects
+			# out of its own stores.
+			#
+			# Costing it anything made `payment_offered` decide every priority
+			# letter in the game: the PC sends no gold with a pronouncement, so
+			# refusing scored highest every month and the governor answered
+			# "I will not" to instructions he already agreed with. What an urge
+			# actually costs him is his own judgement, and that is the `autonomy`
+			# consideration's business rather than a price.
+			return 0.0
 	return 200.0
 
 
@@ -150,7 +162,16 @@ static func cost_of(order: Order) -> float:
 ## An order carrying a figure is specific: send 200 of iron, pay 500 for troops.
 ## One carrying only words — set this policy, grant this favour — is not, and
 ## SPEC §8 expects personality to show in how a contact reads it.
+##
+## **An intent is specific without carrying a number.** "Your people's survival
+## must come first" is one of exactly five things the PC can say and there is
+## nothing in it to misread — so a governor who disagrees refuses honestly rather
+## than claiming your letter admitted of more than one reading. Judging it vague
+## made every governor reinterpret or refuse every priority he was ever sent,
+## which read as a man who could not follow plain English.
 static func vagueness_of(order: Order) -> float:
+	if order.kind == M1Registrations.ORDER_URGE_INTENT:
+		return 0.0
 	for key in order.params:
 		if key == "to":
 			continue

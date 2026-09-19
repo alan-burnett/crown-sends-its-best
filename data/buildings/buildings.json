@@ -1,7 +1,7 @@
 [
   {
     "id": "storehouse",
-    "name": "storehouse",
+    "name": "a storehouse",
     "months": 2,
     "cost": {
       "wood": 30
@@ -13,7 +13,7 @@
   },
   {
     "id": "palisade",
-    "name": "palisade",
+    "name": "a palisade",
     "months": 2,
     "cost": {
       "wood": 40
@@ -25,7 +25,7 @@
   },
   {
     "id": "stockyard",
-    "name": "stockyard",
+    "name": "a stockyard",
     "requires": [
       "storehouse"
     ],
@@ -40,7 +40,7 @@
   },
   {
     "id": "sawmill",
-    "name": "sawmill",
+    "name": "a sawmill",
     "requires": [
       "storehouse"
     ],
@@ -57,7 +57,7 @@
   },
   {
     "id": "quarry_works",
-    "name": "quarry works",
+    "name": "the quarry works",
     "requires": [
       "storehouse"
     ],
@@ -75,7 +75,7 @@
   },
   {
     "id": "carpenters_hall",
-    "name": "carpenters' hall",
+    "name": "a carpenters' hall",
     "requires": [
       "sawmill"
     ],
@@ -91,7 +91,7 @@
   },
   {
     "id": "granary",
-    "name": "granary",
+    "name": "a granary",
     "requires": [
       "storehouse"
     ],
@@ -107,7 +107,7 @@
   },
   {
     "id": "smithy",
-    "name": "smithy",
+    "name": "a smithy",
     "requires": [
       "quarry_works"
     ],
@@ -129,7 +129,7 @@
   },
   {
     "id": "church",
-    "name": "church",
+    "name": "a church",
     "requires": [
       "storehouse"
     ],
@@ -145,7 +145,7 @@
   },
   {
     "id": "armoury",
-    "name": "armoury",
+    "name": "an armoury",
     "requires": [
       "smithy"
     ],

@@ -1,0 +1,234 @@
+[
+  {
+    "id": "trigger.governor.report_month",
+    "letter": "governor.report_month",
+    "urgency": 0.15,
+    "cooldown": 3,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "people": {
+        "from": "town_population"
+      },
+      "trade": {
+        "from": "town_trade"
+      },
+      "pursuing": {
+        "from": "intent_pursuing"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "always": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.announce_objective",
+    "letter": "governor.announce_objective",
+    "urgency": 0.45,
+    "cooldown": 2,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "objective": {
+        "from": "objective_name",
+        "fallback": "the work"
+      },
+      "pursuing": {
+        "from": "intent_pursuing"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "town_objective_is_new": {}
+      },
+      {
+        "town_is_building": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.report_completed",
+    "letter": "governor.report_completed",
+    "urgency": 0.4,
+    "cooldown": 1,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "objective": {
+        "from": "finished_name",
+        "fallback": "the work"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "town_finished_something": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.report_shortage",
+    "letter": "governor.report_shortage",
+    "urgency": 0.8,
+    "cooldown": 2,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "lacking": {
+        "from": "town_lacks",
+        "fallback": "supplies"
+      },
+      "held": {
+        "from": "town_lacking_stock"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "town_measure_below": {
+          "measure": "stockpile_health",
+          "value": 0.34
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.question_duty",
+    "letter": "governor.question_duty",
+    "urgency": 0.3,
+    "cooldown": 7,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "trade": {
+        "from": "town_trade"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "world_value_above": {
+          "key": "tax.base",
+          "value": 0.12
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.report_disagreement",
+    "letter": "governor.report_disagreement",
+    "urgency": 0.6,
+    "cooldown": 4,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "pursuing": {
+        "from": "intent_pursuing"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "town_disagrees_with_the_crown": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.ack_complied",
+    "letter": "governor.ack_complied",
+    "acknowledges": "comply",
+    "urgency": 0.35,
+    "cooldown": 0,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "what": {
+        "from": "intent_name"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": []
+  },
+  {
+    "id": "trigger.governor.ack_delayed",
+    "letter": "governor.ack_delayed",
+    "acknowledges": "delay",
+    "urgency": 0.35,
+    "cooldown": 0,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "what": {
+        "from": "intent_name"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": []
+  },
+  {
+    "id": "trigger.governor.ack_refused",
+    "letter": "governor.ack_refused",
+    "acknowledges": "refuse",
+    "urgency": 0.35,
+    "cooldown": 0,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "what": {
+        "from": "intent_name"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": []
+  },
+  {
+    "id": "trigger.governor.ack_acted_alone",
+    "letter": "governor.ack_acted_alone",
+    "acknowledges": "act_alone",
+    "urgency": 0.35,
+    "cooldown": 0,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "what": {
+        "from": "intent_name"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": []
+  }
+]

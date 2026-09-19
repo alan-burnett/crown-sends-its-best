@@ -102,12 +102,21 @@ const TOWN_GOLD_NAMES: Array[Array] = [
 ##
 ## `urged_intent` is deliberately absent: that one **is** the letter's business,
 ## and it is what the PC argues about instead.
+## **Writes, not mentions.** A governor's letter has every right to *read* how
+## far along the work is — that is what a letter about the work is — and the
+## first version of this rule banned the words outright and flagged the very
+## condition that asks whether a project has started yet. The second banned
+## `objective_progress =` by substring and flagged `objective_progress ==`.
+##
+## What SPEC §8.5 forbids is the PC reaching the objective, so what is matched is
+## assignment to a member, and nothing else.
 const OBJECTIVE_WRITES: Array[Array] = [
-	["objective =", "sets a town's objective"],
-	["objective_target", "names the tile for a town's objective"],
-	["objective_progress", "moves a town's objective along"],
-	["objective_invested", "moves what a town has put into its objective"],
-	["clear_objective", "cancels a town's objective"],
+	["\\.objective\\s*=[^=]", "sets a town's objective"],
+	["\\.objective_target\\s*=[^=]", "names the tile for a town's objective"],
+	["\\.objective_progress\\s*(=[^=]|\\+=)", "moves a town's objective along"],
+	["\\.objective_intent\\s*=[^=]", "decides what a town's objective serves"],
+	["\\.objective_invested\\s*(=[^=]|\\[)", "moves what a town has put into its objective"],
+	["\\.clear_objective\\s*\\(", "cancels a town's objective"],
 ]
 
 const MAP_TRUTH_NAMES: Array[Array] = [
@@ -172,8 +181,8 @@ func _check(path: String) -> void:
 		if not in_sim:
 			_match(path, index, line, APPLY_PATTERN, "calls apply() outside sim/ — only the sim writes sim state (Seam A, Seam B)")
 			for rule in OBJECTIVE_WRITES:
-				if line.contains(rule[0]):
-					_report(path, index, "%s from outside sim/ (SPEC 8.5: an order reaches the governor's intent, never the town's objective)" % rule[1])
+				_match(path, index, line, rule[0],
+					"%s from outside sim/ (SPEC 8.5: an order reaches the governor's intent, never the town's objective)" % rule[1])
 
 		if in_presentation:
 			for rule in TOWN_GOLD_NAMES:

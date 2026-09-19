@@ -1,0 +1,159 @@
+{
+  "id": "governor.report_month",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "town": "town",
+    "people": "integer",
+    "trade": "gold",
+    "pursuing": "intent",
+    "governor": "contact"
+  },
+  "perception": {
+    "larder": {
+      "measure": "food_security",
+      "ladder": [
+        "all but bare",
+        "thin",
+        "sufficient",
+        "amply stocked"
+      ]
+    },
+    "spirits": {
+      "measure": "quality_of_life",
+      "ladder": [
+        "wretched",
+        "low",
+        "settled",
+        "in good heart"
+      ]
+    },
+    "commerce": {
+      "measure": "trade_volume",
+      "ladder": [
+        "nothing worth the name",
+        "slight",
+        "brisk"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "From {param:town}, where there are now {param:people} souls and the stores are {perception:larder}."
+    },
+    {
+      "text": "The month's trade came to {param:trade}, which is {perception:commerce}. The people are {perception:spirits}."
+    },
+    {
+      "text": "I am {param:pursuing}, as I have said before and shall say again.",
+      "only_tones": [
+        "dutiful",
+        "annoyed"
+      ]
+    },
+    {
+      "text": "I am {param:pursuing}. I should be glad of a word from you on whether that is still your wish.",
+      "only_tones": [
+        "pleased",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "Your account is {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "welcome, and better than I had feared"
+        },
+        {
+          "tone": "dutiful",
+          "text": "received"
+        },
+        {
+          "tone": "annoyed",
+          "text": "thinner than I should like"
+        },
+        {
+          "tone": "desperate",
+          "text": "the only good news I have had this month"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "priority",
+        "prompt": "As to what {param:town} is for",
+        "options": [
+          {
+            "id": "profit",
+            "label": "attend to the colony's profit",
+            "text": "Attend to the colony's profit. That is what you are there for, and what the Crown will ask me about.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "increase_economic_output"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "see that the town grows",
+            "text": "See that the town grows. A place with nobody in it returns nothing, whatever the ledgers say.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "grow_the_population"
+              }
+            }
+          },
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your defences. I would rather pay for walls I did not need than explain why there were none.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "strengthen_defences"
+              }
+            }
+          },
+          {
+            "id": "settle",
+            "label": "plant a new settlement",
+            "text": "Plant a new settlement. One town is a foothold; it is not a colony.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "settle_a_new_town"
+              }
+            }
+          },
+          {
+            "id": "survival",
+            "label": "your people's survival must come first",
+            "text": "Your people's survival must come first. Everything else can wait on it, and I will hear no argument.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "secure_survival"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,",
+        "tone": {
+          "pleased": "With every confidence in you,",
+          "annoyed": "I trust I shall not have to write again,"
+        }
+      }
+    ]
+  }
+}

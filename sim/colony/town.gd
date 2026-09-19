@@ -54,6 +54,21 @@ var quality_of_life: float = 0.0
 ## runs through things that actually happened instead.
 var rebel_sentiment: float = 0.0
 
+## The last thing the town finished, and the month it finished in.
+##
+## **Build clears the objective the moment it completes**, so by the time the
+## governor sits down to write in phase 9 there is nothing left on the town
+## saying a church went up. Without this his letter announcing it can never fire,
+## which is exactly what happened.
+var last_completed: StringName = &""
+var last_completed_month: int = -1
+
+## What the town bought and sold this month, in gold.
+##
+## **Reset in Reckon and added to by every trade**, so it is this month's figure
+## and not the run's. A governor writes about the month that just happened.
+var traded_value: float = 0.0
+
 ## Births owed but not yet born.
 ##
 ## **Natural growth starts slowly and snowballs** (SPEC §12.1), which for a town
@@ -283,6 +298,9 @@ func to_dict() -> Dictionary:
 		"quality_of_life": quality_of_life,
 		"rebel_sentiment": rebel_sentiment,
 		"growth_accrued": growth_accrued,
+		"traded_value": traded_value,
+		"last_completed": String(last_completed),
+		"last_completed_month": last_completed_month,
 		"intent": String(intent),
 		"intent_since": intent_since,
 		"urged_intent": String(urged_intent),
@@ -316,6 +334,9 @@ static func from_dict(data: Dictionary) -> Town:
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.growth_accrued = float(data.get("growth_accrued", 0.0))
+	town.traded_value = float(data.get("traded_value", 0.0))
+	town.last_completed = StringName(data.get("last_completed", ""))
+	town.last_completed_month = int(data.get("last_completed_month", -1))
 	town.intent = StringName(data.get("intent", ""))
 	town.intent_since = int(data.get("intent_since", 0))
 	town.urged_intent = StringName(data.get("urged_intent", ""))

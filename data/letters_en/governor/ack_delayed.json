@@ -1,0 +1,18 @@
+{
+  "id": "governor.ack_delayed",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "what": "intent",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "I have your letter about {param:what}, and I shall come to it."
+    },
+    {
+      "text": "Not this month. There is work half done at {param:town} that would be wasted by turning now, and I will not waste it."
+    }
+  ]
+}
