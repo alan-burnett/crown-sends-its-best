@@ -49,9 +49,31 @@ var quality_of_life: float = 0.0
 ## Rising sentiment is M3; the field exists so the town is whole.
 var rebel_sentiment: float = 0.0
 
-## What the town is working towards. The Governor chooses it (#53).
+## What the town is working towards. The Governor chooses it (#53). Either a
+## building or a standing posture — see `Objective`.
 var objective: StringName = &""
+
+## Months of labour already put in. Only construction advances it.
 var objective_progress: int = 0
+
+## Resource id -> how much has gone into the build.
+##
+## **Invested is spent.** It has left the stockpile, so it cannot be eaten, sold
+## or given away, and a town that stalls for want of the rest does not get it
+## back (#49).
+var objective_invested: Dictionary = {}
+
+## Months in a row the town has gone meaningfully without food.
+##
+## **Famine is sustained hunger, not one bad month** (#48). A town that misses a
+## month recovers; a town that misses three buries people.
+var months_hungry: int = 0
+
+## Relief given away, less relief received, valued at Crown prices.
+##
+## **A town that keeps carrying the colony resents the Crown for it** (#45). M3
+## reads this into rebel sentiment; M2's job is to have it be true by then.
+var relief_balance: float = 0.0
 
 ## The contact who speaks for it (#52).
 var governor_id: StringName = &""
@@ -152,6 +174,29 @@ func can_afford(amount: float) -> bool:
 	return _gold >= amount
 
 
+# --- The objective ---------------------------------------------------------
+
+func invested(resource: StringName) -> float:
+	return float(objective_invested.get(String(resource), 0.0))
+
+
+## Move a resource out of the stockpile and into the build. Returns what was
+## actually moved, which is what the town had.
+func invest(resource: StringName, amount: float) -> float:
+	var moved := take(resource, amount)
+	if moved > 0.0:
+		objective_invested[String(resource)] = invested(resource) + moved
+	return moved
+
+
+## Start again on something else. **Whatever was invested is gone** — the timber
+## is already cut and standing in the half-built frame.
+func clear_objective() -> void:
+	objective = &""
+	objective_progress = 0
+	objective_invested = {}
+
+
 # --- Buildings -------------------------------------------------------------
 
 func has_building(id_to_find: StringName) -> bool:
@@ -179,6 +224,9 @@ func to_dict() -> Dictionary:
 		"rebel_sentiment": rebel_sentiment,
 		"objective": String(objective),
 		"objective_progress": objective_progress,
+		"objective_invested": objective_invested.duplicate(),
+		"months_hungry": months_hungry,
+		"relief_balance": relief_balance,
 		"governor": String(governor_id),
 		"rebelling": rebelling,
 		"gold": _gold,
@@ -200,6 +248,9 @@ static func from_dict(data: Dictionary) -> Town:
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.objective = StringName(data.get("objective", ""))
 	town.objective_progress = int(data.get("objective_progress", 0))
+	town.objective_invested = data.get("objective_invested", {}).duplicate()
+	town.months_hungry = int(data.get("months_hungry", 0))
+	town.relief_balance = float(data.get("relief_balance", 0.0))
 	town.governor_id = StringName(data.get("governor", ""))
 	town.rebelling = bool(data.get("rebelling", false))
 	town._gold = float(data.get("gold", 0.0))

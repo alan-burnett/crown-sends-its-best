@@ -58,6 +58,7 @@ func set_handler(phase: StringName, handler: ColonyPhase) -> void:
 
 ## Run the whole colony month.
 func run(colony: Colony, context: ColonyContext) -> void:
+	context.colony = colony
 	for phase in ORDER:
 		_run_phase(phase, colony, context)
 

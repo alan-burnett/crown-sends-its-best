@@ -28,6 +28,9 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	if phase != WorldPhase.COLONY_MONTH or colony == null:
 		return
 
+	# A fresh context each month. **The tax the Crown took is this month's**, and
+	# a context that carried it over would have Settle report a year's duty as a
+	# month's.
 	var context := ColonyContext.new(state, log, streams, map)
 	context.run_seed = run_seed
 	if territory_driver != null:

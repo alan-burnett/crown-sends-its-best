@@ -137,6 +137,19 @@ static func reserve_months_for(town: Town) -> float:
 	return months_held
 
 
+## How many head this town's buildings can graze.
+##
+## **Livestock off pasture eat the town's grain** (#48), so this is the
+## difference between a herd that feeds the town and one that competes with it.
+static func pasture_capacity_for(town: Town) -> int:
+	var head := 0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building != null:
+			head += int(building.effect("pasture", 0))
+	return head
+
+
 ## What standing buildings contribute to quality of life. Read in Settle (#50).
 static func quality_of_life_for(town: Town) -> float:
 	var total := 0.0

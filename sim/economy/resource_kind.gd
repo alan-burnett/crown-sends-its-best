@@ -36,6 +36,15 @@ var converts_from: PackedStringArray = PackedStringArray()
 ## rather than stockpile (SPEC §12.2). The population side is M4.
 var livestock: bool = false
 
+## What one unit trades for with the Crown, before tax (SPEC §10.2). Tuning.
+var price: float = 1.0
+
+## Food one head eats each month, when it is not on pasture (#48).
+var feed: float = 0.0
+
+## Food one head yields when a hungry town kills it (SPEC §12.2).
+var slaughter_yield: float = 0.0
+
 
 func is_processed() -> bool:
 	return not converts_from.is_empty()
@@ -58,6 +67,9 @@ static func from_data(record: Dictionary) -> ResourceKind:
 	kind.producible = bool(record.get("producible", true))
 	kind.converts_from = PackedStringArray(record.get("converts_from", []))
 	kind.livestock = bool(record.get("livestock", false))
+	kind.price = float(record.get("price", 1.0))
+	kind.feed = float(record.get("feed", 0.0))
+	kind.slaughter_yield = float(record.get("slaughter_yield", 0.0))
 	return kind
 
 
@@ -69,6 +81,9 @@ func to_dict() -> Dictionary:
 		"producible": producible,
 		"converts_from": converts_from.duplicate(),
 		"livestock": livestock,
+		"price": price,
+		"feed": feed,
+		"slaughter_yield": slaughter_yield,
 	}
 
 

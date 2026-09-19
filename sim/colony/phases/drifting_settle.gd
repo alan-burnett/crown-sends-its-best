@@ -1,17 +1,26 @@
 class_name DriftingSettle
 extends ColonyPhase
 
-## **Temporary.** What the stub world used to do to the colony's numbers, moved
-## into the phase it belongs to.
+## **Settle, partially.** What the colony's month adds up to, as far as the
+## phases that exist can say.
 ##
-## The colony's supply, revenue and food are not yet derived from anything — the
-## phases that would derive them are #44 to #50. Until they land, something has
-## to keep those numbers moving or the letters go static and the playtest tests
-## nothing, which is the failure #20 warns about.
+## Two of the three headline numbers are now **derived from the towns** rather
+## than invented here:
 ##
-## So this drifts them, in **Settle**, where the town's condition is supposed to
-## be worked out. **#50 replaces this file.** It is not a model of anything and
-## should not be built on.
+## - **Revenue** is the duty the Crown actually took this month, across Exchange
+##   and Sell (#47). Not a drifting figure the Steward reports — the sum of real
+##   transactions, each of which is in the log with its rate and its tax.
+## - **Food security** is how many months of food the colony is holding after
+##   Consume has eaten (#48).
+##
+## **Supply is still drifting.** Nothing derives it yet — it is the convoy, the
+## Crown's shipping, the state of the road — and #50 is where it stops being a
+## random walk. Until then something has to keep it moving or the Marshal and the
+## Steward have nothing to disagree about, which is the failure #20 warns of.
+##
+## So: **#50 replaces what is left of the drift**, and inherits the derivations.
+## The drifting half is not a model of anything and should not be built on. The
+## derived half is.
 
 const SUPPLY_RECOVERY: float = 6.0
 const SUPPLY_NOISE: float = 2.5
@@ -19,33 +28,23 @@ const WAR_DRAIN: float = 0.09
 const CONVOY_LOSS_CHANCE: float = 0.15
 const CONVOY_LOSS: float = 18.0
 
-const REVENUE_FROM_SUPPLY: float = 14.0
-const REVENUE_NOISE: float = 90.0
-const REVENUE_SMOOTHING: float = 0.45
-
-const FOOD_FROM_SUPPLY: float = 0.022
-const FOOD_NOISE: float = 0.12
+## How many months of food a colony has to hold to count as fully secure.
+const SECURE_MONTHS: float = 3.0
 
 const EVENT_SETTLED: StringName = &"colony_settled"
 const EVENT_CONVOY_LOST: StringName = &"convoy_lost"
 
-## Whether it has already run this month. The drift belongs to the colony as a
-## whole rather than to any one town, so it happens once however many towns there
-## are — another reason this is a placeholder and not a model.
-var _month_done: int = -1
-
 
 func run(_town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
-	if _month_done == context.state.month:
+	# The colony's condition is the colony's, not any one town's.
+	if not claim_month(context):
 		return
-	_month_done = context.state.month
 
 	var state := context.state
 	var rng := context.streams.stream("sim")
 
 	var war := float(state.get_value(WorldValues.WAR, 0.0))
 	var supply := float(state.get_value(WorldValues.SUPPLY, 0.0))
-	var revenue := float(state.get_value(WorldValues.REVENUE, 0.0))
 
 	# The war pulls supply down; the colony pulls it back up. Which wins this
 	# month is what the Marshal and the Steward end up arguing about.
@@ -60,15 +59,32 @@ func run(_town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 
 	supply = clampf(supply, 0.0, 100.0)
 
-	# Revenue follows supply but lags it, so a good month does not read as a
-	# reversal and the Steward has something to be wrong about.
-	var target := supply * REVENUE_FROM_SUPPLY + rng.randf_range(-REVENUE_NOISE, REVENUE_NOISE)
-	revenue = lerpf(revenue, maxf(target, 0.0), REVENUE_SMOOTHING)
-
-	var food := clampf(supply * FOOD_FROM_SUPPLY + rng.randf_range(-FOOD_NOISE, FOOD_NOISE), 0.0, 3.0)
-
 	state.apply(context.log, EVENT_SETTLED, &"colony", {
 		WorldValues.SUPPLY: supply,
-		WorldValues.REVENUE: revenue,
-		WorldValues.FOOD: food,
+		WorldValues.REVENUE: context.crown_tax,
+		WorldValues.FOOD: _food_security(context),
 	}, WorldPhase.COLONY_MONTH)
+
+
+## Months of food the colony is holding, per mouth, capped.
+##
+## **Read after Consume, so it is what is actually left**, not what was harvested
+## and then eaten. This is the number the Steward quotes and the governors write
+## around, and SPEC §9.1 makes letters matching the simulation an invariant — so
+## it had better be the food that is actually in the storehouses.
+func _food_security(context: ColonyContext) -> float:
+	if context.colony == null or context.colony.is_empty():
+		return 0.0
+
+	var held := 0.0
+	var mouths := 0.0
+	for town in context.colony.in_order():
+		held += town.held(&"food")
+		mouths += float(town.population())
+	if mouths <= 0.0:
+		return 0.0
+
+	var monthly := mouths * ColonyNeeds.per_head(&"food")
+	if monthly <= 0.0:
+		return 0.0
+	return clampf(held / monthly, 0.0, SECURE_MONTHS)

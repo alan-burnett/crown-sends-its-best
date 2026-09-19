@@ -12,6 +12,13 @@ var streams: RngStreams = null
 var map: WorldMap = null
 var territory: Territory = null
 
+## The colony itself.
+##
+## Most phases only ever touch the town they were handed, and should keep to
+## that. **Relief is the exception**: giving is a transaction between two towns,
+## so it needs to reach the other end of it.
+var colony: Colony = null
+
 var run_seed: int = 0
 
 ## Town id -> what Reckon worked out this month.
@@ -19,6 +26,20 @@ var run_seed: int = 0
 ## **Every later phase reads this rather than working it out again**, which is
 ## the whole point of Reckon being a phase of its own.
 var reckonings: Dictionary = {}
+
+## What the Crown has taken in duty this month, across both trade phases.
+##
+## Exchange taxes purchases and Sell taxes sales, with Consume and Build between
+## them. **Sell writes the total to `WorldValues.REVENUE`** because it is the
+## later of the two; neither phase alone is the colony's return to the Crown.
+var crown_tax: float = 0.0
+
+## Town id -> what Consume found out about how the town is living.
+##
+## Quality of life is **stored on the town and moved only in Settle** (#50), so
+## Consume records its findings here rather than writing them. Keys: `food`,
+## `clothing`, `luxury`, each a `0.0`-to-`1.0` share of the need that was met.
+var wellbeing: Dictionary = {}
 
 
 func _init(
