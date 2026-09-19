@@ -58,10 +58,25 @@ var save_path: String = SaveGame.SAVE_PATH
 var saves_on_send: bool = true
 
 
+## Carries the post to its recipients and resolves their compliance, in phase 7.
+var orders: OrderDriver = null
+
+## Settles promises, in phase 5.
+var promise_driver: PromiseDriver = null
+
+
 func _init(p_run: RunState) -> void:
 	run = p_run
+
+	orders = OrderDriver.new(run.intents, run.promises)
+	orders.contacts = run.contacts
+	promise_driver = PromiseDriver.new(run.promises)
+	promise_driver.contacts = run.contacts
+
 	month_runner = WorldMonth.new(run.intents, run.streams)
-	month_runner.drivers = [StubWorld.new()]
+	# Order matters only where the mechanics doc says it does; each driver
+	# answers for its own phase.
+	month_runner.drivers = [StubWorld.new(), promise_driver, orders]
 	month_runner.executors = [StubIntentExecutor.new()]
 
 
@@ -116,6 +131,9 @@ func send_post() -> bool:
 
 	run.phase = SENDING
 	issued_orders = _build_orders()
+	# The post goes aboard. It is read next month, in phase 7.
+	for order in issued_orders:
+		orders.carry(order)
 	run.post.seal()
 
 	run.log.emit(EVENT_POST_SENT, &"pc", run.world.month, {

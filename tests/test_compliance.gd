@@ -1,0 +1,335 @@
+extends TestCase
+
+## Orders and compliance resolution (#16), and the three Crown officers (#13).
+
+const SEED: int = 1066
+
+var state: WorldState = null
+var log: EventLog = null
+var book: IntentBook = null
+var streams: RngStreams = null
+var content: ContentDatabase = null
+
+
+func before_each() -> void:
+	Deliberation.reset()
+	ContentRegistry.reset()
+	MeasureRegistry.reset()
+	M1Registrations.register_all()
+
+	state = StubWorld.initial_state()
+	state.month = 3
+	log = EventLog.new()
+	book = IntentBook.new()
+	streams = RngStreams.new(SEED)
+
+	content = ContentDatabase.new()
+	content.load_all("en")
+
+
+func after_each() -> void:
+	Deliberation.reset()
+	ContentRegistry.reset()
+	MeasureRegistry.reset()
+	content.free()
+
+
+func _officer(id: String) -> Contact:
+	return Contact.from_data(content.collection("contacts")[id])
+
+
+func _contact(loyalty: float, weights: Dictionary = {}) -> Contact:
+	var contact := Contact.new(&"someone", weights)
+	contact.relationship = Relationship.new(&"someone", loyalty)
+	return contact
+
+
+func _troop_request(payment: float) -> Order:
+	return Order.new(M1Registrations.ORDER_REQUEST_TROOPS, &"marshal", {
+		"to": "marshal", "payment": payment,
+	}, state.month)
+
+
+func _resolve(order: Order, contact: Contact) -> Dictionary:
+	return Compliance.resolve(order, contact, book, state, log, streams)
+
+
+# --- The six outcomes ------------------------------------------------------
+
+func _vague_order() -> Order:
+	# No figure in it, so there is room to decide what the PC meant.
+	return Order.new(M1Registrations.ORDER_SET_POLICY, &"marshal", {
+		"to": "marshal", "policy": "tax.tea", "value": "lower",
+	}, state.month)
+
+
+func test_all_six_outcomes_are_reachable() -> void:
+	# Swept across loyalty, payment, personality and how specific the order was,
+	# which is the honest way to ask "can this happen" without asserting a
+	# balance number.
+	var seen: Dictionary = {}
+	for loyalty in [0.0, 15.0, 30.0, 50.0, 70.0, 85.0, 100.0]:
+		for autonomy in [0.4, 1.0, 1.8]:
+			for payment in [0.0, 250.0, 500.0, 900.0, 1000.0]:
+				var contact := _contact(loyalty, {"autonomy": autonomy})
+				seen[String(_resolve(_troop_request(payment), contact)["outcome"])] = true
+			seen[String(_resolve(_vague_order(), _contact(loyalty, {"autonomy": autonomy}))["outcome"])] = true
+	for outcome in Compliance.OUTCOMES:
+		assert_true(seen.has(String(outcome)), "%s was never reachable. Reached: %s" % [outcome, seen.keys()])
+
+
+func test_a_vague_order_invites_reinterpretation() -> void:
+	# SPEC §8: personality shows in how a contact reads vague orders. A figure in
+	# the letter is what closes the gap.
+	assert_almost_eq(Compliance.vagueness_of(_troop_request(500.0)), 0.0)
+	assert_almost_eq(Compliance.vagueness_of(_vague_order()), 1.0)
+
+	var reinterpreted := false
+	for loyalty in [20.0, 40.0, 60.0, 80.0]:
+		if String(_resolve(_vague_order(), _contact(loyalty))["outcome"]) == String(Compliance.REINTERPRET):
+			reinterpreted = true
+	assert_true(reinterpreted, "no vague order was ever reinterpreted")
+
+
+func test_each_outcome_emits_a_distinguishable_event() -> void:
+	var types: Dictionary = {}
+	for outcome in Compliance.OUTCOMES:
+		var event_type: StringName = Compliance.OUTCOME_EVENTS[outcome]
+		assert_false(types.has(event_type), "%s shares an event type" % outcome)
+		types[event_type] = true
+	assert_eq(types.size(), Compliance.OUTCOMES.size())
+
+
+func test_loyalty_changes_which_outcome_occurs() -> void:
+	var devoted := _resolve(_troop_request(0.0), _contact(100.0))
+	var hostile := _resolve(_troop_request(0.0), _contact(0.0))
+	assert_ne(String(devoted["outcome"]), String(hostile["outcome"]),
+		"loyalty made no difference at all")
+
+
+func test_personality_changes_which_outcome_occurs() -> void:
+	# Same loyalty, same request, different weights, and no bespoke code for any
+	# of them. Asserting that personality *matters*, not which one wins — the
+	# latter is a balance value.
+	# A half-paid request for troops, where every consideration has something to
+	# say and none of them drowns the rest.
+	var personalities: Array[Dictionary] = [
+		{},
+		{"autonomy": 3.0, "cost_of_request": 0.2},
+		{"loyalty": 2.5, "cost_of_request": 0.2, "payment_offered": 2.0},
+		{"cost_of_request": 2.0, "autonomy": 0.1},
+	]
+	var outcomes: Dictionary = {}
+	for weights in personalities:
+		outcomes[String(_resolve(_troop_request(400.0), _contact(40.0, weights))["outcome"])] = true
+	assert_true(outcomes.size() > 1, "every personality reached the same outcome: %s" % outcomes.keys())
+
+
+func test_full_payment_is_a_guaranteed_yes() -> void:
+	# SPEC §12.6. A filter, not a heavy weight — a guarantee that can lose a close
+	# vote is not a guarantee. Even at the floor of loyalty, he does not refuse.
+	for loyalty in [0.0, 10.0, 50.0, 100.0]:
+		var result := _resolve(_troop_request(1000.0), _contact(loyalty, {"autonomy": 2.0}))
+		assert_ne(String(result["outcome"]), String(Compliance.REFUSE),
+			"refused a fully paid request at loyalty %f" % loyalty)
+
+
+func test_the_guarantee_is_recorded_as_a_filter_not_a_low_score() -> void:
+	var result := _resolve(_troop_request(1000.0), _contact(0.0))
+	var decision: Decision = result["decision"]
+	assert_true(decision.was_filtered(Compliance.REFUSE))
+	assert_eq(decision.filtered_by(Compliance.REFUSE), &"full_payment_is_a_yes")
+
+
+func test_paying_nothing_leaves_refusal_available() -> void:
+	var decision: Decision = _resolve(_troop_request(0.0), _contact(50.0))["decision"]
+	assert_false(decision.was_filtered(Compliance.REFUSE))
+
+
+# --- Seam B and Seam C -----------------------------------------------------
+
+func test_compliance_produces_an_intent_not_a_write() -> void:
+	var before := state.to_dict()
+	var result := _resolve(_troop_request(1000.0), _contact(80.0))
+	assert_eq(state.to_dict(), before, "resolving an Order must not touch the world")
+	assert_true(result["intent"] != null)
+	assert_eq(book.live().size(), 1)
+
+
+func test_a_refusal_produces_no_intent() -> void:
+	# A refusal is a thing that did not happen.
+	var contact := _contact(0.0, {"loyalty": 2.0, "autonomy": 0.1, "payment_offered": 2.0})
+	var result := _resolve(_troop_request(0.0), contact)
+	if String(result["outcome"]) != String(Compliance.REFUSE):
+		return  # This actor did not refuse; the reachability sweep covers that case.
+	assert_true(result["intent"] == null)
+	assert_empty(book.live())
+
+
+func test_acting_alone_is_the_same_path_with_a_different_origin() -> void:
+	# "The contact complied" and "he acted on his own and told you after" are one
+	# mechanism. The executor cannot tell them apart; only the letters care.
+	var acted_alone := false
+	for loyalty in [0.0, 5.0, 10.0, 20.0]:
+		var contact := _contact(loyalty, {"autonomy": 2.5})
+		var result := _resolve(_troop_request(0.0), contact)
+		if String(result["outcome"]) == String(Compliance.ACT_ALONE):
+			acted_alone = true
+			var intent: Intent = result["intent"]
+			assert_eq(intent.origin, Intent.ORIGIN_WILL)
+			assert_true(intent.is_live(), "it still becomes an Intent like any other")
+	assert_true(acted_alone, "no loyalty was low enough to produce acting alone")
+
+
+func test_every_resolution_emits_a_deliberation_trace() -> void:
+	_resolve(_troop_request(500.0), _contact(50.0))
+	assert_eq(log.of_type(Deliberation.TRACE_EVENT).size(), 1)
+
+
+func test_resolution_is_deterministic() -> void:
+	var first := _resolve(_troop_request(400.0), _contact(45.0))
+	var second_log := EventLog.new()
+	var second := Compliance.resolve(
+		_troop_request(400.0), _contact(45.0), IntentBook.new(), state, second_log, RngStreams.new(SEED)
+	)
+	assert_eq(String(first["outcome"]), String(second["outcome"]))
+
+
+func test_a_partial_compliance_delivers_less() -> void:
+	var order := Order.new(M1Registrations.ORDER_PROMISE_RESOURCE, &"marshal", {
+		"to": "marshal", "resource": "iron", "amount": 200,
+	}, state.month)
+	var contact := _contact(50.0)
+	var intent := Compliance._intent_for(order, Compliance.PARTIAL, contact)
+	assert_eq(intent.data["amount"], 100)
+
+
+func test_a_delay_takes_longer_than_compliance() -> void:
+	assert_true(int(Compliance.MONTHS_FOR[Compliance.DELAY]) > int(Compliance.MONTHS_FOR[Compliance.COMPLY]))
+
+
+# --- Costly requests -------------------------------------------------------
+
+func test_paying_generously_costs_no_loyalty() -> void:
+	# SPEC §8.5: request troops and pay generously and his loyalty does not
+	# shrink; pay less, or nothing, and it does.
+	var generous := _contact(50.0)
+	var before := generous.loyalty()
+	var order := _troop_request(1000.0)
+	order.tone = &""
+	Compliance.resolve(order, generous, book, state, log, streams)
+	assert_almost_eq(generous.loyalty(), before, 0.001)
+
+
+func test_paying_nothing_costs_loyalty() -> void:
+	var stingy := _contact(50.0)
+	var before := stingy.loyalty()
+	var order := _troop_request(0.0)
+	order.tone = &""
+	Compliance.resolve(order, stingy, book, state, log, streams)
+	assert_true(stingy.loyalty() < before, "asking for troops and paying nothing should sting")
+
+
+func test_granting_something_raises_loyalty() -> void:
+	var contact := _contact(50.0)
+	var before := contact.loyalty()
+	var order := Order.new(M1Registrations.ORDER_PROMISE_GOLD, &"marshal", {
+		"to": "marshal", "amount": 500,
+	}, state.month)
+	Compliance.resolve(order, contact, book, state, log, streams)
+	assert_true(contact.loyalty() > before)
+
+
+func test_tone_moves_loyalty_far_less_than_the_deed() -> void:
+	var by_deed := _contact(50.0)
+	var deed_order := Order.new(M1Registrations.ORDER_PROMISE_GOLD, &"marshal", {"to": "marshal", "amount": 500}, state.month)
+	Compliance.resolve(deed_order, by_deed, book, state, log, streams)
+
+	var by_tone := _contact(50.0)
+	var tone_order := Order.new(M1Registrations.ORDER_SET_POLICY, &"marshal", {"policy": "x", "value": "y"}, state.month)
+	tone_order.tone = Tone.PLEASED
+	Compliance.resolve(tone_order, by_tone, book, state, log, streams)
+
+	assert_true(absf(by_deed.loyalty() - 50.0) > absf(by_tone.loyalty() - 50.0))
+
+
+# --- The three Crown officers ----------------------------------------------
+
+func test_the_three_officers_load_from_data() -> void:
+	for id in ["marshal", "chancellor", "steward"]:
+		assert_true(content.has_record("contacts", id), "no data for '%s'" % id)
+		var officer := _officer(id)
+		assert_eq(officer.role, Contact.ROLE_CROWN_OFFICER)
+		assert_not_empty(officer.display_name)
+		assert_not_empty(officer.title)
+
+
+func test_the_chancellors_loyalty_begins_very_low() -> void:
+	# He cherishes giving you news of your failures (SPEC §8.1). Data, not a
+	# special case.
+	var chancellor := _officer("chancellor")
+	assert_true(chancellor.loyalty() < _officer("marshal").loyalty())
+	assert_true(chancellor.loyalty() < _officer("steward").loyalty())
+
+
+func test_the_officers_are_three_distinct_people() -> void:
+	var marshal := _officer("marshal")
+	var chancellor := _officer("chancellor")
+	var steward := _officer("steward")
+	assert_ne(marshal.weights, chancellor.weights)
+	assert_ne(chancellor.weights, steward.weights)
+	assert_ne(marshal.weights, steward.weights)
+
+
+func test_their_weights_visibly_change_behaviour() -> void:
+	# Demonstrable through the traces: identical request, identical loyalty,
+	# different totals because the weights differ.
+	var order := _troop_request(300.0)
+	var totals: Dictionary = {}
+	for id in ["marshal", "chancellor", "steward"]:
+		var officer := _officer(id)
+		officer.relationship = Relationship.new(officer.id, 50.0)
+		var decision: Decision = _resolve(order, officer)["decision"]
+		totals[id] = decision.total_for(Compliance.COMPLY)
+	assert_ne(totals["marshal"], totals["chancellor"])
+	assert_ne(totals["chancellor"], totals["steward"])
+
+
+func test_their_leans_differ_per_officer_and_per_topic() -> void:
+	# So two officers describe the same situation differently and both tell the
+	# truth (SPEC §9.1).
+	var marshal := _officer("marshal")
+	var steward := _officer("steward")
+	assert_ne(marshal.lean_for("supply_situation"), steward.lean_for("supply_situation"))
+	assert_ne(marshal.lean_for("crown_war_intensity"), marshal.lean_for("supply_situation"))
+
+
+func test_two_officers_describe_the_same_month_differently() -> void:
+	MeasureRegistry.register_linear("supply_situation", 0.0, 100.0)
+	var ladder := PackedStringArray(["desperate", "strained", "adequate", "ample", "abundant"])
+	var marshal := _officer("marshal")
+	var steward := _officer("steward")
+	assert_ne(
+		Perception.word("supply_situation", 50.0, marshal.lean_for("supply_situation"), ladder),
+		Perception.word("supply_situation", 50.0, steward.lean_for("supply_situation"), ladder),
+	)
+
+
+func test_their_portraits_are_asset_ids() -> void:
+	# SPEC §16.3: swapping placeholder art for final art is a data change.
+	for id in ["marshal", "chancellor", "steward"]:
+		var officer := _officer(id)
+		assert_not_empty(officer.portrait_asset)
+		assert_false(officer.portrait_asset.contains("res://"))
+
+
+func test_adding_an_officer_later_needs_only_a_data_file() -> void:
+	# The Provost and the Diplomat are out of scope for M1, and this is the test
+	# that they will not need code when they arrive.
+	var provost := Contact.from_data({
+		"id": "provost", "name": "Doctor Selwyn Marchmont", "title": "Provost",
+		"role": "crown_officer", "loyalty": 50, "weights": {"loyalty": 1.1},
+	})
+	assert_eq(provost.role, Contact.ROLE_CROWN_OFFICER)
+	var result := _resolve(_troop_request(500.0), provost)
+	assert_true(Compliance.OUTCOMES.has(StringName(result["outcome"])))

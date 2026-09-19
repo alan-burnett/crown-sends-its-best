@@ -35,6 +35,10 @@ var last_diff: WorldDiff = null
 ## Contact id -> Contact, each carrying its own Relationship.
 var contacts: Dictionary = {}
 
+## Everything the PC has committed to. Honoured automatically while he can keep
+## them; a broken one costs loyalty (SPEC §9.5).
+var promises: PromiseBook = null
+
 ## This turn's desk.
 var inbox: Array[InboundLetter] = []
 var post: Post = null
@@ -60,6 +64,7 @@ static func new_run(seed_value: int) -> RunState:
 	run.log = EventLog.new()
 	run.intents = IntentBook.new()
 	run.post = Post.new()
+	run.promises = PromiseBook.new()
 	run.last_diff = WorldDiff.new()
 	return run
 
@@ -122,6 +127,7 @@ func to_dict() -> Dictionary:
 		"world": world.to_dict(),
 		"log": log.to_dict(),
 		"intents": intents.to_dict(),
+		"promises": promises.to_dict(),
 		"streams": streams.to_dict(),
 		"last_diff": last_diff.to_dict(),
 		"contacts": contact_entries,
@@ -139,6 +145,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.world = WorldState.from_dict(data.get("world", {}))
 	run.log = EventLog.from_dict(data.get("log", {}))
 	run.intents = IntentBook.from_dict(data.get("intents", {}))
+	run.promises = PromiseBook.from_dict(data.get("promises", {}))
 	run.streams = RngStreams.from_dict(data.get("streams", {}))
 	run.last_diff = WorldDiff.from_dict(data.get("last_diff", {}))
 	run.post = Post.from_dict(data.get("post", {}))

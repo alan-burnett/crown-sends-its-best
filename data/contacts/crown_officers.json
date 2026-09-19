@@ -1,0 +1,60 @@
+[
+  {
+    "id": "marshal",
+    "name": "Sir Aldous Vane",
+    "title": "Marshal of the Crown",
+    "role": "crown_officer",
+    "portrait": "portrait.marshal",
+    "loyalty": 55,
+    "weights": {
+      "loyalty": 0.8,
+      "cost_of_request": 0.7,
+      "payment_offered": 1.5,
+      "autonomy": 1.1
+    },
+    "leans": {
+      "crown_war_intensity": 0.22,
+      "supply_situation": -0.20
+    },
+    "cares_about": ["crown_war_intensity", "supply_situation"]
+  },
+  {
+    "id": "chancellor",
+    "name": "Lord Hensworth Grail",
+    "title": "Chancellor of the Crown",
+    "role": "crown_officer",
+    "portrait": "portrait.chancellor",
+    "loyalty": 12,
+    "weights": {
+      "loyalty": 1.4,
+      "cost_of_request": 1.2,
+      "payment_offered": 0.5,
+      "autonomy": 1.5
+    },
+    "leans": {
+      "colony_revenue": -0.24,
+      "crown_war_intensity": 0.10
+    },
+    "cares_about": ["colony_revenue"]
+  },
+  {
+    "id": "steward",
+    "name": "Master Corvyn Thrale",
+    "title": "Steward of the Revenue",
+    "role": "crown_officer",
+    "portrait": "portrait.steward",
+    "loyalty": 48,
+    "weights": {
+      "loyalty": 1.0,
+      "cost_of_request": 1.4,
+      "payment_offered": 0.9,
+      "autonomy": 0.7
+    },
+    "leans": {
+      "colony_revenue": -0.18,
+      "supply_situation": 0.16,
+      "food_security": 0.15
+    },
+    "cares_about": ["colony_revenue", "supply_situation"]
+  }
+]

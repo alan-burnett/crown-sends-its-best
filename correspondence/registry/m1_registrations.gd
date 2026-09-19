@@ -26,6 +26,12 @@ static func register_all() -> void:
 	register_effects()
 	register_conditions()
 	register_measures()
+	register_considerations()
+
+
+## **A milestone that adds a system ships that system's considerations with it.**
+static func register_considerations() -> void:
+	ComplianceConsiderations.register_all()
 
 
 # --- Effects ---------------------------------------------------------------
