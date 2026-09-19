@@ -1,31 +1,59 @@
 class_name SettlePhase
 extends ColonyPhase
 
-## **Settle.** The month is totted up and the town decides what it does next
-## (SPEC §11.3, #53).
+## **Settle.** The month is totted up: how the town lived, whether it grew, and
+## what it does next (SPEC §11.3, #50, #53).
 ##
-## Two things happen here, in this order:
+## Four things happen, in this order, and the order is the reason it is one
+## phase rather than four:
 ##
-## 1. **Each town reconsiders its objective**
-##    (`docs/mechanics/governor-objectives.md` §7). Complete, stalled, or serving
-##    an intent the governor no longer holds — any of those and it picks
-##    something else, deterministically. None of them and it carries on.
-## 2. **The colony's condition is worked out.** Revenue is the duty the Crown
+## 1. **Quality of life** is computed from the month that has just happened
+##    (`QualityOfLife`, from `docs/mechanics/quality-of-life.md`).
+## 2. **The population grows** from births, at a rate that reads the quality of
+##    life just computed (SPEC §12.1).
+## 3. **Each town reconsiders its objective**
+##    (`docs/mechanics/governor-objectives.md` §7).
+## 4. **The colony's condition** is settled: revenue is the duty the Crown
 ##    actually took (#47) and food security is what is left after eating (#48).
+##
+## ## 🔒 Quality of life is stored, and moved only here
+##
+## A reader that recomputed it would get a different answer halfway through a
+## month and two readers would disagree. So it is written once, in Settle, and
+## everything else in the game reads the field.
+##
+## ## 🔒 Rebel sentiment is not touched
+##
+## M3 owns it. QoL feeds sentiment, so sentiment must not feed back within a
+## month (`quality-of-life.md` §7) — and the surest way to keep that true is that
+## nothing here writes it at all.
 ##
 ## ## What is still a placeholder
 ##
-## **Supply is a random walk and quality of life is not computed at all.** #50
-## owns both. The drift is here rather than nowhere because the letters go static
-## without it and a static playtest tests nothing (#20) — but it is not a model
-## of anything and nothing should be built on it.
-##
-## The reconsideration half *is* a model, and is not #50's to replace.
+## **Supply is a random walk.** Nothing derives it: it is the convoy, the Crown's
+## shipping, the state of the road, and none of those are modelled. It moves so
+## the letters do not go static, which is the failure #20 warns of, and it is not
+## a model of anything.
 
 const EVENT_SETTLED: StringName = &"colony_settled"
 const EVENT_CONVOY_LOST: StringName = &"convoy_lost"
+const EVENT_LIVED: StringName = &"town_lived"
+const EVENT_BORN: StringName = &"town_grew"
 
-# --- The drift, which #50 replaces -----------------------------------------
+# --- Population (SPEC §12.1) ------------------------------------------------
+
+## Births a month per head, in a town living well.
+##
+## **Natural growth starts slowly and snowballs**: it is a share of the
+## population, so a town of twelve gains a person every year or so and a town of
+## two hundred gains several a month. Immigration, which §12.1 calls the main
+## source of early growth, is M4.
+const BIRTH_RATE: float = 0.006
+
+## Below this quality of life nobody is having children.
+const BARREN_BELOW: float = 0.25
+
+# --- The drift, which nothing yet replaces ---------------------------------
 
 const SUPPLY_RECOVERY: float = 6.0
 const SUPPLY_NOISE: float = 2.5
@@ -37,13 +65,67 @@ const CONVOY_LOSS: float = 18.0
 ## the perception range in `docs/mechanics/perception.md` §4.
 const SECURE_MONTHS: float = 3.0
 
+## Changes smaller than this are not worth a letter noticing.
+const NOTICEABLE: float = 0.02
+
 
 func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
+	_live(town, context)
+	_grow(town, context)
 	_reconsider(town, context)
 
 	# The colony's condition is the colony's, not any one town's.
 	if claim_month(context):
 		_settle_the_colony(context)
+
+
+## How the town lived this month.
+func _live(town: Town, context: ColonyContext) -> void:
+	var parts := QualityOfLife.of(town, context)
+	var before := town.quality_of_life
+	town.quality_of_life = float(parts["quality_of_life"])
+
+	# **The direction and rough magnitude**, so a governor's letter can say that
+	# things are looking up without the letter doing arithmetic — and so it
+	# cannot say so when they are not (SPEC §9.1).
+	var change := town.quality_of_life - before
+	var direction := "steady"
+	if change > NOTICEABLE:
+		direction = "better"
+	elif change < -NOTICEABLE:
+		direction = "worse"
+
+	context.log.emit(EVENT_LIVED, town.id, context.state.month, {
+		"town": String(town.id),
+		"quality_of_life": town.quality_of_life,
+		"was": before,
+		"change": change,
+		"direction": direction,
+		"health": float(parts["health"]),
+		"safety": float(parts["safety"]),
+		"means": float(parts["means"]),
+		"hope": float(parts["hope"]),
+		"pleasure": float(parts["pleasure"]),
+	}, WorldPhase.COLONY_MONTH)
+
+
+## Births. **Not immigration**, which is M4 and is the larger source.
+func _grow(town: Town, context: ColonyContext) -> void:
+	if town.quality_of_life < BARREN_BELOW or town.population() <= 0:
+		return
+
+	town.growth_accrued += float(town.population()) * BIRTH_RATE * town.quality_of_life
+	var born := int(floor(town.growth_accrued))
+	if born <= 0:
+		return
+
+	town.growth_accrued -= float(born)
+	town.workers += born
+	context.log.emit(EVENT_BORN, town.id, context.state.month, {
+		"town": String(town.id),
+		"born": born,
+		"population": town.population(),
+	}, WorldPhase.COLONY_MONTH)
 
 
 ## The three tests, and a new objective when one of them fires.
@@ -107,6 +189,7 @@ func _settle_the_colony(context: ColonyContext) -> void:
 		WorldValues.SUPPLY: clampf(supply, 0.0, 100.0),
 		WorldValues.REVENUE: context.crown_tax,
 		WorldValues.FOOD: _food_security(context),
+		WorldValues.QUALITY_OF_LIFE: _colony_quality_of_life(context),
 	}, WorldPhase.COLONY_MONTH)
 
 
@@ -132,3 +215,23 @@ func _food_security(context: ColonyContext) -> float:
 	if monthly <= 0.0:
 		return 0.0
 	return clampf(held / monthly, 0.0, SECURE_MONTHS)
+
+
+## How the colony is living, **weighted by where people actually are**.
+##
+## A colony of one wretched hamlet and one thriving city is not living averagely;
+## it is mostly living the way the city does, because that is where most of it
+## is. Weighting by population is what makes the Crown's impression of the
+## colony match the impression of the average colonist.
+func _colony_quality_of_life(context: ColonyContext) -> float:
+	if context.colony == null or context.colony.is_empty():
+		return 0.0
+	var total := 0.0
+	var mouths := 0.0
+	for town in context.colony.in_order():
+		var here := float(town.population())
+		total += town.quality_of_life * here
+		mouths += here
+	if mouths <= 0.0:
+		return 0.0
+	return clampf(total / mouths, 0.0, 1.0)
