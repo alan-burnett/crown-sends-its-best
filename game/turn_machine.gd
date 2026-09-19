@@ -111,6 +111,8 @@ func _init(p_run: RunState) -> void:
 	colony_month = ColonyDriver.new(run.colony, run.map, run.run_seed)
 	colony_month.territory_driver = territory
 	colony_month.intents = run.intents
+	colony_month.grievances = run.grievances
+	colony_month.contacts = run.contacts
 	colony_month.month.set_handler(ColonyMonth.WORK, WorkPhase.new())
 	colony_month.month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
 	colony_month.month.set_handler(ColonyMonth.RELIEF, ReliefPhase.new())
@@ -145,9 +147,13 @@ func _init(p_run: RunState) -> void:
 
 	# Order within the list does not decide anything — each driver answers for its
 	# own phase, and the phases are the mechanics doc's.
+	# Phase 7. What the month did to the colony's patience, after promises have
+	# settled and orders have resolved (#71).
+	var grievances := GrievanceDriver.new(run.colony, run.grievances)
+
 	month_runner.drivers = [
 		crown_affairs, territory, colony_month, promise_driver,
-		crown_standing, orders, silence, governors,
+		crown_standing, orders, silence, governors, grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.

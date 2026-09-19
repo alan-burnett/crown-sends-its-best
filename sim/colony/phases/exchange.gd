@@ -160,14 +160,15 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	for resource in reckoning.shortages():
 		var lacking := reckoning.need_of(StringName(resource)) - before.held(town.id, StringName(resource))
 		if lacking > 0.0:
-			_shop(town, StringName(resource), lacking, context, spent_on)
+			_shop(town, StringName(resource), lacking, context, spent_on, Trade.TIER_NEED)
 
 	# 2. Tier 2, the objective. It waits behind survival and nothing else.
 	var required := reckoning.objective
 	var required_ids: PackedStringArray = PackedStringArray(required.keys())
 	required_ids.sort()
 	for resource in required_ids:
-		_shop(town, StringName(resource), float(required[resource]), context, spent_on)
+		_shop(town, StringName(resource), float(required[resource]), context, spent_on,
+			Trade.TIER_OBJECTIVE)
 
 	# 3a. Tier 3, the governor's ambitions: guns for a military intent, timber
 	#     and stone for a builder. **What makes an intent reach the economy** —
@@ -178,7 +179,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 			stocked.append(String(resource))
 	stocked.sort()
 	for resource in stocked:
-		_shop(town, StringName(resource), reckoning.want_of(StringName(resource)), context, spent_on)
+		_shop(town, StringName(resource), reckoning.want_of(StringName(resource)),
+			context, spent_on, Trade.TIER_OBJECTIVE)
 
 	# 3b. Comforts, last and only with what is left — and chosen at the margin
 	#     rather than by price, which is what makes a per-resource duty a real
@@ -201,10 +203,11 @@ func _shop(
 	wanted: float,
 	context: ColonyContext,
 	into: Dictionary,
+	tier: StringName = Trade.TIER_WANT,
 ) -> float:
 	var got := _buy_from_natives(town, resource, wanted, context)
 	if wanted - got > 0.0:
-		var deal := Trade.buy(town, resource, wanted - got, context)
+		var deal := Trade.buy(town, resource, wanted - got, context, tier)
 		got += float(deal["received"])
 	if got > 0.0:
 		into[String(resource)] = float(into.get(String(resource), 0.0)) + got

@@ -281,3 +281,47 @@ func test_selling_pays_the_crown_its_duty() -> void:
 	assert_not_empty(events)
 	assert_almost_eq(float(events[0].payload["rate"]), 0.3, 0.001)
 	assert_true(context.crown_tax > 0.0)
+
+
+# --- 🔒 The rate is an instrument the player can actually reach -------------
+
+func test_every_letter_about_a_rate_moves_the_rate() -> void:
+	# **The bug this exists to stop coming back.** `set_tax_rate` was registered
+	# in code, carried a builder that worked out the world key and the step, had
+	# an entry in the executor table — and was used by no letter. Every letter
+	# that asked about a rate used `set_policy`, which the table maps to nothing.
+	#
+	# So the player could not change a tax rate at all, for the whole of M1 and
+	# M2, while SPEC §10.2 makes per-resource rates his main economic instrument
+	# and #115 built the trade-protest backfire on top of them. Nothing failed,
+	# because nothing asserted that the instrument was connected.
+	var database := ContentDatabase.new()
+	database.load_all("en")
+
+	var about_rates := 0
+	for id in database.ids("letters"):
+		var record: Dictionary = database.collection("letters")[id]
+		var text := JSON.stringify(record)
+		if not text.contains("tax.") and not text.contains("set_tax_rate"):
+			continue
+		about_rates += 1
+		assert_true(text.contains("set_tax_rate"),
+			"%s talks about a rate and moves nothing: a letter that asks the "
+			% id + "player to raise a duty must use `set_tax_rate`")
+		assert_false(text.contains("\"policy\": \"tax."),
+			"%s sets a tax rate as though it were a policy string" % id)
+
+	assert_true(about_rates > 0, "no letter in the game asks about a tax rate at all")
+	database.free()
+
+
+func test_a_step_moves_the_rate_by_a_step() -> void:
+	var state := WorldValues.initial_state()
+	var before := TaxRates.rate_for(state, &"tea")
+	var raised := TaxRates.moved(state, &"tea", 1.0)
+	var lowered := TaxRates.moved(state, &"tea", -1.0)
+
+	assert_true(raised > before, "raising a duty by one step left it where it was")
+	assert_true(lowered < before, "lowering a duty by one step left it where it was")
+	assert_almost_eq(raised - before, TaxRates.STEP, 0.0001,
+		"a step was not a step")

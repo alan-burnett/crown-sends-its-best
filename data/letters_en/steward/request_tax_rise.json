@@ -31,10 +31,10 @@
         { "id": "raise", "label": "raise the rate on {param:resource}",
           "text": "Raise it, then, and let the ledger speak for itself{insert:caution}.",
           "insert": { "caution": { "dutiful": ", though I should like to hear no complaints of it" } },
-          "effect": { "set_policy": { "policy": "tax.{resource}", "value": "raise" } } },
+          "effect": { "set_tax_rate": { "to": "steward", "resource": "{resource}", "steps": 1 } } },
         { "id": "lower", "label": "lower the rate instead",
           "text": "Lower it. The colony has paid enough for one winter.",
-          "effect": { "set_policy": { "policy": "tax.{resource}", "value": "lower" } } },
+          "effect": { "set_tax_rate": { "to": "steward", "resource": "{resource}", "steps": -1 } } },
         { "id": "hold", "label": "leave the rate where it stands",
           "text": "It stands as it is, and we shall speak of it again in the spring.",
           "effect": { "refuse": { "to": "steward" } } }

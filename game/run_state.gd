@@ -78,6 +78,12 @@ var demands: DemandGrowth = null
 ## What the Crown is asking for right now, and when it last asked (#69).
 var demand_book: DemandBook = null
 
+## What each town holds against the Crown (#71).
+##
+## Serialised, because a grievance is a timed contributor: a reload that forgot
+## them would hand the player a colony that had forgiven everything.
+var grievances: Grievances = null
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -135,6 +141,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.refusal = CrownRefusal.new()
 	run.demands = DemandGrowth.new()
 	run.demand_book = DemandBook.new()
+	run.grievances = Grievances.new()
 	run.found_first_town()
 
 	# **A town knows the ground it was built on.** Territory is recomputed in
@@ -249,6 +256,7 @@ func to_dict() -> Dictionary:
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
+		"grievances": grievances.to_dict() if grievances != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -277,6 +285,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
+	run.grievances = Grievances.from_dict(data.get("grievances", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 

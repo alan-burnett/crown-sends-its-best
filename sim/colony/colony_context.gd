@@ -26,6 +26,14 @@ var colony: Colony = null
 ## step with the book the executor works from.
 var intents: IntentBook = null
 
+## What each town holds against the Crown (#71). Null in fixtures that do not
+## care, which is why every reader checks.
+var grievances: Grievances = null
+
+## The colony's contacts, so sentiment can weigh who lives where and what they
+## think of the PC. Contact id -> `Contact`.
+var contacts: Dictionary = {}
+
 var run_seed: int = 0
 
 ## Town id -> what Reckon worked out this month.

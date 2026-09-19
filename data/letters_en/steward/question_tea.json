@@ -26,7 +26,7 @@
       { "id": "tea", "prompt": "The duty on tea", "options": [
         { "id": "tax", "label": "tax the tea heavily",
           "text": "Tax it, and let them write to me about it.",
-          "effect": { "set_policy": { "policy": "tax.tea", "value": "raise" } } },
+          "effect": { "set_tax_rate": { "to": "steward", "resource": "tea", "steps": 1 } } },
         { "id": "spare", "label": "leave the tea alone",
           "text": "Leave the tea alone. A colony with no small comforts is a colony with nothing to lose.",
           "effect": { "adjust_loyalty": { "to": "steward", "amount": -2 } } }

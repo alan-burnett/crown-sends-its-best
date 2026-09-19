@@ -283,7 +283,11 @@ func _row(
 	var objectives: PackedStringArray = PackedStringArray()
 	var intents: PackedStringArray = PackedStringArray()
 
+	var sentiment := 0.0
+	var worst_sentiment := 0.0
 	for town in towns:
+		sentiment += town.rebel_sentiment
+		worst_sentiment = maxf(worst_sentiment, town.rebel_sentiment)
 		people += town.population()
 		quality += town.quality_of_life * float(town.population())
 		food += town.held(&"food")
@@ -323,6 +327,13 @@ func _row(
 		"demand_target": DemandSchedule.gold_target(run.demands),
 		"demand_refusal": DemandSchedule.refusal_cost(run.demands),
 		"demand_askers": DemandSchedule.askers(run.demands),
+		# **The harness may read the figure; the game may not.** SPEC §12.3 keeps
+		# it off the player's screens and `tools/lint.gd` keeps it out of
+		# `presentation/` — but tuning it against evidence is the whole reason
+		# this exists, and the bands in `rebel-sentiment.md` §5 cannot be tuned
+		# from a band alone (#71).
+		"sentiment": 0.0 if towns.is_empty() else sentiment / float(towns.size()),
+		"worst_sentiment": worst_sentiment,
 		"intents": "|".join(intents),
 		"objectives": "|".join(objectives),
 	}
@@ -373,7 +384,7 @@ const COLUMNS: PackedStringArray = [
 	"tax_burden", "net_position", "standing", "standing_band", "letters",
 	"promises_outstanding", "tile_moves",
 	"demand_axis", "demand_interval", "demand_target", "demand_refusal",
-	"demand_askers",
+	"demand_askers", "sentiment", "worst_sentiment",
 ]
 
 ## The fixed columns, then one per comfort, then the wide text last so a

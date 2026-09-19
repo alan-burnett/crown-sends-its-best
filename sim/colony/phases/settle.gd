@@ -71,12 +71,70 @@ const NOTICEABLE: float = 0.02
 
 func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 	_live(town, context)
+	# **After quality of life and before anything reads it.** Sentiment is read
+	# through how the town lived (`rebel-sentiment.md` §4), so it cannot be
+	# worked out until this month's living is settled.
+	_take_the_temperature(town, context)
 	_grow(town, context)
 	_reconsider(town, context)
 
 	# The colony's condition is the colony's, not any one town's.
 	if claim_month(context):
 		_settle_the_colony(context)
+
+
+## Whether the town would be better off without the Crown in its life (#71).
+##
+## **Computed fresh, with no carry-over term** (`rebel-sentiment.md` §3). The
+## figure on the town is this month's answer rather than a running total, which
+## is what makes attribution work: the same wretchedness counts one way under the
+## Crown and the other way in rebellion, and a value that accumulated could not
+## change its mind.
+##
+## **The payload carries the parts and never the figure.** §6 is explicit that
+## sentiment is never a number the player sees — it surfaces through the
+## Diplomat's ladders, the governor's tone, and his loyalty slipping. The parts
+## are here so the Diplomat can say *what* is driving a trend, and `tools/lint.gd`
+## keeps `presentation/` away from the lot of it.
+func _take_the_temperature(town: Town, context: ColonyContext) -> void:
+	var before := town.rebel_sentiment
+	var parts := RebelSentiment.of(town, context, context.grievances, context.contacts)
+	town.rebel_sentiment = float(parts["total"])
+
+	var change := town.rebel_sentiment - before
+	var direction := "steady"
+	if change > NOTICEABLE:
+		direction = "rising"
+	elif change < -NOTICEABLE:
+		direction = "settling"
+
+	context.log.emit(RebelSentiment.EVENT_MEASURED, town.id, context.state.month, {
+		"town": String(town.id),
+		"direction": direction,
+		# **What is driving it, never how much of it there is.** A payload
+		# carrying the figure is a payload a letter could render.
+		"largest": _loudest(parts),
+		"rebelling": town.rebelling,
+	}, WorldPhase.COLONY_MONTH)
+
+
+## Which contributor is doing the most to a town's sentiment right now.
+##
+## What the Diplomat names when he reports. Ties break on the name so the answer
+## is the colony's rather than the dictionary's.
+func _loudest(parts: Dictionary) -> String:
+	var loudest := ""
+	var most := 0.0
+	var names: Array = parts.keys()
+	names.sort()
+	for name in names:
+		if String(name) == "total":
+			continue
+		var size := absf(float(parts[name]))
+		if size > most + 0.000001:
+			most = size
+			loudest = String(name)
+	return loudest
 
 
 ## How the town lived this month.
