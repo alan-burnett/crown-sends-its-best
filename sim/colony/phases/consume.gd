@@ -191,42 +191,53 @@ func _slaughter(town: Town, short_by: float, context: ColonyContext) -> void:
 
 ## The severe end. Rare in M2 given a sensible objective, and it should read as
 ## a disaster when it happens rather than as a number ticking down.
+##
+## ## 🔒 One at a time
+##
+## **No single event ever costs a town more than one population** (CLAUDE.md). A
+## bad month may take several, but it takes them **one at a time, each its own
+## resolution and its own event** — never one event saying three died.
+##
+## That is what keeps per-population consequences uniform: the Diplomat's death
+## roll, quality of life and the letters that name what happened all hang off a
+## single loss, and a bulk-casualty path here would be one the rest of the game
+## does not expect.
 func _starve(town: Town, unmet: float, context: ColonyContext) -> void:
 	if town.months_hungry < FAMINE_MONTHS or unmet <= 0.0:
 		return
-	var lost := maxi(1, int(round(float(town.population()) * unmet * FAMINE_DEATH_RATE)))
-	lost = _take_lives(town, lost)
-	if lost <= 0:
-		return
-	context.log.emit(EVENT_FAMINE, town.id, context.state.month, {
-		"town": String(town.id),
-		"lost": lost,
-		"remaining": town.population(),
-		"months_hungry": town.months_hungry,
-		"severity": String(Shortage.grade_of(unmet)),
-	}, WorldPhase.COLONY_MONTH)
+
+	var toll := maxi(1, int(round(float(town.population()) * unmet * FAMINE_DEATH_RATE)))
+	for _each in toll:
+		var who := _take_one_life(town)
+		if who.is_empty():
+			break  # There is nobody left to lose.
+		context.log.emit(EVENT_FAMINE, town.id, context.state.month, {
+			"town": String(town.id),
+			"lost": who,
+			"remaining": town.population(),
+			"months_hungry": town.months_hungry,
+			"severity": String(Shortage.grade_of(unmet)),
+		}, WorldPhase.COLONY_MONTH)
 
 
+## Take exactly one life, and say whose. Empty when there is nobody left.
+##
 ## Workers first, then experts. **A colony loses its skilled men last** — they
 ## are fed by the rest as long as there is anything to feed them with, and losing
-## one is a blow the town feels for years.
-func _take_lives(town: Town, count: int) -> int:
-	var taken := mini(count, town.workers)
-	town.workers -= taken
-	var left := count - taken
+## one is a blow the town feels for years. Experts go in sorted order, so which
+## one is lost is the colony's business rather than the dictionary's.
+func _take_one_life(town: Town) -> String:
+	if town.workers > 0:
+		town.workers -= 1
+		return "worker"
 
 	var kinds: PackedStringArray = PackedStringArray(town.experts.keys())
 	kinds.sort()
 	for kind in kinds:
-		if left <= 0:
-			break
-		var here := mini(left, town.expert_count(StringName(kind)))
-		if here <= 0:
-			continue
-		town.add_experts(StringName(kind), -here)
-		left -= here
-		taken += here
-	return taken
+		if town.expert_count(StringName(kind)) > 0:
+			town.add_experts(StringName(kind), -1)
+			return String(kind)
+	return ""
 
 
 ## Livestock kinds, cheapest first, then by name.
