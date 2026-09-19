@@ -12,9 +12,13 @@ var streams: RngStreams = null
 var map: WorldMap = null
 var territory: Territory = null
 
-## Tax rates are read straight off the world; this is here so a phase does not
-## have to know that (#47).
 var run_seed: int = 0
+
+## Town id -> what Reckon worked out this month.
+##
+## **Every later phase reads this rather than working it out again**, which is
+## the whole point of Reckon being a phase of its own.
+var reckonings: Dictionary = {}
 
 
 func _init(
@@ -32,6 +36,11 @@ func _init(
 ## The rate a resource is taxed at, wherever it is traded (SPEC §10.2).
 func tax_rate(resource: StringName) -> float:
 	return TaxRates.rate_for(state, resource)
+
+
+## What a town needs and can spare this month, once Reckon has run.
+func reckoning_for(town: Town) -> Reckoning:
+	return reckonings.get(String(town.id), Reckoning.new(town.id))
 
 
 ## The tiles a town works. Empty until territory has been computed, which phase 3

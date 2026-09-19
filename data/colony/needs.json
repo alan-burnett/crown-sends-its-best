@@ -1,0 +1,6 @@
+{
+  "id": "needs",
+  "per_head": { "food": 1.0, "clothing": 0.15 },
+  "reserve_months": { "food": 2.0, "clothing": 1.0 },
+  "default_reserve_months": 0.5
+}
