@@ -20,6 +20,7 @@ being rewritten every iteration.
 | [governor-objectives.md](governor-objectives.md) | Intent, objectives, and who decides which | M2 |
 | [town-economy.md](town-economy.md) | Prices, reserve, buying, and working the tiles | M2 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
+| [rebel-sentiment.md](rebel-sentiment.md) | Who gets blamed, and when a town stops asking | M3 |
 
 ## Still to write
 
@@ -29,7 +30,6 @@ In roughly the order they are needed.
 | :--- | :--- | :--- |
 | **Production and conversion** | Deferred by the Author as a larger mechanic: tiles, improvements, building bonuses, experts, and the split of labour between fields and town. **M2 needs a minimal version regardless, because clothing is a need.** Conversion competing with tile work is settled. | M2 |
 | **Policy** | A third category of order, alongside intent and objectives — a standing instruction about how a town or an officer conducts itself. "Stop producing rum." "Treat the tribe gently." Named in SPEC §11.3 and §9.4, defined nowhere, absent from §4. **Stub as a no-op until defined.** | M3 |
-| **Rebel sentiment** | The colony-side jaw of the Squeeze, opposite crown standing. Inputs are listed in §12.3; there is no model. Carries a threshold, a spread mechanism, a last-chance stage, and a peaceful-return condition. | M3 |
 | **Trade protests** | §10.2 lists six inputs, unusually complete. Mostly a formula rather than a design conversation. | M3 |
 | **Crown demand growth** | §10.2 says demands grow over time and nothing else. One curve, but it is what makes year five harder than year two. | M3 |
 | **Immigration** | §12.1 names the inputs. Reads quality of life, which is written. | M4 |
