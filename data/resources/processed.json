@@ -68,7 +68,7 @@
     "converts_from": [
       "sugar"
     ],
-    "price": 9,
+    "price": 11,
     "input_per_unit": 1.2,
     "per_worker": 3.0
   },
@@ -80,7 +80,7 @@
     "converts_from": [
       "tobacco"
     ],
-    "price": 9,
+    "price": 11,
     "input_per_unit": 1.2,
     "per_worker": 3.0
   }
