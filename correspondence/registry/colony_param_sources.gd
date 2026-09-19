@@ -56,6 +56,9 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"recalled", {"reach": "string", "field": "string"}, ColonyParamSources.recalled
 	)
+	ContentRegistry.register_param_source(
+		"pc", {"field": "string"}, ColonyParamSources.pc
+	)
 
 
 ## How many letters the Treasury will still honour.
@@ -291,6 +294,23 @@ static func recalled(args: Dictionary, context: LetterContext) -> Variant:
 ## kindness. Same log, same queries, different men.
 static func _sourness(contact: Contact) -> float:
 	return clampf(1.0 - contact.loyalty() / Relationship.MAX_LOYALTY, 0.0, 1.0)
+
+
+## What to call the man (#79).
+##
+## **The only thing SPEC §5's flavour is for.** A letter addresses him by name
+## and title and nothing else in the game may read either — no condition, no
+## effect, no consideration. A `{param:}` rather than a new slot kind, because
+## the four in CLAUDE.md are a contract and this needed no fifth.
+static func pc(args: Dictionary, context: LetterContext) -> Variant:
+	if context.pc == null:
+		return ""
+	match String(args.get("field", "name")):
+		"name":
+			return context.pc.pc_name
+		"title":
+			return context.pc.pc_title
+	return ""
 
 
 static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:
