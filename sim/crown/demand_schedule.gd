@@ -37,6 +37,7 @@ const DEFAULT_MONTHS_BETWEEN: float = 4.0
 const DEFAULT_GOLD_TARGET: float = 600.0
 const DEFAULT_REFUSAL_COST: float = 6.0
 const DEFAULT_ASKERS: int = 1
+const DEFAULT_TERM_MONTHS: int = 6
 
 static var _steady: Dictionary = {}
 static var _growth: Dictionary = {}
@@ -56,6 +57,15 @@ static func _steady_value(key: String, fallback: float) -> float:
 	return float(_steady.get(key, fallback))
 
 
+## How far one axis has grown, tolerating a run that has no growth state.
+##
+## A null growth is the steady bar, not an error: the standing driver and the
+## demand book are each useful in a fixture that does not care which year it is,
+## and the alternative is every caller guarding the same way.
+static func _level(growth: DemandGrowth, dimension: StringName) -> float:
+	return 0.0 if growth == null else float(growth.level_of(dimension))
+
+
 static func _growth_value(dimension: StringName, key: String, fallback: float) -> float:
 	var entry: Dictionary = _growth.get(String(dimension), {})
 	return float(entry.get(key, fallback))
@@ -67,7 +77,7 @@ static func months_between(growth: DemandGrowth) -> float:
 	var base := _steady_value("months_between", DEFAULT_MONTHS_BETWEEN)
 	var step := _growth_value(DemandGrowth.FREQUENCY, "months_between", -0.5)
 	var floor_at := _growth_value(DemandGrowth.FREQUENCY, "floor", 1.5)
-	return maxf(floor_at, base + step * float(growth.level_of(DemandGrowth.FREQUENCY)))
+	return maxf(floor_at, base + step * _level(growth, DemandGrowth.FREQUENCY))
 
 
 ## What a gold demand asks for. **Set above a young colony's output** and raised
@@ -75,7 +85,7 @@ static func months_between(growth: DemandGrowth) -> float:
 static func gold_target(growth: DemandGrowth) -> float:
 	var base := _steady_value("gold_target", DEFAULT_GOLD_TARGET)
 	var step := _growth_value(DemandGrowth.SIZE, "gold_target", 0.35)
-	return base * (1.0 + step * float(growth.level_of(DemandGrowth.SIZE)))
+	return base * (1.0 + step * _level(growth, DemandGrowth.SIZE))
 
 
 ## What refusing costs, as a multiple of the steady figure.
@@ -85,7 +95,7 @@ static func gold_target(growth: DemandGrowth) -> float:
 static func refusal_cost(growth: DemandGrowth) -> float:
 	var base := _steady_value("refusal_cost", DEFAULT_REFUSAL_COST)
 	var step := _growth_value(DemandGrowth.DESPERATION, "refusal_cost", 0.4)
-	return base * (1.0 + step * float(growth.level_of(DemandGrowth.DESPERATION)))
+	return base * (1.0 + step * _level(growth, DemandGrowth.DESPERATION))
 
 
 ## How many sources are demanding at all.
@@ -97,7 +107,16 @@ static func askers(growth: DemandGrowth) -> int:
 	var base := int(_steady_value("askers", float(DEFAULT_ASKERS)))
 	var step := int(_growth_value(DemandGrowth.REACH, "askers", 1.0))
 	var ceiling := int(_growth_value(DemandGrowth.REACH, "ceiling", 4.0))
-	return mini(ceiling, base + step * growth.level_of(DemandGrowth.REACH))
+	return mini(ceiling, base + step * int(_level(growth, DemandGrowth.REACH)))
+
+
+## How long the colony has to reach a revenue target.
+##
+## **Does not grow.** None of the four axes is "less time", and adding a fifth
+## silently would change what the bucket means. If the term should tighten, that
+## is a dimension and belongs in the doc.
+static func term_months() -> int:
+	return int(_steady_value("term_months", float(DEFAULT_TERM_MONTHS)))
 
 
 ## The whole bar in one dictionary, for the event log and the harness.

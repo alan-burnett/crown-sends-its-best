@@ -1,0 +1,46 @@
+{
+  "id": "steward.revenue_demand",
+  "sender": "steward",
+  "type": "demand",
+  "skippable": false,
+  "params": { "amount": "gold", "months": "integer" },
+  "perception": {
+    "returns": { "measure": "colony_revenue",
+                 "ladder": ["a rounding error", "thin", "steady enough", "handsome"] }
+  },
+  "body": [
+    { "text": "The Treasury has set the colony's return for the coming season at {param:amount}, over {param:months} months." },
+    { "text": "I am obliged to say plainly what this is and what it is not. It is not a bill. Nobody is coming to your door for coin you do not have. It is a figure, and at the end of {param:months} months the books will show whether the colony reached it." },
+    { "text": "I have your last returns in front of me and they are {perception:returns}. Draw from that what you will; I am not permitted to draw it for you." },
+    { "text": "You may accept, and the Crown will record that you undertook it. You may decline, and the Crown will record that too. I would not have you believe the second is the graver of the two, whatever the tone of the letter you are reading." },
+    { "text": "A man who undertakes a figure and misses it has told the Treasury something about his judgement. A man who declines has only told it something about his colony.", "only_tones": ["dutiful", "pleased"] },
+    { "text": "I have seen governors accept out of pride and spend the season watching a number they could not move. It is not an edifying spectacle from this end either.", "only_tones": ["annoyed", "hateful"] }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have the Treasury's figure before me {choice}.",
+      "options": [
+        { "tone": "dutiful",   "text": "and have considered it properly" },
+        { "tone": "pleased",   "text": "and am glad of a target to work to" },
+        { "tone": "annoyed",   "text": "and note that nobody asked what it cost to raise" },
+        { "tone": "desperate", "text": "and can scarcely read it for the others beside it" },
+        { "tone": "hateful",   "text": "and have given it the attention it merits" }
+      ]
+    },
+    "steps": [
+      { "id": "answer", "prompt": "Your undertaking to the Treasury", "options": [
+        { "id": "accept", "label": "undertake the figure",
+          "text": "The colony will return {param:amount} inside {param:months} months. You may set it down in the book over my name{insert:hedge}.",
+          "insert": { "hedge": { "desperate": ", and God help us both" } },
+          "effect": { "promise_revenue": { "to": "steward", "amount": "{amount}", "months": "{months}" } } },
+        { "id": "decline", "label": "decline the figure, plainly",
+          "text": "I will not undertake it. The ground here returns what it returns, and I would rather tell you so now than have you learn it from the books in {param:months} months.",
+          "effect": { "decline_demand": { "to": "steward" } } }
+      ] }
+    ],
+    "closing": [
+      { "text": "Your obedient servant,",
+        "tone": { "hateful": "Kindly send the next figure without the sermon attached." } }
+    ]
+  }
+}

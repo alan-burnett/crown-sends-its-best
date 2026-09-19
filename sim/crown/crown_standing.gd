@@ -82,6 +82,13 @@ const H_MAX: float = 120.0
 ## into a long punishment.
 const RISE_FLOOR: float = 0.08
 
+## What reaching a revenue target is worth, and what missing one costs.
+##
+## **Missing costs more than reaching is worth**, and more than declining does.
+## Placeholders pending the calibration in `crown-demands.md` §8.
+const TARGET_REACHED: float = 3.0
+const TARGET_MISSED: float = 8.0
+
 const EVENT_MOVED: StringName = &"crown_standing_moved"
 
 ## `0` to `100`, and **never shown to the player**.
@@ -101,7 +108,7 @@ var band: StringName = BAND_CONTENT
 ##
 ## Returns `{before, after, delta, band, was, monthly_net, horizon}`. The caller
 ## emits; this decides.
-func advance(revenue: float, spending: float) -> Dictionary:
+func advance(revenue: float, spending: float, judgement: float = 0.0) -> Dictionary:
 	var before := standing
 	var was := band
 
@@ -116,15 +123,32 @@ func advance(revenue: float, spending: float) -> Dictionary:
 		horizon = horizon_at(net_position, monthly_net)
 		delta = rise_rate() * maxf(RISE_FLOOR, 1.0 - horizon / H_MAX)
 
-	standing = clampf(standing + delta, 0.0, MAXIMUM)
+	standing = clampf(standing + delta + judgement, 0.0, MAXIMUM)
 	band = band_of(standing)
 
 	return {
 		"before": before, "after": standing, "delta": standing - before,
 		"band": band, "was": was,
 		"monthly_net": monthly_net, "net_position": net_position,
-		"horizon": horizon,
+		"horizon": horizon, "judgement": judgement,
 	}
+
+
+## What the Crown thinks of him, over and above what he cost it.
+##
+## ## Why standing is not only arithmetic
+##
+## The bands are the Crown's *opinion*, and an opinion is formed by conduct as
+## well as by accounts (`crown-demands.md` §4). A governor who undertook a figure
+## and reached it has told the Treasury something about his judgement that the
+## gold alone does not say; one who undertook it and missed has told it something
+## worse. An honest refusal costs something too, and deliberately costs **less**
+## than a broken undertaking — that asymmetry is the decision the Steward's
+## letter puts in front of the player, and without it here the letter is
+## decoration.
+##
+## Magnitudes are placeholders. §8 calibrates them against the reference players,
+## and `refusal_cost` is the `desperation` axis reaching the one thing it moves.
 
 
 ## **Falling scales with what the colony actually earns**, so a hundred gold of

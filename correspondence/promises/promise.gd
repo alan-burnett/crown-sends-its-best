@@ -21,6 +21,15 @@ const BROKEN: StringName = &"broken"
 const PAYER_CROWN: StringName = &"crown"
 const PAYER_COLONY: StringName = &"colony"
 
+## A revenue target the PC accepted from the Steward (#69).
+##
+## **The only promise whose keeping is not in the PC's hands.** Gold and
+## resources are paid out of a purse or a stockpile and either can be found or
+## cannot; a revenue target is kept by whether the colony's trade reached the
+## figure over the term. That is why it is a bet rather than a payment, and why
+## it settles against the Crown's own books rather than against anybody's will.
+const KIND_REVENUE: StringName = &"revenue"
+
 var id: StringName = &""
 var to: StringName = &""
 var kind: StringName = &""
@@ -60,6 +69,14 @@ func is_outstanding() -> bool:
 
 func is_due(month: int) -> bool:
 	return is_outstanding() and month >= due_month
+
+
+## Whether this promise is kept by an outcome rather than by a payment.
+##
+## The driver has to judge it against what actually happened, so `settle_due`
+## cannot simply mark it kept when the month comes round.
+func is_a_wager() -> bool:
+	return kind == KIND_REVENUE
 
 
 func amount() -> float:

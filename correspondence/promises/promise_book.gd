@@ -58,6 +58,18 @@ static func from_order(order: Order, month: int) -> Promise:
 			}, month, 0)
 			promise.payer = Promise.PAYER_COLONY
 			return promise
+		M1Registrations.ORDER_PROMISE_REVENUE:
+			# **Not the Crown's money to refuse**, and not the colony's to hand
+			# over either: it is a figure the colony's own trade either reaches or
+			# does not. The payer is recorded as the colony so that a Crown
+			# repudiation leaves it standing — the Treasury closing its purse does
+			# not excuse the PC from what he said his colony would earn.
+			var wager := Promise.new(order.addressed_to, Promise.KIND_REVENUE, {
+				"amount": order.get_param("amount", 0),
+				"term_months": order.get_param("months", 0),
+			}, month, month + int(order.get_param("months", 0)))
+			wager.payer = Promise.PAYER_COLONY
+			return wager
 		M1Registrations.ORDER_GRANT_FAVOR:
 			return Promise.new(order.addressed_to, &"favor", {
 				"favor": order.get_param("favor", ""),
@@ -72,7 +84,13 @@ static func from_order(order: Order, month: int) -> Promise:
 ## `can_crown_pay` is the seam **crown standing plugs into in M3** (#17 says not
 ## to design that model here, and SPEC §17 defers part of it). For M1 the Crown
 ## always pays, and nothing in this file assumes a formula.
-func settle_due(contacts: Dictionary, log: EventLog, month: int, can_crown_pay: bool = true) -> Array[Promise]:
+func settle_due(
+	contacts: Dictionary,
+	log: EventLog,
+	month: int,
+	can_crown_pay: bool = true,
+	verdicts: Dictionary = {},
+) -> Array[Promise]:
 	var settled: Array[Promise] = []
 	for promise in _promises:
 		if not promise.is_due(month):
@@ -83,6 +101,11 @@ func settle_due(contacts: Dictionary, log: EventLog, month: int, can_crown_pay: 
 
 		if crown_refused:
 			_break(promise, contact, log, month, "the Crown refused the payment")
+		elif promise.is_a_wager() and not bool(verdicts.get(String(promise.id), false)):
+			# **The bet the PC lost.** He promised what his colony would return and
+			# it did not return it. Nobody refused him anything; he was wrong about
+			# his own colony, which costs more than an honest refusal would have.
+			_break(promise, contact, log, month, "the colony's trade fell short of the figure")
 		else:
 			_keep(promise, contact, log, month)
 		settled.append(promise)

@@ -129,6 +129,7 @@ func _init(p_run: RunState) -> void:
 	# those land in phases 4 and 5 — so it judges after both (#67).
 	crown_standing = CrownStandingDriver.new(run.standing, run.refusal)
 	crown_standing.promises = promise_driver
+	crown_standing.growth = run.demands
 	# The Crown pays until the process says otherwise, which it decides monthly.
 	promise_driver.can_crown_pay = run.refusal.pays()
 
@@ -136,6 +137,7 @@ func _init(p_run: RunState) -> void:
 	# holds the colony to (#69).
 	var crown_affairs := CrownAffairs.new()
 	crown_affairs.growth = run.demands
+	crown_affairs.demands = run.demand_book
 
 	# Order within the list does not decide anything — each driver answers for its
 	# own phase, and the phases are the mechanics doc's.
@@ -171,6 +173,11 @@ static func order_effects() -> Dictionary:
 			{"target": WorldValues.REVENUE, "amount_factor": -1.0},
 		String(M1Registrations.ORDER_PROMISE_RESOURCE):
 			{"target": WorldValues.SUPPLY, "amount_factor": -0.05},
+		# **Accepting a revenue target moves nothing.** It is a statement about
+		# what the colony will return, not an instruction to the colony — and the
+		# whole point is that the colony either reaches it or does not, on its own
+		# terms. The promise it creates is where it bites.
+		String(M1Registrations.ORDER_PROMISE_REVENUE): {"target": ""},
 		# Troops arrive and are fed and armed out of the colony's stores.
 		String(M1Registrations.ORDER_REQUEST_TROOPS):
 			{"target": WorldValues.SUPPLY, "per_month": 6.0},
@@ -184,6 +191,9 @@ static func order_effects() -> Dictionary:
 		String(M1Registrations.ORDER_GRANT_FAVOR): {"target": ""},
 		String(M1Registrations.ORDER_ADJUST_LOYALTY): {"target": ""},
 		String(M1Registrations.ORDER_REFUSE): {"target": ""},
+		# Declining moves no world value. What it costs is Crown standing, and the
+		# standing driver reads it off the log in phase 6.
+		String(M1Registrations.ORDER_DECLINE_DEMAND): {"target": ""},
 		# Urging an intent reaches the town rather than a world value, so
 		# `UrgeIntentExecutor` handles it. Listed here so that every Order kind is
 		# still accounted for in one place.

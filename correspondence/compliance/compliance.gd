@@ -137,10 +137,11 @@ static func cost_of(order: Order) -> float:
 	match order.kind:
 		M1Registrations.ORDER_REQUEST_TROOPS:
 			return 1000.0
-		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE:
+		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
+		M1Registrations.ORDER_PROMISE_REVENUE:
 			# Being given something costs the recipient nothing.
 			return 0.0
-		M1Registrations.ORDER_REFUSE:
+		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
 			return 0.0
 		M1Registrations.ORDER_URGE_INTENT:
 			# **Being told what matters costs a governor nothing to carry out.**
@@ -205,9 +206,10 @@ static func payment_ratio(order: Order) -> float:
 ## business, not a favour the PC did him.
 static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName) -> void:
 	match order.kind:
-		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, M1Registrations.ORDER_GRANT_FAVOR:
+		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
+		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_GRANT_FAVOR:
 			contact.relationship.record_deed(Relationship.GRANTED)
-		M1Registrations.ORDER_REFUSE:
+		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
 			contact.relationship.record_deed(Relationship.REFUSED)
 		M1Registrations.ORDER_ADJUST_LOYALTY:
 			# The letter said plainly that it would move his regard, so it must.

@@ -41,6 +41,9 @@ static func register_all() -> void:
 		"town_population", {}, ColonyParamSources.town_population
 	)
 	ContentRegistry.register_param_source("years_served", {}, ColonyParamSources.years_served)
+	ContentRegistry.register_param_source(
+		"crown_demand", {"field": "string"}, ColonyParamSources.crown_demand
+	)
 
 
 ## How many letters the Treasury will still honour.
@@ -59,6 +62,24 @@ static func warning_turns(_args: Dictionary, _context: LetterContext) -> Variant
 ## man's tenure but he is not wrong about the number.
 static func years_served(_args: Dictionary, context: LetterContext) -> Variant:
 	return 0 if context.state == null else context.state.year_index() - 1
+
+
+## What the Crown asked for, exactly as it asked for it (#69).
+##
+## **Exact and truthful**, so it is a `{param:}`. The Steward's opinion of the
+## figure is his own and belongs in a `{perception:}`; the figure itself is the
+## thing the promise will be settled against, and a letter that rounded it would
+## be settling the player against a number he was never shown.
+static func crown_demand(args: Dictionary, context: LetterContext) -> Variant:
+	var book := context.demand_book
+	if book == null:
+		return 0
+	match String(args.get("field", "")):
+		"amount":
+			return book.amount
+		"months":
+			return book.term_months
+	return 0
 
 
 ## Who the letter came from, so a reply can be addressed back without the file

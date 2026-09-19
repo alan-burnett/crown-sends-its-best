@@ -75,6 +75,9 @@ var refusal: CrownRefusal = null
 ## seeded generation just as surely as regenerating the map would.
 var demands: DemandGrowth = null
 
+## What the Crown is asking for right now, and when it last asked (#69).
+var demand_book: DemandBook = null
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -131,6 +134,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.standing = CrownStanding.new()
 	run.refusal = CrownRefusal.new()
 	run.demands = DemandGrowth.new()
+	run.demand_book = DemandBook.new()
 	run.found_first_town()
 
 	# **A town knows the ground it was built on.** Territory is recomputed in
@@ -244,6 +248,7 @@ func to_dict() -> Dictionary:
 		"standing": standing.to_dict() if standing != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
+		"demand_book": demand_book.to_dict() if demand_book != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -271,6 +276,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.standing = CrownStanding.from_dict(data.get("standing", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
+	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 
