@@ -79,6 +79,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"remembers_a_kindness", {}, ColonyConditions.remembers_a_kindness
 	)
+	ContentRegistry.register_condition(
+		"town_is_preparing_to_leave", {}, ColonyConditions.town_is_preparing_to_leave
+	)
 
 
 ## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).
@@ -151,6 +154,18 @@ static func remembers_a_kindness(_args: Dictionary, context: LetterContext) -> b
 		return false
 	var memory := context.sender.relationship.most_generous()
 	return memory != null and memory.magnitude > 0.0 and not memory.subject.is_empty()
+
+
+## Whether this governor has decided to make his town ready to stand alone
+## (#128).
+##
+## **What makes it fair.** A rebellion the player never saw coming is a
+## trapdoor; SPEC §12.3 wants a spiral he can watch and intervene in. So the man
+## preparing for it writes about the walls and the powder and the grain, and
+## says nothing about why — the player has everything he needs to work it out,
+## and nobody tells him.
+static func town_is_preparing_to_leave(_args: Dictionary, context: LetterContext) -> bool:
+	return context.town != null and GovernorIntent.is_sedition(context.town.intent)
 
 
 ## Whether the town could not cover a need out of its own stores this month.

@@ -88,6 +88,17 @@
         "food": 1.5,
         "clothing": 0.5
       }
+    },
+    {
+      "id": "prepare_for_rebellion",
+      "name": "what is coming",
+      "pursuing": "seeing that this town can stand on its own feet",
+      "stocks": {
+        "guns": 0.9,
+        "iron": 0.6,
+        "food": 2.5,
+        "stone": 1.2
+      }
     }
   ]
 }

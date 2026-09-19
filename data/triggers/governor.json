@@ -289,5 +289,24 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.governor.nothing_to_report",
+    "letter": "governor.nothing_to_report",
+    "urgency": 0.75,
+    "cooldown": 5,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "town_is_preparing_to_leave": {}
+      }
+    ]
   }
 ]

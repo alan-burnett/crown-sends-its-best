@@ -78,6 +78,16 @@ const TAX_CEILING: float = 40.0
 const GOVERNOR_INFLUENCE: float = 22.0
 const RESIDENT_INFLUENCE: float = 6.0
 
+## What a governor actively preparing his town for rebellion is worth on top
+## (#128).
+##
+## **A man who has decided is not the same as a man who is sullen.** His regard
+## is already counted above; this is the difference between holding an opinion
+## and acting on it, and it is what makes the governor an accelerant rather than
+## a passenger — he drives sentiment up, sentiment crosses the line, the town
+## declares. A far better story than a number quietly passing a threshold.
+const SEDITIOUS_GOVERNOR: float = 15.0
+
 ## Loyalty at which a contact neither helps nor hurts.
 const LOYALTY_NEUTRAL: float = 55.0
 
@@ -188,6 +198,13 @@ static func _contacts(town: Town, contacts: Dictionary) -> float:
 		var weight := GOVERNOR_INFLUENCE if contact.id == town.governor_id \
 			else RESIDENT_INFLUENCE
 		total += weight * (LOYALTY_NEUTRAL - contact.loyalty()) / LOYALTY_NEUTRAL
+
+	# **A man who has decided is not the same as a man who is sullen.** His
+	# regard is already counted above; this is the difference between holding an
+	# opinion and acting on it, and it is what makes the governor an accelerant
+	# rather than a passenger (#128).
+	if GovernorIntent.is_sedition(town.intent):
+		total += SEDITIOUS_GOVERNOR
 	return total
 
 
