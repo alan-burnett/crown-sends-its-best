@@ -144,6 +144,42 @@ func test_the_crown_closing_its_purse_does_not_excuse_the_goods() -> void:
 
 # --- 🔒 More than one turn to answer ----------------------------------------
 
+## A run that has grown far enough for the Marshal to have a hand out.
+##
+## Only the Steward asks at the opening of a run; the Marshal is something
+## `reach` adds (`crown-demands.md` §6), so every fixture here needs a run that
+## has drawn that axis at least once.
+func _grown() -> DemandGrowth:
+	var growth := DemandGrowth.new()
+	growth.levels[String(DemandGrowth.REACH)] = 1
+	return growth
+
+
+func test_only_the_steward_has_a_hand_out_at_first() -> void:
+	# **The fourth dimension made real.** At the opening of a run one man is
+	# asking; the rest are something the run grows into. Without this the axis
+	# moves a number nobody consults.
+	for seed_value in 40:
+		var demands := DemandBook.new()
+		var streams := RngStreams.new(seed_value)
+		for month in 40:
+			if demands.advance(month, DemandGrowth.new(), streams, null):
+				assert_eq(String(demands.kind), String(DemandBook.KIND_GOLD),
+					"the Marshal set a requisition before anyone had joined him")
+
+
+func test_growing_reach_brings_the_marshal_in() -> void:
+	var asked := false
+	for seed_value in 40:
+		var demands := DemandBook.new()
+		var streams := RngStreams.new(seed_value)
+		for month in 40:
+			if demands.advance(month, _grown(), streams, null) 					and demands.kind == DemandBook.KIND_RESOURCE:
+				asked = true
+				demands.answer()
+	assert_true(asked, "reach grew and the Marshal still never asked for anything")
+
+
 func _requisition(month: int = DemandBook.FIRST_DEMAND_MONTH) -> DemandBook:
 	# Walk the dice until the Crown asks for goods rather than gold. It is meant
 	# to be the exception, so this may take several tries — which is itself the
@@ -153,7 +189,7 @@ func _requisition(month: int = DemandBook.FIRST_DEMAND_MONTH) -> DemandBook:
 		var streams := RngStreams.new(seed_value)
 		var at := month
 		for _try in 40:
-			if demands.advance(at, DemandGrowth.new(), streams, null) \
+			if demands.advance(at, _grown(), streams, null) \
 					and demands.kind == DemandBook.KIND_RESOURCE:
 				return demands
 			at += 1
@@ -216,7 +252,7 @@ func test_the_crown_does_not_pile_one_demand_on_another() -> void:
 	assert_true(demands != null)
 	var streams := RngStreams.new(SEED)
 	for month in range(demands.issued_month + 1, demands.expires_month + 1):
-		assert_false(demands.advance(month, DemandGrowth.new(), streams, null),
+		assert_false(demands.advance(month, _grown(), streams, null),
 			"a second demand arrived in month %d while the first still stood" % month)
 
 
@@ -232,7 +268,7 @@ func test_gold_is_the_routine_and_goods_the_exception() -> void:
 		var demands := DemandBook.new()
 		var streams := RngStreams.new(seed_value)
 		for month in 60:
-			if not demands.advance(month, DemandGrowth.new(), streams, null):
+			if not demands.advance(month, _grown(), streams, null):
 				continue
 			if demands.kind == DemandBook.KIND_RESOURCE:
 				goods += 1
@@ -253,7 +289,7 @@ func test_the_marshal_never_requisitions_a_comfort() -> void:
 		var demands := DemandBook.new()
 		var streams := RngStreams.new(seed_value)
 		for month in 40:
-			if demands.advance(month, DemandGrowth.new(), streams, null) \
+			if demands.advance(month, _grown(), streams, null) \
 					and demands.kind == DemandBook.KIND_RESOURCE:
 				assert_false(ResourceCatalogue.is_luxury(demands.resource),
 					"the Marshal requisitioned %s for his wars" % demands.resource)
