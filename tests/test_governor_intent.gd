@@ -331,7 +331,12 @@ func test_a_project_is_chosen_carried_and_completed() -> void:
 		_run_month(harness)
 
 	assert_not_empty(harness["context"].log.of_type(ObjectiveSelector.EVENT_CHOSEN))
-	assert_not_empty(town.buildings, "eight months and a full storehouse built nothing")
+	# **A project, not specifically a building.** Which one the governor picks is
+	# his business and moves with the price list — a town attending to profit
+	# plants a cash crop when cash crops are worth planting. What this test is
+	# about is that whatever he picked got finished.
+	assert_not_empty(harness["context"].log.of_type(BuildPhase.EVENT_COMPLETED),
+		"eight months and a full storehouse finished nothing at all")
 
 
 func test_a_standing_posture_can_win_the_board() -> void:

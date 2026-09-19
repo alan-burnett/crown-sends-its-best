@@ -46,20 +46,20 @@
     "name": "sugar",
     "luxury": true,
     "producible": true,
-    "price": 6
+    "price": 8
   },
   {
     "id": "tobacco",
     "name": "tobacco",
     "luxury": true,
     "producible": true,
-    "price": 6
+    "price": 8
   },
   {
     "id": "tea",
     "name": "tea",
     "luxury": true,
     "producible": false,
-    "price": 8
+    "price": 6
   }
 ]

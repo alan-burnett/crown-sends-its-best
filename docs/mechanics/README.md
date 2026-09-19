@@ -20,6 +20,7 @@ being rewritten every iteration.
 | [governor-objectives.md](governor-objectives.md) | Intent, objectives, and who decides which | M2 |
 | [town-economy.md](town-economy.md) | Prices, reserve, buying, and working the tiles | M2 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
+| [crown-demands.md](crown-demands.md) | A fixed bar, then a moving one — and bucket randomisation | M3 |
 | [rebel-sentiment.md](rebel-sentiment.md) | Who gets blamed, and when a town stops asking | M3 |
 | [the-diplomat.md](the-diplomat.md) | The PC's only resident eyes, and his price | M3 |
 
@@ -34,7 +35,6 @@ first needs it. That list is the live one; this table is the map.
 | Town buildings and the building tree | #93 | M2 |
 | General contact behaviour | #91 | M3 |
 | Trade protests | #94 | M3 |
-| Crown demand growth | #95 | M3 |
 | Policy | #96 | M3 |
 | Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
 | Immigration and population growth | #98 | M4 |
@@ -48,6 +48,16 @@ first needs it. That list is the live one; this table is the map.
 | Commanders | #106 | M6 |
 | Patrons | #107 | M7 |
 | Institutional contacts | #108 | M7 |
+
+## Patterns
+
+**Bucket randomisation** lives in [crown-demands.md](crown-demands.md) section 5.
+Draw without replacement from a bucket holding two of each option, refill at the
+halfway mark. Runs differ; aberrant runs — the same option five years running —
+are impossible rather than unlikely, which keeps tuning and scoring honest.
+
+Written to be lifted. If a second mechanic wants it, extract it rather than
+duplicating it.
 
 ## Contacts
 
