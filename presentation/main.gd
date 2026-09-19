@@ -43,6 +43,14 @@ func _ready() -> void:
 		_show_failure()
 		return
 
+	# **Before the run is made, not after.** Generating the map needs the terrain
+	# table, and creating the colony needs the buildings and the needs — so
+	# registering afterwards produced a world built against empty tables. It
+	# looked harmless because the desk never showed the map; the first thing the
+	# map view drew was an empty sea.
+	M1Registrations.register_all()
+	M1Registrations.load_resources(content)
+
 	_start()
 
 
@@ -61,9 +69,6 @@ func _start() -> void:
 			run = RunState.new_run(DEVELOPMENT_SEED)
 			ContactRoster.load_into(run, content)
 			print("Began a new run.")
-
-	M1Registrations.register_all()
-	M1Registrations.load_resources(content)
 
 	machine = TurnMachine.new(run)
 	machine.use_content(content)

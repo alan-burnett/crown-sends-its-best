@@ -20,15 +20,29 @@ const UNEXPLORED: StringName = &"unexplored"
 const REMEMBERED: StringName = &"remembered"
 const IN_SIGHT: StringName = &"in_sight"
 
-## Vector2i -> {terrain, improvement, month}, as last seen.
+## Vector2i -> {terrain, improvement, month, border, worked_by}, as last seen.
 var seen: Dictionary = {}
+
+## Vector2i -> the name of the town standing there, as last seen.
+##
+## **A town is a thing the colony knows about**, and the map has to draw it. It
+## is recorded here rather than read off the colony so that `presentation/` has
+## exactly one object to ask — which is what `tools/lint.gd` enforces, and what
+## keeps M5 from leaking a tribe's position the first time somebody draws an
+## overlay.
+var towns: Dictionary = {}
 
 ## Tiles in sight as of the last recomputation.
 var in_sight: Dictionary = {}
 
 
 ## Record what is visible now. Called in phase 3, after territory.
-func observe(map: WorldMap, territory: Territory, month: int) -> void:
+func observe(
+	map: WorldMap,
+	territory: Territory,
+	month: int,
+	towns_present: Array = [],
+) -> void:
 	in_sight = {}
 	for at in territory.visible:
 		in_sight[at] = true
@@ -36,7 +50,13 @@ func observe(map: WorldMap, territory: Territory, month: int) -> void:
 			"terrain": String(map.terrain_at(at.x, at.y)),
 			"improvement": String(map.improvement_at(at.x, at.y)),
 			"month": month,
+			"border": territory.inside_border(at),
+			"worked_by": String(territory.influenced_by(at)),
 		}
+
+	for town in towns_present:
+		if in_sight.has(town.at):
+			towns[town.at] = town.display_name
 
 
 func state_of(at: Vector2i) -> StringName:
@@ -66,6 +86,47 @@ func improvement_at(at: Vector2i) -> StringName:
 
 
 ## Which month a tile was last looked at. How stale what is shown may be.
+## Whether the tile was inside the colony's border when last seen.
+func inside_border(at: Vector2i) -> bool:
+	return bool(seen.get(at, {}).get("border", false))
+
+
+## Which town works this tile, as last seen, or empty.
+func worked_by(at: Vector2i) -> StringName:
+	return StringName(seen.get(at, {}).get("worked_by", ""))
+
+
+## The town standing on this tile, or empty.
+func town_at(at: Vector2i) -> String:
+	return String(towns.get(at, ""))
+
+
+## Every tile ever seen, in a stable order.
+##
+## Sorted north-west first, so anything drawing or listing the map gets the same
+## order every time rather than the dictionary's.
+func explored() -> Array:
+	var out: Array = []
+	for at in seen:
+		out.append(at)
+	out.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x))
+	return out
+
+
+## The rectangle the colony has seen, as {from, to} inclusive. Empty when it has
+## seen nothing at all.
+func bounds() -> Dictionary:
+	if seen.is_empty():
+		return {}
+	var low := Vector2i(1 << 30, 1 << 30)
+	var high := Vector2i(-(1 << 30), -(1 << 30))
+	for at in seen:
+		low = Vector2i(mini(low.x, at.x), mini(low.y, at.y))
+		high = Vector2i(maxi(high.x, at.x), maxi(high.y, at.y))
+	return {"from": low, "to": high}
+
+
 func seen_in_month(at: Vector2i) -> int:
 	if not seen.has(at):
 		return -1
@@ -85,7 +146,15 @@ func to_dict() -> Dictionary:
 		return a.y < b.y or (a.y == b.y and a.x < b.x))
 	for at in keys:
 		entries["%d,%d" % [at.x, at.y]] = seen[at]
-	return {"seen": entries}
+
+	var settlements: Dictionary = {}
+	var places: Array = towns.keys()
+	places.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x))
+	for at in places:
+		settlements["%d,%d" % [at.x, at.y]] = towns[at]
+
+	return {"seen": entries, "towns": settlements}
 
 
 static func from_dict(data: Dictionary) -> MapKnowledge:
@@ -98,4 +167,12 @@ static func from_dict(data: Dictionary) -> MapKnowledge:
 		if parts.size() != 2:
 			continue
 		knowledge.seen[Vector2i(int(parts[0]), int(parts[1]))] = entries[key]
+
+	var settlements: Dictionary = data.get("towns", {})
+	var places: Array = settlements.keys()
+	places.sort()
+	for key in places:
+		var where := String(key).split(",")
+		if where.size() == 2:
+			knowledge.towns[Vector2i(int(where[0]), int(where[1]))] = settlements[key]
 	return knowledge

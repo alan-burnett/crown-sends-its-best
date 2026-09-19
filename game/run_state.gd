@@ -104,6 +104,17 @@ static func new_run(seed_value: int) -> RunState:
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
 	run.found_first_town()
+
+	# **A town knows the ground it was built on.** Territory is recomputed in
+	# phase 3 of every world month, but the first of those does not run until the
+	# first post is sent — so without this the player opens the map on turn one,
+	# having just founded a town, and is shown an empty sea.
+	run.knowledge.observe(
+		run.map,
+		Territory.compute(run.map, run.colony.in_order()),
+		run.world.month,
+		run.colony.in_order(),
+	)
 	return run
 
 
