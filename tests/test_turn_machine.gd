@@ -22,7 +22,7 @@ func before_each() -> void:
 	run = RunState.new_run(SEED)
 	run.add_contact(Contact.from_data({"id": "marshal", "name": "Vane", "role": "crown_officer"}))
 	machine = TurnMachine.new(run)
-	machine.content = content
+	machine.use_content(content)
 	machine.save_path = PATH
 
 
@@ -31,6 +31,17 @@ func after_each() -> void:
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
 	content.free()
+
+
+## Open the desk and deal with whatever the director delivered.
+##
+## Setting a letter aside counts as handling it, so this clears the desk without
+## answering anything — which is what these tests want, since they are about the
+## turn machine rather than about the letters.
+func _open_desk() -> void:
+	machine.begin_turn()
+	for inbound in run.inbox:
+		inbound.status = InboundLetter.SET_ASIDE
 
 
 func _queue_a_reply() -> OutgoingLetter:
@@ -44,7 +55,7 @@ func _queue_a_reply() -> OutgoingLetter:
 # --- The sequence ----------------------------------------------------------
 
 func test_a_turn_runs_through_every_phase_in_order() -> void:
-	machine.begin_turn()
+	_open_desk()
 	assert_true(machine.at_desk(), "a turn stops at the desk, because only the desk has decisions")
 	assert_true(machine.send_post())
 	assert_eq(run.phase, TurnMachine.DATE_CARD, "and comes back round to the next turn")
@@ -53,7 +64,7 @@ func test_a_turn_runs_through_every_phase_in_order() -> void:
 func test_the_stubbed_slots_are_in_the_sequence_and_skipped_cleanly() -> void:
 	for phase in TurnMachine.STUBBED:
 		assert_true(TurnMachine.ORDER.has(phase), "%s is missing from the sequence" % phase)
-	machine.begin_turn()
+	_open_desk()
 	assert_true(machine.at_desk())
 
 
@@ -61,7 +72,7 @@ func test_the_loop_runs_headless() -> void:
 	# No presentation layer attached, which is what lets the determinism tests and
 	# the balance harness drive a whole run.
 	for i in 12:
-		machine.begin_turn()
+		_open_desk()
 		assert_true(machine.send_post(), "turn %d could not be sent" % i)
 	assert_eq(run.turn, 12)
 	assert_eq(run.world.month, 12)
@@ -71,7 +82,7 @@ func test_the_loop_runs_headless() -> void:
 
 func test_an_order_written_this_turn_does_not_touch_the_world_now() -> void:
 	# **Nothing the player writes changes the world instantly.**
-	machine.begin_turn()
+	_open_desk()
 	_queue_a_reply()
 	var before := run.world.to_dict()
 	assert_eq(run.world.to_dict(), before, "queuing a letter must not move the world")
@@ -81,7 +92,7 @@ func test_an_order_written_this_turn_does_not_touch_the_world_now() -> void:
 
 
 func test_the_post_produces_orders_and_never_writes() -> void:
-	machine.begin_turn()
+	_open_desk()
 	_queue_a_reply()
 	machine.send_post()
 
@@ -93,7 +104,7 @@ func test_the_post_produces_orders_and_never_writes() -> void:
 
 
 func test_sending_emits_the_orders_in_the_dispatch_phase() -> void:
-	machine.begin_turn()
+	_open_desk()
 	_queue_a_reply()
 	machine.send_post()
 	var issued := run.log.of_type(TurnMachine.EVENT_ORDER_ISSUED)
@@ -102,7 +113,7 @@ func test_sending_emits_the_orders_in_the_dispatch_phase() -> void:
 
 
 func test_resolution_advances_exactly_one_month() -> void:
-	machine.begin_turn()
+	_open_desk()
 	machine.send_post()
 	assert_eq(run.world.month, 1)
 	assert_eq(run.turn, 1)
@@ -111,7 +122,7 @@ func test_resolution_advances_exactly_one_month() -> void:
 # --- Changes of mind -------------------------------------------------------
 
 func test_an_outgoing_letter_can_be_rewritten_until_the_post_is_sent() -> void:
-	machine.begin_turn()
+	_open_desk()
 	var outgoing := _queue_a_reply()
 
 	outgoing.choose("grant", "none")
@@ -123,7 +134,7 @@ func test_an_outgoing_letter_can_be_rewritten_until_the_post_is_sent() -> void:
 
 
 func test_an_outgoing_letter_can_be_discarded() -> void:
-	machine.begin_turn()
+	_open_desk()
 	var outgoing := _queue_a_reply()
 	assert_true(run.post.discard(outgoing.id))
 	assert_true(run.post.is_empty())
@@ -133,7 +144,7 @@ func test_an_outgoing_letter_can_be_discarded() -> void:
 
 
 func test_nothing_in_a_sent_post_can_be_altered() -> void:
-	machine.begin_turn()
+	_open_desk()
 	var outgoing := _queue_a_reply()
 	machine.send_post()
 
@@ -151,7 +162,7 @@ func test_a_sealed_post_refuses_edits() -> void:
 
 
 func test_answering_the_same_letter_twice_is_findable() -> void:
-	machine.begin_turn()
+	_open_desk()
 	var outgoing := _queue_a_reply()
 	outgoing.in_reply_to = &"inbound_1"
 	assert_eq(run.post.reply_to(&"inbound_1"), outgoing)
@@ -160,7 +171,7 @@ func test_answering_the_same_letter_twice_is_findable() -> void:
 # --- Sending the post ------------------------------------------------------
 
 func test_send_is_blocked_while_a_letter_is_unread_with_a_reason() -> void:
-	machine.begin_turn()
+	_open_desk()
 	var inbound := InboundLetter.new("marshal.request_supplies", &"marshal", Tone.DUTIFUL)
 	inbound.id = &"inbound_1"
 	run.inbox.append(inbound)
@@ -175,7 +186,7 @@ func test_send_is_blocked_while_a_letter_is_unread_with_a_reason() -> void:
 func test_setting_a_letter_aside_counts_as_handling_it() -> void:
 	# Distinct from ignoring it: the loyalty consequences differ (#18), but either
 	# way it clears the desk.
-	machine.begin_turn()
+	_open_desk()
 	var inbound := InboundLetter.new("marshal.request_supplies", &"marshal", Tone.DUTIFUL)
 	inbound.id = &"inbound_1"
 	run.inbox.append(inbound)
@@ -187,7 +198,7 @@ func test_setting_a_letter_aside_counts_as_handling_it() -> void:
 
 
 func test_sending_triggers_the_save() -> void:
-	machine.begin_turn()
+	_open_desk()
 	assert_false(SaveGame.has_save(PATH))
 	machine.send_post()
 	assert_true(SaveGame.has_save(PATH), "the save happens as part of sending")
@@ -197,7 +208,7 @@ func test_the_saved_state_is_reloadable() -> void:
 	# Killing the process immediately after sending loses nothing: the save is
 	# taken after the resolution, so it is the start of the next turn with the
 	# month already run.
-	machine.begin_turn()
+	_open_desk()
 	_queue_a_reply()
 	machine.send_post()
 
@@ -226,9 +237,11 @@ func _play_twelve_turns(seed_value: int) -> String:
 	var local_run := RunState.new_run(seed_value)
 	local_run.add_contact(Contact.from_data({"id": "marshal", "name": "Vane"}))
 	var local_machine := TurnMachine.new(local_run)
-	local_machine.content = content
+	local_machine.use_content(content)
 	local_machine.saves_on_send = false
 	for i in 12:
 		local_machine.begin_turn()
+		for inbound in local_run.inbox:
+			inbound.status = InboundLetter.SET_ASIDE
 		local_machine.send_post()
 	return local_run.state_hash()

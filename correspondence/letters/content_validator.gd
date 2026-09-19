@@ -289,6 +289,20 @@ func validate_trigger(record: Dictionary) -> void:
 		_problem("conditions", "expected an array of condition objects")
 		return
 
+	var params: Variant = record.get("params", {})
+	if typeof(params) != TYPE_DICTIONARY:
+		_problem("params", "expected an object of param names to sources")
+	else:
+		for name in params:
+			var spec: Variant = params[name]
+			if typeof(spec) != TYPE_DICTIONARY or not spec.has("from"):
+				continue  # A literal value, which needs no source.
+			var args: Dictionary = spec.duplicate()
+			var source_id := String(args["from"])
+			args.erase("from")
+			for problem in ContentRegistry.check_param_source_call(source_id, args):
+				_problem("params.%s" % name, problem)
+
 	for index in conditions.size():
 		var entry: Variant = conditions[index]
 		var path := "conditions[%d]" % index
@@ -302,6 +316,22 @@ func validate_trigger(record: Dictionary) -> void:
 				continue
 			for problem in ContentRegistry.check_condition_call(String(condition_id), args):
 				_problem("%s.%s" % [path, condition_id], problem)
+
+
+## Every param a letter declares must be supplied by the trigger that fires it,
+## or the director has nothing to put in the slot.
+func check_trigger_params(content: ContentDatabase) -> void:
+	for id in content.ids("triggers"):
+		var trigger: Dictionary = content.collection("triggers")[id]
+		var letter_id := String(trigger.get("letter", ""))
+		if not content.has_record("letters", letter_id):
+			continue
+		_file = String(trigger.get(JsonLoader.SOURCE_KEY, "?"))
+		var letter := Letter.from_record(content.record("letters", letter_id))
+		var supplied: Dictionary = trigger.get("params", {})
+		for name in letter.params:
+			if not supplied.has(name):
+				_problem("params", "'%s' declares param '%s', which this trigger does not supply" % [letter_id, name])
 
 
 ## Cross-check that every trigger names a letter that exists, and report letters

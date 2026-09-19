@@ -1,0 +1,13 @@
+[
+  {
+    "id": "trigger.chancellor.how_to_answer",
+    "letter": "chancellor.how_to_answer",
+    "urgency": 0.8,
+    "params": {
+      "amount": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.1, "minimum": 5, "maximum": 2000 }
+    },
+    "conditions": [
+      { "world_value_below": { "key": "colony_revenue", "value": 1400 } }
+    ]
+  }
+]

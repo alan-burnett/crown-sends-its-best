@@ -24,6 +24,7 @@ const ARG_TYPES: Array[StringName] = [
 
 static var _effects: Dictionary = {}  # id -> {params, order_kind, builder}
 static var _conditions: Dictionary = {}  # id -> {params, predicate}
+static var _param_sources: Dictionary = {}  # id -> {params, supplier}
 
 
 # --- Registration ----------------------------------------------------------
@@ -54,6 +55,41 @@ static func register_condition(id: String, params: Dictionary, predicate: Callab
 	_conditions[id] = {"params": params.duplicate(), "predicate": predicate}
 
 
+## Declare a param source: how the director gets a value for a letter's declared
+## `params` (#14).
+##
+## The same shape as a condition, and for the same reason — a trigger file says
+## *which* source and with what arguments, never *how* to compute it.
+static func register_param_source(id: String, params: Dictionary, supplier: Callable) -> void:
+	if not _check_param_types(id, params):
+		return
+	_param_sources[id] = {"params": params.duplicate(), "supplier": supplier}
+
+
+static func has_param_source(id: String) -> bool:
+	return _param_sources.has(id)
+
+
+static func param_source_ids() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray(_param_sources.keys())
+	out.sort()
+	return out
+
+
+static func check_param_source_call(id: String, supplied: Dictionary) -> PackedStringArray:
+	if not has_param_source(id):
+		return PackedStringArray(["unregistered param source '%s'" % id])
+	return _check_args(id, _param_sources[id].get("params", {}), supplied)
+
+
+## Ask a source for a value.
+static func supply_param(id: String, args: Dictionary, context: LetterContext) -> Variant:
+	if not has_param_source(id):
+		push_error("Unregistered param source '%s'." % id)
+		return null
+	return _param_sources[id]["supplier"].call(args, context)
+
+
 static func _check_param_types(id: String, params: Dictionary) -> bool:
 	for name in params:
 		var declared := StringName(params[name])
@@ -66,6 +102,7 @@ static func _check_param_types(id: String, params: Dictionary) -> bool:
 static func reset() -> void:
 	_effects = {}
 	_conditions = {}
+	_param_sources = {}
 
 
 # --- Enumeration, for the validator ----------------------------------------
