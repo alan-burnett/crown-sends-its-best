@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v1.8: Under Author ownership but not ready for PO or developers.
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v1.9: Under Author ownership but not ready for PO or developers.
 
 ---
 
@@ -425,7 +425,7 @@ Each town has:
 
 **The Colony Month.** The month resolves in phases. **🔒 Every town completes a phase before any town begins the next**, and every choice in a phase is made from the colony's state as it stood when that phase began. No town benefits from being simulated first, and ties are broken by a rule fixed by the seed.
 
-1. **Work.** Each town assigns its population to tiles in its influence area, chosen by its objective, each tile's potential, and what the town needs. Yields go into the stockpile.  
+1. **Work.** Each town assigns its population between **working tiles** in its influence area and **converting** raw resources into processed ones (§10.1). Tile assignment is chosen by its objective, each tile's potential, and what the town needs; yields go into the stockpile. A worker is in the fields or in the town, never both, so every conversion costs a worked tile. Conversion draws on the stockpile as it stood at the start of the month.  
 2. **Reckon.** Each town works out, in priority order, what it must have, what its objective requires, and what it would like:  
    1. **Needs** are what survival demands: food, clothing. The citizens will meet these with the town's gold whatever the governor wants.  
    2. **The objective** comes next: the resources the town's current project requires (§11.3, Intent and Objective). This is the tier the governor directs.  
