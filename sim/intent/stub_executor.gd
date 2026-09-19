@@ -20,20 +20,47 @@ const KIND: StringName = &"adjust_value"
 
 const EVENT_PROGRESSED: StringName = &"intent_progressed"
 
+## Intent kind -> `{target, per_month}` or `{target, amount_factor}`.
+##
+## **What each kind of Order means in the world.** The sim cannot name the Order
+## kinds — they belong to the correspondence layer — so the table is handed in by
+## whoever can see both, which is the turn loop. That also keeps the whole
+## mapping in one readable place, to be deleted with the rest of the stub in M2.
+##
+## A `target` of `""` means the Order has no effect on the world at all. It still
+## completes rather than stalling: a stall is "nothing could carry this out",
+## which is a different and much louder thing to say.
+var table: Dictionary = {}
+
 
 func handles(intent: Intent) -> bool:
-	return intent.kind == KIND
+	return intent.kind == KIND or table.has(String(intent.kind))
 
 
 func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
-	var key: String = String(intent.target)
+	var entry: Dictionary = table.get(String(intent.kind), {})
+	var key: String = String(entry.get("target", intent.target))
+
+	# An Order with nothing to do in the world is done the moment it is read.
+	if key.is_empty():
+		intent.progress = intent.months_required
+		log.emit(IntentBook.EVENT_ADVANCED, intent.source, state.month, {
+			"intent": String(intent.id),
+			"kind": String(intent.kind),
+			"target": "",
+			"progress": intent.progress,
+			"months_required": intent.months_required,
+			"remaining": 0,
+		}, WorldPhase.MOVEMENT)
+		return Intent.COMPLETED
+
 	if not state.has_value(key):
 		# The thing it was aimed at is gone. Next month's letters need to be able
 		# to report that it came to nothing, so this stalls rather than silently
 		# doing nothing for ever.
 		return Intent.STALLED
 
-	var per_month := float(intent.data.get("per_month", 0.0))
+	var per_month := _per_month(intent, entry)
 	var before := float(state.get_value(key, 0.0))
 	var completed := intent.advance()
 
@@ -54,3 +81,17 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	}, WorldPhase.MOVEMENT)
 
 	return Intent.COMPLETED if completed else Intent.IN_PROGRESS
+
+
+## How far this Intent moves its target each month.
+##
+## An Intent carrying its own `per_month` says so directly. Otherwise the table
+## scales whatever the letter promised — send more iron and the colony feels it
+## more, which is what makes the amount in the letter a real choice.
+func _per_month(intent: Intent, entry: Dictionary) -> float:
+	if intent.data.has("per_month"):
+		return float(intent.data["per_month"])
+	if entry.has("amount_factor"):
+		var amount := float(intent.data.get("amount", 0.0))
+		return amount * float(entry["amount_factor"]) / float(maxi(1, intent.months_required))
+	return float(entry.get("per_month", 0.0))
