@@ -197,13 +197,12 @@ static func register_measures() -> void:
 	# consumption, 0.0 at a ratio of 0 and 1.0 at a ratio of 3.0.
 	MeasureRegistry.register_linear("food_security", 0.0, 3.0)
 	MeasureRegistry.register_linear("crown_war_intensity", 0.0, 100.0)
-	# **Provisional.** `colony_revenue` is the duty the Crown actually took this
-	# month (#47), where it used to be a drifting placeholder in the hundreds.
-	# One town at steady state yields around forty, so the old ceiling pinned the
-	# Steward's ladder at its bottom rung for ever. This is a range the current
-	# colony can move within; the real answer is a normalisation that tracks how
-	# large the colony is, which is the PO's to settle.
-	MeasureRegistry.register_linear("colony_revenue", 0.0, 120.0)
+	# **Not gold: a ratio** (#63, `perception.md` §4a). `WorldValues.measures()`
+	# supplies this month's duty against what a month lately brings, so `1.0` is
+	# a normal month and the middle of any ladder. A colony ten times the size
+	# reads the same when it is doing as well as it usually does, and the
+	# Steward's four rungs all stay reachable for the whole run.
+	MeasureRegistry.register_linear("colony_revenue", 0.0, 2.0)
 	MeasureRegistry.register_linear("supply_situation", 0.0, 100.0)
 	# Quality of life is already a share (`quality-of-life.md` §1), so there is
 	# no scale to apply. **The player never sees the number** — only a governor
@@ -213,7 +212,11 @@ static func register_measures() -> void:
 	# shares; trade is in gold and needs a scale.
 	MeasureRegistry.register_linear(ColonyMeasures.OBJECTIVE_PROGRESS, 0.0, 1.0)
 	MeasureRegistry.register_linear(ColonyMeasures.STOCKPILE_HEALTH, 0.0, 1.0)
-	MeasureRegistry.register_linear(ColonyMeasures.TRADE_VOLUME, 0.0, ColonyMeasures.BUSY_TRADE)
+	# Likewise a ratio: a town's month against the colony's average town, so a
+	# governor calling his month brisk means brisk for the place he governs.
+	MeasureRegistry.register_linear(
+		ColonyMeasures.TRADE_VOLUME, 0.0, ColonyMeasures.BUSY_TOWN
+	)
 	# How heavily the colony is taxed, which is what the Steward writes about and
 	# what his lean shades.
 	MeasureRegistry.register_linear("tax_burden", 0.0, TaxRates.MAX_RATE)
