@@ -65,6 +65,7 @@ static func resolve(
 	state: WorldState,
 	log: EventLog,
 	streams: RngStreams,
+	rebel: Town = null,
 ) -> Dictionary:
 	var context := DeliberationContext.new(DecisionKind.ORDER_COMPLIANCE, state, log)
 	context.phase = WorldPhase.RECKONING
@@ -79,6 +80,16 @@ static func resolve(
 
 	var decision := Deliberation.choose(contact, _candidates(), context)
 	var outcome: StringName = decision.chosen_id() if decision.has_choice() else REFUSE
+
+	# **A rebel town's governor has no loyalty to the Crown** (SPEC §12.3, #72).
+	# A filter rather than a weight, per `CLAUDE.md`: the spec locks that the PC
+	# gets no cooperation, and a heavy thumb on the scale would still let a very
+	# well-liked governor comply with the Crown he has just renounced.
+	#
+	# The PC may still write. He will simply be refused, and the refusal is a
+	# real event his letters can report rather than silence.
+	if rebel != null and rebel.rebelling:
+		outcome = REFUSE
 
 	log.emit(OUTCOME_EVENTS[outcome], contact.id, state.month, {
 		"order": order.to_dict(),

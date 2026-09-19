@@ -19,6 +19,10 @@ var contacts: Dictionary = {}
 var intents: IntentBook = null
 var promises: PromiseBook = null
 
+## The colony, so a governor who has renounced the Crown can be told apart from
+## one who is merely disinclined (#72). Absent in fixtures that do not care.
+var colony: Colony = null
+
 ## Orders waiting to be read. Filled when the post is sent, emptied when it lands.
 var pending: Array[Order] = []
 
@@ -55,7 +59,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		if promise != null and promises != null:
 			promises.make(promise, contact, log, state.month)
 
-		var result := Compliance.resolve(order, contact, intents, state, log, streams)
+		var rebel: Town = null if colony == null else colony.governed_by(contact.id)
+		var result := Compliance.resolve(order, contact, intents, state, log, streams, rebel)
 		result["order"] = order
 		results.append(result)
 

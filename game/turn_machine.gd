@@ -135,6 +135,7 @@ func _init(p_run: RunState) -> void:
 	# those land in phases 4 and 5 — so it judges after both (#67).
 	crown_standing = CrownStandingDriver.new(run.standing, run.refusal)
 	crown_standing.promises = promise_driver
+	orders.colony = run.colony
 	crown_standing.growth = run.demands
 	# The Crown pays until the process says otherwise, which it decides monthly.
 	promise_driver.can_crown_pay = run.refusal.pays()

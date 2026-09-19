@@ -117,6 +117,12 @@ func _take_the_temperature(town: Town, context: ColonyContext) -> void:
 		"rebelling": town.rebelling,
 	}, WorldPhase.COLONY_MONTH)
 
+	# **After the measuring and never before it** (#72). The state the next month
+	# reads is the state this month earned, which is what lets attribution flip:
+	# a town that declares in March is judged as a rebel from April.
+	if Rebellion.resolve(town, context) == Rebellion.EVENT_DECLARED:
+		town.rebelling_since = context.state.month
+
 
 ## Which contributor is doing the most to a town's sentiment right now.
 ##
