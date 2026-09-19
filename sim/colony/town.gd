@@ -46,7 +46,8 @@ var buildings: PackedStringArray = PackedStringArray()
 ## a different answer halfway through a month, and two readers would disagree.
 var quality_of_life: float = 0.0
 
-## Rising sentiment is M3; the field exists so the town is whole.
+## How close the town is to deciding it would be better off without the Crown
+## (#71). Written by Settle each month; see `RebelSentiment`.
 ##
 ## **🔒 Quality of life may never read this.** QoL feeds sentiment, so sentiment
 ## reading back would close the loop inside a single month
@@ -137,8 +138,17 @@ var relief_balance: float = 0.0
 ## The contact who speaks for it (#52).
 var governor_id: StringName = &""
 
-## Whether it still obeys the Crown (SPEC §12.3). Rebellion is M6.
+## Whether it still obeys the Crown (SPEC §12.3, #72).
+##
+## **A rebel town is not a lost town.** In the Crown's eyes it is still the PC's,
+## and his job is to bring it back: it trades with loyal neighbours, the PC may
+## still write, and only the town itself can end the rebellion in M3 — Crown
+## troops are M6.
 var rebelling: bool = false
+
+## The month it declared, so a letter can say how long it has been out and the
+## return event can report it. `-1` while the town is loyal.
+var rebelling_since: int = -1
 
 ## **The sum of its citizens' private wealth plus the town's coffers.** Rises
 ## selling to the Crown, falls buying from it, and never moves between towns or
@@ -316,6 +326,7 @@ func to_dict() -> Dictionary:
 		"relief_balance": relief_balance,
 		"governor": String(governor_id),
 		"rebelling": rebelling,
+		"rebelling_since": rebelling_since,
 		"gold": _gold,
 	}
 
@@ -332,6 +343,8 @@ static func from_dict(data: Dictionary) -> Town:
 	town.stockpile = data.get("stockpile", {}).duplicate()
 	town.buildings = PackedStringArray(data.get("buildings", []))
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
+	town.rebelling = bool(data.get("rebelling", false))
+	town.rebelling_since = int(data.get("rebelling_since", -1))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.growth_accrued = float(data.get("growth_accrued", 0.0))
 	town.traded_value = float(data.get("traded_value", 0.0))
