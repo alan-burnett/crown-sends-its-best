@@ -25,13 +25,14 @@ between them.
 
 ## 2. The organizing principle: attribution
 
-§12.3 says shortages **raise** sentiment. But a rebelling town's life gets
-demonstrably worse, and that has to **lower** it, or §12.3's lock that rebel
-towns can return peacefully could never fire.
+**SPEC §12.3 locks this as of v2.0:**
 
-Both are true, because sentiment does not measure suffering:
+> **🔒 Sentiment measures who is blamed, not how bad life is.** Suffering the
+> Crown caused raises it; suffering the rebellion caused lowers it.
 
-> **Rebel sentiment measures who gets blamed, not how bad life is.**
+It is what reconciles §12.3's "shortages raise sentiment" with §12.3's lock that
+rebel towns can return peacefully — without it, a rebelling town's worsening life
+would drive it further away and no town could ever come home.
 
 | Situation | Blamed | Sentiment |
 | :--- | :--- | :--- |
@@ -202,7 +203,8 @@ He is killed only if the PC **refuses to move him out of a town that then
 rebels**, or if every town rebels and there is nowhere friendly left. His death
 is a consequence of a decision, never ambient bad luck.
 
-**This requires a change to SPEC §8.1**, which currently reads as ambient risk.
+SPEC §8.1 carries this as of v2.0. `docs/mechanics/the-diplomat.md` has the full
+mechanic.
 
 ## 7. Tall and wide fail differently
 

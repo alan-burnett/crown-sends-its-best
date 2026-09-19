@@ -127,7 +127,10 @@ func _init(p_run: RunState) -> void:
 
 	# Phase 6. Standing reacts to the month's duty and the month's promises, and
 	# those land in phases 4 and 5 — so it judges after both (#67).
-	crown_standing = CrownStandingDriver.new(run.standing)
+	crown_standing = CrownStandingDriver.new(run.standing, run.refusal)
+	crown_standing.promises = promise_driver
+	# The Crown pays until the process says otherwise, which it decides monthly.
+	promise_driver.can_crown_pay = run.refusal.pays()
 
 	# Order within the list does not decide anything — each driver answers for its
 	# own phase, and the phases are the mechanics doc's.

@@ -62,6 +62,12 @@ var knowledge: MapKnowledge = null
 ## `tools/lint.gd` keeps `presentation/` away from it entirely.
 var standing: CrownStanding = null
 
+## **Whether the Crown is still honouring the PC's word** (SPEC §10.3, #68).
+##
+## Separate from standing on purpose: the arithmetic may collapse in a month,
+## the political process may not.
+var refusal: CrownRefusal = null
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -110,6 +116,7 @@ static func new_run(seed_value: int) -> RunState:
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
 	run.standing = CrownStanding.new()
+	run.refusal = CrownRefusal.new()
 	run.found_first_town()
 
 	# **A town knows the ground it was built on.** Territory is recomputed in
@@ -221,6 +228,7 @@ func to_dict() -> Dictionary:
 		"colony": colony.to_dict() if colony != null else {},
 		"knowledge": knowledge.to_dict() if knowledge != null else {},
 		"standing": standing.to_dict() if standing != null else {},
+		"refusal": refusal.to_dict() if refusal != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -246,6 +254,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.colony = Colony.from_dict(data.get("colony", {}))
 	run.knowledge = MapKnowledge.from_dict(data.get("knowledge", {}))
 	run.standing = CrownStanding.from_dict(data.get("standing", {}))
+	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 

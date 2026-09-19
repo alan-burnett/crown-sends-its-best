@@ -12,6 +12,9 @@ extends RefCounted
 ## Godot 4.7 on shutdown (CLAUDE.md).
 
 static func register_all() -> void:
+	ContentRegistry.register_param_source(
+		"warning_turns", {}, ColonyParamSources.warning_turns
+	)
 	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
 	ContentRegistry.register_param_source("town_name", {}, ColonyParamSources.town_name)
 	ContentRegistry.register_param_source(
@@ -37,6 +40,15 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"town_population", {}, ColonyParamSources.town_population
 	)
+
+
+## How many letters the Treasury will still honour.
+##
+## **The deadline, in something the player can count** (#68). A window he cannot
+## see is a trap rather than an opportunity, and this is how the Chancellor says
+## it without anybody seeing a standing figure.
+static func warning_turns(_args: Dictionary, _context: LetterContext) -> Variant:
+	return CrownRefusal.WARNING_TURNS
 
 
 ## Who the letter came from, so a reply can be addressed back without the file
