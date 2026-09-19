@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.0: Under Author ownership, actively being read by PO and Dev
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.1: Under Author ownership, actively being read by PO and Dev
 
 ---
 
@@ -99,6 +99,7 @@ The spec uses a small set of words precisely. Most are defined where their mecha
 | Optics | §14.1 |
 | Patron | §8.3 |
 | Perk, Quirk | §5 |
+| Policy | §11.3, §9.4, §12.5 |
 | Population: Workers, Experts, Livestock | §12.2 |
 | Prestige | §14.1 |
 | Quality of Life | §11.3 |
@@ -203,8 +204,7 @@ These five contacts are the same in every run and are **not randomized**. Each o
 
 - **Governors:** one per town, and the main contact for that town's affairs. A governor holds an **Intent**: a standing goal such as growing the town, raising its defenses, increasing its output, or settling a new town. Intent is his, not the town's, and it comes from his personality, his circumstances, the Crown's mandate early in a run, and the PC's letters. An intent can hold for many months while the town works through several objectives under it.  
 - **Institutional contacts:** some buildings bring a new contact, such as a church bringing a clergyman or an armory bringing a quartermaster. Each has their own agenda and loyalty.  
-- Personalities are **generated semi-randomly** for each run.  
-- Colony contacts can change during a run through death, replacement, promotion, or defection.
+- Personalities are **generated semi-randomly** for each run.
 
 ### 8.3 Patrons (semi-random)
 
@@ -216,7 +216,7 @@ These five contacts are the same in every run and are **not randomized**. Each o
 
 - Each of the three rivals has a ‘duke’ who will be your only contact.  
 - The relationship is purely adversarial, they covet the land your colony is on, especially if your colony prospers. They will bully you into giving them resources, attack your colony, and mislead you about their intentions.   
-- Rivals will not ask for help with other rivals or with natives. They will not offer any of their own resources for any reason. They will either ignore you, make demands, or attack. Accepting their demands may defer the risk of an attack but will never create a peaceful or mutually beneficial relationship. 
+- Rivals will not ask for help with other rivals or with natives. They will not offer any of their own resources to you. They will either ignore you, make demands, or attack. Accepting their demands may defer the risk of an attack but will never create a peaceful or mutually beneficial relationship. 
 
 ### 8.5 Loyalty and Compliance
 
@@ -352,7 +352,7 @@ A typical run will only have so many letters per turn, increasing as the game go
   - The town’s quality of life.  
   - The tax rate of this particular resource. Trade protests are increasingly likely in response to a tax increase.  
   - Whether or not it’s a luxury resource (luxury resources are more likely to trigger a trade protest since the town can do without it more easily)  
-  - The number of existing trade protests to ensure that you will only get one trade protest at a time, and only continued pressure on the town would cause them to have another trade protest on a later turn.  
+  - The number of existing trade protests to ensure that you will usually get one trade protest at a time  
   - Mechanically, ‘tea’ is favored to be one of the first trade protests likely to happen, but this is by nature of its mechanics and not hardcoded priority.  
 - The story is that when the crown’s merchant ship docks in town, the crown informs them of the new tax rate, and instead of accepting the tax increase, the town will refuse to buy/sell in that resource.  
 - Each trade protest is scoped to one town and one resource. It costs you prestige and the potential tax income from trading in that resource, plus the town suffers from its hindered ability to trade.    
@@ -437,7 +437,7 @@ Each town has:
 7. **Sell.** Surplus above the reserve is sold to the Crown, which is taxed. (same exceptions as step 4\)  
 8. **Settle.** Quality of life, population, and rebel sentiment update, and the town may take a new objective.
 
-**🔒 Needs, then the objective, then wants.** A town covers survival before it spends on its project, and its project before it spends on comforts. A town typically keeps a reserve before it sells anything to the Crown.
+**🔒 Towns spend mostly in their best interests.** A town’s balance of gold is carefully managed when they decide what resources to spend gold on. They will favor trying to meet their needs, then complete their objectives, then spend on luxuries, but they will behave realistically \- trying to keep a reserve month to month when their survival is not at stake, and spending a little on luxuries even when there are more important things to buy. 
 
 **🔒 Towns run themselves** under leadership of the Governor. The PC shapes things through letters to the Governor (setting intent and policies, and sending resources) but never manages them directly. The governor has authority over what the town actually does, not the player. 
 
