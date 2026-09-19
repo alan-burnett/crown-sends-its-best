@@ -70,7 +70,15 @@ func validate_letter(record: Dictionary) -> void:
 	var letter := Letter.from_record(record)
 	_file = letter.source_file
 
-	if letter.sender.is_empty():
+	if letter.is_composable():
+		# A player-initiated letter is written *by* the PC, so it has no sender,
+		# and its recipients come from `to_roles`.
+		for role in letter.to_roles:
+			if String(role).is_empty():
+				_problem("to_roles", "empty role")
+		if not letter.has_reply():
+			_problem("reply", "a composable letter needs a reply block — it is all reply")
+	elif letter.sender.is_empty():
 		_problem("sender", "a letter needs a sender")
 
 	if not LetterSchema.is_type(letter.type):
@@ -329,6 +337,15 @@ func check_trigger_params(content: ContentDatabase) -> void:
 		_file = String(trigger.get(JsonLoader.SOURCE_KEY, "?"))
 		var letter := Letter.from_record(content.record("letters", letter_id))
 		var supplied: Dictionary = trigger.get("params", {})
+		if letter.is_composable():
+			# A composed letter takes its values at the moment of writing, from
+			# `compose_defaults`, not from the trigger that offers it.
+			for name in letter.params:
+				if String(name) == Composer.RECIPIENT_PARAM:
+					continue  # The flow supplies the recipient.
+				if not letter.compose_defaults.has(name):
+					_problem("compose_defaults", "'%s' declares param '%s' with no compose default" % [letter_id, name])
+			continue
 		for name in letter.params:
 			if not supplied.has(name):
 				_problem("params", "'%s' declares param '%s', which this trigger does not supply" % [letter_id, name])

@@ -29,6 +29,17 @@ var perception: Dictionary = {}
 var body: Array = []
 var reply: Dictionary = {}
 
+## Set on a **player-initiated** letter (#19): what the player is writing about,
+## in his own words. A letter with a purpose and no body is composable.
+var purpose: String = ""
+
+## Which contact roles this purpose makes sense for. Empty means anyone.
+var to_roles: PackedStringArray = PackedStringArray()
+
+## Values for the letter's declared params when the player composes it, since
+## there is no incoming letter to have carried them.
+var compose_defaults: Dictionary = {}
+
 var source_file: String = ""
 
 
@@ -42,8 +53,16 @@ static func from_record(record: Dictionary) -> Letter:
 	letter.perception = record.get(LetterSchema.KEY_PERCEPTION, {}).duplicate(true)
 	letter.body = record.get(LetterSchema.KEY_BODY, []).duplicate(true)
 	letter.reply = record.get(LetterSchema.KEY_REPLY, {}).duplicate(true)
+	letter.purpose = String(record.get(LetterSchema.KEY_PURPOSE, ""))
+	letter.to_roles = PackedStringArray(record.get(LetterSchema.KEY_TO_ROLES, []))
+	letter.compose_defaults = record.get(LetterSchema.KEY_COMPOSE_DEFAULTS, {}).duplicate(true)
 	letter.source_file = String(record.get(JsonLoader.SOURCE_KEY, ""))
 	return letter
+
+
+## **The same file shape as a reply, minus the `body`.** One format, not two.
+func is_composable() -> bool:
+	return not purpose.is_empty() and body.is_empty()
 
 
 ## **A letter with no reply block is valid** — reports and news need no response.

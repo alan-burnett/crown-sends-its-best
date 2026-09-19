@@ -92,6 +92,9 @@ const KEY_LABEL: String = "label"
 const KEY_EFFECT: String = "effect"
 const KEY_INSERT: String = "insert"
 const KEY_MEASURE: String = "measure"
+const KEY_PURPOSE: String = "purpose"
+const KEY_TO_ROLES: String = "to_roles"
+const KEY_COMPOSE_DEFAULTS: String = "compose_defaults"
 const KEY_LADDER: String = "ladder"
 
 
