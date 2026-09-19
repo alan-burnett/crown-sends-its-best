@@ -10,6 +10,12 @@ extends RefCounted
 ## second running tally would be a second thing to keep in step, and the first
 ## month they disagreed the player would be reading a lie about their own money.
 ##
+## **The arithmetic is `CrownAccounts`**, in `sim/`, which is the same reduction
+## Crown standing judges the PC on. This file turns it into lines a player can
+## read; it does not work out the totals for itself. The gap between what the
+## sheet shows and what the letters say is the player's only instrument for
+## reading the Crown's mind, so the two must be reading the same books.
+##
 ## ## 🔒 Crown-side only
 ##
 ## A town's gold is hidden from the player (SPEC §11.3) and **nothing here may
@@ -77,13 +83,19 @@ class Page extends RefCounted:
 
 
 ## Month -> Page, and the months in order.
+
+
 var _pages: Dictionary = {}
 var _months: PackedInt32Array = PackedInt32Array()
+
+## The same books Crown standing reads.
+var _accounts: CrownAccounts = null
 
 
 ## Read the whole run off the log.
 static func of(log: EventLog) -> Ledger:
 	var ledger := Ledger.new()
+	ledger._accounts = CrownAccounts.of(log)
 	if log == null:
 		return ledger
 
@@ -98,13 +110,11 @@ static func of(log: EventLog) -> Ledger:
 				ledger._add(event.month, IN, float(event.payload.get("tax", 0.0)),
 					"duty on %s sold" % _named(event.payload))
 			PromiseBook.EVENT_KEPT:
-				# **Only what the Crown paid.** A promise of resources is sent
-				# from the colony's own stockpiles, so the Crown is not out a
-				# penny on it and it has no business on this sheet — the Ledger
-				# shows Crown-side transactions and nothing else (SPEC §10.4).
-				if String(event.payload.get("payer", "")) != Promise.PAYER_CROWN:
-					continue
-				if String(event.payload.get("kind", "")) != "gold":
+				# **Only what the Crown paid.** A promise of resources comes from
+				# the colony's own stockpiles, so the Crown is not out a penny on
+				# it and it has no business on this sheet. `CrownAccounts` draws
+				# the same line, and this asks it rather than repeating the rule.
+				if not CrownAccounts._is_the_crowns_money(event.payload):
 					continue
 				ledger._add(event.month, OUT, float(event.payload.get("terms", {}).get("amount", 0.0)),
 					"honoured to %s" % String(event.payload.get("to", "a contact")))
@@ -181,13 +191,14 @@ func trend() -> Array:
 ## What the Crown is up or down across the whole run.
 ##
 ## `docs/mechanics/crown-standing.md` calls this `net_position`, and it is the
-## one number a diligent player can work out for themselves that the Crown will
-## never tell them.
+## one figure a diligent player can work out for themselves. **What they cannot
+## work out is the Crown's judgement of it** — that is standing, and it is never
+## shown.
+##
+## Read from the same accounts standing is judged on, so the sheet and the
+## verdict cannot come from different books.
 func net_position() -> float:
-	var total := 0.0
-	for month in _months:
-		total += _pages[month].net()
-	return total
+	return _accounts.net_position() if _accounts != null else 0.0
 
 
 ## The largest single month either way, so a graph can scale to fit.

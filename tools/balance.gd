@@ -262,9 +262,13 @@ func _row(seed_value: int, run: RunState, letters: int) -> Dictionary:
 		"revenue": float(run.world.get_value(WorldValues.REVENUE, 0.0)),
 		"tax_base": TaxRates.base_rate(run.world),
 		"tax_burden": TaxRates.burden(run.world),
-		# Crown standing is M3 (#67). Until it exists, the Ledger's cumulative
-		# position is the honest proxy and is what standing will be built from.
 		"net_position": ledger.net_position(),
+		# **The harness may read the figure; the game may not.** SPEC §10.3 keeps
+		# it off the player's screens, and `tools/lint.gd` keeps it out of
+		# `presentation/` — but tuning it against evidence is the whole reason
+		# this exists, and a band alone cannot be tuned.
+		"standing": run.standing.standing,
+		"standing_band": String(run.standing.band),
 		"letters": letters,
 		"promises_outstanding": run.promises.outstanding().size(),
 		"intents": "|".join(intents),
@@ -275,7 +279,8 @@ func _row(seed_value: int, run: RunState, letters: int) -> Dictionary:
 const COLUMNS: PackedStringArray = [
 	"seed", "year", "towns", "population", "quality_of_life", "food_held",
 	"months_hungry", "food_security", "supply", "revenue", "tax_base",
-	"tax_burden", "net_position", "letters", "promises_outstanding",
+	"tax_burden", "net_position", "standing", "standing_band", "letters",
+	"promises_outstanding",
 	"intents", "objectives",
 ]
 

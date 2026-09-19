@@ -15,6 +15,10 @@ extends SceneTree
 ##    another's sequence. `randi()`, and also `Array.shuffle()` and
 ##    `pick_random()`, which quietly use the same global generator.
 ##
+## It keeps **Crown standing** out of `presentation/` entirely, because SPEC
+## §10.3 makes the four bands the whole interface and a screen that can read the
+## figure is a screen that will eventually print it.
+##
 ## It also bans GDScript's built-in `hash()` in run-affecting code, because it is
 ## not documented as stable across engine versions or platforms and the game
 ## ships on desktop and mobile (SPEC §16.1).
@@ -119,6 +123,19 @@ const OBJECTIVE_WRITES: Array[Array] = [
 	["\\.clear_objective\\s*\\(", "cancels a town's objective"],
 ]
 
+## 🔒 SPEC §10.3, `docs/mechanics/crown-standing.md` §5. **Standing is never
+## displayed as a number anywhere**, and the four bands are the entire
+## interface.
+##
+## The Ledger is the compensating instrument and is untouched by this: the
+## player may see every transaction and derive the monthly net. What they may
+## not see is the Crown's judgement of it.
+const STANDING_NAMES: Array[Array] = [
+	["CrownStanding", "reads the Crown's judgement of the player"],
+	["crown_standing", "reads the Crown's judgement of the player"],
+	[".standing", "reads the Crown's judgement of the player"],
+]
+
 const MAP_TRUTH_NAMES: Array[Array] = [
 	["WorldMap", "reads the real map instead of MapKnowledge"],
 	["MapGenerator", "reaches into map generation"],
@@ -191,6 +208,9 @@ func _check(path: String) -> void:
 			for rule in MAP_TRUTH_NAMES:
 				if line.contains(rule[0]):
 					_report(path, index, "presentation/ %s (SPEC 11.2 is locked)" % rule[1])
+			for rule in STANDING_NAMES:
+				if line.contains(rule[0]):
+					_report(path, index, "presentation/ %s (SPEC 10.3: it is never a number the player sees)" % rule[1])
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")
