@@ -21,6 +21,13 @@ var navigable: bool = false
 ## Resource id -> level name, as authored.
 var yields: Dictionary = {}
 
+## What the map draws this terrain as.
+##
+## **Content, not code** (SPEC §16.3). A placeholder palette now; swapping in
+## real tile art is a change to `data/terrain/` and to whatever draws it, never
+## to the model.
+var colour: String = "#808080"
+
 
 # --- Loading ---------------------------------------------------------------
 
@@ -35,6 +42,7 @@ static func load_from(records: Array, levels: Dictionary = {}) -> void:
 			push_error("A terrain record has no id.")
 			continue
 		terrain.display_name = String(record.get("name", record.get("id", "")))
+		terrain.colour = String(record.get("colour", "#808080"))
 		terrain.land = bool(record.get("land", false))
 		terrain.navigable = bool(record.get("navigable", not terrain.land))
 		terrain.yields = record.get("yields", {}).duplicate()

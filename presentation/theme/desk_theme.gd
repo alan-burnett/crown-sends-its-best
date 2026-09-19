@@ -19,6 +19,17 @@ const PAPER_HANDLED: Color = Color(0.85, 0.82, 0.75)
 const DESK_WOOD: Color = Color(0.22, 0.15, 0.11)
 const SEAL: Color = Color(0.55, 0.13, 0.13)
 
+## The map. Terrain colours are content (`data/terrain/`); these are the marks
+## the map draws over them, which are not.
+const MAP_DARK: Color = Color(0.07, 0.08, 0.10)
+const MAP_UNKNOWN: Color = Color(0.16, 0.16, 0.18)
+const MAP_BORDER: Color = Color(0.93, 0.85, 0.55, 0.85)
+const MAP_WORKED: Color = Color(0.93, 0.90, 0.82, 0.55)
+const MAP_IMPROVED: Color = Color(0.85, 0.62, 0.30, 0.9)
+const MAP_TOWN: Color = Color(0.90, 0.24, 0.20)
+## Remembered ground is hatched, so it reads as stale even in one colour.
+const MAP_STALE: Color = Color(0.0, 0.0, 0.0, 0.35)
+
 ## Type sizes, in the order they matter: the letter first.
 const SIZE_BODY: int = 20
 const SIZE_LABEL: int = 17

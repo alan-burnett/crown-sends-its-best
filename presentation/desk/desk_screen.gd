@@ -86,15 +86,21 @@ func _build() -> void:
 	compose.pressed.connect(_open_compose)
 	inner.add_child(compose)
 
-	# Slots for the map and the ledger, disabled in M1.
+	# **Look, do not touch.** Both of these show information and neither has a
+	# decision on it; only the desk does (SPEC §7). The Ledger arrives with #51.
 	var elsewhere := HBoxContainer.new()
 	elsewhere.add_theme_constant_override("separation", DeskTheme.GAP)
 	inner.add_child(elsewhere)
-	for name in ["Map", "Ledger"]:
-		var button := DeskTheme.button(name)
-		button.disabled = true
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		elsewhere.add_child(button)
+
+	var map_button := DeskTheme.button("Map")
+	map_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	map_button.pressed.connect(_open_map)
+	elsewhere.add_child(map_button)
+
+	var ledger := DeskTheme.button("Ledger")
+	ledger.disabled = true
+	ledger.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	elsewhere.add_child(ledger)
 
 	_send_reason = DeskTheme.label("", DeskTheme.SIZE_SMALL, DeskTheme.PAPER)
 	inner.add_child(_send_reason)
@@ -112,6 +118,17 @@ func _build() -> void:
 	add_child(_confirm)
 
 	_apply_measure()
+
+
+## Open the map over the desk, and put the desk back when it closes.
+##
+## **The outgoing post is not disturbed.** The map is laid over the desk rather
+## than replacing it, so an answered letter waiting to go is still waiting when
+## the player comes back.
+func _open_map() -> void:
+	var screen := MapScreen.new()
+	add_child(screen)
+	screen.begin(run.knowledge, refresh)
 
 
 ## Keep the letter column readable: full width on a phone, capped and centred on

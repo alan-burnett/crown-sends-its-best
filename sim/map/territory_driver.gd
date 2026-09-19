@@ -33,7 +33,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 
 	territory = Territory.compute(map, colony.in_order())
 	if knowledge != null:
-		knowledge.observe(map, territory, state.month)
+		knowledge.observe(map, territory, state.month, colony.in_order())
 
 	log.emit(EVENT_TERRITORY, &"colony", state.month, {
 		"worked": territory.influence.size(),

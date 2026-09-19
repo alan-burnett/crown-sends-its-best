@@ -1,16 +1,81 @@
 [
-  { "id": "ocean",     "name": "ocean",     "land": false, "navigable": true,
-    "yields": { "food": "low" } },
-  { "id": "sea",       "name": "sea",       "land": false, "navigable": true,
-    "yields": { "food": "high" } },
-  { "id": "desert",    "name": "desert",    "land": true,
-    "yields": { "food": "low", "ore": "low", "stone": "medium" } },
-  { "id": "grassland", "name": "grassland", "land": true,
-    "yields": { "food": "medium", "furs": "medium", "wood": "low", "stone": "low" } },
-  { "id": "plains",    "name": "plains",    "land": true,
-    "yields": { "food": "high", "furs": "low", "wood": "low", "stone": "low" } },
-  { "id": "forest",    "name": "forest",    "land": true,
-    "yields": { "wood": "high", "furs": "high", "food": "low", "stone": "low" } },
-  { "id": "mountains", "name": "mountains", "land": true,
-    "yields": { "stone": "high", "ore": "high", "furs": "low", "wood": "low" } }
+  {
+    "id": "ocean",
+    "name": "ocean",
+    "land": false,
+    "navigable": true,
+    "yields": {
+      "food": "low"
+    },
+    "colour": "#1d3a52"
+  },
+  {
+    "id": "sea",
+    "name": "sea",
+    "land": false,
+    "navigable": true,
+    "yields": {
+      "food": "high"
+    },
+    "colour": "#2b5d7d"
+  },
+  {
+    "id": "desert",
+    "name": "desert",
+    "land": true,
+    "yields": {
+      "food": "low",
+      "ore": "low",
+      "stone": "medium"
+    },
+    "colour": "#b8a06a"
+  },
+  {
+    "id": "grassland",
+    "name": "grassland",
+    "land": true,
+    "yields": {
+      "food": "medium",
+      "furs": "medium",
+      "wood": "low",
+      "stone": "low"
+    },
+    "colour": "#7a9a4e"
+  },
+  {
+    "id": "plains",
+    "name": "plains",
+    "land": true,
+    "yields": {
+      "food": "high",
+      "furs": "low",
+      "wood": "low",
+      "stone": "low"
+    },
+    "colour": "#a3ab5c"
+  },
+  {
+    "id": "forest",
+    "name": "forest",
+    "land": true,
+    "yields": {
+      "wood": "high",
+      "furs": "high",
+      "food": "low",
+      "stone": "low"
+    },
+    "colour": "#3f6b3a"
+  },
+  {
+    "id": "mountains",
+    "name": "mountains",
+    "land": true,
+    "yields": {
+      "stone": "high",
+      "ore": "high",
+      "furs": "low",
+      "wood": "low"
+    },
+    "colour": "#7c7268"
+  }
 ]

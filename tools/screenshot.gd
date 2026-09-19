@@ -15,7 +15,8 @@ func _init() -> void:
 	var out_path: String = arguments[0] if arguments.size() > 0 else "user://desk.png"
 	var width: int = int(arguments[1]) if arguments.size() > 1 else 540
 	var height: int = int(arguments[2]) if arguments.size() > 2 else 960
-	# "open" opens the first letter, "reply" also walks the wizard to the end.
+	# "open" opens the first letter, "reply" also walks the wizard to the end,
+	# "map" opens the map over the desk.
 	var mode: String = arguments[3] if arguments.size() > 3 else ""
 
 	var window := get_root()
@@ -37,7 +38,11 @@ func _init() -> void:
 	for i in SETTLE_FRAMES:
 		await process_frame
 
-	if not mode.is_empty():
+	if mode == "map":
+		_open_the_map(instance)
+		for i in SETTLE_FRAMES:
+			await process_frame
+	elif not mode.is_empty():
 		_open_a_letter(instance, mode)
 		for i in SETTLE_FRAMES:
 			await process_frame
@@ -48,6 +53,15 @@ func _init() -> void:
 		"ok" if error == OK else "FAILED", out_path, width, height, image.get_width(), image.get_height(),
 	])
 	quit(0 if error == OK else 1)
+
+
+## Open the map over the desk, so it can be looked at.
+func _open_the_map(instance: Node) -> void:
+	for child in instance.get_children():
+		if child is DeskScreen:
+			(child as DeskScreen)._open_map()
+			return
+	print("no desk to open the map from")
 
 
 ## Open the first letter on the desk, and optionally answer it, so the reply
