@@ -6,7 +6,7 @@
 
 ## 0\. How to Use This Document
 
-- **This spec describes the game as a whole.** It covers what the game is, instanhow its systems relate, and the rules that must stay true. It does not cover exact numbers, balance values, content lists, or implementation details. Those belong in tickets, data files, and code. Where the spec gives numbers, they are **design targets** for tuning to aim at.  
+- **This spec describes the game as a whole.** It covers what the game is, how its systems relate, and the rules that must stay true. It does not cover exact numbers, balance values, content lists, or implementation details. Those belong in tickets, data files, and code. Where the spec gives numbers, they are **design targets** for tuning to aim at.  
 - **When the spec and a ticket conflict, the spec wins.** If a ticket would break something written here, it gets the `author` label and waits until the Author changes either the spec or the ticket.  
 - **Invariants** (marked **🔒**) are rules that must hold for the whole of development. Any feature or mechanic added later must fit inside them.  
 - **Only the Author edits this file.** Examples in this document show intent. They are not exhaustive lists.  
@@ -439,7 +439,7 @@ Each town has:
 
 **🔒 Needs, then the objective, then wants.** A town covers survival before it spends on its project, and its project before it spends on comforts. A town typically keeps a reserve before it sells anything to the Crown.
 
-**🔒 Towns run themselves** under leadership of the Governor. The PC shapes things through letters to the Governor (setting objectives and policies, and sending resources) but never manages them directly. The governor has authority over what the town actually does, not the player. 
+**🔒 Towns run themselves** under leadership of the Governor. The PC shapes things through letters to the Governor (setting intent and policies, and sending resources) but never manages them directly. The governor has authority over what the town actually does, not the player. 
 
 ### 11.4 Founding Towns
 
