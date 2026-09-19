@@ -42,27 +42,52 @@
     {
       "id": "increase_economic_output",
       "name": "the colony's profit",
-      "pursuing": "getting more out of this country"
+      "pursuing": "getting more out of this country",
+      "stocks": {
+        "wood": 1.2,
+        "stone": 0.8,
+        "tools": 0.4
+      }
     },
     {
       "id": "grow_the_population",
       "name": "the growth of the town",
-      "pursuing": "seeing that more people come, and stay"
+      "pursuing": "seeing that more people come, and stay",
+      "stocks": {
+        "wood": 1.5,
+        "stone": 1.0,
+        "clothing": 0.4
+      }
     },
     {
       "id": "strengthen_defences",
       "name": "our defences",
-      "pursuing": "seeing that we can hold what we have"
+      "pursuing": "seeing that we can hold what we have",
+      "stocks": {
+        "guns": 0.5,
+        "horses": 0.25,
+        "iron": 0.4,
+        "stone": 1.5
+      }
     },
     {
       "id": "settle_a_new_town",
       "name": "a new settlement",
-      "pursuing": "gathering what an expedition would need"
+      "pursuing": "gathering what an expedition would need",
+      "stocks": {
+        "food": 2.0,
+        "tools": 0.6,
+        "wood": 1.0
+      }
     },
     {
       "id": "secure_survival",
       "name": "your people's survival",
-      "pursuing": "seeing that nobody here starves"
+      "pursuing": "seeing that nobody here starves",
+      "stocks": {
+        "food": 1.5,
+        "clothing": 0.5
+      }
     }
   ]
 }
