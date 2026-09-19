@@ -1,0 +1,25 @@
+{
+  "id": "objectives",
+  "postures": [
+    {
+      "id": "stockpile_food",
+      "name": "stockpiling food",
+      "focus": "food"
+    },
+    {
+      "id": "harvest_timber",
+      "name": "cutting timber",
+      "focus": "wood"
+    },
+    {
+      "id": "harvest_stone",
+      "name": "quarrying stone",
+      "focus": "stone"
+    },
+    {
+      "id": "harvest_furs",
+      "name": "trapping furs",
+      "focus": "furs"
+    }
+  ]
+}

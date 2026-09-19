@@ -11,6 +11,9 @@ per-resource.
 | `luxury` | Consumed to raise quality of life. **Taxed differently** and provokes far less rebel sentiment (§10.2). A flag, never a list in code. |
 | `producible` | Whether the colony can make it at all. **Tea is the only one that cannot** — it must be bought from the Crown, which is what makes it a natural first trade protest. |
 | `converts_from` | Inputs it is made from. Any one of them will do: clothing comes from furs **or** cotton. |
+| `price` | What one unit trades for with the Crown, before tax. Tuning |
+| `feed` | Food one head eats each month off pasture. Livestock only |
+| `slaughter_yield` | Food one head yields when a hungry town kills it |
 | `livestock` | Trades like a resource and carries the livestock tax rate, but is population rather than stockpile (§12.2). The population side is M4. |
 
 Adding a resource is adding a file. Nothing in code needs to be told.

@@ -84,6 +84,29 @@ static func processed() -> PackedStringArray:
 	return _ids_where(func(kind: ResourceKind) -> bool: return kind.is_processed())
 
 
+## What one unit trades for with the Crown, before tax.
+static func price_of(id: StringName) -> float:
+	var kind := get_kind(id)
+	return kind.price if kind != null else 1.0
+
+
+## Food one head of this eats each month, off pasture.
+static func feed_of(id: StringName) -> float:
+	var kind := get_kind(id)
+	return kind.feed if kind != null else 0.0
+
+
+## Food one head yields when it is killed for the table.
+static func slaughter_yield_of(id: StringName) -> float:
+	var kind := get_kind(id)
+	return kind.slaughter_yield if kind != null else 0.0
+
+
+static func is_livestock(id: StringName) -> bool:
+	var kind := get_kind(id)
+	return kind != null and kind.livestock
+
+
 static func is_luxury(id: StringName) -> bool:
 	var kind := get_kind(id)
 	return kind != null and kind.luxury

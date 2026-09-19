@@ -70,26 +70,37 @@ func test_values_push_on_each_other() -> void:
 	# Not "hold some numbers": the war has to actually cost the colony something,
 	# or the Marshal and the Steward have nothing to disagree about.
 	#
-	# Compared as thirds rather than against fixed thresholds, so the test asks
-	# whether the coupling exists rather than whether a tuning value landed in a
-	# particular band.
+	# Compared as **month-on-month change**, not as levels. Supply is an
+	# integrator — it carries the last month's damage into this one — so a calm
+	# month in the middle of a recovery still reads low, and comparing levels
+	# measures the lag rather than the coupling. What the war does is push supply
+	# *down*, and that is what this asks.
 	var history: Array = _run(48)["history"]
-	history.sort_custom(func(a, b): return float(a[WorldValues.WAR]) < float(b[WorldValues.WAR]))
 
-	var third: int = history.size() / 3
-	var calm := _mean_supply(history.slice(0, third))
-	var fierce := _mean_supply(history.slice(history.size() - third, history.size()))
+	var months: Array = []
+	for index in range(1, history.size()):
+		months.append({
+			"war": float(history[index][WorldValues.WAR]),
+			"change": float(history[index][WorldValues.SUPPLY])
+				- float(history[index - 1][WorldValues.SUPPLY]),
+		})
+	months.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return float(a["war"]) < float(b["war"]))
+
+	var third: int = months.size() / 3
+	var calm := _mean_change(months.slice(0, third))
+	var fierce := _mean_change(months.slice(months.size() - third, months.size()))
 
 	assert_true(fierce < calm,
-		"supply averaged %f in the fiercest third of months and %f in the calmest" % [fierce, calm])
+		"supply moved by %f a month in the fiercest third and %f in the calmest" % [fierce, calm])
 
 
-func _mean_supply(months: Array) -> float:
+func _mean_change(months: Array) -> float:
 	if months.is_empty():
 		return 0.0
 	var total: float = 0.0
-	for snapshot in months:
-		total += float(snapshot[WorldValues.SUPPLY])
+	for entry in months:
+		total += float(entry["change"])
 	return total / float(months.size())
 
 

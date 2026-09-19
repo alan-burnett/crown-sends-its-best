@@ -14,8 +14,9 @@ extends ColonyPhase
 ## 1. **Hunger outranks everything.** A town short of food weights food far above
 ##    anything else, and the shorter it is the heavier that weight. This is what
 ##    stops the famine-while-quarrying case.
-## 2. **Then what it is building.** Its objective's remaining cost is what it
-##    actually wants, so tiles yielding those resources come next.
+## 2. **Then what its objective calls for.** A construction wants its remaining
+##    cost; a standing posture wants its focus resource and goes on wanting it.
+##    Either way, tiles yielding those come next.
 ## 3. **Then value in general**, so a town with nothing pressing still works its
 ##    best ground rather than standing about.
 ##
@@ -44,13 +45,17 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		return
 
 	var hunger := _hunger_of(town, before)
-	var wanted := _wanted_by_objective(town)
+	# What the objective still wants. A construction wants its remaining
+	# materials; a standing posture wants its focus resource, every month,
+	# forever.
+	var wanted := Objective.still_to_gather(town)
+	var focus := Objective.posture_focus(town)
 
 	# Score every tile the town can reach, then take the best ones. Ties break on
 	# position so the choice is the map's rather than the iteration order's.
 	var scored: Array = []
 	for at in tiles:
-		scored.append([_score_tile(context, at, hunger, wanted), at])
+		scored.append([_score_tile(context, at, hunger, wanted, focus), at])
 	scored.sort_custom(func(a: Array, b: Array) -> bool:
 		if not is_equal_approx(float(a[0]), float(b[0])):
 			return float(a[0]) > float(b[0])
@@ -93,20 +98,13 @@ func _hunger_of(town: Town, before: ColonySnapshot) -> float:
 	return clampf(1.0 - months_held / ColonyNeeds.comfortable_months(), 0.0, 1.0)
 
 
-## The rest of what the town's objective costs it.
-func _wanted_by_objective(town: Town) -> Dictionary:
-	var building := Building.find(town.objective)
-	if building == null:
-		return {}
-	var wanted: Dictionary = {}
-	for resource in building.costed_resources():
-		var still_needed := building.cost_of(StringName(resource)) - town.held(StringName(resource))
-		if still_needed > 0.0:
-			wanted[resource] = still_needed
-	return wanted
-
-
-func _score_tile(context: ColonyContext, at: Vector2i, hunger: float, wanted: Dictionary) -> float:
+func _score_tile(
+	context: ColonyContext,
+	at: Vector2i,
+	hunger: float,
+	wanted: Dictionary,
+	focus: StringName,
+) -> float:
 	var score := 0.0
 	for resource in ResourceCatalogue.ids():
 		var amount := context.map.yield_at(at.x, at.y, StringName(resource))
@@ -115,7 +113,7 @@ func _score_tile(context: ColonyContext, at: Vector2i, hunger: float, wanted: Di
 		var weight := 1.0
 		if resource == "food":
 			weight += hunger * HUNGER_WEIGHT
-		if wanted.has(resource):
+		if wanted.has(resource) or resource == String(focus):
 			weight += OBJECTIVE_WEIGHT
 		score += amount * weight
 	return score

@@ -102,6 +102,11 @@ func _init(p_run: RunState) -> void:
 	colony_month.territory_driver = territory
 	colony_month.month.set_handler(ColonyMonth.WORK, WorkPhase.new())
 	colony_month.month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
+	colony_month.month.set_handler(ColonyMonth.RELIEF, ReliefPhase.new())
+	colony_month.month.set_handler(ColonyMonth.EXCHANGE, ExchangePhase.new())
+	colony_month.month.set_handler(ColonyMonth.CONSUME, ConsumePhase.new())
+	colony_month.month.set_handler(ColonyMonth.BUILD, BuildPhase.new())
+	colony_month.month.set_handler(ColonyMonth.SELL, SellPhase.new())
 	colony_month.month.set_handler(ColonyMonth.SETTLE, DriftingSettle.new())
 
 	# Order within the list does not decide anything — each driver answers for its

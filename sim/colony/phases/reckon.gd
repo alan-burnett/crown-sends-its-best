@@ -26,13 +26,9 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		if required > 0.0:
 			reckoning.needs[resource] = required
 
-	# Wants: the rest of what it is building. Never more urgent than a need.
-	var building := Building.find(town.objective)
-	if building != null:
-		for resource in building.costed_resources():
-			var outstanding := building.cost_of(StringName(resource)) - town.held(StringName(resource))
-			if outstanding > 0.0:
-				reckoning.wants[resource] = outstanding
+	# Wants: the rest of what it is building, over what has already gone into the
+	# frame. Never more urgent than a need.
+	reckoning.wants = Objective.still_to_gather(town)
 
 	# Reserve: months of need held back before anything is sold, plus whatever
 	# the town's storehouses let it keep.
@@ -40,6 +36,16 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	for resource in ColonyNeeds.needed_resources():
 		var monthly := mouths * ColonyNeeds.per_head(StringName(resource))
 		reckoning.reserve[resource] = monthly * (ColonyNeeds.reserve_months(StringName(resource)) + extra_months)
+
+	# A standing posture to stockpile or harvest something means the town parts
+	# with none of it. Reserving all of it is how that becomes true everywhere at
+	# once, rather than in each of the four phases that might have moved it.
+	var hoarded := Objective.posture_focus(town)
+	if not String(hoarded).is_empty():
+		reckoning.reserve[String(hoarded)] = maxf(
+			reckoning.reserve_of(hoarded),
+			before.held(town.id, hoarded),
+		)
 
 	# Spare and shortfall fall out of the above, from the town's stores as the
 	# phase began.

@@ -56,6 +56,9 @@ static func load_resources(content: ContentDatabase) -> void:
 	if content.has_record("colony", "needs"):
 		ColonyNeeds.load_from(content.record("colony", "needs"))
 
+	if content.has_record("colony", "objectives"):
+		Objective.load_from(content.record("colony", "objectives"))
+
 
 static func register_all() -> void:
 	register_effects()
@@ -178,7 +181,13 @@ static func register_measures() -> void:
 	# consumption, 0.0 at a ratio of 0 and 1.0 at a ratio of 3.0.
 	MeasureRegistry.register_linear("food_security", 0.0, 3.0)
 	MeasureRegistry.register_linear("crown_war_intensity", 0.0, 100.0)
-	MeasureRegistry.register_linear("colony_revenue", 0.0, 2000.0)
+	# **Provisional.** `colony_revenue` is the duty the Crown actually took this
+	# month (#47), where it used to be a drifting placeholder in the hundreds.
+	# One town at steady state yields around forty, so the old ceiling pinned the
+	# Steward's ladder at its bottom rung for ever. This is a range the current
+	# colony can move within; the real answer is a normalisation that tracks how
+	# large the colony is, which is the PO's to settle.
+	MeasureRegistry.register_linear("colony_revenue", 0.0, 120.0)
 	MeasureRegistry.register_linear("supply_situation", 0.0, 100.0)
 	# How heavily the colony is taxed, which is what the Steward writes about and
 	# what his lean shades.

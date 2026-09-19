@@ -1,16 +1,73 @@
 [
-  { "id": "clothing", "name": "clothing", "luxury": false, "producible": true,
-    "converts_from": ["furs", "cotton"] },
-  { "id": "iron",     "name": "iron",     "luxury": false, "producible": true,
-    "converts_from": ["ore"] },
-  { "id": "tools",    "name": "tools",    "luxury": false, "producible": true,
-    "converts_from": ["iron"] },
-  { "id": "guns",     "name": "guns",     "luxury": false, "producible": true,
-    "converts_from": ["iron"] },
-  { "id": "beer",     "name": "beer",     "luxury": true,  "producible": true,
-    "converts_from": ["food"] },
-  { "id": "rum",      "name": "rum",      "luxury": true,  "producible": true,
-    "converts_from": ["sugar"] },
-  { "id": "cigars",   "name": "cigars",   "luxury": true,  "producible": true,
-    "converts_from": ["tobacco"] }
+  {
+    "id": "clothing",
+    "name": "clothing",
+    "luxury": false,
+    "producible": true,
+    "converts_from": [
+      "furs",
+      "cotton"
+    ],
+    "price": 8
+  },
+  {
+    "id": "iron",
+    "name": "iron",
+    "luxury": false,
+    "producible": true,
+    "converts_from": [
+      "ore"
+    ],
+    "price": 8
+  },
+  {
+    "id": "tools",
+    "name": "tools",
+    "luxury": false,
+    "producible": true,
+    "converts_from": [
+      "iron"
+    ],
+    "price": 12
+  },
+  {
+    "id": "guns",
+    "name": "guns",
+    "luxury": false,
+    "producible": true,
+    "converts_from": [
+      "iron"
+    ],
+    "price": 20
+  },
+  {
+    "id": "beer",
+    "name": "beer",
+    "luxury": true,
+    "producible": true,
+    "converts_from": [
+      "food"
+    ],
+    "price": 5
+  },
+  {
+    "id": "rum",
+    "name": "rum",
+    "luxury": true,
+    "producible": true,
+    "converts_from": [
+      "sugar"
+    ],
+    "price": 9
+  },
+  {
+    "id": "cigars",
+    "name": "cigars",
+    "luxury": true,
+    "producible": true,
+    "converts_from": [
+      "tobacco"
+    ],
+    "price": 9
+  }
 ]
