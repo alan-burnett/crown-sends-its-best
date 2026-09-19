@@ -36,6 +36,12 @@ extends RefCounted
 
 const EVENT_BOUGHT: StringName = &"crown_purchase"
 const EVENT_SOLD: StringName = &"crown_sale"
+## The Reckon tier a purchase served (SPEC §11.3), carried on the event so that
+## rebel sentiment can weigh a duty by how cornered the town was (#71).
+const TIER_NEED: StringName = &"need"
+const TIER_OBJECTIVE: StringName = &"objective"
+const TIER_WANT: StringName = &"want"
+
 const EVENT_REFUSED: StringName = &"crown_trade_refused"
 
 ## How sharply luxury demand falls off as the duty rises. At `2.0` a ten per cent
@@ -58,7 +64,13 @@ static func may_trade_with_crown(town: Town, _context: ColonyContext) -> bool:
 ##
 ## Returns `{received, spent, tax, rate}`. Buying less than was wanted is the
 ## normal case, not an error: a town buys what it can afford.
-static func buy(town: Town, resource: StringName, desired: float, context: ColonyContext) -> Dictionary:
+static func buy(
+	town: Town,
+	resource: StringName,
+	desired: float,
+	context: ColonyContext,
+	tier: StringName = TIER_WANT,
+) -> Dictionary:
 	var nothing: Dictionary = {"received": 0.0, "spent": 0.0, "tax": 0.0, "rate": 0.0}
 	if desired <= 0.0:
 		return nothing
@@ -104,6 +116,11 @@ static func buy(town: Town, resource: StringName, desired: float, context: Colon
 	context.log.emit(EVENT_BOUGHT, town.id, context.state.month, {
 		"town": String(town.id),
 		"resource": String(resource),
+		# **Which tier the purchase served** (#71). Towns resent a duty as they
+		# pay it and in proportion to how little choice they had, so the tier is
+		# part of what happened and belongs on the event rather than being
+		# reconstructed later from what was bought.
+		"tier": String(tier),
 		"luxury": ResourceCatalogue.is_luxury(resource),
 		"wanted": desired,
 		"quantity": received,

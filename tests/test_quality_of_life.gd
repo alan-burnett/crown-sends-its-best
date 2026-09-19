@@ -424,15 +424,27 @@ func test_a_miserable_town_has_fewer_children_than_a_happy_one() -> void:
 
 # --- 🔒 What Settle does not do ---------------------------------------------
 
-func test_rebel_sentiment_is_untouched() -> void:
-	# M3 owns it. QoL feeds sentiment, so sentiment must not feed back within a
-	# month — and the surest way to keep that true is that nothing writes it.
-	var town := _town({"food": 200.0, "clothing": 40.0})
-	town.rebel_sentiment = 0.42
-	var harness := _harness(town)
+func test_sentiment_does_not_feed_back_into_quality_of_life() -> void:
+	# **The one-way street.** Quality of life feeds rebel sentiment
+	# (`rebel-sentiment.md` §4), so sentiment must not feed back within a month
+	# or the two chase each other and neither means anything.
+	#
+	# This used to be stated as "nothing writes sentiment", which was true while
+	# M3 was unbuilt and stopped being true the month #71 landed. The property it
+	# was protecting is this one.
+	var settled := _town({"food": 200.0, "clothing": 40.0})
+	settled.rebel_sentiment = 0.0
+	var seething := _town({"food": 200.0, "clothing": 40.0})
+	seething.rebel_sentiment = 90.0
+
+	var calm := _harness(settled)
+	var angry := _harness(seething)
 	for _month in 4:
-		_run_month(harness)
-	assert_almost_eq(town.rebel_sentiment, 0.42, 0.0001, "something moved rebel sentiment in M2")
+		_run_month(calm)
+		_run_month(angry)
+
+	assert_almost_eq(seething.quality_of_life, settled.quality_of_life, 0.0001,
+		"a seething town lived differently from a contented one for no other reason")
 
 
 func test_choosing_the_objective_is_delegated() -> void:

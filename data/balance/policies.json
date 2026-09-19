@@ -100,5 +100,20 @@
     "answers": "all",
     "ground": "poor",
     "ground_quantile": 1.0
+  },
+  {
+    "id": "tyrant",
+    "name": "the tyrant",
+    "note": "Raises every rate he is offered and refuses every request. The profile rebel-sentiment.md section 8 names: a player who taxes sharply and denies his governors should see a first rebellion in years 2-3.",
+    "prefer": [
+      "raise",
+      "refuse",
+      "none",
+      "no",
+      "full",
+      "profit"
+    ],
+    "tone": "annoyed",
+    "answers": "all"
   }
 ]

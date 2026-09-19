@@ -15,7 +15,9 @@ extends SceneTree
 ##    another's sequence. `randi()`, and also `Array.shuffle()` and
 ##    `pick_random()`, which quietly use the same global generator.
 ##
-## It keeps **Crown standing** out of `presentation/` entirely, because SPEC
+## It keeps **Crown standing** and **rebel sentiment** out of `presentation/`
+## entirely — the two jaws of the Squeeze, neither of which is ever a number the
+## player sees — because SPEC
 ## §10.3 makes the four bands the whole interface and a screen that can read the
 ## figure is a screen that will eventually print it.
 ##
@@ -136,6 +138,20 @@ const STANDING_NAMES: Array[Array] = [
 	[".standing", "reads the Crown's judgement of the player"],
 ]
 
+## 🔒 SPEC §12.3, `docs/mechanics/rebel-sentiment.md` §6. **Sentiment is never a
+## number the player sees.** It surfaces three ways and no others: the Diplomat
+## reports on it through his own perception ladders, the governor's tone shifts
+## and he begins dropping hints, and his loyalty visibly slips in compliance.
+##
+## The same rule as crown standing and for the same reason. The two are the jaws
+## of the Squeeze, and a player who could read either figure would be playing a
+## spreadsheet rather than reading his post.
+const SENTIMENT_NAMES: Array[Array] = [
+	["RebelSentiment", "reads how close a town is to rebellion"],
+	["rebel_sentiment", "reads how close a town is to rebellion"],
+	["Grievances", "reads what a town holds against the Crown"],
+]
+
 const MAP_TRUTH_NAMES: Array[Array] = [
 	["WorldMap", "reads the real map instead of MapKnowledge"],
 	["MapGenerator", "reaches into map generation"],
@@ -211,6 +227,9 @@ func _check(path: String) -> void:
 			for rule in STANDING_NAMES:
 				if line.contains(rule[0]):
 					_report(path, index, "presentation/ %s (SPEC 10.3: it is never a number the player sees)" % rule[1])
+			for rule in SENTIMENT_NAMES:
+				if line.contains(rule[0]):
+					_report(path, index, "presentation/ %s (SPEC 12.3: it is never a number the player sees)" % rule[1])
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")
