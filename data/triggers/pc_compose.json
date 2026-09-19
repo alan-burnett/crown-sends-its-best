@@ -4,7 +4,17 @@
     "letter": "pc.request_troops",
     "offers_composition": true,
     "conditions": [
-      { "loyalty_above": { "value": 20 } }
+      {
+        "loyalty_above": {
+          "value": 20
+        }
+      }
     ]
+  },
+  {
+    "id": "trigger.pc.request_shipment",
+    "letter": "pc.request_shipment",
+    "offers_composition": true,
+    "conditions": []
   }
 ]

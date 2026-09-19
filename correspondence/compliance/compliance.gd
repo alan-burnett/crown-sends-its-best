@@ -120,6 +120,15 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 			# He does what he thinks you meant, which is not what you wrote.
 			params["reinterpreted"] = true
 
+	if order.kind == M1Registrations.ORDER_SHIP_RESOURCE:
+		# **Compliance is a choice of priority tier, not a mood** (#69,
+		# `crown-demands.md` §5). Treating a shipment as a need outranks the
+		# governor's own project and his town goes without; shipping what he can
+		# lets only genuine surplus leave. The same three answers, read as what
+		# they cost his town rather than as how he felt about being asked.
+		params["tier"] = String(Shipment.tier_for(outcome))
+		params["shipped"] = 0.0
+
 	var intent := Intent.new(
 		&"",
 		StringName(order.kind),
@@ -137,6 +146,13 @@ static func cost_of(order: Order) -> float:
 	match order.kind:
 		M1Registrations.ORDER_REQUEST_TROOPS:
 			return 1000.0
+		M1Registrations.ORDER_SHIP_RESOURCE:
+			# **Full compliance damages his own town**, so it costs him, and the
+			# payment is what makes it up to him (SPEC §8.5). Priced off what the
+			# goods are worth, so a demand for two hundred iron weighs more on him
+			# than one for twenty.
+			return float(order.get_param("amount", 0)) \
+				* ResourceCatalogue.price_of(StringName(order.get_param("resource", "")))
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
 		M1Registrations.ORDER_PROMISE_REVENUE:
 			# Being given something costs the recipient nothing.

@@ -250,10 +250,19 @@ func test_a_composable_letter_is_a_reply_minus_the_body() -> void:
 
 
 func test_only_purposes_valid_for_the_state_are_offered() -> void:
+	# **Stated as membership, not as position.** This used to assert on
+	# `offered[0]`, which made adding any composable letter look like a
+	# regression — the order of the list is not what the test is about.
 	var offered := composer.purposes(run)
 	assert_not_empty(offered)
-	assert_eq(offered[0]["letter_id"], "pc.request_troops")
-	assert_not_empty(String(offered[0]["purpose"]))
+
+	var ids: PackedStringArray = PackedStringArray()
+	for entry in offered:
+		ids.append(String(entry["letter_id"]))
+		assert_not_empty(String(entry["purpose"]),
+			"%s is offered with nothing to describe it" % entry["letter_id"])
+	assert_true(ids.has("pc.request_troops"),
+		"the troop request was not offered at all: %s" % ", ".join(ids))
 
 
 func test_only_recipients_valid_for_the_purpose_are_offered() -> void:

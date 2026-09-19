@@ -93,6 +93,9 @@ func _init(p_run: RunState) -> void:
 	# The one Order that reaches a town rather than a world value. It needs the
 	# colony, so it cannot live in the table above.
 	var urging := UrgeIntentExecutor.new()
+	# Goods leave a town over months, so a letter can still reach them (#69).
+	var shipments := ShipmentExecutor.new()
+	shipments.colony = run.colony
 	urging.colony = run.colony
 
 	month_runner = WorldMonth.new(run.intents, run.streams)
@@ -107,6 +110,7 @@ func _init(p_run: RunState) -> void:
 	# themselves arrive one ticket at a time (#44 to #50).
 	colony_month = ColonyDriver.new(run.colony, run.map, run.run_seed)
 	colony_month.territory_driver = territory
+	colony_month.intents = run.intents
 	colony_month.month.set_handler(ColonyMonth.WORK, WorkPhase.new())
 	colony_month.month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
 	colony_month.month.set_handler(ColonyMonth.RELIEF, ReliefPhase.new())
@@ -147,7 +151,7 @@ func _init(p_run: RunState) -> void:
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
-	month_runner.executors = [urging, executor]
+	month_runner.executors = [urging, shipments, executor]
 
 
 ## What each kind of Order does to the world.
@@ -194,6 +198,9 @@ static func order_effects() -> Dictionary:
 		# Declining moves no world value. What it costs is Crown standing, and the
 		# standing driver reads it off the log in phase 6.
 		String(M1Registrations.ORDER_DECLINE_DEMAND): {"target": ""},
+		# Goods move through `ShipmentExecutor`, over months, rather than through a
+		# world value. Listed so that every Order kind is accounted for here.
+		String(M1Registrations.ORDER_SHIP_RESOURCE): {"target": ""},
 		# Urging an intent reaches the town rather than a world value, so
 		# `UrgeIntentExecutor` handles it. Listed here so that every Order kind is
 		# still accounted for in one place.

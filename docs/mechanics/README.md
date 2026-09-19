@@ -22,6 +22,7 @@ being rewritten every iteration.
 | [town-economy.md](town-economy.md) | Prices, reserve, buying, and working the tiles | M2 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
 | [crown-demands.md](crown-demands.md) | A fixed bar, then a moving one — and bucket randomisation | M3 |
+| [trade-protests.md](trade-protests.md) | When a town refuses the Crown's duty, and what it costs | M3 |
 | [rebel-sentiment.md](rebel-sentiment.md) | Who gets blamed, and when a town stops asking | M3 |
 | [the-diplomat.md](the-diplomat.md) | The PC's only resident eyes, and his price | M3 |
 
@@ -34,7 +35,6 @@ first needs it. That list is the live one; this table is the map.
 | :--- | :--- | :--- |
 | Production and conversion | #92 | M2 |
 | Town buildings and the building tree | #93 | M2 |
-| Trade protests | #94 | M3 |
 | Policy | #96 | M3 |
 | Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
 | Immigration and population growth | #98 | M4 |

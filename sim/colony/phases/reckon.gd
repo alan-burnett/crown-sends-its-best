@@ -52,6 +52,16 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		if required > 0.0:
 			reckoning.needs[resource] = required
 
+	# **And what the governor has made a need of** (#69, `crown-demands.md` §5).
+	# A shipment he agreed to treat as a need outranks his own project: the town
+	# buys to fulfil it and goes without. That is what makes his three answers a
+	# choice of tier rather than a mood, and it is the whole cost the payment is
+	# there to make up to him.
+	var owed := Shipment.owed_by(context.intents, context.colony, town, Shipment.TIER_NEED)
+	for resource in owed:
+		reckoning.needs[resource] = float(reckoning.needs.get(resource, 0.0)) \
+			+ float(owed[resource])
+
 	# Tier 2, the objective: the rest of what it is building, over what has
 	# already gone into the frame. Never more urgent than a need.
 	reckoning.objective = Objective.still_to_gather(town)
