@@ -221,6 +221,93 @@ func test_the_saved_state_is_reloadable() -> void:
 	assert_eq(restored.world.state_hash(), run.world.state_hash())
 
 
+# --- Orders reach the world ------------------------------------------------
+
+func test_every_order_kind_has_somewhere_to_go() -> void:
+	# The seam was built and nothing was plugged into it, so every Order the
+	# player wrote stalled for want of an executor and no decision ever reached
+	# the world. A missing entry here is that bug returning.
+	var effects := TurnMachine.order_effects()
+	for effect_id in ContentRegistry.effect_ids():
+		var order := ContentRegistry.run_effect(effect_id, _arguments_for(effect_id), _letter_context())
+		assert_true(order != null, "'%s' produced no Order" % effect_id)
+		assert_true(effects.has(String(order.kind)),
+			"Order kind '%s', from effect '%s', has no entry in order_effects()" % [order.kind, effect_id])
+
+
+func _letter_context() -> LetterContext:
+	return LetterContext.new(run.world, run.contact(&"marshal"), Tone.DUTIFUL)
+
+
+func _arguments_for(effect_id: String) -> Dictionary:
+	var arguments: Dictionary = {}
+	for name in ContentRegistry.effect_params(effect_id):
+		match StringName(ContentRegistry.effect_params(effect_id)[name]):
+			&"integer", &"gold":
+				arguments[name] = 10
+			&"number":
+				arguments[name] = 1
+			&"bool":
+				arguments[name] = true
+			&"tone":
+				arguments[name] = String(Tone.DUTIFUL)
+			_:
+				arguments[name] = "marshal"
+	return arguments
+
+
+func test_no_order_stalls_for_want_of_an_executor() -> void:
+	for turn in 6:
+		_open_desk()
+		_queue_a_reply()
+		machine.send_post()
+
+	for event in run.log.of_type(&"intent_stalled"):
+		fail("an Intent stalled: %s (%s)" % [event.payload.get("kind"), event.payload.get("reason")])
+	assert_true(run.intents.all().size() > 0, "no Intents were created at all")
+
+
+func test_a_decision_reaches_the_world() -> void:
+	# #20: a decision written on turn T changes state during turn T+1's
+	# resolution. Compared against an identical run that wrote nothing, so the
+	# difference is the decision and not the weather.
+	var quiet := RunState.new_run(SEED)
+	quiet.add_contact(Contact.from_data({"id": "marshal", "name": "Vane", "role": "crown_officer"}))
+	var quiet_machine := TurnMachine.new(quiet)
+	quiet_machine.use_content(content)
+	quiet_machine.saves_on_send = false
+
+	for turn in 4:
+		_open_desk()
+		_queue_a_reply()
+		machine.send_post()
+
+		quiet_machine.begin_turn()
+		for inbound in quiet.inbox:
+			inbound.status = InboundLetter.SET_ASIDE
+		quiet_machine.send_post()
+
+	assert_ne(run.world.state_hash(), quiet.world.state_hash(),
+		"answering letters left the world exactly as ignoring them did")
+
+
+func test_an_order_with_no_world_effect_completes_rather_than_stalling() -> void:
+	# A stall means "nothing could carry this out", which is a much louder claim
+	# than "there was nothing to do".
+	var effects := TurnMachine.order_effects()
+	assert_eq(String(effects[String(M1Registrations.ORDER_SET_POLICY)]["target"]), "",
+		"set_policy has no world effect in M1")
+
+	var executor := StubIntentExecutor.new()
+	executor.table = effects
+	var intent := Intent.new(&"", M1Registrations.ORDER_SET_POLICY, &"steward", &"", 1, {})
+	run.intents.commit(intent, run.log, run.world.month)
+	run.world.advance_month(run.log)
+	IntentExecutor.run_month([executor], run.intents, run.world, run.log)
+
+	assert_eq(intent.resolution, Intent.COMPLETED)
+
+
 # --- Determinism -----------------------------------------------------------
 
 func test_the_same_seed_and_decisions_produce_the_same_run() -> void:

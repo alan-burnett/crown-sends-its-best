@@ -79,6 +79,9 @@ func _init(p_run: RunState) -> void:
 	promise_driver = PromiseDriver.new(run.promises)
 	promise_driver.contacts = run.contacts
 
+	var executor := StubIntentExecutor.new()
+	executor.table = order_effects()
+
 	month_runner = WorldMonth.new(run.intents, run.streams)
 	# Order matters only where the mechanics doc says it does; each driver
 	# answers for its own phase.
@@ -86,7 +89,42 @@ func _init(p_run: RunState) -> void:
 	silence.run = run
 
 	month_runner.drivers = [StubWorld.new(), promise_driver, orders, silence]
-	month_runner.executors = [StubIntentExecutor.new()]
+	month_runner.executors = [executor]
+
+
+## What each kind of Order does to the world.
+##
+## **The turn loop owns this because it is the only place that can see both
+## sides**: the Order kinds belong to the correspondence layer, the world values
+## belong to the sim, and neither may name the other.
+##
+## Until this existed every Order the player wrote stalled for want of an
+## executor — the seam was built and nothing was plugged into it, so nothing the
+## player decided ever reached the world.
+##
+## The numbers are placeholders against the stub world and go with it in M2. What
+## is not a placeholder is that **every Order kind appears here**: an Order with
+## no effect says so with an empty target and completes, rather than stalling.
+## A stall means "nothing could carry this out", which is a much louder claim and
+## should be rare.
+static func order_effects() -> Dictionary:
+	return {
+		# Sending gold and resources costs the colony, in proportion to what the
+		# letter promised — which is what makes the amount a real choice.
+		String(M1Registrations.ORDER_PROMISE_GOLD):
+			{"target": StubWorld.REVENUE, "amount_factor": -1.0},
+		String(M1Registrations.ORDER_PROMISE_RESOURCE):
+			{"target": StubWorld.SUPPLY, "amount_factor": -0.05},
+		# Troops arrive and are fed and armed out of the colony's stores.
+		String(M1Registrations.ORDER_REQUEST_TROOPS):
+			{"target": StubWorld.SUPPLY, "per_month": 6.0},
+		# These land on the Relationship rather than on the world. The stub has no
+		# tax model, and inventing one here would be M3's work done badly.
+		String(M1Registrations.ORDER_SET_POLICY): {"target": ""},
+		String(M1Registrations.ORDER_GRANT_FAVOR): {"target": ""},
+		String(M1Registrations.ORDER_ADJUST_LOYALTY): {"target": ""},
+		String(M1Registrations.ORDER_REFUSE): {"target": ""},
+	}
 
 
 # --- Driving the turn ------------------------------------------------------
