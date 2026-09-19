@@ -21,6 +21,8 @@ const ORDER_SHIP_RESOURCE: StringName = &"ship_resource"
 const ORDER_PROMISE_SHIPMENT: StringName = &"promise_shipment"
 const ORDER_EMBARGO: StringName = &"embargo"
 const ORDER_ENACT_POLICY: StringName = &"enact_policy"
+const ORDER_FUND_POLICY: StringName = &"fund_policy"
+const ORDER_END_POLICY: StringName = &"end_policy"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
@@ -150,6 +152,15 @@ static func register_effects() -> void:
 	ContentRegistry.register_effect(
 		"embargo", {"to": "contact", "months": "integer"}, ORDER_EMBARGO
 	)
+	# **The answer to a man who says he will not carry it further** (#80, §4).
+	# `bonus` is the lump sum on top — everybody loves a bribe, and a letter that
+	# offers one reads very differently from a letter that merely concedes a
+	# point.
+	ContentRegistry.register_effect(
+		"fund_policy", {"to": "contact", "split": "string", "bonus": "gold"},
+		ORDER_FUND_POLICY,
+	)
+	ContentRegistry.register_effect("end_policy", {"to": "contact"}, ORDER_END_POLICY)
 	ContentRegistry.register_effect(
 		"ship_resource",
 		{"to": "contact", "resource": "resource", "amount": "integer", "payment": "gold"},

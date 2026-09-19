@@ -106,6 +106,13 @@ static func resolve(
 	if order.kind == M1Registrations.ORDER_EMBARGO:
 		outcome = COMPLY
 
+	# **Being paid is not a request.** A man who wrote asking the PC to bear his
+	# share does not then deliberate about whether to accept it, and one told to
+	# stop is not being asked either. Both are answers to his own letter.
+	if order.kind == M1Registrations.ORDER_FUND_POLICY \
+			or order.kind == M1Registrations.ORDER_END_POLICY:
+		outcome = COMPLY
+
 	log.emit(OUTCOME_EVENTS[outcome], contact.id, state.month, {
 		"order": order.to_dict(),
 		"outcome": String(outcome),
@@ -228,7 +235,8 @@ static func cost_of(order: Order) -> float:
 		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT:
 			# Being given something costs the recipient nothing.
 			return 0.0
-		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
+		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND, \
+		M1Registrations.ORDER_FUND_POLICY, M1Registrations.ORDER_END_POLICY:
 			return 0.0
 		M1Registrations.ORDER_EMBARGO:
 			# It costs him a great deal, and no payment is on offer. What that

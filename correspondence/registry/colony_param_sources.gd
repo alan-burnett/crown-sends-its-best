@@ -59,6 +59,9 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"pc", {"field": "string"}, ColonyParamSources.pc
 	)
+	ContentRegistry.register_param_source(
+		"policy", {"field": "string"}, ColonyParamSources.policy
+	)
 
 
 ## How many letters the Treasury will still honour.
@@ -311,6 +314,26 @@ static func pc(args: Dictionary, context: LetterContext) -> Variant:
 		"title":
 			return context.pc.pc_title
 	return ""
+
+
+## What the policy this contact is warning about costs, and how long he will
+## give (#80, §4).
+##
+## **The charge and the deadline, never the drain.** He can say what it costs him
+## in gold because he knows; what it has cost him in regard is his own business
+## and no letter reads it.
+static func policy(args: Dictionary, context: LetterContext) -> Variant:
+	if context.sender == null or context.policies == null:
+		return 0
+	for held in context.policies.held_by(context.sender.id):
+		if not held.is_warning():
+			continue
+		match String(args.get("field", "cost")):
+			"cost":
+				return int(roundf(held.cost))
+			"months":
+				return maxi(0, held.ends_month - context.month)
+	return 0
 
 
 static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:

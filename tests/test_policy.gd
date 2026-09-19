@@ -214,6 +214,129 @@ func test_the_enactor_is_written_to() -> void:
 		"the PC's cheque bounced and nobody mentioned it")
 
 
+# --- 🔒 He writes before he stops -------------------------------------------
+
+func test_he_carries_it_a_while_before_saying_anything() -> void:
+	# An occasional lean month is not a crisis. A PC who is simply not paying
+	# finds out inside a year.
+	var policy := _enact(Policy.NONE)
+	for month in range(4, 4 + PolicyBook.PATIENCE - 1):
+		book.bill(_contacts(), log, month)
+		book.take_stock(log, month)
+	assert_false(policy.is_warning(),
+		"he complained after %d months of carrying it" % (PolicyBook.PATIENCE - 1))
+
+
+func test_eventually_he_says_he_will_not_go_on() -> void:
+	var policy := _enact(Policy.NONE)
+	for month in range(4, 4 + PolicyBook.PATIENCE + 1):
+		book.bill(_contacts(), log, month)
+		book.take_stock(log, month)
+	assert_true(policy.is_warning(), "he carried it for ever without a word")
+	assert_eq(log.of_type(PolicyBook.EVENT_WARNED).size(), 1,
+		"he said it once a month instead of once")
+
+
+func test_the_warning_always_comes_before_the_ending() -> void:
+	# 🔒 **The same principle as the Chancellor's deadline.** A cost the player
+	# cannot see coming is a trap, not a decision — so there is no month in which
+	# a policy both first warns and ends.
+	var policy := _enact(Policy.NONE)
+	var warned_in := -1
+	var ended_in := -1
+	for month in range(4, 60):
+		book.bill(_contacts(), log, month)
+		var stock := book.take_stock(log, month)
+		if not (stock["warned"] as Array).is_empty():
+			warned_in = month
+		if not (stock["ended"] as Array).is_empty():
+			ended_in = month
+
+	assert_true(warned_in > 0, "it never warned at all")
+	assert_true(ended_in > warned_in,
+		"it ended in month %d having warned in month %d" % [ended_in, warned_in])
+	assert_true(ended_in - warned_in >= PolicyBook.GRACE,
+		"the grace he gave was shorter than the grace he offered")
+	assert_true(book.by_id(policy.id) == null, "it warned, ended, and stood anyway")
+
+
+func test_a_funded_policy_never_warns() -> void:
+	var policy := _enact(Policy.ALL)
+	for month in range(4, 60):
+		book.bill(_contacts(), log, month)
+		book.take_stock(log, month)
+	assert_false(policy.is_warning(), "a man being paid in full threatened to stop")
+	assert_true(book.by_id(policy.id) != null, "a fully funded policy lapsed")
+
+
+func test_paying_up_resets_everything() -> void:
+	# **A policy made good is not a policy three months from lapsing**, or the PC
+	# would have paid and watched it end anyway.
+	var policy := _enact(Policy.NONE)
+	for month in range(4, 4 + PolicyBook.PATIENCE + 1):
+		book.bill(_contacts(), log, month)
+		book.take_stock(log, month)
+	assert_true(policy.is_warning())
+
+	policy.made_good(Policy.ALL)
+	assert_false(policy.is_warning(), "he was paid in full and went on threatening")
+	assert_eq(policy.carried_months, 0, "he remembered months he was no longer carrying")
+
+	for month in range(20, 60):
+		book.bill(_contacts(), log, month)
+		book.take_stock(log, month)
+	assert_true(book.by_id(policy.id) != null, "a policy made good lapsed anyway")
+
+
+func test_what_differs_between_half_and_nothing_is_his_regard() -> void:
+	# The drain is three times at nothing, so the patience runs out at the same
+	# count either way — **what differs is his regard**, which is the whole
+	# lesson. Stated so that a future change making patience depend on the split
+	# has to come past this test.
+	var half := _enact(Policy.HALF)
+	var none := PolicyBook.new()
+	var other := Contact.new(&"marshal")
+	other.relationship = Relationship.new(&"marshal", 70.0)
+	none.enact(Policy.new(&"marshal", PolicyEffects.IMMIGRATION, 100.0, Policy.NONE), log, 3)
+
+	for month in range(4, 4 + PolicyBook.PATIENCE):
+		book.bill(_contacts(), log, month)
+		none.bill({"marshal": other}, log, month)
+
+	assert_true(other.relationship.loyalty < enactor.relationship.loyalty,
+		"carrying the whole charge cost no more than carrying half of it")
+	assert_eq(half.carried_months, PolicyBook.PATIENCE,
+		"the months he carried it were not counted")
+
+
+func test_the_letter_can_name_the_charge_and_the_deadline() -> void:
+	var policy := _enact(Policy.NONE, 240.0)
+	policy.warned_month = 10
+	policy.ends_month = 13
+
+	var state := WorldValues.initial_state()
+	state.month = 11
+	var context := LetterContext.new(state, enactor, &"dutiful")
+	context.month = 11
+	context.policies = book
+
+	assert_true(ColonyConditions.will_not_carry_it_further({}, context),
+		"a man three months from letting it lapse had nothing to say")
+	assert_eq(int(ColonyParamSources.policy({"field": "cost"}, context)), 240)
+	assert_eq(int(ColonyParamSources.policy({"field": "months"}, context)), 2)
+
+
+func test_a_contented_enactor_writes_no_such_letter() -> void:
+	_enact(Policy.ALL)
+	var state := WorldValues.initial_state()
+	state.month = 11
+	var context := LetterContext.new(state, enactor, &"dutiful")
+	context.month = 11
+	context.policies = book
+	assert_false(ColonyConditions.will_not_carry_it_further({}, context),
+		"a man being paid in full wrote to complain about it")
+
+
 # --- 🔒 Cancelling costs -----------------------------------------------------
 
 func test_calling_one_off_costs_the_enactor() -> void:

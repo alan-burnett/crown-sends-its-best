@@ -106,5 +106,29 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.steward.policy_lapsing",
+    "letter": "steward.policy_lapsing",
+    "urgency": 0.95,
+    "cooldown": 4,
+    "params": {
+      "sender_id": {
+        "from": "sender_id"
+      },
+      "cost": {
+        "from": "policy",
+        "field": "cost"
+      },
+      "months": {
+        "from": "policy",
+        "field": "months"
+      }
+    },
+    "conditions": [
+      {
+        "will_not_carry_it_further": {}
+      }
+    ]
   }
 ]

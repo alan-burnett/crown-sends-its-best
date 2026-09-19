@@ -131,6 +131,7 @@ func _params_for(letter: Letter, run: RunState, to: StringName) -> Dictionary:
 	context.demand_book = run.demand_book
 	context.log = run.log
 	context.pc = run.setup
+	context.policies = run.policies
 
 	# The recipient is chosen in the flow, not declared with a default, so
 	# `{to}` in an effect resolves to whoever the player picked.

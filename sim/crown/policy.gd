@@ -89,6 +89,39 @@ var enacted_month: int = 0
 ## rather than a silent collapse (§5).
 var renegotiating: bool = false
 
+## How many months he has carried what the PC did not pay.
+##
+## **Reset when the PC begins bearing his share**, so a man who has been made
+## good starts the count afresh rather than carrying a grudge into an arrangement
+## that now suits him.
+var carried_months: int = 0
+
+## The month he said he would not carry it further, and the month he stops.
+##
+## 🔒 **The warning always comes before the ending** — the same principle as the
+## Chancellor's deadline in `crown-standing.md`. A cost the player cannot see
+## coming is a trap, not a decision.
+var warned_month: int = -1
+var ends_month: int = -1
+
+
+## Whether he has said he will not go on.
+func is_warning() -> bool:
+	return warned_month >= 0
+
+
+## The PC has begun bearing more of it. Everything resets.
+##
+## **A lump sum soothes it over** (§4). Everybody loves a bribe, and a letter
+## that offers one reads very differently from a letter that merely concedes a
+## point — so a payment large enough clears the warning as well as the count.
+func made_good(new_split: StringName) -> void:
+	split = new_split
+	carried_months = 0
+	warned_month = -1
+	ends_month = -1
+	renegotiating = false
+
 
 func _init(
 	p_enactor: StringName = &"",
@@ -137,6 +170,9 @@ func to_dict() -> Dictionary:
 		"split": String(split),
 		"enacted_month": enacted_month,
 		"renegotiating": renegotiating,
+		"carried_months": carried_months,
+		"warned_month": warned_month,
+		"ends_month": ends_month,
 	}
 
 
@@ -151,4 +187,7 @@ static func from_dict(data: Dictionary) -> Policy:
 	restored.id = StringName(data.get("id", ""))
 	restored.enacted_month = int(data.get("enacted_month", 0))
 	restored.renegotiating = bool(data.get("renegotiating", false))
+	restored.carried_months = int(data.get("carried_months", 0))
+	restored.warned_month = int(data.get("warned_month", -1))
+	restored.ends_month = int(data.get("ends_month", -1))
 	return restored
