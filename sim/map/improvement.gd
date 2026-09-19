@@ -40,6 +40,12 @@ var livestock_capacity: int = 0
 ## Built at no cost by trade rather than chosen. Roads only (SPEC §11.1).
 var natural: bool = false
 
+## Resource id -> how much raising it costs the town (#49, #53).
+var cost: Dictionary = {}
+
+## How long it takes once the materials are there.
+var months: int = 1
+
 
 # --- Loading ---------------------------------------------------------------
 
@@ -59,6 +65,8 @@ static func load_from(records: Array) -> void:
 		improvement.allowed_on = PackedStringArray(record.get("allowed_on", []))
 		improvement.livestock_capacity = JsonTypes.to_int(record.get("livestock_capacity", 0), "livestock_capacity")
 		improvement.natural = bool(record.get("natural", false))
+		improvement.cost = record.get("cost", {}).duplicate()
+		improvement.months = maxi(1, JsonTypes.to_int(record.get("months", 1), "months"))
 		_improvements[String(improvement.id)] = improvement
 
 
@@ -82,6 +90,17 @@ static func ids() -> PackedStringArray:
 
 
 # --- Building --------------------------------------------------------------
+
+func cost_of(resource: StringName) -> float:
+	return float(cost.get(String(resource), 0.0))
+
+
+## Resources this improvement needs, sorted.
+func costed_resources() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray(cost.keys())
+	out.sort()
+	return out
+
 
 func can_build_on(terrain: StringName) -> bool:
 	return allowed_on.has(String(terrain))
@@ -137,4 +156,6 @@ func to_dict() -> Dictionary:
 		"allowed_on": allowed_on.duplicate(),
 		"livestock_capacity": livestock_capacity,
 		"natural": natural,
+		"cost": cost.duplicate(),
+		"months": months,
 	}

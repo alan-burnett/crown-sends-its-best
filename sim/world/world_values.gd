@@ -21,6 +21,12 @@ const REVENUE: String = "colony_revenue"
 const SUPPLY: String = "supply_situation"
 const FOOD: String = "food_security"
 
+## **What the Crown appointed the governors to do** (SPEC §6.1). One per run,
+## and a governor's intent leans towards it with a pull that decays over the
+## run. M2 carries a fixed mandate; Run Setup in M3 supplies the value and
+## nothing else changes.
+const MANDATE: String = "crown_mandate"
+
 
 static func initial_state() -> WorldState:
 	var state := WorldState.new(0, {
@@ -29,6 +35,7 @@ static func initial_state() -> WorldState:
 		SUPPLY: 62.0,
 		FOOD: 1.1,
 		CAMPAIGN_MONTHS_LEFT: 0,
+		MANDATE: GovernorIntent.ECONOMY,
 	})
 	for key in TaxRates.initial_values():
 		state.values[key] = TaxRates.initial_values()[key]

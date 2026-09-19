@@ -2,68 +2,202 @@
   {
     "id": "farm",
     "name": "farm",
-    "keeps": ["food"],
-    "scale": { "*": 0.3 },
-    "adds": { "food": "medium" },
-    "terrain_factor": { "plains": 1.0, "grassland": 0.6, "*": 0.2 },
-    "allowed_on": ["plains", "grassland", "desert", "forest"]
+    "keeps": [
+      "food"
+    ],
+    "scale": {
+      "*": 0.3
+    },
+    "adds": {
+      "food": "medium"
+    },
+    "terrain_factor": {
+      "plains": 1.0,
+      "grassland": 0.6,
+      "*": 0.2
+    },
+    "allowed_on": [
+      "plains",
+      "grassland",
+      "desert",
+      "forest"
+    ],
+    "cost": {
+      "wood": 12
+    },
+    "months": 2
   },
   {
     "id": "pasture",
     "name": "pasture",
-    "scale": { "*": 0.5 },
+    "scale": {
+      "*": 0.5
+    },
     "livestock_capacity": 4,
-    "terrain_factor": { "grassland": 1.0, "plains": 0.6, "forest": 0.6, "*": 0.25 },
-    "allowed_on": ["grassland", "plains", "forest", "desert"]
+    "terrain_factor": {
+      "grassland": 1.0,
+      "plains": 0.6,
+      "forest": 0.6,
+      "*": 0.25
+    },
+    "allowed_on": [
+      "grassland",
+      "plains",
+      "forest",
+      "desert"
+    ],
+    "cost": {
+      "wood": 10
+    },
+    "months": 2
   },
   {
     "id": "plantation_sugar",
     "name": "sugar plantation",
-    "keeps": ["food"],
-    "scale": { "*": 0.0 },
-    "adds": { "sugar": "medium" },
-    "terrain_factor": { "grassland": 1.0, "plains": 1.0, "*": 0.3 },
-    "allowed_on": ["grassland", "plains"]
+    "keeps": [
+      "food"
+    ],
+    "scale": {
+      "*": 0.0
+    },
+    "adds": {
+      "sugar": "medium"
+    },
+    "terrain_factor": {
+      "grassland": 1.0,
+      "plains": 1.0,
+      "*": 0.3
+    },
+    "allowed_on": [
+      "grassland",
+      "plains"
+    ],
+    "cost": {
+      "wood": 18,
+      "tools": 2
+    },
+    "months": 3
   },
   {
     "id": "plantation_cotton",
     "name": "cotton plantation",
-    "keeps": ["food"],
-    "scale": { "*": 0.0 },
-    "adds": { "cotton": "medium" },
-    "terrain_factor": { "grassland": 1.0, "plains": 1.0, "*": 0.3 },
-    "allowed_on": ["grassland", "plains"]
+    "keeps": [
+      "food"
+    ],
+    "scale": {
+      "*": 0.0
+    },
+    "adds": {
+      "cotton": "medium"
+    },
+    "terrain_factor": {
+      "grassland": 1.0,
+      "plains": 1.0,
+      "*": 0.3
+    },
+    "allowed_on": [
+      "grassland",
+      "plains"
+    ],
+    "cost": {
+      "wood": 18,
+      "tools": 2
+    },
+    "months": 3
   },
   {
     "id": "plantation_tobacco",
     "name": "tobacco plantation",
-    "keeps": ["food"],
-    "scale": { "*": 0.0 },
-    "adds": { "tobacco": "medium" },
-    "terrain_factor": { "grassland": 1.0, "plains": 1.0, "*": 0.3 },
-    "allowed_on": ["grassland", "plains"]
+    "keeps": [
+      "food"
+    ],
+    "scale": {
+      "*": 0.0
+    },
+    "adds": {
+      "tobacco": "medium"
+    },
+    "terrain_factor": {
+      "grassland": 1.0,
+      "plains": 1.0,
+      "*": 0.3
+    },
+    "allowed_on": [
+      "grassland",
+      "plains"
+    ],
+    "cost": {
+      "wood": 18,
+      "tools": 2
+    },
+    "months": 3
   },
   {
     "id": "mine",
     "name": "mine",
-    "keeps": ["stone"],
-    "scale": { "*": 0.0 },
-    "adds": { "stone": "low", "ore": "high" },
-    "terrain_factor": { "mountains": 1.0, "*": 0.5 },
-    "allowed_on": ["mountains", "desert", "grassland", "plains", "forest"]
+    "keeps": [
+      "stone"
+    ],
+    "scale": {
+      "*": 0.0
+    },
+    "adds": {
+      "stone": "low",
+      "ore": "high"
+    },
+    "terrain_factor": {
+      "mountains": 1.0,
+      "*": 0.5
+    },
+    "allowed_on": [
+      "mountains",
+      "desert",
+      "grassland",
+      "plains",
+      "forest"
+    ],
+    "cost": {
+      "wood": 20,
+      "tools": 4
+    },
+    "months": 3
   },
   {
     "id": "road",
     "name": "road",
-    "scale": { "*": 1.15 },
+    "scale": {
+      "*": 1.15
+    },
     "natural": true,
-    "terrain_factor": { "*": 1.0 },
-    "allowed_on": ["plains", "grassland", "forest", "desert", "mountains"]
+    "terrain_factor": {
+      "*": 1.0
+    },
+    "allowed_on": [
+      "plains",
+      "grassland",
+      "forest",
+      "desert",
+      "mountains"
+    ],
+    "months": 1
   },
   {
     "id": "fort",
     "name": "fort",
-    "terrain_factor": { "*": 1.0 },
-    "allowed_on": ["plains", "grassland", "forest", "desert", "mountains"]
+    "terrain_factor": {
+      "*": 1.0
+    },
+    "allowed_on": [
+      "plains",
+      "grassland",
+      "forest",
+      "desert",
+      "mountains"
+    ],
+    "cost": {
+      "wood": 30,
+      "stone": 20
+    },
+    "months": 3
   }
 ]

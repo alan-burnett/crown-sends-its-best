@@ -20,10 +20,6 @@ const SAVE_VERSION: int = 1
 ## and resources is a starting decision in M3 (SPEC §6.1); these are the numbers
 ## until the player gets to choose.
 const FIRST_TOWN_ID: StringName = &"ashmere"
-## What the first town starts working towards, until #53 lets its Governor
-## choose for himself.
-const FIRST_OBJECTIVE: StringName = &"storehouse"
-
 const FIRST_TOWN_NAME: String = "Ashmere"
 const STARTING_WORKERS: int = 12
 const STARTING_FOOD: float = 90.0
@@ -126,10 +122,10 @@ func found_first_town() -> Town:
 	town.store(&"wood", STARTING_WOOD)
 	town.store(&"tools", STARTING_TOOLS)
 	town.receive_gold(STARTING_GOLD)
-	# Something to be getting on with. **The Governor chooses the objective**
-	# (#53); until he can, a storehouse is what a town founded last month would
-	# be raising, and it gives Build something to be observably part-way through.
-	town.objective = FIRST_OBJECTIVE
+	# **He starts on the Crown's Mandate** (SPEC §6.1). Nothing here sets the
+	# town's objective: the first Settle picks one to serve this, which is the
+	# only way an objective is ever chosen (#53).
+	town.intent = StringName(world.get_value(WorldValues.MANDATE, GovernorIntent.ECONOMY))
 	colony.add(town)
 
 	add_contact(Governor.generate(town, streams))

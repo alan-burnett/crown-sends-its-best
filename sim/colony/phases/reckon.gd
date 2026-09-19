@@ -40,11 +40,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# A standing posture to stockpile or harvest something means the town parts
 	# with none of it. Reserving all of it is how that becomes true everywhere at
 	# once, rather than in each of the four phases that might have moved it.
-	var hoarded := Objective.posture_focus(town)
-	if not String(hoarded).is_empty():
-		reckoning.reserve[String(hoarded)] = maxf(
-			reckoning.reserve_of(hoarded),
-			before.held(town.id, hoarded),
+	for hoarded in Objective.posture_focus(town):
+		reckoning.reserve[hoarded] = maxf(
+			reckoning.reserve_of(StringName(hoarded)),
+			before.held(town.id, StringName(hoarded)),
 		)
 
 	# Spare and shortfall fall out of the above, from the town's stores as the

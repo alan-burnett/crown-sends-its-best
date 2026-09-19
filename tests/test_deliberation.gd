@@ -49,7 +49,7 @@ class BlockingFilter:
 
 # --- Fixtures --------------------------------------------------------------
 
-const KIND: StringName = DecisionKind.TOWN_OBJECTIVE
+const KIND: StringName = DecisionKind.GOVERNOR_INTENT
 
 var log: EventLog = null
 var context: DeliberationContext = null

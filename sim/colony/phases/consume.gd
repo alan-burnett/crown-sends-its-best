@@ -70,7 +70,7 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 ## unmet.
 func _eat(town: Town, mouths: float, context: ColonyContext, record: Dictionary) -> float:
 	var for_people := mouths * ColonyNeeds.per_head(&"food")
-	var for_stock := _feed_required(town)
+	var for_stock := _feed_required(town, context)
 	var short_by := (for_people + for_stock) - town.held(&"food")
 	if short_by > 0.0:
 		_slaughter(town, short_by, context)
@@ -129,8 +129,13 @@ func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
 
 
 ## What the town's herds eat, over what its pasture supports.
-func _feed_required(town: Town) -> float:
+func _feed_required(town: Town, context: ColonyContext) -> float:
+	# Stock graze on pasture improvements in the town's reach, and shelter in
+	# what the town has built. Both are capacity; neither is grain.
 	var pastured := float(Building.pasture_capacity_for(town))
+	if context.map != null:
+		for at in context.tiles_of(town):
+			pastured += float(context.map.livestock_capacity_at(at.x, at.y))
 	var total := 0.0
 	for id in _livestock_by_price():
 		var head := float(town.livestock_head(StringName(id)))

@@ -13,9 +13,12 @@ extends RefCounted
 ## So an objective is either:
 ##
 ## - a **construction** — a building id, with a cost that Build consumes over
-##   months and a completion that applies an effect; or
+##   months and a completion that applies an effect;
+## - an **improvement** — the same, raised on a named tile rather than in the
+##   town. **The governor picks the tile** (`docs/mechanics/governor-objectives.md`
+##   section 5); there is no code path by which the PC names one; or
 ## - a **posture** — no cost, no completion, but it **bends Work and Reckon**: the
-##   town works its focus resource by preference and holds more of it back.
+##   town works its focus resources by preference and holds them back.
 ##
 ## A governor who can only ever be part-way through a church writes the same
 ## letter every month. This is the class that stops that.
@@ -34,8 +37,20 @@ const NONE: StringName = &"none"
 ## A building, with a cost and a completion.
 const CONSTRUCTION: StringName = &"construction"
 
+## An improvement on a tile. A cost and a completion, like a construction, but
+## the tile is part of the objective.
+const IMPROVEMENT: StringName = &"improvement"
+
 ## A standing posture. No cost, no completion.
 const POSTURE: StringName = &"posture"
+
+## **A cost is met when it is met to within this.**
+##
+## Resources are floats and arrive by purchase, so the last unit of a thirty-unit
+## cost lands as 29.999999. Without a tolerance the build is never finished, the
+## town gathers for ever, and the bug looks exactly like a town that cannot
+## afford the last plank.
+const MET: float = 0.001
 
 ## Posture id -> its record. Data, like everything else the town does.
 static var _postures: Dictionary = {}
@@ -52,7 +67,7 @@ static func load_from(record: Dictionary) -> void:
 			continue
 		_postures[id] = {
 			"name": String(entry.get("name", id)),
-			"focus": String(entry.get("focus", "")),
+			"focus": PackedStringArray(entry.get("focus", [])),
 		}
 
 
@@ -78,6 +93,8 @@ static func kind_of(id: StringName) -> StringName:
 		return NONE
 	if Building.has(id):
 		return CONSTRUCTION
+	if Improvement.has(id):
+		return IMPROVEMENT
 	if is_posture(id):
 		return POSTURE
 	return NONE
@@ -86,6 +103,8 @@ static func kind_of(id: StringName) -> StringName:
 static func display_name(id: StringName) -> String:
 	if Building.has(id):
 		return Building.find(id).display_name
+	if Improvement.has(id):
+		return Improvement.find(id).display_name
 	if is_posture(id):
 		return String(_postures[String(id)].get("name", String(id)))
 	return ""
@@ -93,14 +112,21 @@ static func display_name(id: StringName) -> String:
 
 # --- Postures ---------------------------------------------------------------
 
-## The resource a town's posture favours, or empty.
+## The resources a town's posture favours, sorted. Empty when it has no posture.
 ##
-## **Read by Work**, which weights tiles yielding it, and by Reckon, which holds
-## more of it back. That is the whole of what a posture *is*.
-static func posture_focus(town: Town) -> StringName:
+## **Read by Work**, which weights tiles yielding them, and by Reckon, which
+## holds them back. That is the whole of what a posture *is*.
+##
+## More than one, because gathering an expedition supplies grain *and* tools, and
+## a posture that could only ever name one resource would have to be split into
+## two orders the governor never meant to give separately.
+static func posture_focus(town: Town) -> PackedStringArray:
 	if not is_posture(town.objective):
-		return &""
-	return StringName(_postures[String(town.objective)].get("focus", ""))
+		return PackedStringArray()
+	var focus: PackedStringArray = _postures[String(town.objective)].get("focus", PackedStringArray())
+	var out := focus.duplicate()
+	out.sort()
+	return out
 
 
 ## Whether the town's posture means it will not part with a resource.
@@ -110,7 +136,7 @@ static func posture_focus(town: Town) -> StringName:
 ## holds of it, so Sell finds no spare and Relief finds nothing to give — which
 ## is what a standing order to hoard something actually means.
 static func hoards(town: Town, resource: StringName) -> bool:
-	return not String(resource).is_empty() and posture_focus(town) == resource
+	return posture_focus(town).has(String(resource))
 
 
 # --- Construction -----------------------------------------------------------
@@ -121,15 +147,38 @@ static func hoards(town: Town, resource: StringName) -> bool:
 ## into a build they are gone from the stores, so counting the stores again would
 ## have the town gather everything twice.
 static func outstanding(town: Town) -> Dictionary:
-	var building := Building.find(town.objective)
-	if building == null:
-		return {}
 	var out: Dictionary = {}
-	for resource in building.costed_resources():
-		var still := building.cost_of(StringName(resource)) - town.invested(StringName(resource))
-		if still > 0.0:
+	for resource in costed_resources(town):
+		var still := cost_of(town, StringName(resource)) - town.invested(StringName(resource))
+		if still > MET:
 			out[resource] = still
 	return out
+
+
+## What this town is working towards costs, whichever kind it is. A posture
+## costs nothing, which is why it can never stall.
+static func costed_resources(town: Town) -> PackedStringArray:
+	match kind_of(town.objective):
+		CONSTRUCTION:
+			return Building.find(town.objective).costed_resources()
+		IMPROVEMENT:
+			return Improvement.find(town.objective).costed_resources()
+	return PackedStringArray()
+
+
+static func cost_of(town: Town, resource: StringName) -> float:
+	match kind_of(town.objective):
+		CONSTRUCTION:
+			return Building.find(town.objective).cost_of(resource)
+		IMPROVEMENT:
+			return Improvement.find(town.objective).cost_of(resource)
+	return 0.0
+
+
+## Whether this is a thing that finishes at all.
+static func completes(id: StringName) -> bool:
+	var kind := kind_of(id)
+	return kind == CONSTRUCTION or kind == IMPROVEMENT
 
 
 ## What the build still needs that the town does not already have to hand.
@@ -142,7 +191,7 @@ static func still_to_gather(town: Town) -> Dictionary:
 	var still := outstanding(town)
 	for resource in still:
 		var missing := float(still[resource]) - town.held(StringName(resource))
-		if missing > 0.0:
+		if missing > MET:
 			out[resource] = missing
 	return out
 
@@ -156,15 +205,20 @@ static func materials_complete(town: Town) -> bool:
 ##
 ## A carpenters' hall makes every build faster, which is the point of having one.
 static func months_required(town: Town) -> int:
-	var building := Building.find(town.objective)
-	if building == null:
+	if not completes(town.objective):
 		return 0
+	var months := 1
+	match kind_of(town.objective):
+		CONSTRUCTION:
+			months = Building.find(town.objective).months
+		IMPROVEMENT:
+			months = Improvement.find(town.objective).months
 	var speed := 0.0
 	for id in town.buildings:
 		var standing := Building.find(StringName(id))
 		if standing != null:
 			speed += float(standing.effect("build_speed", 0.0))
-	return maxi(1, int(ceil(float(building.months) / (1.0 + maxf(0.0, speed)))))
+	return maxi(1, int(ceil(float(months) / (1.0 + maxf(0.0, speed)))))
 
 
 ## How far along, as `0.0` to `1.0`.
@@ -174,14 +228,13 @@ static func months_required(town: Town) -> int:
 ## cutting it. A posture has no progress and returns `0.0`; ask `kind_of` first
 ## rather than reading a fraction that was never going to move.
 static func progress_fraction(town: Town) -> float:
-	var building := Building.find(town.objective)
-	if building == null:
+	if not completes(town.objective):
 		return 0.0
 
 	var required := 0.0
 	var invested := 0.0
-	for resource in building.costed_resources():
-		var needed := building.cost_of(StringName(resource))
+	for resource in costed_resources(town):
+		var needed := cost_of(town, StringName(resource))
 		required += needed
 		invested += minf(needed, town.invested(StringName(resource)))
 	var materials := 1.0 if required <= 0.0 else invested / required

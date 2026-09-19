@@ -24,8 +24,8 @@
     }
   },
   {
-    "id": "pasture",
-    "name": "pasture",
+    "id": "stockyard",
+    "name": "stockyard",
     "requires": [
       "storehouse"
     ],
