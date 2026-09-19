@@ -30,6 +30,15 @@ const PAYER_COLONY: StringName = &"colony"
 ## it settles against the Crown's own books rather than against anybody's will.
 const KIND_REVENUE: StringName = &"revenue"
 
+## Goods the PC undertook that the Marshal's wars need (#69).
+##
+## Like a revenue target and for the same reason: the PC does not control it.
+## SPEC §11.3 locks that towns run themselves, so whether this is kept depends on
+## whether a governor agreed to ship and whether his town could. **One acceptance
+## can make two enemies** — the Marshal's regard falls because he was failed, the
+## governor's because he was asked something costly.
+const KIND_SHIPMENT: StringName = &"shipment"
+
 var id: StringName = &""
 var to: StringName = &""
 var kind: StringName = &""
@@ -76,7 +85,7 @@ func is_due(month: int) -> bool:
 ## The driver has to judge it against what actually happened, so `settle_due`
 ## cannot simply mark it kept when the month comes round.
 func is_a_wager() -> bool:
-	return kind == KIND_REVENUE
+	return kind == KIND_REVENUE or kind == KIND_SHIPMENT
 
 
 func amount() -> float:

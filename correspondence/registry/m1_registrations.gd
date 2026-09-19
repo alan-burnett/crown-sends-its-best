@@ -18,6 +18,7 @@ const ORDER_PROMISE_RESOURCE: StringName = &"promise_resource"
 const ORDER_PROMISE_REVENUE: StringName = &"promise_revenue"
 const ORDER_DECLINE_DEMAND: StringName = &"decline_demand"
 const ORDER_SHIP_RESOURCE: StringName = &"ship_resource"
+const ORDER_PROMISE_SHIPMENT: StringName = &"promise_shipment"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
@@ -125,6 +126,14 @@ static func register_effects() -> void:
 	# writes to the governor and the governor decides what priority to give it.
 	# The payment is the lever: pay nothing and the governor bears the whole cost,
 	# pay double and his town is richer for it.
+	# **Undertaking goods the PC does not control** (#69). Accepting the Marshal's
+	# demand is a promise; making it good takes a second letter to a governor who
+	# may refuse. Both steps can fail, and the second failing breaks the first.
+	ContentRegistry.register_effect(
+		"promise_shipment",
+		{"to": "contact", "resource": "resource", "amount": "integer", "months": "integer"},
+		ORDER_PROMISE_SHIPMENT,
+	)
 	ContentRegistry.register_effect(
 		"ship_resource",
 		{"to": "contact", "resource": "resource", "amount": "integer", "payment": "gold"},

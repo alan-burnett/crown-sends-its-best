@@ -182,6 +182,9 @@ static func order_effects() -> Dictionary:
 		# whole point is that the colony either reaches it or does not, on its own
 		# terms. The promise it creates is where it bites.
 		String(M1Registrations.ORDER_PROMISE_REVENUE): {"target": ""},
+		# Undertaking goods moves nothing either. What moves is the shipment the
+		# PC then has to persuade a governor to make.
+		String(M1Registrations.ORDER_PROMISE_SHIPMENT): {"target": ""},
 		# Troops arrive and are fed and armed out of the colony's stores.
 		String(M1Registrations.ORDER_REQUEST_TROOPS):
 			{"target": WorldValues.SUPPLY, "per_month": 6.0},
@@ -277,6 +280,13 @@ func send_post() -> bool:
 			silence.pending.append(inbound)
 
 	issued_orders = _build_orders()
+	# **The Crown stops waiting once he has answered.** A demand for goods stands
+	# across several posts so the PC can write to a governor first (#69), and this
+	# is what closes it — either answer will do, since declining plainly is an
+	# answer and the Marshal would rather have it than silence.
+	for order in issued_orders:
+		if order.kind == M1Registrations.ORDER_PROMISE_SHIPMENT 				or order.kind == M1Registrations.ORDER_DECLINE_DEMAND:
+			run.demand_book.answer()
 	# The post goes aboard. It is read next month, in phase 7.
 	for order in issued_orders:
 		orders.carry(order)

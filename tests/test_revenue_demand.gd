@@ -175,6 +175,9 @@ func test_the_crown_closing_its_purse_does_not_excuse_the_figure() -> void:
 
 # --- 🔒 The Crown asks on a schedule ----------------------------------------
 
+## **A book with no dice asks only for gold.** `_wants_goods` needs a stream to
+## throw, so passing none keeps these fixtures on the Steward's figure — which is
+## what they are about. Resource demands have their own file.
 func _book_and_growth() -> Array:
 	return [DemandBook.new(), DemandGrowth.new()]
 
@@ -185,7 +188,7 @@ func test_the_crown_waits_before_asking_for_anything() -> void:
 	var pair := _book_and_growth()
 	var demands: DemandBook = pair[0]
 	for month in DemandBook.FIRST_DEMAND_MONTH:
-		assert_false(demands.advance(month, pair[1], null),
+		assert_false(demands.advance(month, pair[1], null, null),
 			"the Treasury wrote in month %d, before the colony had a first harvest" % month)
 
 
@@ -197,7 +200,7 @@ func test_demands_arrive_on_the_interval() -> void:
 
 	var asked: PackedInt32Array = PackedInt32Array()
 	for month in 40:
-		if demands.advance(month, growth, null):
+		if demands.advance(month, growth, null, null):
 			asked.append(month)
 	assert_true(asked.size() > 1, "the Treasury asked once in forty months")
 	for at in range(1, asked.size()):
@@ -218,9 +221,9 @@ func test_frequency_growth_brings_them_closer() -> void:
 	var slow_count := 0
 	var quick_count := 0
 	for month in 60:
-		if slow.advance(month, steady, null):
+		if slow.advance(month, steady, null, null):
 			slow_count += 1
-		if quick.advance(month, pressed, null):
+		if quick.advance(month, pressed, null, null):
 			quick_count += 1
 	assert_true(quick_count > slow_count,
 		"four years of frequency growth produced %d demands against %d" % [
@@ -230,21 +233,21 @@ func test_frequency_growth_brings_them_closer() -> void:
 func test_the_figure_is_the_schedules_figure_and_grows_with_size() -> void:
 	var demands := DemandBook.new()
 	var growth := DemandGrowth.new()
-	demands.advance(DemandBook.FIRST_DEMAND_MONTH, growth, null)
+	demands.advance(DemandBook.FIRST_DEMAND_MONTH, growth, null, null)
 	assert_almost_eq(demands.amount, DemandSchedule.gold_target(growth), 0.001,
 		"the Steward asked for something the schedule never set")
 
 	var bigger := DemandGrowth.new()
 	bigger.levels[String(DemandGrowth.SIZE)] = 3
 	var later := DemandBook.new()
-	later.advance(DemandBook.FIRST_DEMAND_MONTH, bigger, null)
+	later.advance(DemandBook.FIRST_DEMAND_MONTH, bigger, null, null)
 	assert_true(later.amount > demands.amount,
 		"three years of size growth did not change what was asked")
 
 
 func test_what_the_crown_asked_survives_a_round_trip() -> void:
 	var demands := DemandBook.new()
-	demands.advance(DemandBook.FIRST_DEMAND_MONTH, DemandGrowth.new(), null)
+	demands.advance(DemandBook.FIRST_DEMAND_MONTH, DemandGrowth.new(), null, null)
 	var restored := DemandBook.from_dict(demands.to_dict())
 	assert_eq(restored.last_issued_month, demands.last_issued_month)
 	assert_eq(restored.issued_month, demands.issued_month)

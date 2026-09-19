@@ -6,7 +6,9 @@
     "gold_target": 300.0,
     "refusal_cost": 2.5,
     "askers": 1,
-    "term_months": 6
+    "term_months": 6,
+    "resource_share": 0.25,
+    "deadline_turns": 3
   },
   "growth": {
     "frequency": {

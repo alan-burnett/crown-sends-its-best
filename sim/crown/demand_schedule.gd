@@ -38,6 +38,8 @@ const DEFAULT_GOLD_TARGET: float = 600.0
 const DEFAULT_REFUSAL_COST: float = 6.0
 const DEFAULT_ASKERS: int = 1
 const DEFAULT_TERM_MONTHS: int = 6
+const DEFAULT_RESOURCE_SHARE: float = 0.25
+const DEFAULT_DEADLINE_TURNS: int = 3
 
 static var _steady: Dictionary = {}
 static var _growth: Dictionary = {}
@@ -117,6 +119,28 @@ static func askers(growth: DemandGrowth) -> int:
 ## is a dimension and belongs in the doc.
 static func term_months() -> int:
 	return int(_steady_value("term_months", float(DEFAULT_TERM_MONTHS)))
+
+
+## How often a demand asks for goods rather than gold.
+##
+## **Gold is the routine and resources are the exception** (`crown-demands.md`
+## §5). A resource demand costs two letters, a payment decision and a governor's
+## compliance; at every demand the desk becomes a logistics exercise and SPEC
+## §9.6's promise that it will not become a chore is broken. They are for when
+## the Marshal's war genuinely needs a thing the colony makes.
+static func resource_share() -> float:
+	return clampf(_steady_value("resource_share", DEFAULT_RESOURCE_SHARE), 0.0, 1.0)
+
+
+## How many turns the PC has to answer a demand for goods.
+##
+## **More than one, and that is the whole point.** A careful player writes to the
+## governor first and learns whether the goods can be had — it costs him a month,
+## and the demand may not wait, but it turns a blind bet into an informed one. A
+## demand answered by return of post makes that play impossible and reduces the
+## decision to a coin toss (§5).
+static func deadline_turns() -> int:
+	return maxi(2, int(_steady_value("deadline_turns", float(DEFAULT_DEADLINE_TURNS))))
 
 
 ## The whole bar in one dictionary, for the event log and the harness.

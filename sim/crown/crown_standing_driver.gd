@@ -94,6 +94,12 @@ func _judgement(log: EventLog, month: int) -> float:
 			PromiseBook.EVENT_BROKEN:
 				if String(event.payload.get("kind", "")) == String(Promise.KIND_REVENUE):
 					total -= CrownStanding.TARGET_MISSED
+			DemandBook.EVENT_LAPSED:
+				# **Silence is not neutral.** The Marshal was not asking whether the
+				# PC had noticed him, and letting the deadline pass costs what
+				# saying no plainly would have cost. SPEC §9.3 lets the post pile
+				# up; it does not make it free.
+				total -= DemandSchedule.refusal_cost(growth)
 			Compliance.OUTCOME_EVENTS[Compliance.COMPLY], \
 			Compliance.OUTCOME_EVENTS[Compliance.PARTIAL], \
 			Compliance.OUTCOME_EVENTS[Compliance.DELAY], \
