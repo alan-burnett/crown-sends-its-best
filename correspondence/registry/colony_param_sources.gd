@@ -53,6 +53,9 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"town_months_out", {}, ColonyParamSources.town_months_out
 	)
+	ContentRegistry.register_param_source(
+		"recalled", {"reach": "string", "field": "string"}, ColonyParamSources.recalled
+	)
 
 
 ## How many letters the Treasury will still honour.
@@ -238,6 +241,56 @@ static func town_months_out(_args: Dictionary, context: LetterContext) -> Varian
 		if event.subject == context.town.id:
 			return int(event.payload.get("months_out", 0))
 	return 0
+
+
+## Something the sender actually remembers the PC doing (#127).
+##
+## > *Your Grace was good enough to send two hundred measures of iron in the
+## > spring, when we had none.*
+##
+## **Always true**, because it names a real event on the record, which is what
+## SPEC §9.1 requires of a letter. The bias is in `reach` — which memory this
+## contact goes to — and that is framing, which §9.1 allows: a warm man leads
+## with the last kindness, a sour one with the last slight, and neither is lying.
+##
+## `field` is `amount`, `resource` or `months_ago`. A letter asks for the pieces
+## it needs and builds its own sentence, because **a stored sentence is a
+## sentence no translation could reach**.
+static func recalled(args: Dictionary, context: LetterContext) -> Variant:
+	var field := String(args.get("field", "amount"))
+	if context.sender == null or context.sender.relationship == null:
+		return 0 if field != "resource" else ""
+
+	var memory: Recollection = null
+	match String(args.get("reach", "kindness")):
+		"kindness":
+			memory = context.sender.relationship.most_generous()
+		"slight":
+			memory = context.sender.relationship.most_recent_slight()
+		"broken_word":
+			memory = context.sender.relationship.last_broken_word()
+		"in_character":
+			memory = context.sender.relationship.recalled(_sourness(context.sender))
+
+	if memory == null:
+		return 0 if field != "resource" else ""
+	match field:
+		"amount":
+			return int(roundf(memory.magnitude))
+		"resource":
+			return memory.subject
+		"months_ago":
+			return maxi(0, context.month - memory.month)
+	return 0
+
+
+## How sourly this contact remembers things.
+##
+## **Free characterisation from a weight he already has.** A man who leans hard
+## on being let down reaches for the slight; a man who does not reaches for the
+## kindness. Same log, same queries, different men.
+static func _sourness(contact: Contact) -> float:
+	return clampf(1.0 - contact.loyalty() / Relationship.MAX_LOYALTY, 0.0, 1.0)
 
 
 static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:

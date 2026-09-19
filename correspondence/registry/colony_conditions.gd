@@ -76,6 +76,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"town_came_back", {"within": "integer"}, ColonyConditions.town_came_back
 	)
+	ContentRegistry.register_condition(
+		"remembers_a_kindness", {}, ColonyConditions.remembers_a_kindness
+	)
 
 
 ## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).
@@ -135,6 +138,19 @@ static func town_came_back(args: Dictionary, context: LetterContext) -> bool:
 		if event.subject == context.town.id and context.month - event.month < within:
 			return true
 	return false
+
+
+## Whether this contact has a kindness he could name (#127).
+##
+## **The letter cannot fire without one**, because it opens by describing it.
+## A letter that referred to a generosity that never happened would break SPEC
+## §9.1's requirement that letters get the past right, and the cheapest way to
+## be sure is to only send it when there is something true to say.
+static func remembers_a_kindness(_args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.sender.relationship == null:
+		return false
+	var memory := context.sender.relationship.most_generous()
+	return memory != null and memory.magnitude > 0.0 and not memory.subject.is_empty()
 
 
 ## Whether the town could not cover a need out of its own stores this month.

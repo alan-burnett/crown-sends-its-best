@@ -159,6 +159,10 @@ func _keep(promise: Promise, contact: Contact, log: EventLog, month: int) -> voi
 	promise.settled_month = month
 	if contact != null:
 		contact.relationship.settle_promise(String(promise.id), true, month)
+		contact.relationship.remember(
+			Relationship.DELIVERED, month, promise.amount(),
+			String(promise.terms.get("resource", "")),
+		)
 	log.emit(EVENT_KEPT, promise.to, month, promise.to_dict(), WorldPhase.CROWNS_MONTH)
 
 
@@ -169,6 +173,12 @@ func _break(promise: Promise, contact: Contact, log: EventLog, month: int, reaso
 	# **A broken promise costs loyalty**, however it broke.
 	if contact != null:
 		contact.relationship.settle_promise(String(promise.id), false, month)
+		# The one a man is least likely to forget: being refused is
+		# disappointing, being promised is being lied to (#127).
+		contact.relationship.remember(
+			Relationship.PROMISE_BROKEN, month, promise.amount(),
+			String(promise.terms.get("resource", "")),
+		)
 	var payload := promise.to_dict()
 	payload["reason"] = reason
 	log.emit(EVENT_BROKEN, promise.to, month, payload, WorldPhase.CROWNS_MONTH)

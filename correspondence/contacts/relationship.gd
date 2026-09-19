@@ -43,6 +43,22 @@ const DEED_WEIGHT: Dictionary = {
 	IGNORED: -7.0,
 }
 
+## How many things a contact keeps in mind at once.
+##
+## **A fifty-year run cannot hold every deed for every contact in a save.** Keep
+## the most significant and the most recent and let the middle fall away, which
+## is also how people remember: you recall the great kindness and the last
+## slight, and the ordinary months in between are gone.
+const MEMORY_LIMIT: int = 12
+
+## How many of those are held simply for being recent, whatever they were.
+##
+## Without this a contact would remember four remarkable years and nothing about
+## last month, and a letter referring to the spring of a decade ago as though it
+## were news reads as a man who has stopped paying attention.
+const MEMORY_RECENT: int = 4
+
+
 ## Tone flavours how a letter lands and has **only a minor effect on loyalty**
 ## compared with what the letter actually grants or promises (SPEC §9.2).
 ##
@@ -69,6 +85,14 @@ var deeds: Dictionary = {}
 ## The last world month the PC wrote. -1 means never.
 var last_written_month: int = -1
 
+## What he actually remembers, oldest first (#127).
+##
+## **Counts answer how often; this answers what.** A contact asking for
+## something new can reach back, find the last time the PC was generous, and
+## name it — which is a fact about the past, and SPEC §9.1 requires letters to
+## get those right. The bias is in *which* one he reaches for.
+var history: Array[Recollection] = []
+
 
 func _init(p_contact_id: StringName = &"", p_loyalty: float = NEUTRAL_LOYALTY) -> void:
 	contact_id = p_contact_id
@@ -82,6 +106,98 @@ func _init(p_contact_id: StringName = &"", p_loyalty: float = NEUTRAL_LOYALTY) -
 ## `scale` lets a caller say how big the deed was — granting 10 gold and granting
 ## 10,000 are both `GRANTED`. Returns the actual change after clamping, so a
 ## caller can report what really happened rather than what it asked for.
+## Record a deed as something he will remember, as well as counting it.
+##
+## `magnitude` and `subject` are what make it describable: two hundred measures
+## of iron rather than "a kindness". Both may be empty — a refusal with no
+## subject is still a refusal, and a letter has to be able to say so.
+func remember(
+	deed: StringName,
+	month: int,
+	magnitude: float = 0.0,
+	subject: String = "",
+) -> void:
+	history.append(Recollection.new(deed, month, magnitude, subject))
+	_forget_the_middle()
+
+
+## Keep the most recent and the most significant; let the middle go.
+func _forget_the_middle() -> void:
+	if history.size() <= MEMORY_LIMIT:
+		return
+
+	var recent := history.slice(maxi(0, history.size() - MEMORY_RECENT))
+	var older := history.slice(0, maxi(0, history.size() - MEMORY_RECENT))
+	# Most memorable first, ties broken by recency so a man forgets the older of
+	# two equal memories.
+	older.sort_custom(func(a: Recollection, b: Recollection) -> bool:
+		if not is_equal_approx(a.weight(), b.weight()):
+			return a.weight() > b.weight()
+		return a.month > b.month)
+
+	var kept := older.slice(0, maxi(0, MEMORY_LIMIT - recent.size()))
+	kept.sort_custom(func(a: Recollection, b: Recollection) -> bool: return a.month < b.month)
+
+	history.clear()
+	for entry in kept:
+		history.append(entry)
+	for entry in recent:
+		history.append(entry)
+
+
+# --- What he reaches for ----------------------------------------------------
+
+## The largest kindness he remembers, or null.
+##
+## What a contact leads with when he is about to ask for something else.
+func most_generous() -> Recollection:
+	return _best(func(entry: Recollection) -> bool: return entry.is_a_kindness(),
+		func(a: Recollection, b: Recollection) -> bool:
+			if not is_equal_approx(a.magnitude, b.magnitude):
+				return a.magnitude > b.magnitude
+			return a.month > b.month)
+
+
+## The most recent thing done *to* him, or null.
+func most_recent_slight() -> Recollection:
+	return _best(func(entry: Recollection) -> bool: return entry.is_a_slight(),
+		func(a: Recollection, b: Recollection) -> bool: return a.month > b.month)
+
+
+## The last time the PC's word did not hold, or null.
+##
+## Kept separate from a slight because it is a different accusation: being
+## refused is disappointing and being promised is being lied to.
+func last_broken_word() -> Recollection:
+	return _best(func(entry: Recollection) -> bool: return entry.kind == PROMISE_BROKEN,
+		func(a: Recollection, b: Recollection) -> bool: return a.month > b.month)
+
+
+## The one a contact of this temper reaches for, or null.
+##
+## **Free characterisation.** Same log, same queries, different weights: a warm
+## man leads with the last kindness and a sour one with the last slight, and
+## neither of them is lying. `sourness` runs `0.0` to `1.0`.
+func recalled(sourness: float) -> Recollection:
+	var kindness := most_generous()
+	var slight := most_recent_slight()
+	if kindness == null:
+		return slight
+	if slight == null:
+		return kindness
+	return slight if sourness >= 0.5 else kindness
+
+
+func _best(matches: Callable, better: Callable) -> Recollection:
+	var found: Recollection = null
+	for entry in history:
+		if not matches.call(entry):
+			continue
+		if found == null or better.call(entry, found):
+			found = entry
+	return found
+
+
 func record_deed(deed: StringName, scale: float = 1.0) -> float:
 	if not DEEDS.has(deed):
 		push_error("Unknown deed '%s'." % deed)
@@ -177,7 +293,15 @@ func to_dict() -> Dictionary:
 		"outstanding_promises": outstanding_promises.duplicate(),
 		"deeds": deeds.duplicate(),
 		"last_written_month": last_written_month,
+		"history": _history_to_dicts(),
 	}
+
+
+func _history_to_dicts() -> Array:
+	var out: Array = []
+	for entry in history:
+		out.append(entry.to_dict())
+	return out
 
 
 static func from_dict(data: Dictionary) -> Relationship:
@@ -190,4 +314,6 @@ static func from_dict(data: Dictionary) -> Relationship:
 	relationship.last_written_month = int(data.get("last_written_month", -1))
 	relationship.promises_broken = int(data.get("promises_broken", 0))
 	relationship.last_promise_broken_month = int(data.get("last_promise_broken_month", -1))
+	for entry in data.get("history", []):
+		relationship.history.append(Recollection.from_dict(entry))
 	return relationship
