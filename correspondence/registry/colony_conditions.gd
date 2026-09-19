@@ -64,6 +64,40 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"i_was_let_down", {"within": "integer"}, ColonyConditions.i_was_let_down
 	)
+	ContentRegistry.register_condition(
+		"crown_first_leaned_harder", {}, ColonyConditions.crown_first_leaned_harder
+	)
+	ContentRegistry.register_condition(
+		"crown_leaned_on", {"axis": "string"}, ColonyConditions.crown_leaned_on
+	)
+
+
+## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).
+##
+## **The announcement, and only the announcement.** The player has to be told the
+## rules changed, or a moving bar reads as the game cheating — so this is true
+## for exactly one month of one run, the month of the first draw. It reads the
+## month rather than the levels because the levels say the same thing all year.
+static func crown_first_leaned_harder(_args: Dictionary, context: LetterContext) -> bool:
+	var growth := context.demands
+	return (
+		growth != null
+		and growth.history.size() == 1
+		and growth.grew_in_month == context.month
+	)
+
+
+## Whether the bar last moved along a named axis.
+##
+## Paired with the condition above so the Chancellor names what changed. He is
+## announcing a direction for the colony's governance, not a mood, and a letter
+## that could only say "things are harder now" would be the same letter four
+## times.
+static func crown_leaned_on(args: Dictionary, context: LetterContext) -> bool:
+	var growth := context.demands
+	if growth == null or growth.history.is_empty():
+		return false
+	return String(growth.history[growth.history.size() - 1]) == String(args.get("axis", ""))
 
 
 ## Whether the town could not cover a need out of its own stores this month.

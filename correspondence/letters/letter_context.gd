@@ -43,6 +43,14 @@ var data_order: Order = null
 ## (SPEC §10.3), and `tools/lint.gd` keeps `presentation/` away from it too.
 var refusal: CrownRefusal = null
 
+## How hard the Crown is leaning, and along which axis it last leaned harder.
+##
+## **What the Crown did, not what it is worth.** A letter may ask whether the
+## bar moved this month and which way; the magnitudes belong to the director and
+## reach the prose as declared `params`, the same rule that keeps the standing
+## figure off the page (SPEC §10.3).
+var demands: DemandGrowth = null
+
 ## The town this letter is about, when the sender speaks for one.
 ##
 ## **A governor's letter is about a place**, and the conditions that decide

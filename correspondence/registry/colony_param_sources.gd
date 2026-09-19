@@ -40,6 +40,7 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"town_population", {}, ColonyParamSources.town_population
 	)
+	ContentRegistry.register_param_source("years_served", {}, ColonyParamSources.years_served)
 
 
 ## How many letters the Treasury will still honour.
@@ -49,6 +50,15 @@ static func register_all() -> void:
 ## it without anybody seeing a standing figure.
 static func warning_turns(_args: Dictionary, _context: LetterContext) -> Variant:
 	return CrownRefusal.WARNING_TURNS
+
+
+## How many years the PC has held the post.
+##
+## Exact and truthful, so it belongs in a `{param:}` rather than a
+## `{perception:}` — the Chancellor may be unpleasant about the length of a
+## man's tenure but he is not wrong about the number.
+static func years_served(_args: Dictionary, context: LetterContext) -> Variant:
+	return 0 if context.state == null else context.state.year_index() - 1
 
 
 ## Who the letter came from, so a reply can be addressed back without the file

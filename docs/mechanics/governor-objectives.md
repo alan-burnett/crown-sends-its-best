@@ -82,6 +82,18 @@ Starting set, to grow:
 - Strengthen defences
 - Settle a new town
 - Secure the town's survival (the crisis intent)
+- **Prepare the town for rebellion** — reachable only at very low loyalty
+
+That last one is the only intent directed **against** the PC, and it is what
+`contacts.md` §4 means when it says an order at the bottom of the loyalty scale
+does not merely fail but can become the reason for what happens next. A governor
+holding it is a resident contact with heavy influence deliberately driving rebel
+sentiment upward, and his town's objectives now serve that.
+
+It does not replace SPEC §12.3's threshold — a town still rebels when sentiment
+crosses it. The two work together: the governor accelerates, sentiment crosses,
+the town declares. Which is a better story than a number quietly passing a line,
+and gives the player something he can see coming.
 
 ### How it is chosen
 

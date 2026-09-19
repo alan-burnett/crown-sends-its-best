@@ -90,6 +90,15 @@ var history: PackedStringArray = PackedStringArray()
 ## the driver is called.
 var last_drawn_year: int = 0
 
+## The month the bar last moved.
+##
+## **The Chancellor's announcement is a one-month event**, and the levels alone
+## cannot say so: they read the same all year. Without this the announcement
+## would either repeat for twelve months or lean on a cooldown, and a cooldown
+## that happened to be shorter than a year would put the same letter on the desk
+## twice.
+var grew_in_month: int = -1
+
 
 func _init() -> void:
 	for dimension in DIMENSIONS:
@@ -127,6 +136,7 @@ func advance(year: int, streams: RngStreams, log: EventLog, month: int) -> Strin
 	var drawn := _draw(streams.stream(STREAM))
 	levels[String(drawn)] = level_of(drawn) + 1
 	history.append(String(drawn))
+	grew_in_month = month
 
 	if log != null:
 		log.emit(EVENT_GROWTH, &"crown", month, {
@@ -168,6 +178,7 @@ func to_dict() -> Dictionary:
 		"bucket": Array(bucket),
 		"history": Array(history),
 		"last_drawn_year": last_drawn_year,
+		"grew_in_month": grew_in_month,
 	}
 
 
@@ -180,4 +191,5 @@ static func from_dict(data: Dictionary) -> DemandGrowth:
 	restored.bucket = PackedStringArray(data.get("bucket", []))
 	restored.history = PackedStringArray(data.get("history", []))
 	restored.last_drawn_year = int(data.get("last_drawn_year", 0))
+	restored.grew_in_month = int(data.get("grew_in_month", -1))
 	return restored
