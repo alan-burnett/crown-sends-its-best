@@ -22,5 +22,11 @@
     "letter": "pc.lay_an_embargo",
     "offers_composition": true,
     "conditions": []
+  },
+  {
+    "id": "trigger.pc.ask_for_a_policy",
+    "letter": "pc.ask_for_a_policy",
+    "offers_composition": true,
+    "conditions": []
   }
 ]

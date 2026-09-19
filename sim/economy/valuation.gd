@@ -59,11 +59,16 @@ const MERCHANT_MARGIN: float = 0.18
 
 ## What the Crown will pay, before duty.
 ##
-## Effectively fixed today. `state` is taken because it is what a failed harvest
-## at home will move, and a signature that has to grow one later is a signature
-## every caller has to be found and changed for.
-static func crown(resource: StringName, _state: WorldState = null) -> float:
-	return ResourceCatalogue.price_of(resource)
+## **The seam was cut for a harvest failure and policy arrived through it first**
+## (#80, `policy.md` §8). A patron whose specialty is horses can be persuaded to
+## have his Barony buy from your colony instead of its neighbour, and the game
+## expresses that as the Crown's price for horses going up.
+##
+## Which is the whole argument for a valuation being a function: a constant table
+## could not have carried this without being rewritten, and the driver the player
+## actually chose is more interesting than the weather.
+static func crown(resource: StringName, state: WorldState = null) -> float:
+	return ResourceCatalogue.price_of(resource) 		* PolicyEffects.price_multiplier(state, resource)
 
 
 # --- The town ---------------------------------------------------------------
