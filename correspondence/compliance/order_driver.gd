@@ -23,6 +23,10 @@ var promises: PromiseBook = null
 ## one who is merely disinclined (#72). Absent in fixtures that do not care.
 var colony: Colony = null
 
+## Standing instructions the PC has bought (#80). An enactor who agrees to one
+## puts his name to it here, in the month he agrees.
+var policies: PolicyBook = null
+
 ## Orders waiting to be read. Filled when the post is sent, emptied when it lands.
 var pending: Array[Order] = []
 
@@ -63,8 +67,41 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		var result := Compliance.resolve(order, contact, intents, state, log, streams, rebel)
 		result["order"] = order
 		results.append(result)
+		_enact_if_agreed(order, contact, result, state, log)
 
 	pending.clear()
+
+
+## A policy stands from the month its enactor agrees to it.
+##
+## **Only on a full compliance.** A policy half-agreed to is not a thing: he
+## either puts his name to it or he does not, and a delay or a reinterpretation
+## is the same as a no. That is the one place a policy differs from an ordinary
+## Order, and it is because it is a standing commitment rather than a task.
+func _enact_if_agreed(
+	order: Order,
+	contact: Contact,
+	result: Dictionary,
+	state: WorldState,
+	log: EventLog,
+) -> void:
+	if policies == null or order.kind != M1Registrations.ORDER_ENACT_POLICY:
+		return
+	if String(result.get("outcome", "")) != String(Compliance.COMPLY):
+		return
+
+	var effect := StringName(order.get_param("effect", ""))
+	if not PolicyEffects.is_effect(effect):
+		push_error("Unknown policy effect '%s'. Add it to PolicyEffects." % effect)
+		return
+
+	policies.enact(Policy.new(
+		contact.id,
+		effect,
+		float(order.get_param("cost", 0.0)),
+		StringName(order.get_param("split", Policy.NONE)),
+		order.params,
+	), log, state.month)
 
 
 ## Outcomes from the month just resolved, by contact.

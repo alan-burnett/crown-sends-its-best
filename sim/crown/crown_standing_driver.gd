@@ -32,6 +32,11 @@ var refusal: CrownRefusal = null
 ## meet the rest of the game.
 var promises: PromiseDriver = null
 
+## Told when the Crown's drafts start bouncing, so every policy the PC was
+## funding becomes a renegotiation rather than a silent collapse (#80, §5).
+var policies: PolicyBook = null
+var contacts: Dictionary = {}
+
 
 func _init(p_standing: CrownStanding = null, p_refusal: CrownRefusal = null) -> void:
 	standing = p_standing
@@ -145,6 +150,14 @@ func _react(state: WorldState, log: EventLog) -> void:
 	# **The month it stops, it stops for everything.** Not only what fell due.
 	if String(happened.get("event", "")) == String(CrownRefusal.EVENT_REFUSING):
 		var broken := promises.repudiate(log, state.month)
+		# **And every policy he was funding is now unfunded** (#80, §5). Not a
+		# collapse: it puts him in the same position as if he had written to each
+		# enactor saying he would pay nothing, and each decides for himself. A PC
+		# who has been generous finds half his apparatus carried by men willing
+		# to cover for him; one who has squeezed everyone finds it unwinds in a
+		# season, at the exact moment he can least afford it.
+		if policies != null:
+			policies.crown_stopped_paying(log, state.month)
 		log.emit(CrownRefusal.EVENT_REFUSING, &"crown", state.month, {
 			"state": String(refusal.state),
 			"repudiated": broken.size(),

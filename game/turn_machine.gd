@@ -139,7 +139,16 @@ func _init(p_run: RunState) -> void:
 	crown_standing = CrownStandingDriver.new(run.standing, run.refusal)
 	crown_standing.promises = promise_driver
 	orders.colony = run.colony
+	orders.policies = run.policies
 	crown_standing.growth = run.demands
+	crown_standing.policies = run.policies
+	crown_standing.contacts = run.contacts
+
+	# Phase 5. The standing bill, before standing is judged in phase 6: a PC who
+	# has taken on more than the colony returns watches his standing fall for it
+	# month after month, which is what a standing commitment ought to feel like.
+	var policies := PolicyDriver.new(run.policies)
+	policies.contacts = run.contacts
 	# The Crown pays until the process says otherwise, which it decides monthly.
 	promise_driver.can_crown_pay = run.refusal.pays()
 
@@ -161,7 +170,7 @@ func _init(p_run: RunState) -> void:
 	var drift := DriftDriver.new(run)
 
 	month_runner.drivers = [
-		crown_affairs, territory, colony_month, promise_driver,
+		crown_affairs, territory, colony_month, promise_driver, policies,
 		crown_standing, drift, orders, silence, governors, grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
@@ -222,6 +231,9 @@ static func order_effects() -> Dictionary:
 		# An embargo reaches a town rather than a world value, through
 		# `EmbargoExecutor`.
 		String(M1Registrations.ORDER_EMBARGO): {"target": ""},
+		# A policy is enacted when the enactor agrees to it, in phase 7, and
+		# billed from phase 5 thereafter. It moves no world value on its own.
+		String(M1Registrations.ORDER_ENACT_POLICY): {"target": ""},
 		# Urging an intent reaches the town rather than a world value, so
 		# `UrgeIntentExecutor` handles it. Listed here so that every Order kind is
 		# still accounted for in one place.

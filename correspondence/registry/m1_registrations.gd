@@ -20,6 +20,7 @@ const ORDER_DECLINE_DEMAND: StringName = &"decline_demand"
 const ORDER_SHIP_RESOURCE: StringName = &"ship_resource"
 const ORDER_PROMISE_SHIPMENT: StringName = &"promise_shipment"
 const ORDER_EMBARGO: StringName = &"embargo"
+const ORDER_ENACT_POLICY: StringName = &"enact_policy"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
@@ -122,6 +123,14 @@ static func register_effects() -> void:
 	# so the Crown has to be able to tell the two apart, and a shared `refuse`
 	# would have made every "no" to the Steward a matter for the Treasury.
 	ContentRegistry.register_effect("decline_demand", {"to": "contact"}, ORDER_DECLINE_DEMAND)
+	# **The Crown's thumb on the scale** (#80). A standing instruction with a
+	# monthly charge, and who bears that charge is the whole of the mechanic —
+	# which is why the split is a param the letter sets rather than a constant.
+	ContentRegistry.register_effect(
+		"enact_policy",
+		{"to": "contact", "effect": "string", "cost": "gold", "split": "string"},
+		ORDER_ENACT_POLICY,
+	)
 	# **The PC's only power over goods he has already promised** (#69). He cannot
 	# move a town's stockpile — SPEC §11.3 locks that towns run themselves — so he
 	# writes to the governor and the governor decides what priority to give it.

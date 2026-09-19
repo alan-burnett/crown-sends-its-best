@@ -27,6 +27,13 @@ const OUTCOMES: Array[StringName] = [COMPLY, PARTIAL, DELAY, REINTERPRET, REFUSE
 
 ## Distinct event types, so next month's letters can key on what he did without
 ## unpacking a payload.
+## How many months ahead a contact looks when he weighs a standing charge.
+##
+## **A policy has no end date**, so asked "what will this cost you", the honest
+## answer is "forever". A man does not weigh forever; he weighs a year or so and
+## decides. Tuning.
+const POLICY_HORIZON: float = 14.0
+
 const OUTCOME_EVENTS: Dictionary = {
 	COMPLY: &"order_complied",
 	PARTIAL: &"order_partly_complied",
@@ -227,6 +234,14 @@ static func cost_of(order: Order) -> float:
 			# It costs him a great deal, and no payment is on offer. What that
 			# does to his regard is the point of laying one.
 			return 0.0 if int(order.get_param("months", 0)) <= 0 else 2000.0
+		M1Registrations.ORDER_ENACT_POLICY:
+			# **What it costs him is what the PC is not paying**, for as long as
+			# it stands — so an unfunded policy is an expensive thing to be asked
+			# for and a fully funded one costs him nothing but his name.
+			var monthly := float(order.get_param("cost", 0.0))
+			var unpaid: float = Policy.UNPAID_SHARE.get(
+				StringName(order.get_param("split", "none")), 1.0)
+			return monthly * unpaid * POLICY_HORIZON
 		M1Registrations.ORDER_URGE_INTENT:
 			# **Being told what matters costs a governor nothing to carry out.**
 			# He is governing either way, and the town pays for its own projects

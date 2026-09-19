@@ -19,7 +19,8 @@ extends RefCounted
 ## and the colonists always pay:
 ##
 ## - **In** is duty, on every purchase and every sale (§10.2, both directions).
-## - **Out** is gold the Crown itself paid to honour the PC's word (§9.5).
+## - **Out** is gold the Crown itself paid to honour the PC's word (§9.5), and
+##   the monthly charge on every policy he is funding (#80).
 ##
 ## So **revenue is never negative**, and a month only goes badly through the
 ## PC's spending, rates too low to collect, or a colony that has stopped
@@ -41,6 +42,11 @@ static func of(log: EventLog) -> CrownAccounts:
 		match event.type:
 			Trade.EVENT_BOUGHT, Trade.EVENT_SOLD:
 				accounts._add(event.month, float(event.payload.get("tax", 0.0)), 0.0)
+			PolicyBook.EVENT_BILLED:
+				# **A standing charge is the Crown's money exactly as an honoured
+				# promise is** (#80). It has to land on the same books, or the
+				# one commitment the player cannot see is the one that recurs.
+				accounts._add(event.month, 0.0, float(event.payload.get("crown_paid", 0.0)))
 			PromiseBook.EVENT_KEPT:
 				if not _is_the_crowns_money(event.payload):
 					continue
