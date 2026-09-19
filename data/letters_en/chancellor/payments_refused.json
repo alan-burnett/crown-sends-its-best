@@ -1,0 +1,18 @@
+{
+  "id": "chancellor.payments_refused",
+  "sender": "chancellor",
+  "type": "report",
+  "skippable": false,
+  "params": {},
+  "body": [
+    {
+      "text": "The Treasury has stopped. I am instructed to tell you plainly, so: it has stopped."
+    },
+    {
+      "text": "What you promised on the Crown's purse is not being paid. The people you promised it to are being told by somebody who is not me, which is the one mercy in this."
+    },
+    {
+      "text": "It will resume when the books say it may, and not when you ask me. I no longer have the standing to be asked."
+    }
+  ]
+}

@@ -24,9 +24,18 @@ extends RefCounted
 
 var standing: CrownStanding = null
 
+## The political half (#68). Driven from here so that the arithmetic always
+## settles before the process reacts to it, in that order, once a month.
+var refusal: CrownRefusal = null
 
-func _init(p_standing: CrownStanding = null) -> void:
+## Told whether the Crown is paying, every month. The one place the two halves
+## meet the rest of the game.
+var promises: PromiseDriver = null
+
+
+func _init(p_standing: CrownStanding = null, p_refusal: CrownRefusal = null) -> void:
 	standing = p_standing
+	refusal = p_refusal
 
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: RngStreams) -> void:
@@ -52,3 +61,28 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 		# **The number is not in here.** The bands are the whole interface, and a
 		# payload carrying the figure is a payload a letter could render.
 	}, WorldPhase.RUN_END_CHECK)
+
+	_react(state, log)
+
+
+## The political process, after the arithmetic and never before it.
+##
+## **Refusal waits for the warning and the countdown**, however fast standing
+## collapsed, which is how SPEC §10.3's locked guarantee is kept without
+## blunting the arithmetic.
+func _react(state: WorldState, log: EventLog) -> void:
+	if refusal == null:
+		return
+
+	var happened := refusal.advance(standing, state.month)
+	if not happened.is_empty():
+		var payload := happened.duplicate()
+		payload.erase("event")
+		payload["state"] = String(refusal.state)
+		log.emit(
+			StringName(happened["event"]), &"crown", state.month,
+			payload, WorldPhase.RUN_END_CHECK,
+		)
+
+	if promises != null:
+		promises.can_crown_pay = refusal.pays()

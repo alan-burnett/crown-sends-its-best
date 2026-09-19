@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v1.9: Under Author ownership but not ready for PO or developers.
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.0: Under Author ownership, actively being read by PO and Dev
 
 ---
 
@@ -94,7 +94,7 @@ The spec uses a small set of words precisely. Most are defined where their mecha
 | Luxury | §10.1, taxed differently in §10.2 |
 | Mandate | §6.1 |
 | Natives, Tribes | §12.5 |
-| Needs and Wants | §11.3 |
+| Needs | §11.3 |
 | Objective | §11.3 |
 | Optics | §14.1 |
 | Patron | §8.3 |
@@ -197,7 +197,7 @@ These five contacts are the same in every run and are **not randomized**. Each o
 | **Chancellor** | Speaks with the Crown's political voice. Issues formal warnings about crown standing and delivers news of defeat. Loyalty to the chancellor begins very low, typically he cherishes giving you news of your failures. |
 | **Steward** | Watches the finances. Manages tax rates on the colony. Warns when gold income is negatively affecting crown standing, praises good revenue, and pushes for higher taxes. Reports on trade protests.  |
 | **Provost**  | Advises on trade specialization and education. Influences immigration policy and can supply experts. |
-| **Diplomat** | Lives in the colony and reports to you on issues such as rebel sentiment, or disloyalty of governors. Can be a casualty when towns begin to rebel or suffer (quality of life, rivals, native attacks), and the run will continue with no diplomat.  |
+| **Diplomat** | Lives in one of the colony's towns and reports on every town, most sharply on his own. He asks to be rehomed when his town turns dangerous or rebellious. He is killed if his town falls to rebellion, and may be killed when enemy attack costs his town population. He is never replaced, and the run continues with no diplomat.  |
 
 ### 8.2 Colony Contacts (semi-random)
 
@@ -453,7 +453,7 @@ Going wide or going tall is one of the run's defining choices.
 - **A new town begins fragile:** no buildings, a thin stockpile, low population, low quality of life.   
 - **The colony grows, which can offend natives.** Founding near or beyond native land offends nearby tribes in proportion to the intrusion. A new town extends the colony's border and vision.  
 - **Rebel towns never found towns.** They are too concerned about fighting the crown to worry about long term colony growth.  
-- There is no cap on number of towns. The natural forces of growth, conflict, and rebel sentiment will prevent snowballing to an extreme number of towns.
+- There is no cap on number of towns. The natural forces of growth and conflict prevent snowballing to an extreme number of towns. Expansion is checked by the people it displaces, not by the discontent of the towns already held.
 
 ---
 
@@ -479,7 +479,7 @@ A town tracks three distinct types of population
 ### 12.3 Rebel Sentiment and Rebellion
 
 - **Rebel sentiment is tracked for each town.**  
-- **Raised by:** taxes (especially on non-luxuries), shortages, harsh orders, broken promises, military abuses, and neglect.  
+- **Raised by:** taxes (especially on non-luxuries), shortages, harsh orders, broken promises, military abuses, neglect, and **development itself** — a town with more buildings, more trade, and more people of standing carries more sentiment than a hamlet.  
 - **Lowered by:** meeting needs, lower taxes, investment, favors to loyal contacts, and defeats suffered at the hands of crown troops.  
 - **Individual towns rebel.** Past a threshold, a single town declares rebellion and stops obeying the PC.  
 - **A rebel town is still part of the colony.** In the Crown's eyes it still belongs to the PC. Its people are misbehaving, and the PC's job is to bring them back into line. This is different from a **lost town**, which rivals or natives have destroyed or taken and which no longer belongs to the colony.  
@@ -497,6 +497,7 @@ A town tracks three distinct types of population
   - **Punishment:** discouraging rebellion with embargoes, penalties, and making an example of the town.  
   - **Reward and persuasion:** encouraging loyalty with concessions, investment, favors, and public relations.  
 - **🔒 Rebel towns can return peacefully.** A rebel town goes back to the Crown on its own once its people believe life was better under the Crown, or would be better if they returned.  
+- **🔒 Sentiment measures who is blamed, not how bad life is.** Suffering the Crown caused raises it; suffering the rebellion caused lowers it. Battle losses at the hands of the Crown is damage only a rebelling town can incur, so the people blame the rebellion.   
 - If every town rebels and the Crown will send no more troops, the result is the **Independence** fail condition (§13.1).
 
 ### 12.4 Rivals

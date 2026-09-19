@@ -36,6 +36,13 @@ var tone: StringName = &""
 ## what it was you asked for without the director having to flatten it first.
 var data_order: Order = null
 
+## Whether the Crown is still honouring the PC's word, and how long he has.
+##
+## **The band, the window and the deadline — never the standing figure.** A
+## letter that could read the number is a letter that would eventually print it
+## (SPEC §10.3), and `tools/lint.gd` keeps `presentation/` away from it too.
+var refusal: CrownRefusal = null
+
 ## The town this letter is about, when the sender speaks for one.
 ##
 ## **A governor's letter is about a place**, and the conditions that decide

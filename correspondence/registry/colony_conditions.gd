@@ -49,6 +49,19 @@ static func register_all() -> void:
 		ColonyConditions.town_measure_above,
 	)
 
+	# **What the Crown is doing, never how it feels about it.** A letter may ask
+	# whether the window is open or the faucet shut; it may not ask for the
+	# standing figure (SPEC §10.3, #68).
+	ContentRegistry.register_condition(
+		"crown_opened_the_window", {}, ColonyConditions.crown_opened_the_window
+	)
+	ContentRegistry.register_condition(
+		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
+	)
+	ContentRegistry.register_condition(
+		"crown_reopened_the_faucet", {}, ColonyConditions.crown_reopened_the_faucet
+	)
+
 
 ## Whether the town could not cover a need out of its own stores this month.
 ##
@@ -115,6 +128,35 @@ static func town_disagrees_with_the_crown(_args: Dictionary, context: LetterCont
 	if town == null or String(town.urged_intent).is_empty():
 		return false
 	return town.urged_intent != town.intent
+
+
+## Whether the Chancellor's warning is owed this month.
+##
+## **Fires on the month the window opens**, which is the letter SPEC §10.3 locks:
+## the player always gets it before the Crown first refuses. The countdown is at
+## its full length only on that month, so this cannot fire twice for one window.
+static func crown_opened_the_window(_args: Dictionary, context: LetterContext) -> bool:
+	var refusal := context.refusal
+	return (
+		refusal != null
+		and refusal.state == CrownRefusal.WARNED
+		and refusal.countdown == CrownRefusal.WARNING_TURNS
+	)
+
+
+## Whether the faucet shut this month.
+static func crown_closed_the_faucet(_args: Dictionary, context: LetterContext) -> bool:
+	var refusal := context.refusal
+	return refusal != null and refusal.state == CrownRefusal.REFUSING
+
+
+## Whether the Crown has started paying again after a cutoff.
+##
+## Only after a real default — a near miss inside the window was never a
+## stoppage, so there is nothing to announce.
+static func crown_reopened_the_faucet(_args: Dictionary, context: LetterContext) -> bool:
+	var refusal := context.refusal
+	return refusal != null and refusal.state == CrownRefusal.SOLVENT and refusal.cutoffs > 0
 
 
 static func town_measure_below(args: Dictionary, context: LetterContext) -> bool:

@@ -75,5 +75,45 @@
     "urgency": 0.5,
     "cooldown": 0,
     "conditions": []
+  },
+  {
+    "id": "trigger.chancellor.final_warning",
+    "letter": "chancellor.final_warning",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "turns": {
+        "from": "warning_turns"
+      }
+    },
+    "conditions": [
+      {
+        "crown_opened_the_window": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.payments_refused",
+    "letter": "chancellor.payments_refused",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {},
+    "conditions": [
+      {
+        "crown_closed_the_faucet": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.payments_restored",
+    "letter": "chancellor.payments_restored",
+    "urgency": 0.7,
+    "cooldown": 0,
+    "params": {},
+    "conditions": [
+      {
+        "crown_reopened_the_faucet": {}
+      }
+    ]
   }
 ]

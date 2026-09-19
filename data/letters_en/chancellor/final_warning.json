@@ -1,0 +1,105 @@
+{
+  "id": "chancellor.final_warning",
+  "sender": "chancellor",
+  "type": "warning",
+  "skippable": false,
+  "params": {
+    "turns": "integer"
+  },
+  "body": [
+    {
+      "text": "I write in my official capacity, which I should like you to notice, because I have not done so before."
+    },
+    {
+      "text": "The Treasury will honour what you pledge in your next {param:turns} letters. After that it honours nothing you have written, whatever you have written, and to whom."
+    },
+    {
+      "text": "I would use them, if I were you. I am not, and I say that as the kindest thing available to me."
+    },
+    {
+      "text": "I have carried a great many of your letters. This is the last one I shall enjoy carrying.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "It gives me no pleasure. I want that on the record, since very little else of mine is.",
+      "only_tones": [
+        "dutiful",
+        "desperate"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter, and I receive it {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "as a man who intends to use the time"
+        },
+        {
+          "tone": "desperate",
+          "text": "rather worse than you will imagine"
+        },
+        {
+          "tone": "annoyed",
+          "text": "with the contempt its author has earned"
+        },
+        {
+          "tone": "hateful",
+          "text": "as the final service of a man I shall not miss"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "posture",
+        "prompt": "What the court is to be told",
+        "options": [
+          {
+            "id": "retrench",
+            "label": "promise economy, and mean it",
+            "text": "The colony will retrench, and you may put your name to that.",
+            "effect": {
+              "set_policy": {
+                "policy": "spending",
+                "value": "retrench"
+              }
+            }
+          },
+          {
+            "id": "favour",
+            "label": "grant the Chancellor a favour for his trouble",
+            "text": "You have carried more than was owed. It shall be repaid in kind.",
+            "effect": {
+              "grant_favor": {
+                "to": "chancellor",
+                "favor": "a word in the right ear"
+              }
+            }
+          },
+          {
+            "id": "nothing",
+            "label": "say nothing to the court",
+            "text": "The court may think what it likes. It generally does.",
+            "effect": {
+              "refuse": {
+                "to": "chancellor"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant, for the present,",
+        "tone": {
+          "hateful": "Yours, and not for much longer,"
+        }
+      }
+    ]
+  }
+}

@@ -6,8 +6,7 @@
 >
 > **Serves:** SPEC §8.1, §12.3, and the satire in §3.2.
 >
-> **Requires a change to SPEC §8.1**, which currently describes his death as
-> ambient risk.
+> **SPEC §8.1 matches this document as of v2.0.**
 
 ---
 

@@ -1,0 +1,27 @@
+{
+  "id": "chancellor.payments_restored",
+  "sender": "chancellor",
+  "type": "report",
+  "skippable": true,
+  "params": {},
+  "body": [
+    {
+      "text": "The Treasury has resumed. I am told the books now bear looking at, which from that quarter is a declaration of love."
+    },
+    {
+      "text": "You will find it holds you to a higher mark than before. It does that each time. I would not test how much higher.",
+      "only_tones": [
+        "dutiful",
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I said very little on your behalf. It seems to have been the right amount.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    }
+  ]
+}
