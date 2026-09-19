@@ -190,7 +190,10 @@ func test_needs_are_by_population() -> void:
 
 
 func test_the_objective_tier_is_what_it_still_costs() -> void:
-	var harness := _harness()
+	# **One worker**, so the month's work cannot finish the storehouse outright.
+	# The fixture always assumed that; it used to hold because the hunger weight
+	# kept a destitute town out of the forest, and that weight is gone (#116).
+	var harness := _harness(1)
 	harness["town"].objective = &"storehouse"
 	harness["town"].store(&"wood", 10.0)
 	_run_month(harness)
