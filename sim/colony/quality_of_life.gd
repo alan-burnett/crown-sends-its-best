@@ -54,6 +54,27 @@ const W_SAFETY: float = 0.25
 const W_MEANS: float = 0.20
 const W_HOPE: float = 0.25
 
+## **Safety is inert until M5, so it is left out of the sum** (#117).
+##
+## Pinned at 1.0 and carrying a quarter of the weight, it contributed a flat
+## 0.25 every month — which is not a component, it is a constant, and it put a
+## floor of 0.25 under every town in the game. Across 400 harness runs quality of
+## life never left 0.91–0.98 (#90), so every ladder hung on it had one reachable
+## rung and every governor said the same word about his people for five years.
+##
+## Excluded and the rest renormalised: same relative balance between health,
+## means and hope, and the full range reachable.
+##
+## **This widens the range; it does not create variation.** A town whose health,
+## means and hope all sit near 1.0 still scores near 1.0. Real movement needs the
+## colony to struggle, which is M3's pressures landing. This only removes the
+## structural floor so that when they land, the ladders can discriminate.
+##
+## **Flipping this back is not the M5 plan.** The Author has asked that safety's
+## return be a fresh look at how combat reaches quality of life rather than a
+## restoration of these numbers — safety is not the only component a war touches.
+const SAFETY_IS_INERT: bool = true
+
 ## How far pleasure carries a town from where it stands towards contentment.
 const PLEASURE_LIFT: float = 0.45
 
@@ -114,16 +135,35 @@ static func of(town: Town, context: ColonyContext) -> Dictionary:
 	return parts
 
 
-## The weighted sum of the four that are not pleasure.
+## The weighted sum of the components that are not pleasure.
+##
+## Renormalised over whichever of them can actually vary, so that leaving one out
+## changes the range and not the balance between the rest.
 static func substance_of(parts: Dictionary) -> float:
-	return clampf(
+	var total := (
 		W_HEALTH * float(parts.get("health", 0.0))
-		+ W_SAFETY * float(parts.get("safety", 0.0))
 		+ W_MEANS * float(parts.get("means", 0.0))
-		+ W_HOPE * float(parts.get("hope", 0.0)),
-		0.0,
-		1.0,
+		+ W_HOPE * float(parts.get("hope", 0.0))
 	)
+	if not SAFETY_IS_INERT:
+		total += W_SAFETY * float(parts.get("safety", 0.0))
+	return clampf(total / live_weight(), 0.0, 1.0)
+
+
+## What the weights add up to, over the components that can move.
+static func live_weight() -> float:
+	var total := W_HEALTH + W_MEANS + W_HOPE
+	if not SAFETY_IS_INERT:
+		total += W_SAFETY
+	return maxf(0.001, total)
+
+
+## What a component is worth once the sum has been renormalised.
+##
+## Exposed so a test can state the interim balance without recomputing it, and
+## so nothing has to hardcode 0.40 where 0.30 is written.
+static func effective_weight(raw: float) -> float:
+	return raw / live_weight()
 
 
 ## Pleasure lifts, it does not add.
