@@ -183,6 +183,7 @@ rejected.
 ```bash
 ./tools/godot.sh --script res://tools/run_tests.gd    # tests
 ./tools/godot.sh --script res://tools/lint.gd         # architecture lint
+./tools/godot.sh --script res://tools/validate_content.gd   # content validator
 ./tools/godot.sh --editor --quit                      # reimport after adding a class_name
 ```
 
@@ -192,6 +193,11 @@ Windows the standard Godot build prints nothing to a terminal without it.
 **Reimport after adding a `class_name`.** Godot only registers those during a
 project scan, so a script added outside the editor is invisible until one runs.
 The failure reads `Could not find type "X" in the current scope`.
+
+**Do not put a lambda in a static registry.** Godot 4.7 segfaults on shutdown
+when one is still held at exit, which cost an afternoon and would have handed CI
+a meaningless exit code. Register a **named static function** instead, or store
+plain data and interpret it.
 
 The lint enforces two rules that are cheap now and expensive to retrofit:
 nothing under `sim/` touches a Godot node, and nothing anywhere draws from the

@@ -1,0 +1,10 @@
+[
+  {
+    "id": "trigger.marshal.request_supplies",
+    "letter": "marshal.request_supplies",
+    "conditions": [
+      { "world_value_above": { "key": "crown_war_intensity", "value": 30 } },
+      { "months_silent_at_least": { "months": 0 } }
+    ]
+  }
+]

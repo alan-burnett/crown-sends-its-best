@@ -1,0 +1,65 @@
+{
+  "id": "marshal.request_supplies",
+  "sender": "marshal",
+  "type": "request",
+  "skippable": true,
+
+  "params": { "resource": "resource", "amount": "integer" },
+
+  "perception": {
+    "northern_front": {
+      "measure": "crown_war_intensity",
+      "ladder": ["quiet", "troubled", "hard-pressed", "desperate"]
+    }
+  },
+
+  "body": [
+    { "text": "The campaign in the {perception:northern_front} north drags on." },
+    { "text": "I require {param:amount} of {param:resource}, and I require it by winter." },
+    { "text": "Your predecessor understood what the Crown's wars cost.",
+      "only_tones": ["annoyed", "hateful"] }
+  ],
+
+  "reply": {
+    "tone": {
+      "text": "Your letter finds me {choice}.",
+      "options": [
+        { "tone": "pleased",   "text": "in the very best of humours" },
+        { "tone": "dutiful",   "text": "attentive to the Crown's need" },
+        { "tone": "annoyed",   "text": "short of both time and patience" },
+        { "tone": "desperate", "text": "at the very end of my means" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "grant",
+        "prompt": "The supplies",
+        "options": [
+          {
+            "id": "full",
+            "label": "send the full {param:amount}",
+            "text": "You shall have {param:amount} of {param:resource} entire{insert:barb}.",
+            "insert": { "barb": { "annoyed": ", though it beggars the colony to do it" } },
+            "effect": {
+              "promise_resource": { "to": "marshal", "resource": "{resource}", "amount": "{amount}" }
+            }
+          },
+          {
+            "id": "none",
+            "label": "send nothing",
+            "text": "The colony can spare nothing this season{insert:apology}.",
+            "insert": { "apology": { "desperate": ", and I am sorry for it" } },
+            "effect": { "refuse": { "to": "marshal" } }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant,",
+        "tone": {
+          "pleased": "Your most affectionate servant,",
+          "hateful": "Do not write to me again this season."
+        } }
+    ]
+  }
+}
