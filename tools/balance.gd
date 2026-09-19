@@ -124,6 +124,16 @@ func _play(
 	influence: Dictionary,
 ) -> Dictionary:
 	var run := RunState.new_run(seed_value)
+	# **A policy may start the run with duties already set.** Some questions are
+	# about a rate rather than about how letters are answered — what raising the
+	# duty on tea does to what towns buy (#115) cannot be asked any other way,
+	# because nothing in the post moves a single resource's rate far enough in
+	# five years to see it.
+	var rates: Dictionary = policy.get("rates", {})
+	var keyed: PackedStringArray = PackedStringArray(rates.keys())
+	keyed.sort()
+	for resource in keyed:
+		run.world.values[TaxRates.key_for(StringName(resource))] = float(rates[resource])
 	ContactRoster.load_into(run, content)
 	var machine := TurnMachine.new(run)
 	machine.use_content(content)
@@ -133,6 +143,7 @@ func _play(
 	var turns := years * MONTHS_PER_YEAR
 	var seen_traces := 0
 	var letters := 0
+	var counted := 0
 
 	for turn in turns:
 		machine.begin_turn()
@@ -149,7 +160,8 @@ func _play(
 			return {"error": wrong, "turn": turn, "rows": rows}
 
 		if run.world.month % MONTHS_PER_YEAR == 0:
-			rows.append(_row(seed_value, run, letters))
+			rows.append(_row(seed_value, run, letters, run.log.since(counted)))
+			counted = run.log.next_seq()
 			letters = 0
 
 	return {"rows": rows}
@@ -230,7 +242,7 @@ func _preferred_tone(options: Array, wanted: StringName) -> StringName:
 
 # --- A year's row -----------------------------------------------------------
 
-func _row(seed_value: int, run: RunState, letters: int) -> Dictionary:
+func _row(seed_value: int, run: RunState, letters: int, fresh: Array) -> Dictionary:
 	var towns := run.colony.in_order()
 	var people := 0
 	var quality := 0.0
@@ -249,7 +261,7 @@ func _row(seed_value: int, run: RunState, letters: int) -> Dictionary:
 		intents.append(String(town.intent))
 
 	var ledger := Ledger.of(run.log)
-	return {
+	var row: Dictionary = {
 		"seed": seed_value,
 		"year": run.world.year_index(),
 		"towns": towns.size(),
@@ -275,21 +287,46 @@ func _row(seed_value: int, run: RunState, letters: int) -> Dictionary:
 		"objectives": "|".join(objectives),
 	}
 
+	# **What the colony actually bought, by kind.** The column that shows a duty
+	# backfiring: raise the rate on one comfort and the quantity moves onto the
+	# others rather than the Crown collecting more (#115, `town-economy.md` §2).
+	for id in ResourceCatalogue.luxuries():
+		row["bought_%s" % id] = 0.0
+	for event in fresh:
+		if event.type != ExchangePhase.EVENT_SHOPPED:
+			continue
+		var bought: Dictionary = event.payload.get("bought", {})
+		for id in bought:
+			var column := "bought_%s" % id
+			if row.has(column):
+				row[column] = float(row[column]) + float(bought[id])
+	return row
+
 
 const COLUMNS: PackedStringArray = [
 	"seed", "year", "towns", "population", "quality_of_life", "food_held",
 	"months_hungry", "food_security", "supply", "revenue", "tax_base",
 	"tax_burden", "net_position", "standing", "standing_band", "letters",
 	"promises_outstanding",
-	"intents", "objectives",
 ]
+
+## The fixed columns, then one per comfort, then the wide text last so a
+## spreadsheet opens on the numbers.
+func _columns() -> PackedStringArray:
+	var out := COLUMNS.duplicate()
+	for id in ResourceCatalogue.luxuries():
+		out.append("bought_%s" % id)
+	out.append("intents")
+	out.append("objectives")
+	return out
 
 
 func _years_csv(rows: Array) -> String:
-	var lines: PackedStringArray = PackedStringArray([",".join(COLUMNS)])
+	var columns := _columns()
+	var lines: PackedStringArray = PackedStringArray([",".join(columns)])
 	for row in rows:
 		var cells: PackedStringArray = PackedStringArray()
-		for column in COLUMNS:
+		for column in columns:
 			cells.append(_cell(row.get(column, "")))
 		lines.append(",".join(cells))
 	return "\n".join(lines) + "\n"

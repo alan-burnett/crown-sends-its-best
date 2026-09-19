@@ -38,9 +38,18 @@ var needs: Dictionary = {}
 ## town is building, over what has already gone into it.
 var objective: Dictionary = {}
 
-## **Tier 3.** Comforts the town would buy with whatever is left. Luxuries, and
-## never anything survival depends on.
+## **Tier 3.** What the governor's ambitions want laid in, bought with whatever
+## survives the first two tiers. Never anything survival depends on.
 var wants: Dictionary = {}
+
+## What the town will lay out on comforts this month, in gold.
+##
+## **A budget, not a shopping list.** Which comfort it buys is decided at the
+## margin by Exchange, given what the cellar already holds and what each one is
+## taxed at — a town swimming in tea buys rum instead, and a town that makes its
+## own rum buys neither (`town-economy.md` §2). A per-kind appetite could not
+## express any of that.
+var comfort_budget: float = 0.0
 
 ## Held back before anything is sold. Months of need, per the data.
 var reserve: Dictionary = {}
@@ -118,6 +127,7 @@ func to_dict() -> Dictionary:
 		"needs": needs.duplicate(),
 		"objective": objective.duplicate(),
 		"wants": wants.duplicate(),
+		"comfort_budget": comfort_budget,
 		"reserve": reserve.duplicate(),
 		"spare": spare.duplicate(),
 		"shortfall": shortfall.duplicate(),

@@ -28,16 +28,126 @@ extends ColonyPhase
 
 const EVENT_SHOPPED: StringName = &"town_exchanged"
 
-## How much comfort a town lays in altogether.
+## How many purchases a town makes in one month before it stops reconsidering.
 ##
-## Reckon says how much of *each* luxury the town would like; this is what it
-## will actually carry home in one month, across all of them. Set to several
-## kinds' worth rather than one, because **variety is worth something**
-## (`quality-of-life.md` §4): a town with beer, rum and tea is happier than a
-## town with the same quantity of beer alone, and a town that only ever bought
-## the cheapest thing on the list would never find that out.
-func _comfort_budget(town: Town) -> float:
-	return float(town.population()) * ColonyNeeds.luxury_per_head() * QualityOfLife.VARIETY_TARGET
+## Enough to fill a cellar with several kinds; bounded, so choosing comforts is
+## a short loop rather than a search.
+const COMFORT_ROUNDS: int = 8
+
+
+## Spend the comfort purse on whatever is worth the most per gold, a little at a
+## time, until the money or the appetite runs out.
+##
+## ## Why a loop and not a list
+##
+## **What is worth buying changes as the cellar fills.** A town swimming in tea
+## gets more from its first rum than its hundredth tea, so the second purchase of
+## a month is not necessarily the same as the first. That is the variety bonus in
+## `quality-of-life.md` §4 read backwards, and it cannot be expressed as a
+## quantity worked out in advance.
+##
+## ## What it buys, and what it will not
+##
+## Each step picks the comfort with the best **quality of life per gold at the
+## margin**, where the gold includes that resource's duty. So:
+##
+## - A town that already has a heap of one thing turns to another, dearer one.
+## - **A town that can make a comfort never buys it.** A sugar plantation makes
+##   rum at near-zero marginal cost, and the Crown sells it none.
+## - **Raising the duty on one comfort pushes the town onto the others.** That
+##   is the backfire SPEC §10.2 describes — tax tea heavily and towns shift to
+##   the rum they distil themselves, and the Crown collects nothing rather than
+##   more. It falls out of this rather than being written anywhere.
+func _buy_comfort(
+	town: Town,
+	reckoning: Reckoning,
+	context: ColonyContext,
+	into: Dictionary,
+) -> void:
+	var budget := reckoning.comfort_budget
+	if budget <= 0.0:
+		return
+
+	var mouths := maxf(1.0, float(town.population()))
+	var step := mouths * ColonyNeeds.luxury_per_head() / QualityOfLife.VARIETY_TARGET
+	if step <= 0.0:
+		return
+
+	var purse := budget
+	for _round in COMFORT_ROUNDS:
+		if purse <= 0.0:
+			break
+		var best := _best_value(town, mouths, step, reckoning, context)
+		if String(best) == "":
+			break
+
+		var outlay := step * ResourceCatalogue.price_of(best) * (1.0 + context.tax_rate(best))
+		var got := _shop(town, best, minf(step, purse / maxf(0.001, outlay / step)), context, into)
+		if got <= 0.0:
+			break
+		purse -= outlay
+
+
+## Which comfort is worth the most per gold right now, or empty.
+func _best_value(
+	town: Town,
+	mouths: float,
+	step: float,
+	reckoning: Reckoning,
+	context: ColonyContext,
+) -> StringName:
+	var held: Dictionary = {}
+	for id in ResourceCatalogue.luxuries():
+		held[String(id)] = town.held(StringName(id))
+
+	var best := &""
+	var best_value := 0.0
+	for id in ResourceCatalogue.luxuries():
+		var resource := StringName(id)
+		if _makes_its_own(town, resource, step, reckoning):
+			continue
+		var price := ResourceCatalogue.price_of(resource) * (1.0 + context.tax_rate(resource))
+		if price <= 0.0:
+			continue
+		var value := QualityOfLife.marginal_pleasure(mouths, held, resource, step) / (price * step)
+		# Ties break on the name, so the choice is the colony's rather than the
+		# catalogue's iteration order.
+		if value > best_value + 0.000001 or (
+			absf(value - best_value) <= 0.000001 and String(best) != "" and String(id) < String(best)
+		):
+			best = resource
+			best_value = value
+	return best if best_value > 0.0 else &""
+
+
+## Whether the town can make this month's drinking for itself.
+##
+## **A town with a sugar plantation has rum at near-zero marginal cost and never
+## buys it** (`town-economy.md` §2).
+##
+## ## Spare input, not any input
+##
+## The test is the input the town holds **over what Reckon has reserved**, and
+## enough of it to be worth a batch. Holding a scrap is not a plantation: beer is
+## brewed from food, so "holds any food at all" would mean no fed town ever buys
+## a beer — the cheapest comfort in the colony would be unpurchasable, and the
+## duty on it would be an instrument that moves nothing. A town buying its dinner
+## from the Crown has no grain to spare for the brewhouse and buys its beer too.
+func _makes_its_own(
+	town: Town,
+	resource: StringName,
+	step: float,
+	reckoning: Reckoning,
+) -> bool:
+	var per_unit := ResourceCatalogue.input_per_unit_of(resource)
+	if per_unit <= 0.0:
+		return false
+	var batch := step * per_unit
+	for input in ResourceCatalogue.inputs_for(resource):
+		var kind := StringName(input)
+		if town.held(kind) - reckoning.reserve_of(kind) >= batch:
+			return true
+	return false
 
 
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
@@ -70,16 +180,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	for resource in stocked:
 		_shop(town, StringName(resource), reckoning.want_of(StringName(resource)), context, spent_on)
 
-	# 3b. Tier 3, comforts, last and only with what is left. Cheapest first
-	#    — a town buying comfort gets more of it per coin from beer than from tea.
-	var purse := _comfort_budget(town)
-	for resource in _luxuries_by_price():
-		if purse <= 0.0:
-			break
-		var room := reckoning.want_of(StringName(resource))
-		if room <= 0.0:
-			continue
-		purse -= _shop(town, StringName(resource), minf(room, purse), context, spent_on)
+	# 3b. Comforts, last and only with what is left — and chosen at the margin
+	#     rather than by price, which is what makes a per-resource duty a real
+	#     instrument (`town-economy.md` §2).
+	_buy_comfort(town, reckoning, context, spent_on)
 
 	if spent_on.is_empty():
 		return
@@ -116,20 +220,3 @@ func _buy_from_natives(
 	_context: ColonyContext,
 ) -> float:
 	return 0.0
-
-
-## Luxuries, cheapest first, then by name.
-func _luxuries_by_price() -> PackedStringArray:
-	var entries: Array = []
-	for id in ResourceCatalogue.ids():
-		if ResourceCatalogue.is_luxury(StringName(id)):
-			entries.append([ResourceCatalogue.price_of(StringName(id)), String(id)])
-	entries.sort_custom(func(a: Array, b: Array) -> bool:
-		if not is_equal_approx(float(a[0]), float(b[0])):
-			return float(a[0]) < float(b[0])
-		return String(a[1]) < String(b[1]))
-
-	var out: PackedStringArray = PackedStringArray()
-	for entry in entries:
-		out.append(String(entry[1]))
-	return out

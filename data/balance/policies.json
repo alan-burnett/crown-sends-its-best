@@ -50,5 +50,39 @@
     "prefer": [],
     "tone": "dutiful",
     "answers": "none"
+  },
+  {
+    "id": "tea_free",
+    "name": "the steady hand, tea untaxed",
+    "note": "The steady hand with tea at the base rate. The control for the tea duty.",
+    "prefer": [
+      "partial",
+      "half",
+      "hold",
+      "survival",
+      "growth"
+    ],
+    "tone": "dutiful",
+    "answers": "all",
+    "rates": {
+      "tea": 0.1
+    }
+  },
+  {
+    "id": "tea_duty",
+    "name": "the steady hand, tea taxed hard",
+    "note": "The steady hand with a heavy duty on tea. What taxing the one comfort the colony cannot grow actually does (SPEC 10.2).",
+    "prefer": [
+      "partial",
+      "half",
+      "hold",
+      "survival",
+      "growth"
+    ],
+    "tone": "dutiful",
+    "answers": "all",
+    "rates": {
+      "tea": 0.9
+    }
   }
 ]

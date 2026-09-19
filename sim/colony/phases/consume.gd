@@ -113,23 +113,32 @@ func _wear(town: Town, mouths: float, record: Dictionary) -> void:
 
 ## Luxuries, up to the cap. The share of the cap actually met is what Settle
 ## reads; a town with no luxuries at all is not *suffering*, merely dull.
+##
+## **The draw itself lives in `QualityOfLife`**, because Exchange needs to know
+## what a cellar will be worth *before* buying it (`town-economy.md` §2). One
+## function, used from both sides, is the only way the two cannot drift apart.
 func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
 	var cap := mouths * ColonyNeeds.luxury_per_head()
 	if cap <= 0.0:
 		record["luxury"] = 0.0
 		record["luxury_kinds"] = 0
 		return
+
+	var held: Dictionary = {}
+	for id in ResourceCatalogue.luxuries():
+		held[String(id)] = town.held(StringName(id))
+
+	var drawn := QualityOfLife.draw_from(mouths, held)
+	var ids: PackedStringArray = PackedStringArray(drawn.keys())
+	ids.sort()
 	var taken := 0.0
 	var kinds := 0
-	for id in ResourceCatalogue.ids():
-		if taken >= cap:
-			break
-		if not ResourceCatalogue.is_luxury(StringName(id)):
-			continue
-		var drunk := town.take(StringName(id), cap - taken)
+	for id in ids:
+		var drunk := town.take(StringName(id), float(drawn[id]))
 		if drunk > 0.0:
 			kinds += 1
 		taken += drunk
+
 	record["luxury"] = clampf(taken / cap, 0.0, 1.0)
 	# **Variety is worth something of its own**: beer alone is worth less than
 	# beer, rum and tea together (`quality-of-life.md` §4). Counted here because
