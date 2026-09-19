@@ -21,7 +21,7 @@ func _colony_driver() -> ColonyDriver:
 	colony.add(town)
 
 	var driver := ColonyDriver.new(colony, null, SEED)
-	driver.month.set_handler(ColonyMonth.SETTLE, DriftingSettle.new())
+	driver.month.set_handler(ColonyMonth.SETTLE, SettlePhase.new())
 	return driver
 
 
@@ -123,9 +123,9 @@ func test_it_emits_real_events_in_real_phases() -> void:
 	# events and their phases are the ones the real sim will use.
 	var log: EventLog = _run(3)["log"]
 	assert_not_empty(log.of_type(CrownAffairs.EVENT_WAR_MOVED))
-	assert_not_empty(log.of_type(DriftingSettle.EVENT_SETTLED))
+	assert_not_empty(log.of_type(SettlePhase.EVENT_SETTLED))
 	assert_eq(log.of_type(CrownAffairs.EVENT_WAR_MOVED)[0].phase, WorldPhase.CROWNS_MONTH)
-	assert_eq(log.of_type(DriftingSettle.EVENT_SETTLED)[0].phase, WorldPhase.COLONY_MONTH)
+	assert_eq(log.of_type(SettlePhase.EVENT_SETTLED)[0].phase, WorldPhase.COLONY_MONTH)
 
 
 func test_it_produces_a_real_diff() -> void:

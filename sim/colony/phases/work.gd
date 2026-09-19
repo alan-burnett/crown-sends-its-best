@@ -103,7 +103,7 @@ func _score_tile(
 	at: Vector2i,
 	hunger: float,
 	wanted: Dictionary,
-	focus: StringName,
+	focus: PackedStringArray,
 ) -> float:
 	var score := 0.0
 	for resource in ResourceCatalogue.ids():
@@ -113,7 +113,7 @@ func _score_tile(
 		var weight := 1.0
 		if resource == "food":
 			weight += hunger * HUNGER_WEIGHT
-		if wanted.has(resource) or resource == String(focus):
+		if wanted.has(resource) or focus.has(resource):
 			weight += OBJECTIVE_WEIGHT
 		score += amount * weight
 	return score

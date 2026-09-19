@@ -69,6 +69,7 @@ var silence: SilenceDriver = null
 
 ## Recomputes borders, influence and vision, in phase 3.
 var territory: TerritoryDriver = null
+var governors: GovernorDriver = null
 
 ## Runs the eight phases of the colony month, in phase 4.
 var colony_month: ColonyDriver = null
@@ -87,6 +88,11 @@ func _init(p_run: RunState) -> void:
 
 	var executor := StubIntentExecutor.new()
 	executor.table = order_effects()
+
+	# The one Order that reaches a town rather than a world value. It needs the
+	# colony, so it cannot live in the table above.
+	var urging := UrgeIntentExecutor.new()
+	urging.colony = run.colony
 
 	month_runner = WorldMonth.new(run.intents, run.streams)
 	# Order matters only where the mechanics doc says it does; each driver
@@ -107,12 +113,23 @@ func _init(p_run: RunState) -> void:
 	colony_month.month.set_handler(ColonyMonth.CONSUME, ConsumePhase.new())
 	colony_month.month.set_handler(ColonyMonth.BUILD, BuildPhase.new())
 	colony_month.month.set_handler(ColonyMonth.SELL, SellPhase.new())
-	colony_month.month.set_handler(ColonyMonth.SETTLE, DriftingSettle.new())
+	colony_month.month.set_handler(ColonyMonth.SETTLE, SettlePhase.new())
+
+	# Phase 8. Each governor commits to what his town is for, which next month's
+	# Settle turns into a project (#53).
+	governors = GovernorDriver.new(run.colony, run.map)
+	governors.territory_driver = territory
+	for id in run.contact_ids():
+		var contact := run.contact(StringName(id))
+		if contact != null and contact.role == Governor.ROLE:
+			governors.actors[String(id)] = contact
 
 	# Order within the list does not decide anything — each driver answers for its
 	# own phase, and the phases are the mechanics doc's.
-	month_runner.drivers = [CrownAffairs.new(), territory, colony_month, promise_driver, orders, silence]
-	month_runner.executors = [executor]
+	month_runner.drivers = [CrownAffairs.new(), territory, colony_month, promise_driver, orders, silence, governors]
+	# The specific executor is asked first; the table-driven one answers for
+	# everything else.
+	month_runner.executors = [urging, executor]
 
 
 ## What each kind of Order does to the world.
@@ -151,6 +168,10 @@ static func order_effects() -> Dictionary:
 		String(M1Registrations.ORDER_GRANT_FAVOR): {"target": ""},
 		String(M1Registrations.ORDER_ADJUST_LOYALTY): {"target": ""},
 		String(M1Registrations.ORDER_REFUSE): {"target": ""},
+		# Urging an intent reaches the town rather than a world value, so
+		# `UrgeIntentExecutor` handles it. Listed here so that every Order kind is
+		# still accounted for in one place.
+		String(M1Registrations.ORDER_URGE_INTENT): {"target": ""},
 	}
 
 

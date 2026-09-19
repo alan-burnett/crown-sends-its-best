@@ -18,6 +18,12 @@ extends SceneTree
 ## It also bans GDScript's built-in `hash()` in run-affecting code, because it is
 ## not documented as stable across engine versions or platforms and the game
 ## ships on desktop and mobile (SPEC §16.1).
+##
+## And it enforces SPEC §8.5's lock on what a letter can reach: **an order
+## reaches the governor's intent, never the town's objective.** The PC cannot
+## name the project, the tile or the month, and the check is here rather than in
+## a review because the tempting version of that bug — a letter effect that sets
+## `town.objective` directly — looks entirely reasonable in isolation.
 
 const SIM_ROOT: String = "res://sim"
 const PRESENTATION_ROOT: String = "res://presentation"
@@ -91,6 +97,19 @@ const TOWN_GOLD_NAMES: Array[Array] = [
 ## **🔒 The map only shows what the colony knows** (SPEC §11.2).
 ## Presentation reads `MapKnowledge`, never the real map — otherwise the first
 ## debug overlay leaks every rival's position the moment M5 puts them on it.
+## 🔒 SPEC §8.5. Writing any of these outside `sim/` is naming a project or a
+## tile on the PC's behalf.
+##
+## `urged_intent` is deliberately absent: that one **is** the letter's business,
+## and it is what the PC argues about instead.
+const OBJECTIVE_WRITES: Array[Array] = [
+	["objective =", "sets a town's objective"],
+	["objective_target", "names the tile for a town's objective"],
+	["objective_progress", "moves a town's objective along"],
+	["objective_invested", "moves what a town has put into its objective"],
+	["clear_objective", "cancels a town's objective"],
+]
+
 const MAP_TRUTH_NAMES: Array[Array] = [
 	["WorldMap", "reads the real map instead of MapKnowledge"],
 	["MapGenerator", "reaches into map generation"],
@@ -152,6 +171,9 @@ func _check(path: String) -> void:
 
 		if not in_sim:
 			_match(path, index, line, APPLY_PATTERN, "calls apply() outside sim/ — only the sim writes sim state (Seam A, Seam B)")
+			for rule in OBJECTIVE_WRITES:
+				if line.contains(rule[0]):
+					_report(path, index, "%s from outside sim/ (SPEC 8.5: an order reaches the governor's intent, never the town's objective)" % rule[1])
 
 		if in_presentation:
 			for rule in TOWN_GOLD_NAMES:

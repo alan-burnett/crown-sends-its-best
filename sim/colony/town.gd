@@ -49,9 +49,41 @@ var quality_of_life: float = 0.0
 ## Rising sentiment is M3; the field exists so the town is whole.
 var rebel_sentiment: float = 0.0
 
-## What the town is working towards. The Governor chooses it (#53). Either a
-## building or a standing posture — see `Objective`.
+## **What the governor wants for the town** — a standing goal that may hold for
+## twenty months (`GovernorIntent`). He chooses it; the town works out what to
+## do about it.
+var intent: StringName = &""
+
+## When he settled on it. Read by nothing that decides; written so a letter can
+## say how long he has been at this.
+var intent_since: int = 0
+
+## What the PC last wrote that the town was *for*, and when.
+##
+## **🔒 An order reaches the governor's intent, never the town's objective**
+## (SPEC §8.5). This is the only thing a letter can move, and a consideration —
+## not a rule — decides what he does about it.
+var urged_intent: StringName = &""
+var urged_month: int = 0
+
+## What the town is working towards. **The town chooses it, deterministically,
+## to serve the intent** — a building, an improvement, or a standing posture.
+## See `Objective` and `ObjectiveSelector`.
 var objective: StringName = &""
+
+## The tile, when the objective is an improvement. The governor picked it.
+var objective_target: Vector2i = Vector2i(-1, -1)
+
+## The intent this objective was chosen to serve. When it and `intent` differ,
+## the objective becomes eligible for reconsideration — eligible, not doomed.
+var objective_intent: StringName = &""
+
+## The month work began.
+var objective_since: int = 0
+
+## Months in a row the build has put in no labour. **Kept by Build, read by
+## Reconsideration**: only Build knows whether a month moved the project on.
+var objective_idle_months: int = 0
 
 ## Months of labour already put in. Only construction advances it.
 var objective_progress: int = 0
@@ -193,7 +225,10 @@ func invest(resource: StringName, amount: float) -> float:
 ## is already cut and standing in the half-built frame.
 func clear_objective() -> void:
 	objective = &""
+	objective_target = Vector2i(-1, -1)
+	objective_intent = &""
 	objective_progress = 0
+	objective_idle_months = 0
 	objective_invested = {}
 
 
@@ -222,7 +257,15 @@ func to_dict() -> Dictionary:
 		"buildings": buildings.duplicate(),
 		"quality_of_life": quality_of_life,
 		"rebel_sentiment": rebel_sentiment,
+		"intent": String(intent),
+		"intent_since": intent_since,
+		"urged_intent": String(urged_intent),
+		"urged_month": urged_month,
 		"objective": String(objective),
+		"objective_target": objective_target,
+		"objective_intent": String(objective_intent),
+		"objective_since": objective_since,
+		"objective_idle_months": objective_idle_months,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
 		"months_hungry": months_hungry,
@@ -246,7 +289,15 @@ static func from_dict(data: Dictionary) -> Town:
 	town.buildings = PackedStringArray(data.get("buildings", []))
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
+	town.intent = StringName(data.get("intent", ""))
+	town.intent_since = int(data.get("intent_since", 0))
+	town.urged_intent = StringName(data.get("urged_intent", ""))
+	town.urged_month = int(data.get("urged_month", 0))
 	town.objective = StringName(data.get("objective", ""))
+	town.objective_target = data.get("objective_target", Vector2i(-1, -1))
+	town.objective_intent = StringName(data.get("objective_intent", ""))
+	town.objective_since = int(data.get("objective_since", 0))
+	town.objective_idle_months = int(data.get("objective_idle_months", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
 	town.months_hungry = int(data.get("months_hungry", 0))

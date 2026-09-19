@@ -10,8 +10,15 @@ extends RefCounted
 ## A consideration registers against the kinds it affects. Adding a kind here
 ## does not touch the kernel.
 
-## A governor picks a town objective (SPEC §11.3).
-const TOWN_OBJECTIVE: StringName = &"town_objective"
+## A governor commits to what his town is for (SPEC §11.3, §8.5).
+##
+## **Not the objective.** `docs/mechanics/governor-objectives.md` §9 marks
+## objective selection, stall detection and tile choice as decisions personality
+## must *not* touch — the governor has wise advisors and a town that builds badly
+## reads as a bug rather than as character. Those are `ObjectiveSelector` and
+## `Reconsideration`, and they are deliberately not decision kinds: a kind here
+## is an invitation to register a weight against it.
+const GOVERNOR_INTENT: StringName = &"governor_intent"
 
 ## A contact complies, partly complies, delays, reinterprets, refuses, or acts
 ## alone (SPEC §8.5).
@@ -31,7 +38,7 @@ const TRADE_PROTEST: StringName = &"trade_protest"
 const FACTION_POSTURE: StringName = &"faction_posture"
 
 const ALL: Array[StringName] = [
-	TOWN_OBJECTIVE,
+	GOVERNOR_INTENT,
 	ORDER_COMPLIANCE,
 	UNANSWERED,
 	DIRECTOR_URGENCY,

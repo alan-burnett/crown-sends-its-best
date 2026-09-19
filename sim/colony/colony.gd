@@ -64,6 +64,19 @@ func simulation_order(run_seed: int) -> Array[Town]:
 	return out
 
 
+## The town this contact speaks for, or null.
+##
+## **One governor, one town** (SPEC §8.2), which is what lets a letter addressed
+## to a man be an instruction about a place without naming the place.
+func governed_by(contact_id: StringName) -> Town:
+	if String(contact_id).is_empty():
+		return null
+	for town in in_order():
+		if town.governor_id == contact_id:
+			return town
+	return null
+
+
 func loyal() -> Array[Town]:
 	var out: Array[Town] = []
 	for town in in_order():

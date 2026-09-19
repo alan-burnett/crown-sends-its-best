@@ -22,12 +22,14 @@ extends RefCounted
 
 const ROLE: StringName = &"governor"
 
-## Considerations a governor weighs. Compliance ships its own (#16); these are
-## the ones a town's affairs turn on, and the systems that introduce them will
-## register them as they arrive.
+## Considerations a governor weighs. Compliance ships its own (#16) and intent
+## ships the rest (#53) — **personality is a weight vector over these and
+## nothing else**, so a cautious governor and a greedy one differ by seven
+## numbers rather than by a line of code.
 const WEIGHTED: PackedStringArray = [
 	"loyalty", "cost_of_request", "payment_offered", "autonomy", "order_clarity",
 	"quality_of_life", "food_security", "revenue", "native_threat",
+	"room_to_grow", "mandate", "crown_urging",
 ]
 
 ## Topics a governor shades when he writes about his own town. **These are what

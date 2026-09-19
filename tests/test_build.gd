@@ -120,7 +120,7 @@ func test_completion_applies_the_effect_and_emits() -> void:
 
 	var events: Array = harness["context"].log.of_type(BuildPhase.EVENT_COMPLETED)
 	assert_eq(events.size(), 1)
-	assert_eq(String(events[0].payload["building"]), "storehouse")
+	assert_eq(String(events[0].payload["objective"]), "storehouse")
 	assert_has(events[0].payload, "unlocks")
 
 

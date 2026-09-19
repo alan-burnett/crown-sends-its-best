@@ -4,22 +4,38 @@
     {
       "id": "stockpile_food",
       "name": "stockpiling food",
-      "focus": "food"
+      "focus": [
+        "food"
+      ]
     },
     {
       "id": "harvest_timber",
       "name": "cutting timber",
-      "focus": "wood"
+      "focus": [
+        "wood"
+      ]
     },
     {
       "id": "harvest_stone",
       "name": "quarrying stone",
-      "focus": "stone"
+      "focus": [
+        "stone"
+      ]
     },
     {
       "id": "harvest_furs",
       "name": "trapping furs",
-      "focus": "furs"
+      "focus": [
+        "furs"
+      ]
+    },
+    {
+      "id": "amass_expedition",
+      "name": "gathering an expedition's supplies",
+      "focus": [
+        "food",
+        "tools"
+      ]
     }
   ]
 }

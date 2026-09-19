@@ -22,6 +22,10 @@ const ORDER_REQUEST_TROOPS: StringName = &"request_troops"
 const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
 const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
 
+## **The only order that reaches a town** (SPEC §8.5, #53). It argues for a goal
+## and names no project, no tile and no month. The letters that use it are #54.
+const ORDER_URGE_INTENT: StringName = &"urge_intent"
+
 
 ## Populate the resource catalogue and the terrain table from loaded content.
 ##
@@ -72,6 +76,7 @@ static func register_all() -> void:
 static func register_considerations() -> void:
 	ComplianceConsiderations.register_all()
 	UnansweredConsiderations.register_all()
+	IntentConsiderations.register_all()
 
 
 # --- Effects ---------------------------------------------------------------
@@ -103,6 +108,13 @@ static func register_effects() -> void:
 	)
 	ContentRegistry.register_effect(
 		"adjust_loyalty", {"to": "contact", "amount": "number"}, ORDER_ADJUST_LOYALTY
+	)
+	# **🔒 The PC argues for a goal and nothing else** (SPEC §8.5). There is no
+	# effect that names a project, a tile or a month, and `tools/lint.gd` fails
+	# if one appears. `intent` is one of `GovernorIntent`; the town is the one the
+	# governor addressed speaks for.
+	ContentRegistry.register_effect(
+		"urge_intent", {"to": "contact", "intent": "string"}, ORDER_URGE_INTENT
 	)
 	# **The player never sets a rate directly** (SPEC §10.2). It is always a
 	# letter to the Steward, resolved through compliance like any other Order —
