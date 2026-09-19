@@ -13,10 +13,13 @@ func before_each() -> void:
 	Deliberation.reset()
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
+	ResourceCatalogue.reset()
+	Terrain.reset()
 	M1Registrations.register_all()
 
 	content = ContentDatabase.new()
 	content.load_all("en")
+	M1Registrations.load_resources(content)
 
 	run = RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)

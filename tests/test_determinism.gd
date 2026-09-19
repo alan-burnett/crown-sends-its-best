@@ -22,10 +22,13 @@ func before_each() -> void:
 	Deliberation.reset()
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
+	ResourceCatalogue.reset()
+	Terrain.reset()
 	M1Registrations.register_all()
 	SaveGame.delete_save(PATH)
 	content = ContentDatabase.new()
 	content.load_all("en")
+	M1Registrations.load_resources(content)
 
 
 func after_each() -> void:

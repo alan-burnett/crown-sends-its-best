@@ -15,6 +15,8 @@ func before_each() -> void:
 	Deliberation.reset()
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
+	ResourceCatalogue.reset()
+	Terrain.reset()
 	M1Registrations.register_all()
 
 	state = StubWorld.initial_state()
@@ -25,6 +27,7 @@ func before_each() -> void:
 
 	content = ContentDatabase.new()
 	content.load_all("en")
+	M1Registrations.load_resources(content)
 
 
 func after_each() -> void:
@@ -122,7 +125,7 @@ func test_personality_changes_which_outcome_occurs() -> void:
 	var outcomes: Dictionary = {}
 	for weights in personalities:
 		outcomes[String(_resolve(_troop_request(400.0), _contact(40.0, weights))["outcome"])] = true
-	assert_true(outcomes.size() > 1, "every personality reached the same outcome: %s" % outcomes.keys())
+	assert_true(outcomes.size() > 1, "every personality reached the same outcome: %s" % [outcomes.keys()])
 
 
 func test_full_payment_is_a_guaranteed_yes() -> void:

@@ -1,6 +1,6 @@
 # CI
 
-One job, on pull requests against `main`. It runs **only** the content validator
+One job, on **every** pull request — work here stacks, and a filter on `main` skips every PR in a stack but the first. It runs **only** the content validator
 and the narrow mandatory tests — per the testing policy in `CLAUDE.md`, it does
 not run UI tests and does not gate on balance.
 
