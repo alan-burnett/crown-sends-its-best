@@ -36,6 +36,13 @@ var tone: StringName = &""
 ## what it was you asked for without the director having to flatten it first.
 var data_order: Order = null
 
+## The town this letter is about, when the sender speaks for one.
+##
+## **A governor's letter is about a place**, and the conditions that decide
+## whether he writes at all need to see it. Null for the Crown's officers, who
+## write about the colony and have no town of their own.
+var town: Town = null
+
 
 func _init(p_state: WorldState = null, p_sender: Contact = null, p_tone: StringName = &"") -> void:
 	state = p_state

@@ -25,6 +25,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := Reckoning.new(town.id)
 	var mouths := float(town.population())
 
+	# The month's trading account opens here, before Exchange and Sell write to
+	# it, so what a governor reports is this month and not the run so far.
+	town.traded_value = 0.0
+
 	# Needs: what the town will die without.
 	for resource in ColonyNeeds.needed_resources():
 		var required := mouths * ColonyNeeds.per_head(StringName(resource))

@@ -1,0 +1,134 @@
+class_name ColonyParamSources
+extends RefCounted
+
+## Where a governor's letter gets the facts about his town (#54).
+##
+## **`{param:}` slots are exact and truthful** (SPEC §9.7). The bias lives in
+## `{perception:}` and nowhere else, so everything here is the plain number or
+## the plain name. A governor may be gloomy about how much grain there is; he
+## does not misreport which building he is putting up.
+##
+## Named static functions, not lambdas — a lambda in a static registry crashes
+## Godot 4.7 on shutdown (CLAUDE.md).
+
+static func register_all() -> void:
+	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
+	ContentRegistry.register_param_source("town_name", {}, ColonyParamSources.town_name)
+	ContentRegistry.register_param_source(
+		"objective_name", {"fallback": "string"}, ColonyParamSources.objective_name
+	)
+	ContentRegistry.register_param_source(
+		"finished_name", {"fallback": "string"}, ColonyParamSources.finished_name
+	)
+	ContentRegistry.register_param_source("intent_name", {}, ColonyParamSources.intent_name)
+	ContentRegistry.register_param_source(
+		"intent_pursuing", {}, ColonyParamSources.intent_pursuing
+	)
+	ContentRegistry.register_param_source(
+		"town_lacks", {"fallback": "string"}, ColonyParamSources.town_lacks
+	)
+	ContentRegistry.register_param_source(
+		"town_stock", {"resource": "string"}, ColonyParamSources.town_stock
+	)
+	ContentRegistry.register_param_source(
+		"town_lacking_stock", {}, ColonyParamSources.town_lacking_stock
+	)
+	ContentRegistry.register_param_source("town_trade", {}, ColonyParamSources.town_trade)
+	ContentRegistry.register_param_source(
+		"town_population", {}, ColonyParamSources.town_population
+	)
+
+
+## Who the letter came from, so a reply can be addressed back without the file
+## hard-coding a contact id.
+##
+## **This is what makes a governor letter set reusable.** M4 brings a second
+## governor and a second town; without it, every letter file would name Ashmere
+## and the set would have to be copied per town, which is a content-scaling
+## problem the folder-per-language rule was designed to avoid (SPEC §9.7).
+static func sender_id(_args: Dictionary, context: LetterContext) -> Variant:
+	return String(context.sender.id) if context.sender != null else ""
+
+
+static func town_name(_args: Dictionary, context: LetterContext) -> Variant:
+	return context.town.display_name if context.town != null else "the colony"
+
+
+## What the town is working on, by name. Never its id, and never a tile.
+static func objective_name(args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null:
+		return args.get("fallback", "the work")
+	var name := Objective.display_name(context.town.objective)
+	return name if not name.is_empty() else args.get("fallback", "the work")
+
+
+## What the town last finished, by name.
+static func finished_name(args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null:
+		return args.get("fallback", "the work")
+	var name := Objective.display_name(context.town.last_completed)
+	return name if not name.is_empty() else args.get("fallback", "the work")
+
+
+## What the governor is *for*, as a noun phrase.
+static func intent_name(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null:
+		return "the colony"
+	return Objective.intent_name(context.town.intent)
+
+
+## What he says he is doing, as a clause.
+static func intent_pursuing(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null:
+		return "doing what I can"
+	return Objective.intent_pursuing(context.town.intent)
+
+
+## The need the town is furthest from covering, named.
+##
+## **The worst one**, on the same worst-first rule Relief serves need by, so the
+## letter and the simulation agree about which shortage matters.
+static func town_lacks(args: Dictionary, context: LetterContext) -> Variant:
+	var town := context.town
+	if town == null:
+		return args.get("fallback", "supplies")
+
+	var worst := ""
+	var deepest := INF
+	for resource in ColonyNeeds.needed_resources():
+		var monthly := maxf(1.0, float(town.population())) * ColonyNeeds.per_head(StringName(resource))
+		if monthly <= 0.0:
+			continue
+		var months := town.held(StringName(resource)) / monthly
+		if months < deepest:
+			deepest = months
+			worst = resource
+	return worst if not worst.is_empty() else args.get("fallback", "supplies")
+
+
+## How much of something is in the store, as a whole number. A letter that
+## declares an integer must never render "48.0" at the player.
+static func town_stock(args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null:
+		return 0
+	return int(roundf(context.town.held(StringName(args.get("resource", "")))))
+
+
+## How much of the thing it is short of the town actually has.
+##
+## Paired with `town_lacks`, so the letter names one resource and counts the
+## same one. Naming the shortage and then counting the grain is the sort of
+## mismatch a player notices and a validator cannot.
+static func town_lacking_stock(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null:
+		return 0
+	var worst := String(town_lacks({"fallback": ""}, context))
+	return 0 if worst.is_empty() else int(roundf(context.town.held(StringName(worst))))
+
+
+static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:
+	return 0 if context.town == null else int(roundf(context.town.traded_value))
+
+
+static func town_population(_args: Dictionary, context: LetterContext) -> Variant:
+	return 0 if context.town == null else context.town.population()

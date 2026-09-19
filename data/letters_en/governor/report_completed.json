@@ -1,0 +1,121 @@
+{
+  "id": "governor.report_completed",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "town": "town",
+    "objective": "objective",
+    "governor": "contact"
+  },
+  "perception": {
+    "spirits": {
+      "measure": "quality_of_life",
+      "ladder": [
+        "wretched",
+        "low",
+        "settled",
+        "in good heart"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "It is finished: {param:objective}, at last, and the men are off it."
+    },
+    {
+      "text": "The people are {perception:spirits} for it, and I shall want something new to set them to before the season turns."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your news, and it is {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "very well done"
+        },
+        {
+          "tone": "dutiful",
+          "text": "noted with satisfaction"
+        },
+        {
+          "tone": "annoyed",
+          "text": "later than I was led to expect"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "priority",
+        "prompt": "What {param:town} turns to next",
+        "options": [
+          {
+            "id": "profit",
+            "label": "attend to the colony's profit",
+            "text": "Attend to the colony's profit. That is what you are there for, and what the Crown will ask me about.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "increase_economic_output"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "see that the town grows",
+            "text": "See that the town grows. A place with nobody in it returns nothing, whatever the ledgers say.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "grow_the_population"
+              }
+            }
+          },
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your defences. I would rather pay for walls I did not need than explain why there were none.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "strengthen_defences"
+              }
+            }
+          },
+          {
+            "id": "settle",
+            "label": "plant a new settlement",
+            "text": "Plant a new settlement. One town is a foothold; it is not a colony.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "settle_a_new_town"
+              }
+            }
+          },
+          {
+            "id": "survival",
+            "label": "your people's survival must come first",
+            "text": "Your people's survival must come first. Everything else can wait on it, and I will hear no argument.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "secure_survival"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,",
+        "tone": {
+          "pleased": "With every confidence in you,",
+          "annoyed": "I trust I shall not have to write again,"
+        }
+      }
+    ]
+  }
+}

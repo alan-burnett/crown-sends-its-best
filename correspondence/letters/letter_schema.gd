@@ -37,8 +37,13 @@ const TYPES_ASKING_A_DECISION: Array[StringName] = [TYPE_QUESTION]
 ## **`params` is a typed contract, not a generator.** The file declares what it
 ## expects; the director (#14) supplies the values. The letter file never
 ## re-decides what it is about.
+## **`intent` is here and `objective` is too, and they are not the same thing.**
+## SPEC §11.3 separates them: the governor holds an intent, the town works on an
+## objective, and §8.5 locks the PC out of naming the second. A letter that could
+## only say "objective" would have no word for the thing the player is actually
+## allowed to argue about.
 const PARAM_TYPES: Array[StringName] = [
-	&"resource", &"integer", &"gold", &"town", &"contact",
+	&"resource", &"integer", &"gold", &"town", &"contact", &"intent",
 	&"tribe", &"rival", &"tile", &"building", &"objective",
 ]
 

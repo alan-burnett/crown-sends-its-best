@@ -1,0 +1,144 @@
+{
+  "id": "governor.report_shortage",
+  "sender": "governor_ashmere",
+  "type": "request",
+  "skippable": true,
+  "params": {
+    "town": "town",
+    "lacking": "resource",
+    "held": "integer",
+    "governor": "contact"
+  },
+  "perception": {
+    "larder": {
+      "measure": "stockpile_health",
+      "ladder": [
+        "desperate",
+        "hard pressed",
+        "managing"
+      ]
+    },
+    "spirits": {
+      "measure": "quality_of_life",
+      "ladder": [
+        "wretched",
+        "low",
+        "settled",
+        "in good heart"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "We are short of {param:lacking} at {param:town}. There are {param:held} in the store and the month is not out."
+    },
+    {
+      "text": "I shall not dress it up: we are {perception:larder}, and the people are {perception:spirits}."
+    },
+    {
+      "text": "I have written of this before and had no answer.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I can turn hands to it if that is your wish. It will cost us elsewhere, and I would rather be told than guess."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "On the matter of the {param:lacking}, I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "attending to it"
+        },
+        {
+          "tone": "pleased",
+          "text": "glad you wrote before it grew worse"
+        },
+        {
+          "tone": "desperate",
+          "text": "as troubled by it as you are"
+        },
+        {
+          "tone": "annoyed",
+          "text": "not much moved"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "priority",
+        "prompt": "What is to come first at {param:town}",
+        "options": [
+          {
+            "id": "profit",
+            "label": "attend to the colony's profit",
+            "text": "Attend to the colony's profit. That is what you are there for, and what the Crown will ask me about.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "increase_economic_output"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "see that the town grows",
+            "text": "See that the town grows. A place with nobody in it returns nothing, whatever the ledgers say.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "grow_the_population"
+              }
+            }
+          },
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your defences. I would rather pay for walls I did not need than explain why there were none.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "strengthen_defences"
+              }
+            }
+          },
+          {
+            "id": "settle",
+            "label": "plant a new settlement",
+            "text": "Plant a new settlement. One town is a foothold; it is not a colony.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "settle_a_new_town"
+              }
+            }
+          },
+          {
+            "id": "survival",
+            "label": "your people's survival must come first",
+            "text": "Your people's survival must come first. Everything else can wait on it, and I will hear no argument.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "secure_survival"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,",
+        "tone": {
+          "pleased": "With every confidence in you,",
+          "annoyed": "I trust I shall not have to write again,"
+        }
+      }
+    ]
+  }
+}

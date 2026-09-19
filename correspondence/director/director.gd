@@ -128,7 +128,8 @@ func _conditions_hold(trigger: Dictionary, context: LetterContext) -> bool:
 func _context(run: RunState, contact: Contact) -> LetterContext:
 	var context := LetterContext.new(run.world, contact, &"")
 	context.diff = run.last_diff
-	context.measures = WorldValues.measures(run.world)
+	context.measures = ColonyMeasures.for_contact(run, contact)
+	context.town = run.colony.governed_by(contact.id) if run.colony != null else null
 	return context
 
 

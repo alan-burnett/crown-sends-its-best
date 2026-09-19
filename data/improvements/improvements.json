@@ -1,7 +1,7 @@
 [
   {
     "id": "farm",
-    "name": "farm",
+    "name": "a farm",
     "keeps": [
       "food"
     ],
@@ -29,7 +29,7 @@
   },
   {
     "id": "pasture",
-    "name": "pasture",
+    "name": "a pasture",
     "scale": {
       "*": 0.5
     },
@@ -53,7 +53,7 @@
   },
   {
     "id": "plantation_sugar",
-    "name": "sugar plantation",
+    "name": "a sugar plantation",
     "keeps": [
       "food"
     ],
@@ -80,7 +80,7 @@
   },
   {
     "id": "plantation_cotton",
-    "name": "cotton plantation",
+    "name": "a cotton plantation",
     "keeps": [
       "food"
     ],
@@ -107,7 +107,7 @@
   },
   {
     "id": "plantation_tobacco",
-    "name": "tobacco plantation",
+    "name": "a tobacco plantation",
     "keeps": [
       "food"
     ],
@@ -134,7 +134,7 @@
   },
   {
     "id": "mine",
-    "name": "mine",
+    "name": "a mine",
     "keeps": [
       "stone"
     ],
@@ -164,7 +164,7 @@
   },
   {
     "id": "road",
-    "name": "road",
+    "name": "a road",
     "scale": {
       "*": 1.15
     },
@@ -183,7 +183,7 @@
   },
   {
     "id": "fort",
-    "name": "fort",
+    "name": "a fort",
     "terrain_factor": {
       "*": 1.0
     },

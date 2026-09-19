@@ -55,6 +55,14 @@ const MET: float = 0.001
 ## Posture id -> its record. Data, like everything else the town does.
 static var _postures: Dictionary = {}
 
+## Intent id -> how a letter says it.
+##
+## **Prose belongs in the content**, even prose about a code constant. A
+## governor writing "I am seeing that nobody here starves" is a sentence in a
+## language, and a second language is a copied folder where only the text
+## changes (SPEC §9.7).
+static var _intents: Dictionary = {}
+
 
 
 static func load_from(record: Dictionary) -> void:
@@ -71,8 +79,37 @@ static func load_from(record: Dictionary) -> void:
 		}
 
 
+	_intents = {}
+	for entry in record.get("intents", []):
+		var intent := String(entry.get("id", ""))
+		if not intent.is_empty():
+			_intents[intent] = {
+				"name": String(entry.get("name", intent)),
+				"pursuing": String(entry.get("pursuing", "")),
+			}
+
+
 static func reset() -> void:
 	_postures = {}
+	_intents = {}
+
+
+## What a letter calls an intent — a noun phrase, as in "attend to the colony's
+## profit".
+static func intent_name(id: StringName) -> String:
+	return String(_intents.get(String(id), {}).get("name", String(id)))
+
+
+## What a governor says he is doing, as a clause: "seeing that nobody starves".
+static func intent_pursuing(id: StringName) -> String:
+	return String(_intents.get(String(id), {}).get("pursuing", ""))
+
+
+## Intent ids that carry prose, sorted.
+static func named_intents() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray(_intents.keys())
+	out.sort()
+	return out
 
 
 ## Posture ids, sorted.

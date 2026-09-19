@@ -126,6 +126,11 @@ func found_first_town() -> Town:
 	# town's objective: the first Settle picks one to serve this, which is the
 	# only way an objective is ever chosen (#53).
 	town.intent = StringName(world.get_value(WorldValues.MANDATE, GovernorIntent.ECONOMY))
+	# **A town founded last month has not lived a month yet**, and Settle has not
+	# run. Without a starting value its governor opens the run reporting his
+	# people as wretched, which is not true of anybody and is the first thing the
+	# player reads.
+	town.quality_of_life = float(world.get_value(WorldValues.QUALITY_OF_LIFE, 0.5))
 	colony.add(town)
 
 	add_contact(Governor.generate(town, streams))

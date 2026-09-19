@@ -1,0 +1,18 @@
+{
+  "id": "governor.ack_acted_alone",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "what": "intent",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "You will wish to know — though you did not ask — that I have turned {param:town} to other work."
+    },
+    {
+      "text": "I did not think it could wait on the tide. I am confident you would have come to the same place, given a month."
+    }
+  ]
+}
