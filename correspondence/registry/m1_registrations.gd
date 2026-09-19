@@ -17,6 +17,7 @@ const ORDER_PROMISE_GOLD: StringName = &"promise_gold"
 const ORDER_PROMISE_RESOURCE: StringName = &"promise_resource"
 const ORDER_PROMISE_REVENUE: StringName = &"promise_revenue"
 const ORDER_DECLINE_DEMAND: StringName = &"decline_demand"
+const ORDER_SHIP_RESOURCE: StringName = &"ship_resource"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
@@ -119,6 +120,16 @@ static func register_effects() -> void:
 	# so the Crown has to be able to tell the two apart, and a shared `refuse`
 	# would have made every "no" to the Steward a matter for the Treasury.
 	ContentRegistry.register_effect("decline_demand", {"to": "contact"}, ORDER_DECLINE_DEMAND)
+	# **The PC's only power over goods he has already promised** (#69). He cannot
+	# move a town's stockpile — SPEC §11.3 locks that towns run themselves — so he
+	# writes to the governor and the governor decides what priority to give it.
+	# The payment is the lever: pay nothing and the governor bears the whole cost,
+	# pay double and his town is richer for it.
+	ContentRegistry.register_effect(
+		"ship_resource",
+		{"to": "contact", "resource": "resource", "amount": "integer", "payment": "gold"},
+		ORDER_SHIP_RESOURCE,
+	)
 	ContentRegistry.register_effect(
 		"grant_favor", {"to": "contact", "favor": "string"}, ORDER_GRANT_FAVOR
 	)

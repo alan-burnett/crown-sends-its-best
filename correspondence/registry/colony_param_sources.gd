@@ -44,6 +44,12 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"crown_demand", {"field": "string"}, ColonyParamSources.crown_demand
 	)
+	ContentRegistry.register_param_source(
+		"town_surplus", {"fallback": "string"}, ColonyParamSources.town_surplus
+	)
+	ContentRegistry.register_param_source(
+		"town_surplus_amount", {}, ColonyParamSources.town_surplus_amount
+	)
 
 
 ## How many letters the Treasury will still honour.
@@ -167,6 +173,49 @@ static func town_lacking_stock(_args: Dictionary, context: LetterContext) -> Var
 		return 0
 	var worst := String(town_lacks({"fallback": ""}, context))
 	return 0 if worst.is_empty() else int(roundf(context.town.held(StringName(worst))))
+
+
+## What this town has most of, over what it needs to keep.
+##
+## **The default the Crown would ask for**, so a composed shipment letter opens
+## on something the town could plausibly send rather than on whatever is first in
+## the catalogue. Comforts are excluded: the Marshal's wars do not run on rum,
+## and asking a town for its beer reads as a joke rather than a requisition.
+##
+## Ordered by name on a tie, so the same town always suggests the same thing.
+static func town_surplus(args: Dictionary, context: LetterContext) -> Variant:
+	var fallback := String(args.get("fallback", "iron"))
+	if context.town == null:
+		return fallback
+	var mouths := maxf(1.0, float(context.town.population()))
+
+	var best := ""
+	var most := 0.0
+	for id in ResourceCatalogue.ids():
+		var resource := StringName(id)
+		if ResourceCatalogue.is_luxury(resource) or ResourceCatalogue.is_livestock(resource):
+			continue
+		var keep := mouths * ColonyNeeds.per_head(resource) 			* (1.0 + ColonyNeeds.reserve_months(resource))
+		var spare := context.town.held(resource) - keep
+		if spare > most + 0.001 or (absf(spare - most) <= 0.001 and best != "" and String(id) < best):
+			most = spare
+			best = String(id)
+	return fallback if best.is_empty() or most <= 0.0 else best
+
+
+## How much of that surplus there is, rounded to something a letter can say.
+##
+## Half of it rather than all: the Crown asking a town for every last bar of its
+## spare iron is a demand no governor would treat as anything but confiscation,
+## and the default a composed letter opens on should be one the PC might
+## plausibly send unedited.
+static func town_surplus_amount(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null:
+		return 0
+	var resource := StringName(town_surplus({"fallback": "iron"}, context))
+	var mouths := maxf(1.0, float(context.town.population()))
+	var keep := mouths * ColonyNeeds.per_head(resource) 		* (1.0 + ColonyNeeds.reserve_months(resource))
+	return maxi(1, int(roundf(maxf(0.0, context.town.held(resource) - keep) * 0.5)))
 
 
 static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:

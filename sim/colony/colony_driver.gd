@@ -13,6 +13,9 @@ var month: ColonyMonth = null
 var map: WorldMap = null
 var run_seed: int = 0
 
+## The run's live Intents, so Reckon can see what a town owes the Crown (#69).
+var intents: IntentBook = null
+
 ## Supplied by the territory driver, which runs in phase 3 — before this.
 var territory_driver: TerritoryDriver = null
 
@@ -33,6 +36,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	# month's.
 	var context := ColonyContext.new(state, log, streams, map)
 	context.run_seed = run_seed
+	context.intents = intents
 	if territory_driver != null:
 		context.territory = territory_driver.territory
 

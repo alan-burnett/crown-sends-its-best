@@ -19,6 +19,13 @@ var territory: Territory = null
 ## so it needs to reach the other end of it.
 var colony: Colony = null
 
+## The run's live Intents, so Reckon can see what this town owes the Crown (#69).
+##
+## **The Intent is the record.** A second copy of an outstanding shipment on the
+## town would be one more thing to serialise and one more thing to fall out of
+## step with the book the executor works from.
+var intents: IntentBook = null
+
 var run_seed: int = 0
 
 ## Town id -> what Reckon worked out this month.
