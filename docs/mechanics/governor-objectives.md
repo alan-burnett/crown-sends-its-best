@@ -137,7 +137,11 @@ letter but never names a tile, consistent with §11.4's lock.
 
 ## 6. How the PC influences a town
 
-**The PC addresses intent. He almost never names an objective.**
+**The PC addresses intent. He cannot name an objective at all.**
+
+SPEC §8.5 locks it: *"An order reaches the governor's intent, never the town's
+objective. The PC can argue for a goal; he cannot name the project, the tile, or
+the month."*
 
 This is characterisation before it is mechanics. The PC is a pampered aristocrat
 who has never seen a dock. *"You must build a dock before the warehouse"* is not
@@ -155,27 +159,33 @@ an intent:
 | plant a new settlement | settle a new town |
 | your people's survival must come first | secure survival |
 
-### Naming an objective is possible, and usually a mistake
+### Why the lock is right
 
-The PC *can* name a specific objective. He should rarely want to, and when he
-does it should usually go badly — which is correct rather than a punishment.
+Two reasons, and the second is mechanical rather than literary.
 
-The governor's objective selection is deterministic and well informed. The PC's
-is neither: everything he knows about the town arrived through one man's
-perception ladders, a month late. A specific instruction replaces a good
-optimiser with a worse one.
+The PC is a pampered aristocrat who has never seen a dock, so the vocabulary
+simply is not available to him. But even if it were, **his instruction would be
+worse than the governor's judgement.** Objective selection is deterministic and
+well informed. Everything the PC knows about the town arrived through one man's
+perception ladders, a month late. Letting him name projects would replace a good
+optimiser with a worse one and make the colony read as incompetent.
 
-**Reinterpretation at the objective level is the competent subordinate quietly
-protecting the PC from himself.** He builds what his advisors would have chosen
-and reports that His Grace's wishes have been attended to. Whether the PC ever
-finds out depends on the governor's personality.
+So there is no objective-level order, and therefore **no objective-level
+compliance.** Compliance operates on intent alone:
 
-### What compliance means at each level
-
-| Level | Comply | Refuse or reinterpret |
+| | Comply | Refuse or reinterpret |
 | :--- | :--- | :--- |
 | **Intent** | he adopts the intent the PC urges | he keeps his own, and may say so |
-| **Objective** | he builds the named thing | he builds what the town actually needed |
+
+**There is no code path by which a letter names a project, a tile, or a month.**
+A dev who adds one has broken a locked invariant.
+
+### What the PC does instead
+
+Everything he might have wanted from naming a project, he gets by arguing about
+priority. He cannot say *build a granary*; he can say *your people's survival
+must come first*, and a governor who takes that to heart will build the granary
+himself, on a better tile than the PC would have picked.
 
 ### The Mandate is an intent-level instruction
 
