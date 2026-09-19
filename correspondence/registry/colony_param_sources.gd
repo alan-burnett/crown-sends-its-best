@@ -82,9 +82,14 @@ static func crown_demand(args: Dictionary, context: LetterContext) -> Variant:
 		return 0
 	match String(args.get("field", "")):
 		"amount":
-			return book.amount
+			return int(roundf(book.amount)) if book.kind == DemandBook.KIND_RESOURCE \
+				else book.amount
 		"months":
 			return book.term_months
+		"resource":
+			return String(book.resource)
+		"turns_left":
+			return book.turns_left(context.month)
 	return 0
 
 

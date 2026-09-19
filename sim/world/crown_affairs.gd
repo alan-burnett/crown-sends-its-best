@@ -53,7 +53,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	if growth != null:
 		growth.advance(state.year_index(), streams, log, state.month)
 		if demands != null:
-			demands.advance(state.month, growth, log)
+			demands.advance(state.month, growth, streams, log)
 	_advance_war(state, log, streams.stream("sim"))
 
 

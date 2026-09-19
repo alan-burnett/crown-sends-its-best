@@ -70,6 +70,17 @@ static func from_order(order: Order, month: int) -> Promise:
 			}, month, month + int(order.get_param("months", 0)))
 			wager.payer = Promise.PAYER_COLONY
 			return wager
+		M1Registrations.ORDER_PROMISE_SHIPMENT:
+			# Settled on goods that actually left a town, not on the PC's word or
+			# on a governor's answer. A governor who agreed and then could not
+			# deliver breaks it exactly as one who refused outright.
+			var undertaking := Promise.new(order.addressed_to, Promise.KIND_SHIPMENT, {
+				"amount": order.get_param("amount", 0),
+				"resource": order.get_param("resource", ""),
+				"term_months": order.get_param("months", 0),
+			}, month, month + int(order.get_param("months", 0)))
+			undertaking.payer = Promise.PAYER_COLONY
+			return undertaking
 		M1Registrations.ORDER_GRANT_FAVOR:
 			return Promise.new(order.addressed_to, &"favor", {
 				"favor": order.get_param("favor", ""),

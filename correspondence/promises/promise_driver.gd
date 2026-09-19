@@ -41,6 +41,9 @@ func _wagers_won(log: EventLog, month: int) -> Dictionary:
 	for promise in promises.outstanding():
 		if not promise.is_a_wager() or not promise.is_due(month):
 			continue
+		if promise.kind == Promise.KIND_SHIPMENT:
+			verdicts[String(promise.id)] = _shipped(log, promise, month) >= promise.amount()
+			continue
 		if accounts == null:
 			accounts = CrownAccounts.of(log)
 		var earned := 0.0
@@ -48,6 +51,24 @@ func _wagers_won(log: EventLog, month: int) -> Dictionary:
 			earned += accounts.received_in(at)
 		verdicts[String(promise.id)] = earned >= promise.amount()
 	return verdicts
+
+
+## How much of the promised resource actually left a town inside the term.
+##
+## **Goods, not good intentions.** A governor who agreed and then could not
+## deliver breaks the promise exactly as one who refused outright, because the
+## Marshal is counting crates and not letters — which is what makes the PC's only
+## power over goods he has already promised another letter.
+func _shipped(log: EventLog, promise: Promise, month: int) -> float:
+	var wanted := String(promise.terms.get("resource", ""))
+	var total := 0.0
+	for event in log.of_type(ShipmentExecutor.EVENT_SENT):
+		if event.month <= promise.made_month or event.month > month:
+			continue
+		if String(event.payload.get("resource", "")) != wanted:
+			continue
+		total += float(event.payload.get("quantity", 0.0))
+	return total
 
 
 ## Repudiate everything the Crown owes, the month it stops paying.

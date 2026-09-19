@@ -123,5 +123,36 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.marshal.requisition",
+    "letter": "marshal.requisition",
+    "urgency": 0.95,
+    "cooldown": 0,
+    "params": {
+      "resource": {
+        "from": "crown_demand",
+        "field": "resource"
+      },
+      "amount": {
+        "from": "crown_demand",
+        "field": "amount"
+      },
+      "months": {
+        "from": "crown_demand",
+        "field": "months"
+      },
+      "turns_left": {
+        "from": "crown_demand",
+        "field": "turns_left"
+      }
+    },
+    "conditions": [
+      {
+        "crown_asked_for": {
+          "kind": "resource"
+        }
+      }
+    ]
   }
 ]

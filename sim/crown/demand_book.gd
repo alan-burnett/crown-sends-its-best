@@ -28,8 +28,10 @@ extends RefCounted
 ## every month or need a cooldown that could not grow with `frequency`.
 
 const KIND_GOLD: StringName = &"gold"
+const KIND_RESOURCE: StringName = &"resource"
 
 const EVENT_DEMANDED: StringName = &"crown_demanded"
+const EVENT_LAPSED: StringName = &"crown_demand_lapsed"
 
 ## Months before the Crown asks for anything at all.
 ##
@@ -49,38 +51,139 @@ var kind: StringName = KIND_GOLD
 var amount: float = 0.0
 var term_months: int = 0
 
+## What the Marshal wants, when it is goods rather than gold.
+var resource: StringName = &""
 
-## Whether a demand was made this month, and so whether a letter is owed.
+## The month after which a demand for goods is taken as a refusal.
+##
+## **Gold is answered by return of post; goods are not.** A careful player writes
+## to the governor first and learns whether they can be had — it costs him a
+## month, and the demand may not wait, but it turns a blind bet into an informed
+## one (`crown-demands.md` §5). A demand answered by return of post makes that
+## play impossible and reduces the decision to a coin toss.
+var expires_month: int = -1
+
+
+## Whether a letter carrying this demand is owed.
+##
+## A gold demand is owed the month it is made and no longer. A demand for goods
+## stands until it is answered or it lapses, because the PC is meant to be able
+## to go away and ask.
 func is_pending(month: int) -> bool:
-	return issued_month == month and issued_month >= 0
+	if issued_month < 0:
+		return false
+	if kind == KIND_RESOURCE:
+		return month <= expires_month
+	return issued_month == month
+
+
+## How many more posts the PC has to answer with.
+func turns_left(month: int) -> int:
+	return 0 if expires_month < 0 else maxi(0, expires_month - month)
+
+
+## The PC answered. Whatever he said, the Crown is no longer waiting.
+func answer() -> void:
+	expires_month = -1
+	issued_month = -1
+
+
+## Nothing came back before the deadline.
+##
+## **Silence is not neutral.** SPEC §9.3 lets the post pile up, and the price of
+## letting it pile up here is the price of a refusal — the Marshal was not asking
+## whether the PC had noticed him.
+func lapse(month: int, log: EventLog) -> bool:
+	if kind != KIND_RESOURCE or expires_month < 0 or month <= expires_month:
+		return false
+	if log != null:
+		log.emit(EVENT_LAPSED, asker, month, {
+			"asker": String(asker),
+			"kind": String(kind),
+			"resource": String(resource),
+			"amount": amount,
+		}, WorldPhase.CROWNS_MONTH)
+	answer()
+	return true
 
 
 ## Decide whether the Crown asks for something this month, and what.
 ##
 ## Returns whether it did. **Idempotent within a month**, since the driver runs
 ## once a month but nothing should depend on that being true.
-func advance(month: int, growth: DemandGrowth, log: EventLog) -> bool:
+func advance(month: int, growth: DemandGrowth, streams: RngStreams, log: EventLog) -> bool:
+	if lapse(month, log):
+		# One lapses and the next is not due the same month. The Crown is not so
+		# eager as to send a fresh demand in the same post as the reproach.
+		return false
 	if month < FIRST_DEMAND_MONTH or issued_month == month:
 		return false
+	if is_pending(month):
+		return false  # He is still holding one; the Crown waits for its answer.
 	if last_issued_month >= 0:
 		if float(month - last_issued_month) < DemandSchedule.months_between(growth):
 			return false
 
 	issued_month = month
 	last_issued_month = month
-	asker = &"steward"
-	kind = KIND_GOLD
 	amount = DemandSchedule.gold_target(growth)
 	term_months = DemandSchedule.term_months()
+	resource = &""
+	expires_month = -1
+
+	if _wants_goods(streams):
+		asker = &"marshal"
+		kind = KIND_RESOURCE
+		resource = _wanted(streams)
+		# Priced in the same gold as the Steward's figure, so the two askers weigh
+		# roughly the same on the colony and the `size` axis reaches both.
+		amount = maxf(1.0, roundf(amount / maxf(0.5, ResourceCatalogue.price_of(resource))))
+		expires_month = month + DemandSchedule.deadline_turns() - 1
+	else:
+		asker = &"steward"
+		kind = KIND_GOLD
 
 	if log != null:
 		log.emit(EVENT_DEMANDED, asker, month, {
 			"asker": String(asker),
 			"kind": String(kind),
+			"resource": String(resource),
 			"amount": amount,
 			"term_months": term_months,
+			"expires_month": expires_month,
 		}, WorldPhase.CROWNS_MONTH)
 	return true
+
+
+## Whether this demand is for goods rather than gold.
+##
+## **Gold is the routine.** A resource demand costs two letters, a payment
+## decision and a governor's compliance, and at every demand the desk becomes a
+## logistics exercise (§5).
+func _wants_goods(streams: RngStreams) -> bool:
+	if streams == null:
+		return false
+	return streams.stream(DemandGrowth.STREAM).randf() < DemandSchedule.resource_share()
+
+
+## What the Marshal's wars need. Iron, guns and the like — never a comfort.
+##
+## Drawn from the catalogue rather than listed here, so a resource added to the
+## data is one the Crown can want without a code change.
+func _wanted(streams: RngStreams) -> StringName:
+	var wantable: PackedStringArray = PackedStringArray()
+	for id in ResourceCatalogue.ids():
+		var candidate := StringName(id)
+		if ResourceCatalogue.is_luxury(candidate) or ResourceCatalogue.is_livestock(candidate):
+			continue
+		if ColonyNeeds.per_head(candidate) > 0.0:
+			continue  # He does not take the bread out of a colony's mouth by post.
+		wantable.append(String(id))
+	wantable.sort()
+	if wantable.is_empty():
+		return &"iron"
+	return StringName(wantable[streams.stream(DemandGrowth.STREAM).randi_range(
+		0, wantable.size() - 1)])
 
 
 func to_dict() -> Dictionary:
@@ -91,6 +194,8 @@ func to_dict() -> Dictionary:
 		"kind": String(kind),
 		"amount": amount,
 		"term_months": term_months,
+		"resource": String(resource),
+		"expires_month": expires_month,
 	}
 
 
@@ -102,4 +207,6 @@ static func from_dict(data: Dictionary) -> DemandBook:
 	restored.kind = StringName(data.get("kind", KIND_GOLD))
 	restored.amount = float(data.get("amount", 0.0))
 	restored.term_months = int(data.get("term_months", 0))
+	restored.resource = StringName(data.get("resource", ""))
+	restored.expires_month = int(data.get("expires_month", -1))
 	return restored
