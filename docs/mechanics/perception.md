@@ -122,6 +122,36 @@ Note that *amply provisioned* is out of the Steward's reach here — the cap is
 doing its job. Direct contradiction between two senders is the failure mode
 this system is built to prevent.
 
+## 4a. Ranges must track the size of the colony
+
+A measure normalised against a **fixed** range stops meaning anything as the
+colony grows. Two hundred gold is a fortune in year one and a rounding error in
+year ten; five hundred bushels is a full granary for thirty people and a famine
+for three thousand. A ladder pinned to absolutes will say *ruinous* forever, or
+*trifling* forever, and the words stop carrying information.
+
+**Prefer measures that are already ratios.** `food_security` is
+`stockpile / consumption`, so it scales by construction — a town of thirty and a
+town of three thousand both read 1.0 when they hold a month's food. Most measures
+can be written this way, and should be.
+
+**Where a raw quantity is unavoidable, the normaliser takes its reference from
+current state**, not from a constant: gold against the colony's monthly trade
+volume, a demand against the running size of recent demands, a war party against
+the strength of the town it is walking toward.
+
+### This is correct, not merely convenient
+
+Perception is a person's judgement, and a person's scale is their own world. The
+governor of a hamlet and the governor of a city both say *our granary is full*
+when it is full **for them**, and both are telling the truth.
+
+**Nothing is lost, because exact quantities are unaffected.** `{param:}` carries
+the true figure and always did. A letter can say the town holds four thousand
+bushels and that the granary is comfortable, in the same sentence, with the
+number absolute and the judgement relative. The split between truth and framing
+does the work.
+
 ## 5. Authoring notes
 
 - **Ladders are local to the letter that uses them.** The same `measure` can

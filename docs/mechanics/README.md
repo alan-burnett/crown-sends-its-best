@@ -21,6 +21,7 @@ being rewritten every iteration.
 | [town-economy.md](town-economy.md) | Prices, reserve, buying, and working the tiles | M2 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
 | [rebel-sentiment.md](rebel-sentiment.md) | Who gets blamed, and when a town stops asking | M3 |
+| [the-diplomat.md](the-diplomat.md) | The PC's only resident eyes, and his price | M3 |
 
 ## Still to write
 
