@@ -1,12 +1,17 @@
 name: checks
 
-# Runs on pull requests against main. **Non-blocking to begin with**: nothing
-# here is a required check, so a red run is a signal to the dev rather than a
-# gate. Making it required later is a branch-protection setting and no change to
-# this file.
+# Runs on **every** pull request, not only those against main.
+#
+# Work here stacks — a branch is opened against the one before it and merged
+# bottom-up — and a `branches: [main]` filter silently skips every PR in a stack
+# but the first. Which is exactly the run you most want, since it is the one
+# carrying the unreviewed code.
+#
+# **Non-blocking to begin with**: nothing here is a required check, so a red run
+# is a signal to the dev rather than a gate. Making it required later is a
+# branch-protection setting and no change to this file.
 on:
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 # A second push to the same branch cancels the first. CI that queues behind
