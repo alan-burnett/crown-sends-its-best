@@ -1,0 +1,54 @@
+[
+  {
+    "id": "spendthrift",
+    "name": "the spendthrift",
+    "note": "Grants whatever is asked and promises whatever is wanted. The Crown pays for a while.",
+    "prefer": [
+      "full",
+      "grant",
+      "raise",
+      "yes",
+      "settle",
+      "survival",
+      "profit"
+    ],
+    "tone": "pleased",
+    "answers": "all"
+  },
+  {
+    "id": "miser",
+    "name": "the miser",
+    "note": "Refuses on principle and lets the post pile up. Cheap, and nobody likes him.",
+    "prefer": [
+      "refuse",
+      "none",
+      "hold",
+      "lower",
+      "no"
+    ],
+    "tone": "annoyed",
+    "answers": "required"
+  },
+  {
+    "id": "steady",
+    "name": "the steady hand",
+    "note": "Middling: pays part, holds rates, and keeps the governor pointed at survival.",
+    "prefer": [
+      "partial",
+      "half",
+      "hold",
+      "survival",
+      "growth"
+    ],
+    "tone": "dutiful",
+    "answers": "all"
+  },
+  {
+    "id": "absentee",
+    "name": "the absentee",
+    "note": "Answers nothing at all. The reference for what silence alone does (SPEC 9.3).",
+    "prefer": [],
+    "tone": "dutiful",
+    "answers": "none"
+  }
+]
