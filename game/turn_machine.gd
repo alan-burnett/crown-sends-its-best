@@ -100,6 +100,8 @@ func _init(p_run: RunState) -> void:
 	# themselves arrive one ticket at a time (#44 to #50).
 	colony_month = ColonyDriver.new(run.colony, run.map, run.run_seed)
 	colony_month.territory_driver = territory
+	colony_month.month.set_handler(ColonyMonth.WORK, WorkPhase.new())
+	colony_month.month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
 	colony_month.month.set_handler(ColonyMonth.SETTLE, DriftingSettle.new())
 
 	# Order within the list does not decide anything — each driver answers for its

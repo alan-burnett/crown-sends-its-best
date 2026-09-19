@@ -48,6 +48,14 @@ static func load_resources(content: ContentDatabase) -> void:
 		improvements.append(content.collection("improvements")[id])
 	Improvement.load_from(improvements)
 
+	var buildings: Array = []
+	for id in content.ids("buildings"):
+		buildings.append(content.collection("buildings")[id])
+	Building.load_from(buildings)
+
+	if content.has_record("colony", "needs"):
+		ColonyNeeds.load_from(content.record("colony", "needs"))
+
 
 static func register_all() -> void:
 	register_effects()

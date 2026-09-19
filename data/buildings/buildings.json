@@ -1,0 +1,74 @@
+[
+  {
+    "id": "storehouse",
+    "name": "storehouse",
+    "months": 2,
+    "cost": { "wood": 30 },
+    "effects": { "reserve_months": 1, "quality_of_life": 0.5 }
+  },
+  {
+    "id": "palisade",
+    "name": "palisade",
+    "months": 2,
+    "cost": { "wood": 40 },
+    "effects": { "defence": 2, "quality_of_life": 0.5 }
+  },
+  {
+    "id": "sawmill",
+    "name": "sawmill",
+    "requires": ["storehouse"],
+    "months": 3,
+    "cost": { "wood": 40, "tools": 6 },
+    "effects": { "yield_bonus": { "wood": 0.6 } }
+  },
+  {
+    "id": "quarry_works",
+    "name": "quarry works",
+    "requires": ["storehouse"],
+    "months": 3,
+    "cost": { "wood": 30, "tools": 8 },
+    "effects": { "yield_bonus": { "stone": 0.6, "ore": 0.3 } }
+  },
+  {
+    "id": "carpenters_hall",
+    "name": "carpenters' hall",
+    "requires": ["sawmill"],
+    "months": 3,
+    "cost": { "wood": 60, "stone": 20 },
+    "effects": { "build_speed": 0.5, "quality_of_life": 0.5 }
+  },
+  {
+    "id": "granary",
+    "name": "granary",
+    "requires": ["storehouse"],
+    "months": 3,
+    "cost": { "wood": 40, "stone": 20 },
+    "effects": { "reserve_months": 2, "quality_of_life": 1.0 }
+  },
+  {
+    "id": "smithy",
+    "name": "smithy",
+    "requires": ["quarry_works"],
+    "months": 4,
+    "cost": { "stone": 40, "wood": 20, "tools": 10 },
+    "effects": { "yield_bonus": { "iron": 0.5 }, "converts": ["iron", "tools"] }
+  },
+  {
+    "id": "church",
+    "name": "church",
+    "requires": ["storehouse"],
+    "months": 4,
+    "cost": { "stone": 50, "wood": 30 },
+    "effects": { "quality_of_life": 2.0 },
+    "grants_contact": "clergyman"
+  },
+  {
+    "id": "armoury",
+    "name": "armoury",
+    "requires": ["smithy"],
+    "months": 4,
+    "cost": { "stone": 40, "iron": 20, "tools": 12 },
+    "effects": { "yield_bonus": { "guns": 0.8 }, "defence": 3 },
+    "grants_contact": "quartermaster"
+  }
+]
