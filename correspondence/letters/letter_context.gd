@@ -54,6 +54,13 @@ var demands: DemandGrowth = null
 ## What the Crown asked for this month, if it asked for anything.
 var demand_book: DemandBook = null
 
+## The run's event log.
+##
+## **What happened, which is the only thing a letter may react to** (Seam A). A
+## condition that needs to know a town came home reads the event that said so
+## rather than inferring it from a flag that looks the same as never having left.
+var log: EventLog = null
+
 ## The town this letter is about, when the sender speaks for one.
 ##
 ## **A governor's letter is about a place**, and the conditions that decide

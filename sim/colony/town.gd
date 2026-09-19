@@ -150,6 +150,20 @@ var rebelling: bool = false
 ## return event can report it. `-1` while the town is loyal.
 var rebelling_since: int = -1
 
+## Months of embargo left to run (SPEC §12.3, #73, #74).
+##
+## **The Crown's one punishment before it has troops.** Its neighbours are
+## forbidden to relieve it, so the rebellion visibly costs something — and the
+## suffering that causes is the *Crown's* doing, so it raises the town's own
+## sentiment while lowering the argument its rebellion makes to everybody else.
+## That tension is the design and not a bug.
+var embargo_months: int = 0
+
+
+## Whether the colony is currently forbidden to help this town.
+func is_embargoed() -> bool:
+	return embargo_months > 0
+
 ## **The sum of its citizens' private wealth plus the town's coffers.** Rises
 ## selling to the Crown, falls buying from it, and never moves between towns or
 ## to natives.
@@ -327,6 +341,7 @@ func to_dict() -> Dictionary:
 		"governor": String(governor_id),
 		"rebelling": rebelling,
 		"rebelling_since": rebelling_since,
+		"embargo_months": embargo_months,
 		"gold": _gold,
 	}
 
@@ -345,6 +360,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))
 	town.rebelling_since = int(data.get("rebelling_since", -1))
+	town.embargo_months = int(data.get("embargo_months", 0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.growth_accrued = float(data.get("growth_accrued", 0.0))
 	town.traded_value = float(data.get("traded_value", 0.0))

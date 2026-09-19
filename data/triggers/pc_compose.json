@@ -16,5 +16,11 @@
     "letter": "pc.request_shipment",
     "offers_composition": true,
     "conditions": []
+  },
+  {
+    "id": "trigger.pc.lay_an_embargo",
+    "letter": "pc.lay_an_embargo",
+    "offers_composition": true,
+    "conditions": []
   }
 ]

@@ -308,6 +308,154 @@ func test_nothing_here_lets_the_crown_retake_a_town() -> void:
 		"something put a rebel town back under the Crown without its sentiment moving")
 
 
+# --- 🔒 A rebellion never stays put -----------------------------------------
+
+func _rebel(id: StringName, quality: float, embargoed: bool = false) -> Town:
+	var town := _town(id)
+	town.rebelling = true
+	town.quality_of_life = quality
+	town.embargo_months = 6 if embargoed else 0
+	return town
+
+
+func test_two_rebels_are_worse_than_one() -> void:
+	var watching := _town(&"ashmere")
+	var one := _context([watching, _rebel(&"bellhaven", 0.9)])
+	var two := _context([_town(&"ashmere"), _rebel(&"bellhaven", 0.9), _rebel(&"carrick", 0.9)])
+
+	assert_true(
+		float(RebelSentiment.of(two.colony.by_id(&"ashmere"), two, null, {})["neighbours"])
+		> float(RebelSentiment.of(watching, one, null, {})["neighbours"]),
+		"a second town in revolt was no more persuasive than the first")
+
+
+func test_the_term_does_not_run_away() -> void:
+	# **Dire, not arithmetically absurd.** A colony half in revolt should be
+	# desperate; a term that grew without bound would make the second rebellion
+	# decide the run.
+	var towns: Array = [_town(&"ashmere")]
+	for at in 8:
+		towns.append(_rebel(StringName("rebel_%d" % at), 1.0))
+	var context := _context(towns)
+	var spread := float(RebelSentiment.of(towns[0], context, null, {})["neighbours"])
+	assert_true(spread <= RebelSentiment.NEIGHBOUR_WEIGHT * 3.0,
+		"eight rebel towns produced a spread term of %f" % spread)
+
+
+func test_a_punished_rebel_argues_less() -> void:
+	# **A town being ground down is an argument against rebellion**, and reads as
+	# one. SPEC §12.3: loyal towns will not keep paying taxes while a neighbour
+	# refuses them and suffers nothing for it.
+	var free_rein := _context([_town(&"ashmere"), _rebel(&"bellhaven", 0.9)])
+	var punished := _context([_town(&"ashmere"), _rebel(&"bellhaven", 0.9, true)])
+
+	assert_true(
+		float(RebelSentiment.of(punished.colony.by_id(&"ashmere"), punished, null, {})["neighbours"])
+		< float(RebelSentiment.of(free_rein.colony.by_id(&"ashmere"), free_rein, null, {})["neighbours"]),
+		"a rebel town under embargo was as tempting as one the Crown had left alone")
+
+
+func test_a_town_that_comes_home_stops_arguing_at_once() -> void:
+	var rebel := _rebel(&"bellhaven", 0.9)
+	var watching := _town(&"ashmere")
+	var context := _context([watching, rebel])
+	assert_true(float(RebelSentiment.of(watching, context, null, {})["neighbours"]) > 0.0)
+
+	rebel.rebelling = false
+	assert_almost_eq(float(RebelSentiment.of(watching, context, null, {})["neighbours"]), 0.0, 0.0001,
+		"a town back in the fold went on arguing for rebellion")
+
+
+# --- 🔒 Punishment cuts both ways -------------------------------------------
+
+func test_an_embargo_hardens_the_town_it_falls_on() -> void:
+	# **The tension is the design.** The hunger is visibly the Crown's doing, so
+	# under attribution it is the Crown that is blamed for it — and the PC buys
+	# quiet among the neighbours at the price of digging in the town he is trying
+	# to win back.
+	var spared := _rebel(&"ashmere", 0.4)
+	var starved := _rebel(&"ashmere", 0.4, true)
+
+	assert_true(
+		float(RebelSentiment.of(starved, _context([starved]), null, {})["punishment"])
+		> float(RebelSentiment.of(spared, _context([spared]), null, {})["punishment"]),
+		"an embargo cost the town it was laid on nothing at all")
+
+
+func test_the_colony_will_not_relieve_an_embargoed_town() -> void:
+	var cut_off := _town(&"ashmere")
+	cut_off.rebelling = true
+	cut_off.embargo_months = 6
+	var generous := _town(&"bellhaven")
+	generous.store(&"food", 900.0)
+
+	var context := _context([cut_off, generous])
+	var month := ColonyMonth.new()
+	month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
+	month.set_handler(ColonyMonth.RELIEF, ReliefPhase.new())
+	month.run(context.colony, context)
+
+	assert_almost_eq(cut_off.held(&"food"), 0.0, 0.001,
+		"the convoys went through an embargo")
+
+
+func test_lifting_it_lets_the_convoys_through_again() -> void:
+	# The pair, so the test above cannot pass by Relief being broken.
+	var restored := _town(&"ashmere")
+	restored.rebelling = true
+	var generous := _town(&"bellhaven")
+	generous.store(&"food", 900.0)
+
+	var context := _context([restored, generous])
+	var month := ColonyMonth.new()
+	month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
+	month.set_handler(ColonyMonth.RELIEF, ReliefPhase.new())
+	month.run(context.colony, context)
+
+	assert_true(restored.held(&"food") > 0.0,
+		"a rebel town under no embargo was left to starve anyway")
+
+
+func test_an_embargo_is_something_the_pc_can_stop_doing() -> void:
+	# A punishment with no end is one he cannot take back, and SPEC §12.3's
+	# reward-and-punish pair only works if both can be stopped.
+	var town := _town()
+	town.embargo_months = 2
+	var executor := EmbargoExecutor.new()
+	var colony := Colony.new()
+	colony.add(town)
+	executor.colony = colony
+
+	var intent := Intent.new(&"lift_1", EmbargoExecutor.KIND, &"pc", town.id, 1, {"months": 0})
+	var state := WorldValues.initial_state()
+	state.month = 10
+	assert_eq(String(executor.execute(intent, state, EventLog.new())), String(Intent.COMPLETED))
+	assert_false(town.is_embargoed(), "the embargo outlived the order lifting it")
+
+
+func test_a_rebel_governor_cannot_refuse_an_embargo() -> void:
+	# It is an instruction to the rest of the colony, carried to the man it
+	# concerns as a courtesy. Making it conditional on his goodwill would have
+	# made the Crown's only punishment unusable against anyone who deserved it.
+	var town := _town()
+	town.rebelling = true
+	var governor := Contact.new(&"gov_ashmere")
+	governor.relationship.loyalty = 0.0
+
+	var order := Order.new()
+	order.kind = M1Registrations.ORDER_EMBARGO
+	order.addressed_to = &"gov_ashmere"
+	order.params = {"to": "gov_ashmere", "months": 6}
+
+	var state := WorldValues.initial_state()
+	state.month = 9
+	var resolved := Compliance.resolve(
+		order, governor, IntentBook.new(), state, EventLog.new(), RngStreams.new(SEED), town
+	)
+	assert_eq(String(resolved["outcome"]), String(Compliance.COMPLY),
+		"a rebel governor talked the Crown out of punishing his town")
+
+
 # --- 🔒 It survives a reload ------------------------------------------------
 
 func test_a_rebellion_survives_a_round_trip() -> void:

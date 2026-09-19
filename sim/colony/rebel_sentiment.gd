@@ -94,6 +94,27 @@ const DEVELOPMENT_CEILING: float = 18.0
 ## What a neighbour in open rebellion is worth, at its worst.
 const NEIGHBOUR_WEIGHT: float = 18.0
 
+## What each rebel after the first is worth, as a share of the one before.
+##
+## **Two are worse than one, and ten are not ten times worse.** SPEC §12.3 locks
+## that a rebellion never stays put, so the term has to grow — but a colony half
+## in revolt should be dire rather than arithmetically absurd, and a term that
+## ran away would make the second rebellion decide the run.
+const NEIGHBOUR_FALLOFF: float = 0.6
+
+## What is left of a rebel town's argument once the Crown is visibly punishing
+## it. **A town being ground down is an argument against rebellion**, and should
+## read as one.
+const PUNISHED_SHARE: float = 0.25
+
+## What an embargo does to the town it is laid on.
+##
+## **It raises its sentiment**, because the suffering is visibly the Crown's
+## doing rather than the rebellion's — which is the whole tension: the PC buys
+## quiet among the neighbours at the price of digging in the town he is trying
+## to win back.
+const EMBARGO_RESENTMENT: float = 14.0
+
 
 ## Work out a town's sentiment for this month.
 ##
@@ -114,6 +135,7 @@ static func of(
 		"quality": _quality(town),
 		"development": _development(town),
 		"neighbours": _neighbours(town, context),
+		"punishment": EMBARGO_RESENTMENT if town.is_embargoed() else 0.0,
 	}
 
 	var total := 0.0
@@ -207,9 +229,31 @@ static func _development(town: Town) -> float:
 static func _neighbours(town: Town, context: ColonyContext) -> float:
 	if context.colony == null or town.rebelling:
 		return 0.0
-	var worst := 0.0
+
+	# Strongest argument first, then each one after it worth less. Sorted so the
+	# order is the colony's and not the traversal's.
+	var arguments: Array = []
 	for other in context.colony.in_order():
 		if other == town or not other.rebelling:
 			continue
-		worst = maxf(worst, clampf(other.quality_of_life, 0.0, 1.0))
-	return NEIGHBOUR_WEIGHT * worst
+		arguments.append(argument_of(other))
+	arguments.sort()
+	arguments.reverse()
+
+	var total := 0.0
+	var share := 1.0
+	for argument in arguments:
+		total += float(argument) * share
+		share *= NEIGHBOUR_FALLOFF
+	return NEIGHBOUR_WEIGHT * total
+
+
+## How persuasive one rebel town's example is.
+##
+## **Prosperous is persuasive, and punished is not.** SPEC §12.3 states the
+## reasoning plainly: loyal towns will not keep paying taxes while a neighbour
+## refuses them and suffers nothing for it. The two halves of that sentence are
+## the two terms here.
+static func argument_of(rebel: Town) -> float:
+	var persuasive := clampf(rebel.quality_of_life, 0.0, 1.0)
+	return persuasive * PUNISHED_SHARE if rebel.is_embargoed() else persuasive

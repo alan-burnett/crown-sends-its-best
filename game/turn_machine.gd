@@ -96,6 +96,9 @@ func _init(p_run: RunState) -> void:
 	# Goods leave a town over months, so a letter can still reach them (#69).
 	var shipments := ShipmentExecutor.new()
 	shipments.colony = run.colony
+	# The Crown's one punishment before it has troops (#73, #74).
+	var embargoes := EmbargoExecutor.new()
+	embargoes.colony = run.colony
 	urging.colony = run.colony
 
 	month_runner = WorldMonth.new(run.intents, run.streams)
@@ -158,7 +161,7 @@ func _init(p_run: RunState) -> void:
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
-	month_runner.executors = [urging, shipments, executor]
+	month_runner.executors = [urging, shipments, embargoes, executor]
 
 
 ## What each kind of Order does to the world.
@@ -211,6 +214,9 @@ static func order_effects() -> Dictionary:
 		# Goods move through `ShipmentExecutor`, over months, rather than through a
 		# world value. Listed so that every Order kind is accounted for here.
 		String(M1Registrations.ORDER_SHIP_RESOURCE): {"target": ""},
+		# An embargo reaches a town rather than a world value, through
+		# `EmbargoExecutor`.
+		String(M1Registrations.ORDER_EMBARGO): {"target": ""},
 		# Urging an intent reaches the town rather than a world value, so
 		# `UrgeIntentExecutor` handles it. Listed here so that every Order kind is
 		# still accounted for in one place.

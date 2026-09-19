@@ -230,5 +230,23 @@
       }
     },
     "conditions": []
+  },
+  {
+    "id": "trigger.governor.we_are_coming_back",
+    "letter": "governor.we_are_coming_back",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "months": {
+        "from": "town_months_out"
+      }
+    },
+    "conditions": [
+      {
+        "town_came_back": {
+          "within": 2
+        }
+      }
+    ]
   }
 ]

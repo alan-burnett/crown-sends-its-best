@@ -50,6 +50,9 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"town_surplus_amount", {}, ColonyParamSources.town_surplus_amount
 	)
+	ContentRegistry.register_param_source(
+		"town_months_out", {}, ColonyParamSources.town_months_out
+	)
 
 
 ## How many letters the Treasury will still honour.
@@ -221,6 +224,20 @@ static func town_surplus_amount(_args: Dictionary, context: LetterContext) -> Va
 	var mouths := maxf(1.0, float(context.town.population()))
 	var keep := mouths * ColonyNeeds.per_head(resource) 		* (1.0 + ColonyNeeds.reserve_months(resource))
 	return maxi(1, int(roundf(maxf(0.0, context.town.held(resource) - keep) * 0.5)))
+
+
+## How long the town was outside the Crown, in months (#74).
+##
+## Read off the return event rather than off the town, which has already
+## forgotten: `rebelling_since` is cleared the moment it comes home, because a
+## town that is back is not a town that is out.
+static func town_months_out(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null or context.log == null:
+		return 0
+	for event in context.log.of_type(Rebellion.EVENT_RETURNED):
+		if event.subject == context.town.id:
+			return int(event.payload.get("months_out", 0))
+	return 0
 
 
 static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:

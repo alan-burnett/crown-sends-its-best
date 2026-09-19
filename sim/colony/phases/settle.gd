@@ -123,6 +123,18 @@ func _take_the_temperature(town: Town, context: ColonyContext) -> void:
 	if Rebellion.resolve(town, context) == Rebellion.EVENT_DECLARED:
 		town.rebelling_since = context.state.month
 
+	# **An embargo runs down whether anybody remembers it or not.** A punishment
+	# with no end is a punishment the PC cannot take back, and SPEC §12.3's
+	# reward-and-punish pair only works if both are things he can stop doing.
+	if town.embargo_months > 0:
+		town.embargo_months -= 1
+		if town.embargo_months == 0:
+			context.log.emit(EmbargoExecutor.EVENT_LIFTED, town.id, context.state.month, {
+				"town": String(town.id),
+				"months": 0,
+				"rebelling": town.rebelling,
+			}, WorldPhase.COLONY_MONTH)
+
 
 ## Which contributor is doing the most to a town's sentiment right now.
 ##

@@ -135,6 +135,13 @@ func _serve(deficits: Array, available: Dictionary, transfers: Array, context: C
 		var receiver := colony.by_id(StringName(deficit["town"]))
 		if receiver == null:
 			continue
+		if receiver.is_embargoed():
+			# **The Crown's one punishment before it has troops** (SPEC §12.3).
+			# Its neighbours are forbidden to relieve it, so the rebellion costs
+			# the town something visible. What that does to its own sentiment is
+			# the opposite of what it does to everyone else's, deliberately:
+			# the hunger is plainly the Crown's doing.
+			continue
 		var resource := StringName(deficit["resource"])
 		var wanted := float(deficit["amount"])
 
