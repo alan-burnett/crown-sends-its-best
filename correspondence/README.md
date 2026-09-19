@@ -43,6 +43,9 @@ afterward" (§8.5) are therefore the same code path with different origins.
 | `perception/` | A true number becomes a biased word (`docs/mechanics/perception.md`) |
 | `registry/` | Conditions and effects as ids with typed params |
 | `orders/order.gd` | What a player's letter actually produces |
+| `post/inbound_letter.gd` | One letter on the desk, with the values it arrived with |
+| `post/outgoing_letter.gd` | A letter written but not yet sent — choices, not Orders |
+| `post/post.gd` | The turn's outgoing post, sealed when it goes |
 
 **Relationship is not a ledger.** SPEC §4 fixes Ledger as the gold screen and
 nothing else.

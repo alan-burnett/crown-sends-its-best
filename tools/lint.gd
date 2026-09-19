@@ -20,7 +20,7 @@ extends SceneTree
 ## ships on desktop and mobile (SPEC §16.1).
 
 const SIM_ROOT: String = "res://sim"
-const SCAN_ROOTS: PackedStringArray = ["res://sim", "res://correspondence", "res://presentation", "res://core"]
+const SCAN_ROOTS: PackedStringArray = ["res://sim", "res://correspondence", "res://presentation", "res://core", "res://game"]
 
 ## Node types and node-only APIs. `sim/` may use RefCounted and plain data.
 const NODE_PATTERNS: Array[Array] = [

@@ -33,6 +33,8 @@ not a polish item.
 | `serialization/canonical.gd` | One canonical text form, so equal states hash equally |
 | `deliberation/` | The one kernel every actor that chooses goes through |
 | `intent/` | What an actor committed to, and the executors that carry it out |
+| `world/world_month.gd` | The nine phases, run in order |
+| `world/stub_world.gd` | M1's stand-in world (#20). M2 replaces this file, not the runner |
 
 ## Seam C — will is not a write
 
