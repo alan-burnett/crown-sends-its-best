@@ -8,7 +8,9 @@
       "furs",
       "cotton"
     ],
-    "price": 8
+    "price": 8,
+    "input_per_unit": 1.2,
+    "per_worker": 4.0
   },
   {
     "id": "iron",
@@ -18,7 +20,9 @@
     "converts_from": [
       "ore"
     ],
-    "price": 8
+    "price": 8,
+    "input_per_unit": 1.5,
+    "per_worker": 3.0
   },
   {
     "id": "tools",
@@ -28,7 +32,9 @@
     "converts_from": [
       "iron"
     ],
-    "price": 12
+    "price": 12,
+    "input_per_unit": 1.0,
+    "per_worker": 2.0
   },
   {
     "id": "guns",
@@ -38,7 +44,9 @@
     "converts_from": [
       "iron"
     ],
-    "price": 20
+    "price": 20,
+    "input_per_unit": 2.0,
+    "per_worker": 1.0
   },
   {
     "id": "beer",
@@ -48,7 +56,9 @@
     "converts_from": [
       "food"
     ],
-    "price": 5
+    "price": 5,
+    "input_per_unit": 2.0,
+    "per_worker": 5.0
   },
   {
     "id": "rum",
@@ -58,7 +68,9 @@
     "converts_from": [
       "sugar"
     ],
-    "price": 9
+    "price": 9,
+    "input_per_unit": 1.2,
+    "per_worker": 3.0
   },
   {
     "id": "cigars",
@@ -68,6 +80,8 @@
     "converts_from": [
       "tobacco"
     ],
-    "price": 9
+    "price": 9,
+    "input_per_unit": 1.2,
+    "per_worker": 3.0
   }
 ]

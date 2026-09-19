@@ -9,5 +9,9 @@
     "clothing": 1.0
   },
   "default_reserve_months": 0.5,
-  "luxury_per_head": 0.12
+  "luxury_per_head": 0.12,
+  "severity": {
+    "food": 1.0,
+    "clothing": 0.5
+  }
 }

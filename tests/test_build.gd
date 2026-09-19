@@ -239,8 +239,12 @@ func test_a_posture_changes_what_work_does() -> void:
 	# forest outscores plains on this map before any weighting is applied, so a
 	# town with no orders already cuts timber, and "no orders" would have made a
 	# weaker comparison look like a passing one.
-	var timber := _town(&"harvest_timber", {"food": 100.0})
-	var grain := _town(&"stockpile_food", {"food": 100.0})
+	# **Both towns are fed and clothed.** A town with no cloth at all weights furs
+	# heavily enough to send everybody to the forest whatever its standing order
+	# is, which is correct behaviour and a second signal louder than the one this
+	# test is about.
+	var timber := _town(&"harvest_timber", {"food": 100.0, "clothing": 20.0})
+	var grain := _town(&"stockpile_food", {"food": 100.0, "clothing": 20.0})
 	_run_month(_harness(timber, [ColonyMonth.WORK]))
 	_run_month(_harness(grain, [ColonyMonth.WORK]))
 

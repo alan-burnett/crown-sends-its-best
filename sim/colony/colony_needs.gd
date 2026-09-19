@@ -12,6 +12,7 @@ static var _per_head: Dictionary = {"food": 1.0, "clothing": 0.15}
 static var _reserve_months: Dictionary = {"food": 2.0, "clothing": 1.0}
 static var _default_reserve_months: float = 0.5
 static var _luxury_per_head: float = 0.12
+static var _severity: Dictionary = {"food": 1.0, "clothing": 0.5}
 
 ## How many months of food a town considers comfortable. Above this it stops
 ## treating hunger as urgent.
@@ -23,6 +24,7 @@ static func load_from(record: Dictionary) -> void:
 	_reserve_months = record.get("reserve_months", _reserve_months).duplicate()
 	_default_reserve_months = float(record.get("default_reserve_months", _default_reserve_months))
 	_luxury_per_head = float(record.get("luxury_per_head", _luxury_per_head))
+	_severity = record.get("severity", _severity).duplicate()
 
 
 ## Consumed per head each month. **Absence of these threatens survival**, which
@@ -36,6 +38,16 @@ static func needed_resources() -> PackedStringArray:
 	var out: PackedStringArray = PackedStringArray(_per_head.keys())
 	out.sort()
 	return out
+
+
+## **How fast going without this kills you**, as a share of the worst case.
+##
+## Needs are not equal. A town with no grain is dead in weeks; a town with no
+## cloth is merely wretched, for months. Without this the two rank the same and
+## a starving town goes trapping furs because it is also cold — which is the
+## same failure as a town quarrying while it starves, wearing a different coat.
+static func severity(resource: StringName) -> float:
+	return float(_severity.get(String(resource), 1.0))
 
 
 static func reserve_months(resource: StringName) -> float:
