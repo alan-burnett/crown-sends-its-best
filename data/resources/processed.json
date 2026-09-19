@@ -1,0 +1,16 @@
+[
+  { "id": "clothing", "name": "clothing", "luxury": false, "producible": true,
+    "converts_from": ["furs", "cotton"] },
+  { "id": "iron",     "name": "iron",     "luxury": false, "producible": true,
+    "converts_from": ["ore"] },
+  { "id": "tools",    "name": "tools",    "luxury": false, "producible": true,
+    "converts_from": ["iron"] },
+  { "id": "guns",     "name": "guns",     "luxury": false, "producible": true,
+    "converts_from": ["iron"] },
+  { "id": "beer",     "name": "beer",     "luxury": true,  "producible": true,
+    "converts_from": ["food"] },
+  { "id": "rum",      "name": "rum",      "luxury": true,  "producible": true,
+    "converts_from": ["sugar"] },
+  { "id": "cigars",   "name": "cigars",   "luxury": true,  "producible": true,
+    "converts_from": ["tobacco"] }
+]

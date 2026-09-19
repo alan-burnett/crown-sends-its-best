@@ -27,7 +27,7 @@
     "params": {
       "resource": {
         "from": "literal",
-        "value": "cloth"
+        "value": "clothing"
       },
       "amount": {
         "from": "scaled_world_value",

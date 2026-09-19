@@ -20,7 +20,15 @@ const KIND: StringName = &"adjust_value"
 
 const EVENT_PROGRESSED: StringName = &"intent_progressed"
 
-## Intent kind -> `{target, per_month}` or `{target, amount_factor}`.
+## Intent kind -> what it moves and by how much.
+##
+## | Key | Meaning |
+## | :--- | :--- |
+## | `target` | The world value it moves. `""` means it moves nothing |
+## | `target_from_data` | Read the world value's name out of the Intent instead, for Orders that choose their own target — a tax rate names the resource it is levied on |
+## | `per_month` | A fixed monthly change |
+## | `amount_factor` | Scale whatever the letter promised |
+## | `set_from_data` | **Set** the value outright, rather than move it, reading the new value out of the Intent. A tax instruction puts a rate somewhere; it does not drift one towards it — and it has to be able to create the value, since a resource with no override yet has no rate of its own |
 ##
 ## **What each kind of Order means in the world.** The sim cannot name the Order
 ## kinds — they belong to the correspondence layer — so the table is handed in by
@@ -40,6 +48,8 @@ func handles(intent: Intent) -> bool:
 func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	var entry: Dictionary = table.get(String(intent.kind), {})
 	var key: String = String(entry.get("target", intent.target))
+	if entry.has("target_from_data"):
+		key = String(intent.data.get(String(entry["target_from_data"]), ""))
 
 	# An Order with nothing to do in the world is done the moment it is read.
 	if key.is_empty():
@@ -52,6 +62,14 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 			"months_required": intent.months_required,
 			"remaining": 0,
 		}, WorldPhase.MOVEMENT)
+		return Intent.COMPLETED
+
+	# Setting a value outright, which may not exist yet — that is the normal case
+	# for the first override on a resource.
+	if entry.has("set_from_data"):
+		var settled := float(intent.data.get(String(entry["set_from_data"]), 0.0))
+		intent.progress = intent.months_required
+		state.apply(log, EVENT_PROGRESSED, intent.source, {key: settled}, WorldPhase.MOVEMENT)
 		return Intent.COMPLETED
 
 	if not state.has_value(key):

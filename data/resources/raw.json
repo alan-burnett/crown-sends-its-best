@@ -1,0 +1,11 @@
+[
+  { "id": "food",    "name": "food",    "luxury": false, "producible": true },
+  { "id": "wood",    "name": "wood",    "luxury": false, "producible": true },
+  { "id": "stone",   "name": "stone",   "luxury": false, "producible": true },
+  { "id": "ore",     "name": "ore",     "luxury": false, "producible": true },
+  { "id": "furs",    "name": "furs",    "luxury": false, "producible": true },
+  { "id": "cotton",  "name": "cotton",  "luxury": false, "producible": true },
+  { "id": "sugar",   "name": "sugar",   "luxury": true,  "producible": true },
+  { "id": "tobacco", "name": "tobacco", "luxury": true,  "producible": true },
+  { "id": "tea",     "name": "tea",     "luxury": true,  "producible": false }
+]
