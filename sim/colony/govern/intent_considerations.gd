@@ -58,6 +58,7 @@ static func register_all() -> void:
 	Deliberation.register_consideration(Mandate.new(), kinds)
 	Deliberation.register_consideration(CrownUrging.new(), kinds)
 	Deliberation.register_filter(RoomToSettle.new(), kinds)
+	Deliberation.register_filter(OnlyIfHeLoathesYou.new(), kinds)
 
 
 ## Halve every `half_life` months. Used for both decaying pulls.
@@ -233,6 +234,28 @@ class CrownUrging extends Consideration:
 ## governor, however expansionist, can send an expedition to land the colony has
 ## never seen. Filters run before scoring, so this removes the candidate rather
 ## than making it merely unattractive.
+## Loyalty at or below which a governor will consider turning his town.
+##
+## **A filter and not a weight** (`deliberation.md` §5). A weight can lose a
+## close vote and then win one; this must be unreachable to a man who does not
+## loathe the PC, however the rest of his temperament falls. It is also what
+## makes recovery work: raise him back over the line and the candidate simply
+## stops existing for him (`contacts.md` §8).
+const SEDITION_AT: float = 12.0
+
+
+class OnlyIfHeLoathesYou extends DeliberationFilter:
+	func _init() -> void:
+		super(&"only_if_he_loathes_you")
+
+	func permits(actor: DeliberationActor, candidate: Candidate, _context: DeliberationContext) -> bool:
+		if candidate.id != GovernorIntent.SEDITION:
+			return true
+		var contact := actor as Contact
+		return contact != null \
+			and contact.loyalty() <= IntentConsiderations.SEDITION_AT
+
+
 class RoomToSettle extends DeliberationFilter:
 	func _init() -> void:
 		super(&"somewhere_to_settle")

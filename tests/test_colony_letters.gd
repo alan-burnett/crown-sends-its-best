@@ -95,9 +95,16 @@ func test_the_only_thing_a_letter_can_urge_is_a_real_intent() -> void:
 
 
 func test_every_intent_is_something_the_pc_can_actually_say() -> void:
-	# The five purposes in `docs/mechanics/governor-objectives.md` §6. If one had
-	# no letter option, that intent would exist in the sim and be unreachable by
+	# The purposes in `docs/mechanics/governor-objectives.md` §6. If one had no
+	# letter option, that intent would exist in the sim and be unreachable by
 	# correspondence, which is the one way the PC is allowed to act.
+	#
+	# **Sedition is the exception, and it is the interesting one** (#128). The PC
+	# cannot argue for a governor to prepare his town for rebellion — there is no
+	# letter in which the Crown asks a man to turn against it, and there should
+	# not be. It is the one intent a governor reaches entirely on his own, which
+	# is what makes it a consequence of how he has been treated rather than
+	# another thing the PC decides.
 	var reachable: Dictionary = {}
 	for letter in _governor_letters():
 		if not letter.has_reply():
@@ -109,6 +116,10 @@ func test_every_intent_is_something_the_pc_can_actually_say() -> void:
 					reachable[String(effect["urge_intent"].get("intent", ""))] = true
 
 	for intent in GovernorIntent.IN_ORDER:
+		if GovernorIntent.is_sedition(intent):
+			assert_false(reachable.has(String(intent)),
+				"a letter lets the PC ask a governor to prepare for rebellion")
+			continue
 		assert_has(reachable, String(intent),
 			"no letter lets the PC argue for '%s'" % intent)
 
