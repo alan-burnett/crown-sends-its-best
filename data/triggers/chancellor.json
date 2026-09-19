@@ -129,5 +129,89 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.chancellor.squeeze_frequency",
+    "letter": "chancellor.squeeze_frequency",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "years": {
+        "from": "years_served"
+      }
+    },
+    "conditions": [
+      {
+        "crown_first_leaned_harder": {}
+      },
+      {
+        "crown_leaned_on": {
+          "axis": "frequency"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.squeeze_size",
+    "letter": "chancellor.squeeze_size",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "years": {
+        "from": "years_served"
+      }
+    },
+    "conditions": [
+      {
+        "crown_first_leaned_harder": {}
+      },
+      {
+        "crown_leaned_on": {
+          "axis": "size"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.squeeze_desperation",
+    "letter": "chancellor.squeeze_desperation",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "years": {
+        "from": "years_served"
+      }
+    },
+    "conditions": [
+      {
+        "crown_first_leaned_harder": {}
+      },
+      {
+        "crown_leaned_on": {
+          "axis": "desperation"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.squeeze_reach",
+    "letter": "chancellor.squeeze_reach",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "years": {
+        "from": "years_served"
+      }
+    },
+    "conditions": [
+      {
+        "crown_first_leaned_harder": {}
+      },
+      {
+        "crown_leaned_on": {
+          "axis": "reach"
+        }
+      }
+    ]
   }
 ]

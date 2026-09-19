@@ -13,6 +13,7 @@ being rewritten every iteration.
 
 | Doc | What it covers | First needed |
 | :--- | :--- | :--- |
+| [contacts.md](contacts.md) | What is true of every contact, and what loyalty does | M1 |
 | [perception.md](perception.md) | How a truthful number becomes a biased word | M1 |
 | [deliberation.md](deliberation.md) | One kernel for every decision an actor makes | M1 |
 | [world-month.md](world-month.md) | The nine phases, and the timing rule | M1 |
@@ -33,7 +34,6 @@ first needs it. That list is the live one; this table is the map.
 | :--- | :--- | :--- |
 | Production and conversion | #92 | M2 |
 | Town buildings and the building tree | #93 | M2 |
-| General contact behaviour | #91 | M3 |
 | Trade protests | #94 | M3 |
 | Policy | #96 | M3 |
 | Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
@@ -61,8 +61,8 @@ duplicating it.
 
 ## Contacts
 
-One doc for **general contact behaviour** (#91), and an override doc for each
-contact that breaks those rules. Most will need one — a contact usually exists
+One doc for **general contact behaviour** ([contacts.md](contacts.md)), and an
+override doc for each contact that breaks those rules. Most will need one — a contact usually exists
 *because* it does something special, and the override is where that something
 gets written down.
 

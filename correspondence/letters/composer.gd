@@ -127,6 +127,7 @@ func _params_for(letter: Letter, run: RunState, to: StringName) -> Dictionary:
 	context.measures = ColonyMeasures.for_contact(run, contact)
 	context.town = run.colony.governed_by(contact.id) if run.colony != null else null
 	context.refusal = run.refusal
+	context.demands = run.demands
 
 	# The recipient is chosen in the flow, not declared with a default, so
 	# `{to}` in an effect resolves to whoever the player picked.
