@@ -63,6 +63,7 @@ func _start() -> void:
 			print("Began a new run.")
 
 	M1Registrations.register_all()
+	M1Registrations.load_resources(content)
 
 	machine = TurnMachine.new(run)
 	machine.use_content(content)

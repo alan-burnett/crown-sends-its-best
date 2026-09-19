@@ -30,6 +30,7 @@ class Problem:
 var problems: Array[Problem] = []
 var letters_checked: int = 0
 var triggers_checked: int = 0
+var resources_checked: int = 0
 
 var _file: String = ""
 
@@ -40,7 +41,9 @@ func ok() -> bool:
 
 func report() -> String:
 	if ok():
-		return "content: %d letters, %d triggers, no problems" % [letters_checked, triggers_checked]
+		return "content: %d letters, %d triggers, %d resources, no problems" % [
+			letters_checked, triggers_checked, resources_checked,
+		]
 	var lines: PackedStringArray = PackedStringArray()
 	lines.append("content: %d problem(s)" % problems.size())
 	for problem in problems:
@@ -60,7 +63,49 @@ func validate(content: ContentDatabase) -> bool:
 		validate_letter(content.collection("letters")[id])
 	for id in content.ids("triggers"):
 		validate_trigger(content.collection("triggers")[id])
+	validate_resources(content)
 	return ok()
+
+
+# --- Resources -------------------------------------------------------------
+
+## The resource data has to hang together, or a town will one day try to make
+## clothing out of something that does not exist.
+##
+## Checked here rather than at runtime because **adding a resource is adding a
+## file** (#36), and a build-time error is the only thing standing between a
+## typo in `converts_from` and a silent hole in the economy.
+func validate_resources(content: ContentDatabase) -> void:
+	var known: Dictionary = {}
+	for id in content.ids("resources"):
+		known[id] = true
+
+	for id in content.ids("resources"):
+		resources_checked += 1
+		var record: Dictionary = content.collection("resources")[id]
+		_file = String(record.get(JsonLoader.SOURCE_KEY, "?"))
+
+		for input in record.get("converts_from", []):
+			if not known.has(String(input)):
+				_problem("converts_from", "'%s' is made from '%s', which is not a resource" % [id, input])
+			elif String(input) == id:
+				_problem("converts_from", "'%s' is made from itself" % id)
+
+		if typeof(record.get("luxury", false)) != TYPE_BOOL:
+			_problem("luxury", "'%s' must be true or false" % id)
+		if typeof(record.get("producible", true)) != TYPE_BOOL:
+			_problem("producible", "'%s' must be true or false" % id)
+
+	# Only meaningful once the catalogue is loaded, which the CLI does first.
+	if ResourceCatalogue.size() == 0:
+		return
+	for id in ResourceCatalogue.ids():
+		var kind := ResourceCatalogue.get_kind(StringName(id))
+		if kind.is_raw():
+			continue
+		if not ResourceCatalogue.has_complete_chain(StringName(id)):
+			_file = "data/resources"
+			_problem("converts_from", "'%s' cannot be made from anything the colony can produce" % id)
 
 
 # --- Letters ---------------------------------------------------------------

@@ -29,6 +29,7 @@ func _init() -> void:
 		content.free()
 		quit(EXIT_LOAD_FAILED)
 		return
+	M1Registrations.load_resources(content)
 
 	var validator := ContentValidator.new()
 	validator.validate(content)

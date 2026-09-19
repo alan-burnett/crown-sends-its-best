@@ -20,6 +20,18 @@ const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
 const ORDER_REQUEST_TROOPS: StringName = &"request_troops"
 const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
+const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
+
+
+## Populate the resource catalogue from loaded content.
+##
+## Separate from `register_all()` because it needs the content database, and the
+## registries deliberately do not.
+static func load_resources(content: ContentDatabase) -> void:
+	var records: Array = []
+	for id in content.ids("resources"):
+		records.append(content.collection("resources")[id])
+	ResourceCatalogue.load_from(records)
 
 
 static func register_all() -> void:
@@ -65,6 +77,38 @@ static func register_effects() -> void:
 	)
 	ContentRegistry.register_effect(
 		"adjust_loyalty", {"to": "contact", "amount": "number"}, ORDER_ADJUST_LOYALTY
+	)
+	# **The player never sets a rate directly** (SPEC §10.2). It is always a
+	# letter to the Steward, resolved through compliance like any other Order —
+	# which is why he can delay it.
+	#
+	# `resource` empty means the base rate, which applies to everything without an
+	# override of its own. A builder rather than a plain declaration because the
+	# world key and the size of the step are worked out here, once, instead of in
+	# every letter that asks for a change.
+	ContentRegistry.register_effect(
+		"set_tax_rate",
+		{"to": "contact", "resource": "string", "steps": "number"},
+		ORDER_SET_TAX_RATE,
+		M1Registrations.build_tax_order,
+	)
+
+
+## Turn "raise the rate on cloth" into an Order that names the world value it
+## moves and how far.
+static func build_tax_order(args: Dictionary, context: LetterContext) -> Order:
+	var resource := String(args.get("resource", ""))
+	var steps := float(args.get("steps", 0.0))
+	var params := args.duplicate()
+	params["key"] = TaxRates.BASE_KEY if resource.is_empty() else TaxRates.key_for(StringName(resource))
+	# Where the rate is to land, worked out now so the letter and the Order agree
+	# about what was asked for. A rate is put somewhere, not drifted towards.
+	params["rate"] = TaxRates.moved(context.state, StringName(resource), steps)
+	return Order.new(
+		ORDER_SET_TAX_RATE,
+		StringName(args.get("to", "")),
+		params,
+		context.month,
 	)
 
 
@@ -113,3 +157,6 @@ static func register_measures() -> void:
 	MeasureRegistry.register_linear("crown_war_intensity", 0.0, 100.0)
 	MeasureRegistry.register_linear("colony_revenue", 0.0, 2000.0)
 	MeasureRegistry.register_linear("supply_situation", 0.0, 100.0)
+	# How heavily the colony is taxed, which is what the Steward writes about and
+	# what his lean shades.
+	MeasureRegistry.register_linear("tax_burden", 0.0, TaxRates.MAX_RATE)

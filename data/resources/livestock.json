@@ -1,0 +1,5 @@
+[
+  { "id": "cows",   "name": "cows",   "luxury": false, "producible": true, "livestock": true },
+  { "id": "sheep",  "name": "sheep",  "luxury": false, "producible": true, "livestock": true },
+  { "id": "horses", "name": "horses", "luxury": false, "producible": true, "livestock": true }
+]

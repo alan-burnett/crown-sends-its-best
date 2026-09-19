@@ -68,6 +68,8 @@ static func new_run(seed_value: int) -> RunState:
 	run.run_seed = seed_value
 	run.streams = RngStreams.new(seed_value)
 	run.world = StubWorld.initial_state()
+	for key in TaxRates.initial_values():
+		run.world.values[key] = TaxRates.initial_values()[key]
 	run.log = EventLog.new()
 	run.intents = IntentBook.new()
 	run.post = Post.new()

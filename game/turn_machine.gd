@@ -120,6 +120,10 @@ static func order_effects() -> Dictionary:
 			{"target": StubWorld.SUPPLY, "per_month": 6.0},
 		# These land on the Relationship rather than on the world. The stub has no
 		# tax model, and inventing one here would be M3's work done badly.
+		# A tax change names the world value it moves, because which rate it is
+		# depends on the resource the letter asked about.
+		String(M1Registrations.ORDER_SET_TAX_RATE):
+			{"target_from_data": "key", "set_from_data": "rate"},
 		String(M1Registrations.ORDER_SET_POLICY): {"target": ""},
 		String(M1Registrations.ORDER_GRANT_FAVOR): {"target": ""},
 		String(M1Registrations.ORDER_ADJUST_LOYALTY): {"target": ""},

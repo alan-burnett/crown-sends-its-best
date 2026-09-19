@@ -32,6 +32,7 @@ func _init() -> void:
 		content.free()
 		quit(2)
 		return
+	M1Registrations.load_resources(content)
 
 	var run := RunState.new_run(seed_value)
 	ContactRoster.load_into(run, content)
