@@ -114,6 +114,18 @@ static func per_worker_of(id: StringName) -> float:
 	return kind.per_worker if kind != null else 0.0
 
 
+## What a tribe would give for it, as a multiple of the Crown's price
+## (#136, `town-economy.md` §1).
+##
+## **A thing is valuable to them when making it requires a craft they cannot
+## do.** Iron is worth nothing because they cannot work it; tools are worth a
+## great deal for the same reason from the other end. Authored in the resource
+## data and inert until M5.
+static func native_worth(id: StringName) -> float:
+	var kind := get_kind(id)
+	return 0.0 if kind == null else kind.native_worth
+
+
 static func is_livestock(id: StringName) -> bool:
 	var kind := get_kind(id)
 	return kind != null and kind.livestock

@@ -76,7 +76,7 @@ static func buy(
 		return nothing
 
 	var rate := context.tax_rate(resource)
-	var price := ResourceCatalogue.price_of(resource)
+	var price := Valuation.crown(resource, context.state)
 	if price <= 0.0:
 		return nothing
 
@@ -144,7 +144,7 @@ static func sell(town: Town, resource: StringName, quantity: float, context: Col
 	if quantity <= EPSILON:
 		return nothing
 
-	var price := ResourceCatalogue.price_of(resource)
+	var price := Valuation.crown(resource, context.state)
 	if price <= 0.0:
 		return nothing
 

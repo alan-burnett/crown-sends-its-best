@@ -7,7 +7,8 @@
     "livestock": true,
     "price": 15,
     "feed": 0.3,
-    "slaughter_yield": 9
+    "slaughter_yield": 9,
+    "native_worth": 0.5
   },
   {
     "id": "sheep",
@@ -17,7 +18,8 @@
     "livestock": true,
     "price": 12,
     "feed": 0.15,
-    "slaughter_yield": 4
+    "slaughter_yield": 4,
+    "native_worth": 0.5
   },
   {
     "id": "horses",
@@ -27,6 +29,7 @@
     "livestock": true,
     "price": 25,
     "feed": 0.4,
-    "slaughter_yield": 7
+    "slaughter_yield": 7,
+    "native_worth": 3.2
   }
 ]
