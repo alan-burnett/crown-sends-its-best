@@ -102,6 +102,24 @@ All six of the spec's decision points go through one kernel, never a bespoke
   Adding natives is not complete until governors, commanders and the director
   can all feel them.
 
+### The world month
+
+Nine phases wrapping SPEC §11.3's Colony Month, which is phase 4 of the nine.
+See `docs/mechanics/world-month.md`.
+
+**The timing rule: an Intent committed in month N executes in phase 2 of month
+N+1.** One month to hear back, two months to see it happen.
+
+SPEC §7 says letters are "acted on during the next simulation step." They are —
+read, relationships updated, new Intent produced. It does **not** mean the
+physical consequence lands in that step. Implementing one-month physical effects
+destroys the announce-then-act property the whole loop depends on.
+
+It follows that **consequential actions should be multi-month, so a letter can
+interrupt them.** A single-month action cannot be countermanded, which is where
+arriving too late is supposed to sting; if everything were single-month the
+player would be a spectator.
+
 ### Determinism
 
 - **Named RNG streams per system** (mapgen, letters, sim resolution, contacts),
@@ -159,6 +177,25 @@ and silent breakage is expensive:**
 **Do not write** tests asserting balance numbers, tests on UI, or tests against
 anything expected to iterate. A test written against a moving value will be
 rejected.
+
+## Running things
+
+```bash
+./tools/godot.sh --script res://tools/run_tests.gd    # tests
+./tools/godot.sh --script res://tools/lint.gd         # architecture lint
+./tools/godot.sh --editor --quit                      # reimport after adding a class_name
+```
+
+`tools/godot.sh` finds Godot, runs it headless, and streams the output. On
+Windows the standard Godot build prints nothing to a terminal without it.
+
+**Reimport after adding a `class_name`.** Godot only registers those during a
+project scan, so a script added outside the editor is invisible until one runs.
+The failure reads `Could not find type "X" in the current scope`.
+
+The lint enforces two rules that are cheap now and expensive to retrofit:
+nothing under `sim/` touches a Godot node, and nothing anywhere draws from the
+global RNG or the engine's built-in `hash()`.
 
 ## Platform and presentation
 

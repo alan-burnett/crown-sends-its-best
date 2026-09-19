@@ -1,0 +1,171 @@
+extends SceneTree
+
+## Architectural lint.
+##
+##     godot --headless --script res://tools/lint.gd
+##
+## Two rules that later tickets depend on and that are cheap to check now and
+## expensive to retrofit once hundreds of files exist:
+##
+## 1. **`sim/` references no Godot node type** (#1). The world sim is
+##    deterministic and headless; the moment a node appears in it, it can no
+##    longer run in a test or a balance harness.
+## 2. **Nothing draws from the global RNG** (#2). Every random decision comes
+##    from a named stream, so adding a die roll in one system cannot perturb
+##    another's sequence. `randi()`, and also `Array.shuffle()` and
+##    `pick_random()`, which quietly use the same global generator.
+##
+## It also bans GDScript's built-in `hash()` in run-affecting code, because it is
+## not documented as stable across engine versions or platforms and the game
+## ships on desktop and mobile (SPEC §16.1).
+
+const SIM_ROOT: String = "res://sim"
+const SCAN_ROOTS: PackedStringArray = ["res://sim", "res://correspondence", "res://presentation", "res://core"]
+
+## Node types and node-only APIs. `sim/` may use RefCounted and plain data.
+const NODE_PATTERNS: Array[Array] = [
+	["\\bextends\\s+(Node|Node2D|Node3D|Control|CanvasItem|Window|Viewport|SceneTree|MainLoop)\\b", "extends a Godot node type"],
+	["\\bget_tree\\s*\\(", "calls get_tree()"],
+	["\\bget_node\\s*\\(", "calls get_node()"],
+	["\\badd_child\\s*\\(", "calls add_child()"],
+	["\\bqueue_free\\s*\\(", "calls queue_free()"],
+	["@onready\\b", "uses @onready"],
+	["\\$[A-Za-z_\"]", "uses $ node access"],
+]
+
+## `sim/` sits at the bottom of the stack and depends on nothing above it.
+const LAYER_PATTERNS: Array[Array] = [
+	["res://correspondence", "references the correspondence layer"],
+	["res://presentation", "references the presentation layer"],
+	["res://core", "references core infrastructure"],
+]
+
+const RNG_PATTERNS: Array[Array] = [
+	["\\brandomize\\s*\\(", "calls randomize()"],
+	["\\brandi\\s*\\(", "calls randi()"],
+	["\\brandf\\s*\\(", "calls randf()"],
+	["\\brandi_range\\s*\\(", "calls randi_range()"],
+	["\\brandf_range\\s*\\(", "calls randf_range()"],
+	["\\brand_from_seed\\s*\\(", "calls rand_from_seed()"],
+	["\\.shuffle\\s*\\(", "calls shuffle(), which uses the global RNG"],
+	["\\.pick_random\\s*\\(", "calls pick_random(), which uses the global RNG"],
+]
+
+const HASH_PATTERN: String = "(^|[^_a-zA-Z0-9.])hash\\s*\\("
+
+## Files allowed to hold the thing they are the exception for.
+const RNG_EXEMPT: PackedStringArray = ["res://sim/rng/rng_streams.gd"]
+const HASH_EXEMPT: PackedStringArray = ["res://sim/rng/stable_hash.gd"]
+
+var _violations: PackedStringArray = PackedStringArray()
+
+
+func _init() -> void:
+	for root in SCAN_ROOTS:
+		for path in _gd_files(root):
+			_check(path)
+
+	if _violations.is_empty():
+		print("lint: clean")
+		quit(0)
+		return
+
+	print("lint: %d violation(s)" % _violations.size())
+	for violation in _violations:
+		print("  %s" % violation)
+	quit(1)
+
+
+func _check(path: String) -> void:
+	var source := FileAccess.get_file_as_string(path)
+	if source.is_empty():
+		return
+	var lines := source.split("\n")
+	var in_sim := path.begins_with(SIM_ROOT)
+
+	for index in lines.size():
+		var line := _strip(lines[index])
+		if line.strip_edges().is_empty():
+			continue
+
+		if in_sim:
+			for rule in NODE_PATTERNS:
+				_match(path, index, line, rule[0], "sim/ %s" % rule[1])
+			for rule in LAYER_PATTERNS:
+				if line.contains(rule[0]):
+					_report(path, index, "sim/ %s" % rule[1])
+
+		if not RNG_EXEMPT.has(path):
+			for rule in RNG_PATTERNS:
+				_match(path, index, line, rule[0], rule[1])
+
+		if not HASH_EXEMPT.has(path):
+			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")
+
+
+func _match(path: String, index: int, line: String, pattern: String, message: String) -> void:
+	var regex := RegEx.new()
+	regex.compile(pattern)
+	if regex.search(line) != null:
+		_report(path, index, message)
+
+
+func _report(path: String, index: int, message: String) -> void:
+	_violations.append("%s:%d  %s" % [path, index + 1, message])
+
+
+## Remove string literals and trailing comments, so a rule name inside a doc
+## comment or an error message does not trip the lint that names it.
+static func _strip(line: String) -> String:
+	var out := ""
+	var index := 0
+	var quote := ""
+	while index < line.length():
+		var character := line[index]
+		if not quote.is_empty():
+			if character == "\\":
+				index += 2
+				continue
+			if character == quote:
+				quote = ""
+			index += 1
+			continue
+		if character == "\"" or character == "'":
+			quote = character
+			index += 1
+			continue
+		if character == "#":
+			break
+		out += character
+		index += 1
+	return out
+
+
+func _gd_files(root: String) -> PackedStringArray:
+	var found: PackedStringArray = PackedStringArray()
+	_walk(root, found)
+	found.sort()
+	return found
+
+
+func _walk(dir_path: String, found: PackedStringArray) -> void:
+	var dir := DirAccess.open(dir_path)
+	if dir == null:
+		return
+	dir.list_dir_begin()
+	var directories: PackedStringArray = PackedStringArray()
+	var entry: String = dir.get_next()
+	while entry != "":
+		if entry.begins_with("."):
+			entry = dir.get_next()
+			continue
+		var full_path: String = dir_path.path_join(entry)
+		if dir.current_is_dir():
+			directories.append(full_path)
+		elif entry.ends_with(".gd"):
+			found.append(full_path)
+		entry = dir.get_next()
+	dir.list_dir_end()
+	directories.sort()
+	for child in directories:
+		_walk(child, found)
