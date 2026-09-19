@@ -40,6 +40,15 @@ const EVENT_LAPSED: StringName = &"crown_demand_lapsed"
 ## made blind.
 const FIRST_DEMAND_MONTH: int = 3
 
+## How many hands have to be out before one of them is the Marshal's.
+##
+## The Provost and the rival dukes are the third and fourth (§4). The Provost
+## waits on M4 and a rival's tribute costs **prestige** rather than standing,
+## which is #76 — so `reach` beyond this point currently raises a figure with
+## nobody behind it yet, and that is recorded here rather than left to be
+## rediscovered.
+const ASKERS_FOR_GOODS: int = 2
+
 ## The month the Crown last asked for something, so the next one is `frequency`
 ## months after it rather than a fixed cooldown the growth could not reach.
 var last_issued_month: int = -1
@@ -131,7 +140,7 @@ func advance(month: int, growth: DemandGrowth, streams: RngStreams, log: EventLo
 	resource = &""
 	expires_month = -1
 
-	if _wants_goods(streams):
+	if _wants_goods(growth, streams):
 		asker = &"marshal"
 		kind = KIND_RESOURCE
 		resource = _wanted(streams)
@@ -157,11 +166,25 @@ func advance(month: int, growth: DemandGrowth, streams: RngStreams, log: EventLo
 
 ## Whether this demand is for goods rather than gold.
 ##
-## **Gold is the routine.** A resource demand costs two letters, a payment
-## decision and a governor's compliance, and at every demand the desk becomes a
-## logistics exercise (§5).
-func _wants_goods(streams: RngStreams) -> bool:
-	if streams == null:
+## ## The Marshal is not asking yet
+##
+## **Two things gate it.** The first is `reach`: at the opening of a run only the
+## Steward has a hand out, and `crown-demands.md` §6 reads the fourth dimension
+## as *more sources of demand* — naming "the Marshal wanting supplies as well as
+## gold" among them. So a requisition is something the run grows into rather than
+## something it starts with, and the axis moves a thing the player can feel
+## rather than a number nobody consults.
+##
+## He still writes early about his wars (`marshal.request_supplies`). That is the
+## Marshal asking because a campaign is going badly, which is not the same as the
+## Crown setting a requisition against the colony on a schedule.
+##
+## The second is that **gold is the routine**. A resource demand costs two
+## letters, a payment decision and a governor's compliance; at every demand the
+## desk becomes a logistics exercise and SPEC §9.6's promise that it will not
+## become a chore is broken (§5).
+func _wants_goods(growth: DemandGrowth, streams: RngStreams) -> bool:
+	if streams == null or DemandSchedule.askers(growth) < ASKERS_FOR_GOODS:
 		return false
 	return streams.stream(DemandGrowth.STREAM).randf() < DemandSchedule.resource_share()
 
