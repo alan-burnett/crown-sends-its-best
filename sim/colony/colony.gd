@@ -44,6 +44,26 @@ func in_order() -> Array[Town]:
 	return sorted_towns
 
 
+## The order towns are simulated in, **fixed by the seed** (SPEC §11.3).
+##
+## Id order would be deterministic too, but it would also mean Ashmere always
+## went first, in every run, for ever. Seeding the order means no town has a
+## standing advantage, while the same seed still replays exactly.
+func simulation_order(run_seed: int) -> Array[Town]:
+	var keyed: Array = []
+	for town in towns:
+		keyed.append([StableHash.stream_seed(run_seed, "town_order:" + String(town.id)), town])
+	keyed.sort_custom(func(a: Array, b: Array) -> bool:
+		if int(a[0]) != int(b[0]):
+			return int(a[0]) < int(b[0])
+		return String(a[1].id) < String(b[1].id))
+
+	var out: Array[Town] = []
+	for entry in keyed:
+		out.append(entry[1])
+	return out
+
+
 func loyal() -> Array[Town]:
 	var out: Array[Town] = []
 	for town in in_order():

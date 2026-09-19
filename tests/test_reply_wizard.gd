@@ -47,7 +47,7 @@ func _wizard(letter_id: String, to: StringName) -> ReplyWizard:
 func _context(to: StringName, params: Dictionary) -> LetterContext:
 	var context := LetterContext.new(run.world, run.contact(to), &"")
 	context.params = params
-	context.measures = StubWorld.measures(run.world)
+	context.measures = WorldValues.measures(run.world)
 	return context
 
 

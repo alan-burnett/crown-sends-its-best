@@ -19,7 +19,7 @@ func before_each() -> void:
 	Terrain.reset()
 	M1Registrations.register_all()
 
-	state = StubWorld.initial_state()
+	state = WorldValues.initial_state()
 	state.month = 3
 	log = EventLog.new()
 	book = IntentBook.new()

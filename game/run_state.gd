@@ -16,6 +16,17 @@ extends RefCounted
 ## going up invalidates saves, deliberately.
 const SAVE_VERSION: int = 1
 
+## What the Crown hands over. How the initial grant is split between people, gold
+## and resources is a starting decision in M3 (SPEC §6.1); these are the numbers
+## until the player gets to choose.
+const FIRST_TOWN_ID: StringName = &"ashmere"
+const FIRST_TOWN_NAME: String = "Ashmere"
+const STARTING_WORKERS: int = 12
+const STARTING_FOOD: float = 90.0
+const STARTING_WOOD: float = 30.0
+const STARTING_TOOLS: float = 8.0
+const STARTING_GOLD: float = 250.0
+
 var version: int = SAVE_VERSION
 var run_seed: int = 0
 
@@ -82,9 +93,7 @@ static func new_run(seed_value: int) -> RunState:
 	var run := RunState.new()
 	run.run_seed = seed_value
 	run.streams = RngStreams.new(seed_value)
-	run.world = StubWorld.initial_state()
-	for key in TaxRates.initial_values():
-		run.world.values[key] = TaxRates.initial_values()[key]
+	run.world = WorldValues.initial_state()
 	run.log = EventLog.new()
 	run.intents = IntentBook.new()
 	run.post = Post.new()
@@ -94,7 +103,29 @@ static func new_run(seed_value: int) -> RunState:
 	run.starting_site = MapGenerator.choose_starting_site(run.map)
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
+	run.found_first_town()
 	return run
+
+
+## The colony the PC is handed: one town, on the site the map chose, with a
+## governor of its own.
+##
+## Site selection among several regions is Run Setup in M3, and founding further
+## towns is M4 (SPEC §11.4). This is the one the run begins with.
+func found_first_town() -> Town:
+	if map == null or not map.in_bounds(starting_site.x, starting_site.y):
+		return null
+
+	var town := Town.new(FIRST_TOWN_ID, FIRST_TOWN_NAME, starting_site)
+	town.workers = STARTING_WORKERS
+	town.store(&"food", STARTING_FOOD)
+	town.store(&"wood", STARTING_WOOD)
+	town.store(&"tools", STARTING_TOOLS)
+	town.receive_gold(STARTING_GOLD)
+	colony.add(town)
+
+	add_contact(Governor.generate(town, streams))
+	return town
 
 
 func contact(id: StringName) -> Contact:

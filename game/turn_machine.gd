@@ -70,6 +70,9 @@ var silence: SilenceDriver = null
 ## Recomputes borders, influence and vision, in phase 3.
 var territory: TerritoryDriver = null
 
+## Runs the eight phases of the colony month, in phase 4.
+var colony_month: ColonyDriver = null
+
 ## Decides who writes to the PC, and about what.
 var director: Director = null
 
@@ -93,9 +96,15 @@ func _init(p_run: RunState) -> void:
 
 	territory = TerritoryDriver.new(run.map, run.colony, run.knowledge)
 
+	# Phase 4. The colony month replaces the stub's colony half; the phases
+	# themselves arrive one ticket at a time (#44 to #50).
+	colony_month = ColonyDriver.new(run.colony, run.map, run.run_seed)
+	colony_month.territory_driver = territory
+	colony_month.month.set_handler(ColonyMonth.SETTLE, DriftingSettle.new())
+
 	# Order within the list does not decide anything — each driver answers for its
 	# own phase, and the phases are the mechanics doc's.
-	month_runner.drivers = [StubWorld.new(), territory, promise_driver, orders, silence]
+	month_runner.drivers = [CrownAffairs.new(), territory, colony_month, promise_driver, orders, silence]
 	month_runner.executors = [executor]
 
 
@@ -119,12 +128,12 @@ static func order_effects() -> Dictionary:
 		# Sending gold and resources costs the colony, in proportion to what the
 		# letter promised — which is what makes the amount a real choice.
 		String(M1Registrations.ORDER_PROMISE_GOLD):
-			{"target": StubWorld.REVENUE, "amount_factor": -1.0},
+			{"target": WorldValues.REVENUE, "amount_factor": -1.0},
 		String(M1Registrations.ORDER_PROMISE_RESOURCE):
-			{"target": StubWorld.SUPPLY, "amount_factor": -0.05},
+			{"target": WorldValues.SUPPLY, "amount_factor": -0.05},
 		# Troops arrive and are fed and armed out of the colony's stores.
 		String(M1Registrations.ORDER_REQUEST_TROOPS):
-			{"target": StubWorld.SUPPLY, "per_month": 6.0},
+			{"target": WorldValues.SUPPLY, "per_month": 6.0},
 		# These land on the Relationship rather than on the world. The stub has no
 		# tax model, and inventing one here would be M3's work done badly.
 		# A tax change names the world value it moves, because which rate it is

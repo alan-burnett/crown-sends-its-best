@@ -41,7 +41,7 @@ func _run_with_history() -> RunState:
 
 	# An Intent mid-flight, with months still to run.
 	run.intents.commit(Intent.new(
-		&"", StubIntentExecutor.KIND, &"marshal", StubWorld.SUPPLY, 4, {"per_month": 3.0}
+		&"", StubIntentExecutor.KIND, &"marshal", WorldValues.SUPPLY, 4, {"per_month": 3.0}
 	), run.log, run.world.month)
 
 	# Draw from a couple of streams so their state is somewhere non-initial.
@@ -84,7 +84,7 @@ func test_in_flight_intents_survive() -> void:
 	var intent := restored.intents.live()[0]
 	assert_eq(intent.months_required, 4)
 	assert_true(intent.is_live())
-	assert_eq(intent.target, StringName(StubWorld.SUPPLY))
+	assert_eq(intent.target, StringName(WorldValues.SUPPLY))
 
 
 func test_rng_streams_survive_and_resume_mid_sequence() -> void:

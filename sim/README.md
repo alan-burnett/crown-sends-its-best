@@ -34,7 +34,9 @@ not a polish item.
 | `deliberation/` | The one kernel every actor that chooses goes through |
 | `intent/` | What an actor committed to, and the executors that carry it out |
 | `world/world_month.gd` | The nine phases, run in order |
-| `world/stub_world.gd` | M1's stand-in world (#20). M2 replaces this file, not the runner |
+| `world/world_values.gd` | The named scalars the world is made of |
+| `world/crown_affairs.gd` | The Crown's war, in phase 5. Still a stand-in, and not the colony's to run |
+| `colony/colony_month.gd` | The eight phases of SPEC §11.3, phase-locked across towns |
 | `economy/` | The resources everything is denominated in, and the tax rates on them |
 | `map/` | The New World as a tile grid, generated from the run seed |
 | `colony/` | The towns, and everything one is |
