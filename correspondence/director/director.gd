@@ -135,6 +135,7 @@ func _context(run: RunState, contact: Contact) -> LetterContext:
 	context.demand_book = run.demand_book
 	context.log = run.log
 	context.pc = run.setup
+	context.policies = run.policies
 	return context
 
 

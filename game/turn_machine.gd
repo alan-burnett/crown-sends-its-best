@@ -234,6 +234,9 @@ static func order_effects() -> Dictionary:
 		# A policy is enacted when the enactor agrees to it, in phase 7, and
 		# billed from phase 5 thereafter. It moves no world value on its own.
 		String(M1Registrations.ORDER_ENACT_POLICY): {"target": ""},
+		# Funding one and ending one both reach the policy book, in phase 7.
+		String(M1Registrations.ORDER_FUND_POLICY): {"target": ""},
+		String(M1Registrations.ORDER_END_POLICY): {"target": ""},
 		# Urging an intent reaches the town rather than a world value, so
 		# `UrgeIntentExecutor` handles it. Listed here so that every Order kind is
 		# still accounted for in one place.

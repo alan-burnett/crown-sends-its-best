@@ -82,6 +82,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"town_is_preparing_to_leave", {}, ColonyConditions.town_is_preparing_to_leave
 	)
+	ContentRegistry.register_condition(
+		"will_not_carry_it_further", {}, ColonyConditions.will_not_carry_it_further
+	)
 
 
 ## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).
@@ -166,6 +169,21 @@ static func remembers_a_kindness(_args: Dictionary, context: LetterContext) -> b
 ## and nobody tells him.
 static func town_is_preparing_to_leave(_args: Dictionary, context: LetterContext) -> bool:
 	return context.town != null and GovernorIntent.is_sedition(context.town.intent)
+
+
+## Whether this contact has said he will not carry an unfunded policy further
+## (#80, §4).
+##
+## 🔒 **The warning always comes before the ending.** A cost the player cannot
+## see coming is a trap rather than a decision, and this is what puts the letter
+## on the desk while there is still time to answer it.
+static func will_not_carry_it_further(_args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.policies == null:
+		return false
+	for policy in context.policies.held_by(context.sender.id):
+		if policy.is_warning():
+			return true
+	return false
 
 
 ## Whether the town could not cover a need out of its own stores this month.

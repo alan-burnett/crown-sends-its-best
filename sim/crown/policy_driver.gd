@@ -33,6 +33,9 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 		return
 
 	book.bill(contacts, log, state.month)
+	# **Before the pressure is recomputed**, so a policy that ended this month
+	# stops pressing this month rather than getting one more for free.
+	book.take_stock(log, state.month)
 
 	# Everything the standing policies press on, worked out afresh. Written
 	# through `apply` so the diff carries it and the letters can see it move.

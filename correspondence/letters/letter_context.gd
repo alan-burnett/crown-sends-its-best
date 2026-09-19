@@ -54,6 +54,13 @@ var demands: DemandGrowth = null
 ## What the Crown asked for this month, if it asked for anything.
 var demand_book: DemandBook = null
 
+## The standing instructions the PC has bought (#80).
+##
+## **What is owed and by whom**, so a man about to let one lapse can say so and
+## the letter can name the charge. Never the loyalty it is costing him — that is
+## his own business, like every other regard in the game.
+var policies: PolicyBook = null
+
 ## Who the PC is (#79).
 ##
 ## **Flavour, and the letters are the whole of what it is for.** SPEC §5 makes

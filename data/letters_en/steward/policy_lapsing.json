@@ -1,0 +1,49 @@
+{
+  "id": "steward.policy_lapsing",
+  "sender": "steward",
+  "type": "warning",
+  "skippable": false,
+  "params": { "sender_id": "contact", "months": "integer", "cost": "gold" },
+  "body": [
+    { "text": "I have carried the charge on this arrangement out of my own establishment for some months now. I did not write about it because I thought you would notice." },
+    { "text": "It is {param:cost} a month. I am not a poor man and I am not asking for sympathy. I am telling you what it has cost, which is a thing you could not have known and can now no longer say you did not." },
+    { "text": "I will carry it {param:months} months more. After that I shall let it lapse, and I would rather write you this letter than that one." },
+    { "text": "I have taken no pleasure in composing this.", "only_tones": ["dutiful", "pleased"] },
+    { "text": "You will understand that my forbearance is not a renewable resource.", "only_tones": ["annoyed", "hateful"] }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        { "tone": "dutiful",   "text": "and should have written first" },
+        { "tone": "pleased",   "text": "and am sorry it took a letter" },
+        { "tone": "desperate", "text": "and can only tell you how little there is" },
+        { "tone": "annoyed",   "text": "and note the tone of it" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "purse",
+        "prompt": "What the Crown will bear from here",
+        "options": [
+          { "id": "all", "label": "take the whole charge onto the Crown",
+            "text": "The whole of it falls on the Crown from this month{insert:warmth}. You should not have had to ask, and I shall not make you ask twice.",
+            "insert": { "warmth": { "pleased": ", with my thanks for carrying it this long" } },
+            "effect": { "fund_policy": { "to": "{sender_id}", "split": "all", "bonus": 0 } } },
+          { "id": "half_and_purse", "label": "take half, and send something for the trouble",
+            "text": "Half the charge from this month, and {param:cost} besides for what you have already carried. I would rather square the account than argue about it.",
+            "effect": { "fund_policy": { "to": "{sender_id}", "split": "half", "bonus": "{cost}" } } },
+          { "id": "half", "label": "take half, and say plainly there is no more",
+            "text": "Half, and not because it is fair. It is what there is, and I would rather tell you the truth about it than promise you the rest and fail.",
+            "effect": { "fund_policy": { "to": "{sender_id}", "split": "half", "bonus": 0 } } },
+          { "id": "lapse", "label": "let it lapse, and thank him",
+            "text": "Let it lapse. You have carried it longer than I had any right to expect, and I will not have you beggar yourself for a thing the Treasury should have paid for.",
+            "effect": { "end_policy": { "to": "{sender_id}" } } }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant,", "tone": { "hateful": "The account is settled. Do not raise it again." } }
+    ]
+  }
+}

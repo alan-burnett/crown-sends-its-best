@@ -27,6 +27,19 @@ const EVENT_ENACTED: StringName = &"policy_enacted"
 const EVENT_BILLED: StringName = &"policy_billed"
 const EVENT_ENDED: StringName = &"policy_ended"
 const EVENT_RENEGOTIATING: StringName = &"policy_renegotiating"
+const EVENT_WARNED: StringName = &"policy_warned"
+
+## How long a man carries what the PC is not paying before he says something.
+##
+## Long enough that an occasional lean month is not a crisis, short enough that
+## a PC who is simply not paying finds out inside a year. Tuning (§9).
+const PATIENCE: int = 7
+
+## And how long he gives the PC once he has said it.
+##
+## 🔒 **The warning always comes before the ending**, and the grace is what makes
+## it a decision rather than a notification.
+const GRACE: int = 3
 
 ## What ending one costs the enactor, over and above the month's drain.
 ##
@@ -82,6 +95,11 @@ func bill(contacts: Dictionary, log: EventLog, month: int) -> float:
 
 		var contact: Contact = contacts.get(String(policy.enactor))
 		var drain := policy.drains()
+		if drain > 0.0:
+			policy.carried_months += 1
+		else:
+			# He is being paid. Nothing is owed and nothing is remembered.
+			policy.carried_months = 0
 		if contact != null and drain > 0.0:
 			# **The policy works at full strength either way.** What the PC did
 			# not pay is carried by a man, in regard, every month — and he
@@ -98,6 +116,38 @@ func bill(contacts: Dictionary, log: EventLog, month: int) -> float:
 				"crown_paid": crown,
 			}, WorldPhase.CROWNS_MONTH)
 	return paid
+
+
+## Who has had enough, and who has run out of patience altogether.
+##
+## Returns `{warned, ended}`. **The warning always comes first**, so a policy
+## cannot lapse in the same month the player first hears about it — which is the
+## whole difference between a decision and a notification.
+func take_stock(log: EventLog, month: int) -> Dictionary:
+	var warned: Array[Policy] = []
+	var ended: Array[Policy] = []
+
+	for policy in _policies.duplicate():
+		if policy.is_warning():
+			if month >= policy.ends_month:
+				ended.append(policy)
+			continue
+		if policy.carried_months < PATIENCE:
+			continue
+
+		policy.warned_month = month
+		policy.ends_month = month + GRACE
+		warned.append(policy)
+		if log != null:
+			log.emit(EVENT_WARNED, policy.enactor, month, {
+				"policy": String(policy.id),
+				"effect": String(policy.effect),
+				"months": GRACE,
+			}, WorldPhase.CROWNS_MONTH)
+
+	for policy in ended:
+		lapse(policy.id, log, month)
+	return {"warned": warned, "ended": ended}
 
 
 ## The Crown's drafts have started bouncing (§5).

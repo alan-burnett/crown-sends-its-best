@@ -68,6 +68,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		result["order"] = order
 		results.append(result)
 		_enact_if_agreed(order, contact, result, state, log)
+		_settle_policy(order, contact, state, log)
 
 	pending.clear()
 
@@ -102,6 +103,36 @@ func _enact_if_agreed(
 		StringName(order.get_param("split", Policy.NONE)),
 		order.params,
 	), log, state.month)
+
+
+## The PC's answer to a man who said he would not carry it further (§4).
+##
+## **Everything resets**, including the warning: a policy made good is not a
+## policy three months from lapsing, or the PC would have paid up and still
+## watched it end. A lump sum is regard rather than gold in the sim's books —
+## the Crown's side of it is the charge, which the new split already carries.
+func _settle_policy(order: Order, contact: Contact, state: WorldState, log: EventLog) -> void:
+	if policies == null:
+		return
+	var held := policies.held_by(contact.id)
+	if held.is_empty():
+		return
+
+	match order.kind:
+		M1Registrations.ORDER_FUND_POLICY:
+			var split := StringName(order.get_param("split", Policy.ALL))
+			var bonus := float(order.get_param("bonus", 0.0))
+			for policy in held:
+				policy.made_good(split)
+			if bonus > 0.0 and contact.relationship != null:
+				# Everybody loves a bribe.
+				contact.relationship.record_deed(Relationship.GRANTED)
+				contact.relationship.remember(
+					Relationship.GRANTED, state.month, bonus, String(held[0].effect)
+				)
+		M1Registrations.ORDER_END_POLICY:
+			for policy in held:
+				policies.lapse(policy.id, log, state.month)
 
 
 ## Outcomes from the month just resolved, by contact.
