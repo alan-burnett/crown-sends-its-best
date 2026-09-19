@@ -70,6 +70,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_leaned_on", {"axis": "string"}, ColonyConditions.crown_leaned_on
 	)
+	ContentRegistry.register_condition(
+		"crown_asked_for", {"kind": "string"}, ColonyConditions.crown_asked_for
+	)
 
 
 ## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).
@@ -98,6 +101,21 @@ static func crown_leaned_on(args: Dictionary, context: LetterContext) -> bool:
 	if growth == null or growth.history.is_empty():
 		return false
 	return String(growth.history[growth.history.size() - 1]) == String(args.get("axis", ""))
+
+
+## Whether the Crown asked for something of this kind this month (#69).
+##
+## **The sim decides when**, in phase 5, and this only carries it to the desk. A
+## condition cannot record that it fired, so a demand scheduled from the letter
+## side would either repeat every month or lean on a cooldown that could not grow
+## with the `frequency` axis.
+static func crown_asked_for(args: Dictionary, context: LetterContext) -> bool:
+	var book := context.demand_book
+	return (
+		book != null
+		and book.is_pending(context.month)
+		and String(book.kind) == String(args.get("kind", ""))
+	)
 
 
 ## Whether the town could not cover a need out of its own stores this month.

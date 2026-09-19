@@ -15,6 +15,8 @@ extends RefCounted
 
 const ORDER_PROMISE_GOLD: StringName = &"promise_gold"
 const ORDER_PROMISE_RESOURCE: StringName = &"promise_resource"
+const ORDER_PROMISE_REVENUE: StringName = &"promise_revenue"
+const ORDER_DECLINE_DEMAND: StringName = &"decline_demand"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
@@ -99,9 +101,24 @@ static func register_effects() -> void:
 		{"to": "contact", "resource": "resource", "amount": "integer"},
 		ORDER_PROMISE_RESOURCE,
 	)
+	# **A bet on your own colony** (#69). The PC is not pledging coins; he is
+	# agreeing to a figure his colony's trade is expected to return, and the
+	# promise is kept or broken by whether it does. Falling short costs loyalty on
+	# top of the standing an honest refusal would have cost — which is the whole
+	# decision the Steward's letter puts in front of him.
+	ContentRegistry.register_effect(
+		"promise_revenue",
+		{"to": "contact", "amount": "gold", "months": "integer"},
+		ORDER_PROMISE_REVENUE,
+	)
 	# A refusal is still an Order. The contact learns of it and reacts, which is
 	# not the same as the PC saying nothing at all (SPEC §9.3).
 	ContentRegistry.register_effect("refuse", {"to": "contact"}, ORDER_REFUSE)
+	# **Declining a demand is not the same as refusing a request** (#69). It costs
+	# Crown standing, where an ordinary refusal costs only the contact's regard —
+	# so the Crown has to be able to tell the two apart, and a shared `refuse`
+	# would have made every "no" to the Steward a matter for the Treasury.
+	ContentRegistry.register_effect("decline_demand", {"to": "contact"}, ORDER_DECLINE_DEMAND)
 	ContentRegistry.register_effect(
 		"grant_favor", {"to": "contact", "favor": "string"}, ORDER_GRANT_FAVOR
 	)

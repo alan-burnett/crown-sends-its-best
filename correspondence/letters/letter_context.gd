@@ -51,6 +51,9 @@ var refusal: CrownRefusal = null
 ## figure off the page (SPEC §10.3).
 var demands: DemandGrowth = null
 
+## What the Crown asked for this month, if it asked for anything.
+var demand_book: DemandBook = null
+
 ## The town this letter is about, when the sender speaks for one.
 ##
 ## **A governor's letter is about a place**, and the conditions that decide

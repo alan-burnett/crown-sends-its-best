@@ -1,11 +1,12 @@
 {
   "id": "demands",
-  "note": "The bar, and what each growth event does to it. Magnitudes are placeholders pending the harness calibration in crown-demands.md section 8 — equal expected pressure across the reference players, which is measured rather than judged.",
+  "note": "The bar, and what each growth event does to it. Magnitudes are placeholders pending the harness calibration in crown-demands.md section 8 - equal expected pressure across the reference players, which is measured rather than judged. gold_target is a revenue target over term_months, not a bill; it is meant to sit above what a young colony returns.",
   "steady": {
     "months_between": 4.0,
-    "gold_target": 600.0,
-    "refusal_cost": 6.0,
-    "askers": 1
+    "gold_target": 300.0,
+    "refusal_cost": 2.5,
+    "askers": 1,
+    "term_months": 6
   },
   "growth": {
     "frequency": {

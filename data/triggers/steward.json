@@ -83,5 +83,28 @@
     "urgency": 0.4,
     "cooldown": 0,
     "conditions": []
+  },
+  {
+    "id": "trigger.steward.revenue_demand",
+    "letter": "steward.revenue_demand",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "amount": {
+        "from": "crown_demand",
+        "field": "amount"
+      },
+      "months": {
+        "from": "crown_demand",
+        "field": "months"
+      }
+    },
+    "conditions": [
+      {
+        "crown_asked_for": {
+          "kind": "gold"
+        }
+      }
+    ]
   }
 ]

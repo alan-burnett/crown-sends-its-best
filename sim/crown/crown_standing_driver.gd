@@ -46,6 +46,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 	var moved := standing.advance(
 		accounts.received_in(state.month),
 		accounts.paid_in(state.month),
+		_judgement(log, state.month),
 	)
 
 	# **Emitted every month, moved or not.** A month the Crown thought about the
@@ -58,11 +59,58 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 		"monthly_net": float(moved["monthly_net"]),
 		"net_position": float(moved["net_position"]),
 		"horizon": float(moved["horizon"]),
+		"judgement": float(moved["judgement"]),
 		# **The number is not in here.** The bands are the whole interface, and a
 		# payload carrying the figure is a payload a letter could render.
 	}, WorldPhase.RUN_END_CHECK)
 
 	_react(state, log)
+
+
+## What the Crown made of the PC's conduct this month, beyond his accounts.
+##
+## **Read off the log**, like everything else here, so the letters and the sheet
+## cannot disagree about what happened. Three things register:
+##
+## - A revenue target reached. He said what his colony would return and it did.
+## - A revenue target missed. Worse than never having undertaken it, because the
+##   Treasury now knows something about his judgement as well as his colony.
+## - A demand declined. It costs, and it costs **less** than missing one — which
+##   is the whole decision the Steward's letter puts in front of the player.
+##
+## The cost of declining is scaled by `refusal_cost`, which is how the
+## `desperation` axis reaches anything at all: it changes the price of saying no
+## and nothing else, so a player who grants everything never feels it
+## (`crown-demands.md` §6).
+func _judgement(log: EventLog, month: int) -> float:
+	if log == null:
+		return 0.0
+	var total := 0.0
+	for event in log.for_month(month):
+		match event.type:
+			PromiseBook.EVENT_KEPT:
+				if String(event.payload.get("kind", "")) == String(Promise.KIND_REVENUE):
+					total += CrownStanding.TARGET_REACHED
+			PromiseBook.EVENT_BROKEN:
+				if String(event.payload.get("kind", "")) == String(Promise.KIND_REVENUE):
+					total -= CrownStanding.TARGET_MISSED
+			Compliance.OUTCOME_EVENTS[Compliance.COMPLY], \
+			Compliance.OUTCOME_EVENTS[Compliance.PARTIAL], \
+			Compliance.OUTCOME_EVENTS[Compliance.DELAY], \
+			Compliance.OUTCOME_EVENTS[Compliance.REINTERPRET], \
+			Compliance.OUTCOME_EVENTS[Compliance.REFUSE]:
+				# **The deed is the PC's, whatever the contact then does with it.**
+				# He declined the Crown; what the Steward makes of the letter is a
+				# separate matter and is already on the relationship.
+				var order: Dictionary = event.payload.get("order", {})
+				if String(order.get("kind", "")) == String(M1Registrations.ORDER_DECLINE_DEMAND):
+					total -= DemandSchedule.refusal_cost(growth)
+	return total
+
+
+## The run's growth, so the price of a refusal is this year's price. Set by the
+## turn machine; without it the steady figure stands.
+var growth: DemandGrowth = null
 
 
 ## The political process, after the arithmetic and never before it.

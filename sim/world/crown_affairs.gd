@@ -43,12 +43,17 @@ const WAR_NOISE: float = 3.0
 ## only care about the war, which is why this is checked rather than assumed.
 var growth: DemandGrowth = null
 
+## What the Crown is asking for. Set by the turn machine.
+var demands: DemandBook = null
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if phase != WorldPhase.CROWNS_MONTH:
 		return
 	if growth != null:
 		growth.advance(state.year_index(), streams, log, state.month)
+		if demands != null:
+			demands.advance(state.month, growth, log)
 	_advance_war(state, log, streams.stream("sim"))
 
 
