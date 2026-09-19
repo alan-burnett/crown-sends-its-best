@@ -15,7 +15,11 @@ extends RefCounted
 ## precisely the draw it was on, which is what resume has to mean.
 
 ## The system streams. Asking for anything else is a programming error.
-const SYSTEM_STREAMS: PackedStringArray = ["mapgen", "letters", "sim", "contacts"]
+##
+## `crown` is the Crown's own dice: which axis its demands grow along each year
+## (#69). Separate from `sim` so that the shape of a run's squeeze does not
+## change because the colony sim threw one more die somewhere.
+const SYSTEM_STREAMS: PackedStringArray = ["mapgen", "letters", "sim", "contacts", "crown"]
 
 const CONTACT_PREFIX: String = "contact:"
 

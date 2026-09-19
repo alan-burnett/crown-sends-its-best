@@ -1,0 +1,26 @@
+{
+  "id": "demands",
+  "note": "The bar, and what each growth event does to it. Magnitudes are placeholders pending the harness calibration in crown-demands.md section 8 — equal expected pressure across the reference players, which is measured rather than judged.",
+  "steady": {
+    "months_between": 4.0,
+    "gold_target": 600.0,
+    "refusal_cost": 6.0,
+    "askers": 1
+  },
+  "growth": {
+    "frequency": {
+      "months_between": -0.5,
+      "floor": 1.5
+    },
+    "size": {
+      "gold_target": 0.35
+    },
+    "desperation": {
+      "refusal_cost": 0.4
+    },
+    "reach": {
+      "askers": 1,
+      "ceiling": 4
+    }
+  }
+}

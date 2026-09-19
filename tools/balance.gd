@@ -315,6 +315,14 @@ func _row(
 		"standing_band": String(run.standing.band),
 		"letters": letters,
 		"promises_outstanding": run.promises.outstanding().size(),
+		# **The bar, and what moved it this year** (#69). Years one to three are a
+		# level and these should not budge; from year four exactly one of them
+		# should, and which one is the whole question §8 asks the harness.
+		"demand_axis": String(run.demands.drawn_in(run.world.year_index())),
+		"demand_interval": DemandSchedule.months_between(run.demands),
+		"demand_target": DemandSchedule.gold_target(run.demands),
+		"demand_refusal": DemandSchedule.refusal_cost(run.demands),
+		"demand_askers": DemandSchedule.askers(run.demands),
 		"intents": "|".join(intents),
 		"objectives": "|".join(objectives),
 	}
@@ -364,6 +372,8 @@ const COLUMNS: PackedStringArray = [
 	"months_hungry", "food_security", "supply", "revenue", "tax_base",
 	"tax_burden", "net_position", "standing", "standing_band", "letters",
 	"promises_outstanding", "tile_moves",
+	"demand_axis", "demand_interval", "demand_target", "demand_refusal",
+	"demand_askers",
 ]
 
 ## The fixed columns, then one per comfort, then the wide text last so a

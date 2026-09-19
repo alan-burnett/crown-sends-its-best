@@ -132,10 +132,15 @@ func _init(p_run: RunState) -> void:
 	# The Crown pays until the process says otherwise, which it decides monthly.
 	promise_driver.can_crown_pay = run.refusal.pays()
 
+	# Phase 5. The Crown's own business: its wars, and from year four the bar it
+	# holds the colony to (#69).
+	var crown_affairs := CrownAffairs.new()
+	crown_affairs.growth = run.demands
+
 	# Order within the list does not decide anything — each driver answers for its
 	# own phase, and the phases are the mechanics doc's.
 	month_runner.drivers = [
-		CrownAffairs.new(), territory, colony_month, promise_driver,
+		crown_affairs, territory, colony_month, promise_driver,
 		crown_standing, orders, silence, governors,
 	]
 	# The specific executor is asked first; the table-driven one answers for
