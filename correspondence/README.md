@@ -28,4 +28,21 @@ NPC deliberation -> will --------------+
 "The contact complied" and "the contact acted on his own and informed the PC
 afterward" (§8.5) are therefore the same code path with different origins.
 
-Arrives across #4, #5, #9, #10, #11, #12, #14, #15, #16, #17, #18.
+## Contents
+
+| Path | What it is |
+| :--- | :--- |
+| `tone.gd` | The five tones. **Not ordered** — no "annoyed or worse" anywhere |
+| `contacts/contact.gd` | Identity, role, personality weights, perception leans |
+| `contacts/relationship.gd` | Where the PC and one contact stand. Loyalty lives here |
+
+**Relationship is not a ledger.** SPEC §4 fixes Ledger as the gold screen and
+nothing else.
+
+A `Contact` extends `DeliberationActor`, so personality is the weight vector the
+kernel already reads. **No contact has bespoke behavioural code.** Crown Officers
+load from data because they are fixed in every run (SPEC §8.1); colony contacts
+and patrons generate from their own RNG stream, so the same seed yields the same
+person however late in the run he appears.
+
+Still to arrive: #9, #10, #11, #14, #15, #16, #17, #18.

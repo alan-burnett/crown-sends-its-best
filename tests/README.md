@@ -23,6 +23,11 @@ A file named `tests/test_*.gd` extending `TestCase` is picked up automatically;
 every method named `test_*` runs. `fixtures/` holds deliberately broken JSON for
 the loader tests and is not part of `data/`.
 
+**A test method that records no assertion fails.** A GDScript runtime error
+aborts a method without raising anything a runner can catch, so a test that blew
+up would otherwise look exactly like a test that passed. Requiring an assertion
+is the only way this runner can go red on an error rather than green.
+
 `assert_eq` compares through `Canonical.encode`, so `1` and `1.0` are **not**
 equal and dictionary insertion order does not matter. Use `assert_same` for
 object identity.
