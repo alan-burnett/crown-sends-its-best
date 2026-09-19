@@ -120,6 +120,16 @@ interrupt them.** A single-month action cannot be countermanded, which is where
 arriving too late is supposed to sting; if everything were single-month the
 player would be a spectator.
 
+### Population moves one at a time
+
+**No single event ever costs a town more than one population.** Not a battle, not
+a famine month, not a raid.
+
+Five lost battles are five separate losses resolved separately, each emitting its
+own event. This keeps per-population consequences — the Diplomat's death roll,
+quality of life, letters that name what happened — uniform and legible, and it
+stops any one system inventing a bulk-casualty path the others do not expect.
+
 ### Determinism
 
 - **Named RNG streams per system** (mapgen, letters, sim resolution, contacts),

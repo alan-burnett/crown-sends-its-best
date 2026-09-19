@@ -25,22 +25,37 @@ being rewritten every iteration.
 
 ## Still to write
 
-In roughly the order they are needed.
+**Tracked as GitHub issues labelled `po`**, each assigned to the milestone that
+first needs it. That list is the live one; this table is the map.
 
-| Mechanic | Why it is not written | First needed |
+| Mechanic | Issue | First needed |
 | :--- | :--- | :--- |
-| **Production and conversion** | Deferred by the Author as a larger mechanic: tiles, improvements, building bonuses, experts, and the split of labour between fields and town. **M2 needs a minimal version regardless, because clothing is a need.** Conversion competing with tile work is settled. | M2 |
-| **Policy** | A third category of order, alongside intent and objectives — a standing instruction about how a town or an officer conducts itself. "Stop producing rum." "Treat the tribe gently." Named in SPEC §11.3 and §9.4, defined nowhere, absent from §4. **Stub as a no-op until defined.** | M3 |
-| **Trade protests** | §10.2 lists six inputs, unusually complete. Mostly a formula rather than a design conversation. | M3 |
-| **Crown demand growth** | §10.2 says demands grow over time and nothing else. One curve, but it is what makes year five harder than year two. | M3 |
-| **Immigration** | §12.1 names the inputs. Reads quality of life, which is written. | M4 |
-| **Founding and expeditions** | §11.4 is detailed on intent, silent on numbers. | M4 |
-| **Native trust** | §12.5 gives tribes an invisible trust value and their own diplomacy. | M5 |
-| **Rival pressure** | §12.4 says pressure grows as a run goes on. | M5 |
-| **Battles** | Deferred by the Author. §12.6 says the simulation resolves them and nothing more. | M6 |
-| **The Marshal** | Troop requests: payment tier drives loyalty cost drives refusal odds, plus his own wars stretching him thin late in a run. Sketched in conversation, never written down. | M6 |
-| **Commanders** | §8.6 gives them troop objectives and §12.6 lets them refuse orders against Crown interests. | M6 |
-| **The Provost** | Immigration policy, supplying experts, trade specialisation advice. | M4 |
-| **Patrons** | Requests, trades, ventures, and the major source of prestige. | M7 |
-| **Institutional contacts** | How a building yields a contact and how he pushes his town. **One doc for the pattern** — clergyman versus quartermaster is content, authored in data. | M7 |
-| **Prestige** | Gated on SPEC §17 and on crown standing stabilising in playtest. | M3+ |
+| Production and conversion | #92 | M2 |
+| Town buildings and the building tree | #93 | M2 |
+| General contact behaviour | #91 | M3 |
+| Trade protests | #94 | M3 |
+| Crown demand growth | #95 | M3 |
+| Policy | #96 | M3 |
+| Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
+| Immigration and population growth | #98 | M4 |
+| Founding towns and expeditions | #99 | M4 |
+| The Provost | #100 | M4 |
+| Native behaviour and trust | #101 | M5 |
+| Trading with natives | #102 | M5 |
+| Rival pressure | #103 | M5 |
+| Battles and combat resolution | #104 | M6 |
+| The Marshal | #105 | M6 |
+| Commanders | #106 | M6 |
+| Patrons | #107 | M7 |
+| Institutional contacts | #108 | M7 |
+
+## Contacts
+
+One doc for **general contact behaviour** (#91), and an override doc for each
+contact that breaks those rules. Most will need one — a contact usually exists
+*because* it does something special, and the override is where that something
+gets written down.
+
+**Chancellor and Steward are deferred, not exempt.** SPEC §10.3 and §10.2 cover
+them well enough today. The moment anything is built on top of them that the spec
+does not describe, they need docs too.

@@ -127,6 +127,10 @@ attack, he dies with probability `1 / new_population`. Going from ten to nine is
 a long shot; going from two to one is certain. A town reduced to nothing takes
 him with it.
 
+**No event ever costs more than one population** (see `CLAUDE.md`), so this is
+always a single roll against `old - 1`. Five lost battles in a month are five
+separate losses and five separate rolls, not one large one.
+
 Note what this excludes: **population lost to famine does not endanger him.** Only
 enemies do.
 
@@ -148,9 +152,6 @@ is clear that nobody will take the post.
 
 ## 8. Open items
 
-- Whether a larger population loss should be deadlier than a small one ending at
-  the same size. The rule as written keys only on how thin the town now is, which
-  is simple and probably enough.
 - Whether a second rehoming costs more than the first.
 - Whether he reports on rival or native activity at all, or only on the colony.
   Currently only the colony.
