@@ -85,6 +85,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"will_not_carry_it_further", {}, ColonyConditions.will_not_carry_it_further
 	)
+	ContentRegistry.register_condition(
+		"his_draft_was_returned", {"within": "integer"}, ColonyConditions.his_draft_was_returned
+	)
 
 
 ## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).
@@ -182,6 +185,21 @@ static func will_not_carry_it_further(_args: Dictionary, context: LetterContext)
 		return false
 	for policy in context.policies.held_by(context.sender.id):
 		if policy.is_warning():
+			return true
+	return false
+
+
+## Whether this contact has just learned the PC's cheque bounced (#80, §5).
+##
+## **Either way he writes.** Whether he covers it or names the month it ends, the
+## PC finds out — a policy apparatus that unwound silently would be the one thing
+## in the game that happened to him without a letter.
+static func his_draft_was_returned(args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.log == null:
+		return false
+	var within := maxi(1, int(args.get("within", 2)))
+	for event in context.log.of_type(PolicyBook.EVENT_RENEGOTIATING):
+		if event.subject == context.sender.id and context.month - event.month < within:
 			return true
 	return false
 

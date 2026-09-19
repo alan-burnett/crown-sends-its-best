@@ -154,16 +154,48 @@ func take_stock(log: EventLog, month: int) -> Dictionary:
 ##
 ## Returns the policies now in renegotiation, so their enactors can be written
 ## to. **Either way he writes**, and either way the PC learns his cheque bounced.
-func crown_stopped_paying(log: EventLog, month: int) -> Array[Policy]:
+## Loyalty at which a man will cover the PC's bounced draft rather than start
+## counting the months until he stops.
+##
+## Everything above it is somebody willing to carry the PC for a while; below it
+## is somebody who sets a date. Tuning (§9).
+const WILL_COVER_FOR_YOU: float = 55.0
+
+
+func crown_stopped_paying(
+	log: EventLog,
+	month: int,
+	contacts: Dictionary = {},
+) -> Array[Policy]:
 	var shaken: Array[Policy] = []
 	for policy in _policies:
 		if not policy.crown_stopped_paying():
 			continue
 		shaken.append(policy)
+
+		# **Each decides for himself**, and this is the line §5 calls one of the
+		# best things loyalty does:
+		#
+		# > Your policies survive in proportion to how well you have treated
+		# > people.
+		#
+		# A man who thinks well of the PC covers it from here, and the ordinary
+		# patience of §4 then runs from today. A man who does not names the month
+		# it ends — with time to act, because the warning still comes first.
+		var contact: Contact = contacts.get(String(policy.enactor))
+		var covering := contact == null or contact.loyalty() >= WILL_COVER_FOR_YOU
+		if covering:
+			policy.carried_months = 0
+		else:
+			policy.warned_month = month
+			policy.ends_month = month + GRACE
+
 		if log != null:
 			log.emit(EVENT_RENEGOTIATING, policy.enactor, month, {
 				"policy": String(policy.id),
 				"effect": String(policy.effect),
+				"covering": covering,
+				"months": 0 if covering else GRACE,
 			}, WorldPhase.CROWNS_MONTH)
 	return shaken
 

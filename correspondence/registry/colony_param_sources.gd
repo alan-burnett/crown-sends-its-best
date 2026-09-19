@@ -326,10 +326,10 @@ static func policy(args: Dictionary, context: LetterContext) -> Variant:
 	if context.sender == null or context.policies == null:
 		return 0
 	for held in context.policies.held_by(context.sender.id):
-		if not held.is_warning():
+		if not held.is_warning() and String(args.get("field", "cost")) != "any_cost":
 			continue
 		match String(args.get("field", "cost")):
-			"cost":
+			"cost", "any_cost":
 				return int(roundf(held.cost))
 			"months":
 				return maxi(0, held.ends_month - context.month)
