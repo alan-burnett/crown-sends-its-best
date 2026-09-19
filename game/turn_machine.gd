@@ -70,6 +70,7 @@ var silence: SilenceDriver = null
 ## Recomputes borders, influence and vision, in phase 3.
 var territory: TerritoryDriver = null
 var governors: GovernorDriver = null
+var crown_standing: CrownStandingDriver = null
 
 ## Runs the eight phases of the colony month, in phase 4.
 var colony_month: ColonyDriver = null
@@ -124,9 +125,16 @@ func _init(p_run: RunState) -> void:
 		if contact != null and contact.role == Governor.ROLE:
 			governors.actors[String(id)] = contact
 
+	# Phase 6. Standing reacts to the month's duty and the month's promises, and
+	# those land in phases 4 and 5 — so it judges after both (#67).
+	crown_standing = CrownStandingDriver.new(run.standing)
+
 	# Order within the list does not decide anything — each driver answers for its
 	# own phase, and the phases are the mechanics doc's.
-	month_runner.drivers = [CrownAffairs.new(), territory, colony_month, promise_driver, orders, silence, governors]
+	month_runner.drivers = [
+		CrownAffairs.new(), territory, colony_month, promise_driver,
+		crown_standing, orders, silence, governors,
+	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [urging, executor]

@@ -56,6 +56,12 @@ var colony: Colony = null
 ## **What the colony knows**, which is all the map view may read (SPEC §11.2).
 var knowledge: MapKnowledge = null
 
+## **What the Crown makes of the PC's accounts** (SPEC §10.3, #67).
+##
+## Never shown as a number; the four bands are the whole interface, and
+## `tools/lint.gd` keeps `presentation/` away from it entirely.
+var standing: CrownStanding = null
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -103,6 +109,7 @@ static func new_run(seed_value: int) -> RunState:
 	run.starting_site = MapGenerator.choose_starting_site(run.map)
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
+	run.standing = CrownStanding.new()
 	run.found_first_town()
 
 	# **A town knows the ground it was built on.** Territory is recomputed in
@@ -213,6 +220,7 @@ func to_dict() -> Dictionary:
 		"starting_site": [starting_site.x, starting_site.y],
 		"colony": colony.to_dict() if colony != null else {},
 		"knowledge": knowledge.to_dict() if knowledge != null else {},
+		"standing": standing.to_dict() if standing != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -237,6 +245,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.starting_site = Vector2i(int(site[0]), int(site[1]))
 	run.colony = Colony.from_dict(data.get("colony", {}))
 	run.knowledge = MapKnowledge.from_dict(data.get("knowledge", {}))
+	run.standing = CrownStanding.from_dict(data.get("standing", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 
