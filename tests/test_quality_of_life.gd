@@ -46,43 +46,94 @@ func _parts(health: float, safety: float, means: float, hope: float) -> Dictiona
 
 
 func test_the_worked_examples_from_the_mechanics_doc() -> void:
-	# | Town | health | safety | means | hope | pleasure | substance | QoL |
+	# The doc's §5 table, at the interim weights of #117: safety is pinned at
+	# 1.0 until M5, so it is excluded and the other three are renormalised.
+	# Same relative balance, and the full range reachable instead of a floor of
+	# 0.25 under every town in the game.
+	#
+	# | Town | health | means | hope | pleasure | substance | QoL |
 	var rows: Array = [
-		["thriving",           1.00, 1.0, 0.8, 0.70, 0.9, 0.89, 0.93],
-		["thriving, raided",   1.00, 0.3, 0.8, 0.70, 0.9, 0.71, 0.83],
-		["struggling",         0.35, 1.0, 0.2, 0.05, 0.0, 0.41, 0.41],
-		["struggling, raided", 0.35, 0.3, 0.2, 0.05, 0.0, 0.23, 0.23],
-		["starving and drunk", 0.10, 0.3, 0.5, 0.10, 1.0, 0.23, 0.58],
+		["thriving",           1.00, 0.8, 0.70, 0.9, 0.85, 0.91],
+		["struggling",         0.35, 0.2, 0.05, 0.0, 0.21, 0.21],
+		["starving and drunk", 0.10, 0.5, 0.10, 1.0, 0.21, 0.56],
 	]
 	# Compared at the doc's own precision. It quotes two decimal places, so two
 	# decimal places is the claim being checked.
 	for row in rows:
-		var parts := _parts(float(row[1]), float(row[2]), float(row[3]), float(row[4]))
+		var parts := _parts(float(row[1]), 1.0, float(row[2]), float(row[3]))
 		var substance := QualityOfLife.substance_of(parts)
-		var quality := QualityOfLife.combine(substance, float(row[5]))
-		assert_almost_eq(snappedf(substance, 0.01), float(row[6]), 0.0001,
+		var quality := QualityOfLife.combine(substance, float(row[4]))
+		assert_almost_eq(snappedf(substance, 0.01), float(row[5]), 0.0001,
 			"%s: substance came out %f" % [row[0], substance])
-		assert_almost_eq(snappedf(quality, 0.01), float(row[7]), 0.0001,
+		assert_almost_eq(snappedf(quality, 0.01), float(row[6]), 0.0001,
 			"%s: quality of life came out %f" % [row[0], quality])
 
 
-func test_the_same_raid_lands_differently_on_two_towns() -> void:
+func test_the_interim_weights_keep_the_balance_between_what_is_left() -> void:
+	# **Excluding a component changes the range, not the balance.** Health is
+	# still worth more than hope, which is still worth more than means, in the
+	# same proportions the doc gives.
+	assert_almost_eq(QualityOfLife.effective_weight(QualityOfLife.W_HEALTH), 0.400, 0.001)
+	assert_almost_eq(QualityOfLife.effective_weight(QualityOfLife.W_HOPE), 0.333, 0.001)
+	assert_almost_eq(QualityOfLife.effective_weight(QualityOfLife.W_MEANS), 0.267, 0.001)
+
+	var shares := (
+		QualityOfLife.effective_weight(QualityOfLife.W_HEALTH)
+		+ QualityOfLife.effective_weight(QualityOfLife.W_HOPE)
+		+ QualityOfLife.effective_weight(QualityOfLife.W_MEANS)
+	)
+	assert_almost_eq(shares, 1.0, 0.001, "the live weights do not add up to a whole")
+
+
+func test_there_is_no_longer_a_floor_under_every_town() -> void:
+	# **What #117 is for.** A quarter of the formula was a constant, so nothing
+	# could score below 0.25 however badly it was going, and the bottom rungs of
+	# every quality-of-life ladder were unreachable for the whole milestone.
+	var wretched := QualityOfLife.combine(
+		QualityOfLife.substance_of(_parts(0.0, 1.0, 0.0, 0.0)), 0.0
+	)
+	assert_almost_eq(wretched, 0.0, 0.001,
+		"a town with nothing at all still scored %f" % wretched)
+
+
+func test_a_raid_costs_nothing_while_safety_is_inert() -> void:
+	# Stated rather than discovered. Safety is excluded until M5, so the doc's
+	# two raided rows currently read the same as their unraided ones — and the
+	# day that changes, this test changes with it.
+	assert_true(QualityOfLife.SAFETY_IS_INERT,
+		"safety has come alive and this test is now the wrong one")
+	assert_almost_eq(
+		QualityOfLife.substance_of(_parts(1.0, 1.0, 0.8, 0.7)),
+		QualityOfLife.substance_of(_parts(1.0, 0.3, 0.8, 0.7)),
+		0.0001,
+		"safety moved something while it is supposed to be inert",
+	)
+
+
+func test_a_town_propped_up_by_one_thing_collapses_when_it_goes() -> void:
 	# **The acceptance criterion, and the reason substance is a sum rather than a
-	# product.** Both towns lose the same absolute safety. The thriving one slips
-	# and carries on; the struggling one, for whom safety was nearly all it had,
-	# falls off a cliff.
+	# product.** Both towns lose the same absolute health. The thriving one slips
+	# and carries on; the struggling one, for which health was most of what it
+	# had, falls off a cliff.
+	#
+	# Demonstrated on health rather than safety, because safety cannot move.
 	var thriving := QualityOfLife.substance_of(_parts(1.0, 1.0, 0.8, 0.7))
-	var thriving_raided := QualityOfLife.substance_of(_parts(1.0, 0.3, 0.8, 0.7))
-	var struggling := QualityOfLife.substance_of(_parts(0.35, 1.0, 0.2, 0.05))
-	var struggling_raided := QualityOfLife.substance_of(_parts(0.35, 0.3, 0.2, 0.05))
+	var thriving_hurt := QualityOfLife.substance_of(_parts(0.3, 1.0, 0.8, 0.7))
+	var struggling := QualityOfLife.substance_of(_parts(0.7, 1.0, 0.1, 0.05))
+	var struggling_hurt := QualityOfLife.substance_of(_parts(0.0, 1.0, 0.1, 0.05))
 
-	var lost_by_thriving := QualityOfLife.combine(thriving, 0.9) - QualityOfLife.combine(thriving_raided, 0.9)
-	var lost_by_struggling := QualityOfLife.combine(struggling, 0.0) - QualityOfLife.combine(struggling_raided, 0.0)
+	assert_almost_eq(thriving - thriving_hurt, struggling - struggling_hurt, 0.005,
+		"the fixture did not cost both towns the same health")
 
-	assert_almost_eq(thriving - thriving_raided, struggling - struggling_raided, 0.005,
-		"the raid did not cost both towns the same substance")
-	assert_true(lost_by_struggling > lost_by_thriving * 1.5,
-		"the raid cost the struggling town %f and the thriving town %f" % [lost_by_struggling, lost_by_thriving])
+	var lost_by_thriving := (
+		QualityOfLife.combine(thriving, 0.9) - QualityOfLife.combine(thriving_hurt, 0.9)
+	)
+	var lost_by_struggling := (
+		QualityOfLife.combine(struggling, 0.0) - QualityOfLife.combine(struggling_hurt, 0.0)
+	)
+	assert_true(lost_by_struggling > lost_by_thriving,
+		"the same loss cost the struggling town %f and the thriving one %f" % [
+			lost_by_struggling, lost_by_thriving])
 
 
 func test_a_starving_drunk_town_outscores_a_struggling_sober_one() -> void:
@@ -345,22 +396,13 @@ func test_growth_is_slow_at_low_population_and_compounds() -> void:
 		"growth did not compound: %f against %f" % [large_growth, small_growth])
 
 
-func test_nothing_in_m2_can_fall_below_the_safety_floor() -> void:
-	# **A consequence of safety being pinned at 1.0 until M5**, and worth locking
-	# because it is surprising: safety carries a quarter of substance, so the
-	# worst a town can possibly feel this milestone is 0.25. The doc's own
-	# "struggling, raided" row sits at 0.23 — and needs a raid to get there.
-	#
-	# It means the bottom rungs of the quality-of-life ladder cannot fire yet,
-	# and that the barren threshold below is inert until natives arrive.
+func test_a_town_with_nothing_reads_as_having_nothing() -> void:
 	var town := _town({}, 0.0)
 	var harness := _harness(town)
 	for _month in 6:
 		_run_month(harness)
 
-	assert_true(town.quality_of_life >= QualityOfLife.W_SAFETY - 0.0001,
-		"a town with nothing at all scored %f, under the safety floor" % town.quality_of_life)
-	assert_true(town.quality_of_life < 0.45,
+	assert_true(town.quality_of_life < 0.35,
 		"a town with no food, no clothes and no money scored %f" % town.quality_of_life)
 
 
