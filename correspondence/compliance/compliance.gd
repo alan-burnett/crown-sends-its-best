@@ -107,6 +107,11 @@ static func resolve(
 	# **A costly request reduces loyalty unless the PC makes it up to them**
 	# (SPEC §8.5). Paying generously for troops costs nothing; paying less does.
 	_settle_loyalty(order, contact, outcome)
+	# **And he remembers it**, with enough to describe it later (#127). The count
+	# says how often; this says what.
+	contact.relationship.remember(
+		_deed_of(order), state.month, _size_of(order), _about(order)
+	)
 
 	var intent: Intent = null
 	if outcome != REFUSE:
@@ -114,6 +119,46 @@ static func resolve(
 		book.commit(intent, log, state.month)
 
 	return {"outcome": outcome, "decision": decision, "intent": intent}
+
+
+## Which deed this Order will read as, to the man who received it.
+##
+## The same match as `_settle_loyalty`, kept beside it so the two cannot
+## disagree about whether a letter was a kindness or an injury — a contact who
+## warmed to a letter and remembered it as a slight would be two different men.
+static func _deed_of(order: Order) -> StringName:
+	match order.kind:
+		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
+		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
+		M1Registrations.ORDER_GRANT_FAVOR:
+			return Relationship.GRANTED
+		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
+			return Relationship.REFUSED
+		M1Registrations.ORDER_ADJUST_LOYALTY:
+			return Relationship.GRANTED if float(order.get_param("amount", 0.0)) >= 0.0 \
+				else Relationship.REFUSED
+	return Relationship.DELIVERED
+
+
+## How much of it there was. **Two hundred measures of iron is a different
+## memory from two**, and a letter that could only say "a kindness" would be
+## saying nothing.
+static func _size_of(order: Order) -> float:
+	for name in ["amount", "payment", "months"]:
+		if order.params.has(name):
+			return absf(float(order.get_param(name, 0.0)))
+	return 0.0
+
+
+## What it concerned — a resource, an intent, whatever the letter was about.
+##
+## Empty when the deed had no subject. A refusal with nothing attached is still
+## a refusal and the letters have to be able to say so.
+static func _about(order: Order) -> String:
+	for name in ["resource", "intent", "favor", "policy"]:
+		if order.params.has(name):
+			return String(order.get_param(name, ""))
+	return ""
 
 
 static func _candidates() -> Array:

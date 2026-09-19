@@ -45,6 +45,11 @@ static func resolve_one(contact: Contact, letter: Letter, inbound: InboundLetter
 
 	# **He asked and was not answered**, which costs either way.
 	var moved := contact.relationship.record_deed(Relationship.IGNORED)
+	# **Being unanswered is a thing that happened to him**, and he can name the
+	# month it did (#127).
+	contact.relationship.remember(
+		Relationship.IGNORED, run.world.month, 0.0, String(letter.type)
+	)
 	run.log.emit(EVENT_IGNORED, contact.id, run.world.month, {
 		"letter": letter.id,
 		"type": String(letter.type),

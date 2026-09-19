@@ -248,5 +248,46 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.governor.asking_again",
+    "letter": "governor.asking_again",
+    "urgency": 0.55,
+    "cooldown": 8,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "last_amount": {
+        "from": "recalled",
+        "reach": "kindness",
+        "field": "amount"
+      },
+      "last_resource": {
+        "from": "recalled",
+        "reach": "kindness",
+        "field": "resource"
+      },
+      "months_ago": {
+        "from": "recalled",
+        "reach": "kindness",
+        "field": "months_ago"
+      },
+      "lacking": {
+        "from": "town_lacks",
+        "fallback": "food"
+      }
+    },
+    "conditions": [
+      {
+        "remembers_a_kindness": {}
+      },
+      {
+        "town_measure_below": {
+          "measure": "stockpile_health",
+          "value": 0.5
+        }
+      }
+    ]
   }
 ]
