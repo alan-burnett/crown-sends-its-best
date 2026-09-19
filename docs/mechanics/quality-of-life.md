@@ -1,0 +1,219 @@
+# Mechanics — Quality of Life
+
+> **Owner:** PO. Living document, expected to be reworked after playtesting.
+> Devs implement from this; devs do not edit it. If this doc ever contradicts
+> SPEC.md, the spec wins and the ticket gets the `author` label.
+>
+> **Serves:** SPEC §11.3 (Quality of Life), §10.1 (luxuries), §12.1
+> (immigration), §12.3 (rebel sentiment), and the satire in §3.2.
+
+---
+
+## 1. What it is
+
+A value in `[0, 1]` **scoped to one town**, representing how pleasant or
+miserable the average citizen's life is. The governor wants it high (§11.3).
+
+It is read by immigration (§12.1), by rebel sentiment (§12.3, from M3), and by
+every governor letter. It is never shown to the player as a number.
+
+## 2. Memoryless, but the inputs remember
+
+**QoL is a pure function of this month's state.** There is no carry-over term, no
+smoothing, no inertia. Last month's QoL does not appear in this month's
+calculation.
+
+It is nonetheless stable, because most of what feeds it cannot move quickly. Food
+stockpiles accumulate over months. Objective progress accumulates. Town gold
+accumulates. A large swing therefore requires several things to change at once —
+which is exactly what happens when something dramatic happens to a town.
+
+**Do not add a smoothing term.** The stability is supposed to come from the
+inputs, not from the formula. A smoothed QoL would blunt the one case the design
+needs to land hard: a town being attacked.
+
+## 3. The shape
+
+```
+substance = w_health * health
+          + w_safety * safety
+          + w_means  * means
+          + w_hope   * hope           // weights sum to 1
+
+QoL = substance + PLEASURE_LIFT * pleasure * (1 - substance)
+```
+
+Two decisions are encoded here, and both matter.
+
+**Substance is a weighted sum, not a product.** Health does not gate the others.
+A town with five decent things going for it absorbs the loss of one; a town
+propped up by a single component collapses when that component goes. This is why
+the same raid devastates a struggling town and merely bruises a thriving one.
+
+**Pleasure masks rather than adds.** It lifts the town a fraction of the way from
+wherever it stands toward contentment, so **its power is greatest when life is
+worst.** A thriving town gains almost nothing from more rum. A wretched town
+gains enormously.
+
+That is not a logical assessment of the situation. It is human nature, and it is
+the point.
+
+## 4. The five components
+
+Each resolves to `[0, 1]`.
+
+### Health
+
+Can people eat and stay warm.
+
+- **Food security** measured against a target *reserve*, not against this month's
+  consumption. Eating exactly enough every month is not the same as being secure,
+  and "ample food in the larder" is what a high-QoL town has.
+- **Livestock count toward the buffer** at a conversion rate, because a town that
+  would otherwise go hungry will eat them (§12.2). This is what makes livestock
+  matter before M4's pastures exist.
+- **Clothing** sufficiency against population.
+
+### Safety
+
+Is the population being attacked, and is it safe to travel to other towns.
+
+**Constant at 1.0 for all of M2.** Natives arrive in M5 and military in M6. It is
+a component that does nothing for two milestones and then matters enormously —
+see §6.
+
+### Means
+
+Gold per capita against a target, so the town can buy what it wants when the
+ship docks.
+
+This is the **only** route by which hidden town gold (§11.3) becomes perceptible
+to the player. They never see the number; they see a governor who sounds
+comfortable or pinched.
+
+### Hope
+
+Not "how far along is the objective" but **"is anyone addressing what we
+actually need."**
+
+```
+hope = FITNESS_SHARE * fitness + PROGRESS_SHARE * progress
+```
+
+- **Fitness** — does the current objective address the town's largest unmet need,
+  as Reckon computed it? A starving town building cannons scores near zero. A
+  starving town building farms, or begging the Crown for the means to, scores
+  high.
+- **Progress** — is it actually moving? A town stalled four months at 80% has
+  little hope; a town visibly advancing at 20% has more.
+
+**Fitness weighs more than progress.** A town forgives slow work on the right
+problem far more readily than fast work on the wrong one. This is where the
+town's judgement of its governor lives: not trust built from past behaviour, but
+a reading of his intent right now.
+
+It also gives the PC a fast lever. Writing to the governor to change the
+objective raises hope as soon as he adopts it, well before anything is finished.
+
+### Pleasure
+
+Luxury consumption: sugar, tobacco, tea, rum, cigars, beer.
+
+Scaled by the fraction of the population served, with a **variety bonus** — beer
+alone is worth less than beer, rum and tea together.
+
+Note what this does to **tea**. §10.1 says the colony can never produce it, so it
+comes only from the Crown. The variety bonus therefore makes tea the luxury a
+prosperous town most wants and most depends on trade for, which means taxing tea
+hurts a comfortable town exactly where it is softest. §10.2's "tea is favored to
+be one of the first trade protests" then falls out of the mechanics rather than
+being hardcoded, which is what that section says should happen.
+
+## 5. Worked
+
+Starting weights — all tuning, all to be revised against the harness:
+
+```
+w_health 0.30   w_safety 0.25   w_means 0.20   w_hope 0.25
+PLEASURE_LIFT 0.45
+FITNESS_SHARE 0.65   PROGRESS_SHARE 0.35
+```
+
+| Town | health | safety | means | hope | pleasure | substance | **QoL** |
+| :--- | --: | --: | --: | --: | --: | --: | --: |
+| Thriving | 1.0 | 1.0 | 0.8 | 0.7 | 0.9 | 0.89 | **0.93** |
+| Thriving, raided | 1.0 | 0.3 | 0.8 | 0.7 | 0.9 | 0.71 | **0.83** |
+| Struggling | 0.35 | 1.0 | 0.2 | 0.05 | 0.0 | 0.41 | **0.41** |
+| Struggling, raided | 0.35 | 0.3 | 0.2 | 0.05 | 0.0 | 0.23 | **0.23** |
+| Starving and drunk | 0.1 | 0.3 | 0.5 | 0.1 | 1.0 | 0.23 | **0.58** |
+
+**The two raids cost the same absolute substance and land completely
+differently.** The thriving town slips from 0.93 to 0.83 and carries on: there is
+food in the larder, the church is going up, and the tavern is still open. The
+struggling town falls from 0.41 to 0.23, because safety was nearly all it had.
+
+**The starving drunk town scores higher than the struggling sober one.** That is
+correct and deliberate.
+
+## 6. Safety, rebellion, and the player's foothold
+
+When a town rebels, the Crown stops being its guardian and becomes its enemy.
+Safety falls, and QoL with it.
+
+**This is the PC's foothold for quelling a rebellion.** Life under rebellion is
+demonstrably worse, QoL feeds rebel sentiment (§12.3), and the sentiment falls.
+
+But the loop runs both ways. If the town survives the danger — it beats the
+troops, or the PC has no more troops to send — its safety re-establishes, QoL
+recovers, and neighbouring towns see a rebel town that is prosperous and
+unpunished. §12.3 says sentiment then spreads strongly, and this is the mechanism
+by which it does.
+
+So **safety is not "is this town at war."** It is "is this town threatened by
+forces it cannot handle." A rebel town that has beaten what was sent against it
+is safe, and that is precisely when it becomes most dangerous to the colony.
+
+## 7. The acyclicity rule
+
+QoL feeds rebel sentiment, so it must not read it.
+
+**QoL may read facts about the world — was this town attacked, were the roads
+cut, is this town in rebellion. It may never read the rebel sentiment value
+itself.**
+
+That keeps the computation acyclic within a month while still allowing the
+multi-month spiral of §12.3, mediated through things that actually happened
+rather than through a number reading itself.
+
+## 8. What this predicts, and what to watch
+
+**The rum trap.** The cheapest way to raise a miserable town's QoL is luxuries,
+not food. A player who notices can paper over a dying colony: consumption still
+removes population through famine (§11.3), so the town shrinks while reporting
+good spirits, and the governor's letters will say so honestly because they are
+true. This is the satire working, and it should not be patched out. It should be
+watched to confirm it is a trap a player can learn, rather than a dominant
+strategy that trivialises the colony.
+
+**Hope is the fastest lever the PC has.** Objective fitness responds the month a
+governor adopts a new objective. Expect players to discover that redirecting a
+town is more immediately effective than supplying it. That seems right — it is
+rule by correspondence — but if it is *too* strong, lower `FITNESS_SHARE` before
+touching anything else.
+
+**Safety is inert until M5.** Two milestones of tuning will happen with a
+constant pinned at 1.0, and then a whole component will come alive at once.
+Expect the weights to need revisiting when it does.
+
+## 9. Open items
+
+- Every constant above. They are a starting point, not a design.
+- Whether the variety bonus should be a count of luxury types or something
+  smoother. Count is simpler and probably enough.
+- The target food reserve, in months. This single number does more to set the
+  colony's difficulty than any other value here.
+- Whether `means` should scale its target with the colony's price level, once
+  prices exist as more than a constant.
+- Whether pleasure should saturate below 1.0, so that no amount of rum fully
+  masks starvation. Currently it does not, and the worked example above is the
+  consequence.
