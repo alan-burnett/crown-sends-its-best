@@ -3,38 +3,89 @@
   "sender": "chancellor",
   "type": "news",
   "skippable": false,
-  "params": { "years": "integer" },
+  "params": {
+    "years": "integer",
+    "pc_title": "pc",
+    "pc_name": "pc"
+  },
   "body": [
-    { "text": "You have had {param:years} years of us, and we have had {param:years} years of you. I write to tell you that the arrangement is changing, and that you had no part in the decision." },
-    { "text": "His Majesty's obligations have grown. They did not grow because of anything you did or failed to do out there, which I say partly to spare your feelings and partly because it is true." },
-    { "text": "What it means for you is this: the Crown will ask for no more than it asked last year, and it will take a refusal very much worse." },
-    { "text": "There was a time when a colony could decline a thing gracefully and the matter ended there. That time ended in the spring, in a room you have never seen, over a war you have never heard of." },
-    { "text": "Say no if you must. Only understand what it costs you now, which is not what it cost you before." }
+    {
+      "text": "{param:pc_title} {param:pc_name}. You have had {param:years} years of us, and we have had {param:years} years of you. I write to tell you that the arrangement is changing, and that you had no part in the decision."
+    },
+    {
+      "text": "His Majesty's obligations have grown. They did not grow because of anything you did or failed to do out there, which I say partly to spare your feelings and partly because it is true."
+    },
+    {
+      "text": "What it means for you is this: the Crown will ask for no more than it asked last year, and it will take a refusal very much worse."
+    },
+    {
+      "text": "There was a time when a colony could decline a thing gracefully and the matter ended there. That time ended in the spring, in a room you have never seen, over a war you have never heard of."
+    },
+    {
+      "text": "Say no if you must. Only understand what it costs you now, which is not what it cost you before."
+    }
   ],
   "reply": {
     "tone": {
       "text": "I have read your announcement {choice}.",
       "options": [
-        { "tone": "dutiful",   "text": "and will govern accordingly" },
-        { "tone": "pleased",   "text": "and thank you for the warning, such as it was" },
-        { "tone": "annoyed",   "text": "and note you took your time in sending it" },
-        { "tone": "desperate", "text": "and would ask what is left to give" },
-        { "tone": "hateful",   "text": "and understand it exactly as it was meant" }
+        {
+          "tone": "dutiful",
+          "text": "and will govern accordingly"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for the warning, such as it was"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and note you took your time in sending it"
+        },
+        {
+          "tone": "desperate",
+          "text": "and would ask what is left to give"
+        },
+        {
+          "tone": "hateful",
+          "text": "and understand it exactly as it was meant"
+        }
       ]
     },
     "steps": [
-      { "id": "answer", "prompt": "Your reply to the Chancellor", "options": [
-        { "id": "accept", "label": "acknowledge it, and say nothing more",
-          "text": "The colony has heard the Crown{insert:barb}. It will do what it can.",
-          "insert": { "barb": { "hateful": ", as it always does, at length" } } },
-        { "id": "protest", "label": "protest that a governor must sometimes refuse",
-          "text": "A governor who can never say no is a clerk with a worse view. If the Crown wanted a clerk it should have sent one." },
-        { "id": "ask", "label": "ask what else is coming",
-          "text": "You have told me what changes this year. Tell me what changes next, and I will build for it." }
-      ] }
+      {
+        "id": "answer",
+        "prompt": "Your reply to the Chancellor",
+        "options": [
+          {
+            "id": "accept",
+            "label": "acknowledge it, and say nothing more",
+            "text": "The colony has heard the Crown{insert:barb}. It will do what it can.",
+            "insert": {
+              "barb": {
+                "hateful": ", as it always does, at length"
+              }
+            }
+          },
+          {
+            "id": "protest",
+            "label": "protest that a governor must sometimes refuse",
+            "text": "A governor who can never say no is a clerk with a worse view. If the Crown wanted a clerk it should have sent one."
+          },
+          {
+            "id": "ask",
+            "label": "ask what else is coming",
+            "text": "You have told me what changes this year. Tell me what changes next, and I will build for it."
+          }
+        ]
+      }
     ],
     "closing": [
-      { "text": "Your servant,", "tone": { "hateful": "Do try to say yes to something. It would be novel." } }
+      {
+        "text": "Your servant,",
+        "tone": {
+          "hateful": "Do try to say yes to something. It would be novel."
+        }
+      }
     ]
   }
 }

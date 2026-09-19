@@ -45,6 +45,12 @@ const TYPES_ASKING_A_DECISION: Array[StringName] = [TYPE_QUESTION]
 const PARAM_TYPES: Array[StringName] = [
 	&"resource", &"integer", &"gold", &"town", &"contact", &"intent",
 	&"tribe", &"rival", &"tile", &"building", &"objective",
+	# **The man being written to** (#79). SPEC §5 makes his name and title
+	# flavour with no mechanical effect, and a letter addressing him by them is
+	# the whole of what they are for. A typed param rather than a fifth slot
+	# kind, because the four in `CLAUDE.md` are a contract and this needs no
+	# exception to it.
+	&"pc",
 ]
 
 ## Param types that are whole numbers.

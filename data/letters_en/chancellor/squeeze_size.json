@@ -3,39 +3,100 @@
   "sender": "chancellor",
   "type": "news",
   "skippable": false,
-  "params": { "years": "integer" },
+  "params": {
+    "years": "integer",
+    "pc_title": "pc",
+    "pc_name": "pc"
+  },
   "body": [
-    { "text": "You have had {param:years} years of us, and we have had {param:years} years of you. I write to tell you that the arrangement is changing, and that you had no part in the decision." },
-    { "text": "His Majesty's obligations have grown. They did not grow because of anything you did or failed to do out there, which I say partly to spare your feelings and partly because it is true." },
-    { "text": "What it means for you is this: the figures will be larger. The same men will write to you about the same matters and ask for more than they asked last year, and they will ask again the year after." },
-    { "text": "A colony is a thing that is expected to grow. You will find that expectation is not a compliment." },
-    { "text": "Build something that produces, and quickly. I say that as a friend, which I am not.", "only_tones": ["pleased", "dutiful"] },
-    { "text": "I do not expect you to manage it. I have been wrong before, though not often, and not lately.", "only_tones": ["annoyed", "hateful"] }
+    {
+      "text": "{param:pc_title} {param:pc_name}. You have had {param:years} years of us, and we have had {param:years} years of you. I write to tell you that the arrangement is changing, and that you had no part in the decision."
+    },
+    {
+      "text": "His Majesty's obligations have grown. They did not grow because of anything you did or failed to do out there, which I say partly to spare your feelings and partly because it is true."
+    },
+    {
+      "text": "What it means for you is this: the figures will be larger. The same men will write to you about the same matters and ask for more than they asked last year, and they will ask again the year after."
+    },
+    {
+      "text": "A colony is a thing that is expected to grow. You will find that expectation is not a compliment."
+    },
+    {
+      "text": "Build something that produces, and quickly. I say that as a friend, which I am not.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I do not expect you to manage it. I have been wrong before, though not often, and not lately.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    }
   ],
   "reply": {
     "tone": {
       "text": "I have read your announcement {choice}.",
       "options": [
-        { "tone": "dutiful",   "text": "and will govern accordingly" },
-        { "tone": "pleased",   "text": "and thank you for the warning, such as it was" },
-        { "tone": "annoyed",   "text": "and note you took your time in sending it" },
-        { "tone": "desperate", "text": "and would ask what is left to give" },
-        { "tone": "hateful",   "text": "and understand it exactly as it was meant" }
+        {
+          "tone": "dutiful",
+          "text": "and will govern accordingly"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for the warning, such as it was"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and note you took your time in sending it"
+        },
+        {
+          "tone": "desperate",
+          "text": "and would ask what is left to give"
+        },
+        {
+          "tone": "hateful",
+          "text": "and understand it exactly as it was meant"
+        }
       ]
     },
     "steps": [
-      { "id": "answer", "prompt": "Your reply to the Chancellor", "options": [
-        { "id": "accept", "label": "acknowledge it, and say nothing more",
-          "text": "The colony has heard the Crown{insert:barb}. It will do what it can.",
-          "insert": { "barb": { "hateful": ", as it always does, at length" } } },
-        { "id": "protest", "label": "protest that the ground will not bear it",
-          "text": "You are asking a young colony to return what an old one returns. I will send you what the ground gives and not one bushel of what it does not." },
-        { "id": "ask", "label": "ask what else is coming",
-          "text": "You have told me what changes this year. Tell me what changes next, and I will build for it." }
-      ] }
+      {
+        "id": "answer",
+        "prompt": "Your reply to the Chancellor",
+        "options": [
+          {
+            "id": "accept",
+            "label": "acknowledge it, and say nothing more",
+            "text": "The colony has heard the Crown{insert:barb}. It will do what it can.",
+            "insert": {
+              "barb": {
+                "hateful": ", as it always does, at length"
+              }
+            }
+          },
+          {
+            "id": "protest",
+            "label": "protest that the ground will not bear it",
+            "text": "You are asking a young colony to return what an old one returns. I will send you what the ground gives and not one bushel of what it does not."
+          },
+          {
+            "id": "ask",
+            "label": "ask what else is coming",
+            "text": "You have told me what changes this year. Tell me what changes next, and I will build for it."
+          }
+        ]
+      }
     ],
     "closing": [
-      { "text": "Your servant,", "tone": { "hateful": "The revised figures are enclosed. I recommend you sit down." } }
+      {
+        "text": "Your servant,",
+        "tone": {
+          "hateful": "The revised figures are enclosed. I recommend you sit down."
+        }
+      }
     ]
   }
 }

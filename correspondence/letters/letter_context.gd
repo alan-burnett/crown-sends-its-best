@@ -54,6 +54,14 @@ var demands: DemandGrowth = null
 ## What the Crown asked for this month, if it asked for anything.
 var demand_book: DemandBook = null
 
+## Who the PC is (#79).
+##
+## **Flavour, and the letters are the whole of what it is for.** SPEC §5 makes
+## the name, title, portrait and colour mechanically inert, so this is here to
+## be addressed by and for nothing else — no condition reads it and no effect
+## takes it.
+var pc: RunSetup = null
+
 ## The run's event log.
 ##
 ## **What happened, which is the only thing a letter may react to** (Seam A). A

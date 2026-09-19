@@ -27,6 +27,13 @@ const STARTING_WOOD: float = 30.0
 const STARTING_TOOLS: float = 8.0
 const STARTING_GOLD: float = 250.0
 
+## What taking the grant one way rather than another is worth.
+##
+## **One grant, three ways to take it** (SPEC §6.1). Deliberately not a small
+## difference: the split has to be visible in the colony's opening position or
+## it is a question the player answers once and never thinks about again.
+const SPLIT_BONUS: float = 0.45
+
 var version: int = SAVE_VERSION
 var run_seed: int = 0
 
@@ -87,6 +94,14 @@ var grievances: Grievances = null
 ## Standing instructions the PC has bought, and what they cost every month (#80).
 var policies: PolicyBook = null
 
+## The decisions this run was made from (#79).
+##
+## **Kept so the letters can address the PC by name.** SPEC §5 makes the name,
+## title, portrait and colour flavour with no mechanical effect, and nothing may
+## read them to decide anything — the choices that *do* shape the colony have
+## already been applied by the time a run exists.
+var setup: RunSetup = null
+
 # --- The correspondence ----------------------------------------------------
 
 ## Contact id -> Contact, each carrying its own Relationship.
@@ -120,12 +135,57 @@ var turn: int = 0
 var phase: StringName = &"date_card"
 
 
+## Start a run from the decisions the player made (#79).
+##
+## **The same seed and the same choices always produce the same run** (SPEC
+## §16.1), which is why everything that shapes a colony arrives through here.
+##
+## `setup` is optional so the harness and the tests can still ask for a plain
+## seeded run, and `site` remains for the balance harness's poor-ground policy
+## (#90, #116), which is choosing ground rather than making a run.
+static func from_setup(setup: RunSetup) -> RunState:
+	var run := new_run(setup.seed_value, setup.site())
+	run.setup = setup
+
+	# **The perk, applied where the mechanic already was.** `CrownRefusal` has
+	# carried a grace since #68 with nothing able to switch it on.
+	run.refusal.has_grace = setup.has_perk(RunSetup.PERK_FIRST_DAY)
+
+	# **The Crown's stated goal is the founding governor's starting intent**
+	# (SPEC §6.1). Written to the world before the town is founded would be
+	# neater, but founding happens inside `new_run`, so the town is told here and
+	# the world value is corrected to match — the two must never disagree, since
+	# the mandate consideration reads the world and the governor reads the town.
+	run.world.values[WorldValues.MANDATE] = String(setup.mandate)
+	var first := run.colony.in_order()
+	if not first.is_empty():
+		first[0].intent = setup.mandate
+		_apply_split(first[0], setup.split)
+	return run
+
+
+## How the opening grant was taken.
+##
+## A larger party eats more and works more ground; gold buys what the ground will
+## not give; stores are the safe answer and the dullest.
+static func _apply_split(town: Town, split: StringName) -> void:
+	match split:
+		RunSetup.SPLIT_PEOPLE:
+			town.workers = int(roundf(float(STARTING_WORKERS) * (1.0 + SPLIT_BONUS)))
+		RunSetup.SPLIT_GOLD:
+			town.receive_gold(STARTING_GOLD * SPLIT_BONUS)
+		RunSetup.SPLIT_STORES:
+			town.store(&"food", STARTING_FOOD * SPLIT_BONUS)
+			town.store(&"wood", STARTING_WOOD * SPLIT_BONUS)
+			town.store(&"tools", STARTING_TOOLS * SPLIT_BONUS)
+
+
 ## Start a run.
 ##
 ## `site` founds the first town somewhere other than the best ground on the map.
-## SPEC §6.1's Run Setup will pass it when the player is offered a choice of
-## regions; until then the balance harness passes it to study a colony that
-## cannot feed itself, which is not otherwise reachable (#90, #116).
+## SPEC §6.1's Run Setup passes it when the player is offered a choice of
+## regions; the balance harness passes it to study a colony that cannot feed
+## itself, which is not otherwise reachable (#90, #116).
 static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunState:
 	var run := RunState.new()
 	run.run_seed = seed_value
@@ -146,6 +206,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.demand_book = DemandBook.new()
 	run.grievances = Grievances.new()
 	run.policies = PolicyBook.new()
+	run.setup = RunSetup.new()
 	run.found_first_town()
 
 	# **A town knows the ground it was built on.** Territory is recomputed in
@@ -262,6 +323,7 @@ func to_dict() -> Dictionary:
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
 		"grievances": grievances.to_dict() if grievances != null else {},
 		"policies": policies.to_dict() if policies != null else {},
+		"setup": setup.to_dict() if setup != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
@@ -292,6 +354,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
 	run.grievances = Grievances.from_dict(data.get("grievances", {}))
 	run.policies = PolicyBook.from_dict(data.get("policies", {}))
+	run.setup = RunSetup.from_dict(data.get("setup", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
 

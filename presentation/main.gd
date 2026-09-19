@@ -6,10 +6,15 @@ extends Control
 ## (SPEC §16.2), so there is no menu of saves here and no "load" — either a run
 ## is in progress and it resumes, or a new one begins.
 ##
-## Run setup and the main menu are M3 and M7. Until then this opens the desk.
+## **A new run opens the commission first** (#79, SPEC §6.1): the PC's name, what
+## the Crown says the colony is for, how the grant is taken, and which of three
+## charts to sail for. A run already in progress skips it, because Ironman means
+## those decisions were made once and are not revisited.
+##
+## The main menu is M7.
 
-## The seed a development run starts from. Run setup (#M3) chooses it properly.
-const DEVELOPMENT_SEED: int = 20_260_918
+## What the commission opens on before the player asks for another chart.
+const OPENING_SEED: int = 20_260_918
 
 const PORTRAIT_SIZE: Vector2i = Vector2i(540, 960)
 
@@ -66,10 +71,33 @@ func _start() -> void:
 			_show_failure(resumed["message"])
 			return
 		_:
-			run = RunState.new_run(DEVELOPMENT_SEED)
-			ContactRoster.load_into(run, content)
-			print("Began a new run.")
+			_ask_for_the_commission()
+			return
 
+	_open_desk()
+
+
+## The commission, before there is a run to open a desk on.
+func _ask_for_the_commission() -> void:
+	var opening := RunSetup.new()
+	opening.seed_value = OPENING_SEED
+
+	var screen := SetupScreen.new()
+	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(screen)
+	screen.begun.connect(_on_commission_signed.bind(screen))
+	screen.begin(opening)
+
+
+func _on_commission_signed(setup: RunSetup, screen: SetupScreen) -> void:
+	screen.queue_free()
+	run = RunState.from_setup(setup)
+	ContactRoster.load_into(run, content)
+	print("Began a new run on chart %d." % setup.seed_value)
+	_open_desk()
+
+
+func _open_desk() -> void:
 	machine = TurnMachine.new(run)
 	machine.use_content(content)
 

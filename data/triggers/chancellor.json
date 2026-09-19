@@ -138,6 +138,14 @@
     "params": {
       "years": {
         "from": "years_served"
+      },
+      "pc_title": {
+        "from": "pc",
+        "field": "title"
+      },
+      "pc_name": {
+        "from": "pc",
+        "field": "name"
       }
     },
     "conditions": [
@@ -159,6 +167,14 @@
     "params": {
       "years": {
         "from": "years_served"
+      },
+      "pc_title": {
+        "from": "pc",
+        "field": "title"
+      },
+      "pc_name": {
+        "from": "pc",
+        "field": "name"
       }
     },
     "conditions": [
@@ -180,6 +196,14 @@
     "params": {
       "years": {
         "from": "years_served"
+      },
+      "pc_title": {
+        "from": "pc",
+        "field": "title"
+      },
+      "pc_name": {
+        "from": "pc",
+        "field": "name"
       }
     },
     "conditions": [
@@ -201,6 +225,14 @@
     "params": {
       "years": {
         "from": "years_served"
+      },
+      "pc_title": {
+        "from": "pc",
+        "field": "title"
+      },
+      "pc_name": {
+        "from": "pc",
+        "field": "name"
       }
     },
     "conditions": [
