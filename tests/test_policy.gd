@@ -214,6 +214,49 @@ func test_the_enactor_is_written_to() -> void:
 		"the PC's cheque bounced and nobody mentioned it")
 
 
+func test_a_man_who_thinks_well_of_you_covers_it() -> void:
+	# 🔒 **Your policies survive in proportion to how well you have treated
+	# people.** §5 calls this one of the best things loyalty does, and it is the
+	# difference between a PC losing his apparatus in a season and losing it over
+	# a year he can do something about.
+	enactor.relationship.loyalty = 90.0
+	var policy := _enact(Policy.ALL)
+	book.crown_stopped_paying(log, 9, _contacts())
+	assert_false(policy.is_warning(),
+		"a devoted man named the month he would stop instead of covering it")
+
+
+func test_a_man_who_does_not_names_the_month_it_ends() -> void:
+	enactor.relationship.loyalty = 10.0
+	var policy := _enact(Policy.ALL)
+	book.crown_stopped_paying(log, 9, _contacts())
+	assert_true(policy.is_warning(),
+		"a man who loathes the PC quietly carried his debts for him")
+	assert_eq(policy.ends_month, 9 + PolicyBook.GRACE,
+		"he ended it without the grace the warning promises")
+
+
+func test_either_way_the_pc_finds_out() -> void:
+	# A policy apparatus that unwound silently would be the one thing in the game
+	# that happened to the player without a letter.
+	for loyalty in [90.0, 10.0]:
+		var fresh := PolicyBook.new()
+		var man := Contact.new(&"steward")
+		man.relationship = Relationship.new(&"steward", loyalty)
+		var quiet := EventLog.new()
+		fresh.enact(Policy.new(&"steward", PolicyEffects.IMMIGRATION, 100.0, Policy.ALL), quiet, 3)
+		fresh.crown_stopped_paying(quiet, 9, {"steward": man})
+
+		var state := WorldValues.initial_state()
+		state.month = 9
+		var context := LetterContext.new(state, man, &"dutiful")
+		context.month = 9
+		context.log = quiet
+		context.policies = fresh
+		assert_true(ColonyConditions.his_draft_was_returned({"within": 2}, context),
+			"a man at loyalty %d said nothing about the bounced draft" % int(loyalty))
+
+
 # --- 🔒 He writes before he stops -------------------------------------------
 
 func test_he_carries_it_a_while_before_saying_anything() -> void:

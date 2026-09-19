@@ -130,5 +130,24 @@
         "will_not_carry_it_further": {}
       }
     ]
+  },
+  {
+    "id": "trigger.steward.draft_returned",
+    "letter": "steward.draft_returned",
+    "urgency": 1.0,
+    "cooldown": 0,
+    "params": {
+      "cost": {
+        "from": "policy",
+        "field": "any_cost"
+      }
+    },
+    "conditions": [
+      {
+        "his_draft_was_returned": {
+          "within": 2
+        }
+      }
+    ]
   }
 ]

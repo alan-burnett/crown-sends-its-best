@@ -1,0 +1,34 @@
+{
+  "id": "steward.draft_returned",
+  "sender": "steward",
+  "type": "news",
+  "skippable": false,
+  "params": { "cost": "gold" },
+  "body": [
+    { "text": "Your draft was returned unpaid this morning. I am told there is nothing irregular about it and that the Treasury simply declines to honour your name at present." },
+    { "text": "The charge is {param:cost} a month. I mention the figure because you will want to know it and because nobody else is going to tell you.", "only_tones": ["dutiful", "pleased"] },
+    { "text": "I shall cover it from here. I am not doing it for you and I would rather you did not thank me; I have put my name to this and I am not going to watch it fall over because London has taken against you.", "only_tones": ["dutiful", "pleased"] },
+    { "text": "The charge is {param:cost} a month and I have no intention of finding it out of my own establishment. The funds will not last past the autumn.", "only_tones": ["annoyed", "hateful", "desperate"] }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        { "tone": "dutiful",   "text": "and will not pretend to be surprised" },
+        { "tone": "desperate", "text": "and have no answer that will help either of us" },
+        { "tone": "annoyed",   "text": "and am aware of my own arrangements, thank you" }
+      ]
+    },
+    "steps": [
+      { "id": "answer", "prompt": "Your answer", "options": [
+        { "id": "acknowledge", "label": "acknowledge it, and say nothing you cannot keep",
+          "text": "I have read it. I will not make you a promise this week that I could not keep last week, and I imagine you would rather have that than a pleasant letter." },
+        { "id": "apologise", "label": "say plainly that it is your doing",
+          "text": "This is my doing and not London's, whatever the clerks told you. I would rather you heard that from me than worked it out." }
+      ] }
+    ],
+    "closing": [
+      { "text": "Your servant,", "tone": { "hateful": "I shall write again when there is better news." } }
+    ]
+  }
+}

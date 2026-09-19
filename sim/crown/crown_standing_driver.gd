@@ -157,7 +157,7 @@ func _react(state: WorldState, log: EventLog) -> void:
 		# to cover for him; one who has squeezed everyone finds it unwinds in a
 		# season, at the exact moment he can least afford it.
 		if policies != null:
-			policies.crown_stopped_paying(log, state.month)
+			policies.crown_stopped_paying(log, state.month, contacts)
 		log.emit(CrownRefusal.EVENT_REFUSING, &"crown", state.month, {
 			"state": String(refusal.state),
 			"repudiated": broken.size(),
