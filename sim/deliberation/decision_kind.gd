@@ -3,7 +3,7 @@ extends RefCounted
 
 ## The decision points the spec asks an actor to weigh.
 ##
-## `docs/mechanics/deliberation.md` §1 lists six. They are one mechanism, so that
+## `docs/mechanics/deliberation.md` §1 lists them. They are one mechanism, so that
 ## a system added in a later milestone extends every decision point at once
 ## instead of each one growing an `if` branch.
 ##
@@ -30,8 +30,21 @@ const UNANSWERED: StringName = &"unanswered"
 ## The director decides who writes to the PC and about what (SPEC §9.6).
 const DIRECTOR_URGENCY: StringName = &"director_urgency"
 
-## A town decides to hold a trade protest (SPEC §10.2).
-const TRADE_PROTEST: StringName = &"trade_protest"
+## **A trade protest is not here, and must not be added** (#131).
+##
+## It is a calculation rather than a deliberation: no actor chooses it. A score
+## per town per resource is recomputed each month and crosses a threshold — the
+## same shape as rebellion in SPEC §12.3, which is a protest's larger sibling.
+##
+## **It is the people's decision, not the governor's.** He is an input to it, his
+## loyalty and temperament colouring his town's mood, but the refusal is the
+## town's. A kind here is an invitation to register a weight against it, and a
+## governor's personality weighing whether his town protests would put the
+## decision in the wrong hands.
+##
+## A governor who wants to hurt the Crown has his own route, and it is **intent**
+## (#128) — *prepare the town for rebellion*, reachable at very low loyalty. That
+## is his version of the impulse and it belongs to him. The protest does not.
 
 ## A tribe decides its diplomacy; a rival decides to demand or attack
 ## (SPEC §12.5, §8.4).
@@ -42,7 +55,6 @@ const ALL: Array[StringName] = [
 	ORDER_COMPLIANCE,
 	UNANSWERED,
 	DIRECTOR_URGENCY,
-	TRADE_PROTEST,
 	FACTION_POSTURE,
 ]
 
