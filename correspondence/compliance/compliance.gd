@@ -91,6 +91,14 @@ static func resolve(
 	if rebel != null and rebel.rebelling:
 		outcome = REFUSE
 
+	# **An embargo is not addressed to the town it falls on.** It is an
+	# instruction to the rest of the colony, carried in a letter to the man it
+	# concerns as a courtesy, so his willingness has nothing to do with whether
+	# the convoys stop. A rebel governor refusing it would have made the Crown's
+	# only punishment conditional on the goodwill of the man being punished.
+	if order.kind == M1Registrations.ORDER_EMBARGO:
+		outcome = COMPLY
+
 	log.emit(OUTCOME_EVENTS[outcome], contact.id, state.month, {
 		"order": order.to_dict(),
 		"outcome": String(outcome),
@@ -170,6 +178,10 @@ static func cost_of(order: Order) -> float:
 			return 0.0
 		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
 			return 0.0
+		M1Registrations.ORDER_EMBARGO:
+			# It costs him a great deal, and no payment is on offer. What that
+			# does to his regard is the point of laying one.
+			return 0.0 if int(order.get_param("months", 0)) <= 0 else 2000.0
 		M1Registrations.ORDER_URGE_INTENT:
 			# **Being told what matters costs a governor nothing to carry out.**
 			# He is governing either way, and the town pays for its own projects

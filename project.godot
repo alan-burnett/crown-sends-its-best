@@ -11,9 +11,9 @@ config_version=5
 [application]
 
 config/name="The Crown Sends its Best"
+run/main_scene="res://presentation/main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
-run/main_scene="res://presentation/main.tscn"
 
 [autoload]
 
@@ -24,7 +24,6 @@ Assets="*res://core/assets/asset_registry.gd"
 
 window/size/viewport_width=540
 window/size/viewport_height=960
-window/size/resizable=true
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 

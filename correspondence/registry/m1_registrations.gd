@@ -19,6 +19,7 @@ const ORDER_PROMISE_REVENUE: StringName = &"promise_revenue"
 const ORDER_DECLINE_DEMAND: StringName = &"decline_demand"
 const ORDER_SHIP_RESOURCE: StringName = &"ship_resource"
 const ORDER_PROMISE_SHIPMENT: StringName = &"promise_shipment"
+const ORDER_EMBARGO: StringName = &"embargo"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
@@ -133,6 +134,12 @@ static func register_effects() -> void:
 		"promise_shipment",
 		{"to": "contact", "resource": "resource", "amount": "integer", "months": "integer"},
 		ORDER_PROMISE_SHIPMENT,
+	)
+	# **The Crown's one punishment before it has troops** (SPEC §12.3, #73/#74).
+	# Its neighbours stop relieving it, which raises the punished town's own
+	# sentiment and lowers the argument its rebellion makes to everybody else.
+	ContentRegistry.register_effect(
+		"embargo", {"to": "contact", "months": "integer"}, ORDER_EMBARGO
 	)
 	ContentRegistry.register_effect(
 		"ship_resource",

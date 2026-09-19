@@ -73,6 +73,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_asked_for", {"kind": "string"}, ColonyConditions.crown_asked_for
 	)
+	ContentRegistry.register_condition(
+		"town_came_back", {"within": "integer"}, ColonyConditions.town_came_back
+	)
 
 
 ## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).
@@ -116,6 +119,22 @@ static func crown_asked_for(args: Dictionary, context: LetterContext) -> bool:
 		and book.is_pending(context.month)
 		and String(book.kind) == String(args.get("kind", ""))
 	)
+
+
+## Whether this governor's town has just returned to the Crown (#74).
+##
+## **Read off the event rather than off the flag**, because a town that is not
+## rebelling has either come home or never left, and the governor's letter is
+## only owed in the first case. The window exists because the post takes a month
+## and the letter must not be lost if the desk was busy.
+static func town_came_back(args: Dictionary, context: LetterContext) -> bool:
+	if context.town == null or context.log == null:
+		return false
+	var within := maxi(1, int(args.get("within", 1)))
+	for event in context.log.of_type(Rebellion.EVENT_RETURNED):
+		if event.subject == context.town.id and context.month - event.month < within:
+			return true
+	return false
 
 
 ## Whether the town could not cover a need out of its own stores this month.

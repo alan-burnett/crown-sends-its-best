@@ -133,6 +133,7 @@ func _context(run: RunState, contact: Contact) -> LetterContext:
 	context.refusal = run.refusal
 	context.demands = run.demands
 	context.demand_book = run.demand_book
+	context.log = run.log
 	return context
 
 

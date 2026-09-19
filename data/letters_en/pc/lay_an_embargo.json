@@ -1,0 +1,39 @@
+{
+  "id": "pc.lay_an_embargo",
+  "type": "request",
+  "purpose": "Forbid the colony to relieve a rebel town",
+  "to_roles": ["governor"],
+  "params": { "to": "contact", "months": "integer" },
+  "compose_defaults": {
+    "months": { "from": "number", "value": 6 }
+  },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        { "tone": "dutiful",   "text": "on a matter I have put off long enough" },
+        { "tone": "annoyed",   "text": "having run out of gentler instruments" },
+        { "tone": "desperate", "text": "with nothing else left to try" },
+        { "tone": "hateful",   "text": "and I will not pretend to regret it" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "measure",
+        "prompt": "The instruction to the colony",
+        "options": [
+          { "id": "lay", "label": "forbid the colony to relieve them for {param:months} months",
+            "text": "No town of this colony is to send food, cloth or any other relief to your people for {param:months} months{insert:edge}. They have chosen to stand outside the Crown's protection, and they may find out what that means.",
+            "insert": { "edge": { "hateful": ", and I would make it a year if the Chancellor let me" } },
+            "effect": { "embargo": { "to": "{to}", "months": "{months}" } } },
+          { "id": "lift", "label": "lift the embargo and let the convoys through",
+            "text": "The convoys may go through again. I would rather your people remembered who fed them than who starved them.",
+            "effect": { "embargo": { "to": "{to}", "months": 0 } } }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant,", "tone": { "hateful": "Do not write to me about hardship." } }
+    ]
+  }
+}
