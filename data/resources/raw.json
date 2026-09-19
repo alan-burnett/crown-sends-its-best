@@ -4,62 +4,71 @@
     "name": "food",
     "luxury": false,
     "producible": true,
-    "price": 2
+    "price": 2,
+    "native_worth": 0.4
   },
   {
     "id": "wood",
     "name": "wood",
     "luxury": false,
     "producible": true,
-    "price": 2
+    "price": 2,
+    "native_worth": 0.3
   },
   {
     "id": "stone",
     "name": "stone",
     "luxury": false,
     "producible": true,
-    "price": 3
+    "price": 3,
+    "native_worth": 0.3
   },
   {
     "id": "ore",
     "name": "ore",
     "luxury": false,
     "producible": true,
-    "price": 4
+    "price": 4,
+    "native_worth": 0.3
   },
   {
     "id": "furs",
     "name": "furs",
     "luxury": false,
     "producible": true,
-    "price": 5
+    "price": 5,
+    "native_worth": 0.4
   },
   {
     "id": "cotton",
     "name": "cotton",
     "luxury": false,
     "producible": true,
-    "price": 4
+    "price": 4,
+    "native_worth": 0.4
   },
   {
     "id": "sugar",
     "name": "sugar",
     "luxury": true,
     "producible": true,
-    "price": 8
+    "price": 8,
+    "native_worth": 0.4
   },
   {
     "id": "tobacco",
     "name": "tobacco",
     "luxury": true,
     "producible": true,
-    "price": 8
+    "price": 8,
+    "native_worth": 0.4
   },
   {
     "id": "tea",
     "name": "tea",
     "luxury": true,
     "producible": false,
-    "price": 6
+    "price": 6,
+    "native_worth": 0.4
   }
 ]

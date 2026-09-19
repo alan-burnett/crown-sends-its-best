@@ -10,7 +10,8 @@
     ],
     "price": 8,
     "input_per_unit": 1.2,
-    "per_worker": 4.0
+    "per_worker": 4.0,
+    "native_worth": 1.9
   },
   {
     "id": "iron",
@@ -22,7 +23,8 @@
     ],
     "price": 8,
     "input_per_unit": 1.5,
-    "per_worker": 3.0
+    "per_worker": 3.0,
+    "native_worth": 0.0
   },
   {
     "id": "tools",
@@ -34,7 +36,8 @@
     ],
     "price": 12,
     "input_per_unit": 1.0,
-    "per_worker": 2.0
+    "per_worker": 2.0,
+    "native_worth": 3.2
   },
   {
     "id": "guns",
@@ -46,7 +49,8 @@
     ],
     "price": 20,
     "input_per_unit": 2.0,
-    "per_worker": 1.0
+    "per_worker": 1.0,
+    "native_worth": 3.4
   },
   {
     "id": "beer",
@@ -58,7 +62,8 @@
     ],
     "price": 5,
     "input_per_unit": 2.0,
-    "per_worker": 5.0
+    "per_worker": 5.0,
+    "native_worth": 1.6
   },
   {
     "id": "rum",
@@ -70,7 +75,8 @@
     ],
     "price": 11,
     "input_per_unit": 1.2,
-    "per_worker": 3.0
+    "per_worker": 3.0,
+    "native_worth": 1.8
   },
   {
     "id": "cigars",
@@ -82,6 +88,7 @@
     ],
     "price": 11,
     "input_per_unit": 1.2,
-    "per_worker": 3.0
+    "per_worker": 3.0,
+    "native_worth": 0.5
   }
 ]

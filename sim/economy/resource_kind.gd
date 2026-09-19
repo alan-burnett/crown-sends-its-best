@@ -39,6 +39,13 @@ var livestock: bool = false
 ## What one unit trades for with the Crown, before tax (SPEC §10.2). Tuning.
 var price: float = 1.0
 
+## What a tribe would give for it, as a multiple of `price` (#136).
+##
+## **The value is in the making, not the material.** Zero for iron, which they
+## cannot work; high for tools and guns, which they cannot make at all. Authored
+## in the resource data per `town-economy.md` §1 and inert until M5.
+var native_worth: float = 0.0
+
 ## Food one head eats each month, when it is not on pasture (#48).
 var feed: float = 0.0
 
@@ -75,6 +82,7 @@ static func from_data(record: Dictionary) -> ResourceKind:
 	kind.converts_from = PackedStringArray(record.get("converts_from", []))
 	kind.livestock = bool(record.get("livestock", false))
 	kind.price = float(record.get("price", 1.0))
+	kind.native_worth = float(record.get("native_worth", 0.0))
 	kind.feed = float(record.get("feed", 0.0))
 	kind.slaughter_yield = float(record.get("slaughter_yield", 0.0))
 	kind.input_per_unit = float(record.get("input_per_unit", 1.0))
