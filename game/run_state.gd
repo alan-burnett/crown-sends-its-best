@@ -39,6 +39,13 @@ var contacts: Dictionary = {}
 ## them; a broken one costs loyalty (SPEC §9.5).
 var promises: PromiseBook = null
 
+## Letter id -> the world month it last arrived.
+##
+## What stops the same three letters landing every month for a year. The
+## director reads it; a save carries it, or a resumed run would forget and start
+## repeating itself.
+var letters_sent: Dictionary = {}
+
 ## This turn's desk.
 var inbox: Array[InboundLetter] = []
 var post: Post = null
@@ -132,6 +139,7 @@ func to_dict() -> Dictionary:
 		"last_diff": last_diff.to_dict(),
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
+		"letters_sent": letters_sent.duplicate(),
 		"post": post.to_dict(),
 	}
 
@@ -149,6 +157,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.streams = RngStreams.from_dict(data.get("streams", {}))
 	run.last_diff = WorldDiff.from_dict(data.get("last_diff", {}))
 	run.post = Post.from_dict(data.get("post", {}))
+	run.letters_sent = data.get("letters_sent", {}).duplicate()
 
 	var saved_contacts: Dictionary = data.get("contacts", {})
 	var ids: Array = saved_contacts.keys()

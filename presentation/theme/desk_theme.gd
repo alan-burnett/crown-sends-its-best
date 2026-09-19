@@ -1,0 +1,89 @@
+class_name DeskTheme
+extends RefCounted
+
+## The look of the desk, in one place.
+##
+## **Placeholders, through code rather than through .tres files**, so the Author
+## can drop in real art and a real theme later without any of this being in the
+## way (SPEC §16.3). Nothing outside this file picks a colour or a size.
+##
+## **🔒 Text is the main medium**, and letters must be comfortable to read at
+## length on a phone. That is why the body size is generous and the measure is
+## capped — a letter running the full width of a tablet is harder to read, not
+## easier.
+
+const INK: Color = Color(0.13, 0.11, 0.09)
+const INK_FADED: Color = Color(0.13, 0.11, 0.09, 0.55)
+const PAPER: Color = Color(0.93, 0.90, 0.82)
+const PAPER_HANDLED: Color = Color(0.85, 0.82, 0.75)
+const DESK_WOOD: Color = Color(0.22, 0.15, 0.11)
+const SEAL: Color = Color(0.55, 0.13, 0.13)
+
+## Type sizes, in the order they matter: the letter first.
+const SIZE_BODY: int = 20
+const SIZE_LABEL: int = 17
+const SIZE_HEADING: int = 24
+const SIZE_SMALL: int = 15
+
+const GUTTER: int = 16
+const GAP: int = 10
+
+## Touch targets. Anything the player taps is at least this tall, which is also
+## what makes the options reachable one-handed in portrait.
+const TAP_HEIGHT: int = 48
+
+## Below this width the layout is portrait: options overlay the bottom of the
+## letter. Above it they sit beside the letter instead.
+const PORTRAIT_MAX_WIDTH: int = 700
+
+## The letter column never grows past this, however wide the window.
+const LETTER_MEASURE: int = 560
+
+
+static func is_portrait(size: Vector2) -> bool:
+	return size.x < float(PORTRAIT_MAX_WIDTH)
+
+
+## A filled panel in one of the desk's colours.
+static func panel(colour: Color, radius: int = 4) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = colour
+	style.corner_radius_top_left = radius
+	style.corner_radius_top_right = radius
+	style.corner_radius_bottom_left = radius
+	style.corner_radius_bottom_right = radius
+	style.content_margin_left = GUTTER
+	style.content_margin_right = GUTTER
+	style.content_margin_top = GAP
+	style.content_margin_bottom = GAP
+	return style
+
+
+static func label(text: String, size: int = SIZE_LABEL, colour: Color = INK) -> Label:
+	var node := Label.new()
+	node.text = text
+	node.add_theme_font_size_override("font_size", size)
+	node.add_theme_color_override("font_color", colour)
+	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	return node
+
+
+## A button sized for a thumb and reachable by keyboard.
+##
+## **Every screen works with touch and with mouse and keyboard** (SPEC §15), so
+## nothing here is mouse-only: focus is on, the target is tap-sized, and the
+## label wraps rather than being clipped.
+static func button(text: String) -> Button:
+	var node := Button.new()
+	node.text = text
+	node.custom_minimum_size = Vector2(0, TAP_HEIGHT)
+	node.focus_mode = Control.FOCUS_ALL
+	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	node.add_theme_font_size_override("font_size", SIZE_LABEL)
+	return node
+
+
+static func spacer(height: int = GAP) -> Control:
+	var node := Control.new()
+	node.custom_minimum_size = Vector2(0, height)
+	return node

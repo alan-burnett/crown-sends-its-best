@@ -33,13 +33,22 @@ func has_tone_step() -> bool:
 	return letter.has_tone_step()
 
 
+## How many characters of blank stand in for the unchosen wording.
+const BLANK: String = "______"
+
+
 ## The question this letter phrases in its own words: *"Your letter finds me
-## {choice}."* The `tone` id is the fixed global key; the wording is written
-## fresh per letter, and a letter may offer **any subset** of the five.
+## ______."* The `tone` id is the fixed global key; the wording is written fresh
+## per letter, and a letter may offer **any subset** of the five.
+##
+## The insertion point renders as a **blank to be filled**, which is the whole
+## mad-libs conceit — and stops the raw `{choice}` token reaching the player,
+## which is what it did before anybody looked at the screen.
 func tone_prompt() -> String:
 	if not has_tone_step():
 		return ""
-	return String(letter.reply[LetterSchema.KEY_TONE].get(LetterSchema.KEY_TEXT, ""))
+	var phrasing := String(letter.reply[LetterSchema.KEY_TONE].get(LetterSchema.KEY_TEXT, ""))
+	return phrasing.replace(LetterSchema.CHOICE_TOKEN, BLANK)
 
 
 ## `[{tone, text}]` in the order the letter offers them.
