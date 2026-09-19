@@ -297,6 +297,91 @@ static func pleasure_of(wellbeing: Dictionary) -> float:
 	return clampf(served * (VARIETY_FLOOR + (1.0 - VARIETY_FLOOR) * kinds), 0.0, 1.0)
 
 
+## How much of each comfort a town drinks in a month, given what it holds.
+##
+## **Evenly across the cellar, not down a list.** A town with beer and rum drinks
+## some of each. Drawing in catalogue order instead would mean whichever comfort
+## happens to be listed first is the only one anyone ever tastes: a town with a
+## warehouse of beer would never touch the rum beside it, the variety bonus in
+## `quality-of-life.md` §4 would be unreachable by buying, and "a town swimming
+## in tea reaches for rum" (`town-economy.md` §2) could not be true however the
+## buying was written.
+##
+## Water-filling: every kind takes an equal share of the month, and what a thin
+## cellar cannot cover is shared out again over the rest. Ordered by id, so the
+## result does not depend on how the catalogue is walked.
+static func draw_from(mouths: float, held: Dictionary) -> Dictionary:
+	var drawn: Dictionary = {}
+	var left := mouths * ColonyNeeds.luxury_per_head()
+	if left <= 0.0:
+		return drawn
+
+	var pool: PackedStringArray = PackedStringArray()
+	for id in ResourceCatalogue.luxuries():
+		if float(held.get(String(id), 0.0)) > 0.0:
+			pool.append(String(id))
+	pool.sort()
+
+	while left > 0.000001 and not pool.is_empty():
+		var share := left / float(pool.size())
+		var thirsty: PackedStringArray = PackedStringArray()
+		var round_took := 0.0
+		for id in pool:
+			var spare := float(held.get(id, 0.0)) - float(drawn.get(id, 0.0))
+			var drunk := minf(share, spare)
+			if drunk > 0.0:
+				drawn[id] = float(drawn.get(id, 0.0)) + drunk
+				round_took += drunk
+			if spare - drunk > 0.000001:
+				thirsty.append(id)
+		if round_took <= 0.000001:
+			break
+		left -= round_took
+		pool = thirsty
+	return drawn
+
+
+## What the town's comforts are worth, from a stockpile rather than from a
+## month that has already happened.
+##
+## **The same draw Consume makes**, so the buying side and the drinking side
+## cannot disagree about what a cellar is worth. A town that bought on one theory
+## and drank on another would hold a heap of beer and wonder why it felt no
+## better for it.
+static func pleasure_from(mouths: float, held: Dictionary) -> float:
+	var cap := mouths * ColonyNeeds.luxury_per_head()
+	if cap <= 0.0:
+		return 0.0
+
+	var drawn := draw_from(mouths, held)
+	var taken := 0.0
+	for id in drawn:
+		taken += float(drawn[id])
+	return pleasure_of({
+		"luxury": clampf(taken / cap, 0.0, 1.0),
+		"luxury_kinds": drawn.size(),
+	})
+
+
+## How much better the town would feel for another `amount` of this.
+##
+## **The margin, given what it already has** (`town-economy.md` §2). A town
+## swimming in tea gets more from its first rum than from its hundredth tea, and
+## this is where that comes from — not from a rule about rum, but from the
+## variety bonus read backwards.
+static func marginal_pleasure(
+	mouths: float,
+	held: Dictionary,
+	resource: StringName,
+	amount: float,
+) -> float:
+	if amount <= 0.0:
+		return 0.0
+	var after := held.duplicate()
+	after[String(resource)] = float(after.get(String(resource), 0.0)) + amount
+	return pleasure_from(mouths, after) - pleasure_from(mouths, held)
+
+
 # --- Who is addressing what -------------------------------------------------
 
 ## How much the current objective does about a resource the town is short of.

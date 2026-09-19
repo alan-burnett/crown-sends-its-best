@@ -51,7 +51,7 @@ first needs it. That list is the live one; this table is the map.
 
 ## Patterns
 
-**Bucket randomisation** lives in [crown-demands.md](crown-demands.md) section 5.
+**Bucket randomisation** lives in [crown-demands.md](crown-demands.md) section 7.
 Draw without replacement from a bucket holding two of each option, refill at the
 halfway mark. Runs differ; aberrant runs — the same option five years running —
 are impossible rather than unlikely, which keeps tuning and scoring honest.

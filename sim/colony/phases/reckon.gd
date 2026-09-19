@@ -20,6 +20,19 @@ const EVENT_RECKONED: StringName = &"town_reckoned"
 ## actually drink.
 const LUXURY_MONTHS: float = 1.0
 
+## What a town lays out on comforts, as months of what it can drink valued at
+## the dearest thing it might reasonably buy. Tuning.
+const COMFORT_MONTHS: float = 2.5
+
+
+## The purse for comforts. **Scaled by how well the town is already living**, so
+## a wretched town spends what little it has on comforts and a thriving one
+## spends more of a larger purse — which is the rum trap working rather than a
+## special case (`quality-of-life.md` §8).
+func _comfort_budget(town: Town, mouths: float) -> float:
+	var drinkable := mouths * ColonyNeeds.luxury_per_head() * COMFORT_MONTHS
+	return drinkable * ResourceCatalogue.price_of(&"tea")
+
 
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := Reckoning.new(town.id)
@@ -54,16 +67,18 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# Tier 3, wants: comforts, bought with whatever survives the first two.
 	# Worked out here rather than in Exchange so that all three tiers are
 	# established in one place and read from one place.
-	# **A buying target and a selling floor**, which is one number doing both jobs
-	# (`town-economy.md` §3). Without the floor a town buys rum in Exchange,
-	# drinks a little of it in Consume, and sells the rest back to the Crown in
-	# Sell — paying duty in both directions, every month, for nothing.
-	var appetite := mouths * ColonyNeeds.luxury_per_head() * LUXURY_MONTHS
+	# **What the town will lay out on comforts**, which Exchange spends at the
+	# margin. Not a per-kind appetite: which comfort is worth buying depends on
+	# what the cellar holds and what each one is taxed at, and that is a decision
+	# rather than a quantity (`town-economy.md` §2).
+	reckoning.comfort_budget = _comfort_budget(town, mouths)
+
+	# A selling floor, so a town does not buy rum in Exchange, drink a little in
+	# Consume and sell the rest back in Sell — paying duty both directions, every
+	# month, for nothing. A month of drinking, per kind.
+	var cellar := mouths * ColonyNeeds.luxury_per_head() * LUXURY_MONTHS
 	for resource in ResourceCatalogue.luxuries():
-		var short_of := appetite - before.held(town.id, StringName(resource))
-		if short_of > 0.0:
-			reckoning.wants[resource] = short_of
-		reckoning.reserve[resource] = maxf(reckoning.reserve_of(StringName(resource)), appetite)
+		reckoning.reserve[resource] = maxf(reckoning.reserve_of(StringName(resource)), cellar)
 
 	# Reserve: months of need held back before anything is sold, plus whatever
 	# the town's storehouses let it keep.
