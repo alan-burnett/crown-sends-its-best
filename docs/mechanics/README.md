@@ -25,6 +25,7 @@ being rewritten every iteration.
 | [founding-towns.md](founding-towns.md) | Two ways to plant a town, and what each costs | M4 |
 | [the-provost.md](the-provost.md) | The four knobs, education, and how an expert appears | M4 |
 | [the-marshal.md](the-marshal.md) | The officer with nothing to gain, and the gate on Independence | M6 |
+| [natives.md](natives.md) | Standing, the point of no return, and trade agreements | M5 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
 | [crown-demands.md](crown-demands.md) | A fixed bar, then a moving one — and bucket randomisation | M3 |
 | [trade-protests.md](trade-protests.md) | When a town refuses the Crown's duty, and what it costs | M3 |
@@ -41,8 +42,7 @@ first needs it. That list is the live one; this table is the map.
 | :--- | :--- | :--- |
 | Production and conversion | #92 | M2 |
 | Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
-| Native behaviour and trust | #101 | M5 |
-| Trading with natives | #102 | M5 |
+| **A tribe's own month, and its territory** | #101 | M5 |
 | Rival pressure | #103 | M5 |
 | Battles and combat resolution | #104 | M6 |
 | Commanders | #106 | M6 |
