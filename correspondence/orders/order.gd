@@ -32,6 +32,19 @@ var issued_month: int = 0
 ## promises (SPEC §9.2).
 var tone: StringName = &""
 
+## **Written as a command rather than a request** (`rebel-sentiment.md` §4).
+##
+## A harsh order is the PC leaning on a governor: it is **the most likely thing
+## to actually be obeyed**, and it costs him the man's regard and the town's
+## patience for the privilege. That trade is the whole of it — he can have
+## compliance or he can have goodwill, and a rung that gave him both would make
+## every other rung on the ladder pointless.
+##
+## 🔒 **Harsh orders come from the PC only.** It is set from the reply option he
+## chose, in `TurnMachine._build_orders`, which runs over his outgoing post and
+## nothing else. An NPC deliberating his way to an Intent (Seam C) never sets it.
+var harsh: bool = false
+
 
 func _init(
 	p_kind: StringName = &"",
@@ -57,6 +70,7 @@ func to_dict() -> Dictionary:
 		"params": params.duplicate(true),
 		"issued_month": issued_month,
 		"tone": String(tone),
+		"harsh": harsh,
 	}
 
 
@@ -69,6 +83,7 @@ static func from_dict(data: Dictionary) -> Order:
 	)
 	order.id = StringName(data.get("id", ""))
 	order.tone = StringName(data.get("tone", ""))
+	order.harsh = bool(data.get("harsh", false))
 	return order
 
 

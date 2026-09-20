@@ -336,3 +336,70 @@ func test_adding_an_officer_later_needs_only_a_data_file() -> void:
 	assert_eq(provost.role, Contact.ROLE_CROWN_OFFICER)
 	var result := _resolve(_troop_request(500.0), provost)
 	assert_true(Compliance.OUTCOMES.has(StringName(result["outcome"])))
+
+
+# --- 🔒 A harsh order is obeyed, and it costs (#71) -------------------------
+
+func _shipment(harsh: bool) -> Order:
+	var order := Order.new(M1Registrations.ORDER_SHIP_RESOURCE, &"someone", {
+		"to": "someone", "resource": "iron", "amount": 20, "payment": 0,
+	}, state.month)
+	order.harsh = harsh
+	return order
+
+
+## How often a whole spread of governors comply, asked the same way.
+##
+## **Across many men, not one.** Harshness is a weight in the kernel rather than
+## a rule, so a single governor can refuse a harsh order and that is the design
+## working — the claim is about the odds, so the test has to be too.
+func _compliance_rate(harsh: bool) -> float:
+	var complied := 0.0
+	var asked := 0.0
+	for loyalty in [20.0, 35.0, 45.0, 55.0, 65.0, 80.0]:
+		for weight in [0.5, 1.0, 2.0]:
+			var contact := _contact(loyalty, {"harshness": weight})
+			var outcome := String(_resolve(_shipment(harsh), contact)["outcome"])
+			asked += 1.0
+			if outcome == String(Compliance.COMPLY):
+				complied += 1.0
+	return complied / asked
+
+
+func test_a_harsh_order_is_the_likeliest_to_be_obeyed() -> void:
+	# The whole reason the PC would write one, and the reason it has to cost
+	# something: he can have compliance or he can have goodwill.
+	var plain := _compliance_rate(false)
+	var pressed := _compliance_rate(true)
+	assert_true(pressed > plain,
+		"leaning on a governor got no more compliance than asking him (%.2f against %.2f)"
+			% [pressed, plain])
+
+
+func test_but_he_can_still_refuse() -> void:
+	# 🔒 A weight and not a filter. A man who has had enough can still say no,
+	# and a harsh order to a governor who despises the PC is how a refusal
+	# becomes a rupture rather than a shrug.
+	var bitter := _contact(2.0, {"harshness": 1.0, "loyalty": 6.0})
+	assert_eq(String(_resolve(_shipment(true), bitter)["outcome"]), String(Compliance.REFUSE),
+		"a harsh order compelled a governor who despises the PC, so it is a filter")
+
+
+func test_being_commanded_costs_the_governor_his_regard() -> void:
+	var asked := _contact(60.0)
+	var told := _contact(60.0)
+	_resolve(_shipment(false), asked)
+	_resolve(_shipment(true), told)
+	assert_true(told.loyalty() < asked.loyalty(),
+		"a governor thought no worse of a PC who commanded him than one who asked")
+
+
+func test_it_costs_him_whether_he_obeys_or_not() -> void:
+	# **The deed is the PC's, not his.** Being written to that way is the thing
+	# that stings; whether he then did it is his own business.
+	var refused := _contact(2.0, {"loyalty": 6.0})
+	var before := refused.loyalty()
+	var outcome := String(_resolve(_shipment(true), refused)["outcome"])
+	assert_eq(outcome, String(Compliance.REFUSE), "the fixture complied, so this proves nothing")
+	assert_true(refused.loyalty() < before,
+		"a governor who refused a command thought no worse of the man who gave it")

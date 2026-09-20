@@ -27,7 +27,41 @@ static func register_all() -> void:
 	Deliberation.register_consideration(PaymentConsideration.new(&"payment_offered"), KINDS)
 	Deliberation.register_consideration(AutonomyConsideration.new(&"autonomy"), KINDS)
 	Deliberation.register_consideration(ClarityConsideration.new(&"order_clarity"), KINDS)
+	Deliberation.register_consideration(HarshnessConsideration.new(&"harshness"), KINDS)
 	Deliberation.register_filter(FullPaymentIsAYes.new(&"full_payment_is_a_yes"), KINDS)
+
+
+## Being leaned on (`rebel-sentiment.md` §4).
+##
+## **A harsh order is the most likely thing to actually be obeyed**, which is the
+## whole reason the PC would write one. It pushes hard towards compliance and
+## away from the sideways answers — a man told plainly does not quietly
+## reinterpret the instruction, and he does not put it off and hope.
+##
+## He may still refuse outright. That is the point of it being a consideration
+## and not a filter: a governor who has had enough can still say no, and a harsh
+## order to a man who despises the PC is how a refusal becomes a rupture rather
+## than a shrug.
+##
+## It is a **weight, not a rule**, so personality still decides. A proud man
+## minds being commanded more than a dutiful one, and the same letter lands
+## differently on the two of them.
+class HarshnessConsideration:
+	extends Consideration
+
+	const PULL: Dictionary = {
+		Compliance.COMPLY: 1.0,
+		Compliance.PARTIAL: -0.2,
+		Compliance.DELAY: -0.8,
+		Compliance.REINTERPRET: -1.0,
+		Compliance.REFUSE: -0.3,
+		Compliance.ACT_ALONE: -0.9,
+	}
+
+	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+		if not bool(context.get_value("harsh", false)):
+			return 0.0
+		return clampf(float(PULL.get(candidate.id, 0.0)), -1.0, 1.0)
 
 
 ## Goodwill works like a currency (SPEC §8.5). A contact who likes the PC does

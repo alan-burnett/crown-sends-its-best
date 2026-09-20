@@ -384,6 +384,10 @@ func _build_orders() -> Array[Order]:
 				if order == null:
 					continue
 				order.id = StringName("%s.%s" % [outgoing.id, step_id])
+				# 🔒 **Harsh orders come from the PC only** (#71). This loop runs
+				# over his outgoing post and nothing else, so an NPC's Intent can
+				# never arrive carrying it however the content is authored.
+				order.harsh = bool(option.get(LetterSchema.KEY_HARSH, false))
 				orders.append(order)
 				run.log.emit(EVENT_ORDER_ISSUED, order.addressed_to, run.world.month,
 					order.to_dict(), WorldPhase.DISPATCH)

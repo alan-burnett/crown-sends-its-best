@@ -1,0 +1,120 @@
+{
+  "id": "pc.demand_the_stores",
+  "type": "request",
+  "purpose": "Order a governor to hand over what his town is holding, and decide whether the Crown pays for it",
+  "to_roles": [
+    "governor"
+  ],
+  "params": {
+    "to": "contact",
+    "resource": "resource",
+    "amount": "integer",
+    "payment": "gold"
+  },
+  "compose_defaults": {
+    "resource": {
+      "from": "town_surplus",
+      "fallback": "food"
+    },
+    "amount": {
+      "from": "town_surplus_amount"
+    },
+    "payment": {
+      "from": "scaled_world_value",
+      "key": "colony_revenue",
+      "factor": 0.5,
+      "minimum": 25,
+      "maximum": 2000
+    }
+  },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "on a matter that will not wait on the next ship"
+        },
+        {
+          "tone": "desperate",
+          "text": "because there is nowhere else left to look"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and I would rather not have had to"
+        },
+        {
+          "tone": "hateful",
+          "text": "and I am past caring how it is received"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "terms",
+        "prompt": "On what terms the {param:resource} is to be given up",
+        "options": [
+          {
+            "id": "bought",
+            "label": "buy it from the town at a fair price",
+            "text": "I must have {param:amount} of {param:resource} out of {param:to}'s stores. The Treasury will pay for it at a fair reckoning — I am buying, not taking, and I would have the town know the difference{insert:warmth}.",
+            "insert": {
+              "warmth": {
+                "pleased": ". You have never given me cause to treat you otherwise"
+              }
+            },
+            "effect": {
+              "ship_resource": {
+                "to": "{to}",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "payment": "{payment}"
+              }
+            }
+          },
+          {
+            "id": "part",
+            "label": "pay something towards it and say plainly it is not enough",
+            "text": "I must have {param:amount} of {param:resource}. I can send {param:payment} against it, which is not what it is worth and we both know it. I would rather tell you that than dress it up.",
+            "effect": {
+              "ship_resource": {
+                "to": "{to}",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "payment": "{payment}"
+              }
+            }
+          },
+          {
+            "id": "taken",
+            "label": "take it, and offer nothing",
+            "text": "You will send {param:amount} of {param:resource} to the quay. There is no payment and there will be none. I am aware what that means in a town that has been short all winter, and I am giving the order regardless{insert:cold}.",
+            "insert": {
+              "cold": {
+                "hateful": ". You may tell them it came from me"
+              }
+            },
+            "effect": {
+              "ship_resource": {
+                "to": "{to}",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "payment": 0
+              }
+            },
+            "harsh": true
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,",
+        "tone": {
+          "pleased": "With thanks I know are owed,",
+          "hateful": "See it done."
+        }
+      }
+    ]
+  }
+}

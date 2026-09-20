@@ -60,6 +60,12 @@ const PARTIAL_SHARE: float = 0.5
 ## How much of an `adjust_loyalty` amount counts as one deed's worth. Tuning.
 const LOYALTY_STEP: float = 5.0
 
+## What being leaned on costs a governor, in deeds.
+##
+## **Less than a refusal and more than nothing.** The PC did not decline to help
+## him; he told him. Tuning (§8).
+const HARSH_LOYALTY_COST: float = 0.8
+
 
 ## Resolve one Order into an Intent, or into nothing if he refuses.
 ##
@@ -83,6 +89,10 @@ static func resolve(
 		"payment": payment_in(order),
 		"loyalty": contact.loyalty(),
 		"vagueness": vagueness_of(order),
+		# **Leaning on a man works** (`rebel-sentiment.md` §4). It is the surest
+		# way to be obeyed and the PC pays for it twice — in the governor's regard
+		# below, and in what the town holds against the Crown afterwards.
+		"harsh": order.harsh,
 	}
 
 	var decision := Deliberation.choose(contact, _candidates(), context)
@@ -340,6 +350,12 @@ static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName
 				contact.relationship.record_deed(Relationship.REFUSED, shortfall)
 		_:
 			pass
+
+	# **A command is not a request, and he notices** (§4). Recorded whatever the
+	# outcome, because the deed is the PC's and not his: being written to that way
+	# is the thing that stings, not whether he then did it.
+	if order.harsh:
+		contact.relationship.record_deed(Relationship.REFUSED, HARSH_LOYALTY_COST)
 
 	if not order.tone.is_empty():
 		contact.relationship.record_tone(order.tone)

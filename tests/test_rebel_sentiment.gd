@@ -371,3 +371,70 @@ func test_it_stays_inside_its_bounds() -> void:
 	var total := float(_measure(context, furious, null, loathing)["total"])
 	assert_true(total <= RebelSentiment.MAXIMUM and total >= RebelSentiment.MINIMUM,
 		"sentiment reached %f, outside its own bounds" % total)
+
+
+# --- 🔒 Harsh orders (§4) ---------------------------------------------------
+
+## Put the compliance event on the log the way the order driver does, run the
+## grievance driver over it, and return what the town now holds.
+##
+## **Through `emit`, because there is no other way in.** My first version called
+## `log.append`, which does not exist — so nothing reached the log, the three
+## negative assertions passed against an empty one, and only the positive case
+## gave the game away. A test that cannot fail is worse than no test.
+func _grieve(kind: StringName, harsh: bool, outcome: StringName, payment: Variant = null) -> float:
+	var town := _town()
+	var context := _context([town])
+	var params: Dictionary = {"resource": "iron", "amount": 20}
+	if payment != null:
+		params["payment"] = payment
+	var order := Order.new(kind, &"gov_ashmere", params, context.state.month)
+	order.harsh = harsh
+
+	context.log.emit(
+		Compliance.OUTCOME_EVENTS[outcome], &"gov_ashmere", context.state.month,
+		{"order": order.to_dict(), "outcome": String(outcome)}, WorldPhase.RECKONING
+	)
+
+	var grievances := Grievances.new()
+	var driver := GrievanceDriver.new(context.colony, grievances)
+	driver.on_phase(WorldPhase.RECKONING, context.state, context.log, RngStreams.new(SEED))
+	return grievances.weight_for(town.id, context.state.month)
+
+
+func test_a_harsh_order_the_town_bore_is_a_grievance() -> void:
+	# **The gap this closes.** `harsh_order` has carried a weight and a duration
+	# since #71 and nothing anywhere raised it, so a contributor the doc names was
+	# inert — the same shape as the building effects nothing weighed.
+	assert_true(
+		_grieve(M1Registrations.ORDER_SHIP_RESOURCE, true, Compliance.COMPLY) > 0.0,
+		"a town stripped by command held nothing against the Crown")
+
+
+func test_the_same_order_written_as_a_request_is_not() -> void:
+	assert_almost_eq(
+		_grieve(M1Registrations.ORDER_SHIP_RESOURCE, false, Compliance.COMPLY), 0.0, 0.0001,
+		"a governor asked politely still left his town resenting the Crown")
+
+
+func test_a_harsh_order_refused_costs_the_town_nothing() -> void:
+	# 🔒 **A refusal is news the moment it is written; a harsh order is only a
+	# grievance once it lands.** A governor who refuses to strip his own stores
+	# has spared his people — his loyalty pays for that instead.
+	assert_almost_eq(
+		_grieve(M1Registrations.ORDER_SHIP_RESOURCE, true, Compliance.REFUSE), 0.0, 0.0001,
+		"a town resented an order its governor never carried out")
+
+
+func test_a_harsh_order_partly_borne_still_counts() -> void:
+	assert_true(
+		_grieve(M1Registrations.ORDER_SHIP_RESOURCE, true, Compliance.PARTIAL) > 0.0,
+		"half the stores went and the town minded none of it")
+
+
+func test_it_is_the_harshness_and_not_the_payment() -> void:
+	# Declared by the letter, never inferred from the order: an unpaid shipment
+	# the PC asked for politely is a poor bargain, not a command.
+	assert_almost_eq(
+		_grieve(M1Registrations.ORDER_SHIP_RESOURCE, false, Compliance.COMPLY, 0), 0.0, 0.0001,
+		"an unpaid shipment was read as a command because of its price")
