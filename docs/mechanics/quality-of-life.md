@@ -146,9 +146,17 @@ alone is worth less than beer, rum and tea together.
 pleasure = served * (VARIETY_FLOOR + (1 - VARIETY_FLOOR) * min(kinds / VARIETY_TARGET, 1))
 ```
 
-**Amusement joins both numbers.** A theatre adds to how much of the town was
-served *and* counts as one of the kinds. It is therefore a full participant in
-variety, not a bonus bolted on beside it.
+**Amusement joins both numbers, and it is one kind however much of it there
+is.** A theatre adds to how much of the town was served *and* counts as a kind,
+so it is a full participant in variety. A **second** amusement building — a
+fairgrounds beside the theatre — adds only to `served`. Amusement is already
+being consumed; more of it is deeper, not wider.
+
+That makes amusement behave exactly as a luxury does, which is the point: a town
+with beer, rum and a theatre reaches full variety just as one with beer, rum and
+tea does. **A colony can build its way to part of what it would otherwise have to
+buy**, and tea competes on `served` and on price rather than on being
+irreplaceable. Author-confirmed as intended.
 
 ### One draw, read by two phases
 
@@ -289,14 +297,7 @@ combat reaches quality of life, rather than a restoration of the old weights.
 ## 9. Open items
 
 - Every constant above. They are a starting point, not a design.
-- **Amusement counts toward variety, and that cuts across the tea argument
-  above.** With `VARIETY_TARGET` at three, a town holding beer, rum and a theatre
-  reaches full variety exactly as one holding beer, rum and tea does — so a
-  building the colony can raise for itself substitutes for the luxury it can
-  never produce. The tea case survives through `served`, but it is weaker than
-  §4 claims. **Worth the Author's eye**: either tea is less uniquely valuable
-  than the design wants, or amusement should feed `served` without counting as a
-  kind.
+- Whether pleasure should saturate below 1.0 — see below.
 - The target food reserve, in months, currently three. This single number does
   more to set the colony's difficulty than any other value here.
 - Whether `means` should scale its target with the colony's price level, once
