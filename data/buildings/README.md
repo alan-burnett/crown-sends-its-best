@@ -23,7 +23,38 @@ data, and nothing in code names a building.
 | `build_speed` | Shortens later builds, as a share |
 | `defence` | M6 |
 | `converts` | Conversions the town can now perform |
+| `upkeep` | **Gold a month to keep it running** (#151), and it may be zero |
+| `amusement` | Pleasure that arrives without a ship (#153) — see below |
 | `conversions` | **The terms of a conversion** — see below |
+
+## Upkeep, and what happens when a town cannot pay
+
+A town that cannot pay **keeps the building and loses the effect**. It is not
+lost, not damaged, not demolished — it stands idle and switches back on the
+moment the town can afford it again, with no repair cost and no rebuilding. An
+idle improvement reverts its tile to the bare terrain.
+
+Upkeep settles **before the month's phases begin**, because buildings reach Work
+through yields, Reckon through reserves and Build through speed. What goes dark
+first is what the governor values least.
+
+## Amusement
+
+```json
+"effects": { "amusement": 0.5 }
+```
+
+The share of the population a building entertains. It feeds **the same
+`luxury` and `luxury_kinds` pair a cellar of drink produces**, not a separate
+quality-of-life term, so it masks a shortfall the way rum does and counts towards
+the variety bonus.
+
+**A theatre cannot be embargoed.** Beer and rum arrive through Exchange and can
+be cut off by a trade protest, a blockade, a rebellion or simply no gold, so
+amusement is strategically distinct: expensive up front, carrying upkeep, and
+immune to everything that interrupts commerce. The counterweight is that upkeep
+*does* touch it — a town too poor to pay watches its amusements go dark in the
+same month its larder empties.
 
 ## There is no `months`
 
