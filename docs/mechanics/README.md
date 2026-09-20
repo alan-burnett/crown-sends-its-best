@@ -42,7 +42,6 @@ first needs it. That list is the live one; this table is the map.
 | :--- | :--- | :--- |
 | Production and conversion | #92 | M2 |
 | Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
-| **A tribe's own month, and its territory** | #101 | M5 |
 | Rival pressure | #103 | M5 |
 | Battles and combat resolution | #104 | M6 |
 | Commanders | #106 | M6 |

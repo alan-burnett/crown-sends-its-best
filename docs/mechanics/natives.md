@@ -83,6 +83,35 @@ A tribe's settlement. It works land, holds stores, feeds its people, and trades.
 **they never build forts** (§11.1). They shape the country without fortifying it,
 which is why a village is easier to take than a town and why taking one is worse.
 
+### No new villages. They grow instead
+
+**A tribe never founds a village.** The map's villages are the map's villages.
+
+**They grow in place** — in population, and in **influence**, the land they work.
+A village that prospers presses outward.
+
+That is what keeps them full actors rather than a diminishing obstacle. The
+colony expands by founding; a tribe expands by thriving, and the two press
+against each other over **the same ground**. A colony that leaves its neighbours
+alone does not find them conveniently static — it finds them growing, and wanting
+the tiles it had meant to farm next.
+
+### What a village does with itself
+
+It has **objectives**, as a town does, and **it has no buildings at all**. Its
+objectives are correspondingly simpler: feed ourselves, grow, work more land,
+arm ourselves, drive them off.
+
+There is **no governor and no contact** — nobody the PC could write to even if the
+mechanism allowed it. What steers a village is **the tribe's standings** (§2):
+a tribe that believes itself threatened takes defensive objectives, one that is
+secure takes prosperous ones.
+
+That is the second reason no extra layer is wanted here. A town needs a governor's
+**intent** because a governor is a person with his own opinion who may be wrong.
+A tribe's situation is its own intent, and it is never wrong about what is
+happening to it.
+
 ## 5. Trade agreements
 
 **The tribe proposes. The town never does.**
@@ -169,16 +198,16 @@ knowing almost nothing.
 
 ## 10. Open items
 
-- **Does a tribe's territory grow, hold, or only shrink?** If it only ever loses
-  ground the map is zero-sum and the tribes are a diminishing obstacle, which
-  sits badly against §12.5's lock that they are full actors. If they expand, they
-  compete with the colony for land on their own initiative. **This is the biggest
-  unanswered question here and it shapes everything about how a run's middle
-  feels.**
-- **The tribe's own month.** They work land, eat, trade and fight — but not the
-  way a town does. No gold, no Crown, no buildings, no objectives, no upkeep.
-  What exactly their loop contains is not yet written, and "very differently from
-  your towns" is the whole of the specification so far.
+- **How many villages a tribe has.** §12.5 fixes three tribes and says nothing
+  about settlements. Since none are ever founded, this number is set at
+  generation and never changes, which makes it one of the more consequential
+  things mapgen decides.
+- **Which improvements they build besides farms.** §11.1 names farms explicitly
+  and forbids forts. Pastures, mines and plantations are unstated — and a tribe
+  that mines is a very different neighbour from one that does not.
+- **What happens where a village's influence meets a town's.** Both grow, both
+  want tiles, and nothing says who works a contested one. This is where the
+  friction actually lives.
 - **Whether the PC can forbid arming them.** A governor may trade guns for food
   on his own judgement. *Never arm the tribes* has the shape of a policy
   (`policy.md`) — a standing instruction about conduct — but nothing says he has
