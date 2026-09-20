@@ -122,14 +122,56 @@ war**, and no specialty may be written that does.
 
 Most of a vice is data on machinery that already exists. One is not.
 
-| Vice | What it is |
-| :--- | :--- |
-| **Thin-skinned** | a heavier per-contact deed weight on `REFUSED`, and a harsher register |
-| **Importunate** | he will not take no. He writes again, and again, sliding into the `desperate` tone |
-| **Well-connected** | **his displeasure spreads** — see below |
+| Vice | What he does | Built from |
+| :--- | :--- | :--- |
+| **Thin-skinned** | a harsher register, and refusals cut deeper | a per-contact weight on `REFUSED` |
+| **Importunate** | he will not take no. He writes again and again, sliding into `desperate` | the director's volume and tone |
+| **Credulous** | he reads the colony as richer than it is — **so his asks grow** | perception leans |
+| **Loudmouth** | he talks. Granting banks more prestige; refusing costs it outright | the prestige term |
+| **Pragmatic** | his regard follows **the colony's net contribution to the Crown** | `cares_about` |
+| **Respectable** | he watches rebel sentiment, and **a rebellion ends his business** | `cares_about`, plus cancellation |
+| **Doctrinaire** | he will not touch certain resources, and objects when the colony trades them | a catalogue filter |
+| **Dilatory** | his side of a bargain arrives late, or short | the promise machinery, aimed at him |
+| **Impatient** | his offers expire within the turn — silence is refusal, not delay | §9.3 |
+| **Well-connected** | **his displeasure spreads** — see below | new |
 
-The first two need nothing new: a deed weight override and the director's volume
-and tone, both already per-contact.
+Most of these are a per-contact override on machinery that already exists.
+
+### Credulous asks for more without a rule that says so
+
+Worth pulling out, because it is the pattern the rest should follow. **He has no
+escalation rule.** He has a bias — his leans run positive on every colony measure
+— and because he sincerely believes the colony is prospering, what he asks for
+grows on its own.
+
+The greed is *derived from the perception*, not bolted on beside it. A vice
+built this way needs no bespoke behaviour at all, which is what `contacts.md` §1
+demands of everything else.
+
+### Pragmatic and Respectable are a pair
+
+Both judge the PC by the **colony** rather than by what he sends them, and they
+watch different things: **one reads your books, the other reads your streets.**
+
+**Pragmatic** follows `net_position` — the colony's net contribution to the Crown
+— and deliberately **not prestige**, which would be a feedback loop: pleasing a
+patron banks prestige, prestige would lift his regard, and his regard is itself
+part of prestige.
+
+It has a consequence worth keeping. Paying a patron in gold **lowers**
+`net_position`, so **you cannot buy a pragmatic man's good opinion.** He respects
+a colony that turns a profit, and money spent on him is money off the very figure
+he respects. The only way to please him is to run the place well.
+
+**Respectable** cannot be seen doing business with a man who is losing his
+colony. He writes about rebel sentiment because he cares about it (§6 of
+`contacts.md` — `cares_about` decides what a contact writes about unprompted), and
+when a town actually declares, his regard collapses and **his standing
+arrangements are cancelled.**
+
+That makes him the one patron whose value evaporates exactly when the PC needs
+help most, which is both the correct behaviour for a careful man and the worst
+possible timing.
 
 ### Well-connected is a new mechanic
 
@@ -219,6 +261,8 @@ stops being live.
 - Whether a patron's need can be something the colony cannot supply at all, as tea
   is for luxuries. A patron who wants what the PC has no way of getting is a
   relationship doomed from the roll, which may be good.
+- Whether **Respectable** reads colony-wide sentiment or his worst town. The worst
+  town is sharper and makes one bad province poison every deal he holds.
 - Whether a **departed** patron can return later in a long run, at his banked
   regard. §8.3 says they come and go; it does not say they never come back.
 - What a patron makes of a colony in open rebellion. He is invested in the place
