@@ -131,15 +131,21 @@ interrupt them.** A single-month action cannot be countermanded, which is where
 arriving too late is supposed to sting; if everything were single-month the
 player would be a spectator.
 
-### Population moves one at a time
+### Population moves one at a time, except under arms
 
-**No single event ever costs a town more than one population.** Not a battle, not
-a famine month, not a raid.
+**No event of hardship ever costs a town more than one population.** Not a famine
+month, not a shortage, not a bad winter.
 
-Five lost battles are five separate losses resolved separately, each emitting its
-own event. This keeps per-population consequences — the Diplomat's death roll,
-quality of life, letters that name what happened — uniform and legible, and it
-stops any one system inventing a bulk-casualty path the others do not expect.
+Losses arrive one at a time, each resolved separately and each emitting its own
+event. This keeps per-population consequences — the Diplomat's death roll, quality
+of life, letters that name what happened — uniform and legible, and it stops any
+one system inventing a bulk-casualty path the others do not expect.
+
+**Armed attack is the exception, and it is deliberate.** A battle takes a *share*
+of the people it falls on, so overwhelming force depopulates fast. That is the
+point of overwhelming force, and a rule that metered it out one man a month
+would make a massacre read as a bad harvest. See
+`docs/mechanics/battles.md`.
 
 **And workers go before experts, always.** An expert is lost only when no worker
 remains — it is the workers who take up the pitchforks when the natives come.
@@ -147,9 +153,11 @@ Accumulated expertise is therefore safe from a bad winter, which is what makes
 investing in education something other than a gamble. See
 `docs/mechanics/the-provost.md` §4.
 
-**An expedition is not a town** and is the one deliberate exception to all of
-this: it loses a *share* of its people and stores when attacked. See
-`docs/mechanics/founding-towns.md` §7.
+**A body of people in the open is not a town.** An expedition
+(`docs/mechanics/founding-towns.md` §7) and a company under arms
+(`docs/mechanics/battles.md`) both lose a *share* of their people **and the same
+share of their stores** when attacked. Losses preserve the ratios, which is why a
+fully horsed company stays cavalry however badly it is mauled.
 
 ### Determinism
 
