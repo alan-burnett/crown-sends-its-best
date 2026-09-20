@@ -105,13 +105,13 @@ wants both: food capacity has to keep climbing as a town grows.
 
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
-| **scouts** | 20 wood | low | Expeditions from this town are safer and start better supplied. **Town influence** | — |
-| **worker cabins** | 40 wood, 10 stone | medium | Improvements build faster and **cost no upkeep**. **Town influence** | scouts |
-| **fairgrounds** | 40 wood, 30 stone | medium | Immigration, local amusement, **amusement to every town**, and **town influence** | town pasture, stockade |
+| **scouts** | 20 wood | low | Expeditions from this town are safer and start better supplied | — |
+| **worker cabins** | 40 wood, 10 stone | medium | Improvements build faster and **cost no upkeep** | scouts |
+| **fairgrounds** | 40 wood, 30 stone | medium | Immigration, local amusement, and quality of life **to every town that has none** | town pasture, stockade |
 
-**Town influence is the expansion branch's signature** — more land to work — and
-guard towers quietly share it, so a governor building for defence gets an economy
-as a side effect.
+**Only guard towers carry town influence**, which makes the defence branch the
+one route to more land to work — a governor building for safety gets an economy
+as a side effect. Whether the expansion branch should share it is open (§10).
 
 ### Comfort
 
@@ -239,6 +239,21 @@ M3 playtest exercises the capacity and trade branches only.
 
 ## 10. Open items
 
+- **Does the expansion branch carry town influence?** The authored tree puts
+  influence on **guard towers alone**, so the branch named *expansion* expands
+  nothing but the frontier — scouts help expeditions leave, worker cabins build
+  improvements faster, fairgrounds draws immigrants. That is coherent, but it
+  means a governor who wants more land builds a defence line, which reads oddly
+  against §1's claim that a branch is the intent that pursues it.
+- **`mineworks` or `smelting pit`?** The tree carries both names for the ore-yield
+  building. *Mineworks* is used here throughout. Note that *smelting* describes
+  the ore→iron conversion the **foundry** does, so the two names point at
+  different jobs and only one of them is this building's.
+- **Nothing in the tree costs tools.** Costs are wood, stone and iron — and iron
+  is itself a conversion product, so the tree already reaches past raw materials.
+  Leaving tools out narrows them to expedition supplies and the native trade,
+  where §10.1 has the natives prize them. If that is the whole of their purpose
+  it is a thin one for a resource with its own conversion chain.
 - **The wharf looks underpriced.** A permanent **+10% on all Crown trade for no
   upkeep** partly offsets the duty forever, and at 50 wood and 20 stone it is an
   automatic build for any town that trades. Worth watching in the harness.
