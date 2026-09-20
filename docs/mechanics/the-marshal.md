@@ -67,6 +67,28 @@ actually happening.
 Tune his loyalty to fall faster per unit of shortfall than any other officer's.
 He is the hardest man in the game to move, and he should feel it.
 
+### They are never the colony's burden
+
+**🔒 Crown troops are victualled by the Crown. They never eat the colony's
+food, and there is no state in which soldiers in the colony depend on it.**
+
+An unpaid month does not mean an unsupplied one — the shipments keep coming and
+**the Marshal covers them**, which is exactly what the unpaid share of a policy
+means. He would not let his men starve, and he would certainly not let them
+forage off a province he already thinks is badly run.
+
+So the sequence when the money stops is:
+
+1. The PC stops paying. **Supply continues**, out of the Marshal's own account,
+   and his regard falls for it every month.
+2. He writes, as `policy.md` §5 requires, and either carries it longer or names
+   the season it ends.
+3. He cancels, and **the troops sail home.**
+
+They leave. They never linger as mouths. A garrison is therefore **pure benefit
+to the town it stands in** — the whole of its cost is gold and the Marshal's
+patience, and none of it lands on the people being protected.
+
 ## 4. Losing his men
 
 **If his troops are lost in the colony, he is furious.**
@@ -163,11 +185,6 @@ commander decides *what to do about a particular instruction*. See #106.
 
 ## 11. Open items
 
-- **Do Crown troops eat the colony's food?** §12.6 says colonial forces are
-  raised and supplied by the towns, and says nothing about the Crown's. If they
-  are victualled from home they cost the colony nothing and the trade is purely
-  gold; if they eat locally, a garrison is a burden on the town it protects,
-  which is a much more interesting and much crueller mechanic.
 - **Can the PC ask for an emergency force** outside the standing policy, or is
   adjusting the policy the only instrument? Adjusting is simpler and the payment
   shape is identical; a separate emergency request would need a reason to exist.
