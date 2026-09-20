@@ -26,6 +26,7 @@ being rewritten every iteration.
 | [founding-towns.md](founding-towns.md) | Two ways to plant a town, and what each costs | M4 |
 | [the-provost.md](the-provost.md) | The four knobs, education, and how an expert appears | M4 |
 | [the-marshal.md](the-marshal.md) | The officer with nothing to gain, and the gate on Independence | M6 |
+| [patrons.md](patrons.md) | Specialty, need and vice, and the six months that close | M7 |
 | [commanders.md](commanders.md) | Who decides, what they learn, and why refusal is not a branch | M6 |
 | [battles.md](battles.md) | Companies, force, and how ground is taken | M6 |
 | [rival-pressure.md](rival-pressure.md) | Dukes, tribute, and loyalty as a protection racket | M5 |

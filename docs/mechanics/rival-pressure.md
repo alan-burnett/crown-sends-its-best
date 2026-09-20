@@ -96,6 +96,17 @@ arriving from a direction the Crown's own demands cannot reach.
 are what make paying a real strategy rather than a trap, and the double cost is
 what stops it being the only one.
 
+### There is exactly one third door
+
+A patron whose specialty is rivals can arrange for a demand to be answered with
+neither gold nor a refusal — the duke is sent to collect from the patron's house
+and his men are arrested there. It costs no loyalty, because he never puts it
+together, and it costs no optic, because nothing was paid.
+
+**It is the only answer to a tribute demand that costs nothing**, it is available
+only while such a patron is present, and it is worth two demands. See
+`patrons.md` §5.
+
 ## 5. Tile denial
 
 **The low band's signature, and the one genuinely new mechanic here.**
