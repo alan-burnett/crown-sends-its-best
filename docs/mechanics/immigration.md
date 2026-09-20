@@ -77,6 +77,11 @@ Where the PC's efforts live (§12.1). A policy carries **a condition and a
 bonus**: *all towns*, or *all towns with a church*. Policies target towns; each
 town still computes its own figure.
 
+**The four standing knobs are the Provost's** (`the-provost.md` §2), set the
+moment the first town is founded and adjustable by letter thereafter: **volume**,
+**provision**, **experts** and **livestock**, each running from nothing to a
+great deal. They map onto this section and §6 and §7 directly.
+
 `policy.md` §1 uses this as its worked example — the Crown offers every settler
 bound for the colony supplies and gold, which costs somebody money every month
 and **moves both dials**: more come, and each brings more.
@@ -104,8 +109,22 @@ Policy moves what they bring as well as how many come.
 
 ## 7. Composition
 
-Mostly **workers**. A minority of **experts**, shifted by buildings and policy. 
+Mostly **workers**. A minority of **experts**, shifted by buildings and policy.
 **Livestock** occasionally, shifted by policy.
+
+### Experts arrive as fractions
+
+A town's monthly figure is not whole people — it is something like *+4.5 workers
+and +0.1 experts*. The workers arrive; **the fraction is saved**, and when it
+reaches one, an expert appears.
+
+How large that fraction is depends on the Provost's expert knob and on the town's
+**education** (`the-provost.md` §3 and §4), and **which kind of expert appears is
+decided at the moment he does** — whichever specialism would be worth most to
+that town, by the same measure it values anything else.
+
+So a fur town gets a trapper, then a farmer, and a weaver once it starts turning
+furs into cloth. Nothing about the list is authored.
 
 Experts multiply a town's yield of one resource including its processed forms
 (§12.2), so they are worth a great deal more than a worker and an
