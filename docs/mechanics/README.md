@@ -20,6 +20,7 @@ being rewritten every iteration.
 | [quality-of-life.md](quality-of-life.md) | How pleasant or miserable a town's life is | M2 |
 | [governor-objectives.md](governor-objectives.md) | Intent, objectives, and who decides which | M2 |
 | [town-economy.md](town-economy.md) | Prices, reserve, buying, and working the tiles | M2 |
+| [prestige.md](prestige.md) | The Crown's running account of the PC, and the final score | M3 |
 | [buildings.md](buildings.md) | The tree, what each does, and what it costs to keep | M2 |
 | [immigration.md](immigration.md) | Who comes, why, and why you might not want them | M4 |
 | [founding-towns.md](founding-towns.md) | Two ways to plant a town, and what each costs | M4 |
