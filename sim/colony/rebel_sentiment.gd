@@ -80,13 +80,18 @@ const TAX_RESENTMENT: float = 1.2
 ## The most a single month's taxation can contribute, so one enormous month of
 ## trade cannot rebel a town on its own.
 ##
-## **Held at four times an ordinary month rather than at a round number.** It
-## moved with `TAX_RESENTMENT`: at the old rate the cap was a hundred and twenty
-## times a normal month's duty and could never fire, and leaving it where it was
-## would have put it at three and a half times — close enough that a busy month
-## would cap out and the tier weighting would stop mattering at all, which is the
-## one thing this term exists to express.
-const TAX_CEILING: float = 45.0
+## **Held against an ordinary month rather than at a round number.** It moved
+## with `TAX_RESENTMENT` once, and again with #170: a town of two hundred pays
+## something like thirteen times the duty a town of fourteen does, so a cap
+## calibrated on the small town saturated permanently on the large one.
+##
+## That saturation is worth knowing about beyond the number. **While the cap
+## binds, the duty rate has stopped mattering** — a tyrant raising every rate he
+## is offered pays the same resentment as a steady hand who raises none, and the
+## two are told apart only by grievances. Lower is safer and makes it bind
+## sooner; the underlying fix is that resentment is reckoned per colony where the
+## people paying it are not. Raised on the doc ticket rather than changed here.
+const TAX_CEILING: float = 30.0
 
 ## What a man of the first prominence is worth, either way.
 ##
@@ -130,9 +135,17 @@ const QUALITY_WEIGHT: float = 30.0
 ##
 ## Expressed as a gain on the sum rather than a term in it, so it amplifies both
 ## directions and cannot by itself put a town anywhere.
+##
+## ## The ceiling is load-bearing since immigration
+##
+## It was 1.5 — a stakes multiplier of two and a half — chosen when a town of
+## fourteen barely moved it. #170 took towns to two hundred, `traded_value`
+## climbed with them, and the cap pinned from month sixty. Multiplied against a
+## tax term pinned at *its* ceiling, the product was 112 against a rebellion
+## threshold of 65: two numbers each sane alone that jointly guaranteed revolt.
 const DEVELOPMENT_PER_BUILDING: float = 0.08
 const DEVELOPMENT_PER_TRADE: float = 0.0002
-const DEVELOPMENT_CEILING: float = 1.5
+const DEVELOPMENT_CEILING: float = 0.5
 
 ## What a neighbour in open rebellion is worth, at its worst.
 const NEIGHBOUR_WEIGHT: float = 18.0

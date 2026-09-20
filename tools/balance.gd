@@ -285,7 +285,13 @@ func _row(
 
 	var sentiment := 0.0
 	var worst_sentiment := 0.0
+	# **How many towns are actually out**, which a mean cannot tell you: a colony
+	# at 42 on average is a very different place depending on whether that is
+	# every town simmering or half of them in open revolt (#71 §8).
+	var rebelling := 0
 	for town in towns:
+		if town.rebelling:
+			rebelling += 1
 		sentiment += town.rebel_sentiment
 		worst_sentiment = maxf(worst_sentiment, town.rebel_sentiment)
 		people += town.population()
@@ -334,6 +340,9 @@ func _row(
 		# from a band alone (#71).
 		"sentiment": 0.0 if towns.is_empty() else sentiment / float(towns.size()),
 		"worst_sentiment": worst_sentiment,
+		"rebelling": rebelling,
+		"declared": _counted(fresh, Rebellion.EVENT_DECLARED),
+		"returned": _counted(fresh, Rebellion.EVENT_RETURNED),
 		"intents": "|".join(intents),
 		"objectives": "|".join(objectives),
 	}
@@ -378,11 +387,20 @@ func _row(
 	return row
 
 
+## How many of a kind of event the year carried.
+func _counted(events: Array, type: StringName) -> int:
+	var total := 0
+	for event in events:
+		if event.type == type:
+			total += 1
+	return total
+
+
 const COLUMNS: PackedStringArray = [
 	"seed", "year", "towns", "population", "quality_of_life", "food_held",
 	"months_hungry", "food_security", "supply", "revenue", "tax_base",
 	"tax_burden", "net_position", "standing", "standing_band", "letters",
-	"promises_outstanding", "tile_moves",
+	"promises_outstanding", "tile_moves", "rebelling", "declared", "returned",
 	"demand_axis", "demand_interval", "demand_target", "demand_refusal",
 	"demand_askers", "sentiment", "worst_sentiment",
 ]
