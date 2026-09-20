@@ -20,6 +20,7 @@ being rewritten every iteration.
 | [quality-of-life.md](quality-of-life.md) | How pleasant or miserable a town's life is | M2 |
 | [governor-objectives.md](governor-objectives.md) | Intent, objectives, and who decides which | M2 |
 | [town-economy.md](town-economy.md) | Prices, reserve, buying, and working the tiles | M2 |
+| [buildings.md](buildings.md) | The tree, what each does, and what it costs to keep | M2 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
 | [crown-demands.md](crown-demands.md) | A fixed bar, then a moving one — and bucket randomisation | M3 |
 | [trade-protests.md](trade-protests.md) | When a town refuses the Crown's duty, and what it costs | M3 |
@@ -35,7 +36,6 @@ first needs it. That list is the live one; this table is the map.
 | Mechanic | Issue | First needed |
 | :--- | :--- | :--- |
 | Production and conversion | #92 | M2 |
-| Town buildings and the building tree | #93 | M2 |
 | Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
 | Immigration and population growth | #98 | M4 |
 | Founding towns and expeditions | #99 | M4 |
