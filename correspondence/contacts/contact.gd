@@ -35,6 +35,49 @@ const ROLE_INSTITUTIONAL: StringName = &"institutional"
 const WEIGHT_MIN: float = 0.5
 const WEIGHT_MAX: float = 1.6
 
+## How large each kind of man looms in the town he lives in. Tuning.
+##
+## The Crown's officers sit at nothing deliberately — they are an ocean away and
+## live in no town at all, so they never push anybody's sentiment however the
+## rest of the model changes.
+const PROMINENCE: Dictionary = {
+	"governor": 1.0,
+	"commander": 0.5,
+	"institutional": 0.3,
+	"patron": 0.0,
+	"rival": 0.0,
+	"crown_officer": 0.0,
+}
+
+
+static func prominence_of(role: StringName) -> float:
+	return float(PROMINENCE.get(String(role), 0.0))
+
+
+## How large this man looms where he lives.
+func prominence() -> float:
+	return prominence_override if prominence_override >= 0.0 else prominence_of(role)
+
+## How much weight this man's opinion carries where he lives
+## (`rebel-sentiment.md` §4).
+##
+## **Prominence, not office.** A town listens to the people it has heard of, so
+## what a contact does to its rebel sentiment is scaled by how large he looms
+## there rather than by which box his role falls in. The governor is the town's
+## leader and its voice; a clergyman is listened to on a Sunday.
+##
+## It cuts both ways, which is the point: **if the famous men of a town are all
+## loyal to the Crown there is not much rebel sentiment in it**, and the same
+## men slighted are what carries the town out.
+##
+## **Derived from the role unless the data overrides it**, so it cannot be
+## forgotten. A contact built any other way — a test fixture, a scenario — has
+## the prominence his office implies without anyone remembering to set it, which
+## is the failure this shape exists to prevent.
+##
+## A particular clergyman may be a firebrand, so the field can still say so.
+var prominence_override: float = -1.0
+
 var display_name: String = ""
 var title: String = ""
 var role: StringName = &""
@@ -84,6 +127,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.display_name = String(record.get("name", ""))
 	contact.title = String(record.get("title", ""))
 	contact.role = StringName(record.get("role", ""))
+	contact.prominence_override = float(record.get("prominence", -1.0))
 	contact.portrait_asset = String(record.get("portrait", ""))
 	contact.town = String(record.get("town", ""))
 	contact.leans = record.get("leans", {}).duplicate()
@@ -131,6 +175,7 @@ func to_dict() -> Dictionary:
 		"name": display_name,
 		"title": title,
 		"role": String(role),
+		"prominence": prominence_override,
 		"portrait": portrait_asset,
 		"town": town,
 		"leans": leans.duplicate(),

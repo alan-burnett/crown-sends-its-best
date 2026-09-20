@@ -336,13 +336,6 @@ static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName
 				contact.relationship.record_deed(Relationship.GRANTED, amount / LOYALTY_STEP)
 			else:
 				contact.relationship.record_deed(Relationship.REFUSED, absf(amount) / LOYALTY_STEP)
-		M1Registrations.ORDER_ADJUST_LOYALTY:
-			# The letter said plainly that it would move his regard, so it must.
-			var amount := float(order.get_param("amount", 0.0))
-			if amount >= 0.0:
-				contact.relationship.record_deed(Relationship.GRANTED, amount / 5.0)
-			else:
-				contact.relationship.record_deed(Relationship.REFUSED, absf(amount) / 5.0)
 		M1Registrations.ORDER_REQUEST_TROOPS:
 			# Paying generously leaves loyalty where it was; paying little stings.
 			var shortfall := 1.0 - payment_ratio(order)
