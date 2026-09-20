@@ -277,17 +277,22 @@ const BASE: StringName = &"town_hall"
 ## `is_lit` like every other effect.
 static func amusement_for(town: Town) -> Dictionary:
 	var served := 0.0
-	var kinds := 0
 	for id in town.buildings:
 		var building := find(StringName(id))
 		if building == null or not is_lit(town, StringName(id)):
 			continue
-		var share := float(building.effect("amusement", 0.0))
-		if share <= 0.0:
-			continue
-		served += share
-		kinds += 1
-	return {"served": served, "kinds": kinds}
+		served += maxf(0.0, float(building.effect("amusement", 0.0)))
+	# 🔒 **One kind, however much of it there is** (`buildings.md` §7). A second
+	# amusement building adds only to `served`: amusement is already being
+	# consumed, and more of it is deeper rather than wider.
+	#
+	# That makes it behave exactly as a luxury does, which is the point — a town
+	# with beer, rum and a theatre reaches full variety just as one with beer, rum
+	# and tea does, so a colony can build its way to part of what it would
+	# otherwise have to buy. Counting each building as its own kind would let six
+	# amusements clear `VARIETY_TARGET` on their own and make the cellar
+	# irrelevant.
+	return {"served": served, "kinds": 1 if served > 0.0 else 0}
 
 
 ## How much this town's production of a resource is raised by what it has built.
