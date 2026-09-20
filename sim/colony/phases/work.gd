@@ -18,21 +18,30 @@ extends ColonyPhase
 ## people sends hands to the loom; a town with good land and nothing to process
 ## does not.
 ##
-## ## What the score means, and what it deliberately leaves out
+## ## One number decides it, and it is the town's valuation
 ##
-## Every piece of work is scored as **the weighted resources it adds this
-## month**, where the weight is what the thing is worth and **triple that if the
-## objective calls for it** (`town-economy.md` §4). A recipe subtracts what it
-## consumes, so brewing the last of the grain into beer scores terribly in a
-## hungry town — without anything in code knowing what beer is.
+## Every piece of work is scored as **the resources it adds this month, each at
+## what the town thinks a unit of it is worth** (`town-economy.md` §3). A recipe
+## subtracts what it consumes, so brewing the last of the grain into beer scores
+## terribly in a hungry town — without anything in code knowing what beer is.
 ##
-## **Hunger is not a weight.** It was one, and it is the reason this phase had to
-## be rewritten: a weight that rises as the stores fall re-ranks every tile in
-## the town every month, so a town near the edge reshuffles its whole workforce
-## as its granary crosses a line and back. Measured over 25 seeds and five years,
-## towns gave up 0.25 to 0.67 tiles a month, and the worst seeds three — a fifth
-## of the workforce moved every month. With the weight taken out the same figure
-## is 0.01 to 0.15. The churn was the weight (#116).
+## **There is no objective term here any more.** There was one, a flat bonus on
+## anything the build called for, and the doc's §3 subsumes it: the objective
+## raises the town's *desired stock*, desired stock raises the valuation, and the
+## tier it raises it at decides how steeply. A town raising a church values lumber
+## at four times what the same town values it a year later, and the scoring never
+## hears the word "church".
+##
+## That matters beyond tidiness. The old weight was a second opinion about what
+## the town wanted, held only by this phase — so the tiles it worked and the
+## goods it bought were ranked by two different rules that could disagree.
+##
+## **Hunger is still not a weight.** The need term moves with desired stock, which
+## is a want rather than a larder reading: it changes when the town takes on a
+## project or loses people, not every month as the granary crosses a line. That
+## distinction is the whole of #116. Measured over 25 seeds and five years, the
+## hunger weight cost towns 0.25 to 0.67 tiles a month and the worst seeds three;
+## without it the figure is 0.01 to 0.15.
 ##
 ## ## The survival check, applied after scoring
 ##
@@ -57,25 +66,6 @@ extends ColonyPhase
 const EVENT_WORKED: StringName = &"town_worked"
 const EVENT_CONVERTED: StringName = &"town_converted"
 
-## What the objective's needs are worth beside general value.
-##
-## ## Added, where `town-economy.md` §4 says tripled
-##
-## **The doc's `favour = 3` assumes its own scoring, which counts a tile's yields
-## and nothing else.** Against a bare count, tripling is decisive. Against the
-## weights actually used here it is not, because `value_of` already spreads a
-## resource's worth over a five-to-one range and six furs outweigh six of
-## anything cheap before any favour is applied at all. On the standard forest and
-## plains fixture, a town ordered to stockpile food still goes to the forest at
-## ×3; the multiplier would have to exceed 3.5 to turn it round, and choosing a
-## number that clears one fixture is tuning rather than a rule.
-##
-## Added instead, because favour is a **tier** — needs, then the objective, then
-## what the thing is worth — and a tier should mean the same thing to a cheap
-## material as to a dear one. An objective wanting forty wood wants forty wood;
-## it does not want it three times as much for wood being valuable.
-const OBJECTIVE_WEIGHT: float = 2.5
-
 ## What a month spent fetching an input is worth against the need it becomes.
 ##
 ## Less than the need itself, because it still costs a worker and a month to turn
@@ -93,12 +83,11 @@ const EXPERT_FALLOFF: float = 0.6
 
 
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
-	# What the objective still wants. A construction wants its remaining
-	# materials; a standing posture wants its focus resources, every month,
-	# forever.
-	var wanted := Objective.still_to_gather(town)
-	var focus := Objective.posture_focus(town)
-	var worth := _worth(wanted, focus)
+	# **What this town wants, and what that makes each resource worth to it.**
+	# Both read from the state the month opened with, so Work and Reckon are
+	# working from one account of the town rather than two (§3).
+	var desired := DesiredStock.for_town(town, before)
+	var worth := _worth(town, before, desired)
 	var tiles := context.tiles_of(town)
 
 	# Tiles and recipes, scored the same way and ranked together. Ties break on a
@@ -173,38 +162,16 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 
 # --- What the town wants more of -------------------------------------------
 
-## How much a unit of each resource is worth to this town this month.
+## What a unit of each resource is worth to this town this month (§3).
 ##
-## **What the thing is worth, plus what the objective calls for**, and nothing
-## else. There is deliberately no term here for hunger: need is a
-## redirection applied afterwards, not a thumb on the scale, because a weight
-## that moves with the stores re-ranks the whole town every month (#116).
-func _worth(wanted: Dictionary, focus: PackedStringArray) -> Dictionary:
+## `Valuation.town` for every resource in the catalogue, computed once and looked
+## up by the scoring — the town's one opinion of what it wants, not this phase's.
+func _worth(town: Town, before: ColonySnapshot, desired: DesiredStock) -> Dictionary:
 	var weights: Dictionary = {}
 	for resource in ResourceCatalogue.ids():
-		var weight := value_of(StringName(resource))
-		if wanted.has(resource) or focus.has(resource):
-			weight += OBJECTIVE_WEIGHT
-		weights[resource] = weight
+		var id := StringName(resource)
+		weights[resource] = Valuation.town(id, desired, before.held(town.id, id))
 	return weights
-
-
-## What a unit of a resource is worth in itself, measured in grain.
-##
-## **Conversion cannot be scored without this.** A recipe takes more raw than it
-## makes processed — one and a half of ore for one of iron — so compared by the
-## count it is always a loss, and no town would ever smelt anything. It is a gain
-## because iron is worth twice what ore is, and that is a fact about the
-## resource rather than about the town.
-##
-## `docs/mechanics/town-economy.md` §4 scores a tile by count alone. It was
-## written before conversion existed, and §7 of the same doc says so: *"this
-## doc's tile scoring stands on its own and the survival check's clothing half is
-## incomplete."* SPEC §11.3 step 1 now requires one allocation across fields and
-## town, and the two cannot be ranked together without a common unit.
-static func value_of(resource: StringName) -> float:
-	var grain := maxf(0.001, ResourceCatalogue.price_of(&"food"))
-	return maxf(0.0, ResourceCatalogue.price_of(resource) / grain)
 
 
 # --- The survival check -----------------------------------------------------

@@ -8,7 +8,8 @@
     "price": 15,
     "feed": 0.3,
     "slaughter_yield": 9,
-    "native_worth": 0.5
+    "native_worth": 0.5,
+    "town_base": 18.0
   },
   {
     "id": "sheep",
@@ -19,7 +20,8 @@
     "price": 12,
     "feed": 0.15,
     "slaughter_yield": 4,
-    "native_worth": 0.5
+    "native_worth": 0.5,
+    "town_base": 14.0
   },
   {
     "id": "horses",
@@ -30,6 +32,7 @@
     "price": 25,
     "feed": 0.4,
     "slaughter_yield": 7,
-    "native_worth": 3.2
+    "native_worth": 3.2,
+    "town_base": 34.0
   }
 ]

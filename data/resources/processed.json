@@ -11,7 +11,8 @@
     "price": 8,
     "input_per_unit": 1.2,
     "per_worker": 4.0,
-    "native_worth": 1.9
+    "native_worth": 1.9,
+    "town_base": 11.0
   },
   {
     "id": "iron",
@@ -24,7 +25,8 @@
     "price": 8,
     "input_per_unit": 1.5,
     "per_worker": 3.0,
-    "native_worth": 0.0
+    "native_worth": 0.0,
+    "town_base": 8.0
   },
   {
     "id": "tools",
@@ -37,7 +39,8 @@
     "price": 12,
     "input_per_unit": 1.0,
     "per_worker": 2.0,
-    "native_worth": 3.2
+    "native_worth": 3.2,
+    "town_base": 20.0
   },
   {
     "id": "guns",
@@ -50,7 +53,8 @@
     "price": 20,
     "input_per_unit": 2.0,
     "per_worker": 1.0,
-    "native_worth": 3.4
+    "native_worth": 3.4,
+    "town_base": 30.0
   },
   {
     "id": "beer",
@@ -63,7 +67,8 @@
     "price": 5,
     "input_per_unit": 2.0,
     "per_worker": 5.0,
-    "native_worth": 1.6
+    "native_worth": 1.6,
+    "town_base": 5.0
   },
   {
     "id": "rum",
@@ -76,7 +81,8 @@
     "price": 11,
     "input_per_unit": 1.2,
     "per_worker": 3.0,
-    "native_worth": 1.8
+    "native_worth": 1.8,
+    "town_base": 8.0
   },
   {
     "id": "cigars",
@@ -89,6 +95,7 @@
     "price": 11,
     "input_per_unit": 1.2,
     "per_worker": 3.0,
-    "native_worth": 0.5
+    "native_worth": 0.5,
+    "town_base": 8.0
   }
 ]

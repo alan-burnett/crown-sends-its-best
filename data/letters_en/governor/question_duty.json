@@ -4,46 +4,46 @@
   "type": "report",
   "skippable": true,
   "params": {
-    "town": "town",
-    "trade": "gold"
+	"town": "town",
+	"trade": "gold"
   },
   "perception": {
-    "burden": {
-      "measure": "tax_burden",
-      "ladder": [
-        "light enough",
-        "felt",
-        "heavy",
+	"burden": {
+	  "measure": "tax_burden",
+	  "ladder": [
+		"light enough",
+		"felt",
+		"heavy",
         "insupportable"
-      ]
-    },
-    "spirits": {
-      "measure": "quality_of_life",
-      "ladder": [
-        "wretched",
-        "low",
-        "settled",
+	  ]
+	},
+	"spirits": {
+	  "measure": "quality_of_life",
+	  "ladder": [
+		"wretched",
+		"low",
+		"settled",
         "in good heart"
-      ]
-    }
+	  ]
+	}
   },
   "body": [
-    {
-      "text": "A word on the duty, since nobody else at {param:town} will write it and somebody should."
-    },
-    {
-      "text": "The rate is {perception:burden}. We traded {param:trade} this month, and the merchants took their share of it before the wagons were loaded."
-    },
-    {
-      "text": "The people are {perception:spirits}. I say only that they notice, and that they talk."
-    },
-    {
-      "text": "I am not asking you to change it. I am asking you to know it.",
-      "only_tones": [
-        "annoyed",
-        "hateful",
+	{
+	  "text": "A word on the duty, since nobody else at {param:town} will write it and somebody should."
+	},
+	{
+	  "text": "The rate is {perception:burden}. We traded {param:trade} this month, and the merchants took their share of it before the wagons were loaded."
+	},
+	{
+	  "text": "The people are {perception:spirits}. I say only that they notice, and that they talk."
+	},
+	{
+	  "text": "I am not asking you to change it. I am asking you to know it.",
+	  "only_tones": [
+		"annoyed",
+		"hateful",
         "desperate"
-      ]
-    }
+	  ]
+	}
   ]
 }

@@ -152,15 +152,15 @@ One number per town per resource, recomputed every month.
 valuation(resource)  =  base  +  need
 
 base   =  what the resource is worth to this town in itself.
-          **An authored figure, independent of the Crown's price** — this is
-          the town's entry in §1's dictionary
+		  **An authored figure, independent of the Crown's price** — this is
+		  the town's entry in §1's dictionary
 
 need   =  how far below desired stock the town is, where
 
-          desired stock  =  what the coming months' needs require
+		  desired stock  =  what the coming months' needs require
                           + what the objective requires
                           + what the intent leans toward
-                          + what the town's buildings give it a use for
+						  + what the town's buildings give it a use for
 ```
 
 **Both halves are necessary and they add rather than multiply.**

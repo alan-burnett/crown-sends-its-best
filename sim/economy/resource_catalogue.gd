@@ -114,6 +114,12 @@ static func per_worker_of(id: StringName) -> float:
 	return kind.per_worker if kind != null else 0.0
 
 
+## What a colonial town thinks a unit is worth in itself (#135).
+static func town_base(id: StringName) -> float:
+	var kind := get_kind(id)
+	return 1.0 if kind == null else kind.town_base
+
+
 ## What a tribe would give for it, as a multiple of the Crown's price
 ## (#136, `town-economy.md` §1).
 ##

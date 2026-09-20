@@ -72,17 +72,67 @@ static func crown(resource: StringName, state: WorldState = null) -> float:
 
 
 # --- The town ---------------------------------------------------------------
-#
-# **Not here yet, and deliberately.** §1 says the town's dictionary moves with
-# desired stock against what it holds, which is #135 — but a town valuation
-# expressed as a multiple of the Crown's price cannot produce §1's own table.
-# The gap would be a function of shortfall alone, so every surplus would sell
-# and every shortage would buy, whatever the resource, and "no lumber trade"
-# could not fall out.
-#
-# The two dictionaries have to be independent absolute numbers, which means a
-# second authored table. That is a content decision with a tea-rule constraint
-# on it (#113), so it is the PO's rather than mine. Raised on #136.
+
+## What anything is worth to a town that has no use for it.
+##
+## ## 🔒 An absolute figure, not a share of `base`
+##
+## **A share of `base` is not a collapse**, and getting this wrong produced the
+## clearest bug in #135: a town drowning in furs and drowning in cloth still
+## valued the cloth at four times the furs, because both had been scaled by the
+## same fraction. So it put a hand on the loom and spent the month turning a
+## surplus it did not want into a different surplus it did not want, and the
+## scoring called it the best work available.
+##
+## §3 says the valuation *collapses* once the town is above desired stock. A
+## collapse levels things. What the town does with the pile afterwards is Sell's
+## question and the Crown's price answers it — Work has no business ranking two
+## things the town has no use for.
+##
+## Not zero, only because a valuation at zero would let a town pay duty to be rid
+## of something. Tuning (§10).
+const SURPLUS_FLOOR: float = 0.25
+
+
+## What a unit is worth to this town, this month (#135, §3).
+##
+## ## 🔒 Base plus need, and both halves are necessary
+##
+##     valuation  =  base  +  need
+##
+## `base` is what the resource is worth to the town **in itself** — its entry in
+## §1's dictionary, an authored figure independent of the Crown's price. `need`
+## is a signed premium on top: positive while the town is below its desired
+## stock, negative once it is above.
+##
+## **They add, they do not multiply.** Multiplying would make the premium
+## proportional to a town's existing opinion of the thing, so a town desperate
+## for grain and a town desperate for horses would be desperate in different
+## currencies.
+##
+## And `base` cannot be derived from the Crown's price. Derive it and the gap
+## between the two dictionaries becomes a function of shortfall alone — every
+## surplus sells and every shortage buys, whatever the resource, §1's "no lumber
+## trade" row cannot happen, and valuation is always at or above what the Crown
+## pays so the sell rule never fires at all.
+##
+## ## One number, four questions
+##
+## This is the only thing the town's economy asks. Which tiles to work is
+## `yield x valuation`; whether to buy is valuation above the Crown's price plus
+## duty; whether to sell is valuation below what the Crown pays after duty;
+## what to keep is the same gap restated. **There is no second scoring rule
+## anywhere**, which is what stops the map and the ledger disagreeing.
+static func town(resource: StringName, desired: DesiredStock, held: float) -> float:
+	var base := ResourceCatalogue.town_base(resource)
+	var wanted := desired.wanted(resource)
+	# Normalised by the want, so shortfall is "how far short, as a share of what
+	# was wanted" and reads the same for forty lumber as for four horses. A town
+	# that wants none of a thing is measured against a single unit, so holding any
+	# of it at all is a surplus.
+	var shortfall := 1.0 if desired.leans_toward(resource) 		else clampf((wanted - held) / maxf(wanted, 1.0), -1.0, 1.0)
+	var need := base * desired.reach_of(resource) * shortfall
+	return maxf(SURPLUS_FLOOR, base + need)
 
 
 # --- The natives ------------------------------------------------------------

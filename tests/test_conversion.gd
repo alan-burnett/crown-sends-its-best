@@ -136,10 +136,18 @@ func test_every_conversion_the_spec_names_exists() -> void:
 
 
 func test_every_conversion_actually_produces_its_output() -> void:
-	# Six workers on barren ground, with a heap of the input. If a recipe cannot
-	# happen here it cannot happen anywhere.
+	# Six workers on barren ground, with a heap of the input **and nothing of the
+	# output**. If a recipe cannot happen here it cannot happen anywhere.
+	#
+	# Clearing the output is not the fixture being obliging. Since #135 a town
+	# scores work at what it thinks the resources are worth, and a town holding a
+	# year of cloth thinks cloth is worth very little — so it brews beer instead,
+	# correctly. Leaving the standard 200 clothing in would have this test ask
+	# whether a sated town bothers, which is a question about appetite rather than
+	# about whether the recipe exists.
 	for recipe in Conversion.all():
 		var town := _town({String(recipe.input): 500.0}, 6)
+		town.take(recipe.output, town.held(recipe.output))
 		var before := town.held(recipe.output)
 		_run_month(_harness(town))
 		assert_true(town.held(recipe.output) > before,
@@ -156,8 +164,9 @@ func test_clothing_can_be_woven_from_either_furs_or_cotton() -> void:
 	# The two-input case. Whichever the town actually has will do.
 	for source in ["furs", "cotton"]:
 		var town := _town({source: 500.0}, 6)
+		town.take(&"clothing", town.held(&"clothing"))
 		_run_month(_harness(town))
-		assert_true(town.held(&"clothing") > 200.0, "a town with %s wove nothing" % source)
+		assert_true(town.held(&"clothing") > 0.0, "a town with %s wove nothing" % source)
 
 
 # --- 🔒 A worker is in the fields or in the town, never both ---------------
@@ -249,8 +258,15 @@ func test_a_cold_town_leaves_good_ground_to_weave() -> void:
 	_run_month(one)
 	_run_month(other)
 
+	assert_true(cold.held(&"clothing") > 0.0, "a cold town with furs worked the fields")
 	assert_eq(int(_worked(one)["converting"]), 1, "a cold town with furs worked the fields")
-	assert_eq(int(_worked(other)["converting"]), 0, "a well-clothed town wove anyway")
+
+	# **Asked of the cloth, not of the hands.** The clothed town has 500 of grain
+	# it will never eat and no rum in the cellar, so it brews — which is a hand
+	# converting, and the right one. What this test is about is that it does not
+	# put that hand on the loom.
+	assert_almost_eq(clothed.held(&"clothing"), 200.0, 0.0001,
+		"a well-clothed town wove anyway")
 
 
 func test_a_hungry_town_does_not_brew_its_grain() -> void:

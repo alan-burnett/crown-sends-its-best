@@ -5,7 +5,8 @@
     "luxury": false,
     "producible": true,
     "price": 2,
-    "native_worth": 0.4
+    "native_worth": 0.4,
+    "town_base": 2.0
   },
   {
     "id": "wood",
@@ -13,7 +14,8 @@
     "luxury": false,
     "producible": true,
     "price": 2,
-    "native_worth": 0.3
+    "native_worth": 0.3,
+    "town_base": 2.0
   },
   {
     "id": "stone",
@@ -21,7 +23,8 @@
     "luxury": false,
     "producible": true,
     "price": 3,
-    "native_worth": 0.3
+    "native_worth": 0.3,
+    "town_base": 3.0
   },
   {
     "id": "ore",
@@ -29,7 +32,8 @@
     "luxury": false,
     "producible": true,
     "price": 4,
-    "native_worth": 0.3
+    "native_worth": 0.3,
+    "town_base": 4.0
   },
   {
     "id": "furs",
@@ -37,7 +41,8 @@
     "luxury": false,
     "producible": true,
     "price": 5,
-    "native_worth": 0.4
+    "native_worth": 0.4,
+    "town_base": 2.5
   },
   {
     "id": "cotton",
@@ -45,7 +50,8 @@
     "luxury": false,
     "producible": true,
     "price": 4,
-    "native_worth": 0.4
+    "native_worth": 0.4,
+    "town_base": 2.0
   },
   {
     "id": "sugar",
@@ -53,7 +59,8 @@
     "luxury": true,
     "producible": true,
     "price": 8,
-    "native_worth": 0.4
+    "native_worth": 0.4,
+    "town_base": 3.5
   },
   {
     "id": "tobacco",
@@ -61,7 +68,8 @@
     "luxury": true,
     "producible": true,
     "price": 8,
-    "native_worth": 0.4
+    "native_worth": 0.4,
+    "town_base": 3.5
   },
   {
     "id": "tea",
@@ -69,6 +77,7 @@
     "luxury": true,
     "producible": false,
     "price": 6,
-    "native_worth": 0.4
+    "native_worth": 0.4,
+    "town_base": 9.0
   }
 ]

@@ -39,6 +39,15 @@ var livestock: bool = false
 ## What one unit trades for with the Crown, before tax (SPEC §10.2). Tuning.
 var price: float = 1.0
 
+## What it is worth to a colonial town in itself (#135, #136).
+##
+## **Its own authored figure, not a multiple of `price`.** Derive it and the gap
+## between town and Crown becomes a function of shortfall alone — every surplus
+## sells and every shortage buys, whatever the resource, and lumber behaves
+## exactly like furs. §1's table, where lumber trades in neither direction
+## because both sides value it alike, cannot fall out of a derived number.
+var town_base: float = 1.0
+
 ## What a tribe would give for it, as a multiple of `price` (#136).
 ##
 ## **The value is in the making, not the material.** Zero for iron, which they
@@ -83,6 +92,7 @@ static func from_data(record: Dictionary) -> ResourceKind:
 	kind.livestock = bool(record.get("livestock", false))
 	kind.price = float(record.get("price", 1.0))
 	kind.native_worth = float(record.get("native_worth", 0.0))
+	kind.town_base = float(record.get("town_base", kind.price))
 	kind.feed = float(record.get("feed", 0.0))
 	kind.slaughter_yield = float(record.get("slaughter_yield", 0.0))
 	kind.input_per_unit = float(record.get("input_per_unit", 1.0))
