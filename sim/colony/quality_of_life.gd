@@ -348,7 +348,11 @@ static func draw_from(mouths: float, held: Dictionary) -> Dictionary:
 ## cannot disagree about what a cellar is worth. A town that bought on one theory
 ## and drank on another would hold a heap of beer and wonder why it felt no
 ## better for it.
-static func pleasure_from(mouths: float, held: Dictionary) -> float:
+static func pleasure_from(
+	mouths: float,
+	held: Dictionary,
+	amusement: Dictionary = {},
+) -> float:
 	var cap := mouths * ColonyNeeds.luxury_per_head()
 	if cap <= 0.0:
 		return 0.0
@@ -357,9 +361,14 @@ static func pleasure_from(mouths: float, held: Dictionary) -> float:
 	var taken := 0.0
 	for id in drawn:
 		taken += float(drawn[id])
+	# **Amusement joins the same two numbers** (#153), so Exchange's marginal
+	# scoring sees it too: a town with a theatre gets less from its next measure
+	# of rum, and buys accordingly. Passing it only to Consume would put the
+	# buying side and the drinking side back on two theories of what a month of
+	# pleasure is worth.
 	return pleasure_of({
-		"luxury": clampf(taken / cap, 0.0, 1.0),
-		"luxury_kinds": drawn.size(),
+		"luxury": clampf(taken / cap, 0.0, 1.0) + float(amusement.get("served", 0.0)),
+		"luxury_kinds": drawn.size() + int(amusement.get("kinds", 0)),
 	})
 
 
@@ -374,12 +383,13 @@ static func marginal_pleasure(
 	held: Dictionary,
 	resource: StringName,
 	amount: float,
+	amusement: Dictionary = {},
 ) -> float:
 	if amount <= 0.0:
 		return 0.0
 	var after := held.duplicate()
 	after[String(resource)] = float(after.get(String(resource), 0.0)) + amount
-	return pleasure_from(mouths, after) - pleasure_from(mouths, held)
+	return pleasure_from(mouths, after, amusement) - pleasure_from(mouths, held, amusement)
 
 
 # --- Who is addressing what -------------------------------------------------

@@ -164,6 +164,14 @@ static func _months_for(town: Town, cost: Dictionary) -> int:
 	return maxi(1, int(ceil(total / maxf(0.001, Objective.build_capacity(town)))))
 
 
+## What entertaining the whole town is worth beside a point of quality of life.
+##
+## Amusement is a share of the population rather than a flat figure, so it needs
+## a scale to sit on the same axis. Generous, because unlike a comfort bought
+## with gold it cannot be cut off — and tuning.
+const AMUSEMENT_WORTH: float = 3.0
+
+
 ## What a building is good for, read out of its effects rather than its name.
 ##
 ## Nothing here knows what a granary is. Add a building to the data and the
@@ -202,7 +210,16 @@ static func _building_axes(id: StringName) -> Dictionary:
 			axes["trade"] = float(axes.get("trade", 0.0)) + amount * LASTING * _trade_weight(StringName(resource))
 
 	axes["defence"] = float(building.effect("defence", 0.0)) * 0.5
-	axes["comfort"] = float(building.effect("quality_of_life", 0.0)) * 0.5
+	# **Amusement is comfort a governor can want for its own sake** (#153).
+	# Nothing here knows what a theatre is, but a building that entertains half
+	# the town has to reach this or no governor could ever choose one — which is
+	# what happened when the effect was added and this was not told: the colony
+	# built fourteen of the eighteen buildings in the tree and never the two that
+	# exist to make people happy.
+	axes["comfort"] = (
+		float(building.effect("quality_of_life", 0.0)) * 0.5
+		+ float(building.effect("amusement", 0.0)) * AMUSEMENT_WORTH
+	)
 	# **A reserve is per-resource now** (#148). Read as a float this silently
 	# became zero the month the effect turned into a dictionary, and a governor
 	# stopped being able to want a granary for the reason a granary exists.

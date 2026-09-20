@@ -350,5 +350,38 @@
     },
     "grants_contact": "gunsmith",
     "upkeep": 4
+  },
+  {
+    "id": "pleasure_garden",
+    "name": "a pleasure garden",
+    "requires": [
+      "storehouse"
+    ],
+    "cost": {
+      "wood": 25,
+      "stone": 15
+    },
+    "upkeep": 3,
+    "effects": {
+      "amusement": 0.25
+    }
+  },
+  {
+    "id": "theatre",
+    "name": "a theatre",
+    "requires": [
+      "carpenters_hall"
+    ],
+    "cost": {
+      "wood": 55,
+      "stone": 30,
+      "tools": 8
+    },
+    "upkeep": 6,
+    "effects": {
+      "amusement": 0.5,
+      "quality_of_life": 0.5
+    },
+    "grants_contact": "playwright"
   }
 ]

@@ -118,10 +118,12 @@ func _wear(town: Town, mouths: float, record: Dictionary) -> void:
 ## what a cellar will be worth *before* buying it (`town-economy.md` §2). One
 ## function, used from both sides, is the only way the two cannot drift apart.
 func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
+	# **What the town can amuse itself with, whatever the ships do** (#153).
+	var amusement := Building.amusement_for(town)
 	var cap := mouths * ColonyNeeds.luxury_per_head()
 	if cap <= 0.0:
-		record["luxury"] = 0.0
-		record["luxury_kinds"] = 0
+		record["luxury"] = float(amusement["served"])
+		record["luxury_kinds"] = int(amusement["kinds"])
 		return
 
 	var held: Dictionary = {}
@@ -139,11 +141,11 @@ func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
 			kinds += 1
 		taken += drunk
 
-	record["luxury"] = clampf(taken / cap, 0.0, 1.0)
+	record["luxury"] = clampf(taken / cap, 0.0, 1.0) + float(amusement["served"])
 	# **Variety is worth something of its own**: beer alone is worth less than
 	# beer, rum and tea together (`quality-of-life.md` §4). Counted here because
 	# Settle reads a town that has already drunk it.
-	record["luxury_kinds"] = kinds
+	record["luxury_kinds"] = kinds + int(amusement["kinds"])
 
 
 ## What the town's herds eat, over what its pasture supports.

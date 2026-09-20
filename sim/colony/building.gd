@@ -254,6 +254,42 @@ static func improves_conversion(town: Town, recipe: StringName) -> bool:
 const BASE: StringName = &"town_hall"
 
 
+## **Pleasure that arrives without a ship** (#153).
+##
+## Returns `{"served": share of the population entertained, "kinds": how many
+## distinct amusements}`, which is the same pair a cellar of drink produces —
+## because amusement feeds pleasure through the *same* path as a consumed luxury
+## rather than as a second quality-of-life term.
+##
+## ## Why that matters strategically
+##
+## Beer and rum arrive through Exchange and can be cut off by a trade protest, a
+## blockade, a rebellion, or simply no gold. **A theatre cannot be embargoed.**
+## So a town with amusement has a floor of contentment underneath its luxuries,
+## and the PC can build that floor permanently into a colony he cannot feed.
+##
+## `quality-of-life.md` establishes that pleasure *masks* the shortfall and that
+## its power is greatest when life is worst. Amusement makes bread and circuses
+## buildable, which is SPEC §3.2's satire working exactly as intended.
+##
+## **The counterweight is upkeep.** A town too poor to pay watches its amusements
+## go dark in the same month its larder empties, which is why this reads through
+## `is_lit` like every other effect.
+static func amusement_for(town: Town) -> Dictionary:
+	var served := 0.0
+	var kinds := 0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building == null or not is_lit(town, StringName(id)):
+			continue
+		var share := float(building.effect("amusement", 0.0))
+		if share <= 0.0:
+			continue
+		served += share
+		kinds += 1
+	return {"served": served, "kinds": kinds}
+
+
 ## How much this town's production of a resource is raised by what it has built.
 static func yield_bonus_for(town: Town, resource: StringName) -> float:
 	var bonus := 0.0

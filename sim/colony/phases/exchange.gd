@@ -280,7 +280,13 @@ func _best_comfort(
 			continue
 		if landed <= 0.0 or not town.can_afford(landed * step):
 			continue
-		var pleasure := QualityOfLife.marginal_pleasure(mouths, cellar, resource, step)
+		# **Against what the town already has to amuse itself with** (#153). A town
+		# with a theatre gets less from its next measure of rum and should buy
+		# accordingly, or the buying side and the drinking side are back on two
+		# theories of what a month of pleasure is worth.
+		var pleasure := QualityOfLife.marginal_pleasure(
+			mouths, cellar, resource, step, Building.amusement_for(town)
+		)
 		if pleasure <= 0.0:
 			continue
 		var score := pleasure * Spending.pleasure_worth(mouths) / (landed * step)
