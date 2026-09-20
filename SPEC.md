@@ -450,7 +450,7 @@ Going wide or going tall is one of the run's defining choices.
 - **🔒 The PC never chooses a tile.** He approves, refuses, or states preferences: toward the coast, near the ore, away from the tribes. The governor of the new town chooses the site.  
 - **The new town needs supplies.** The expedition takes workers, food, tools, and sometimes livestock or experts to found the new town. These are given by the parent town, and/or provided by the crown, depending on how the founding was proposed and what promises the PC can deliver.  
 - **Founding takes months.** The expedition crosses the map to its site and can be attacked, turned back, delayed, or if conditions are especially hostile, lost completely. Cutscenes cover its fate.  
-- **A new town begins fragile:** no buildings, a thin stockpile, low population, low quality of life.   
+- **A new town begins as it was sent.** An expedition mounted by a prosperous town, or equipped by the Crown, may arrive with stores, livestock, an expert, even a building already standing. One shed by a crowded town that could spare nothing arrives with almost nothing. What it starts with is what was given to it.  
 - **The colony grows, which can offend natives.** Founding near or beyond native land offends nearby tribes in proportion to the intrusion. A new town extends the colony's border and vision.  
 - **Rebel towns never found towns.** They are too concerned about fighting the crown to worry about long term colony growth.  
 - There is no cap on number of towns. The natural forces of growth and conflict prevent snowballing to an extreme number of towns. Expansion is checked by the people it displaces, not by the discontent of the towns already held.
