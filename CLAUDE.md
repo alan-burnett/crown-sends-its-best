@@ -23,6 +23,17 @@ for the design. Only the Author edits it.
 - `docs/mechanics/**` holds the current draft of numbers and formulas that the
   spec deliberately leaves out. **PO owns these; devs read them, never edit
   them.** If a mechanics doc contradicts the spec, the spec wins.
+- **Every ticket names its mechanics doc and section**, at the top, before
+  anything else. A ticket with no doc to cite means the design was never written
+  down — which is a thing to fix before the ticket, not after it.
+- **A ticket states the change, not the design.** The doc holds the model; the
+  ticket holds what is different afterwards and how you know it worked.
+  Transcribing a doc's tables into a ticket creates a second source of truth
+  that goes stale the moment the doc moves, and it lets a dev complete the work
+  without ever opening the doc. **That has already happened once**, with the
+  building tree: five tickets carried the rules inline, none linked the doc, and
+  everything in it that no ticket happened to quote — the tree itself — went
+  unbuilt for two days.
 - Labels: `author` (needs an Author decision), `blocked` (depends on unfinished
   work).
 
