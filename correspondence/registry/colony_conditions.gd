@@ -83,6 +83,9 @@ static func register_all() -> void:
 		"town_is_preparing_to_leave", {}, ColonyConditions.town_is_preparing_to_leave
 	)
 	ContentRegistry.register_condition(
+		"town_has_an_idle_building", {}, ColonyConditions.town_has_an_idle_building
+	)
+	ContentRegistry.register_condition(
 		"will_not_carry_it_further", {}, ColonyConditions.will_not_carry_it_further
 	)
 	ContentRegistry.register_condition(
@@ -170,6 +173,16 @@ static func remembers_a_kindness(_args: Dictionary, context: LetterContext) -> b
 ## preparing for it writes about the walls and the powder and the grain, and
 ## says nothing about why — the player has everything he needs to work it out,
 ## and nobody tells him.
+## Whether something the town built stands idle for want of coin (#151).
+##
+## 🔒 **Town gold is invisible to the player** (SPEC §11.3), so a governor
+## writing is the entire interface of upkeep. Without this the mechanic is a
+## number the PC cannot see moving things he cannot account for, which is a trap
+## rather than a decision.
+static func town_has_an_idle_building(_args: Dictionary, context: LetterContext) -> bool:
+	return context.town != null and not context.town.dark_buildings.is_empty()
+
+
 static func town_is_preparing_to_leave(_args: Dictionary, context: LetterContext) -> bool:
 	return context.town != null and GovernorIntent.is_sedition(context.town.intent)
 

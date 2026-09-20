@@ -43,6 +43,10 @@ func after_each() -> void:
 func _town(workers: int, stock: Dictionary = {}, herd: Dictionary = {}) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
 	town.workers = workers
+	# **Funded, so its buildings are lit** (#151). A town that cannot pay upkeep
+	# keeps its buildings and loses their effects, which would make every test
+	# here a test of upkeep rather than of the thing it is about.
+	town.receive_gold(5_000.0)
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
 	for kind in herd:

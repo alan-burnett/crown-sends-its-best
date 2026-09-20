@@ -24,6 +24,18 @@ var tiles: PackedStringArray = PackedStringArray()
 ## yields from the terrain rather than from what was there before.
 var improvements: PackedStringArray = PackedStringArray()
 
+## Tiles whose improvement nobody is paying for (#151), as `"x,y"`.
+##
+## **The improvement is still there.** `yield_at` reads the bare terrain while a
+## tile is in here, so a town too poor to keep its farms sees them yield like
+## scrubland — and sees them come back the month it can pay, with no rebuilding.
+##
+## On the map rather than on the town because `yield_at` is the one place every
+## reader goes through: the scoring, the harvest, the projection and the
+## governor's choice of where to build all get it at once, and none of them can
+## be the one that forgot.
+var idle_improvements: Dictionary = {}
+
 
 func _init(p_width: int = 0, p_height: int = 0, fill: StringName = &"ocean") -> void:
 	width = p_width
@@ -86,7 +98,7 @@ func yield_at(x: int, y: int, resource: StringName) -> float:
 	if terrain == null:
 		return 0.0
 	var improvement := Improvement.find(improvement_at(x, y))
-	if improvement != null:
+	if improvement != null and not is_idle(x, y):
 		return improvement.yield_of(terrain, resource)
 	return terrain.yield_of(resource)
 
@@ -150,6 +162,19 @@ func livestock_capacity_at(x: int, y: int) -> int:
 	return improvement.capacity_on(terrain_at(x, y)) if improvement != null else 0
 
 
+## Whether nobody is paying to work this tile's improvement.
+func is_idle(x: int, y: int) -> bool:
+	return idle_improvements.has("%d,%d" % [x, y])
+
+
+func set_idle(x: int, y: int, idle: bool) -> void:
+	var key := "%d,%d" % [x, y]
+	if idle:
+		idle_improvements[key] = true
+	else:
+		idle_improvements.erase(key)
+
+
 # --- Serialisation ---------------------------------------------------------
 
 func to_dict() -> Dictionary:
@@ -158,6 +183,7 @@ func to_dict() -> Dictionary:
 		"height": height,
 		"tiles": tiles.duplicate(),
 		"improvements": improvements.duplicate(),
+		"idle_improvements": idle_improvements.duplicate(),
 	}
 
 
@@ -167,6 +193,7 @@ static func from_dict(data: Dictionary) -> WorldMap:
 	map.height = int(data.get("height", 0))
 	map.tiles = PackedStringArray(data.get("tiles", []))
 	map.improvements = PackedStringArray(data.get("improvements", []))
+	map.idle_improvements = data.get("idle_improvements", {}).duplicate()
 	if map.improvements.size() != map.tiles.size():
 		map.improvements.resize(map.tiles.size())
 	return map

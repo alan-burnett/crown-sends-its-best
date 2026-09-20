@@ -35,7 +35,8 @@
           "throughput": 2.0
         }
       }
-    }
+    },
+    "upkeep": 0
   },
   {
     "id": "storehouse",
@@ -49,7 +50,8 @@
         "wood": 1
       },
       "quality_of_life": 0.5
-    }
+    },
+    "upkeep": 1
   },
   {
     "id": "palisade",
@@ -60,7 +62,8 @@
     "effects": {
       "defence": 2,
       "quality_of_life": 0.5
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "stockyard",
@@ -74,7 +77,8 @@
     "effects": {
       "pasture": 24,
       "quality_of_life": 0.5
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "sawmill",
@@ -90,7 +94,8 @@
       "yield_bonus": {
         "wood": 0.6
       }
-    }
+    },
+    "upkeep": 3
   },
   {
     "id": "quarry_works",
@@ -107,7 +112,8 @@
         "stone": 0.6,
         "ore": 0.3
       }
-    }
+    },
+    "upkeep": 3
   },
   {
     "id": "carpenters_hall",
@@ -122,7 +128,8 @@
     "effects": {
       "build_speed": 0.5,
       "quality_of_life": 0.5
-    }
+    },
+    "upkeep": 3
   },
   {
     "id": "granary",
@@ -139,7 +146,8 @@
         "food": 2
       },
       "quality_of_life": 1.0
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "smithy",
@@ -171,7 +179,8 @@
         "ore": 2,
         "iron": 1
       }
-    }
+    },
+    "upkeep": 4
   },
   {
     "id": "church",
@@ -186,7 +195,8 @@
     "effects": {
       "quality_of_life": 2.0
     },
-    "grants_contact": "clergyman"
+    "grants_contact": "clergyman",
+    "upkeep": 3
   },
   {
     "id": "armoury",
@@ -212,7 +222,8 @@
         "guns": 2
       }
     },
-    "grants_contact": "quartermaster"
+    "grants_contact": "quartermaster",
+    "upkeep": 5
   },
   {
     "id": "brewhouse",
@@ -235,7 +246,8 @@
       "reserve_months": {
         "food": 2
       }
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "weavers_loom",
@@ -262,7 +274,8 @@
         "furs": 2,
         "cotton": 2
       }
-    }
+    },
+    "upkeep": 3
   },
   {
     "id": "distillery",
@@ -286,7 +299,8 @@
       "reserve_months": {
         "sugar": 2
       }
-    }
+    },
+    "upkeep": 3
   },
   {
     "id": "rolling_house",
@@ -309,7 +323,8 @@
       "reserve_months": {
         "tobacco": 2
       }
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "gunsmith",
@@ -333,6 +348,7 @@
         "iron": 2
       }
     },
-    "grants_contact": "gunsmith"
+    "grants_contact": "gunsmith",
+    "upkeep": 4
   }
 ]

@@ -19,6 +19,13 @@ var requires: PackedStringArray = PackedStringArray()
 ## Resource id -> how much the Build phase consumes (#49).
 var cost: Dictionary = {}
 
+## **Gold a month to keep it running** (#151), and it may be zero.
+##
+## A building is not a one-off cost and a permanent gain. A town that overbuilds
+## and goes broke watches its own advantages switch off — and get them back the
+## moment it can pay again, because upkeep is a squeeze rather than a punishment.
+var upkeep: float = 0.0
+
 ## What it does once it stands.
 var effects: Dictionary = {}
 
@@ -39,6 +46,7 @@ static func load_from(records: Array) -> void:
 		building.display_name = String(record.get("name", record.get("id", "")))
 		building.requires = PackedStringArray(record.get("requires", []))
 		building.cost = record.get("cost", {}).duplicate()
+		building.upkeep = maxf(0.0, float(record.get("upkeep", 0.0)))
 		building.effects = record.get("effects", {}).duplicate()
 		building.grants_contact = String(record.get("grants_contact", ""))
 		_buildings[String(building.id)] = building
@@ -112,6 +120,28 @@ func effect(name: String, fallback: Variant = 0.0) -> Variant:
 # Asked of the town rather than stored on it, so a building's effect cannot
 # drift out of step with whether the building is actually there.
 
+## 🔒 **Standing is not the same as working** (#151).
+##
+## A town that cannot pay a building's upkeep keeps the building and loses the
+## effect. It is not lost, not damaged, not demolished — it stands idle and
+## switches back on the month the town can afford it again.
+##
+## Every reader below goes through this, which is the only way the two can never
+## disagree: a yield that counted a dark mill would have the town produce from a
+## building the governor is writing home to say has stopped.
+static func is_lit(town: Town, id: StringName) -> bool:
+	return town == null or not town.dark_buildings.has(String(id))
+
+
+## What the town owes this month to keep everything it has built running.
+static func upkeep_for(town: Town) -> float:
+	var owed := 0.0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building != null:
+			owed += building.upkeep
+	return owed
+
 ## The terms this building sets for a conversion, or empty.
 ##
 ## `{"ratio": input per unit of output, "throughput": input per worker-month}`.
@@ -151,7 +181,7 @@ static func terms_for(town: Town, recipe: StringName) -> Dictionary:
 		held.sort()
 		for id in held:
 			var building := find(StringName(id))
-			if building == null:
+			if building == null or not is_lit(town, StringName(id)):
 				continue
 			var terms := building.conversion_terms(recipe)
 			if terms.is_empty():
@@ -229,7 +259,7 @@ static func yield_bonus_for(town: Town, resource: StringName) -> float:
 	var bonus := 0.0
 	for id in town.buildings:
 		var building := find(StringName(id))
-		if building == null:
+		if building == null or not is_lit(town, StringName(id)):
 			continue
 		var bonuses: Dictionary = building.effect("yield_bonus", {})
 		bonus += float(bonuses.get(String(resource), 0.0))
@@ -241,7 +271,7 @@ static func reserve_months_for(town: Town, resource: StringName) -> float:
 	var months_held := 0.0
 	for id in town.buildings:
 		var building := find(StringName(id))
-		if building == null:
+		if building == null or not is_lit(town, StringName(id)):
 			continue
 		var months: Dictionary = building.effect("reserve_months", {})
 		months_held += float(months.get(String(resource), 0.0))
@@ -253,7 +283,7 @@ static func reserved_resources(town: Town) -> PackedStringArray:
 	var out: Dictionary = {}
 	for id in town.buildings:
 		var building := find(StringName(id))
-		if building == null:
+		if building == null or not is_lit(town, StringName(id)):
 			continue
 		for resource in building.effect("reserve_months", {}):
 			out[String(resource)] = true
@@ -270,7 +300,7 @@ static func pasture_capacity_for(town: Town) -> int:
 	var head := 0
 	for id in town.buildings:
 		var building := find(StringName(id))
-		if building != null:
+		if building != null and is_lit(town, StringName(id)):
 			head += int(building.effect("pasture", 0))
 	return head
 
@@ -280,7 +310,7 @@ static func quality_of_life_for(town: Town) -> float:
 	var total := 0.0
 	for id in town.buildings:
 		var building := find(StringName(id))
-		if building != null:
+		if building != null and is_lit(town, StringName(id)):
 			total += float(building.effect("quality_of_life", 0.0))
 	return total
 

@@ -308,5 +308,28 @@
         "town_is_preparing_to_leave": {}
       }
     ]
+  },
+  {
+    "id": "trigger.governor.report_idle_building",
+    "letter": "governor.report_idle_building",
+    "urgency": 0.8,
+    "cooldown": 6,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "building": {
+        "from": "idle_building",
+        "field": "name"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "town_has_an_idle_building": {}
+      }
+    ]
   }
 ]

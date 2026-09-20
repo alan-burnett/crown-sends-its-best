@@ -43,6 +43,14 @@ var natural: bool = false
 ## Resource id -> how much raising it costs the town (#49, #53).
 var cost: Dictionary = {}
 
+## **Gold a month to keep it worked** (#151), and it may be zero.
+##
+## A disabled improvement reverts its tile to the unimproved yield: the farm is
+## still there, nobody is working it. That is the squeeze the poverty trap in
+## `town-economy.md` needed — a town too poor to pay watches its farms yield like
+## bare ground until it can pay again.
+var upkeep: float = 0.0
+
 
 
 # --- Loading ---------------------------------------------------------------
@@ -64,6 +72,7 @@ static func load_from(records: Array) -> void:
 		improvement.livestock_capacity = JsonTypes.to_int(record.get("livestock_capacity", 0), "livestock_capacity")
 		improvement.natural = bool(record.get("natural", false))
 		improvement.cost = record.get("cost", {}).duplicate()
+		improvement.upkeep = maxf(0.0, float(record.get("upkeep", 0.0)))
 		_improvements[String(improvement.id)] = improvement
 
 

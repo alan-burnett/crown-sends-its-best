@@ -24,7 +24,8 @@
     ],
     "cost": {
       "wood": 12
-    }
+    },
+    "upkeep": 1
   },
   {
     "id": "pasture",
@@ -47,7 +48,8 @@
     ],
     "cost": {
       "wood": 10
-    }
+    },
+    "upkeep": 1
   },
   {
     "id": "plantation_sugar",
@@ -73,7 +75,8 @@
     "cost": {
       "wood": 18,
       "tools": 2
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "plantation_cotton",
@@ -99,7 +102,8 @@
     "cost": {
       "wood": 18,
       "tools": 2
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "plantation_tobacco",
@@ -125,7 +129,8 @@
     "cost": {
       "wood": 18,
       "tools": 2
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "mine",
@@ -154,7 +159,8 @@
     "cost": {
       "wood": 20,
       "tools": 4
-    }
+    },
+    "upkeep": 2
   },
   {
     "id": "road",
@@ -172,7 +178,8 @@
       "forest",
       "desert",
       "mountains"
-    ]
+    ],
+    "upkeep": 0
   },
   {
     "id": "fort",
@@ -190,6 +197,7 @@
     "cost": {
       "wood": 30,
       "stone": 20
-    }
+    },
+    "upkeep": 3
   }
 ]

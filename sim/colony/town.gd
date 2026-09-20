@@ -42,6 +42,14 @@ var stockpile: Dictionary = {}
 ## Buildings completed, in build order.
 var buildings: PackedStringArray = PackedStringArray()
 
+## Buildings the town could not pay the upkeep on this month (#151).
+##
+## **They still stand.** Not lost, not damaged, not demolished — idle, and lit
+## again the month the town can afford them. Written by `Upkeep` before the
+## month's phases begin and read by every one of `Building`'s effect readers, so
+## a dark mill cannot yield while the governor writes home to say it has stopped.
+var dark_buildings: PackedStringArray = PackedStringArray()
+
 ## **Stored, and updated only in Settle.** A reader that recomputed it would get
 ## a different answer halfway through a month, and two readers would disagree.
 var quality_of_life: float = 0.0
@@ -325,6 +333,7 @@ func to_dict() -> Dictionary:
 		"livestock": livestock.duplicate(),
 		"stockpile": stockpile.duplicate(),
 		"buildings": buildings.duplicate(),
+		"dark_buildings": dark_buildings.duplicate(),
 		"quality_of_life": quality_of_life,
 		"rebel_sentiment": rebel_sentiment,
 		"growth_accrued": growth_accrued,
@@ -363,6 +372,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.livestock = data.get("livestock", {}).duplicate()
 	town.stockpile = data.get("stockpile", {}).duplicate()
 	town.buildings = PackedStringArray(data.get("buildings", []))
+	town.dark_buildings = PackedStringArray(data.get("dark_buildings", []))
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))
 	town.rebelling_since = int(data.get("rebelling_since", -1))
