@@ -198,21 +198,73 @@ He has **no extension**. The press is already the end of its branch.
 
 ### The scholar
 
-| | |
-| :--- | :--- |
-| **Wants** | experts sent to his library, and funds for it |
-| **Cares about** | education across the colony, not only in his own town |
-| **Can do** | **he moves experts between towns** |
+**What his loyalty does.** **Medium prominence** — a learned man looms reasonably
+large in a colonial town, but he is respected rather than popular, so less than
+the priest and far less than the journalist.
 
-That is the capability `buildings.md` §4 promises when it calls him *a contact who
-wants them spread about the colony*, and it fills a real gap: `the-provost.md`
-brings experts **into** the colony and nothing else can move one once it has
-landed. A fur town that becomes a weaving town cannot currently redeploy the
-trapper it no longer needs. The scholar can.
+And **his regard scales the library's own effect.** `buildings.md` §4 has the
+library turning resident experts into education; a slighted scholar teaches badly.
+The building still stands and the learning stops.
 
-He overlaps the Provost without duplicating him. **The Provost supplies, the
-scholar distributes**, and the two of them caring about the same measure means a
-PC who builds libraries pleases a Crown officer he has never paid.
+**How he gets loyalty.** Two things, and the second is the interesting one.
+
+**Education across the colony**, not only in his own town. Which means the
+Provost's **curriculum** policy — the cheapest instrument in the game — now pleases
+*two* contacts at once, and a PC who funds it keeps a Crown officer and a resident
+contented for almost nothing.
+
+**And peace.** He wants quiet, cooperation, low duties and schooling, because he
+believes everyone is as reasonable as he is and ought simply to get along. So
+**aggression with the natives or the rivals costs his regard** — and he blames the
+PC for it.
+
+#### He does not ask who started it
+
+**He blames the PC when a rival attacks an expedition.** That is not the PC's
+aggression by any reading, and the scholar does not care.
+
+This is a deliberate inversion of `rebel-sentiment.md` §2, whose entire organizing
+principle is **attribution** — sentiment measures who is blamed, not how bad life
+is. The scholar is the opposite: he measures how bad it is and blames whoever is
+in charge. **He is attribution-blind on purpose**, and that is the whole of what it
+means to be a man who has never had to make a hard decision.
+
+**What he asks for.**
+
+- **Gold** for the library.
+- **An expert sent to him**, specifically.
+- **Lower duties on luxuries** — which makes a neat pairing with the clergy, who
+  wants the duty off what the poor cannot do without. **The priest wants bread
+  cheap and the scholar wants wine cheap**, and they will never ask for the same
+  thing.
+- **That the PC press the Provost on curriculum.** The first contact who asks the
+  PC to lobby another contact, and it needs nothing new — it is a letter that
+  suggests a letter.
+
+**His bias: academia for its own sake.**
+
+`buildings.md` calls him *a contact who wants experts spread about the colony*,
+and that is what he sincerely believes about himself. **What he actually does is
+gather them.**
+
+Left to his own judgement he pulls expertise toward his own library, because that
+is where it can be properly used, where it will compound, where the real work is
+done. The frontier town that needs a farmer is not his concern; it has no library
+to receive one.
+
+**So his bias corrupts his own capability**, which is the sharpest kind. A PC who
+follows the scholar's advice on placement ends with one brilliant town and a
+colony of hamlets, and the scholar will be sincerely delighted about it.
+
+The capability itself stays genuine and stays the PC's instrument: **asked** to
+send a weaver to a struggling town, he does it, exactly as the Steward follows an
+instruction he disagrees with. It is his **unprompted** judgement that has the
+thumb on it.
+
+It also fills a real gap. `the-provost.md` brings experts **into** the colony and
+nothing else could move one afterwards — a fur town that became a weaving town was
+stuck with its trapper. **The Provost supplies, the scholar distributes**, when he
+can be persuaded to.
 
 **The college** extends him to the experts it already counts from elsewhere.
 
