@@ -8,26 +8,33 @@
 
 ---
 
-## 1. The framework, and it is the patron's
+## 1. Four questions, answered against the base contact
 
 SPEC §8.2: *some buildings bring a new contact, such as a church bringing a
 clergyman. Each has their own agenda and loyalty.*
 
-Three questions define one, and they are **the same three that define a patron**
-(`patrons.md` §2):
+**Each of these men extends the ordinary contact model. They do not share a
+second one.** Everything below is the base mechanic of `contacts.md` with its
+blanks filled in — there is no institutional-contact machinery, and there must not
+be, or a change made for one of them silently moves the others.
 
-| | | The patron's word |
-| :--- | :--- | :--- |
-| **What he wants** | the asks he brings to the PC | *need* |
-| **What he cares about** | what moves his loyalty, and what he writes about unprompted | `cares_about` |
-| **What he can do** | the capability his institution gives the colony | *specialty* |
+**Nor are they patrons.** `patrons.md` is deliberately simple and should stay
+that way; binding the two models together would handcuff each to the other's
+future.
 
-**One model, two ways of filling it in.** A patron rolls his three at random and
-leaves within a few years. An institutional contact has his fixed by the building
-that produced him, and stays as long as the building stands.
+Four questions define a contact, and answering them is the whole of adding one:
 
-So `patrons.md`'s offer object (§4) works here unchanged: gift, request, barter,
-sale and purchase are the same five shapes with the same resolution path.
+| Question | Where the answer lives |
+| :--- | :--- |
+| **What does his loyalty do?** | `contacts.md` §2 — one knob, read differently by role |
+| **How does he get loyalty?** | `cares_about` (§5), which also decides what he writes about (§6) |
+| **What will he ask of the PC?** | his letters |
+| **What is his bias?** | perception leans (`perception.md`) |
+
+The fourth is not decoration. Every fixed contact in the game skews one way and
+the player learns to discount it — the Steward wants higher duties, the Provost
+thinks the colony under-schooled, the Marshal minimises every threat. **These four
+each need their own slant**, or they read as instruments rather than people.
 
 ## 2. He lives in a town, which is most of what he is
 
@@ -61,18 +68,50 @@ with the contact", and it is the same relationship in all three cases.
 
 ### The clergy
 
-| | |
-| :--- | :--- |
-| **Wants** | charity — gold or food for the poor, and relief when the town suffers |
-| **Cares about** | how the people are actually living. Hunger, sickness, and want |
-| **Can do** | he preaches obedience. A contented clergyman is a standing weight against rebellion, and he can be asked to intercede in a town on the brink |
+**What his loyalty does.** Two things, and he is the only contact so far who gets
+a second.
 
-He is the PC's cheapest instrument against sentiment and the one that costs
-money rather than force. He also **objects** — to the ale house, to guns, to
-whatever his conscience will not carry — which makes him the first contact whose
-approval and whose usefulness pull in different directions.
+He is **very influential** — among the highest prominence in the game — so his
+regard moves his town's rebel sentiment hard in whichever direction it points. And
+**his loyalty scales the church's own effect**: the building gives perceived
+safety (`buildings.md` §4), and a contented clergyman gives more of it. A church
+with a slighted priest in it is a building the town has stopped believing in.
 
-**The cathedral** extends his reach beyond his own town.
+**How he gets loyalty.** He cares about **his people, and most about the poorest**.
+A town that is not a miserable place to live earns his regard; one that is loses
+it, whatever the PC sends him personally.
+
+Mechanically that is quality of life read **from the bottom**: heavy on health and
+means, and **blind to pleasure**. A town with a theatre, a cellar of rum and
+hungry people does not please him at all, which is precisely the trap
+`quality-of-life.md` §8 warns the player about — and the clergy is the one voice
+that will not be fooled by it.
+
+**What he asks for.**
+
+- **Gold**, for charity.
+- **Relief of a duty** on something the poor cannot do without, or **a holiday**
+  from it — a rate lowered for a season rather than for good.
+- **An expedition of pilgrims**, to be supplied and sent out.
+
+That last one makes the clergy a **source of foundings** in his own right,
+alongside the Provost and the patrons (`founding-towns.md` §3). A pilgrim
+expedition arrives with a character of its own, and it carries rewards beyond the
+priest's gratitude.
+
+**His bias.** He talks to the poorest of the poor, the ones with nowhere else to
+go, **so he believes the colony is far worse off than it is.** Every welfare
+measure he reports leans dark.
+
+Which sets up the thing that makes him difficult: **a PC who believes him
+overspends, and a PC who discounts him entirely misses the famine.** He is never
+lying — §9.1 holds — he simply sees the part of the town nobody else writes about.
+
+He also **objects**: to the ale house, to the guns, to whatever his conscience
+will not carry. So he is the first contact whose approval and whose usefulness
+pull in different directions.
+
+**The cathedral** widens what he can do.
 
 ### The quartermaster
 
@@ -137,7 +176,8 @@ PC who builds libraries pleases a Crown officer he has never paid.
 ## 4. What they have in common, and what that buys
 
 All four **want gold or goods, care about something the PC controls only
-indirectly, and can do one thing nothing else in the game does.**
+indirectly, carry a bias the player has to learn to discount, and can do one
+thing nothing else in the game does.**
 
 The last part is deliberate. An institutional contact whose capability duplicates
 an existing system is a letter that never needs answering. Each of these four is
@@ -163,6 +203,17 @@ why the theatre does not.
 
 ## 6. Open items
 
+- **Whether a contact's loyalty scaling his building's effect is the general
+  rule.** The clergy does it — his regard buys more of the church's perceived
+  safety. If that holds for all four it is an elegant pattern: the building gives
+  the effect, the man decides how much of it the town actually gets. If it holds
+  only for the clergy it should be said plainly, or a dev will infer the rule.
+- **Two things the clergy asks for that do not exist yet.** A **tax holiday** is a
+  rate lowered for a season rather than for good, which nothing in §10.2's
+  structure can express — and §10.2 locks that there are no per-town rates, so
+  relief he asks for is colony-wide on a resource whether he means it that way or
+  not. And a **pilgrim expedition** makes the clergy a founding source
+  (`founding-towns.md` §3) with rewards of its own.
 - **What a contact does at very low loyalty.** `contacts.md` §4 has the general
   answer, but these four each have an obvious betrayal — the journalist who turns
   on the PC in print is not the quartermaster who simply stops caring.
