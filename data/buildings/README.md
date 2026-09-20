@@ -24,6 +24,40 @@ data, and nothing in code names a building.
 | `build_speed` | Shortens later builds, as a share |
 | `defence` | M6 |
 | `converts` | Conversions the town can now perform |
+| `conversions` | **The terms of a conversion** — see below |
+
+## Conversions: two dials, not one
+
+A building does not multiply a conversion's output. It **defines that
+conversion's terms**, and the best building the town has for a recipe is the one
+that governs (#152).
+
+```json
+"conversions": {
+  "iron<-ore": { "ratio": 6.0, "throughput": 12.0 }
+}
+```
+
+| Dial | Meaning |
+| :--- | :--- |
+| `ratio` | Input per unit of output. **Lower is better** |
+| `throughput` | How much input one worker puts through in a month |
+
+They are independent on purpose. *Once you build a tool factory you are shipping
+it a great deal more iron than you were shipping to individual blacksmiths:
+consumption goes up and the ratio improves.* A single `yield_bonus` could only
+move both together, so it no longer applies to conversions at all — it is for
+tile yields.
+
+**Better means a lower ratio**; a tie goes to the one that puts more through, and
+then to the name, so the choice never depends on iteration order.
+
+## The town hall
+
+**Every town has one from the moment it is founded.** It is not built, not
+chosen and not optional, and it is what defines the eight base ratios. That is
+why the base case is not a special case in code: the rule is uniform, and an
+upgrade is simply a building that defines better terms.
 
 ## The fork
 

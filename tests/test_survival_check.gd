@@ -106,6 +106,11 @@ func _worked(harness: Dictionary) -> PackedStringArray:
 		if event.type == WorkPhase.EVENT_WORKED:
 			tiles = PackedStringArray(event.payload.get("tiles", []))
 	harness["seen"] = context.log.next_seq()
+	# **Which ground, not the order hands were put on it.** The payload lists
+	# tiles in assignment order, which is how the greedy allocation happened to
+	# reach them and means nothing to a player looking at the map. Churn is
+	# ground given up, and that is what `tools/balance.gd` counts too.
+	tiles.sort()
 	return tiles
 
 

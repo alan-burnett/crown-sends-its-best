@@ -108,7 +108,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		if inputs.is_empty():
 			continue
 		var monthly := mouths * ColonyNeeds.per_head(making)
-		var raw := monthly * ResourceCatalogue.input_per_unit_of(making) 			* (1.0 + ColonyNeeds.reserve_months(making))
+		var raw := monthly * Conversion.best_ratio(town, making) \
+			* (1.0 + ColonyNeeds.reserve_months(making))
 		for input in inputs:
 			reckoning.reserve[input] = maxf(reckoning.reserve_of(StringName(input)), raw)
 

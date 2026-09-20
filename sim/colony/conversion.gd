@@ -42,8 +42,13 @@ extends RefCounted
 var output: StringName = &""
 var input: StringName = &""
 
-## How much of the output one worker produces in a month, before experts and
-## buildings.
+## What one worker makes in a month, and what that consumes, **at the base terms
+## every town hall defines** (#152).
+##
+## A recipe exists because the catalogue says the output converts from the input.
+## What the exchange actually costs is the town's business, because it is a fact
+## about the building doing the work — so these two are the town hall's figures
+## and `made_by`/`consumes_for` are what anything with a town in hand should ask.
 var made: float = 0.0
 
 ## How much of the input that consumes.
@@ -53,12 +58,37 @@ var consumed: float = 0.0
 func _init(p_output: StringName = &"", p_input: StringName = &"") -> void:
 	output = p_output
 	input = p_input
-	made = ResourceCatalogue.per_worker_of(output)
-	consumed = made * ResourceCatalogue.input_per_unit_of(output)
+	var base := Building.find(Building.BASE)
+	var terms: Dictionary = {} if base == null else base.conversion_terms(id())
+	consumed = float(terms.get("throughput", 0.0))
+	made = consumed / maxf(0.0001, float(terms.get("ratio", 1.0)))
 
 
 func id() -> StringName:
 	return StringName("%s<-%s" % [output, input])
+
+
+## The best rate this town can turn anything into `output` at (#152).
+##
+## **One answer, because there used to be two.** The catalogue carries an
+## `input_per_unit` and the buildings now carry a ratio, and anything that asked
+## the catalogue was working from a different exchange rate than the town
+## actually gets — so Reckon would reserve furs for a bolt of cloth the loom
+## could not weave from them.
+##
+## Cloth comes from furs or cotton, so "best" is over the recipes for this
+## output: the town lays in raw for whichever it would actually use.
+static func best_ratio(town: Town, output: StringName) -> float:
+	var best := 0.0
+	for input in ResourceCatalogue.inputs_for(output):
+		var recipe := Conversion.new(output, StringName(input))
+		var made := recipe.made_by(town)
+		if made <= 0.0:
+			continue
+		var ratio := recipe.consumes_for(town) / made
+		if best <= 0.0 or ratio < best:
+			best = ratio
+	return best if best > 0.0 else ResourceCatalogue.input_per_unit_of(output)
 
 
 ## Every conversion the catalogue knows about, sorted by output then input.
@@ -80,11 +110,24 @@ static func all() -> Array:
 	return out
 
 
-## What this town would actually get from one worker on this recipe.
+## What this town puts through this recipe in a worker-month (#152).
+func consumes_for(town: Town) -> float:
+	var terms := Building.terms_for(town, id())
+	return consumed if terms.is_empty() else float(terms["throughput"])
+
+
+## And what it gets out of that.
 ##
 ## **Experts raise the yield of their resource including processed resources**
-## (SPEC §12.2), and so do the buildings that exist to make the thing — a smithy
-## smelts better iron. Both read the same way they do for tile work, so a town
-## does not have two different ideas of what an expert is worth.
+## (SPEC §12.2), and that is still a multiplier because it is a fact about the
+## people rather than about the terms.
+##
+## A building is not. It **defines** the exchange rather than improving on one,
+## so `yield_bonus` no longer touches a conversion — it would be raising output
+## while the input stayed fixed, which is the single dial #152 exists to split in
+## two.
 func made_by(town: Town) -> float:
-	return made * WorkPhase.expert_multiplier(town, output) * (1.0 + Building.yield_bonus_for(town, output))
+	var terms := Building.terms_for(town, id())
+	var out := made if terms.is_empty() \
+		else float(terms["throughput"]) / float(terms["ratio"])
+	return out * WorkPhase.expert_multiplier(town, output)

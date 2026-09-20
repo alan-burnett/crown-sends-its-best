@@ -115,6 +115,89 @@ func effect(name: String, fallback: Variant = 0.0) -> Variant:
 # Asked of the town rather than stored on it, so a building's effect cannot
 # drift out of step with whether the building is actually there.
 
+## The terms this building sets for a conversion, or empty.
+##
+## `{"ratio": input per unit of output, "throughput": input per worker-month}`.
+func conversion_terms(recipe: StringName) -> Dictionary:
+	var all: Dictionary = effect("conversions", {})
+	return all.get(String(recipe), {})
+
+
+## 🔒 **The best building the town has for a conversion sets its terms** (#152).
+##
+## ## A building defines a conversion; it does not multiply one
+##
+## This was a `yield_bonus` raising output while input stayed fixed, so
+## efficiency and throughput could only move together. They are different things:
+##
+## > Once you build a tool factory you are shipping it **a great deal more iron**
+## > than you were shipping to individual blacksmiths. **Consumption goes up and
+## > the ratio improves.**
+##
+## A bonus can say neither of those. Two dials can say both, and a building that
+## improves one without the other is authorable.
+##
+## ## And the base case is not a special case
+##
+## Every town has a **town hall** from the moment it is founded, and its job is to
+## define the eight base ratios. So there is no fallback branch in code for "a
+## town with no building for this" — the rule is uniform, and an upgrade is
+## simply a building that defines better terms.
+##
+## Better means a lower ratio; a tie goes to the one that puts more through, and
+## then to the name, so the choice never depends on iteration order.
+static func terms_for(town: Town, recipe: StringName) -> Dictionary:
+	var best: Dictionary = {}
+	var from := ""
+	if town != null:
+		var held := town.buildings.duplicate()
+		held.sort()
+		for id in held:
+			var building := find(StringName(id))
+			if building == null:
+				continue
+			var terms := building.conversion_terms(recipe)
+			if terms.is_empty():
+				continue
+			if best.is_empty() or _better(terms, best):
+				best = terms
+				from = id
+	if best.is_empty():
+		return {}
+	return {
+		"ratio": maxf(0.0001, float(best.get("ratio", 1.0))),
+		"throughput": maxf(0.0, float(best.get("throughput", 0.0))),
+		"from": from,
+	}
+
+
+static func _better(terms: Dictionary, than: Dictionary) -> bool:
+	var ratio := float(terms.get("ratio", 1.0))
+	var beaten := float(than.get("ratio", 1.0))
+	if not is_equal_approx(ratio, beaten):
+		return ratio < beaten
+	return float(terms.get("throughput", 0.0)) > float(than.get("throughput", 0.0))
+
+
+## Whether the town has something better than its town hall for a conversion.
+##
+## **What "it has a use for this" means** now that a bonus no longer says it
+## (`desired_stock.gd`). A loom makes furs worth having in a way they are not in
+## a town without one.
+static func improves_conversion(town: Town, recipe: StringName) -> bool:
+	var terms := terms_for(town, recipe)
+	return not terms.is_empty() and String(terms.get("from", "")) != String(BASE)
+
+
+## The building every town has from the moment it is founded (#152).
+##
+## It is not built, not chosen and not optional. Its job is to define the base
+## conversion terms, so that the base case is a building like any other rather
+## than a branch in code. The Author notes it "will come in handy in other
+## ways", so it is the natural anchor for future town-wide effects.
+const BASE: StringName = &"town_hall"
+
+
 ## How much this town's production of a resource is raised by what it has built.
 static func yield_bonus_for(town: Town, resource: StringName) -> float:
 	var bonus := 0.0

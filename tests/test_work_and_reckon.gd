@@ -119,14 +119,42 @@ func test_a_town_short_of_food_prioritises_food_over_its_objective() -> void:
 
 
 func test_experts_raise_the_yield_of_their_resource() -> void:
+	# SPEC §12.2, asked of the tile rather than of the stockpile.
+	#
+	# **It used to be asked of the stockpile and that stopped being the right
+	# question** (#135). A town works its ground until what it would add is worth
+	# less than the next thing, so a food expert makes it reach the grain it wants
+	# *a tile sooner* and puts that hand in the forest. On this fixture the skilled
+	# town ends the month with 17.5 grain against 19 and half again as much of
+	# everything else — better off, and holding less of the thing its expert is
+	# expert in.
+	#
+	# That is the allocation working. What SPEC §12.2 actually claims is about the
+	# tile, so that is what is asserted here, and the total is asserted beside it
+	# so a change that made an expert worthless would still be caught.
+	var harness := _harness(4)
+	var town: Town = harness["town"]
+	var bare := WorkPhase.expert_multiplier(town, &"food")
+	town.add_experts(&"food", 1)
+	assert_true(WorkPhase.expert_multiplier(town, &"food") > bare,
+		"an expert did not raise what his ground gives")
+
 	var plain := _harness(4)
 	_run_month(plain)
-
 	var skilled := _harness(4)
 	skilled["town"].add_experts(&"food", 1)
 	_run_month(skilled)
 
-	assert_true(skilled["town"].held(&"food") > plain["town"].held(&"food"))
+	assert_true(_produced(skilled["town"]) > _produced(plain["town"]),
+		"a town with an expert had no more to show for the month than one without")
+
+
+## Everything a town holds, at what the Crown would pay for it.
+func _produced(town: Town) -> float:
+	var total := 0.0
+	for resource in ResourceCatalogue.ids():
+		total += town.held(StringName(resource)) * ResourceCatalogue.price_of(StringName(resource))
+	return total
 
 
 func test_stacking_experts_has_diminishing_returns() -> void:

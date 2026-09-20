@@ -136,7 +136,7 @@ static func for_town(town: Town, before: ColonySnapshot) -> DesiredStock:
 		var short := clampf((want - before.held(town.id, id)) / maxf(want, 1.0), 0.0, 1.0)
 		if short <= 0.0:
 			continue
-		var raw := monthly * ResourceCatalogue.input_per_unit_of(id) \
+		var raw := monthly * Conversion.best_ratio(town, id) \
 			* (1.0 + ColonyNeeds.reserve_months(id)) * short
 		for input in inputs:
 			desired._want(StringName(input), raw, REACH_NEED)
@@ -160,8 +160,8 @@ static func for_town(town: Town, before: ColonySnapshot) -> DesiredStock:
 	# having in a way they are not in a town without one, and that is a fact about
 	# the building rather than about furs.
 	for recipe in Conversion.all():
-		if Building.yield_bonus_for(town, recipe.output) <= 0.0:
+		if not Building.improves_conversion(town, recipe.id()):
 			continue
-		desired._want(recipe.input, recipe.consumed * USE_MONTHS, REACH_USE)
+		desired._want(recipe.input, recipe.consumes_for(town) * USE_MONTHS, REACH_USE)
 
 	return desired
