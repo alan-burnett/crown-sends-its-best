@@ -134,8 +134,8 @@ as a side effect.
 | **stonecutters** | 20 wood, 20 iron | medium | More stone | — |
 | **sawmill** | 20 stone, 20 iron | medium | More wood | — |
 | **mineworks** | 20 wood, 20 stone | medium | More ore | — |
-| **library** | 30 wood, 10 stone | medium | Amusement. **Experts here generate more experts.** Brings a contact who wants them spread about the colony | theatre |
-| **college** | 50 wood, 30 stone, 20 iron | **high** | **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three | library |
+| **library** | 30 wood, 10 stone | medium | Amusement. **Turns resident experts into education**, so experts here generate more experts. Brings a contact who wants them spread about the colony | theatre |
+| **college** | 50 wood, 30 stone, 20 iron | **high** | **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
 
 Stonecutters and sawmill each cost the resource the other produces, which makes
 them a natural pair rather than a choice.

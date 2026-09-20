@@ -62,9 +62,20 @@ advice on how they are doing.
 
 **A town attribute**, like quality of life — not a colony one.
 
-It is raised by buildings — the **library** and **college** most directly, with
-the **theatre** and **printing press** alongside them (`buildings.md`) — and by
-the **curriculum** policy, which raises every town's a little for very little.
+Three things raise it:
+
+- **Buildings** — the **theatre** and **printing press** contribute, and the
+  **library** and **college** do something more than contribute (below).
+- **The curriculum policy**, which raises every town's a little for very little.
+- **Resident experts, but only through a library.** An expert in an unlettered
+  town teaches nobody. Give the town a library and **his presence becomes
+  education**, which is the mechanism behind that building's promise that experts
+  there generate more experts. A **college** extends it to the experts it counts
+  from elsewhere (`buildings.md`).
+
+That last one is the compounding engine: **a library turns expertise into more
+expertise**, and a town that gets its first scholar finds the second easier. It
+is also why the library is expensive and why it sits where it does in the tree.
 
 It does one thing: **it sets how likely growth is to arrive as an expert rather
 than a worker.** A learned town turns its growth into expertise; an ignorant one
@@ -79,6 +90,16 @@ expert of its own — no schooling, no scholars.
 Provost's expert knob, and special events may deliver one. So an unlettered town
 is not shut out of expertise; it simply cannot generate any, and must be sent
 what it gets.
+
+### There is no schoolhouse to build
+
+**Every town already teaches its children**, however poor it is — they gather
+them in a shack and find somebody to stand in front of them. Schooling is
+universal, free, and on its own worth almost nothing.
+
+That is why **curriculum needs no building and reaches every town**: there is
+always somewhere to send the books. What a town lacks is not a schoolroom but
+anything worth teaching in it — materials, or scholars, or an institution.
 
 ## 4. How an expert actually appears
 
@@ -189,13 +210,6 @@ firmer duty: a real opinion, honestly held, and reliably self-serving.
 
 ## 10. Open items
 
-- **Whether resident experts raise education**, so that learning compounds and a
-  town that gets one scholar finds the next easier. Buildings and curriculum are
-  the stated sources; nothing says a town's own learned men teach anybody.
-- **Whether a schoolhouse is a building.** Curriculum supplies "the schoolhouses
-  throughout the colony," and the tree has a library and a college but nothing
-  smaller. Either the phrase is flavour, or there is a cheap building missing
-  from the bottom of the comfort branch.
 - **Four knobs in one letter, against SPEC §9.2's target of under a minute.** The
   first Provost letter asks for four decisions at once. That is probably still
   one minute if each reads as a single line, but it is the densest letter in the
