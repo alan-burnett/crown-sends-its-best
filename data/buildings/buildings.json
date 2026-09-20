@@ -2,7 +2,6 @@
   {
     "id": "town_hall",
     "name": "the town hall",
-    "months": 0,
     "cost": {},
     "effects": {
       "quality_of_life": 0.5,
@@ -41,19 +40,20 @@
   {
     "id": "storehouse",
     "name": "a storehouse",
-    "months": 2,
     "cost": {
       "wood": 30
     },
     "effects": {
-      "reserve_months": 1,
+      "reserve_months": {
+        "food": 1,
+        "wood": 1
+      },
       "quality_of_life": 0.5
     }
   },
   {
     "id": "palisade",
     "name": "a palisade",
-    "months": 2,
     "cost": {
       "wood": 40
     },
@@ -68,7 +68,6 @@
     "requires": [
       "storehouse"
     ],
-    "months": 2,
     "cost": {
       "wood": 25
     },
@@ -83,7 +82,6 @@
     "requires": [
       "storehouse"
     ],
-    "months": 3,
     "cost": {
       "wood": 40,
       "tools": 6
@@ -100,7 +98,6 @@
     "requires": [
       "storehouse"
     ],
-    "months": 3,
     "cost": {
       "wood": 30,
       "tools": 8
@@ -118,7 +115,6 @@
     "requires": [
       "sawmill"
     ],
-    "months": 3,
     "cost": {
       "wood": 60,
       "stone": 20
@@ -134,13 +130,14 @@
     "requires": [
       "storehouse"
     ],
-    "months": 3,
     "cost": {
       "wood": 40,
       "stone": 20
     },
     "effects": {
-      "reserve_months": 2,
+      "reserve_months": {
+        "food": 2
+      },
       "quality_of_life": 1.0
     }
   },
@@ -150,7 +147,6 @@
     "requires": [
       "quarry_works"
     ],
-    "months": 4,
     "cost": {
       "stone": 40,
       "wood": 20,
@@ -170,6 +166,10 @@
           "ratio": 2.0,
           "throughput": 3.0
         }
+      },
+      "reserve_months": {
+        "ore": 2,
+        "iron": 1
       }
     }
   },
@@ -179,7 +179,6 @@
     "requires": [
       "storehouse"
     ],
-    "months": 4,
     "cost": {
       "stone": 50,
       "wood": 30
@@ -195,7 +194,6 @@
     "requires": [
       "gunsmith"
     ],
-    "months": 4,
     "cost": {
       "stone": 40,
       "iron": 20,
@@ -208,6 +206,10 @@
           "ratio": 2.0,
           "throughput": 3.0
         }
+      },
+      "reserve_months": {
+        "iron": 2,
+        "guns": 2
       }
     },
     "grants_contact": "quartermaster"
@@ -218,7 +220,6 @@
     "requires": [
       "granary"
     ],
-    "months": 2,
     "cost": {
       "wood": 30,
       "stone": 10
@@ -230,6 +231,9 @@
           "ratio": 3.0,
           "throughput": 16.0
         }
+      },
+      "reserve_months": {
+        "food": 2
       }
     }
   },
@@ -239,7 +243,6 @@
     "requires": [
       "storehouse"
     ],
-    "months": 3,
     "cost": {
       "wood": 35,
       "tools": 6
@@ -254,6 +257,10 @@
           "ratio": 3.5,
           "throughput": 7.0
         }
+      },
+      "reserve_months": {
+        "furs": 2,
+        "cotton": 2
       }
     }
   },
@@ -263,7 +270,6 @@
     "requires": [
       "storehouse"
     ],
-    "months": 3,
     "cost": {
       "wood": 30,
       "stone": 15,
@@ -276,6 +282,9 @@
           "ratio": 6.0,
           "throughput": 6.0
         }
+      },
+      "reserve_months": {
+        "sugar": 2
       }
     }
   },
@@ -285,7 +294,6 @@
     "requires": [
       "storehouse"
     ],
-    "months": 2,
     "cost": {
       "wood": 25,
       "tools": 4
@@ -297,6 +305,9 @@
           "ratio": 2.0,
           "throughput": 5.0
         }
+      },
+      "reserve_months": {
+        "tobacco": 2
       }
     }
   },
@@ -306,7 +317,6 @@
     "requires": [
       "smithy"
     ],
-    "months": 3,
     "cost": {
       "stone": 25,
       "wood": 20,
@@ -318,6 +328,9 @@
           "ratio": 3.0,
           "throughput": 2.0
         }
+      },
+      "reserve_months": {
+        "iron": 2
       }
     },
     "grants_contact": "gunsmith"

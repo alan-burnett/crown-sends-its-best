@@ -92,10 +92,21 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 
 	# Reserve: months of need held back before anything is sold, plus whatever
 	# the town's storehouses let it keep.
-	var extra_months := Building.reserve_months_for(town)
 	for resource in ColonyNeeds.needed_resources():
 		var monthly := mouths * ColonyNeeds.per_head(StringName(resource))
-		reckoning.reserve[resource] = monthly * (ColonyNeeds.reserve_months(StringName(resource)) + extra_months)
+		var extra_months := Building.reserve_months_for(town, StringName(resource))
+		reckoning.reserve[resource] = monthly 			* (ColonyNeeds.reserve_months(StringName(resource)) + extra_months)
+
+	# **What the town's buildings want laid in, by name** (#148). A weavers' loom
+	# is a reason to hold cotton back from Sell; a granary is a reason to hold
+	# grain. Blanket months held back guns and rum as readily as grain, which only
+	# made the town trade less.
+	for resource in Building.reserved_resources(town):
+		var id := StringName(resource)
+		reckoning.reserve[resource] = maxf(
+			reckoning.reserve_of(id),
+			DesiredStock.monthly_draw(town, id, mouths) * Building.reserve_months_for(town, id),
+		)
 
 	# **A need's reserve extends to what the need is made of** (#64). Clothing is
 	# woven from furs, so a town that sold every fur it trapped would stand at an

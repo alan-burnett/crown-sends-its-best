@@ -108,7 +108,10 @@ static func candidates(town: Town, context: ColonyContext, intent: StringName = 
 		out.append({
 			"id": StringName(id),
 			"target": Vector2i(-1, -1),
-			"score": _scored(_building_axes(StringName(id)), intent, Building.find(StringName(id)).months),
+			"score": _scored(
+				_building_axes(StringName(id)), intent,
+				_months_for(town, Building.find(StringName(id)).cost),
+			),
 		})
 
 	for id in Improvement.ids():
@@ -123,7 +126,7 @@ static func candidates(town: Town, context: ColonyContext, intent: StringName = 
 		out.append({
 			"id": StringName(id),
 			"target": sited["at"],
-			"score": _scored(sited["axes"], intent, improvement.months),
+			"score": _scored(sited["axes"], intent, _months_for(town, improvement.cost)),
 		})
 
 	for id in Objective.posture_ids():
@@ -146,6 +149,19 @@ static func _scored(axes: Dictionary, intent: StringName, months: int) -> float:
 	for axis in GovernorIntent.AXES:
 		total += float(axes.get(axis, 0.0)) * GovernorIntent.value_of(intent, axis)
 	return total / (1.0 + COST_PENALTY * float(maxi(0, months - 1)))
+
+
+## How long this town would take over a thing costing this (#148).
+##
+## **Derived, never stored.** A building authors one number — its cost — and the
+## schedule falls out of the town that is building it, so a large town really is
+## quicker and the governor's preference for a short project means something
+## different in a big town than a small one.
+static func _months_for(town: Town, cost: Dictionary) -> int:
+	var total := 0.0
+	for resource in cost:
+		total += float(cost[resource])
+	return maxi(1, int(ceil(total / maxf(0.001, Objective.build_capacity(town)))))
 
 
 ## What a building is good for, read out of its effects rather than its name.
@@ -171,8 +187,15 @@ static func _building_axes(id: StringName) -> Dictionary:
 
 	axes["defence"] = float(building.effect("defence", 0.0)) * 0.5
 	axes["comfort"] = float(building.effect("quality_of_life", 0.0)) * 0.5
+	# **A reserve is per-resource now** (#148). Read as a float this silently
+	# became zero the month the effect turned into a dictionary, and a governor
+	# stopped being able to want a granary for the reason a granary exists.
+	var reserved := 0.0
+	for resource in building.effect("reserve_months", {}):
+		reserved += float(building.effect("reserve_months", {})[resource])
+
 	axes["capacity"] = (
-		float(building.effect("reserve_months", 0.0)) * 0.5
+		reserved * 0.5
 		+ float(building.effect("pasture", 0)) * 0.03
 		+ float(building.effect("build_speed", 0.0)) * 0.5
 	)

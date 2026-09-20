@@ -252,24 +252,60 @@ static func materials_complete(town: Town) -> bool:
 	return outstanding(town).is_empty()
 
 
-## How many months of labour this build takes for this town.
+## How much a town can put into construction in a month (#148).
 ##
-## A carpenters' hall makes every build faster, which is the point of having one.
-static func months_required(town: Town) -> int:
-	if not completes(town.objective):
-		return 0
-	var months := 1
-	match kind_of(town.objective):
-		CONSTRUCTION:
-			months = Building.find(town.objective).months
-		IMPROVEMENT:
-			months = Improvement.find(town.objective).months
+## **Resources per month, from the people who carry them.** A large town raises a
+## granary in a month; a small one takes an age over the same structure. Nothing
+## has to be re-tuned when a cost changes, because the cost *is* the schedule.
+##
+## `build_speed` multiplies it, which is what a carpenters' hall is for.
+##
+## **Chosen to reproduce the doc's own worked example** — *"a granary costing 40
+## wood and 20 stone is 60 resources; a town with a capacity of 30 builds it in
+## exactly two months"* — which for a town of fourteen means about two per head.
+##
+## It is the one number in #148 that is tuning rather than mechanism, and it
+## moves a great deal: across 12 seeds and five years, 0.8 gives mean rebel
+## sentiment 0.48 and standing 26.3, while 2.5 gives 3.99 and 23.0. Towns that
+## can build do build, and `RebelSentiment` makes prosperity breed the thing that
+## destroys it. Raising or lowering this is a one-line change and the Author's.
+const CAPACITY_PER_HEAD: float = 2.0
+
+
+static func build_capacity(town: Town) -> float:
 	var speed := 0.0
 	for id in town.buildings:
 		var standing := Building.find(StringName(id))
 		if standing != null:
 			speed += float(standing.effect("build_speed", 0.0))
-	return maxi(1, int(ceil(float(months) / (1.0 + maxf(0.0, speed)))))
+	return maxf(1.0, float(town.population())) * CAPACITY_PER_HEAD * (1.0 + maxf(0.0, speed))
+
+
+## What a build costs altogether, in resources.
+static func total_cost(town: Town) -> float:
+	var total := 0.0
+	for resource in costed_resources(town):
+		total += cost_of(town, StringName(resource))
+	return total
+
+
+## 🔒 **How long this build takes, derived rather than authored** (#148).
+##
+## ## The materials are the time
+##
+## A building used to author a `months` figure beside its cost and the two had to
+## be kept plausible against each other by hand — a cost could be doubled and the
+## duration left alone, and nothing would notice. One authored number instead,
+## and they can no longer disagree.
+##
+## It also collapses two gates into one. A construction used to need its
+## materials gathered *and* its months elapsed; now materials are consumed into
+## the work at the capacity rate, so stalling is a single condition: the town
+## cannot get the resources, or has no capacity.
+static func months_required(town: Town) -> int:
+	if not completes(town.objective):
+		return 0
+	return maxi(1, int(ceil(total_cost(town) / maxf(0.001, build_capacity(town)))))
 
 
 ## How far along, as `0.0` to `1.0`.
@@ -290,7 +326,7 @@ static func progress_fraction(town: Town) -> float:
 		invested += minf(needed, town.invested(StringName(resource)))
 	var materials := 1.0 if required <= 0.0 else invested / required
 
-	var months := float(months_required(town))
-	var laboured := 0.0 if months <= 0.0 else minf(1.0, float(town.objective_progress) / months)
-
-	return clampf(0.5 * materials + 0.5 * laboured, 0.0, 1.0)
+	# **The materials are the time** (#148), so there is no second half to weigh
+	# against them any more. "The church is half raised" means half its stone is
+	# in the frame, which is the thing a governor could actually see.
+	return clampf(materials, 0.0, 1.0)

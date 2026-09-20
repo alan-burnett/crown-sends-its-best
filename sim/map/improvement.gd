@@ -43,8 +43,6 @@ var natural: bool = false
 ## Resource id -> how much raising it costs the town (#49, #53).
 var cost: Dictionary = {}
 
-## How long it takes once the materials are there.
-var months: int = 1
 
 
 # --- Loading ---------------------------------------------------------------
@@ -66,7 +64,6 @@ static func load_from(records: Array) -> void:
 		improvement.livestock_capacity = JsonTypes.to_int(record.get("livestock_capacity", 0), "livestock_capacity")
 		improvement.natural = bool(record.get("natural", false))
 		improvement.cost = record.get("cost", {}).duplicate()
-		improvement.months = maxi(1, JsonTypes.to_int(record.get("months", 1), "months"))
 		_improvements[String(improvement.id)] = improvement
 
 
@@ -157,5 +154,4 @@ func to_dict() -> Dictionary:
 		"livestock_capacity": livestock_capacity,
 		"natural": natural,
 		"cost": cost.duplicate(),
-		"months": months,
 	}

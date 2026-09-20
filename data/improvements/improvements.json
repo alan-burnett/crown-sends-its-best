@@ -24,8 +24,7 @@
     ],
     "cost": {
       "wood": 12
-    },
-    "months": 2
+    }
   },
   {
     "id": "pasture",
@@ -48,8 +47,7 @@
     ],
     "cost": {
       "wood": 10
-    },
-    "months": 2
+    }
   },
   {
     "id": "plantation_sugar",
@@ -75,8 +73,7 @@
     "cost": {
       "wood": 18,
       "tools": 2
-    },
-    "months": 3
+    }
   },
   {
     "id": "plantation_cotton",
@@ -102,8 +99,7 @@
     "cost": {
       "wood": 18,
       "tools": 2
-    },
-    "months": 3
+    }
   },
   {
     "id": "plantation_tobacco",
@@ -129,8 +125,7 @@
     "cost": {
       "wood": 18,
       "tools": 2
-    },
-    "months": 3
+    }
   },
   {
     "id": "mine",
@@ -159,8 +154,7 @@
     "cost": {
       "wood": 20,
       "tools": 4
-    },
-    "months": 3
+    }
   },
   {
     "id": "road",
@@ -178,8 +172,7 @@
       "forest",
       "desert",
       "mountains"
-    ],
-    "months": 1
+    ]
   },
   {
     "id": "fort",
@@ -197,7 +190,6 @@
     "cost": {
       "wood": 30,
       "stone": 20
-    },
-    "months": 3
+    }
   }
 ]

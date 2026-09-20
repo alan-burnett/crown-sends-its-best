@@ -231,8 +231,19 @@ static func _quality(town: Town) -> float:
 
 
 ## What the town has to lose, and the means to act on it.
+##
+## **What it chose to build**, so the town hall does not count. Every town has
+## one from the moment it is founded (#152), and a thing every town has is not a
+## mark of prosperity — counting it added a constant to every town in the colony
+## the month the town hall was introduced, which is exactly the sort of silent
+## shift a building that is "not built, not chosen and not optional" should never
+## cause.
 static func _development(town: Town) -> float:
-	var built := float(town.buildings.size()) * DEVELOPMENT_PER_BUILDING
+	var chosen := 0
+	for id in town.buildings:
+		if StringName(id) != Building.BASE:
+			chosen += 1
+	var built := float(chosen) * DEVELOPMENT_PER_BUILDING
 	var traded := town.traded_value * DEVELOPMENT_PER_TRADE
 	return minf(DEVELOPMENT_CEILING, built + traded)
 

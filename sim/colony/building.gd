@@ -15,8 +15,6 @@ var display_name: String = ""
 ## Buildings that must already stand. **All of them**, not any.
 var requires: PackedStringArray = PackedStringArray()
 
-## How long it takes once the resources are there.
-var months: int = 1
 
 ## Resource id -> how much the Build phase consumes (#49).
 var cost: Dictionary = {}
@@ -40,7 +38,6 @@ static func load_from(records: Array) -> void:
 			continue
 		building.display_name = String(record.get("name", record.get("id", "")))
 		building.requires = PackedStringArray(record.get("requires", []))
-		building.months = maxi(1, JsonTypes.to_int(record.get("months", 1), "months"))
 		building.cost = record.get("cost", {}).duplicate()
 		building.effects = record.get("effects", {}).duplicate()
 		building.grants_contact = String(record.get("grants_contact", ""))
@@ -240,13 +237,29 @@ static func yield_bonus_for(town: Town, resource: StringName) -> float:
 
 
 ## Extra months of need a town holds back, on top of the data's baseline.
-static func reserve_months_for(town: Town) -> float:
+static func reserve_months_for(town: Town, resource: StringName) -> float:
 	var months_held := 0.0
 	for id in town.buildings:
 		var building := find(StringName(id))
-		if building != null:
-			months_held += float(building.effect("reserve_months", 0.0))
+		if building == null:
+			continue
+		var months: Dictionary = building.effect("reserve_months", {})
+		months_held += float(months.get(String(resource), 0.0))
 	return months_held
+
+
+## Every resource this town's buildings want laid in, sorted (#148).
+static func reserved_resources(town: Town) -> PackedStringArray:
+	var out: Dictionary = {}
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building == null:
+			continue
+		for resource in building.effect("reserve_months", {}):
+			out[String(resource)] = true
+	var sorted: PackedStringArray = PackedStringArray(out.keys())
+	sorted.sort()
+	return sorted
 
 
 ## How many head this town's buildings can graze.
@@ -277,7 +290,6 @@ func to_dict() -> Dictionary:
 		"id": String(id),
 		"name": display_name,
 		"requires": requires.duplicate(),
-		"months": months,
 		"cost": cost.duplicate(),
 		"effects": effects.duplicate(),
 		"grants_contact": grants_contact,
