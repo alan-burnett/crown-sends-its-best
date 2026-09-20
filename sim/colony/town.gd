@@ -54,6 +54,13 @@ var dark_buildings: PackedStringArray = PackedStringArray()
 ## a different answer halfway through a month, and two readers would disagree.
 var quality_of_life: float = 0.0
 
+## What the town has worth teaching (#168, `the-provost.md` §3).
+##
+## **Stored and updated in Settle**, for the same reason quality of life is. It
+## does exactly one thing: it sets how likely growth is to arrive as an expert
+## rather than a worker.
+var education: float = 0.0
+
 ## How close the town is to deciding it would be better off without the Crown
 ## (#71). Written by Settle each month; see `RebelSentiment`.
 ##
@@ -214,7 +221,12 @@ func add_livestock(kind: StringName, head: int) -> void:
 
 
 func population() -> int:
-	var total := workers
+	return workers + expert_total()
+
+
+## Everybody in the town who is expert in something.
+func expert_total() -> int:
+	var total := 0
 	for resource in experts:
 		total += int(experts[resource])
 	return total
@@ -335,6 +347,7 @@ func to_dict() -> Dictionary:
 		"buildings": buildings.duplicate(),
 		"dark_buildings": dark_buildings.duplicate(),
 		"quality_of_life": quality_of_life,
+		"education": education,
 		"rebel_sentiment": rebel_sentiment,
 		"growth_accrued": growth_accrued,
 		"traded_value": traded_value,
@@ -374,6 +387,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.buildings = PackedStringArray(data.get("buildings", []))
 	town.dark_buildings = PackedStringArray(data.get("dark_buildings", []))
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
+	town.education = float(data.get("education", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))
 	town.rebelling_since = int(data.get("rebelling_since", -1))
 	town.embargo_months = int(data.get("embargo_months", 0))

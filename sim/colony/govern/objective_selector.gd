@@ -164,6 +164,16 @@ static func _months_for(town: Town, cost: Dictionary) -> int:
 	return maxi(1, int(ceil(total / maxf(0.001, Objective.build_capacity(town)))))
 
 
+## How many scholars a governor imagines his town might hold.
+##
+## **A library is worth nothing to a town with no experts and a great deal to one
+## with several**, and the selector cannot know which this town will become. So
+## it prices the building on a plausible few rather than on today's count, which
+## is the difference between a tree a town can grow into and one it can only ever
+## react to. Tuning.
+const EXPERTS_A_TOWN_MIGHT_HOLD: float = 3.0
+
+
 ## What entertaining the whole town is worth beside a point of quality of life.
 ##
 ## Amusement is a share of the population rather than a flat figure, so it needs
@@ -227,8 +237,19 @@ static func _building_axes(id: StringName) -> Dictionary:
 	for resource in building.effect("reserve_months", {}):
 		reserved += float(building.effect("reserve_months", {})[resource])
 
+	# **Education is capacity** (#168). It decides whether a town's growth arrives
+	# as expertise or as hands, which is a fact about what the town will be able
+	# to do — and a governor who wants his people to amount to something can want
+	# a library for that reason without anything here knowing what a library is.
+	var learning := (
+		float(building.effect("education", 0.0))
+		+ float(building.effect("education_per_expert", 0.0)) * EXPERTS_A_TOWN_MIGHT_HOLD
+		+ float(building.effect("counts_distant_experts", 0.0)) * EXPERTS_A_TOWN_MIGHT_HOLD
+	)
+
 	axes["capacity"] = (
-		reserved * 0.5
+		learning * 0.4
+		+ reserved * 0.5
 		+ float(building.effect("pasture", 0)) * 0.03
 		+ float(building.effect("build_speed", 0.0)) * 0.5
 	)
