@@ -149,10 +149,11 @@ merely resent.
 One number per town per resource, recomputed every month.
 
 ```
-valuation(resource)  =  worth  +  need
+valuation(resource)  =  base  +  need
 
-worth  =  what it fetches from the Crown after duty
-          — what the town could sell it for
+base   =  what the resource is worth to this town in itself.
+          **An authored figure, independent of the Crown's price** — this is
+          the town's entry in §1's dictionary
 
 need   =  how far below desired stock the town is, where
 
@@ -164,11 +165,22 @@ need   =  how far below desired stock the town is, where
 
 **Both halves are necessary and they add rather than multiply.**
 
-Without **worth**, a town holding all the furs it needs values furs at nothing,
+Without **base**, a town holding all the furs it needs values furs at nothing,
 stops working fur tiles, and can never produce for export. Specialisation would
 be impossible.
 
 Without **need**, a town pursues whatever is dearest and ignores its own orders.
+
+**`base` must be its own authored table, not a multiple of the Crown's price.**
+Derive it and the gap between town and Crown becomes a function of shortfall
+alone — every surplus sells and every shortage buys, whatever the resource, and
+lumber behaves exactly like furs. §1's table, where lumber trades in neither
+direction because both sides value it alike, cannot fall out of a derived figure.
+It needs two independent numbers.
+
+Deriving it also breaks trade outright: if `base` were what the Crown pays, then
+valuation is **always at least** the Crown's price, and the sell rule below — sell
+when valuation is under what the Crown pays after duty — could never fire once.
 
 And they **add**, because they are different quantities. An objective wanting
 forty wood wants forty wood; it does not want it three times as much on account
@@ -298,17 +310,30 @@ score(tile) = sum over resources of  yield × valuation(resource)
 **That is the whole rule.** No separate objective multiplier and no hunger
 weight — §3 folded both into valuation. Ties break by a rule fixed by the seed.
 
-Because valuation carries **worth**, this one score also ranks tiles against
+Because valuation carries **base**, this one score also ranks tiles against
 **conversion recipes** in a single list. A recipe always consumes more than it
 makes, so without a common unit every conversion reads as a loss; worth is that
 unit.
 
-A town that cannot close its food gap should reach a **stable assignment and go
-hungry**, not thrash. Valuation is recomputed monthly rather than chased within a
-month, which is what gives it the stopping property.
+### The survival swap stays
+
+Valuation sets the **ranking**. It does not set a **bound**, and those are
+different jobs.
+
+A town short of food values food highly, which is preference. It says nothing
+about when to stop moving hands — and a need term that rises and falls as a
+granary fills is exactly what churned the workforce before #116 replaced it with
+a post-scoring swap that has an explicit stop.
+
+So the swap survives: move a hand onto the shortfall while it helps, and **when
+no move helps, accept the deficit.** It is a no-op whenever valuation is already
+producing a sensible assignment, and a bounded correction when it is not.
+
+A town that cannot close its food gap therefore reaches a **stable assignment and
+goes hungry**, rather than thrashing.
 
 There is **no penalty for producing a surplus of something sellable**, and the
-`worth` half of valuation is what makes that true. Sell disposes of everything
+`base` half of valuation is what makes that true. Sell disposes of everything
 above reserve every month, so surplus becomes gold, and specialisation is how a
 town gets rich. The exception is a town that cannot sell
 — under protest, or in rebellion — where the specialty genuinely rots in the
