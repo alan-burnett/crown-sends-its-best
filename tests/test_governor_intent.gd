@@ -339,26 +339,39 @@ func test_a_project_is_chosen_carried_and_completed() -> void:
 		"eight months and a full granary finished nothing at all")
 
 
-func test_a_standing_posture_can_win_the_board() -> void:
-	# **Both kinds of objective have to work**, or governors only ever write
-	# about construction. Settling a new town is the clearest case: founding one
-	# is M4, but gathering the expedition's stores is something a town can do
-	# now, and no building on the board serves that goal at all.
+func test_something_other_than_a_building_can_win_the_board() -> void:
+	# **Every kind of objective has to be able to win**, or governors only ever
+	# write about construction.
+	#
+	# Settling used to be the posture case here, because gathering an
+	# expedition's stores was something a town could do and founding was not.
+	# It is a **project** since #175 — it has a target and it completes — so the
+	# posture case is a town told to stockpile instead.
+	# **Large enough to spare anybody.** A town of eight cannot send four people
+	# and keep a town behind, so the expedition is not on its board at all — which
+	# is the rule working, and would have made this test about the wrong thing.
 	var town := _town()
+	town.workers = 24
 	var harness := _harness(town)
-	var chosen := ObjectiveSelector.choose(town, GovernorIntent.SETTLEMENT, harness["context"])
+	assert_true(Expedition.may_launch(town), "the fixture town cannot mount an expedition")
 
-	assert_true(Objective.is_posture(StringName(chosen["id"])),
-		"a governor set on settling chose to build '%s'" % chosen["id"])
-	assert_eq(chosen["target"], Vector2i(-1, -1), "a posture was given a tile")
+	var settling := ObjectiveSelector.choose(town, GovernorIntent.SETTLEMENT, harness["context"])
+	assert_false(Building.has(StringName(settling["id"])),
+		"a governor set on settling chose to build '%s'" % settling["id"])
+	assert_eq(settling["target"], Vector2i(-1, -1), "a project without a tile was given one")
+
+	var surviving := ObjectiveSelector.choose(town, GovernorIntent.SURVIVAL, harness["context"])
+	assert_true(Objective.is_posture(StringName(surviving["id"]))
+			or Building.has(StringName(surviving["id"])),
+		"a governor set on survival wanted '%s', which is neither" % surviving["id"])
 
 
 func test_a_posture_neither_completes_nor_stalls() -> void:
 	# It stands until the intent it serves changes, which is what makes it a
 	# posture rather than a project nobody finishes.
-	var town := _town(GovernorIntent.SETTLEMENT)
-	town.objective = &"amass_expedition"
-	town.objective_intent = GovernorIntent.SETTLEMENT
+	var town := _town(GovernorIntent.SURVIVAL)
+	town.objective = &"stockpile_food"
+	town.objective_intent = GovernorIntent.SURVIVAL
 	town.objective_idle_months = 99
 	var harness := _harness(town)
 

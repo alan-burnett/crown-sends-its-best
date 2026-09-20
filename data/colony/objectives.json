@@ -28,14 +28,6 @@
       "focus": [
         "furs"
       ]
-    },
-    {
-      "id": "amass_expedition",
-      "name": "gathering an expedition's supplies",
-      "focus": [
-        "food",
-        "tools"
-      ]
     }
   ],
   "intents": [
@@ -99,6 +91,12 @@
         "food": 2.5,
         "stone": 1.2
       }
+    }
+  ],
+  "expeditions": [
+    {
+      "id": "amass_expedition",
+      "name": "gathering an expedition's supplies"
     }
   ]
 }

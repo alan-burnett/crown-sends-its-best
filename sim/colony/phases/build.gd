@@ -111,7 +111,11 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 		"months_required": required,
 	}
 
-	if kind == Objective.IMPROVEMENT:
+	if kind == Objective.EXPEDITION:
+		# **It leaves.** The people, the cargo and the matching share of the
+		# purse go with it; where it goes is #176's business.
+		Expedition.launch(town, context)
+	elif kind == Objective.IMPROVEMENT:
 		if context.map == null or not context.map.can_build(at.x, at.y, finished):
 			# The ground changed under it. Nothing is refunded, because the work
 			# was really done; the objective simply has nowhere to land.

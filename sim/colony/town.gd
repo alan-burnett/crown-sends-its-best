@@ -140,6 +140,14 @@ var objective_idle_months: int = 0
 ## Months of labour already put in. Only construction advances it.
 var objective_progress: int = 0
 
+## What the governor decided this expedition would carry (#175).
+##
+## **Written when he takes the objective and not recomputed.** The target is his
+## answer to "what can we spare" on the day he decided; letting it move with the
+## stores would mean a town that had a good month could never finish gathering,
+## because the bar would rise with every harvest.
+var objective_cargo: Dictionary = {}
+
 ## Resource id -> how much has gone into the build.
 ##
 ## **Invested is spent.** It has left the stockpile, so it cannot be eaten, sold
@@ -287,6 +295,17 @@ func spend_gold(amount: float) -> float:
 	return spent
 
 
+## Hand over a share of the purse, and say how much it was (#175).
+##
+## **A share rather than a figure**, because the caller must not be able to read
+## the balance to work one out — the whole point of `_gold` having no getter is
+## that nothing outside the town knows what it holds. A fifth of the people leave
+## with a fifth of the coin, and the town is the only thing that needs to know
+## what a fifth is.
+func spend_share(fraction: float) -> float:
+	return spend_gold(_gold * clampf(fraction, 0.0, 1.0))
+
+
 ## Whether the town can afford something. A question, not a balance.
 func can_afford(amount: float) -> bool:
 	return _gold >= amount
@@ -329,6 +348,7 @@ func clear_objective() -> void:
 	objective_progress = 0
 	objective_idle_months = 0
 	objective_invested = {}
+	objective_cargo = {}
 
 
 # --- Buildings -------------------------------------------------------------
@@ -375,6 +395,7 @@ func to_dict() -> Dictionary:
 		"objective_idle_months": objective_idle_months,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
+		"objective_cargo": objective_cargo.duplicate(),
 		"months_hungry": months_hungry,
 		"relief_balance": relief_balance,
 		"governor": String(governor_id),
@@ -420,6 +441,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.objective_idle_months = int(data.get("objective_idle_months", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
+	town.objective_cargo = data.get("objective_cargo", {}).duplicate()
 	town.months_hungry = int(data.get("months_hungry", 0))
 	town.relief_balance = float(data.get("relief_balance", 0.0))
 	town.governor_id = StringName(data.get("governor", ""))
