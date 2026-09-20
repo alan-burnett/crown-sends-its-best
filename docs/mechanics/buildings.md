@@ -213,20 +213,37 @@ move independently:
 | **ratio** | Input per unit of output. Lower is better |
 | **throughput** | How much input one worker puts through in a month |
 
-The base is **one batch per worker**, set by the town hall. A conversion building
-**doubles the throughput and improves the ratio**, because a tool factory is
-shipped far more iron than a village blacksmith ever was.
+### The base is anchored on the output
+
+**A town worker makes two of the processed good.** That is the anchor, and
+everything else is derived from it: at a ratio of 3:1 he consumes six to make his
+two, at 10:1 he consumes twenty.
+
+Anchoring on the *output* rather than the input is what makes the table below
+fall out of a single number. Experts, buildings and whatever comes later are
+multipliers arriving on top of it.
+
+**Two is a ceiling, not a promise.** A worker with less input than his recipe
+wants makes proportionally less, so a smelter in a town with six ore produces
+0.6 iron rather than failing. Nobody stands idle for want of a full batch.
+
+A conversion building **doubles the throughput and improves the ratio**, because
+a tool factory is shipped far more iron than a village blacksmith ever was.
 
 | Conversion | Building | Base | With the building |
 | :--- | :--- | :--- | :--- |
-| tobacco → cigars | **rolling house** | 3 → 1 | 6 → 3 *(2:1)* |
-| ore → iron | **foundry** | 10 → 1 | 20 → 4 *(5:1)* |
-| furs → clothing | **furrier's** | 3 → 1 | 6 → 3 *(2:1)* |
-| cotton → clothing | **weaving shed** | 5 → 1 | 9 → 3 *(3:1)* |
-| sugar → rum | **distillery** | 10 → 1 | 20 → 4 *(5:1)* |
-| food → beer | **brewhouse** | 4 → 1 | 8 → 4 *(2:1)* |
-| iron → tools | **toolworks** | 3 → 1 | 6 → 3 *(2:1)* |
-| iron → guns | **armoury** | 3 → 1 | 6 → 3 *(2:1)* |
+| tobacco → cigars | **rolling house** | 6 → 2 | 12 → 6 *(2:1)* |
+| ore → iron | **foundry** | 20 → 2 | 40 → 8 *(5:1)* |
+| furs → clothing | **furrier's** | 6 → 2 | 12 → 6 *(2:1)* |
+| cotton → clothing | **weaving shed** | 10 → 2 | 20 → 6.7 *(3:1)* |
+| sugar → rum | **distillery** | 20 → 2 | 40 → 8 *(5:1)* |
+| food → beer | **brewhouse** | 8 → 2 | 16 → 8 *(2:1)* |
+| iron → tools | **toolworks** | 6 → 2 | 12 → 6 *(2:1)* |
+| iron → guns | **armoury** | 6 → 2 | 12 → 6 *(2:1)* |
+
+Every ratio here is authored; **every throughput is derived.** Base throughput is
+`2 x ratio` and a building's is twice that, so a change to a ratio carries its
+own throughput with it and the two columns cannot drift apart.
 
 **There is no second tier.** One building per conversion, and that is the whole
 improvement available.

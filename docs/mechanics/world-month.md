@@ -11,7 +11,7 @@
 
 ## 1. Scope
 
-SPEC §11.3 specifies the **Colony Month**: eight phases that towns move through
+SPEC §11.3 specifies the **Colony Month**: nine phases that towns move through
 together. That is one phase of a larger cycle. Expeditions, armies, tribes,
 rivals, the Crown itself and every contact also act each month, and they are not
 towns.
@@ -30,7 +30,7 @@ and ties are broken by a rule fixed by the seed.
 | 1 | **Arrivals** | Everything in transit from the Crown makes landfall |
 | 2 | **Movement and action** | Units execute standing Intents; battles resolve |
 | 3 | **Territory** | Borders, vision and influence areas recomputed |
-| 4 | **The Colony Month** | The eight phases of SPEC §11.3, unchanged |
+| 4 | **The Colony Month** | The nine phases of SPEC §11.3 |
 | 5 | **The Crown's Month** | Standing, demands, distant wars, promises |
 | 6 | **Run-end check** | Fail conditions, last-chance stage, the 50-year cap |
 | 7 | **Reckoning** | Everyone evaluates; relationship and loyalty update |
@@ -71,8 +71,12 @@ expensive to debug.
 
 ### 4. The Colony Month
 
-SPEC §11.3, unchanged: Work, Reckon, Relief, Exchange, Consume, Build, Sell,
+SPEC §11.3: Work, Reckon, Relief, Exchange, Consume, **Convert**, Build, Sell,
 Settle. Every town completes a phase before any town begins the next.
+
+**Convert sits between Consume and Build**, so a town cannot brew the grain its
+people need and this month's ore can reach this month's frame. See
+`town-economy.md` §11.
 
 By now the colony knows what it lost. Yields reflect the three farms the natives
 burned in phase 2, not the farms that stood last month.

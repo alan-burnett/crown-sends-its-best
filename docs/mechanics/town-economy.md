@@ -392,11 +392,101 @@ cotton, rather than making it hoard indiscriminately.
 - The purse reserve, and the tier multipliers in §4.
 - How steeply valuation rises as stock falls below desired.
 
-## 11. Pinned: production and conversion
+## 11. Production, and the Convert phase
 
-**The minimum M2 needed is built** — #64 shipped conversion in the Work phase, so
-the six conversions of §10.1 all happen and clothing need not be bought.
-`buildings.md` §6 now defines the ratios and which building improves each.
+### What a tile gives
+
+Yields are **data twice over**: a terrain says it is *high* in wood, and a
+separate table says what high is worth.
+
+```
+none 0    low 1    medium 3    high 6
+```
+
+Balancing every forest in the game is then one number rather than seven files
+that have to agree. A worker eats **1 food** a month, so a hand on high-food
+plains feeds six and a hand on medium grassland feeds three. That ratio is the
+foundation the whole colony sits on.
+
+```
+yield = tile level  x  expert multiplier  x  (1 + building bonus)
+```
+
+**Experts multiply, and stack with diminishing returns** (SPEC §12.2). The first
+is worth +25%, and each after is 0.6 of the one before — so +25%, +15%, +9%. It
+applies to tiles and to conversion output alike, because it is a fact about the
+people rather than about the ground or the terms.
+
+**Building bonuses are proportional, not flat.** A sawmill at `wood +0.6` raises
+every wood yield in the town by 60%. So a yield building is worth more the more a
+town already commits to that resource — it rewards specialisation rather than
+propping up a town that has none, which is what makes stonecutters and sawmill a
+real choice about what a town is going to be.
+
+### Convert is its own phase
+
+**Conversion is not part of Work.** Work sends hands to tiles and holds the rest
+back for town work; **Convert** runs later, between Consume and Build.
+
+| | |
+| :--- | :--- |
+| **Work** (1) | assigns hands — tiles and recipes ranked in one list — and harvests |
+| **Consume** (5) | people eat, livestock eat, clothing wears |
+| **Convert** (6) | the hands held back do their work |
+| **Build** (7) | the objective advances |
+
+Three things follow, and each replaces a rule that used to be enforced by
+scoring:
+
+**A town cannot brew the grain its people need**, because the grain is already
+eaten. This was a weight in the recipe scorer; now it is arithmetic that cannot
+be got wrong.
+
+**This month's ore can be this month's iron, and go into this month's frame.**
+Convert sits after Exchange, so a town may buy ore and smelt it rather than
+buying iron — which dodges the higher duty on the processed good, and is a piece
+of tax arbitrage worth leaving in.
+
+**Processed goods are a month behind.** Beer brewed in phase 6 is drunk next
+month; cloth woven in phase 6 is worn next month. Buying rum from the Crown
+comforts a town *now* and brewing comforts it later, which is a real reason to
+trade rather than make. The cost is that Work's survival swap can no longer fix a
+**clothing** shortage in the month it happens — no tile yields cloth, so a cold
+town's remedies are relief, purchase, or next month's loom. Accepted: cloth takes
+time to make.
+
+### 🔒 Every recipe draws the stockpile as Convert began
+
+Outputs are written to the real stockpile and are **invisible to other recipes
+this month**.
+
+Without this, a town holding twenty ore with hands at the forge and the toolworks
+turns ore into tools in a single month, and `buildings.md`'s deep chain — the one
+the gunsmith gates — collapses to one step. Worse, the answer would depend on
+**which recipe the loop reached first**, which is a result depending on iteration
+order and forbidden outright.
+
+The snapshot makes order irrelevant by construction, exactly as the Colony Month
+makes every town finish a phase before any town begins the next. It is also the
+mechanism that already exists: Work seeds an allowance from the stockpile and
+spends it down so two recipes cannot smelt the same ore. **Only the moment it is
+seeded moves** — from the top of Work to the top of Convert.
+
+### Deciding who stays in town
+
+Work still ranks tiles and recipes **in one list**, which is what makes a town
+with furs, no spare ground and cold people send hands to the loom without a rule
+saying so. What changes is that Work **assigns rather than executes**.
+
+It scores recipes against the stockpile **net of what the town is about to eat**,
+or it would see forty food, post a brewer, watch Consume eat thirty, and leave him
+almost nothing to do. The estimate stops hands being stranded; the phase order
+guarantees correctness when the estimate is wrong.
+
+Conversion buildings raise the **reserve months of the raw input**, so a town that
+invests in conversion is already told to hold a buffer of what it converts. The
+one-month link in a chain draws on that stock rather than on a hand-to-mouth
+trickle, which is why it does not read as a stall.
 
 **The larger mechanic remains deferred by the Author** (#92): improvements,
 building bonuses, experts, and the full allocation of labour between fields and
