@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.1: Under Author ownership, actively being read by PO and Dev
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.2: Under Author ownership, actively being read by PO and Dev
 
 ---
 
@@ -116,6 +116,7 @@ The spec uses a small set of words precisely. Most are defined where their mecha
 | Town | §11.3 |
 | Trade Protest | §10.2 |
 | Trust | §12.5 |
+| Village | §12.5 |
 | Wants | §11.3 |
 
 **🔒 Terminology is stable.** These words keep these meanings throughout the spec, the tickets, and the code. A ticket that needs a concept not named here goes to the Author.
@@ -425,17 +426,7 @@ Each town has:
 
 **The Colony Month.** The month resolves in phases. **🔒 Every town completes a phase before any town begins the next**, and every choice in a phase is made from the colony's state as it stood when that phase began. No town benefits from being simulated first, and ties are broken by a rule fixed by the seed.
 
-1. **Work.** Each town assigns its population between **working tiles** in its influence area and **converting** raw resources into processed ones (§10.1). Tile assignment is chosen by its objective, each tile's potential, and what the town needs; yields go into the stockpile. A worker is in the fields or in the town, never both, so every conversion costs a worked tile. Conversion draws on the stockpile as it stood at the start of the month.  
-2. **Reckon.** Each town works out, in priority order, what it must have, what its objective requires, and what it would like:  
-   1. **Needs** are what survival demands: food, clothing. The citizens will meet these with the town's gold whatever the governor wants.  
-   2. **The objective** comes next: the resources the town's current project requires (§11.3, Intent and Objective). This is the tier the governor directs.  
-   3. **Wants** are discretionary comforts bought with what's left: luxuries, and anything that lifts quality of life without serving the objective.  
-3. **Relief.** Towns holding more than their reserve give to towns in deficit, free and expecting nothing in return. Need is served worst-first, and needs come before wants. A town who repeatedly gives more than it receives resents the crown for its mismanagement. Towns trade resources without any loss or delay. Towns will not give luxury resources as relief.   
-4. **Exchange.** Each town covers what it still lacks, first by trading with natives, then by buying from the Crown, which is taxed. It also buys to improve quality of life and to advance its objective. (exceptions: towns will enforce their trade protests, and rebelling towns will not trade with the crown)  
-5. **Consume.** Population and livestock eat. Clothing and luxuries are used. Shortages hurt quality of life and can cost population.  
-6. **Build.** The objective advances, consuming resources, and may complete.  
-7. **Sell.** Surplus above the reserve is sold to the Crown, which is taxed. (same exceptions as step 4\)  
-8. **Settle.** Quality of life, population, and rebel sentiment update, and the town may take a new objective.
+Details are in the Town Economy mechanics doc.
 
 **🔒 Towns spend mostly in their best interests.** A town’s balance of gold is carefully managed when they decide what resources to spend gold on. They will favor trying to meet their needs, then complete their objectives, then spend on luxuries, but they will behave realistically \- trying to keep a reserve month to month when their survival is not at stake, and spending a little on luxuries even when there are more important things to buy. 
 
@@ -516,7 +507,8 @@ A town tracks three distinct types of population
 - Each of the three native tribes has an invisible ‘trust’ value representing their attitude toward the colony as a whole. They generally want a peaceful coexistence with your colony, but will be offended by your continued expansion and exploitation of the land, and trust can be permanently broken by aggressive behavior from any colonists.   
 - Colony contacts will report about the native's behavior from their own lens, leaving the inner workings of the tribe mostly invisible to the player.   
 - Tribes with high trust may provide experts, resources, or troops to the colony.   
-- Native tribes manage their own diplomacy with your rivals and with other native tribes, and they may ask governors for resources to assist in their war efforts. Governors may ask you how to respond to these requests
+- Native tribes manage their own diplomacy with your rivals and with other native tribes, and they may ask governors for resources to assist in their war efforts. Governors may ask you how to respond to these requests  
+- Natives have their own ‘towns’ called ‘villages’. They do not build buildings, but they do work the land, feed their population, and have the potential to grow in population and influence. 
 
 ### 12.6 Military
 
@@ -652,8 +644,6 @@ A town tracks three distinct types of population
 ## 17\. Open Questions
 
 These are for the Author to settle. Once decided, move the answer into the relevant section.
-
-1. **Deferred: gold's share of prestige.** The details of how the PC's financial contribution translates to prestige must wait until the gold / crown standing models are stable.
 
 ---
 
