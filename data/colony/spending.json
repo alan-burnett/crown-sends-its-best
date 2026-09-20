@@ -1,0 +1,11 @@
+{
+  "id": "spending",
+  "tiers": {
+    "need": 8.0,
+    "objective": 2.5,
+    "want": 1.0
+  },
+  "purse_reserve_months": 2.0,
+  "pleasure_gold_per_head": 12.0,
+  "rounds": 20
+}

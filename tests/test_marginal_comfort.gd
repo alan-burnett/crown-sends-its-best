@@ -291,3 +291,81 @@ func test_the_buying_side_and_the_drinking_side_value_a_cellar_alike() -> void:
 	var drunk: Dictionary = context.wellbeing["ashmere"]
 	assert_almost_eq(QualityOfLife.pleasure_of(drunk), from_stock, 0.001,
 		"the cellar was worth one thing to buy and another to drink")
+
+
+# --- 🔒 The tiers favour, they do not gate (#137) ---------------------------
+
+func _comforts(town: Town) -> float:
+	var total := 0.0
+	for id in ResourceCatalogue.luxuries():
+		total += town.held(StringName(id))
+	return total
+
+
+func test_a_town_saving_for_its_project_still_buys_a_little_comfort() -> void:
+	# **SPEC §11.3 as the Author revised it**: a town spends "a little on
+	# luxuries even when there are more important things to buy." Exchange used
+	# to work down needs, then the objective, then comforts, so a town that ran
+	# out of money anywhere above the comforts bought none at all, ever.
+	#
+	# That is not a leak. It is the instinct `quality-of-life.md` is built on —
+	# enough rum and people do not mind that they are hungry — arriving on the
+	# buying side instead of the consumption side.
+	#
+	# **Asked of the objective rather than of a need**, and that is a finding
+	# rather than a convenience. A need's valuation is enormous while it is unmet
+	# — eight times a shortage premium — so the only rate at which a comfort
+	# outranks a need is one where a starving town buys drink before grain. The
+	# doc is not obviously against that ("enough rum and people do not mind that
+	# they are hungry") but it is the Author's call, not mine, and it is raised on
+	# the pull request.
+	#
+	# The objective tier is where the property is real and testable today: a town
+	# gathering for a build is short of something it wants a great deal, and it
+	# still buys its beer.
+	# **And the purse has to leave the build out of reach**, or the town finishes
+	# it, the list empties, and the comfort is bought because it is the only
+	# candidate left — which is true of a strict gate as well and so proves
+	# nothing. Sixty gold is under the reserve this town holds against the months
+	# ahead, so the timber is gated all month and stays on the list.
+	var town := _town({}, 60.0)
+	town.objective = &"storehouse"
+	town.objective_target = Vector2i(0, 0)
+	_record(town)
+	_shop(town)
+
+	assert_almost_eq(town.held(&"wood"), 0.0, 0.001,
+		"the reserve did not hold the timber back, so there is nothing left unmet to test against")
+	assert_true(_comforts(town) > 0.0,
+		"a town with its build still unmet bought no comfort at all, which is the gate again")
+
+
+func test_the_reserve_gates_the_objective_and_never_survival() -> void:
+	# §4: the purse reserve is gold held against coming months' needs, and it
+	# **gates comforts and the objective, never survival**. A town that cannot
+	# eat this month spends its last coin, because holding money against next
+	# month while starving is not prudence.
+	var starving := _town({}, 40.0, 0.0)
+	_shop(starving)
+	assert_true(starving.held(&"food") > 0.0,
+		"a starving town sat on its purse reserve rather than buying grain")
+
+
+func test_comfort_spending_is_bounded_by_its_allowance() -> void:
+	# **And "a little" has to mean a little.** The allowance sits outside the
+	# purse reserve — it has to, or a reserve worth holding is larger than a poor
+	# town's whole purse and the gate comes back wearing a different coat — so
+	# the thing that stops a town drinking its way through the winter is the size
+	# of the allowance rather than the reserve.
+	var town := _town({}, 6_000.0)
+	_record(town)
+	_shop(town)
+
+	var laid_out := 0.0
+	for id in ResourceCatalogue.luxuries():
+		laid_out += town.held(StringName(id)) * ResourceCatalogue.price_of(StringName(id))
+	var mouths := float(town.population())
+	var allowance := mouths * ColonyNeeds.luxury_per_head() * 3.0 * ResourceCatalogue.price_of(&"tea")
+	assert_true(laid_out <= allowance * 1.25,
+		"a town with six thousand gold laid out %.0f on drink against an allowance of %.0f" % [
+			laid_out, allowance])

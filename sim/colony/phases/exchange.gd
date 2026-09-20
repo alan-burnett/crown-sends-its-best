@@ -4,20 +4,34 @@ extends ColonyPhase
 ## **Exchange.** The town covers what it still lacks after relief, buying from
 ## the natives first and the Crown second (SPEC §11.3, #47).
 ##
-## ## The order is the rule
+## ## One list, and the tiers favour rather than gate
 ##
-## **Needs, then the objective, then wants** — SPEC §11.3's three tiers, in
-## order. Not a preference: the order the town spends in *is* the rule, because
-## gold runs out. A town that bought rum first and found it could not afford
-## grain would be a town that starves for want of a drink, and no amount of
-## commentary elsewhere would make that not have happened.
+## **This was three loops in tier order and the Author revised §11.3 out from
+## under it** (#137). Towns "will behave realistically — trying to keep a reserve
+## month to month when their survival is not at stake, and spending a little on
+## luxuries even when there are more important things to buy."
 ##
-## All three quantities come from Reckon. Exchange decides what to buy first, not
-## how much of it the town wanted.
+## Sequential tiers cannot do that second half. A town works down its needs, then
+## its project, then its comforts, and if the gold runs out at any point
+## everything below is simply not bought — so a town one coin short of cloth buys
+## no beer at all, ever, which is a different town from the one the spec
+## describes.
 ##
-## Within needs, **worst first**: the resource the town is deepest short of is
-## bought before the one it is merely light on. A town that cannot cover
-## everything covers the thing that will kill it.
+## So every candidate purchase — a sack of grain, a beam for the chapel, a
+## measure of rum — goes in **one list scored at what it is worth per gold**, and
+## the tier is a heavy multiplier on the worth. A very cheap comfort can outrank
+## a very expensive marginal need. Needs still win nearly always, because eight
+## times a shortage valuation is a large number, but they win on the arithmetic
+## rather than on their position in the file.
+##
+## **Worst first falls out of it.** The resource a town is deepest short of has
+## the highest valuation, so it is bought first without a rule saying so.
+##
+## ## A step at a time, because worth moves as the cart fills
+##
+## Nothing here can be worked out in advance. Buying grain lowers what the next
+## grain is worth; buying tea makes rum the better drink. So the month is a short
+## loop that scores everything, buys one step of the best, and looks again.
 ##
 ## ## Natives first
 ##
@@ -28,96 +42,12 @@ extends ColonyPhase
 
 const EVENT_SHOPPED: StringName = &"town_exchanged"
 
-## How many purchases a town makes in one month before it stops reconsidering.
+## What share of an outstanding want a town buys in one round.
 ##
-## Enough to fill a cellar with several kinds; bounded, so choosing comforts is
-## a short loop rather than a search.
-const COMFORT_ROUNDS: int = 8
-
-
-## Spend the comfort purse on whatever is worth the most per gold, a little at a
-## time, until the money or the appetite runs out.
-##
-## ## Why a loop and not a list
-##
-## **What is worth buying changes as the cellar fills.** A town swimming in tea
-## gets more from its first rum than its hundredth tea, so the second purchase of
-## a month is not necessarily the same as the first. That is the variety bonus in
-## `quality-of-life.md` §4 read backwards, and it cannot be expressed as a
-## quantity worked out in advance.
-##
-## ## What it buys, and what it will not
-##
-## Each step picks the comfort with the best **quality of life per gold at the
-## margin**, where the gold includes that resource's duty. So:
-##
-## - A town that already has a heap of one thing turns to another, dearer one.
-## - **A town that can make a comfort never buys it.** A sugar plantation makes
-##   rum at near-zero marginal cost, and the Crown sells it none.
-## - **Raising the duty on one comfort pushes the town onto the others.** That
-##   is the backfire SPEC §10.2 describes — tax tea heavily and towns shift to
-##   the rum they distil themselves, and the Crown collects nothing rather than
-##   more. It falls out of this rather than being written anywhere.
-func _buy_comfort(
-	town: Town,
-	reckoning: Reckoning,
-	context: ColonyContext,
-	into: Dictionary,
-) -> void:
-	var budget := reckoning.comfort_budget
-	if budget <= 0.0:
-		return
-
-	var mouths := maxf(1.0, float(town.population()))
-	var step := mouths * ColonyNeeds.luxury_per_head() / QualityOfLife.VARIETY_TARGET
-	if step <= 0.0:
-		return
-
-	var purse := budget
-	for _round in COMFORT_ROUNDS:
-		if purse <= 0.0:
-			break
-		var best := _best_value(town, mouths, step, reckoning, context)
-		if String(best) == "":
-			break
-
-		var outlay := step * ResourceCatalogue.price_of(best) * (1.0 + context.tax_rate(best))
-		var got := _shop(town, best, minf(step, purse / maxf(0.001, outlay / step)), context, into)
-		if got <= 0.0:
-			break
-		purse -= outlay
-
-
-## Which comfort is worth the most per gold right now, or empty.
-func _best_value(
-	town: Town,
-	mouths: float,
-	step: float,
-	reckoning: Reckoning,
-	context: ColonyContext,
-) -> StringName:
-	var held: Dictionary = {}
-	for id in ResourceCatalogue.luxuries():
-		held[String(id)] = town.held(StringName(id))
-
-	var best := &""
-	var best_value := 0.0
-	for id in ResourceCatalogue.luxuries():
-		var resource := StringName(id)
-		if _makes_its_own(town, resource, step, reckoning):
-			continue
-		var price := ResourceCatalogue.price_of(resource) * (1.0 + context.tax_rate(resource))
-		if price <= 0.0:
-			continue
-		var value := QualityOfLife.marginal_pleasure(mouths, held, resource, step) / (price * step)
-		# Ties break on the name, so the choice is the colony's rather than the
-		# catalogue's iteration order.
-		if value > best_value + 0.000001 or (
-			absf(value - best_value) <= 0.000001 and String(best) != "" and String(id) < String(best)
-		):
-			best = resource
-			best_value = value
-	return best if best_value > 0.0 else &""
+## A quarter, so the tiers interleave. Buying the whole of a want in one purchase
+## would let the first candidate swallow the purse and put the sequential tiers
+## back by another road.
+const STEP_SHARE: float = 0.25
 
 
 ## Whether the town can make this month's drinking for itself.
@@ -153,44 +83,53 @@ func _makes_its_own(
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := context.reckoning_for(town)
 	var desired := DesiredStock.for_town(town, before)
+	var mouths := maxf(1.0, float(town.population()))
+	var reserve := Spending.purse_reserve(town, context)
 	var spent_on: Dictionary = {}
 
-	# 1. Tier 1, needs, worst first. Reckon fixed *how much* is needed; what the
-	#    town still lacks is measured against its stores as this phase began,
-	#    since Relief may have covered some of it already.
-	for resource in reckoning.shortages():
-		var lacking := reckoning.need_of(StringName(resource)) - before.held(town.id, StringName(resource))
-		if lacking > 0.0 and _worth_it(StringName(resource), desired, town, before, context):
-			_shop(town, StringName(resource), lacking, context, spent_on, Trade.TIER_NEED)
+	# What the town holds, updated as it shops, so the second sack of grain is
+	# scored against a town that already has the first.
+	var projected: Dictionary = {}
+	for resource in ResourceCatalogue.ids():
+		projected[resource] = before.held(town.id, StringName(resource))
 
-	# 2. Tier 2, the objective. It waits behind survival and nothing else.
-	var required := reckoning.objective
-	var required_ids: PackedStringArray = PackedStringArray(required.keys())
-	required_ids.sort()
-	for resource in required_ids:
-		if not _worth_it(StringName(resource), desired, town, before, context):
+	# What each tier still wants, drawn down as it is covered.
+	var outstanding := _wanted(town, before, reckoning)
+	# What it has laid out on drink so far, against the small allowance §4 lets
+	# it keep for that whatever else is going on.
+	var on_comfort := 0.0
+
+	for _round in Spending.rounds():
+		var best := _best(
+			town, context, desired, reckoning, outstanding, projected, mouths, reserve, on_comfort
+		)
+		if best.is_empty():
+			break
+
+		var resource := StringName(best["resource"])
+		var key: String = best["key"]
+		var got := _shop(
+			town, resource, float(best["step"]), context, spent_on, StringName(best["tier"])
+		)
+		if got <= 0.0:
+			# It could not be had at all — the town is out of gold, or the Crown
+			# will not deal. Taking it off the list stops the loop asking again.
+			outstanding.erase(key)
 			continue
-		_shop(town, StringName(resource), float(required[resource]), context, spent_on,
-			Trade.TIER_OBJECTIVE)
 
-	# 3a. Tier 3, the governor's ambitions: guns for a military intent, timber
-	#     and stone for a builder. **What makes an intent reach the economy** —
-	#     without it, the only thing a letter changes is which project is picked.
-	var stocked: PackedStringArray = PackedStringArray()
-	for resource in reckoning.wants:
-		if not ResourceCatalogue.is_luxury(StringName(resource)):
-			stocked.append(String(resource))
-	stocked.sort()
-	for resource in stocked:
-		if not _worth_it(StringName(resource), desired, town, before, context):
+		projected[String(resource)] = float(projected.get(String(resource), 0.0)) + got
+		if ResourceCatalogue.is_luxury(resource):
+			on_comfort += got * Valuation.crown(resource, context.state) 				* (1.0 + context.tax_rate(resource))
 			continue
-		_shop(town, StringName(resource), reckoning.want_of(StringName(resource)),
-			context, spent_on, Trade.TIER_OBJECTIVE)
-
-	# 3b. Comforts, last and only with what is left — and chosen at the margin
-	#     rather than by price, which is what makes a per-resource duty a real
-	#     instrument (`town-economy.md` §2).
-	_buy_comfort(town, reckoning, context, spent_on)
+		var entry: Dictionary = outstanding.get(key, {})
+		var left := float(entry.get("left", 0.0)) - got
+		if left > float(entry.get("step", 0.0)) * 0.5:
+			entry["left"] = left
+		else:
+			# **Near enough is done.** A town that kept buying a quarter of what
+			# was left would buy ever smaller slivers of the same thing and never
+			# get to the next one — which it did, for all twenty rounds.
+			outstanding.erase(key)
 
 	if spent_on.is_empty():
 		return
@@ -199,6 +138,187 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		"town": String(town.id),
 		"bought": spent_on,
 	}, WorldPhase.COLONY_MONTH)
+
+
+## Everything the town wants and has not got, by tier, keyed `resource|tier`.
+##
+## The quantities are still Reckon's. Exchange decides what to buy first, not
+## how much of it the town wanted.
+func _wanted(town: Town, before: ColonySnapshot, reckoning: Reckoning) -> Dictionary:
+	var out: Dictionary = {}
+	for resource in reckoning.shortages():
+		var lacking := reckoning.need_of(StringName(resource)) \
+			- before.held(town.id, StringName(resource))
+		if lacking > 0.0:
+			out[String(resource) + "|" + String(Spending.NEED)] = _portioned(lacking)
+	for resource in reckoning.objective:
+		var required := float(reckoning.objective[resource])
+		if required > 0.0:
+			out[String(resource) + "|" + String(Spending.OBJECTIVE)] = _portioned(required)
+	for resource in reckoning.wants:
+		if ResourceCatalogue.is_luxury(StringName(resource)):
+			continue
+		var wanted := reckoning.want_of(StringName(resource))
+		var key := String(resource) + "|" + String(Spending.OBJECTIVE)
+		if wanted > 0.0 and wanted > float(out.get(key, {}).get("left", 0.0)):
+			out[key] = _portioned(wanted)
+	return out
+
+
+## A want, with the size of one round's purchase fixed when it is created.
+##
+## 🔒 **Fixed, not a share of what is left.** A quarter of the remainder is Zeno's
+## paradox: the town buys a quarter, then a quarter of the rest, and after twenty
+## rounds it has spent the whole month on slivers of one resource and never
+## looked at the second. The step has to be a share of the *original* want so the
+## list actually empties.
+func _portioned(amount: float) -> Dictionary:
+	return {"left": amount, "step": maxf(amount * STEP_SHARE, Trade.EPSILON)}
+
+
+## The best gold can do this round, or empty.
+##
+## Scored as **worth per gold**, where worth is the town's own valuation times
+## what the tier does to it, and gold is the landed price including the duty.
+func _best(
+	town: Town,
+	context: ColonyContext,
+	desired: DesiredStock,
+	reckoning: Reckoning,
+	outstanding: Dictionary,
+	projected: Dictionary,
+	mouths: float,
+	reserve: float,
+	on_comfort: float,
+) -> Dictionary:
+	var best: Dictionary = {}
+	var best_score := 0.0
+
+	var keys: PackedStringArray = PackedStringArray(outstanding.keys())
+	keys.sort()
+	for key in keys:
+		var parts := key.split("|")
+		var resource := StringName(parts[0])
+		var tier := StringName(parts[1])
+		var held := float(projected.get(parts[0], 0.0))
+		# §3's gate still applies: a town does not pay more for a thing than it
+		# thinks the thing is worth, whatever tier is asking for it.
+		if not Valuation.worth_buying(resource, desired, held, context):
+			continue
+		var landed := Valuation.crown(resource, context.state) * (1.0 + context.tax_rate(resource))
+		if landed <= 0.0:
+			continue
+		var entry: Dictionary = outstanding[key]
+		var step := minf(float(entry["left"]), float(entry["step"]))
+		if not _affordable(town, landed, step, tier, reserve):
+			continue
+		var score := Valuation.town(resource, desired, held) \
+			* Spending.tier_multiplier(tier) * _urgency(resource, tier) / landed
+		if score > best_score + 0.000001:
+			best_score = score
+			best = {"resource": parts[0], "tier": String(tier), "step": step, "key": key}
+
+	var comfort := _best_comfort(town, reckoning, context, projected, mouths, on_comfort)
+	if not comfort.is_empty() and float(comfort["score"]) > best_score + 0.000001:
+		return comfort
+	return best
+
+
+## How fast going without this one kills you, for a need (§11.3 step 2).
+##
+## **Needs are not equal and their valuations do not say so.** A town with no
+## grain is dead in weeks; a town with no cloth is merely wretched, for months.
+## Cloth is the dearer thing — `base` 11 against grain's 2 — so on valuation
+## alone a starving town buys itself a coat, which is the failure
+## `ColonyNeeds.severity` was written for and the reason it is applied here
+## rather than folded into `base`.
+##
+## Only needs have one. Nothing else is survival.
+func _urgency(resource: StringName, tier: StringName) -> float:
+	return ColonyNeeds.severity(resource) if tier == Spending.NEED else 1.0
+
+
+## The comfort worth the most per gold at the margin, or empty.
+##
+## **Scored on pleasure rather than on `base`**, and then converted to gold so it
+## can be ranked beside a sack of grain. What a luxury is worth to a town is what
+## the next measure does for the people drinking it — which falls as the cellar
+## fills and depends on what else is in there — and an authored figure per
+## resource cannot say that.
+func _best_comfort(
+	town: Town,
+	reckoning: Reckoning,
+	context: ColonyContext,
+	projected: Dictionary,
+	mouths: float,
+	on_comfort: float,
+) -> Dictionary:
+	var step := mouths * ColonyNeeds.luxury_per_head() / QualityOfLife.VARIETY_TARGET
+	if step <= 0.0:
+		return {}
+
+	var cellar: Dictionary = {}
+	for id in ResourceCatalogue.luxuries():
+		cellar[String(id)] = float(projected.get(String(id), 0.0))
+
+	var best: Dictionary = {}
+	var best_score := 0.0
+	for id in ResourceCatalogue.luxuries():
+		var resource := StringName(id)
+		if _makes_its_own(town, resource, step, reckoning):
+			continue
+		var landed := Valuation.crown(resource, context.state) * (1.0 + context.tax_rate(resource))
+		# **A small allowance, outside the purse reserve.** The two halves of §4
+		# contradict each other otherwise: a reserve big enough to be worth
+		# holding is bigger than a poor town's whole purse, so gating comfort on
+		# it means a town short of anything buys no comfort at all — which is the
+		# strict gate the Author's revision removed, wearing a different coat.
+		#
+		# So the allowance is always available and the ranking decides *when* it
+		# is spent, rather than a separate pass deciding *that* it is.
+		if landed * step + on_comfort > reckoning.comfort_budget:
+			continue
+		if landed <= 0.0 or not town.can_afford(landed * step):
+			continue
+		var pleasure := QualityOfLife.marginal_pleasure(mouths, cellar, resource, step)
+		if pleasure <= 0.0:
+			continue
+		var score := pleasure * Spending.pleasure_worth(mouths) / (landed * step)
+		# Ties break on the name, so the choice is the colony's rather than the
+		# catalogue's iteration order.
+		var tie := absf(score - best_score) <= 0.000001 \
+			and not best.is_empty() and id < String(best["resource"])
+		if score > best_score + 0.000001 or tie:
+			best_score = score
+			best = {
+				"resource": id,
+				"tier": String(Spending.WANT),
+				"step": step,
+				"key": id + "|" + String(Spending.WANT),
+				"score": score,
+			}
+	return best
+
+
+## Whether the town will lay this out, given what it is holding back (§4).
+##
+## 🔒 **Needs override the purse reserve.** A town that cannot eat this month
+## spends its last coin; holding gold against next month while starving is not
+## prudence. Everything else stops at the reserve.
+##
+## Asked through `can_afford` rather than by reading the balance, because a
+## town's gold has no getter: SPEC §11.3 makes it invisible to the player and
+## the lint enforces that nothing outside the sim can so much as name it.
+func _affordable(
+	town: Town,
+	landed: float,
+	step: float,
+	tier: StringName,
+	reserve: float,
+) -> bool:
+	if tier == Spending.NEED:
+		return town.can_afford(Trade.EPSILON)
+	return town.can_afford(landed * step + reserve)
 
 
 ## Whether the town would rather have the thing than the gold (§3).
