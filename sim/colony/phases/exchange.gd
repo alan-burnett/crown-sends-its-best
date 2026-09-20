@@ -152,6 +152,7 @@ func _makes_its_own(
 
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := context.reckoning_for(town)
+	var desired := DesiredStock.for_town(town, before)
 	var spent_on: Dictionary = {}
 
 	# 1. Tier 1, needs, worst first. Reckon fixed *how much* is needed; what the
@@ -159,7 +160,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	#    since Relief may have covered some of it already.
 	for resource in reckoning.shortages():
 		var lacking := reckoning.need_of(StringName(resource)) - before.held(town.id, StringName(resource))
-		if lacking > 0.0:
+		if lacking > 0.0 and _worth_it(StringName(resource), desired, town, before, context):
 			_shop(town, StringName(resource), lacking, context, spent_on, Trade.TIER_NEED)
 
 	# 2. Tier 2, the objective. It waits behind survival and nothing else.
@@ -167,6 +168,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var required_ids: PackedStringArray = PackedStringArray(required.keys())
 	required_ids.sort()
 	for resource in required_ids:
+		if not _worth_it(StringName(resource), desired, town, before, context):
+			continue
 		_shop(town, StringName(resource), float(required[resource]), context, spent_on,
 			Trade.TIER_OBJECTIVE)
 
@@ -179,6 +182,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 			stocked.append(String(resource))
 	stocked.sort()
 	for resource in stocked:
+		if not _worth_it(StringName(resource), desired, town, before, context):
+			continue
 		_shop(town, StringName(resource), reckoning.want_of(StringName(resource)),
 			context, spent_on, Trade.TIER_OBJECTIVE)
 
@@ -194,6 +199,32 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		"town": String(town.id),
 		"bought": spent_on,
 	}, WorldPhase.COLONY_MONTH)
+
+
+## Whether the town would rather have the thing than the gold (§3).
+##
+## ## Asked of the tiers, and deliberately not of the comforts
+##
+## **A duty high enough closes a trade** — that is §2's point, and it is what
+## makes a rate an instrument the Steward can be genuinely wrong about rather
+## than a number that only ever shaves the margin. A town ninety per cent of the
+## way to the grain it wants does not pay a premium for the last tenth.
+##
+## Comforts are exempt because they already have a better valuation of their own:
+## §4 scores every candidate at what the next measure is actually worth to the
+## people drinking it, divided by what it costs, and that is a sharper question
+## than this one. Gating them on `base` as well would decide which comforts a
+## town may want from an authored table, which is the whole thing the marginal
+## scoring exists to avoid — and in practice it silently reduced every colony to
+## tea.
+func _worth_it(
+	resource: StringName,
+	desired: DesiredStock,
+	town: Town,
+	before: ColonySnapshot,
+	context: ColonyContext,
+) -> bool:
+	return Valuation.worth_buying(resource, desired, before.held(town.id, resource), context)
 
 
 ## Buy up to `wanted`, natives first. Returns what was actually obtained.

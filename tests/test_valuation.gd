@@ -157,3 +157,131 @@ func test_no_effect_moves_anybody_s_prices() -> void:
 		var name := String(id)
 		assert_false(name.contains("price") or name.contains("valuation"),
 			"the effect '%s' would let the PC move a price" % name)
+
+
+# --- 🔒 The town, and why `base` is its own table ---------------------------
+#
+# §3 makes a town's valuation `base + need`. Everything below is about the first
+# half of that being **authored and independent of the Crown's price**, which is
+# the one thing about #135 that cannot be recovered if it is ever quietly
+# derived: the mercantile pattern in §1 stops being a consequence and becomes a
+# coincidence.
+
+func _town(stock: Dictionary = {}, workers: int = 6) -> Town:
+	var town := Town.new(&"ashmere", "Ashmere", Vector2i(3, 3))
+	town.workers = workers
+	for resource in stock:
+		town.store(StringName(resource), float(stock[resource]))
+	return town
+
+
+func _wants(town: Town) -> DesiredStock:
+	var colony := Colony.new()
+	colony.add(town)
+	return DesiredStock.for_town(town, ColonySnapshot.of(colony))
+
+
+## What the town thinks a unit is worth, holding what it holds.
+func _worth(town: Town, resource: StringName) -> float:
+	return Valuation.town(resource, _wants(town), town.held(resource))
+
+
+func test_the_town_dictionary_is_not_the_crowns_in_disguise() -> void:
+	# **Both directions, or it is a multiple.** A table that were `price` times
+	# anything could not put furs below the Crown and tools above it at once, and
+	# §1's whole table is built on it doing exactly that.
+	assert_true(ResourceCatalogue.town_base(&"furs") < Valuation.crown(&"furs"),
+		"a colony swimming in furs valued them as highly as London did")
+	assert_true(ResourceCatalogue.town_base(&"tools") > Valuation.crown(&"tools"),
+		"a colony that manufactures nothing valued tools no higher than the Crown")
+
+
+func test_lumber_trades_in_neither_direction() -> void:
+	# §1's row that no derived table can produce. A town holding what it wants of
+	# timber neither buys nor sells it: there is no margin in carrying a thing
+	# across an ocean to sell it for what it was worth where it started.
+	var town := _town()
+	var timber := _worth(town, &"wood")
+	assert_true(timber <= Valuation.crown(&"wood") * 1.1,
+		"a town that wanted no more timber would still have paid to import it")
+	assert_true(timber >= Valuation.crown(&"wood") * 0.9,
+		"a town that wanted no more timber would have shipped it home at a loss")
+
+
+func test_a_shortage_raises_it_and_a_surplus_collapses_it() -> void:
+	var short := _town({"food": 0.0})
+	var full := _town({"food": 900.0})
+	assert_true(_worth(short, &"food") > ResourceCatalogue.town_base(&"food"),
+		"an empty granary did not raise what grain was worth to the town")
+	assert_true(_worth(full, &"food") < ResourceCatalogue.town_base(&"food"),
+		"a year of grain in store did not lower what more of it was worth")
+
+
+func test_a_surplus_collapses_to_the_same_place_whatever_it_is() -> void:
+	# 🔒 **The floor is absolute, not a share of `base`.** A share is not a
+	# collapse: it preserves the markup, so a town drowning in furs and drowning
+	# in cloth still rates cloth four times the furs and spends the month at the
+	# loom turning one surplus it does not want into another.
+	var town := _town({"furs": 900.0, "clothing": 900.0, "wood": 900.0})
+	for id in ["furs", "clothing", "wood"]:
+		assert_almost_eq(_worth(town, StringName(id)), Valuation.SURPLUS_FLOOR, 0.0001,
+			"a surplus of %s was still worth more than a surplus of anything else" % id)
+
+
+# --- 🔒 The objective raises it, and finishing lowers it again --------------
+
+func test_a_town_raising_a_church_wants_its_materials() -> void:
+	# **The acceptance criterion for #135, in one pair of assertions.** The same
+	# town, the same stores, differing only in whether it has a build under way.
+	var idle := _town()
+	var building := _town()
+	building.objective = &"storehouse"
+	building.objective_target = Vector2i(3, 3)
+
+	var costed := Objective.costed_resources(building)
+	assert_true(not costed.is_empty(), "a storehouse costs nothing to build")
+	var material := StringName(costed[0])
+	assert_true(_worth(building, material) > _worth(idle, material),
+		"a town raising a building valued its materials no higher than one with no plans")
+
+
+# --- 🔒 One valuation, and it answers the trade questions too ---------------
+
+func _context() -> ColonyContext:
+	return ColonyContext.new(
+		WorldValues.initial_state(), EventLog.new(), RngStreams.new(7),
+		WorldMap.new(5, 5, &"plains")
+	)
+
+
+func test_a_town_buys_what_it_is_short_of_and_not_what_it_has() -> void:
+	# **The same gap, read twice.** Nothing here consults a second table or a
+	# tier: what a town buys and what it sells are both the distance between its
+	# own valuation and the Crown's price, and the duty is inside that distance.
+	var context := _context()
+	var hungry := _town({"food": 0.0})
+	var fed := _town({"food": 900.0})
+
+	assert_true(Valuation.worth_buying(&"food", _wants(hungry), 0.0, context),
+		"a town with an empty granary would not buy grain at any price")
+	assert_false(Valuation.worth_buying(&"food", _wants(fed), 900.0, context),
+		"a town with a year of grain went shopping for more")
+	assert_true(Valuation.worth_selling(&"food", _wants(fed), 900.0, context),
+		"a town with a year of grain would not part with any of it")
+	assert_false(Valuation.worth_selling(&"food", _wants(hungry), 0.0, context),
+		"a town with an empty granary was willing to sell grain")
+
+
+func test_a_duty_high_enough_closes_the_trade() -> void:
+	# §2: the Steward can be genuinely wrong about a rate rather than merely
+	# greedy. A rate that makes the landed cost exceed what the town thinks the
+	# thing is worth ends the trade, and no tier overrides it.
+	var context := _context()
+	var short := _town({"food": 6.0})
+	var wants := _wants(short)
+	assert_true(Valuation.worth_buying(&"food", wants, 6.0, context),
+		"a short town would not buy grain at the standing duty")
+
+	context.state.values[TaxRates.key_for(&"food")] = 4.0
+	assert_false(Valuation.worth_buying(&"food", wants, 6.0, context),
+		"a town went on importing grain at five times its landed worth")

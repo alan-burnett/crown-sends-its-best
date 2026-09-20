@@ -16,12 +16,23 @@ extends ColonyPhase
 ##
 ## **Luxuries are sold like anything else.** A town does not hoard rum against
 ## hard times.
+##
+## ## And only what the Crown pays more for than the town thinks it is worth
+##
+## Spare is not the same question as worth selling, even though the two usually
+## agree (§3: *"what to keep is the gap restated"*). Where they come apart is
+## where a town is holding something above its reserve that it still values above
+## what the Crown nets it — a duty high enough to make the sale a loss, or a want
+## the reserve does not know about. Selling into that is how a town ends a year
+## poorer for having traded, and it is the one thing Sell can get wrong that
+## nothing downstream can correct.
 
 const EVENT_SOLD: StringName = &"town_sold"
 
 
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := context.reckoning_for(town)
+	var desired := DesiredStock.for_town(town, before)
 	var sold: Dictionary = {}
 	var earned := 0.0
 
@@ -33,6 +44,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		var keep := reckoning.need_of(id) + reckoning.reserve_of(id)
 		var surplus := before.held(town.id, id) - keep
 		if surplus <= Trade.EPSILON:
+			continue
+		if not Valuation.worth_selling(id, desired, before.held(town.id, id), context):
 			continue
 		# Never sell more than is actually there now. Build may have taken it.
 		var deal := Trade.sell(town, id, minf(surplus, town.held(id)), context)
