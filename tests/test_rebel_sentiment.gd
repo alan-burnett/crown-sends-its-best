@@ -276,7 +276,7 @@ func test_a_developed_town_carries_more_sentiment() -> void:
 	# to make a large town more rebellious; it falls out of what it has.
 	var small := _town()
 	var grand := _town()
-	grand.buildings = PackedStringArray(["storehouse", "sawmill", "church"])
+	grand.buildings = PackedStringArray(["granary", "sawmill", "church"])
 	grand.traded_value = 4000.0
 
 	assert_true(float(_measure(_context([grand]), grand)["development"])

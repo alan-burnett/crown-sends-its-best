@@ -244,7 +244,7 @@ func test_a_full_larder_is_worth_more_than_eating_exactly_enough() -> void:
 	_run_month(_harness(stocked))
 
 	assert_true(stocked.quality_of_life > hand_to_mouth.quality_of_life,
-		"a full storehouse was worth nothing")
+		"a full granary was worth nothing")
 
 
 func test_livestock_count_towards_the_larder() -> void:
@@ -316,7 +316,7 @@ func test_a_stalled_project_has_less_hope_than_an_advancing_one() -> void:
 		stuck.invest(StringName(resource), Building.find(&"church").cost_of(StringName(resource)))
 
 	var moving := _town()
-	moving.objective = &"storehouse"
+	moving.objective = &"granary"
 	moving.objective_intent = GovernorIntent.ECONOMY
 	moving.store(&"wood", 12.0)
 	moving.invest(&"wood", 12.0)

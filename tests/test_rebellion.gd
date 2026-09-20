@@ -258,13 +258,13 @@ func test_misery_settles_a_rebel_town_and_prosperity_does_not() -> void:
 	var starving := _town(&"ashmere")
 	starving.rebelling = true
 	starving.quality_of_life = 0.05
-	starving.buildings = PackedStringArray(["storehouse", "sawmill", "church"])
+	starving.buildings = PackedStringArray(["granary", "sawmill", "church"])
 	starving.traded_value = 3_000.0
 
 	var thriving := _town(&"bellhaven")
 	thriving.rebelling = true
 	thriving.quality_of_life = 0.95
-	thriving.buildings = PackedStringArray(["storehouse", "sawmill", "church"])
+	thriving.buildings = PackedStringArray(["granary", "sawmill", "church"])
 	thriving.traded_value = 3_000.0
 
 	var bleak := RebelSentiment.of(starving, _context([starving]), null, {})

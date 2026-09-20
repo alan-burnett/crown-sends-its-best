@@ -246,7 +246,7 @@ func test_eating_the_herd_actually_feeds_the_town() -> void:
 
 func test_livestock_eat_the_towns_grain_unless_there_is_pasture() -> void:
 	var grazing := _town(4, {"food": 100.0}, {"cows": 20})
-	grazing.add_building(&"stockyard")
+	grazing.add_building(&"town_pasture")
 	var penned := _town(4, {"food": 100.0}, {"cows": 20})
 
 	_eat(_harness(grazing))

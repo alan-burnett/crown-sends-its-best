@@ -329,7 +329,7 @@ func test_a_town_saving_for_its_project_still_buys_a_little_comfort() -> void:
 	# nothing. Sixty gold is under the reserve this town holds against the months
 	# ahead, so the timber is gated all month and stays on the list.
 	var town := _town({}, 60.0)
-	town.objective = &"storehouse"
+	town.objective = &"granary"
 	town.objective_target = Vector2i(0, 0)
 	_record(town)
 	_shop(town)

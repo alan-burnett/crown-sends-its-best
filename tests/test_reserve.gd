@@ -135,13 +135,13 @@ func test_the_objective_raises_the_reserve_on_what_it_consumes() -> void:
 	# The reserve exists to serve the project, so what the project still needs
 	# is held back rather than counted as spare.
 	var building := _town(&"", {"food": 400.0, "clothing": 80.0, "wood": 200.0})
-	building.objective = &"storehouse"
+	building.objective = &"granary"
 	building.objective_intent = &""
 
 	var idle := _town(&"", {"food": 400.0, "clothing": 80.0, "wood": 200.0})
 
 	assert_true(_reckon(building).reserve_of(&"wood") > _reckon(idle).reserve_of(&"wood"),
-		"a town raising a storehouse held back no more timber than one raising nothing")
+		"a town raising a granary held back no more timber than one raising nothing")
 
 
 func test_a_hoarding_posture_still_reserves_everything() -> void:
@@ -170,7 +170,7 @@ func test_the_objective_draws_below_the_reserve() -> void:
 	# **Delaying the project to protect a stockpile gathered for that project
 	# would be nonsense.** Build takes straight from the stockpile.
 	var town := _town(&"", {"wood": 30.0, "food": 400.0, "clothing": 80.0})
-	town.objective = &"storehouse"
+	town.objective = &"granary"
 
 	var colony := Colony.new()
 	colony.add(town)
