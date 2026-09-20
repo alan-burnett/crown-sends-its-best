@@ -76,7 +76,7 @@ tuning.
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
 | **dock** | 30 wood | low | Sea and ocean tiles yield more food | — |
-| **irrigation station** | 20 wood, 20 stone, 6 tools | medium | Grassland and plains yield more food, **doubled where there is a farm** | — |
+| **irrigation station** | 20 wood, 20 stone, 4 tools | medium | Grassland and plains yield more food, **doubled where there is a farm** | — |
 | **windmill** | 20 stone, 10 wood, 8 tools | medium | Bonus yield from farms | irrigation station |
 | **river mill** | 20 wood, 10 stone, 8 tools | medium | Bonus yield from farms | irrigation station |
 
@@ -88,25 +88,25 @@ wants both: food capacity has to keep climbing as a town grows.
 
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
-| **wharf** | 50 wood, 20 stone, 6 tools | **none** | All gold received in trade with the Crown **+10%** | dock |
+| **wharf** | 50 wood, 20 stone, 4 tools | **none** | All gold received in trade with the Crown **+10%** | dock |
 | *conversion buildings* | 40 wood, 10 stone, 10 iron, 8 tools | medium | See §6 | crane |
-| **gunsmith** | 20 iron, 20 stone, 20 wood, 12 tools | **high** | **Allows guns to be made at all** — the only gated conversion | foundry |
+| **gunsmith** | 20 iron, 20 stone, 20 wood, 25 tools | **high** | **Allows guns to be made at all** — the only gated conversion | foundry |
 
 ### Defence
 
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
 | **stockade** | 40 wood | none | Defence | — |
-| **palisade** | 30 stone, 40 wood, 10 iron, 6 tools | low | More defence | stockade |
-| **guard towers** | 20 stone, 20 wood, 4 tools | medium | Defence, **town vision**, and **town influence** — the tiles it can work | stockade |
+| **palisade** | 30 stone, 40 wood, 10 iron, 4 tools | low | More defence | stockade |
+| **guard towers** | 20 stone, 20 wood, 2 tools | medium | Defence, **town vision**, and **town influence** — the tiles it can work | stockade |
 | **trenches** | 15 stone, 15 wood | none | Defence | stockade |
 
 ### Expansion
 
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
-| **scouts** | 20 wood, 4 tools | low | Expeditions from this town are safer and start better supplied. **Town influence** | — |
-| **worker cabins** | 40 wood, 10 stone, 6 tools | medium | Improvements build faster and **cost no upkeep**. **Town influence** | scouts |
+| **scouts** | 20 wood, 2 tools | low | Expeditions from this town are safer and start better supplied. **Town influence** | — |
+| **worker cabins** | 40 wood, 10 stone, 2 tools | medium | Improvements build faster and **cost no upkeep**. **Town influence** | scouts |
 | **fairgrounds** | 40 wood, 30 stone | medium | Immigration, local amusement, **town influence**, and quality of life **to every town that has none** | town pasture, stockade |
 
 **Town influence is the expansion branch's signature** — every building on it
@@ -118,11 +118,11 @@ building for defence gets an economy as a side effect.
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
 | **church** | 30 wood, 10 stone | low | Amusement, **perceived safety**, brings a clergyman | — |
-| **cathedral** | 120 stone, 10 tools | high | Increases the church's effect, and extends **safety and amusement to every town without a church** — but not the contact | church |
-| **theatre** | 20 stone, 30 wood, 6 tools | medium | Amusement. Attracts experts | — |
+| **cathedral** | 120 stone, 15 tools | high | Increases the church's effect, and extends **safety and amusement to every town without a church** — but not the contact | church |
+| **theatre** | 20 stone, 30 wood, 4 tools | medium | Amusement. Attracts experts | — |
 | **tea house** | 20 wood, 10 stone | **none** | More quality of life from tea. Raises tea's desired stock | — |
 | **ale house** | 20 wood, 10 stone | **none** | More quality of life from beer. Raises beer's desired stock | — |
-| **printing press** | 10 stone, 10 wood, 10 iron, 12 tools | **high** | Attracts experts. Amusement **in every town**. **Raises rebel sentiment.** Brings a contact | college, stockade |
+| **printing press** | 10 stone, 10 wood, 10 iron, 25 tools | **high** | Attracts experts. Amusement **in every town**. **Raises rebel sentiment.** Brings a contact | college, stockade |
 
 ### Capacity
 
@@ -130,12 +130,12 @@ building for defence gets an economy as a side effect.
 | :--- | :--- | :--- | :--- | :--- |
 | **town pasture** | 20 wood | none | Supports livestock, as the pasture improvement does | — |
 | **granary** | 30 wood | low | Natural population growth is faster, livestock included. Raises food's desired stock | — |
-| **crane** | 30 wood, 20 iron, 10 tools | low | Build speed | — |
-| **stonecutters** | 20 wood, 20 iron, 10 tools | medium | More stone | — |
-| **sawmill** | 20 stone, 20 iron, 10 tools | medium | More wood | — |
-| **mineworks** | 20 wood, 20 stone, 8 tools | medium | More ore | — |
+| **crane** | 30 wood, 20 iron, 4 tools | low | Build speed | — |
+| **stonecutters** | 20 wood, 20 iron, 15 tools | medium | More stone | — |
+| **sawmill** | 20 stone, 20 iron, 15 tools | medium | More wood | — |
+| **mineworks** | 20 wood, 20 stone, 15 tools | medium | More ore | — |
 | **library** | 30 wood, 10 stone | medium | Amusement. **Turns resident experts into education**, so experts here generate more experts. Brings a contact who wants them spread about the colony | theatre |
-| **college** | 50 wood, 30 stone, 20 iron, 10 tools | **high** | **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
+| **college** | 50 wood, 30 stone, 20 iron, 15 tools | **high** | **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
 
 Stonecutters and sawmill each cost the resource the other produces, which makes
 them a natural pair rather than a choice.
@@ -160,6 +160,19 @@ bar of iron, three bars to a tool — or it buys them. Neither is a wall. But th
 patient town grinds its own and the impatient one buys from the Crown, which is
 dependence arriving by the front door rather than through a lock.
 
+**The mineworks is where that bites hardest.** It costs fifteen tools, and it is
+the building that makes ore plentiful enough to make tools — roughly four hundred
+and fifty ore at base terms to buy your way out of needing to buy. Nothing is
+locked, because ore comes off a tile without it and the mineworks only raises the
+yield. But a town that wants to mine in earnest buys its entry from the Crown,
+and the Crown is therefore selling the means of not needing the Crown. That is
+the Squeeze in a single building.
+
+**The crane is the deliberate counterweight.** At four tools it is nearly free,
+and it opens every conversion building in the tree at eight apiece. So the route
+out is cheap to *start* and expensive to *finish*, which is the right way round:
+a town can always begin, and only a prospering one arrives.
+
 ### Which buildings cost them
 
 **Wood and stone are what a town gathers; iron and tools are what it makes.** A
@@ -168,11 +181,15 @@ mechanism, a precision or metalwork in it costs tools.
 
 | Band | Tools | Buildings |
 | :--- | --: | :--- |
-| Fittings | 4 | guard towers, scouts |
-| Gearing | 6 | irrigation station, wharf, palisade, worker cabins, theatre |
-| Machinery | 8 | windmill, river mill, mineworks, conversion buildings |
-| Works | 10 | crane, stonecutters, sawmill, college, cathedral |
-| Precision | 12 | gunsmith, printing press |
+| Fittings | 2 | guard towers, scouts, worker cabins |
+| Gearing | 4 | irrigation station, wharf, palisade, theatre, crane |
+| Machinery | 8 | windmill, river mill, conversion buildings |
+| Works | 15 | mineworks, stonecutters, sawmill, college, cathedral |
+| Precision | 25 | gunsmith, printing press |
+
+**The top band costs twelve times the bottom one.** That spread is the point:
+tools are what separate a frontier town from an industrial one, and no amount of
+patience with wood and stone closes the gap.
 
 ### What costs none, and why the list matters
 
@@ -285,7 +302,7 @@ M3 playtest exercises the capacity and trade branches only.
 
 ## 11. Open items
 
-- **Tool quantities are unmeasured.** The 4/6/8/10/12 bands in §5 are a shape,
+- **Tool quantities are unmeasured.** The 2/4/8/15/25 bands in §5 are a shape,
   not a balance. What matters is whether a young town's first mechanical building
   is a stretch or a wall, and only the harness can say.
 - **The wharf looks underpriced.** A permanent **+10% on all Crown trade for no
