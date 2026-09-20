@@ -407,8 +407,9 @@ func test_a_buildings_reserve_reaches_the_same_desired_stock_as_everything_else(
 ## Effects that reach `ObjectiveSelector._building_axes`, and so can be a reason
 ## a governor chooses to build a thing.
 const REACHES_THE_GOVERNOR: Array[String] = [
-	"amusement", "build_speed", "defence", "pasture", "quality_of_life",
-	"reserve_months", "yield_bonus",
+	"amusement", "build_speed", "counts_distant_experts", "defence", "education",
+	"education_per_expert", "pasture", "quality_of_life", "reserve_months",
+	"yield_bonus",
 ]
 
 ## And effects that deliberately do not, with why.
@@ -457,6 +458,8 @@ func _sample_for(effect: String) -> Variant:
 			return {"food": 2}
 		"pasture":
 			return 12
+		"counts_distant_experts":
+			return 1.0
 		_:
 			return 1.0
 

@@ -161,6 +161,11 @@ func _live(town: Town, context: ColonyContext) -> void:
 	var before := town.quality_of_life
 	town.quality_of_life = float(parts["quality_of_life"])
 
+	# **Alongside quality of life, and for the same reason** (#168): a reader
+	# that recomputed it mid-month would get a different answer from the one the
+	# growth roll used.
+	Education.settle(town, context)
+
 	# **The direction and rough magnitude**, so a governor's letter can say that
 	# things are looking up without the letter doing arithmetic — and so it
 	# cannot say so when they are not (SPEC §9.1).
