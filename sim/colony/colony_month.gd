@@ -59,8 +59,24 @@ func set_handler(phase: StringName, handler: ColonyPhase) -> void:
 ## Run the whole colony month.
 func run(colony: Colony, context: ColonyContext) -> void:
 	context.colony = colony
+	_settle_upkeep(colony, context)
 	for phase in ORDER:
 		_run_phase(phase, colony, context)
+
+
+## What the town owes on what it has built, **before the first phase** (#151).
+##
+## Buildings reach Work through yields, Reckon through reserves and Build through
+## speed, so a town that settled afterwards would get a free month of effects
+## from a building it cannot pay for.
+##
+## **Not a ninth phase.** SPEC §11.3 enumerates eight and this does not join
+## them — it is a settlement the colony makes before the first of them. Run town
+## by town in simulation order so the locked lockstep still holds, and taking no
+## snapshot because nothing here reads another town.
+func _settle_upkeep(colony: Colony, context: ColonyContext) -> void:
+	for town in colony.simulation_order(context.run_seed):
+		Upkeep.settle(town, context)
 
 
 ## One phase, for every town, from a single snapshot.

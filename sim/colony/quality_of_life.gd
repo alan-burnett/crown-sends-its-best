@@ -394,9 +394,16 @@ static func _objective_addresses(town: Town, resource: StringName, context: Colo
 			var bonuses: Dictionary = building.effect("yield_bonus", {})
 			if float(bonuses.get(String(resource), 0.0)) > 0.0:
 				return 1.0
-			# A storehouse does not grow grain, but a town short of it can see
-			# the point of somewhere to keep more.
-			if float(building.effect("reserve_months", 0.0)) > 0.0:
+			# A storehouse does not grow grain, but a town short of **this**
+			# resource can see the point of somewhere to keep more of it.
+			#
+			# **Read as a float this threw outright** once #148 made the effect a
+			# dictionary, and it threw only when a town's objective happened to be
+			# a storehouse or a granary — so the suite stayed green and the
+			# balance harness produced numbers with a hole in them. The same trap
+			# the ticket flagged for `_building_axes`, in a second place.
+			var months: Dictionary = building.effect("reserve_months", {})
+			if float(months.get(String(resource), 0.0)) > 0.0:
 				return 0.6
 			return 0.0
 		Objective.IMPROVEMENT:

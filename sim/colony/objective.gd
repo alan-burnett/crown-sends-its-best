@@ -276,7 +276,7 @@ static func build_capacity(town: Town) -> float:
 	var speed := 0.0
 	for id in town.buildings:
 		var standing := Building.find(StringName(id))
-		if standing != null:
+		if standing != null and Building.is_lit(town, StringName(id)):
 			speed += float(standing.effect("build_speed", 0.0))
 	return maxf(1.0, float(town.population())) * CAPACITY_PER_HEAD * (1.0 + maxf(0.0, speed))
 

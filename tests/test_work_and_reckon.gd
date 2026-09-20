@@ -49,6 +49,9 @@ func _harness(workers: int = 6) -> Dictionary:
 	var colony := Colony.new()
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(3, 3))
 	town.workers = workers
+	# **Funded, so its buildings are lit** (#151). Upkeep unpaid disables the
+	# effect and keeps the building, which would make these tests about that.
+	town.receive_gold(5_000.0)
 	colony.add(town)
 
 	var context := ColonyContext.new(WorldValues.initial_state(), EventLog.new(), RngStreams.new(SEED), map)

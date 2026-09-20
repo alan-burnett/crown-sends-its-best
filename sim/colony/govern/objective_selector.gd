@@ -168,6 +168,22 @@ static func _months_for(town: Town, cost: Dictionary) -> int:
 ##
 ## Nothing here knows what a granary is. Add a building to the data and the
 ## governor can already want it for the right reasons.
+## What a building is good for, for anything outside this file (#151).
+##
+## **Upkeep asks it what the governor would give up first**, and asking it here
+## rather than scoring a building twice is the difference between a man who lets
+## the church go dark because he is at war and a man who does it because a second
+## table happened to rate churches low.
+static func building_axes(id: StringName) -> Dictionary:
+	return _building_axes(id)
+
+
+static func improvement_axes_at(
+	at: Vector2i, improvement: Improvement, context: ColonyContext
+) -> Dictionary:
+	return _improvement_axes(at, improvement, context)
+
+
 static func _building_axes(id: StringName) -> Dictionary:
 	var building := Building.find(id)
 	if building == null:

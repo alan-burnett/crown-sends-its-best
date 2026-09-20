@@ -18,6 +18,9 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
 	ContentRegistry.register_param_source("town_name", {}, ColonyParamSources.town_name)
 	ContentRegistry.register_param_source(
+		"idle_building", {"field": "building"}, ColonyParamSources.idle_building
+	)
+	ContentRegistry.register_param_source(
 		"objective_name", {"fallback": "string"}, ColonyParamSources.objective_name
 	)
 	ContentRegistry.register_param_source(
@@ -114,6 +117,23 @@ static func crown_demand(args: Dictionary, context: LetterContext) -> Variant:
 ## problem the folder-per-language rule was designed to avoid (SPEC §9.7).
 static func sender_id(_args: Dictionary, context: LetterContext) -> Variant:
 	return String(context.sender.id) if context.sender != null else ""
+
+
+## What a town has had to shut, by name (#151).
+##
+## **Never an id.** A letter saying "we have shut sawmill" is a bug report, not a
+## governor. The first in build order, so a town with two dark buildings names
+## the one it has had longest rather than whichever the dictionary yielded first.
+static func idle_building(args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null or context.town.dark_buildings.is_empty():
+		return args.get("fallback", "the works")
+	for id in context.town.buildings:
+		if not context.town.dark_buildings.has(String(id)):
+			continue
+		var building := Building.find(StringName(id))
+		if building != null:
+			return building.display_name
+	return args.get("fallback", "the works")
 
 
 static func town_name(_args: Dictionary, context: LetterContext) -> Variant:
