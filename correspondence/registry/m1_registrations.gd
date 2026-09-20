@@ -67,6 +67,8 @@ static func load_resources(content: ContentDatabase) -> void:
 
 	if content.has_record("colony", "needs"):
 		ColonyNeeds.load_from(content.record("colony", "needs"))
+	if content.has_record("colony", "spending"):
+		Spending.load_from(content.record("colony", "spending"))
 
 	if content.has_record("colony", "objectives"):
 		Objective.load_from(content.record("colony", "objectives"))
