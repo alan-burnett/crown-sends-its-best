@@ -59,6 +59,16 @@ func _barren() -> WorldMap:
 	return map
 
 
+## Nothing to work at all.
+##
+## **Barren desert is not barren** — it yields ore and stone, and since Convert
+## moved to phase 6 (#185) a town on it smelts that ore into iron within the same
+## month. A test about a town that has no iron needs ground that cannot give it
+## any.
+func _no_ground() -> WorldMap:
+	return WorldMap.new(7, 7, &"ocean")
+
+
 ## Ground worth working, for the tests about what a town chooses.
 func _land() -> WorldMap:
 	var map := WorldMap.new(7, 7, &"ocean")
@@ -104,8 +114,12 @@ func _harness(town: Town, map: WorldMap = null) -> Dictionary:
 	context.colony = colony
 	context.territory = Territory.compute(ground, colony.in_order())
 
+	# **Work assigns the hands and Convert is where they do anything** (#185), so
+	# a fixture that ran Work alone would watch a town decide to smelt and then
+	# find no iron.
 	var month := ColonyMonth.new()
 	month.set_handler(ColonyMonth.WORK, WorkPhase.new())
+	month.set_handler(ColonyMonth.CONVERT, ConvertPhase.new())
 	return {"colony": colony, "context": context, "month": month, "town": town}
 
 
@@ -214,25 +228,37 @@ func test_converting_costs_a_worked_tile() -> void:
 
 # --- 🔒 The start-of-month stockpile ----------------------------------------
 
-func test_conversion_draws_on_the_start_of_month_stockpile() -> void:
-	# SPEC §11.3 step 1. **Ore bought from the Crown this month is smelted next
-	# month**, so Exchange cannot be used as a same-month forge.
-	#
-	# The phase is run against a deliberately stale snapshot, which is exactly
-	# the situation a mid-month purchase creates.
-	var town := _town({"ore": 3.0}, 6)
+func test_this_months_ore_can_be_this_months_iron() -> void:
+	# 🔒 **The rule inverted deliberately** (#185). It used to be that ore bought
+	# this month was smelted next month, because conversion happened in Work
+	# before Exchange had run. Convert sits after Exchange now, so a town may buy
+	# ore and smelt it rather than buying iron at the higher duty a processed
+	# good carries — and `town-economy.md` §11 says that arbitrage is worth
+	# leaving in.
+	var town := _town({}, 6)
 	var harness := _harness(town)
-	var before := ColonySnapshot.of(harness["colony"])
+	WorkPhase.new().run(town, ColonySnapshot.of(harness["colony"]), harness["context"])
 
-	# The ship docks. The snapshot does not know.
+	# The ship docks between the two phases, which is exactly what Exchange is.
 	town.store(&"ore", 500.0)
-	WorkPhase.new().run(town, before, harness["context"])
+	ConvertPhase.new().run(town, ColonySnapshot.of(harness["colony"]), harness["context"])
 
-	var smelted := town.held(&"iron")
-	assert_true(smelted > 0.0, "the three ore it did have were never smelted")
-	assert_true(smelted <= 3.0 / ResourceCatalogue.input_per_unit_of(&"iron") + 0.0001,
-		"it made %f of iron, which is more than three of ore can yield" % smelted)
-	assert_true(town.held(&"ore") > 490.0, "the new ore went into the furnace the day it landed")
+	assert_true(town.held(&"iron") > 0.0,
+		"ore bought this month went into the furnace next month, which is the old rule")
+
+
+func test_every_recipe_draws_the_stockpile_as_convert_began() -> void:
+	# 🔒 The lock that replaces it. Outputs are invisible to other recipes this
+	# month, so a town with hands at the forge and the toolworks cannot turn ore
+	# into tools in a single month — `buildings.md`'s deep chain would collapse to
+	# one step, and the answer would depend on which recipe the loop reached
+	# first, which is a result depending on iteration order.
+	var town := _town({"ore": 500.0}, 6)
+	_run_month(_harness(town))
+
+	assert_true(town.held(&"iron") > 0.0, "the ore was never smelted at all")
+	assert_almost_eq(town.held(&"tools"), 0.0, 0.0001,
+		"iron smelted this month was forged into tools in the same month")
 
 
 func test_two_recipes_cannot_spend_the_same_stock_twice() -> void:
@@ -256,7 +282,7 @@ func test_a_town_with_furs_and_hands_clothes_itself() -> void:
 	_run_month(harness)
 
 	assert_true(town.held(&"clothing") > 0.0, "a town with furs and spare hands stayed naked")
-	assert_not_empty(harness["context"].log.of_type(WorkPhase.EVENT_CONVERTED))
+	assert_not_empty(harness["context"].log.of_type(ConvertPhase.EVENT_CONVERTED))
 
 
 func test_a_cold_town_leaves_good_ground_to_weave() -> void:
@@ -402,11 +428,18 @@ func test_the_town_hall_defines_every_conversion_there_is() -> void:
 func test_ratio_and_throughput_are_both_the_buildings_to_set() -> void:
 	# The two dials, and the reason there are two: efficiency and volume are
 	# different things and a single bonus could only move them together.
-	var terms := _base_terms()
-	for id in terms:
-		var entry: Dictionary = terms[id]
+	#
+	# **Asked of the building rather than of the file** (#185). Only the ratio is
+	# authored now; throughput is derived from it, because the two drifted apart
+	# the moment both were written down — every figure shipped in #183 was exactly
+	# half what it should have been and the file still agreed with itself.
+	var hall := Building.find(Building.BASE)
+	for id in _base_terms():
+		var entry: Dictionary = hall.conversion_terms(StringName(id))
 		assert_true(float(entry.get("ratio", 0.0)) > 0.0, "%s has no ratio" % id)
 		assert_true(float(entry.get("throughput", 0.0)) > 0.0, "%s has no throughput" % id)
+		assert_almost_eq(float(entry["throughput"]), 2.0 * float(entry["ratio"]), 0.0001,
+			"%s does not put two batches through a worker-month" % id)
 
 
 func test_a_better_building_supersedes_the_hall_for_that_one_conversion() -> void:
@@ -532,7 +565,7 @@ func test_a_town_that_cannot_make_guns_says_so() -> void:
 	_run_month(harness)
 
 	var context: ColonyContext = harness["context"]
-	var said := context.log.of_type(WorkPhase.EVENT_CANNOT_CONVERT)
+	var said := context.log.of_type(ConvertPhase.EVENT_CANNOT_CONVERT)
 	assert_true(said.size() > 0, "a town holding five hundred iron and no gunsmith said nothing")
 	assert_eq(String(said[0].payload["output"]), "guns")
 	assert_true(not PackedStringArray(said[0].payload["needs"]).is_empty(),
@@ -545,13 +578,104 @@ func test_a_town_with_a_gunsmith_says_nothing_of_the_kind() -> void:
 		armed.add_building(StringName(enabling))
 	var harness := _harness(armed)
 	_run_month(harness)
-	assert_eq(harness["context"].log.of_type(WorkPhase.EVENT_CANNOT_CONVERT).size(), 0,
+	assert_eq(harness["context"].log.of_type(ConvertPhase.EVENT_CANNOT_CONVERT).size(), 0,
 		"a town that can forge muskets complained that it could not")
 
 
 func test_a_town_with_no_iron_is_not_being_denied_anything() -> void:
 	var empty := _town({}, 6)
-	var harness := _harness(empty)
+	var harness := _harness(empty, _no_ground())
 	_run_month(harness)
-	assert_eq(harness["context"].log.of_type(WorkPhase.EVENT_CANNOT_CONVERT).size(), 0,
+	assert_almost_eq(empty.held(&"iron"), 0.0, 0.0001,
+		"the fixture found iron somewhere, so it is not the town this test is about")
+	assert_eq(harness["context"].log.of_type(ConvertPhase.EVENT_CANNOT_CONVERT).size(), 0,
 		"a town with no iron at all was told it could not forge muskets")
+
+
+# --- 🔒 Convert is its own phase (#185) -------------------------------------
+
+func test_a_town_cannot_brew_the_grain_its_people_need() -> void:
+	# **Arithmetic, not scoring.** This used to be a term in the recipe scorer
+	# subtracting the input's valuation. Now Consume has already eaten the grain
+	# by the time the brewer reaches his vat, so there is nothing to get wrong.
+	#
+	# The brewer is assigned by hand rather than left to Work, because the scorer
+	# still declines to brew a hungry town's grain and a test that let it choose
+	# would pass for the old reason. What is under test is the *ordering*.
+	var town := _destitute({"food": 6.0}, 4)
+	var colony := Colony.new()
+	colony.add(town)
+	var context := ColonyContext.new(
+		WorldValues.initial_state(), EventLog.new(), RngStreams.new(SEED), _no_ground()
+	)
+	context.run_seed = SEED
+	context.colony = colony
+
+	var brewing: Array = []
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		if String(recipe.id()) == "beer<-food":
+			brewing.append(recipe)
+	assert_true(not brewing.is_empty(), "there is no recipe that turns grain into beer")
+	context.conversions["ashmere"] = brewing
+
+	var snapshot := ColonySnapshot.of(colony)
+	ConsumePhase.new().run(town, snapshot, context)
+	var after_supper := town.held(&"food")
+	ConvertPhase.new().run(town, snapshot, context)
+
+	# Four mouths ate four of the six, so two were left for the vat.
+	assert_true(after_supper < 6.0, "nobody ate, so the fixture proves nothing")
+	assert_true(town.held(&"beer") > 0.0, "the brewer was assigned and did nothing at all")
+	var from_the_vat := after_supper - town.held(&"food")
+	assert_true(from_the_vat <= after_supper + 0.0001,
+		"the vat took %f of grain when only %f survived supper" % [from_the_vat, after_supper])
+	assert_true(town.held(&"food") >= -0.0001, "the town brewed itself into debt")
+
+
+func test_work_assigns_the_hand_and_convert_employs_it() -> void:
+	# A worker is in the fields or in the town, never both — but the town ones
+	# do nothing until phase 6.
+	var town := _town({"ore": 500.0}, 6)
+	var harness := _harness(town)
+	WorkPhase.new().run(town, ColonySnapshot.of(harness["colony"]), harness["context"])
+
+	var assigned: Array = harness["context"].conversions.get("ashmere", [])
+	assert_true(not assigned.is_empty(), "Work put nobody on town work at all")
+	assert_almost_eq(town.held(&"iron"), 0.0, 0.0001,
+		"Work smelted the ore itself, so the hand was never held back")
+
+	ConvertPhase.new().run(town, ColonySnapshot.of(harness["colony"]), harness["context"])
+	assert_true(town.held(&"iron") > 0.0, "the held-back hand did nothing in Convert either")
+
+
+func test_a_worker_makes_two() -> void:
+	# 🔒 The base is anchored on the **output** (`town-economy.md` §11): a town
+	# worker turns out two of the processed good and consumes `2 x ratio` of the
+	# input, whatever the recipe.
+	var town := _town({}, 4)
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		if ResourceCatalogue.requires_building(recipe.output):
+			continue
+		assert_almost_eq(recipe.made_by(town), 2.0, 0.0001,
+			"a worker at %s made something other than two" % recipe.id())
+		assert_almost_eq(recipe.consumes_for(town),
+			2.0 * Building.base_ratio_for(recipe.id()), 0.0001,
+			"%s consumed something other than two batches" % recipe.id())
+
+
+func test_a_building_doubles_what_a_worker_puts_through() -> void:
+	var plain := _town({}, 4)
+	var equipped := _town({}, 4)
+	equipped.add_building(&"crane")
+	equipped.add_building(&"foundry")
+
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		if String(recipe.id()) != "iron<-ore":
+			continue
+		assert_almost_eq(recipe.consumes_for(equipped), 2.0 * recipe.consumes_for(plain), 0.0001,
+			"the foundry did not double what a worker puts through")
+		assert_true(recipe.made_by(equipped) > recipe.made_by(plain),
+			"and it did not improve the ratio either")

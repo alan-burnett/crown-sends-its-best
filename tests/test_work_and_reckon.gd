@@ -93,10 +93,17 @@ func test_a_town_works_its_best_ground_first() -> void:
 	var harness := _harness(2)
 	_run_month(harness)
 	var town: Town = harness["town"]
-	# With food unpressing and only two workers, it takes the two richest tiles
-	# rather than the two nearest.
+	# With food unpressing and only two workers, it takes the richest work
+	# available rather than the nearest.
+	#
+	# **Hands, not tiles** (#185). Tiles and recipes are ranked in one list, so a
+	# worker may be sent to the town instead of the fields — and since Convert
+	# moved to phase 6 he is held back rather than working here. What Work
+	# promises is that every hand is employed on the best thing going.
 	assert_true(town.held(&"food") + town.held(&"wood") > 0.0)
-	assert_eq(harness["context"].log.of_type(WorkPhase.EVENT_WORKED)[0].payload["tiles_worked"], 2)
+	var payload: Dictionary = harness["context"].log.of_type(WorkPhase.EVENT_WORKED)[0].payload
+	assert_eq(int(payload["tiles_worked"]) + int(payload["converting"]), 2,
+		"two workers did not amount to two hands of work")
 
 
 func test_a_town_short_of_food_prioritises_food_over_its_objective() -> void:

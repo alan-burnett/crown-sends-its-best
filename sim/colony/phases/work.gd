@@ -43,6 +43,14 @@ extends ColonyPhase
 ## hunger weight cost towns 0.25 to 0.67 tiles a month and the worst seeds three;
 ## without it the figure is 0.01 to 0.15.
 ##
+## ## Work assigns the hands; Convert is where the town ones do anything
+##
+## A worker is in the fields or in the town, never both, so tiles and recipes are
+## still ranked in one list and the best taken. But a hand put on a recipe is
+## **held back** and does nothing until phase 6 (`town-economy.md` §11), which is
+## after the town has eaten — so a town cannot brew the grain its people need,
+## and that stops being a term in the scorer and becomes arithmetic.
+##
 ## ## The survival check, applied after scoring
 ##
 ## Need is handled instead as a **redirection with a stopping condition**, which
@@ -64,19 +72,6 @@ extends ColonyPhase
 ## done this month.
 
 const EVENT_WORKED: StringName = &"town_worked"
-const EVENT_CONVERTED: StringName = &"town_converted"
-
-## **The town has the makings and no way to make them** (#150, Seam A).
-##
-## A town sitting on iron it cannot forge into muskets is the whole cost of the
-## gunsmith gate, and if the sim only *declined* to convert, nothing downstream
-## would know it had happened — the map would show idle hands and the letters
-## would have nothing to say about why.
-##
-## It covers a town that lost the building as well as one that never had it.
-## There is no way to lose a building yet; when there is, this fires the month
-## after without anything here changing.
-const EVENT_CANNOT_CONVERT: StringName = &"town_cannot_convert"
 
 ## What a month spent fetching an input is worth against the need it becomes.
 ##
@@ -121,11 +116,11 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	_redirect(town, before, context, work)
 
 	var produced: Dictionary = {}
-	var converted: Dictionary = {}
-	# **The start-of-month stockpile**, spent down as recipes claim from it, so
-	# two recipes cannot both smelt the same ore and nothing bought this month
-	# can be processed this month.
-	var available: Dictionary = {}
+	# **Hands held back for town work** (`town-economy.md` §11). Work assigns
+	# them and Convert, four phases later, is where they do anything — so the
+	# grain a brewer would have used has been eaten by then, and the ore a smelter
+	# wants may have been bought this month rather than last.
+	var held_back: Array = []
 	var tiles_worked := 0
 	var hands := 0
 	# **Which ground, not merely how much of it** (Seam A). Map playback wants
@@ -144,7 +139,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 			var at: Vector2i = entry["at"]
 			worked.append("%d,%d" % [at.x, at.y])
 			_harvest(town, context, at, produced)
-		elif _convert(town, before, entry["recipe"], available, converted):
+		else:
+			# **Assigned, not run.** Whether there is anything for him to work on
+			# is Convert's question, asked of the stores as they stand then.
+			held_back.append(entry["recipe"])
 			hands += 1
 
 	for resource in produced:
@@ -160,42 +158,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		"produced": produced,
 	}, WorldPhase.COLONY_MONTH)
 
-	_report_what_it_cannot_make(town, before, context)
-
-	if not converted.is_empty():
-		context.log.emit(EVENT_CONVERTED, town.id, context.state.month, {
-			"town": String(town.id),
-			"made": converted,
-		}, WorldPhase.COLONY_MONTH)
-
-
-## Say what the town could be making and cannot (#150).
-##
-## Only for a gated recipe, and only when the town actually holds the input above
-## its needs. A town with no iron is not being denied anything.
-func _report_what_it_cannot_make(
-	town: Town,
-	before: ColonySnapshot,
-	context: ColonyContext,
-) -> void:
-	for entry in Conversion.all():
-		var recipe: Conversion = entry
-		if not ResourceCatalogue.requires_building(recipe.output):
-			continue
-		if recipe.available_to(town):
-			continue
-		var spare := _spare(town, before, recipe.input)
-		if spare <= 0.0:
-			continue
-		context.log.emit(EVENT_CANNOT_CONVERT, town.id, context.state.month, {
-			"town": String(town.id),
-			"output": String(recipe.output),
-			"input": String(recipe.input),
-			"held": spare,
-			# **What would fix it**, from the data, so a governor's letter can
-			# name the building rather than the prose guessing at it.
-			"needs": Building.would_allow(recipe.id()),
-		}, WorldPhase.COLONY_MONTH)
+	context.conversions[String(town.id)] = held_back
 
 
 # --- What the town wants more of -------------------------------------------
@@ -272,7 +235,15 @@ func _redirect(
 	if hands <= 0 or work.size() <= hands:
 		return  # Every hand is already on the best there is; there is nothing to swap.
 
-	var needs := ColonyNeeds.needed_resources()
+	# 🔒 **Food only** (`town-economy.md` §11, #185). No tile yields cloth, and
+	# since Convert moved to phase 6 no hand sent to the loom today produces any
+	# this month either — so a swap made to answer a clothing shortage moves a
+	# man off food to fix nothing. A cold town's remedies are relief, purchase,
+	# or next month's loom.
+	#
+	# **Do not widen this back.** It looks like a regression and is the stated
+	# cost of the move.
+	var needs := _survival_needs()
 	var gives: Array = []
 	for entry in work:
 		gives.append(_contribution(town, before, context, entry, needs))
@@ -327,6 +298,18 @@ func _redirect(
 		var swapped: Dictionary = gives[take]
 		gives[take] = gives[put]
 		gives[put] = swapped
+
+
+## What the survival swap can actually do something about, this month.
+##
+## Anything a tile yields. Cloth is woven rather than harvested and the loom's
+## output now lands next month, so it is not among them.
+func _survival_needs() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	for resource in ColonyNeeds.needed_resources():
+		if ResourceCatalogue.inputs_for(StringName(resource)).is_empty():
+			out.append(String(resource))
+	return out
 
 
 ## How much of the town's total need is still unmet.
@@ -559,45 +542,6 @@ func _harvest(town: Town, context: ColonyContext, at: Vector2i, into: Dictionary
 		amount *= expert_multiplier(town, StringName(resource))
 		amount *= 1.0 + Building.yield_bonus_for(town, StringName(resource))
 		into[resource] = float(into.get(resource, 0.0)) + amount
-
-
-## Put a worker on a recipe, if there is anything for him to work on.
-##
-## Returns whether he was actually employed. A recipe the town has no input for
-## costs no labour, which keeps "every conversion costs a worked tile" true
-## without also letting an *impossible* conversion cost one.
-func _convert(
-	town: Town,
-	before: ColonySnapshot,
-	recipe: Conversion,
-	available: Dictionary,
-	into: Dictionary,
-) -> bool:
-	var key := String(recipe.input)
-	if not available.has(key):
-		# **The month's needs come off the top.** A town with two days of grain
-		# has none to spare for the brewhouse, whatever beer is worth.
-		available[key] = _spare(town, before, recipe.input)
-
-	var on_hand := float(available[key])
-	if on_hand <= 0.0:
-		return false
-
-	# A part-supplied worker does part of the work rather than none of it.
-	var takes := recipe.consumes_for(town)
-	if takes <= 0.0:
-		return false
-	var share := clampf(on_hand / takes, 0.0, 1.0)
-	var used := takes * share
-	var made := recipe.made_by(town) * share
-	if made <= 0.0:
-		return false
-
-	available[key] = on_hand - used
-	town.take(recipe.input, used)
-	town.store(recipe.output, made)
-	into[String(recipe.output)] = float(into.get(String(recipe.output), 0.0)) + made
-	return true
 
 
 ## What this town's experts are worth on a resource.
