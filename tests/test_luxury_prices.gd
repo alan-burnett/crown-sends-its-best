@@ -97,3 +97,52 @@ func test_every_luxury_still_has_a_price() -> void:
 	for id in ResourceCatalogue.luxuries():
 		assert_true(ResourceCatalogue.price_of(StringName(id)) > 0.0,
 			"%s trades for nothing" % id)
+
+
+# --- 🔒 And it survives a price that moves ----------------------------------
+
+func _unmakeable() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	for id in ResourceCatalogue.luxuries():
+		if not ResourceCatalogue.is_producible(StringName(id)):
+			out.append(String(id))
+	out.sort()
+	return out
+
+
+func test_the_crowns_price_can_only_ever_rise() -> void:
+	# **This is what makes the rule safe, and it is worth asserting directly.**
+	# The tea rule is that nothing the colony cannot make is cheaper than tea. A
+	# price that could fall could break it from underneath, in a way no test of
+	# today's table would catch — so the guarantee is not that the numbers are
+	# right, it is that the driver has no downward gear.
+	var state := WorldValues.initial_state()
+	for id in ResourceCatalogue.ids():
+		state.values[PolicyEffects.PRICE_PREFIX + String(id)] = -5.0
+		assert_true(Valuation.crown(StringName(id), state) >= ResourceCatalogue.price_of(StringName(id)),
+			"the Crown paid less for %s than the catalogue says, so a price can fall" % id)
+
+
+func test_the_rule_holds_when_tea_is_favoured() -> void:
+	# **The one movement that could break it.** Nothing can fall, so the rule can
+	# only go wrong by tea *rising* past something the colony cannot make — which
+	# is exactly what a patron persuaded to favour the tea trade would do.
+	#
+	# Today the assertion has one subject, because tea is the only luxury the
+	# colony cannot make. That is the point of writing it now rather than later:
+	# the day a second one is added, this is what says whether it may be priced
+	# where somebody wants to price it.
+	var unmakeable := _unmakeable()
+	assert_true(unmakeable.has("tea"), "tea became producible and the trade protest has no subject")
+
+	var state := WorldValues.initial_state()
+	# Four patrons all favouring tea at once, which is past anything a run is
+	# likely to reach and therefore the right thing to hold the line at.
+	state.values[PolicyEffects.PRICE_PREFIX + "tea"] = PolicyEffects.MARKET_LIFT * 4.0
+	var tea := Valuation.crown(&"tea", state)
+	assert_true(tea > ResourceCatalogue.price_of(&"tea"),
+		"favouring the tea trade did not move what the Crown pays for tea")
+
+	for id in unmakeable:
+		assert_true(Valuation.crown(StringName(id), state) >= tea,
+			"%s fell below tea once tea was favoured, and the colony cannot make it" % id)
