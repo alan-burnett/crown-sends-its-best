@@ -24,6 +24,7 @@ being rewritten every iteration.
 | [immigration.md](immigration.md) | Who comes, why, and why you might not want them | M4 |
 | [founding-towns.md](founding-towns.md) | Two ways to plant a town, and what each costs | M4 |
 | [the-provost.md](the-provost.md) | The four knobs, education, and how an expert appears | M4 |
+| [the-marshal.md](the-marshal.md) | The officer with nothing to gain, and the gate on Independence | M6 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
 | [crown-demands.md](crown-demands.md) | A fixed bar, then a moving one — and bucket randomisation | M3 |
 | [trade-protests.md](trade-protests.md) | When a town refuses the Crown's duty, and what it costs | M3 |
@@ -44,7 +45,6 @@ first needs it. That list is the live one; this table is the map.
 | Trading with natives | #102 | M5 |
 | Rival pressure | #103 | M5 |
 | Battles and combat resolution | #104 | M6 |
-| The Marshal | #105 | M6 |
 | Commanders | #106 | M6 |
 | Patrons | #107 | M7 |
 | Institutional contacts | #108 | M7 |
