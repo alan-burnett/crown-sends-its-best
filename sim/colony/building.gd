@@ -341,16 +341,6 @@ static func pasture_capacity_for(town: Town) -> int:
 	return head
 
 
-## What standing buildings contribute to quality of life. Read in Settle (#50).
-static func quality_of_life_for(town: Town) -> float:
-	var total := 0.0
-	for id in town.buildings:
-		var building := find(StringName(id))
-		if building != null and is_lit(town, StringName(id)):
-			total += float(building.effect("quality_of_life", 0.0))
-	return total
-
-
 func to_dict() -> Dictionary:
 	return {
 		"id": String(id),

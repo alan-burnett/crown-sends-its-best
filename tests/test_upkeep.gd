@@ -147,18 +147,18 @@ func test_it_keeps_what_the_governor_values_and_lets_the_rest_go() -> void:
 	# the governor would have chosen — which is how the first version of it
 	# passed while testing nothing.
 	var church := Building.find(&"church").upkeep
-	var mill := Building.find(&"sawmill").upkeep
-	assert_almost_eq(church, mill, 0.0001,
+	var wall := Building.find(&"palisade").upkeep
+	assert_almost_eq(church, wall, 0.0001,
 		"the fixture's two buildings cost different amounts, so the purse decides and not the man")
 
-	var trader := _town(church, ["church", "sawmill"])
-	trader.intent = GovernorIntent.ECONOMY
-	var harness := _harness(trader)
+	var soldier := _town(wall, ["church", "palisade"])
+	soldier.intent = GovernorIntent.DEFENCE
+	var harness := _harness(soldier)
 	_settle(harness)
 
-	assert_false(trader.dark_buildings.has("sawmill"),
-		"a governor bent on the economy let his mill go dark and kept the church lit")
-	assert_true(trader.dark_buildings.has("church"),
+	assert_false(soldier.dark_buildings.has("palisade"),
+		"a governor bent on defence let his wall go dark and kept the church lit")
+	assert_true(soldier.dark_buildings.has("church"),
 		"he paid for both on a purse that covers one")
 
 

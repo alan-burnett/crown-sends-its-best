@@ -336,7 +336,7 @@ func test_a_project_is_chosen_carried_and_completed() -> void:
 	# plants a cash crop when cash crops are worth planting. What this test is
 	# about is that whatever he picked got finished.
 	assert_not_empty(harness["context"].log.of_type(BuildPhase.EVENT_COMPLETED),
-		"eight months and a full storehouse finished nothing at all")
+		"eight months and a full granary finished nothing at all")
 
 
 func test_a_standing_posture_can_win_the_board() -> void:
@@ -376,7 +376,13 @@ func test_a_town_does_not_oscillate() -> void:
 	# **Stickiness falls out of the three tests, not out of a switching margin.**
 	# A town making progress on a sensible project simply carries on, so months
 	# of running produce far fewer changes of mind than months.
-	var town := _town(GovernorIntent.ECONOMY, {"food": 400.0, "clothing": 100.0, "wood": 400.0, "stone": 400.0, "tools": 100.0})
+	# **Iron is a build cost since `buildings.md` §5.** Without it in the stores
+	# a town with "everything it needed" could not finish anything it chose, and
+	# this test would be measuring that instead of oscillation.
+	var town := _town(GovernorIntent.ECONOMY, {
+		"food": 400.0, "clothing": 100.0, "wood": 400.0,
+		"stone": 400.0, "tools": 100.0, "iron": 100.0,
+	})
 	var harness := _harness(town, [
 		ColonyMonth.RECKON, ColonyMonth.EXCHANGE, ColonyMonth.CONSUME,
 		ColonyMonth.BUILD, ColonyMonth.SETTLE,
@@ -394,7 +400,7 @@ func test_gathering_is_not_a_stall() -> void:
 	# those months would have it give up on everything expensive and then give up
 	# on the replacement for exactly the same reason, for ever.
 	var town := _town(GovernorIntent.ECONOMY)
-	town.objective = &"storehouse"
+	town.objective = &"granary"
 	town.objective_intent = GovernorIntent.ECONOMY
 	town.store(&"wood", 10.0)
 	var harness := _harness(town, [ColonyMonth.BUILD])
@@ -439,7 +445,7 @@ func _part_built(objective: StringName, share: float) -> Town:
 
 
 func test_a_routine_change_of_intent_does_not_abandon_a_project_underway() -> void:
-	var town := _part_built(&"storehouse", 0.5)
+	var town := _part_built(&"granary", 0.5)
 	var harness := _harness(town)
 	assert_true(Objective.progress_fraction(town) > Reconsideration.ROUTINE_SUNK)
 
@@ -451,12 +457,12 @@ func test_a_routine_change_of_intent_does_not_abandon_a_project_underway() -> vo
 func test_a_crisis_overrides_substantial_sunk_progress() -> void:
 	# The natives are burning the outskirts. The town must not spend eleven more
 	# months on a dock.
-	var town := _part_built(&"storehouse", 0.5)
+	var town := _part_built(&"granary", 0.5)
 	var harness := _harness(town)
 
 	town.intent = GovernorIntent.SURVIVAL
 	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.INTENT_CHANGED),
-		"a crisis could not shift a half-built storehouse")
+		"a crisis could not shift a half-built granary")
 
 
 func test_even_a_crisis_finishes_what_is_nearly_done() -> void:
@@ -471,7 +477,7 @@ func test_even_a_crisis_finishes_what_is_nearly_done() -> void:
 
 func test_abandoning_forfeits_what_was_invested() -> void:
 	# The timber is already cut and standing in the half-built frame.
-	var town := _part_built(&"storehouse", 0.5)
+	var town := _part_built(&"granary", 0.5)
 	var harness := _harness(town)
 	var spare := town.held(&"wood")   # never went into the frame, so never at risk
 	var sunk := town.invested(&"wood")
@@ -546,7 +552,7 @@ func test_an_urging_that_names_no_intent_comes_to_nothing_loudly() -> void:
 # --- Saving -----------------------------------------------------------------
 
 func test_intent_and_objective_survive_save_and_reload() -> void:
-	var town := _part_built(&"storehouse", 0.5)
+	var town := _part_built(&"granary", 0.5)
 	town.intent = GovernorIntent.DEFENCE
 	town.intent_since = 7
 	town.urged_intent = GovernorIntent.POPULATION

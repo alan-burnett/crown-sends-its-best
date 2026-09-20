@@ -331,12 +331,13 @@ func test_experts_multiply_processed_yields_too() -> void:
 func test_a_building_that_helps_a_conversion_helps_it() -> void:
 	var plain := _town({"ore": 500.0}, 6)
 	var equipped := _town({"ore": 500.0}, 6)
-	equipped.add_building(&"smithy")  # a yield bonus on iron
+	equipped.add_building(&"crane")
+	equipped.add_building(&"foundry")  # `buildings.md` §6: 20 ore to 4 iron
 
 	_run_month(_harness(plain))
 	_run_month(_harness(equipped))
 
-	assert_true(equipped.held(&"iron") > plain.held(&"iron"), "the smithy smelted no better")
+	assert_true(equipped.held(&"iron") > plain.held(&"iron"), "the foundry smelted no better")
 
 
 # --- Determinism ------------------------------------------------------------
@@ -409,11 +410,14 @@ func test_ratio_and_throughput_are_both_the_buildings_to_set() -> void:
 
 
 func test_a_better_building_supersedes_the_hall_for_that_one_conversion() -> void:
-	# **And leaves the rest alone.** A smithy is shipped more ore than a village
-	# blacksmith and wastes less of it; it has nothing to say about brewing.
+	# **And leaves the rest alone.** A foundry is shipped more ore than a village
+	# blacksmith and wastes less of it; it has nothing to say about brewing, and
+	# nothing to say about the toolworks either — `buildings.md` §6 gives every
+	# conversion its own building.
 	var plain := _town({"ore": 500.0, "food": 500.0}, 6)
 	var smithing := _town({"ore": 500.0, "food": 500.0}, 6)
-	smithing.add_building(&"smithy")
+	smithing.add_building(&"crane")
+	smithing.add_building(&"foundry")
 
 	for entry in Conversion.all():
 		var recipe: Conversion = entry
@@ -421,14 +425,14 @@ func test_a_better_building_supersedes_the_hall_for_that_one_conversion() -> voi
 		var theirs: float = recipe.made_by(smithing)
 		var takes: float = recipe.consumes_for(plain)
 		var takes_more: float = recipe.consumes_for(smithing)
-		if String(recipe.id()) == "iron<-ore" or String(recipe.id()) == "tools<-iron":
-			assert_true(theirs > mine, "the smithy did not improve %s" % recipe.id())
+		if String(recipe.id()) == "iron<-ore":
+			assert_true(theirs > mine, "the foundry did not improve %s" % recipe.id())
 			assert_true(takes_more > takes,
-				"the smithy improved %s without putting more through, so there is one dial again"
+				"the foundry improved %s without putting more through, so there is one dial again"
 					% recipe.id())
 		else:
 			assert_almost_eq(theirs, mine, 0.0001,
-				"the smithy changed %s, which is none of its business" % recipe.id())
+				"the foundry changed %s, which is none of its business" % recipe.id())
 
 
 func test_no_building_raises_a_processed_resource_with_a_yield_bonus() -> void:

@@ -245,7 +245,7 @@ func test_exchange_buys_luxuries_when_there_is_money_left() -> void:
 
 func test_exchange_shops_for_the_objective() -> void:
 	var town := _town(6, 5000.0, {"food": 100.0, "clothing": 50.0})
-	town.objective = &"storehouse"
+	town.objective = &"granary"
 	_harness(town, ColonyMonth.EXCHANGE, ExchangePhase.new(), {TaxRates.BASE_KEY: 0.0})
 
 	assert_true(town.held(&"wood") > 0.0, "the town bought nothing towards what it is building")

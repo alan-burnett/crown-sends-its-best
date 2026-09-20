@@ -235,11 +235,11 @@ func test_a_town_raising_a_church_wants_its_materials() -> void:
 	# town, the same stores, differing only in whether it has a build under way.
 	var idle := _town()
 	var building := _town()
-	building.objective = &"storehouse"
+	building.objective = &"granary"
 	building.objective_target = Vector2i(3, 3)
 
 	var costed := Objective.costed_resources(building)
-	assert_true(not costed.is_empty(), "a storehouse costs nothing to build")
+	assert_true(not costed.is_empty(), "a granary costs nothing to build")
 	var material := StringName(costed[0])
 	assert_true(_worth(building, material) > _worth(idle, material),
 		"a town raising a building valued its materials no higher than one with no plans")

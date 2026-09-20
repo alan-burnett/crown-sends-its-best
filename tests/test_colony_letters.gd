@@ -187,7 +187,7 @@ func test_an_objective_is_announced_before_a_plank_is_cut() -> void:
 	# responsive rather than reportorial.
 	var run := _run()
 	var town := run.colony.in_order()[0]
-	town.objective = &"storehouse"
+	town.objective = &"granary"
 	town.objective_since = run.world.month
 	town.objective_progress = 0
 
@@ -210,7 +210,7 @@ func test_a_finished_objective_is_still_reportable_after_build_clears_it() -> vo
 	var run := _run()
 	var town := run.colony.in_order()[0]
 	town.clear_objective()
-	town.last_completed = &"storehouse"
+	town.last_completed = &"granary"
 	town.last_completed_month = run.world.month
 
 	var context := LetterContext.new(run.world, run.contact(town.governor_id), &"")
@@ -219,7 +219,7 @@ func test_a_finished_objective_is_still_reportable_after_build_clears_it() -> vo
 
 	assert_true(ColonyConditions.town_finished_something({}, context))
 	assert_eq(String(ColonyParamSources.finished_name({"fallback": "x"}, context)),
-		Objective.display_name(&"storehouse"))
+		Objective.display_name(&"granary"))
 
 	# Last month's news is not this month's.
 	context.month = run.world.month + 1
