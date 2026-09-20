@@ -141,8 +141,11 @@ func test_a_duty_on_what_a_town_cannot_do_without_bites_hardest() -> void:
 	var indulgent := _town()
 	var one := _context([cornered])
 	var two := _context([indulgent])
-	_bought(one, cornered, Trade.TIER_NEED, 400.0)
-	_bought(two, indulgent, Trade.TIER_WANT, 400.0)
+	# **A month's duty, not a fortune.** Four hundred gold of duty is forty times
+	# what a town actually pays, so both tiers hit `TAX_CEILING` and read alike —
+	# which is the cap doing its job and this test measuring nothing.
+	_bought(one, cornered, Trade.TIER_NEED, 10.0)
+	_bought(two, indulgent, Trade.TIER_WANT, 10.0)
 
 	assert_true(float(_measure(one, cornered)["tax"]) > float(_measure(two, indulgent)["tax"]),
 		"the same duty on bread and on rum was resented alike")
@@ -219,8 +222,17 @@ func test_what_is_spent_is_forgotten() -> void:
 
 # --- 🔒 One rule for every resident contact ---------------------------------
 
-func _contact(id: StringName, loyalty: float, town_name: String = "") -> Contact:
+## **With a role, the way the roster builds them.** Prominence is derived from
+## it (§4), so a fixture that left it blank would be testing a man the town has
+## never heard of.
+func _contact(
+	id: StringName,
+	loyalty: float,
+	town_name: String = "",
+	role: StringName = Contact.ROLE_INSTITUTIONAL,
+) -> Contact:
 	var contact := Contact.new(id)
+	contact.role = role
 	contact.relationship.loyalty = loyalty
 	contact.town = town_name
 	return contact
@@ -271,17 +283,38 @@ func test_the_crowns_officers_push_nobody() -> void:
 
 # --- 🔒 Tall and wide fail differently --------------------------------------
 
-func test_a_developed_town_carries_more_sentiment() -> void:
-	# **Prosperity breeds the thing that destroys it.** Nothing extra is needed
-	# to make a large town more rebellious; it falls out of what it has.
-	var small := _town()
-	var grand := _town()
-	grand.buildings = PackedStringArray(["granary", "sawmill", "church"])
-	grand.traded_value = 4000.0
+## The same town, developed and not, with the same thing driving it.
+func _with_stakes(buildings: Array, trade: float, loyalty: float) -> Dictionary:
+	var town := _town()
+	town.buildings = PackedStringArray(buildings)
+	town.traded_value = trade
+	var contacts := {"gov_ashmere": _contact(&"gov_ashmere", loyalty, "", Contact.ROLE_GOVERNOR)}
+	return _measure(_context([town]), town, null, contacts)
 
-	assert_true(float(_measure(_context([grand]), grand)["development"])
-		> float(_measure(_context([small]), small)["development"]),
-		"a town with three buildings and heavy trade was no more restless than a hamlet")
+
+func test_development_raises_the_stakes_rather_than_the_sentiment() -> void:
+	# 🔒 **Building a granary does not make a town want independence.** It makes
+	# the town matter more, so whatever is already driving it drives it harder.
+	var hamlet := _with_stakes([], 0.0, 5.0)
+	var grand := _with_stakes(["granary", "sawmill", "church"], 4000.0, 5.0)
+
+	assert_almost_eq(float(hamlet["contacts"]), float(grand["contacts"]), 0.0001,
+		"development changed what the governor's regard was worth, which is not what it does")
+	assert_true(float(grand["stakes"]) > float(hamlet["stakes"]),
+		"a town with three buildings and heavy trade had no more at stake than a hamlet")
+	assert_true(float(grand["total"]) > float(hamlet["total"]),
+		"the same slighted governor moved a developed town no further than a hamlet")
+
+
+func test_and_it_holds_a_contented_town_down_harder() -> void:
+	# The other direction, which an additive term could never do. **If the famous
+	# men of a town are all loyal to the Crown there is not much rebel sentiment
+	# in it** — and there is least of all in a town with everything to lose.
+	var hamlet := _with_stakes([], 0.0, 100.0)
+	var grand := _with_stakes(["granary", "sawmill", "church"], 4000.0, 100.0)
+	assert_true(float(grand["contacts"]) < 0.0, "the fixture's governor is not devoted")
+	assert_true(float(grand["total"]) <= float(hamlet["total"]),
+		"development made a contented town restless, so it is a contributor again")
 
 
 # --- 🔒 A neighbour in rebellion --------------------------------------------

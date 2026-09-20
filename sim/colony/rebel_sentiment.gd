@@ -64,19 +64,40 @@ const TIER_WEIGHT: Dictionary = {
 }
 
 ## How much a gold of weighted duty is worth in sentiment.
-const TAX_RESENTMENT: float = 0.035
+##
+## **Set so that tax burden actually dominates in steady state**, which §3 says
+## it does and which was not true: at 0.035 a town paying its duty contributed
+## about a third of a point against a governor's twenty-two, and across six
+## hundred town-months tax was the loudest contributor in **none of them**.
+##
+## Measured rather than guessed. A town pays about nine and a third gold of
+## tier-weighted duty a month at the standing rate, so this puts the ordinary
+## squeeze at roughly eleven points — the largest standing contributor while the
+## governor is anywhere near neutral, which is what steady state means, and still
+## something a grievance can spike above.
+const TAX_RESENTMENT: float = 1.2
 
 ## The most a single month's taxation can contribute, so one enormous month of
 ## trade cannot rebel a town on its own.
-const TAX_CEILING: float = 40.0
-
-## What the governor's regard is worth, and what everyone else's is.
 ##
-## **One rule for all resident contacts, scaled by loyalty** (§4), so it keeps
-## working when M7 adds institutional ones. Being a jerk to the clergyman is
-## mechanically dangerous, which is as it should be.
-const GOVERNOR_INFLUENCE: float = 22.0
-const RESIDENT_INFLUENCE: float = 6.0
+## **Held at four times an ordinary month rather than at a round number.** It
+## moved with `TAX_RESENTMENT`: at the old rate the cap was a hundred and twenty
+## times a normal month's duty and could never fire, and leaving it where it was
+## would have put it at three and a half times — close enough that a busy month
+## would cap out and the tier weighting would stop mattering at all, which is the
+## one thing this term exists to express.
+const TAX_CEILING: float = 45.0
+
+## What a man of the first prominence is worth, either way.
+##
+## **One rule for all resident contacts, scaled by loyalty and by how large the
+## man looms** (§4), so it keeps working as M7 adds institutional ones. Being a
+## jerk to the clergyman is mechanically dangerous, which is as it should be.
+##
+## Prominence rather than office: a town listens to the people it has heard of.
+## **If the famous men of a town are all loyal to the Crown there is not much
+## rebel sentiment in it**, and the same men slighted are what carries it out.
+const PROMINENT_INFLUENCE: float = 22.0
 
 ## What a governor actively preparing his town for rebellion is worth on top
 ## (#128).
@@ -94,12 +115,24 @@ const LOYALTY_NEUTRAL: float = 55.0
 ## What a wretched life is worth, read through attribution.
 const QUALITY_WEIGHT: float = 30.0
 
-## What a town's own size and wealth add. **Prosperity breeds the thing that
-## destroys it** (§4): more buildings, more trade, more to lose and more means to
-## act on it.
-const DEVELOPMENT_PER_BUILDING: float = 1.6
-const DEVELOPMENT_PER_TRADE: float = 0.004
-const DEVELOPMENT_CEILING: float = 18.0
+## 🔒 **Development raises the stakes; it does not raise the sentiment** (§4).
+##
+## It was a contributor of its own, which said that building a granary makes a
+## town want independence. It does not. What it does is make the town *matter
+## more* — more to lose, more means to act on it, and more people whose opinion
+## carries — so whatever is already driving sentiment drives it harder.
+##
+## That is the Squeeze in one line. A developed colony leans towards rebellion
+## **unless the PC can keep pampering it**, which is the winning state and the
+## thing everything else pushes him away from. An undeveloped colony is placid
+## because it has nothing at stake, and a developed one with contented people and
+## loyal notables is held down harder than a hamlet ever could be.
+##
+## Expressed as a gain on the sum rather than a term in it, so it amplifies both
+## directions and cannot by itself put a town anywhere.
+const DEVELOPMENT_PER_BUILDING: float = 0.08
+const DEVELOPMENT_PER_TRADE: float = 0.0002
+const DEVELOPMENT_CEILING: float = 1.5
 
 ## What a neighbour in open rebellion is worth, at its worst.
 const NEIGHBOUR_WEIGHT: float = 18.0
@@ -143,15 +176,21 @@ static func of(
 		"grievances": 0.0 if grievances == null else grievances.weight_for(town.id, month),
 		"contacts": _contacts(town, contacts),
 		"quality": _quality(town),
-		"development": _development(town),
 		"neighbours": _neighbours(town, context),
 		"punishment": EMBARGO_RESENTMENT if town.is_embargoed() else 0.0,
 	}
 
-	var total := 0.0
+	var driving := 0.0
 	for key in parts:
-		total += float(parts[key])
-	parts["total"] = clampf(total, MINIMUM, MAXIMUM)
+		driving += float(parts[key])
+
+	# **What is at stake multiplies what is driving it** (§4). A developed town
+	# is not more rebellious for being developed; it is more *consequential*, so
+	# the same squeeze moves it further and the same contentment holds it down
+	# further.
+	var stakes := 1.0 + _development(town)
+	parts["stakes"] = stakes
+	parts["total"] = clampf(driving * stakes, MINIMUM, MAXIMUM)
 	return parts
 
 
@@ -195,8 +234,7 @@ static func _contacts(town: Town, contacts: Dictionary) -> float:
 		var contact: Contact = contacts[id]
 		if contact == null or not lives_in(contact, town):
 			continue
-		var weight := GOVERNOR_INFLUENCE if contact.id == town.governor_id \
-			else RESIDENT_INFLUENCE
+		var weight := PROMINENT_INFLUENCE * prominence_in(contact, town)
 		total += weight * (LOYALTY_NEUTRAL - contact.loyalty()) / LOYALTY_NEUTRAL
 
 	# **A man who has decided is not the same as a man who is sullen.** His
@@ -206,6 +244,22 @@ static func _contacts(town: Town, contacts: Dictionary) -> float:
 	if GovernorIntent.is_sedition(town.intent):
 		total += SEDITIOUS_GOVERNOR
 	return total
+
+
+## How large this man looms in this town.
+##
+## **His role carries the weight**, so an institutional contact who loomed larger
+## than a governor would weigh more without anything here being told about him.
+##
+## The one thing asserted rather than read is that **the man who governs the town
+## is prominent in it**. Governing is standing, whatever his record says, and a
+## governor whose role field was never filled in would otherwise be a nobody —
+## which is a silent zero in the largest term in the model.
+static func prominence_in(contact: Contact, town: Town) -> float:
+	var his := maxf(0.0, contact.prominence())
+	if contact.id == town.governor_id:
+		his = maxf(his, Contact.prominence_of(Contact.ROLE_GOVERNOR))
+	return his
 
 
 ## Whether this contact lives in this town.
@@ -230,7 +284,7 @@ static func _quality(town: Town) -> float:
 	return -QUALITY_WEIGHT * misery if town.rebelling else QUALITY_WEIGHT * misery
 
 
-## What the town has to lose, and the means to act on it.
+## How much this town has at stake, as a gain on everything else.
 ##
 ## **What it chose to build**, so the town hall does not count. Every town has
 ## one from the moment it is founded (#152), and a thing every town has is not a

@@ -53,6 +53,14 @@ func _town(id: StringName = &"ashmere") -> Town:
 	return town
 
 
+## A governor who has had enough, so a rebel town has something pushing up.
+func _rebel_governor(id: StringName) -> Contact:
+	var contact := Contact.new(id)
+	contact.role = Contact.ROLE_GOVERNOR
+	contact.relationship.loyalty = 5.0
+	return contact
+
+
 func _context(towns: Array, month: int = 8) -> ColonyContext:
 	var colony := Colony.new()
 	for town in towns:
@@ -250,25 +258,32 @@ func test_misery_settles_a_rebel_town_and_prosperity_does_not() -> void:
 	#
 	# Stated as a comparison rather than against a number, because every weight
 	# in the model is tuning and the *direction* is the design.
-	# **Both developed**, so the comparison sits above the floor. Sentiment is
-	# clamped at zero, and two rebel towns with nothing else pushing up both
-	# bottom out there and read alike — which is `rebel-sentiment.md` §9's open
-	# item about whether a rebel town's sentiment should have a floor at all,
-	# met in practice on the first fixture that asked.
+	#
+	# **Both have a governor who wants out**, which is what keeps the comparison
+	# above the floor. Sentiment clamps at zero, and two rebel towns with nothing
+	# at all pushing up both bottom out there and read alike — which is
+	# `rebel-sentiment.md` §9's open item about whether a rebel town's sentiment
+	# should have a floor, met in practice on the first fixture that asked.
+	#
+	# It used to be development that lifted them clear. Development is a gain on
+	# the stakes now rather than a contributor (§4), so it multiplies a negative
+	# sum and leaves it negative — which is correct, and meant this fixture was
+	# quietly resting on the old shape.
+	var seditious := {
+		"gov_ashmere": _rebel_governor(&"gov_ashmere"),
+		"gov_bellhaven": _rebel_governor(&"gov_bellhaven"),
+	}
+
 	var starving := _town(&"ashmere")
 	starving.rebelling = true
 	starving.quality_of_life = 0.05
-	starving.buildings = PackedStringArray(["granary", "sawmill", "church"])
-	starving.traded_value = 3_000.0
 
 	var thriving := _town(&"bellhaven")
 	thriving.rebelling = true
 	thriving.quality_of_life = 0.95
-	thriving.buildings = PackedStringArray(["granary", "sawmill", "church"])
-	thriving.traded_value = 3_000.0
 
-	var bleak := RebelSentiment.of(starving, _context([starving]), null, {})
-	var comfortable := RebelSentiment.of(thriving, _context([thriving]), null, {})
+	var bleak := RebelSentiment.of(starving, _context([starving]), null, seditious)
+	var comfortable := RebelSentiment.of(thriving, _context([thriving]), null, seditious)
 
 	assert_true(float(bleak["total"]) < float(comfortable["total"]),
 		"a rebellion that was visibly costing the town was as attractive as one that was working")
