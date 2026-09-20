@@ -106,6 +106,22 @@ The optics debt is for the **embarrassment only**. Charging the gold again would
 double-count the same event and make protests and rebellions read far worse than
 the design intends.
 
+### 🔒 A mechanic emits the event. It never prices it
+
+**No mechanic decides whether it affects prestige.** Trade protests, rebellion,
+tribute, battles and lost towns each emit an event saying what happened. **One
+table, here, decides which events are optics and what each is worth.**
+
+This is the same split the content pipeline uses, where triggers decide *whether*
+a letter is sent and the letter file decides *how it reads*. The reason is the
+same: a price is only meaningful against every other price, so pricing cannot be
+distributed across the mechanics that generate the events.
+
+It also means **a new optic is a row in a table, not a change to the mechanic
+that causes it.** A dev adding rival tribute in M5 emits `tribute_paid` and stops
+there; whether the court minds, and how much, is not his to decide and not his
+ticket's.
+
 ### Fixed debts, not proportional ones
 
 An optic is an absolute figure, not a share of anything. A lost town is a fixed
@@ -214,7 +230,33 @@ put unlocks out of reach of the players who need them most. Either the threshold
 are generous, or some unlocks gate on something other than the total. Not settled
 here.
 
-## 11. Tuning targets
+## 11. The reckoning, in M7
+
+**Prestige is not finished until every optic exists.** Until then each mechanic
+contributes an event to a register that is deliberately incomplete, and the
+prices in it are placeholders that have never been weighed against one another.
+
+The last optic arrives in **M6** — defeats at the hands of natives and rivals. The
+other source, **patrons**, arrives in **M7**, and patrons are also the loudest
+reader (§7). So **M7 is the first moment prestige is whole**, and it gets a
+deliberate pass there:
+
+- every event the register can price, listed in one place
+- every price set **against every other price** rather than in the ticket that
+  introduced it
+- the run-end debts weighed against a typical run's accumulated net gold
+- §14.3's unlock thresholds set once the range of achievable scores is known
+- the letters checked: does a player with falling prestige actually hear it?
+
+**This is why the emit-not-price rule above matters.** Every milestone between now
+and then can add optics freely without anyone having to guess what a rebellion is
+worth relative to a lost town — the question is asked once, with all the answers
+visible.
+
+M8 then tunes the numbers against the harness. M7 decides what the numbers *are
+for*.
+
+## 12. Tuning targets
 
 - **The gold-equivalent of every optic.** The ratio between a trade protest and a
   month's revenue is a design statement rather than a balance value: it decides
@@ -224,7 +266,7 @@ here.
 - The fail-condition debt, against a typical run's accumulated net gold.
 - §14.3's unlock thresholds.
 
-## 12. Open items
+## 13. Open items
 
 - **Whether prestige may go negative.** Currently yes: a PC who cost the Crown a
   fortune and lost the colony is worse than nothing, and an epitaph reads better
