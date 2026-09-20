@@ -143,10 +143,14 @@ func test_the_snapshot_cannot_be_written_through() -> void:
 		"the snapshot moved when the town did")
 
 
-func test_the_eight_phases_run_in_the_spec_s_order() -> void:
+func test_the_nine_phases_run_in_order() -> void:
+	# 🔒 **Convert sits between Consume and Build** (`town-economy.md` §11), which
+	# is what stops a town brewing the grain its people have already eaten and
+	# lets this month's ore reach this month's frame.
 	assert_eq(ColonyMonth.ORDER, [
 		ColonyMonth.WORK, ColonyMonth.RECKON, ColonyMonth.RELIEF, ColonyMonth.EXCHANGE,
-		ColonyMonth.CONSUME, ColonyMonth.BUILD, ColonyMonth.SELL, ColonyMonth.SETTLE,
+		ColonyMonth.CONSUME, ColonyMonth.CONVERT, ColonyMonth.BUILD, ColonyMonth.SELL,
+		ColonyMonth.SETTLE,
 	])
 
 
@@ -185,7 +189,7 @@ func test_an_unhandled_phase_still_happens() -> void:
 	assert_eq(context.log.of_type(ColonyMonth.EVENT_PHASE).size(), ColonyMonth.ORDER.size())
 
 
-func test_a_phase_name_that_is_not_one_of_the_eight_is_refused() -> void:
+func test_a_phase_name_that_is_not_one_of_the_nine_is_refused() -> void:
 	var month := ColonyMonth.new()
 	month.set_handler(&"harvest_festival", OrderingPhase.new("x"))
 	assert_false(month.handlers.has(&"harvest_festival"))

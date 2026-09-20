@@ -42,6 +42,14 @@ var run_seed: int = 0
 ## the whole point of Reckon being a phase of its own.
 var reckonings: Dictionary = {}
 
+## Town id -> the recipes Work put hands on, for Convert to run.
+##
+## **Scratch for one month**, like the reckonings above. Work decides *who* is on
+## town work and Convert decides *what comes of it*, four phases later, and the
+## assignment has to survive the gap between them without being state anybody
+## could save half-way through.
+var conversions: Dictionary = {}
+
 ## What the Crown has taken in duty this month, across both trade phases.
 ##
 ## Exchange taxes purchases and Sell taxes sales, with Consume and Build between

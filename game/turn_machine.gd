@@ -121,6 +121,7 @@ func _init(p_run: RunState) -> void:
 	colony_month.month.set_handler(ColonyMonth.RELIEF, ReliefPhase.new())
 	colony_month.month.set_handler(ColonyMonth.EXCHANGE, ExchangePhase.new())
 	colony_month.month.set_handler(ColonyMonth.CONSUME, ConsumePhase.new())
+	colony_month.month.set_handler(ColonyMonth.CONVERT, ConvertPhase.new())
 	colony_month.month.set_handler(ColonyMonth.BUILD, BuildPhase.new())
 	colony_month.month.set_handler(ColonyMonth.SELL, SellPhase.new())
 	colony_month.month.set_handler(ColonyMonth.SETTLE, SettlePhase.new())

@@ -145,9 +145,47 @@ static func upkeep_for(town: Town) -> float:
 ## The terms this building sets for a conversion, or empty.
 ##
 ## `{"ratio": input per unit of output, "throughput": input per worker-month}`.
+##
+## ## 🔒 Only the ratio is authored
+##
+## **A worker makes two** (`town-economy.md` §11). The base is anchored on the
+## output, so a town worker turns out two of the processed good and consumes
+## `2 x ratio` of the input; a conversion building doubles what he puts through.
+##
+## Both figures therefore fall out of the ratio, and authoring the second would
+## let them drift apart — which they did: every throughput shipped in #183 was
+## exactly half what it should have been, and nothing could tell, because the
+## file agreed with itself.
 func conversion_terms(recipe: StringName) -> Dictionary:
 	var all: Dictionary = effect("conversions", {})
-	return all.get(String(recipe), {})
+	var terms: Dictionary = all.get(String(recipe), {})
+	if terms.is_empty():
+		return {}
+	var ratio := maxf(0.0001, float(terms.get("ratio", 1.0)))
+	var base := base_ratio_for(recipe)
+	# The building that sets the worst terms *is* the base case — the town hall
+	# for everything ungated, the gunsmith for guns. Anything better is an
+	# improvement, and an improvement doubles the throughput.
+	var batches := 2.0 if is_equal_approx(ratio, base) else 4.0
+	return {"ratio": ratio, "throughput": batches * base}
+
+
+## The worst terms anything in the tree offers for a conversion.
+##
+## **That is the base**, by definition: the town hall speaks for every ungated
+## recipe and the gunsmith for the one that is gated, and each of them is the
+## least generous thing that can perform it.
+static func base_ratio_for(recipe: StringName) -> float:
+	var worst := 0.0
+	for id in ids():
+		var building := find(StringName(id))
+		if building == null:
+			continue
+		var all: Dictionary = building.effect("conversions", {})
+		if not all.has(String(recipe)):
+			continue
+		worst = maxf(worst, float(all[String(recipe)].get("ratio", 1.0)))
+	return maxf(0.0001, worst)
 
 
 ## 🔒 **The best building the town has for a conversion sets its terms** (#152).

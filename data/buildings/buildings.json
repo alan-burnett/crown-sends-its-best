@@ -7,32 +7,25 @@
 	"effects": {
 	  "conversions": {
 		"beer<-food": {
-		  "ratio": 4.0,
-		  "throughput": 4.0
+		  "ratio": 4.0
 		},
 		"cigars<-tobacco": {
-		  "ratio": 3.0,
-		  "throughput": 3.0
+		  "ratio": 3.0
 		},
 		"clothing<-cotton": {
-		  "ratio": 5.0,
-		  "throughput": 5.0
+		  "ratio": 5.0
 		},
 		"clothing<-furs": {
-		  "ratio": 3.0,
-		  "throughput": 3.0
+		  "ratio": 3.0
 		},
 		"iron<-ore": {
-		  "ratio": 10.0,
-		  "throughput": 10.0
+		  "ratio": 10.0
 		},
 		"rum<-sugar": {
-		  "ratio": 10.0,
-		  "throughput": 10.0
+		  "ratio": 10.0
 		},
 		"tools<-iron": {
-		  "ratio": 3.0,
-		  "throughput": 3.0
+		  "ratio": 3.0
 		}
 	  }
 	},
@@ -118,8 +111,7 @@
 	"effects": {
 	  "conversions": {
 		"guns<-iron": {
-		  "ratio": 3.0,
-		  "throughput": 3.0
+		  "ratio": 3.0
 		}
 	  },
 	  "reserve_months": {
@@ -454,8 +446,7 @@
 	"effects": {
 	  "conversions": {
 		"iron<-ore": {
-		  "ratio": 5.0,
-		  "throughput": 20.0
+		  "ratio": 5.0
 		}
 	  },
 	  "reserve_months": {
@@ -479,8 +470,7 @@
 	"effects": {
 	  "conversions": {
 		"tools<-iron": {
-		  "ratio": 2.0,
-		  "throughput": 6.0
+		  "ratio": 2.0
 		}
 	  },
 	  "reserve_months": {
@@ -504,8 +494,7 @@
 	"effects": {
 	  "conversions": {
 		"clothing<-furs": {
-		  "ratio": 2.0,
-		  "throughput": 6.0
+		  "ratio": 2.0
 		}
 	  },
 	  "reserve_months": {
@@ -529,8 +518,7 @@
 	"effects": {
 	  "conversions": {
 		"clothing<-cotton": {
-		  "ratio": 3.0,
-		  "throughput": 9.0
+		  "ratio": 3.0
 		}
 	  },
 	  "reserve_months": {
@@ -554,8 +542,7 @@
 	"effects": {
 	  "conversions": {
 		"cigars<-tobacco": {
-		  "ratio": 2.0,
-		  "throughput": 6.0
+		  "ratio": 2.0
 		}
 	  },
 	  "reserve_months": {
@@ -579,8 +566,7 @@
 	"effects": {
 	  "conversions": {
 		"rum<-sugar": {
-		  "ratio": 5.0,
-		  "throughput": 20.0
+		  "ratio": 5.0
 		}
 	  },
 	  "reserve_months": {
@@ -604,8 +590,7 @@
 	"effects": {
 	  "conversions": {
 		"beer<-food": {
-		  "ratio": 2.0,
-		  "throughput": 8.0
+		  "ratio": 2.0
 		}
 	  },
 	  "reserve_months": {
@@ -629,8 +614,7 @@
 	"effects": {
 	  "conversions": {
 		"guns<-iron": {
-		  "ratio": 2.0,
-		  "throughput": 6.0
+		  "ratio": 2.0
 		}
 	  },
 	  "reserve_months": {

@@ -1,7 +1,7 @@
 class_name ColonyMonth
 extends RefCounted
 
-## The eight phases of SPEC §11.3, run as phase 4 of the World Month.
+## The nine phases of the Colony Month, run as phase 4 of the World Month.
 ##
 ## **This is the runner and the seam, not the phase logic.** Each phase has its
 ## own ticket (#44 to #50); this decides only when they happen and what they are
@@ -24,18 +24,35 @@ extends RefCounted
 ## and retrofitting phase-locking onto eight phases written town-at-a-time is a
 ## rewrite rather than a fix.
 
-# --- The eight phases (SPEC §11.3) -----------------------------------------
+# --- The nine phases (`town-economy.md` §11) -------------------------------
+#
+# **Convert is its own phase, between Consume and Build.** Work sends hands to
+# tiles and holds the rest back for town work; Convert is where the held-back
+# hands do it.
+#
+# Three things follow, and each replaces a rule that used to be enforced by
+# scoring. A town cannot brew the grain its people need, because Consume has
+# already eaten it. This month's ore can be this month's iron and go into this
+# month's frame, which is a piece of tax arbitrage worth leaving in. And
+# processed goods are a month behind, so buying rum comforts a town now where
+# brewing comforts it later.
+#
+# SPEC §11.3 used to enumerate eight and put conversion inside Work. It devolved
+# the list to the mechanics doc in v2.2, which is what let this move.
 
 const WORK: StringName = &"work"
 const RECKON: StringName = &"reckon"
 const RELIEF: StringName = &"relief"
 const EXCHANGE: StringName = &"exchange"
 const CONSUME: StringName = &"consume"
+const CONVERT: StringName = &"convert"
 const BUILD: StringName = &"build"
 const SELL: StringName = &"sell"
 const SETTLE: StringName = &"settle"
 
-const ORDER: Array[StringName] = [WORK, RECKON, RELIEF, EXCHANGE, CONSUME, BUILD, SELL, SETTLE]
+const ORDER: Array[StringName] = [
+	WORK, RECKON, RELIEF, EXCHANGE, CONSUME, CONVERT, BUILD, SELL, SETTLE,
+]
 
 const EVENT_PHASE: StringName = &"colony_phase"
 
