@@ -209,6 +209,20 @@ multiplier in tile scoring, and the hunger weight. The objective raises desired
 stock, which raises valuation, which raises the tile's score. Food valuation
 spikes when a town is short because the gap is large. No special cases.
 
+### A bad price is a bad deal, not a loss
+
+Where spare and *worth selling* come apart — a duty high enough that the Crown
+nets the town less than it thinks the thing is worth — the town sells anyway if
+it is genuinely spare.
+
+**That is not a bug and it is not gold lost.** A town cannot turn furs into coin
+by itself; only the Crown buys. So the choice is never *sell at a poor price* or
+*sell at a good one*, it is **sell at a poor price or hold furs it has no use
+for**. The duty means it got a bad deal, which is exactly what a duty is for.
+
+The instrument the player has is the duty itself, and the town's answer to a duty
+it cannot bear is a trade protest (`trade-protests.md`), not a clever sale.
+
 ### And it stops a town drowning in what nobody wants
 
 A forest town's lumber valuation collapses once it is above desired stock with no
