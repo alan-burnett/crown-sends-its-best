@@ -130,6 +130,16 @@ own event. This keeps per-population consequences — the Diplomat's death roll,
 quality of life, letters that name what happened — uniform and legible, and it
 stops any one system inventing a bulk-casualty path the others do not expect.
 
+**And workers go before experts, always.** An expert is lost only when no worker
+remains — it is the workers who take up the pitchforks when the natives come.
+Accumulated expertise is therefore safe from a bad winter, which is what makes
+investing in education something other than a gamble. See
+`docs/mechanics/the-provost.md` §4.
+
+**An expedition is not a town** and is the one deliberate exception to all of
+this: it loses a *share* of its people and stores when attacked. See
+`docs/mechanics/founding-towns.md` §7.
+
 ### Determinism
 
 - **Named RNG streams per system** (mapgen, letters, sim resolution, contacts),

@@ -123,6 +123,10 @@ How large that fraction is depends on the Provost's expert knob and on the town'
 decided at the moment he does** — whichever specialism would be worth most to
 that town, by the same measure it values anything else.
 
+**Education gates natural growth, not arrivals.** A town with no learning will
+never raise an expert of its own, but it can still be *sent* them — the Provost's
+expert knob reaches every town whether or not it has a library.
+
 So a fur town gets a trapper, then a farmer, and a weaver once it starts turning
 furs into cloth. Nothing about the list is authored.
 

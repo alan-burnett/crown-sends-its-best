@@ -35,6 +35,18 @@ the colony's whole growth curve.
 
 Each runs **nothing / a little / a lot / a great deal.**
 
+And a fifth of a different shape:
+
+| | What it buys |
+| :--- | :--- |
+| **5. Curriculum** | Learning materials for the schoolhouses throughout the colony — **a meagre payment** that raises **every** town's education a little |
+
+Curriculum is the cheap one, and it is the counterweight to the library. A
+library is expensive and raises one town a great deal; curriculum is almost
+nothing and raises all of them slightly. **A colony too poor to build anything
+can still have some learning**, and since his loyalty answers to education (§5),
+it is also the cheapest way in the game to keep the Provost content.
+
 They are policies in the ordinary sense of `policy.md`: a **recurring monthly
 cost**, borne by the Crown's purse if the PC agrees to pay, and **by the
 Provost's loyalty** if he does not. The 3× asymmetry applies — paying nothing
@@ -50,12 +62,23 @@ advice on how they are doing.
 
 **A town attribute**, like quality of life — not a colony one.
 
-It is raised by buildings: the **library** and **college** most directly, and the
-**theatre** and **printing press** alongside them (`buildings.md`).
+It is raised by buildings — the **library** and **college** most directly, with
+the **theatre** and **printing press** alongside them (`buildings.md`) — and by
+the **curriculum** policy, which raises every town's a little for very little.
 
 It does one thing: **it sets how likely growth is to arrive as an expert rather
-than a worker** — both immigrants and births. A learned town turns its growth
-into expertise; an ignorant one turns it into hands.
+than a worker.** A learned town turns its growth into expertise; an ignorant one
+turns it into hands.
+
+### What a town with no education can still have
+
+Education gates **natural growth only**. A town with none will never raise an
+expert of its own — no schooling, no scholars.
+
+**It can still receive them.** Immigration brings experts according to the
+Provost's expert knob, and special events may deliver one. So an unlettered town
+is not shut out of expertise; it simply cannot generate any, and must be sent
+what it gets.
 
 ## 4. How an expert actually appears
 
@@ -86,6 +109,20 @@ producible resources, and the town picks from them by value.
 Because the type is fixed at the moment the expert materialises rather than when
 the fraction was earned, **a town that changes character while accumulating gets
 an expert suited to what it has become**, not to what it was.
+
+### Experts are not lost first
+
+When a town loses population — to famine, to a raid — **workers go before
+experts, always.** An expert is only lost once there is no worker left to lose.
+
+The reason is plain enough: it is the workers who take up the pitchforks and the
+guns when the natives come. The scholars do not.
+
+The consequence matters more than the fiction. **Accumulated expertise is safe**,
+so years of slow learning cannot be undone by one bad winter, and investing in
+education is not a gamble against the weather. A town reduced to nothing but
+experts is a town with nobody left to defend it — and that is the point at which
+its scholars begin to die.
 
 ## 5. What he cares about
 
@@ -152,13 +189,13 @@ firmer duty: a real opinion, honestly held, and reliably self-serving.
 
 ## 10. Open items
 
-- **What else raises education besides buildings.** Does a town start at nothing?
-  Do resident experts raise it, so that learning compounds? Does population alone
-  do anything? Buildings are the only stated source and that may be enough, but a
-  town with no library never producing a single expert is a strong claim.
-- **Can an expert be lost?** Famine and attack cost a town population one at a
-  time (`CLAUDE.md`). If the one lost may be an expert, a bad winter can undo
-  years of accumulation — which is either excellent or unbearable.
+- **Whether resident experts raise education**, so that learning compounds and a
+  town that gets one scholar finds the next easier. Buildings and curriculum are
+  the stated sources; nothing says a town's own learned men teach anybody.
+- **Whether a schoolhouse is a building.** Curriculum supplies "the schoolhouses
+  throughout the colony," and the tree has a library and a college but nothing
+  smaller. Either the phrase is flavour, or there is a cheap building missing
+  from the bottom of the comfort branch.
 - **Four knobs in one letter, against SPEC §9.2's target of under a minute.** The
   first Provost letter asks for four decisions at once. That is probably still
   one minute if each reads as a single line, but it is the densest letter in the
