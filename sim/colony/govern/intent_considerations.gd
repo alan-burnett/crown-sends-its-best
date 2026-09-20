@@ -23,13 +23,32 @@ const COMFORT: StringName = &"quality_of_life"
 const REVENUE: StringName = &"revenue"
 const THREAT: StringName = &"native_threat"
 const ROOM: StringName = &"room_to_grow"
+
+## **Too many mouths for the ground the town can work** (#175).
+##
+## Deliberately a *second* consideration rather than a term folded into
+## `room_to_grow`, because `deliberation.md` makes personality a weight vector:
+## two considerations give two weights and therefore two kinds of governor —
+## **the ambitious man who settles because there is land, and the pragmatic one
+## who settles because there are too many mouths.** A single blended term
+## collapses both into the same character.
+##
+## `founding-towns.md` §2 needs both to exist, or only one of its two expedition
+## kinds ever launches: the grand one and the shed one have different motives,
+## not merely different cargo.
+##
+## It also has no floor where `room_to_grow` has one. A one-town colony can never
+## see enough unclaimed land for room to go positive, so settling was unreachable
+## by construction. **A town too full for its fields is too full whether or not
+## anyone has surveyed the frontier.**
+const CROWDING: StringName = &"crowding"
 const MANDATE: StringName = &"mandate"
 const URGING: StringName = &"crown_urging"
 
 ## Consideration ids this system introduces, sorted. `Governor` gives each new
 ## governor a weight for every one of them.
 const ALL: PackedStringArray = [
-	"crown_urging", "food_security", "mandate", "native_threat",
+	"crowding", "crown_urging", "food_security", "mandate", "native_threat",
 	"quality_of_life", "revenue", "room_to_grow",
 ]
 
@@ -55,6 +74,7 @@ static func register_all() -> void:
 	Deliberation.register_consideration(Revenue.new(), kinds)
 	Deliberation.register_consideration(NativeThreat.new(), kinds)
 	Deliberation.register_consideration(RoomToGrow.new(), kinds)
+	Deliberation.register_consideration(Crowding.new(), kinds)
 	Deliberation.register_consideration(Mandate.new(), kinds)
 	Deliberation.register_consideration(CrownUrging.new(), kinds)
 	Deliberation.register_filter(RoomToSettle.new(), kinds)
@@ -184,6 +204,68 @@ class RoomToGrow extends Consideration:
 			GovernorIntent.POPULATION:
 				return room * 0.3
 		return 0.0
+
+
+## How many mouths the town has for the ground it can work.
+##
+## 🔒 **Against workable ground, not population alone.** A town of two hundred
+## with room to work is not crowded; a town of forty on six tiles is. That is
+## what makes the measure mean anything, and it has a consequence worth keeping:
+## **the expansion branch lowers crowding by raising influence**, so a town can
+## build its way out of needing to leave and guard towers become a real
+## alternative to a daughter town.
+class Crowding extends Consideration:
+	func _init() -> void:
+		super(IntentConsiderations.CROWDING)
+
+	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+		var pressure := IntentConsiderations.crowding_of(context)
+		match candidate.id:
+			GovernorIntent.SETTLEMENT:
+				return pressure
+			GovernorIntent.POPULATION:
+				# A man watching his town outgrow its fields does not answer by
+				# sending for more people.
+				return -pressure
+			GovernorIntent.ECONOMY:
+				# More hands than ground is a reason to make more of the ground.
+				return pressure * 0.4
+		return 0.0
+
+
+## How many mouths there are for each tile the town can actually work.
+##
+## Shared with anything else that needs to ask, so "crowded" cannot come to mean
+## two different things — the same reason `room_in_the_colony` is shared.
+##
+## Zero when the town has room to spare and climbing past one when it does not.
+static func crowding_of(context: DeliberationContext) -> float:
+	var town: Town = context.get_value("town")
+	var territory: Territory = context.get_value("territory")
+	if town == null or territory == null:
+		return 0.0
+
+	var ground := 0
+	for at in territory.influence:
+		if StringName(territory.influence[at]) == town.id:
+			ground += 1
+	if ground <= 0:
+		# Nowhere at all to work is as crowded as a town can be.
+		return 1.0
+
+	var mouths_per_tile := float(town.population()) / float(ground)
+	return clampf(
+		(mouths_per_tile - COMFORTABLE_MOUTHS_PER_TILE) / COMFORTABLE_MOUTHS_PER_TILE,
+		0.0, 1.0
+	)
+
+
+## How many people a tile of the town's own ground supports before it feels full.
+##
+## **The shared open item** between `founding-towns.md` §11 and
+## `immigration.md` §10 — how crowded before a town starts shedding people — and
+## it wants tuning against the two together rather than being settled here.
+const COMFORTABLE_MOUTHS_PER_TILE: float = 2.0
 
 
 ## What the Crown appointed him to do (SPEC §6.1).

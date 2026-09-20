@@ -213,6 +213,15 @@ func _worlds_for(id: StringName) -> Array:
 				for revenue in [0.0, 40.0, 400.0]:
 					worlds.append(_context(_town(), {WorldValues.REVENUE: revenue}, month))
 					worlds.append(_crowded_context(_town(), month, revenue))
+		IntentConsiderations.CROWDING:
+			# **Mouths against workable ground**, so the worlds are towns of very
+			# different sizes on the same country. A town of twenty with room to
+			# work is not crowded; the same country with two hundred in it is.
+			for people in [8, 20, 60, 200]:
+				for month in MONTHS:
+					var packed := _town()
+					packed.workers = people
+					worlds.append(_context(packed, {}, month))
 		IntentConsiderations.MANDATE:
 			for mandate in GovernorIntent.IN_ORDER:
 				for month in MONTHS:
@@ -272,10 +281,38 @@ func test_room_to_grow_cannot_decide_yet_and_here_is_why() -> void:
 	# So it is not broken and it is not tunable into relevance: **it is waiting
 	# for a second town.** When M4 founds one this test will start failing, which
 	# is exactly when somebody should look at it again.
+	#
+	# **That moment has been looked at** (#175). The answer was not to tune this
+	# one into relevance but to add a second consideration beside it: `crowding`
+	# measures mouths against workable ground and has no such floor, so a
+	# pragmatic governor can settle before any frontier has been surveyed. Two
+	# considerations mean two weights and therefore two kinds of man — the
+	# ambitious one who goes because there is land, and the pragmatic one who
+	# goes because there are too many mouths — where a single blended term would
+	# have collapsed both into the same character.
+	#
+	# This case stays as it is until a second town exists, which is what it has
+	# been correctly saying all along.
 	assert_false(_matters_somewhere(IntentConsiderations.ROOM,
 		_worlds_for(IntentConsiderations.ROOM)),
 		"room to grow can now change a governor's mind — M4 has arrived, so move "
 		+ "this case up with the others and give it a world where it decides")
+
+
+func test_crowding_can_decide() -> void:
+	# **The consideration that unblocks settling** (#175). `room_to_grow` cannot
+	# fire in a one-town colony by construction — the most unclaimed land a single
+	# town's border leaves inside what it can see is about 0.44, so `room * 2 - 1`
+	# is negative in every world reachable before a second town exists.
+	#
+	# Crowding has no such floor. **A town too full for its fields is too full
+	# whether or not anyone has surveyed the frontier**, so the chicken and egg
+	# breaks: the pragmatic governor settles because there are too many mouths,
+	# and the ambitious one can start wanting land once there is a colony to see
+	# it from.
+	assert_true(_matters_somewhere(IntentConsiderations.CROWDING,
+		_worlds_for(IntentConsiderations.CROWDING)),
+		"a town of two hundred on one town's ground wanted exactly what a hamlet wanted")
 
 
 func test_the_mandate_can_decide() -> void:
@@ -345,6 +382,7 @@ func test_every_registered_consideration_is_covered_here() -> void:
 		IntentConsiderations.COMFORT,
 		IntentConsiderations.REVENUE,
 		IntentConsiderations.ROOM,
+		IntentConsiderations.CROWDING,
 		IntentConsiderations.MANDATE,
 		IntentConsiderations.URGING,
 		IntentConsiderations.THREAT,
