@@ -114,6 +114,12 @@ static func per_worker_of(id: StringName) -> float:
 	return kind.per_worker if kind != null else 0.0
 
 
+## Whether making this needs a building before it can happen at all (#150).
+static func requires_building(id: StringName) -> bool:
+	var kind := get_kind(id)
+	return kind != null and kind.requires_building
+
+
 ## What a colonial town thinks a unit is worth in itself (#135).
 static func town_base(id: StringName) -> float:
 	var kind := get_kind(id)

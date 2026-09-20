@@ -131,6 +131,12 @@ func test_every_conversion_the_spec_names_exists() -> void:
 	for pair in expected:
 		var id := "%s<-%s" % [pair[0], pair[1]]
 		assert_has(found, id, "no recipe turns %s into %s" % [pair[1], pair[0]])
+		if ResourceCatalogue.requires_building(StringName(pair[0])):
+			# A gated recipe has no base terms on purpose (#150) — that absence
+			# *is* the gate. What must be true is that something can perform it.
+			assert_true(not Building.would_allow(StringName(id)).is_empty(),
+				"%s is gated and no building in the tree can perform it" % id)
+			continue
 		assert_true(found[id].made > 0.0, "%s makes nothing" % id)
 		assert_true(found[id].consumed > 0.0, "%s uses nothing up" % id)
 
@@ -148,6 +154,9 @@ func test_every_conversion_actually_produces_its_output() -> void:
 	for recipe in Conversion.all():
 		var town := _town({String(recipe.input): 500.0}, 6)
 		town.take(recipe.output, town.held(recipe.output))
+		# A gated recipe needs whatever lets it happen at all (#150).
+		for enabling in Building.would_allow(recipe.id()):
+			town.add_building(StringName(enabling))
 		var before := town.held(recipe.output)
 		_run_month(_harness(town))
 		assert_true(town.held(recipe.output) > before,
@@ -372,6 +381,14 @@ func test_the_town_hall_defines_every_conversion_there_is() -> void:
 	var terms := _base_terms()
 	for entry in Conversion.all():
 		var recipe: Conversion = entry
+		if ResourceCatalogue.requires_building(recipe.output):
+			# **Gated, and the gate is this absence** (#150). The flag on the
+			# resource is what says the omission is deliberate rather than a line
+			# somebody dropped.
+			assert_true(not terms.has(String(recipe.id())),
+				"%s is gated but the town hall defines it, so every town can make it"
+					% recipe.id())
+			continue
 		assert_has(terms, String(recipe.id()),
 			"no building defines terms for %s, so the base case is a branch in code" % recipe.id())
 
@@ -426,3 +443,106 @@ func test_no_building_raises_a_processed_resource_with_a_yield_bonus() -> void:
 			assert_true(not processed.has(String(resource)),
 				"%s raises %s with a yield bonus, and %s is made by conversion" % [
 					id, resource, resource])
+
+
+# --- 🔒 Nothing is gated, except guns (#150) --------------------------------
+
+func test_a_town_without_a_gunsmith_cannot_make_guns_at_any_rate() -> void:
+	# **Not "makes fewer" — cannot.** Guns arm the militia and SPEC §10.1 makes
+	# them what the natives covet most, so a colony that could arm itself without
+	# investing in the means to would have skipped a decision that ought to cost
+	# something.
+	var plain := _town({"iron": 500.0}, 6)
+	_run_month(_harness(plain))
+	assert_almost_eq(plain.held(&"guns"), 0.0, 0.0001,
+		"a town with no gunsmith forged muskets out of nothing but iron")
+
+
+func test_and_a_town_with_one_can() -> void:
+	# The other half, or the test above passes on a town that could not make guns
+	# for some entirely different reason.
+	var armed := _town({"iron": 500.0}, 6)
+	for enabling in Building.would_allow(&"guns<-iron"):
+		armed.add_building(StringName(enabling))
+	_run_month(_harness(armed))
+	assert_true(armed.held(&"guns") > 0.0,
+		"a town with a gunsmith and five hundred iron forged nothing")
+
+
+func test_no_other_conversion_is_gated() -> void:
+	# 🔒 A town with no smithy still forges tools. The exception is one recipe,
+	# and the data says which.
+	var bare := _town({}, 6)
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		if ResourceCatalogue.requires_building(recipe.output):
+			continue
+		assert_true(recipe.available_to(bare),
+			"%s needs a building, and only guns are supposed to" % recipe.id())
+
+
+func test_only_one_resource_is_gated_at_all() -> void:
+	# The Author settled on exactly one. A second would be a design decision
+	# rather than a data edit, so it should be noticed.
+	var gated: PackedStringArray = PackedStringArray()
+	for id in ResourceCatalogue.ids():
+		if ResourceCatalogue.requires_building(StringName(id)):
+			gated.append(id)
+	assert_eq(",".join(gated), "guns",
+		"the gated resources are now %s, which is a decision rather than a data edit" % gated)
+
+
+func test_every_conversion_has_a_building_that_improves_it() -> void:
+	# Each recipe gets a building that improves **the ratio and the rate**. A
+	# recipe nothing can ever improve is a dead end in the tree — the town would
+	# make it at the same terms forever, whatever it built.
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		var better := false
+		for id in Building.ids():
+			if id == String(Building.BASE):
+				continue
+			var building := Building.find(StringName(id))
+			var terms: Dictionary = building.conversion_terms(recipe.id())
+			if terms.is_empty():
+				continue
+			var equipped := _town({}, 6)
+			equipped.add_building(StringName(id))
+			if recipe.made_by(equipped) > recipe.made_by(_town({}, 6)) \
+					and recipe.consumes_for(equipped) >= recipe.consumes_for(_town({}, 6)):
+				better = true
+		assert_true(better, "nothing in the building tree improves %s" % recipe.id())
+
+
+func test_a_town_that_cannot_make_guns_says_so() -> void:
+	# **Seam A.** A town sitting on iron it cannot forge is the whole cost of the
+	# gate, and a sim that merely declined to convert would leave the map showing
+	# idle hands with nothing able to say why.
+	var plain := _town({"iron": 500.0}, 6)
+	var harness := _harness(plain)
+	_run_month(harness)
+
+	var context: ColonyContext = harness["context"]
+	var said := context.log.of_type(WorkPhase.EVENT_CANNOT_CONVERT)
+	assert_true(said.size() > 0, "a town holding five hundred iron and no gunsmith said nothing")
+	assert_eq(String(said[0].payload["output"]), "guns")
+	assert_true(not PackedStringArray(said[0].payload["needs"]).is_empty(),
+		"it said it could not, without saying what would let it")
+
+
+func test_a_town_with_a_gunsmith_says_nothing_of_the_kind() -> void:
+	var armed := _town({"iron": 500.0}, 6)
+	for enabling in Building.would_allow(&"guns<-iron"):
+		armed.add_building(StringName(enabling))
+	var harness := _harness(armed)
+	_run_month(harness)
+	assert_eq(harness["context"].log.of_type(WorkPhase.EVENT_CANNOT_CONVERT).size(), 0,
+		"a town that can forge muskets complained that it could not")
+
+
+func test_a_town_with_no_iron_is_not_being_denied_anything() -> void:
+	var empty := _town({}, 6)
+	var harness := _harness(empty)
+	_run_month(harness)
+	assert_eq(harness["context"].log.of_type(WorkPhase.EVENT_CANNOT_CONVERT).size(), 0,
+		"a town with no iron at all was told it could not forge muskets")

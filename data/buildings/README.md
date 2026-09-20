@@ -59,6 +59,20 @@ chosen and not optional, and it is what defines the eight base ratios. That is
 why the base case is not a special case in code: the rule is uniform, and an
 upgrade is simply a building that defines better terms.
 
+## Gated conversions
+
+**Nothing is gated, except guns** (#150). A town with no smithy still forges
+tools, because the town hall says on what terms.
+
+The gate is not a check on an id anywhere. It is that **no building defines
+terms for `guns<-iron` except a gunsmith**, so a town without one has nothing
+saying how a musket might be made. Gating another conversion is deleting its
+line from the town hall; ungating one is putting it back.
+
+The resource carries `"requires_building": true` so that the omission reads as
+deliberate rather than as a line somebody dropped, and so the tests can tell
+those apart.
+
 ## The fork
 
 `storehouse` opens everything. From there a town chooses:

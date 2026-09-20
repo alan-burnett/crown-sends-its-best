@@ -171,6 +171,35 @@ static func terms_for(town: Town, recipe: StringName) -> Dictionary:
 	}
 
 
+## Whether any building in the data defines terms for a recipe (#150).
+##
+## **What makes a recipe exist at all.** A conversion nothing can perform is not
+## a conversion, and this is asked of the whole building tree rather than of one
+## town — the recipe is real, and whether *this* town can run it is
+## `terms_for` returning something.
+static func anything_defines(recipe: StringName) -> bool:
+	for id in ids():
+		var building := find(StringName(id))
+		if building != null and not building.conversion_terms(recipe).is_empty():
+			return true
+	return false
+
+
+## Which buildings would let a town perform a conversion it cannot, sorted.
+##
+## **So a letter can name the thing it lacks.** A governor reporting that his
+## militia has no muskets and no way to make any should be able to say what would
+## fix it, and that has to come from the data rather than from prose.
+static func would_allow(recipe: StringName) -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	for id in ids():
+		var building := find(StringName(id))
+		if building != null and not building.conversion_terms(recipe).is_empty():
+			out.append(id)
+	out.sort()
+	return out
+
+
 static func _better(terms: Dictionary, than: Dictionary) -> bool:
 	var ratio := float(terms.get("ratio", 1.0))
 	var beaten := float(than.get("ratio", 1.0))

@@ -54,7 +54,8 @@
     "input_per_unit": 2.0,
     "per_worker": 1.0,
     "native_worth": 3.4,
-    "town_base": 30.0
+    "town_base": 30.0,
+    "requires_building": true
   },
   {
     "id": "beer",
