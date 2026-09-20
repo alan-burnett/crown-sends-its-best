@@ -167,3 +167,37 @@ func test_a_starving_town_with_ample_amusement_reports_good_spirits() -> void:
 		"a starving town with a theatre was no happier than a starving town without")
 	assert_almost_eq(float(distracted["health"]), float(wretched["health"]), 0.0001,
 		"the amusement fed somebody, which is not what masking means")
+
+
+func test_a_second_amusement_is_deeper_and_not_wider() -> void:
+	# 🔒 **One kind however much of it there is** (`buildings.md` §7, Author
+	# confirmed). A fairgrounds beside the theatre adds only to how much of the
+	# town was served.
+	#
+	# Counting each building as its own kind would let a colony clear
+	# `VARIETY_TARGET` on buildings alone and make the cellar irrelevant — and
+	# the tree now has six things that amuse people, so that is not hypothetical.
+	var amusements := _amusements()
+	assert_true(amusements.size() >= 2, "the tree has fewer than two amusements to compare")
+
+	var one := Building.amusement_for(_town(5_000.0, {}, [amusements[0]]))
+	var both := Building.amusement_for(_town(5_000.0, {}, [amusements[0], amusements[1]]))
+
+	assert_true(float(both["served"]) > float(one["served"]),
+		"a second amusement entertained nobody extra")
+	assert_eq(int(both["kinds"]), int(one["kinds"]),
+		"a second amusement counted as a second kind, so buildings buy variety")
+	assert_eq(int(one["kinds"]), 1, "one amusement is one kind")
+
+
+func test_a_town_can_build_its_way_to_the_variety_it_cannot_buy() -> void:
+	# The consequence the Author confirmed as intended: beer, rum and a theatre
+	# reach full variety exactly as beer, rum and tea do, so tea competes on
+	# `served` and on price rather than on being irreplaceable.
+	var mouths := 10.0
+	var cellar := {"beer": 100.0, "rum": 100.0}
+	var bought := QualityOfLife.pleasure_from(mouths, {"beer": 100.0, "rum": 100.0, "tea": 100.0})
+	var built := QualityOfLife.pleasure_from(mouths, cellar, {"served": 0.0, "kinds": 1})
+	assert_true(built > 0.0 and bought > 0.0)
+	assert_almost_eq(built, bought, 0.05,
+		"a theatre is worth markedly less than the tea it is supposed to stand in for")
