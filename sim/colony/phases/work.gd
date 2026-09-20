@@ -66,6 +66,18 @@ extends ColonyPhase
 const EVENT_WORKED: StringName = &"town_worked"
 const EVENT_CONVERTED: StringName = &"town_converted"
 
+## **The town has the makings and no way to make them** (#150, Seam A).
+##
+## A town sitting on iron it cannot forge into muskets is the whole cost of the
+## gunsmith gate, and if the sim only *declined* to convert, nothing downstream
+## would know it had happened — the map would show idle hands and the letters
+## would have nothing to say about why.
+##
+## It covers a town that lost the building as well as one that never had it.
+## There is no way to lose a building yet; when there is, this fires the month
+## after without anything here changing.
+const EVENT_CANNOT_CONVERT: StringName = &"town_cannot_convert"
+
 ## What a month spent fetching an input is worth against the need it becomes.
 ##
 ## Less than the need itself, because it still costs a worker and a month to turn
@@ -148,10 +160,41 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 		"produced": produced,
 	}, WorldPhase.COLONY_MONTH)
 
+	_report_what_it_cannot_make(town, before, context)
+
 	if not converted.is_empty():
 		context.log.emit(EVENT_CONVERTED, town.id, context.state.month, {
 			"town": String(town.id),
 			"made": converted,
+		}, WorldPhase.COLONY_MONTH)
+
+
+## Say what the town could be making and cannot (#150).
+##
+## Only for a gated recipe, and only when the town actually holds the input above
+## its needs. A town with no iron is not being denied anything.
+func _report_what_it_cannot_make(
+	town: Town,
+	before: ColonySnapshot,
+	context: ColonyContext,
+) -> void:
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		if not ResourceCatalogue.requires_building(recipe.output):
+			continue
+		if recipe.available_to(town):
+			continue
+		var spare := _spare(town, before, recipe.input)
+		if spare <= 0.0:
+			continue
+		context.log.emit(EVENT_CANNOT_CONVERT, town.id, context.state.month, {
+			"town": String(town.id),
+			"output": String(recipe.output),
+			"input": String(recipe.input),
+			"held": spare,
+			# **What would fix it**, from the data, so a governor's letter can
+			# name the building rather than the prose guessing at it.
+			"needs": Building.would_allow(recipe.id()),
 		}, WorldPhase.COLONY_MONTH)
 
 

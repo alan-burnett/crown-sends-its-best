@@ -39,6 +39,15 @@ var livestock: bool = false
 ## What one unit trades for with the Crown, before tax (SPEC §10.2). Tuning.
 var price: float = 1.0
 
+## Whether a town needs a building before it can make this at all (#150).
+##
+## **Declared here and enforced by absence.** Nothing reads this to refuse a
+## conversion — the refusal is that no town hall defines terms for it, so a town
+## without the building has nothing saying how it might be made. This says that
+## the omission is deliberate, so the content validator can tell a gate apart
+## from a line somebody dropped.
+var requires_building: bool = false
+
 ## What it is worth to a colonial town in itself (#135, #136).
 ##
 ## **Its own authored figure, not a multiple of `price`.** Derive it and the gap
@@ -93,6 +102,7 @@ static func from_data(record: Dictionary) -> ResourceKind:
 	kind.price = float(record.get("price", 1.0))
 	kind.native_worth = float(record.get("native_worth", 0.0))
 	kind.town_base = float(record.get("town_base", kind.price))
+	kind.requires_building = bool(record.get("requires_building", false))
 	kind.feed = float(record.get("feed", 0.0))
 	kind.slaughter_yield = float(record.get("slaughter_yield", 0.0))
 	kind.input_per_unit = float(record.get("input_per_unit", 1.0))

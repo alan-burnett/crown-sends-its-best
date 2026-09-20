@@ -23,10 +23,6 @@
           "ratio": 3.0,
           "throughput": 4.8
         },
-        "guns<-iron": {
-          "ratio": 3.0,
-          "throughput": 2.0
-        },
         "iron<-ore": {
           "ratio": 10.0,
           "throughput": 4.5
@@ -197,7 +193,7 @@
     "id": "armoury",
     "name": "an armoury",
     "requires": [
-      "smithy"
+      "gunsmith"
     ],
     "months": 4,
     "cost": {
@@ -215,5 +211,115 @@
       }
     },
     "grants_contact": "quartermaster"
+  },
+  {
+    "id": "brewhouse",
+    "name": "a brewhouse",
+    "requires": [
+      "granary"
+    ],
+    "months": 2,
+    "cost": {
+      "wood": 30,
+      "stone": 10
+    },
+    "effects": {
+      "quality_of_life": 0.5,
+      "conversions": {
+        "beer<-food": {
+          "ratio": 3.0,
+          "throughput": 16.0
+        }
+      }
+    }
+  },
+  {
+    "id": "weavers_loom",
+    "name": "a weavers' loom",
+    "requires": [
+      "storehouse"
+    ],
+    "months": 3,
+    "cost": {
+      "wood": 35,
+      "tools": 6
+    },
+    "effects": {
+      "conversions": {
+        "clothing<-furs": {
+          "ratio": 2.0,
+          "throughput": 7.0
+        },
+        "clothing<-cotton": {
+          "ratio": 3.5,
+          "throughput": 7.0
+        }
+      }
+    }
+  },
+  {
+    "id": "distillery",
+    "name": "a distillery",
+    "requires": [
+      "storehouse"
+    ],
+    "months": 3,
+    "cost": {
+      "wood": 30,
+      "stone": 15,
+      "tools": 4
+    },
+    "effects": {
+      "quality_of_life": 0.5,
+      "conversions": {
+        "rum<-sugar": {
+          "ratio": 6.0,
+          "throughput": 6.0
+        }
+      }
+    }
+  },
+  {
+    "id": "rolling_house",
+    "name": "a rolling house",
+    "requires": [
+      "storehouse"
+    ],
+    "months": 2,
+    "cost": {
+      "wood": 25,
+      "tools": 4
+    },
+    "effects": {
+      "quality_of_life": 0.5,
+      "conversions": {
+        "cigars<-tobacco": {
+          "ratio": 2.0,
+          "throughput": 5.0
+        }
+      }
+    }
+  },
+  {
+    "id": "gunsmith",
+    "name": "a gunsmith",
+    "requires": [
+      "smithy"
+    ],
+    "months": 3,
+    "cost": {
+      "stone": 25,
+      "wood": 20,
+      "tools": 10
+    },
+    "effects": {
+      "conversions": {
+        "guns<-iron": {
+          "ratio": 3.0,
+          "throughput": 2.0
+        }
+      }
+    },
+    "grants_contact": "gunsmith"
   }
 ]

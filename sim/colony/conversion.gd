@@ -68,6 +68,24 @@ func id() -> StringName:
 	return StringName("%s<-%s" % [output, input])
 
 
+## Whether this town has anything that can perform this conversion (#150).
+##
+## ## 🔒 Nothing is gated, except guns
+##
+## A town with no smithy still forges tools, because the town hall says on what
+## terms. **Guns are the one exception**: they arm the militia and SPEC §10.1
+## makes them what the natives covet most, so a colony that could arm itself
+## without investing in the means to would have skipped a decision that ought to
+## cost something.
+##
+## And the gate is not a check on an id. It is that **no building defines terms
+## for `guns<-iron` except a gunsmith**, so a town without one has nothing that
+## says how a musket might be made, and therefore cannot make one. Gating another
+## conversion is deleting a line from the town hall.
+func available_to(town: Town) -> bool:
+	return made_by(town) > 0.0
+
+
 ## The best rate this town can turn anything into `output` at (#152).
 ##
 ## **One answer, because there used to be two.** The catalogue carries an
@@ -101,7 +119,11 @@ static func all() -> Array:
 	for id in ResourceCatalogue.processed():
 		for source in ResourceCatalogue.inputs_for(StringName(id)):
 			var recipe := Conversion.new(StringName(id), StringName(source))
-			if recipe.made > 0.0 and recipe.consumed > 0.0:
+			# **A recipe exists if any building in the tree can perform it**, not
+			# if the town hall can. Filtering on the base terms would delete the
+			# gated ones outright, so a gunsmith would have nothing to enable
+			# (#150).
+			if Building.anything_defines(recipe.id()):
 				out.append(recipe)
 	out.sort_custom(func(a: Conversion, b: Conversion) -> bool:
 		if a.output != b.output:
