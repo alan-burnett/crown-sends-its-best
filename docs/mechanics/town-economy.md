@@ -268,17 +268,31 @@ SPEC §11.3:
 > their survival is not at stake, and spending a little on luxuries even when
 > there are more important things to buy.
 
-So the tier is a **heavy multiplier on valuation, not a gate.** A very cheap
-comfort can outrank a very expensive marginal need, and a town one coin short of
-cloth still buys a little beer.
+So the tier is a **heavy multiplier on valuation, not a gate.**
 
-That is not a leak in the model, it is the same instinct `quality-of-life.md` is
-built on: **enough rum and people do not care that they are starving.** The
-masking already existed on the consumption side. This is it on the buying side.
+### What that does and does not mean
 
-A town of 100 gold facing 500 gold of wants therefore spends all 100 — mostly on
-whatever is most desperately short per gold, and a little on beer — and goes into
-Consume hungry.
+**A town gathering for a build it cannot finish still buys its beer.** That is the
+property, and it is the one the spec describes — *spending a little on luxuries
+even when there are more important things to buy*. The more important thing is the
+**objective**.
+
+**A starving town does not.** An unmet need scores around twenty times what a
+comfort does, and there is no tuning at which a comfort outranks it that does not
+also put drink ahead of grain in a famine. The spec is careful here too: it asks
+for a reserve kept *"when their survival is not at stake"*, which says plainly
+that survival is a different case.
+
+An earlier draft of this section claimed a town one coin short of cloth still
+buys beer. **It does not, it should not, and no value of the comfort allowance
+makes it true without making a famine absurd.**
+
+### There is still no gate
+
+Nothing in the code forbids buying comfort while a need is unmet. Comfort loses
+to a need **on the arithmetic**, not on its position in a list — which is what
+keeps the objective case working, and is mutation-checked: putting a strict gate
+back fails the test.
 
 ## 5. Where a need can actually be met
 

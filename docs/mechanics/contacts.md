@@ -21,8 +21,19 @@
 | **Identity** | Name, title, role, portrait, and the town he lives in if he lives in one |
 | **Personality** | A **weight vector over considerations**, not a tag with special-cased behaviour |
 | **Leans** | Signed perception bias per topic, `[-1, +1]` |
-| **Cares about** | The measures he judges the PC by |
-| **Relationship** | Where he and the PC stand (§6) |
+| **Cares about** | The measures he judges the PC by, and what he writes to the PC about (§6) |
+| **Prominence** | How large he looms in the town he lives in |
+| **Relationship** | Where he and the PC stand (§7) |
+
+**Prominence** scales his effect on rebel sentiment (`rebel-sentiment.md` §4),
+replacing what was once a hard split between the governor and everybody else. It
+is derived from his role — the governor's office is a large one — with a
+per-contact override in the data, so a particular clergyman can be a firebrand
+without any code knowing he is unusual.
+
+**It cuts both ways, and that is the point.** If the famous men of a town are all
+loyal to the Crown there is not much rebel sentiment in it. The same men slighted
+are what carries the town out.
 
 **Temperament** is the spec's broad word for the middle three together —
 personality, what he cares about, and how he sees it. It is deliberately loose
