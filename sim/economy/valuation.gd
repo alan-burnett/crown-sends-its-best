@@ -179,6 +179,10 @@ static func worth_buying(
 ##
 ## **The same gap read the other way**, which is why there is no third rule for
 ## what a town keeps: what it keeps is what neither of these fires on.
+##
+## The merchant's cut is on this side too. Somebody has to carry the thing across
+## an ocean either way, and a margin charged only to importers would make the
+## colony's exports look profitable at gaps that do not pay for the voyage.
 static func worth_selling(
 	resource: StringName,
 	desired: DesiredStock,
@@ -186,4 +190,4 @@ static func worth_selling(
 	context: ColonyContext,
 ) -> bool:
 	var net := crown(resource, context.state) * (1.0 - context.tax_rate(resource))
-	return town(resource, desired, held) < net
+	return town(resource, desired, held) * (1.0 + MERCHANT_MARGIN) < net
