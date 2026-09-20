@@ -156,3 +156,34 @@ static func natives(resource: StringName, appetite: Dictionary = {}) -> float:
 	var base := crown(resource)
 	var craft := ResourceCatalogue.native_worth(resource)
 	return base * craft * float(appetite.get(String(resource), 1.0))
+
+
+# --- Where the two dictionaries meet ----------------------------------------
+
+## Whether this town would rather have the resource than the gold (§3).
+##
+## **The buy side of the gap.** Landed cost is the Crown's price plus the duty,
+## so a rate high enough closes the trade on its own — which is §2's point that
+## the Steward can be genuinely wrong about a rate rather than merely greedy.
+static func worth_buying(
+	resource: StringName,
+	desired: DesiredStock,
+	held: float,
+	context: ColonyContext,
+) -> bool:
+	var landed := crown(resource, context.state) * (1.0 + context.tax_rate(resource))
+	return town(resource, desired, held) > landed * (1.0 + MERCHANT_MARGIN)
+
+
+## And whether it would rather have the gold than the resource.
+##
+## **The same gap read the other way**, which is why there is no third rule for
+## what a town keeps: what it keeps is what neither of these fires on.
+static func worth_selling(
+	resource: StringName,
+	desired: DesiredStock,
+	held: float,
+	context: ColonyContext,
+) -> bool:
+	var net := crown(resource, context.state) * (1.0 - context.tax_rate(resource))
+	return town(resource, desired, held) < net

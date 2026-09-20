@@ -87,27 +87,22 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# Both read from the state the month opened with, so Work and Reckon are
 	# working from one account of the town rather than two (§3).
 	var desired := DesiredStock.for_town(town, before)
-	var worth := _worth(town, before, desired)
 	var tiles := context.tiles_of(town)
 
-	# Tiles and recipes, scored the same way and ranked together. Ties break on a
-	# fixed rule, so the choice is the colony's rather than the iteration order's.
+	# Tiles and recipes in one list, to be ranked together. `_allocate` scores
+	# them; the score here is a placeholder it overwrites.
 	var work: Array = []
 	for at in tiles:
-		work.append({"kind": "tile", "at": at, "score": _score_tile(context, at, worth)})
+		work.append({"kind": "tile", "at": at, "score": 0.0})
 	for recipe in Conversion.all():
-		work.append({"kind": "convert", "recipe": recipe, "score": _score_recipe(recipe, town, worth)})
+		work.append({"kind": "convert", "recipe": recipe, "score": 0.0})
 
-	work.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
-		if not is_equal_approx(float(a["score"]), float(b["score"])):
-			return float(a["score"]) > float(b["score"])
-		if String(a["kind"]) != String(b["kind"]):
-			return String(a["kind"]) < String(b["kind"])
-		if String(a["kind"]) == "convert":
-			return String(a["recipe"].id()) < String(b["recipe"].id())
-		var left: Vector2i = a["at"]
-		var right: Vector2i = b["at"]
-		return left.y < right.y or (left.y == right.y and left.x < right.x))
+	# **Ranked a hand at a time, against what the hands before it already
+	# produced.** The month's assignment is built by taking the best remaining
+	# work, adding what it would yield to a running projection of the stores, and
+	# asking again — so the second fur trapper is judged on a town that already
+	# has the first trapper's furs.
+	_allocate(town, before, context, work, desired)
 
 	# **The survival check, after scoring and before anybody goes out.** It may
 	# reorder the list; it never rescores it.
@@ -166,11 +161,12 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 ##
 ## `Valuation.town` for every resource in the catalogue, computed once and looked
 ## up by the scoring — the town's one opinion of what it wants, not this phase's.
-func _worth(town: Town, before: ColonySnapshot, desired: DesiredStock) -> Dictionary:
+func _worth_of(held: Dictionary, desired: DesiredStock) -> Dictionary:
 	var weights: Dictionary = {}
 	for resource in ResourceCatalogue.ids():
-		var id := StringName(resource)
-		weights[resource] = Valuation.town(id, desired, before.held(town.id, id))
+		weights[resource] = Valuation.town(
+			StringName(resource), desired, float(held.get(resource, 0.0))
+		)
 	return weights
 
 
@@ -355,7 +351,132 @@ func _yield_of(context: ColonyContext, town: Town, at: Vector2i, resource: Strin
 		* (1.0 + Building.yield_bonus_for(town, resource))
 
 
-# --- Scoring ---# --- Scoring ----------------------------------------------------------------
+# --- Building the month's assignment ----------------------------------------
+
+## Put the best work first, each hand judged on what the hands before it did.
+##
+## ## 🔒 Marginal, because one tile can overshoot a want twelvefold
+##
+## Scoring every tile once against the stores as the month opened, and taking the
+## top twelve, is what the doc's `yield x valuation` reads like — and it
+## oscillates, hard. A town of twelve wants about four furs and a single forest
+## tile brings in four; twelve hands bring in fifty-one. So the planning
+## valuation says furs are worth three times base, the month lands twelve times
+## the want, and next month the same tiles are worth the surplus floor. The town
+## abandons the forest, comes back the month after, and does it forever.
+##
+## Measured: flat scoring took tile churn from 0.25 abandoned tiles a month to
+## 1.87, which is #116's regression arriving by a different road. Ranking at the
+## margin puts it back, because the assignment stops piling onto a want the
+## moment it is met and moves to the next thing — so the month ends near the
+## target instead of far past it, and next month's ranking is the same ranking.
+##
+## This is not a second opinion about value. It is the same valuation asked the
+## only question that makes sense of a whole month's labour at once: not *what is
+## a fur worth*, but *what is the fifteenth fur worth*.
+##
+## Leaves `work` with the chosen assignment in its first `workable_tiles()`
+## slots, exactly as a sort would, so the survival check downstream is unchanged.
+func _allocate(
+	town: Town,
+	before: ColonySnapshot,
+	context: ColonyContext,
+	work: Array,
+	desired: DesiredStock,
+) -> void:
+	# What the town would be holding, updated as each hand is committed.
+	var projected: Dictionary = {}
+	for resource in ResourceCatalogue.ids():
+		projected[resource] = before.held(town.id, StringName(resource))
+
+	var chosen: Array = []
+	var rounds := mini(town.workable_tiles(), work.size())
+	for _hand in rounds:
+		var worth := _worth_of(projected, desired)
+		var best := -1
+		var best_score := 0.0
+		for i in work.size():
+			var score := _score(town, before, context, work[i], worth)
+			if best < 0 or score > best_score + 0.000001 					or (absf(score - best_score) <= 0.000001 and _before(work[i], work[best])):
+				best = i
+				best_score = score
+		if best < 0:
+			break
+
+		var taken: Dictionary = work[best]
+		taken["score"] = best_score
+		chosen.append(taken)
+		work.remove_at(best)
+		_project(town, before, context, taken, projected)
+
+	# The rest, in the order they last scored, so the survival check has a ranked
+	# tail to draw a replacement hand from.
+	var worth := _worth_of(projected, desired)
+	for entry in work:
+		entry["score"] = _score(town, before, context, entry, worth)
+	work.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		if not is_equal_approx(float(a["score"]), float(b["score"])):
+			return float(a["score"]) > float(b["score"])
+		return _before(a, b))
+
+	work.assign(chosen + work)
+
+
+## A fixed order for work that scores the same, so the choice is the colony's
+## rather than the iteration order's.
+func _before(a: Dictionary, b: Dictionary) -> bool:
+	if String(a["kind"]) != String(b["kind"]):
+		return String(a["kind"]) < String(b["kind"])
+	if String(a["kind"]) == "convert":
+		return String(a["recipe"].id()) < String(b["recipe"].id())
+	var left: Vector2i = a["at"]
+	var right: Vector2i = b["at"]
+	return left.y < right.y or (left.y == right.y and left.x < right.x)
+
+
+func _score(
+	town: Town,
+	before: ColonySnapshot,
+	context: ColonyContext,
+	entry: Dictionary,
+	worth: Dictionary,
+) -> float:
+	if String(entry["kind"]) == "convert":
+		return _score_recipe(entry["recipe"], town, worth)
+	var at: Vector2i = entry["at"]
+	return _score_tile(context, at, worth)
+
+
+## Add what a piece of work would yield to the running projection.
+func _project(
+	town: Town,
+	before: ColonySnapshot,
+	context: ColonyContext,
+	entry: Dictionary,
+	projected: Dictionary,
+) -> void:
+	if String(entry["kind"]) == "convert":
+		var recipe: Conversion = entry["recipe"]
+		# **Only what it could actually run.** A loom with no furs changes
+		# nothing, so it must not look as though it did.
+		var share := _feasible(town, before, recipe)
+		if share <= 0.0:
+			return
+		var out := String(recipe.output)
+		projected[out] = float(projected.get(out, 0.0)) + recipe.made_by(town) * share
+		var into := String(recipe.input)
+		projected[into] = maxf(0.0, float(projected.get(into, 0.0)) - recipe.consumed * share)
+		return
+
+	var at: Vector2i = entry["at"]
+	for resource in ResourceCatalogue.ids():
+		var amount := context.map.yield_at(at.x, at.y, StringName(resource))
+		if amount <= 0.0:
+			continue
+		projected[resource] = float(projected.get(resource, 0.0)) 			+ amount * expert_multiplier(town, StringName(resource)) 			* (1.0 + Building.yield_bonus_for(town, StringName(resource)))
+
+
+# --- Scoring ----------------------------------------------------------------
 
 func _score_tile(context: ColonyContext, at: Vector2i, weights: Dictionary) -> float:
 	var score := 0.0
