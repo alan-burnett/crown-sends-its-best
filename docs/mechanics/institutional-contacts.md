@@ -90,14 +90,62 @@ that will not be fooled by it.
 **What he asks for.**
 
 - **Gold**, for charity.
-- **Relief of a duty** on something the poor cannot do without, or **a holiday**
-  from it — a rate lowered for a season rather than for good.
-- **An expedition of pilgrims**, to be supplied and sent out.
+- **A tax holiday**, in one of two shapes — below.
+- **An expedition of pilgrims** — below.
 
-That last one makes the clergy a **source of foundings** in his own right,
-alongside the Provost and the patrons (`founding-towns.md` §3). A pilgrim
-expedition arrives with a character of its own, and it carries rewards beyond the
-priest's gratitude.
+#### The tax holiday, two shapes
+
+Both are **time-limited rate changes**, which nothing in §10.2 can currently
+express: rates today are standing, a base plus per-resource overrides, with
+nothing that expires. Both are also necessarily **colony-wide**, because §10.2
+locks that there are no per-town rates — so a priest asking relief for his own poor
+is asking the whole colony to go without the duty.
+
+| | The ask | Scope | Length |
+| :--- | :--- | :--- | :--- |
+| **A festival** | *the people are holding a festival to celebrate {resource}; waive the duty on it* | **one resource** | about three months |
+| **A holy day** | *a holiday falls in three months; waive all duties so we may keep it properly* | **everything** | the one month |
+
+Narrow and long, or broad and brief.
+
+**The festival names one of the colony's best-selling resources**, which makes it
+self-targeting: **the better the colony trades, the more the priest asks the Crown
+to give up.** Prosperity draws the cost, exactly as it does with the rivals.
+
+**The holy day is announced three months out**, so the PC sees it coming and can
+do nothing about it but decide. A month of no duty is a month of cheap goods for
+every town — quality of life up, sentiment down — paid for out of Crown revenue,
+which is `net_position` and therefore standing *and* prestige.
+
+So both are the same bargain in different clothes: **buy the colony's goodwill
+with the Crown's money.** That is the clergy's whole character in one instrument.
+
+#### The pilgrim expedition
+
+**He creates the population.** He gathers devout people from outside the colony
+entirely — they are not shed by any town, and nobody already here is displaced.
+
+**But he has no supplies, and the PC must buy them.** Gold, or the expedition
+never materialises at all.
+
+That makes it a **third founding route**, Crown-launched in shape
+(`founding-towns.md` §3): it arrives by ship with no ground travel and none of
+§7's dangers, and it is paid for in gold rather than in a parent town's people.
+
+It is also **a way to buy population that bypasses immigration entirely.**
+`immigration.md`'s arrivals answer to appeal and to the Crown's circumstances;
+pilgrims answer to the PC's purse. Which is the Provost's bargain in another
+coat — growth for gold — and it carries the Provost's consequence too, since
+`immigration.md` §9 makes growth the engine of rebellion. **A pilgrim town is
+future sentiment, bought.**
+
+**And it is how the priest grows his own institution.** A town of pilgrims that
+arrives with a church standing brings a clergyman of its own, which is a second
+resident voice, a second scaled safety bonus, and a second man asking for
+charity.
+
+The PC is being invited to fund that with his own gold, and the letter will not
+mention it.
 
 **His bias.** He talks to the poorest of the poor, the ones with nowhere else to
 go, **so he believes the colony is far worse off than it is.** Every welfare
@@ -208,12 +256,13 @@ why the theatre does not.
   safety. If that holds for all four it is an elegant pattern: the building gives
   the effect, the man decides how much of it the town actually gets. If it holds
   only for the clergy it should be said plainly, or a dev will infer the rule.
-- **Two things the clergy asks for that do not exist yet.** A **tax holiday** is a
-  rate lowered for a season rather than for good, which nothing in §10.2's
-  structure can express — and §10.2 locks that there are no per-town rates, so
-  relief he asks for is colony-wide on a resource whether he means it that way or
-  not. And a **pilgrim expedition** makes the clergy a founding source
-  (`founding-towns.md` §3) with rewards of its own.
+- **Whether a pilgrim town arrives with a church.** It is the natural character
+  for one, and it would mean the clergy uses the PC's gold to seed a second
+  clergyman. That is either the best thing about him or one too many priests.
+- **Whether towns anticipate an announced holy day.** They buy monthly on
+  valuation and know nothing of the calendar, so a known month of free trade is
+  simply a windfall they do not plan for. Making them save for it would be a new
+  kind of foresight and probably not worth it.
 - **What a contact does at very low loyalty.** `contacts.md` §4 has the general
   answer, but these four each have an obvious betrayal — the journalist who turns
   on the PC in print is not the quartermaster who simply stops caring.

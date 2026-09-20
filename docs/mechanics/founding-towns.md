@@ -92,9 +92,14 @@ same thing: set the objective, gather, launch. The letter reaches his **intent**
 
 ## 3. Crown-launched
 
-The Provost or a patron proposes, the PC replies, and **the correspondence
-determines what the town starts with** — what he promises is what it is equipped
-with.
+The Provost, a patron, or **the clergy with an expedition of pilgrims**
+(`institutional-contacts.md` §3) proposes; the PC replies; and **the
+correspondence determines what the town starts with** — what he promises is what it
+is equipped with.
+
+The clergy's is the odd one: **he supplies the people and none of the goods.** He
+gathers the devout from outside the colony, and unless the PC pays for their
+stores the expedition never sails.
 
 ### It arrives with a character
 
