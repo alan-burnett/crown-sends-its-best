@@ -345,3 +345,84 @@ func test_recipes_come_back_in_a_stable_order() -> void:
 	var sorted := ids.duplicate()
 	sorted.sort()
 	assert_eq(Array(ids), Array(sorted), "recipes came back in an unstable order")
+
+
+# --- 🔒 A building defines a conversion; it does not multiply one (#152) ----
+
+## The eight the town hall is responsible for.
+func _base_terms() -> Dictionary:
+	var hall := Building.find(Building.BASE)
+	assert_true(hall != null, "no town hall in the building data")
+	return hall.effect("conversions", {})
+
+
+func test_every_town_has_a_town_hall_from_the_moment_it_is_founded() -> void:
+	# Not built, not chosen, not optional. A town without one could convert
+	# nothing at all, because there would be nothing to say on what terms.
+	var fresh := Town.new(&"newfoundland", "Newfoundland", Vector2i(1, 1))
+	assert_true(fresh.buildings.has(String(Building.BASE)),
+		"a town was founded without a town hall")
+
+
+func test_the_town_hall_defines_every_conversion_there_is() -> void:
+	# **The base case must not be a special case.** If a recipe existed that no
+	# building spoke for, code would need a fallback, and the uniform rule — the
+	# best building the town has for a conversion sets its terms — would stop
+	# being uniform.
+	var terms := _base_terms()
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		assert_has(terms, String(recipe.id()),
+			"no building defines terms for %s, so the base case is a branch in code" % recipe.id())
+
+
+func test_ratio_and_throughput_are_both_the_buildings_to_set() -> void:
+	# The two dials, and the reason there are two: efficiency and volume are
+	# different things and a single bonus could only move them together.
+	var terms := _base_terms()
+	for id in terms:
+		var entry: Dictionary = terms[id]
+		assert_true(float(entry.get("ratio", 0.0)) > 0.0, "%s has no ratio" % id)
+		assert_true(float(entry.get("throughput", 0.0)) > 0.0, "%s has no throughput" % id)
+
+
+func test_a_better_building_supersedes_the_hall_for_that_one_conversion() -> void:
+	# **And leaves the rest alone.** A smithy is shipped more ore than a village
+	# blacksmith and wastes less of it; it has nothing to say about brewing.
+	var plain := _town({"ore": 500.0, "food": 500.0}, 6)
+	var smithing := _town({"ore": 500.0, "food": 500.0}, 6)
+	smithing.add_building(&"smithy")
+
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		var mine: float = recipe.made_by(plain)
+		var theirs: float = recipe.made_by(smithing)
+		var takes: float = recipe.consumes_for(plain)
+		var takes_more: float = recipe.consumes_for(smithing)
+		if String(recipe.id()) == "iron<-ore" or String(recipe.id()) == "tools<-iron":
+			assert_true(theirs > mine, "the smithy did not improve %s" % recipe.id())
+			assert_true(takes_more > takes,
+				"the smithy improved %s without putting more through, so there is one dial again"
+					% recipe.id())
+		else:
+			assert_almost_eq(theirs, mine, 0.0001,
+				"the smithy changed %s, which is none of its business" % recipe.id())
+
+
+func test_no_building_raises_a_processed_resource_with_a_yield_bonus() -> void:
+	# 🔒 **The thing #152 replaces, asserted where it can actually be broken.**
+	# A bonus raises output while input stays fixed, so the ratio improves as a
+	# side effect of throughput and neither can be authored on its own. The smithy
+	# and the armoury both carried one; they carry conversion terms now.
+	#
+	# Asked of the data rather than of a fixture, because a fixture can only test
+	# the buildings that exist today and the rule is about the ones that do not
+	# yet. Tile yields are a separate question and `yield_bonus` is still theirs.
+	var processed := ResourceCatalogue.processed()
+	for id in Building.ids():
+		var building := Building.find(StringName(id))
+		var bonuses: Dictionary = building.effect("yield_bonus", {})
+		for resource in bonuses:
+			assert_true(not processed.has(String(resource)),
+				"%s raises %s with a yield bonus, and %s is made by conversion" % [
+					id, resource, resource])

@@ -1,5 +1,48 @@
 [
   {
+    "id": "town_hall",
+    "name": "the town hall",
+    "months": 0,
+    "cost": {},
+    "effects": {
+      "quality_of_life": 0.5,
+      "conversions": {
+        "beer<-food": {
+          "ratio": 4.0,
+          "throughput": 10.0
+        },
+        "cigars<-tobacco": {
+          "ratio": 3.0,
+          "throughput": 3.6
+        },
+        "clothing<-cotton": {
+          "ratio": 5.0,
+          "throughput": 4.8
+        },
+        "clothing<-furs": {
+          "ratio": 3.0,
+          "throughput": 4.8
+        },
+        "guns<-iron": {
+          "ratio": 3.0,
+          "throughput": 2.0
+        },
+        "iron<-ore": {
+          "ratio": 10.0,
+          "throughput": 4.5
+        },
+        "rum<-sugar": {
+          "ratio": 10.0,
+          "throughput": 3.6
+        },
+        "tools<-iron": {
+          "ratio": 3.0,
+          "throughput": 2.0
+        }
+      }
+    }
+  },
+  {
     "id": "storehouse",
     "name": "a storehouse",
     "months": 2,
@@ -118,13 +161,20 @@
       "tools": 10
     },
     "effects": {
-      "yield_bonus": {
-        "iron": 0.5
-      },
       "converts": [
         "iron",
         "tools"
-      ]
+      ],
+      "conversions": {
+        "iron<-ore": {
+          "ratio": 6.0,
+          "throughput": 12.0
+        },
+        "tools<-iron": {
+          "ratio": 2.0,
+          "throughput": 3.0
+        }
+      }
     }
   },
   {
@@ -156,10 +206,13 @@
       "tools": 12
     },
     "effects": {
-      "yield_bonus": {
-        "guns": 0.8
-      },
-      "defence": 3
+      "defence": 3,
+      "conversions": {
+        "guns<-iron": {
+          "ratio": 2.0,
+          "throughput": 3.0
+        }
+      }
     },
     "grants_contact": "quartermaster"
   }

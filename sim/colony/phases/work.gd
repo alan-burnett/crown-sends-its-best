@@ -190,9 +190,10 @@ func _spare(town: Town, before: ColonySnapshot, resource: StringName) -> float:
 
 ## What share of a month's batch this recipe could actually run.
 func _feasible(town: Town, before: ColonySnapshot, recipe: Conversion) -> float:
-	if recipe.consumed <= 0.0:
+	var takes := recipe.consumes_for(town)
+	if takes <= 0.0:
 		return 0.0
-	return clampf(_spare(town, before, recipe.input) / recipe.consumed, 0.0, 1.0)
+	return clampf(_spare(town, before, recipe.input) / takes, 0.0, 1.0)
 
 
 
@@ -326,7 +327,7 @@ func _contribution(
 				gives[output] = float(gives[output]) + recipe.made_by(town) * share
 			var input := String(recipe.input)
 			if gives.has(input):
-				gives[input] = float(gives[input]) - recipe.consumed * share
+				gives[input] = float(gives[input]) - recipe.consumes_for(town) * share
 		return gives
 
 	var at: Vector2i = entry["at"]
@@ -335,7 +336,7 @@ func _contribution(
 	for output in ResourceCatalogue.processed():
 		if not gives.has(String(output)):
 			continue
-		var per_unit := maxf(0.001, ResourceCatalogue.input_per_unit_of(StringName(output)))
+		var per_unit := maxf(0.001, Conversion.best_ratio(town, StringName(output)))
 		for input in ResourceCatalogue.inputs_for(StringName(output)):
 			var fetched := _yield_of(context, town, at, StringName(input)) / per_unit
 			gives[String(output)] = float(gives[String(output)]) + fetched * INPUT_SHARE
@@ -444,7 +445,7 @@ func _score(
 	if String(entry["kind"]) == "convert":
 		return _score_recipe(entry["recipe"], town, worth)
 	var at: Vector2i = entry["at"]
-	return _score_tile(context, at, worth)
+	return _score_tile(town, context, at, worth)
 
 
 ## Add what a piece of work would yield to the running projection.
@@ -465,7 +466,8 @@ func _project(
 		var out := String(recipe.output)
 		projected[out] = float(projected.get(out, 0.0)) + recipe.made_by(town) * share
 		var into := String(recipe.input)
-		projected[into] = maxf(0.0, float(projected.get(into, 0.0)) - recipe.consumed * share)
+		projected[into] = maxf(0.0,
+			float(projected.get(into, 0.0)) - recipe.consumes_for(town) * share)
 		return
 
 	var at: Vector2i = entry["at"]
@@ -478,10 +480,18 @@ func _project(
 
 # --- Scoring ----------------------------------------------------------------
 
-func _score_tile(context: ColonyContext, at: Vector2i, weights: Dictionary) -> float:
+## What a month on this ground is worth to this town.
+##
+## **Scored on what the town would actually get**, experts and buildings
+## included, because that is what the allocation then adds to its projection. A
+## score that read the bare map while the projection read the town's real yield
+## made a food expert *lower* the town's grain: the projection filled the want
+## faster than the scoring knew, so the town gave up a field it was scoring as
+## though nobody skilled worked it.
+func _score_tile(town: Town, context: ColonyContext, at: Vector2i, weights: Dictionary) -> float:
 	var score := 0.0
 	for resource in ResourceCatalogue.ids():
-		var amount := context.map.yield_at(at.x, at.y, StringName(resource))
+		var amount := _yield_of(context, town, at, StringName(resource))
 		if amount > 0.0:
 			score += amount * float(weights.get(resource, 1.0))
 	return score
@@ -493,7 +503,7 @@ func _score_tile(context: ColonyContext, at: Vector2i, weights: Dictionary) -> f
 ## and it does so without anything here knowing what beer is.
 func _score_recipe(recipe: Conversion, town: Town, weights: Dictionary) -> float:
 	return recipe.made_by(town) * float(weights.get(String(recipe.output), 1.0)) \
-		- recipe.consumed * float(weights.get(String(recipe.input), 1.0))
+		- recipe.consumes_for(town) * float(weights.get(String(recipe.input), 1.0))
 
 
 # --- Doing the work ---------------------------------------------------------
@@ -531,8 +541,11 @@ func _convert(
 		return false
 
 	# A part-supplied worker does part of the work rather than none of it.
-	var share := clampf(on_hand / recipe.consumed, 0.0, 1.0)
-	var used := recipe.consumed * share
+	var takes := recipe.consumes_for(town)
+	if takes <= 0.0:
+		return false
+	var share := clampf(on_hand / takes, 0.0, 1.0)
+	var used := takes * share
 	var made := recipe.made_by(town) * share
 	if made <= 0.0:
 		return false

@@ -174,6 +174,12 @@ func _init(p_id: StringName = &"", p_name: String = "", p_at: Vector2i = Vector2
 	id = p_id
 	display_name = p_name if not p_name.is_empty() else String(p_id)
 	at = p_at
+	# 🔒 **Every town has a town hall from the moment it is founded** (#152). It
+	# is not built, not chosen and not optional: it is what defines the terms of
+	# every conversion the town can perform, so a town without one could process
+	# nothing at all. Here rather than in a founding routine, because a town made
+	# any other way — a test fixture, a scenario — has to have one too.
+	buildings.append(String(Building.BASE))
 
 
 # --- Population ------------------------------------------------------------
