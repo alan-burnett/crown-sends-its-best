@@ -198,7 +198,7 @@ things are worth.
 - Whether a policy's cost scales with the colony — a military presence in a
   colony of two towns cannot cost what it costs in a colony of nine.
 - Whether a contact who has carried an unfunded policy for a long time remembers
-  it. `contacts.md` §6 wants the Relationship to be a history; **a man who
+  it. `contacts.md` §7 wants the Relationship to be a history; **a man who
   covered the PC's debts for two years has earned the right to mention it.**
 - Whether the PC can see what a policy is costing him. The Ledger shows gold
   between colony and Crown (§10.4); a recurring charge belongs there, and that

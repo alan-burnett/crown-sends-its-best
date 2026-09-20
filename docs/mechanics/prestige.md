@@ -92,9 +92,14 @@ Each event is scored **once, when it happens**, as a fixed debt.
 | **Trade protest declared** | the month a town refuses the Crown's price | M3 (#75) |
 | **A town declares rebellion** | the declaration, not each month of it | M3, shipped |
 | **Tribute paid to a rival** | the PC accepts a rival's demand | M5 |
-| **A defeat by natives or rivals** | each battle lost | M6 |
+| **A company destroyed** | its last man is gone | M6 |
 | **A town lost** | it leaves the colony entirely | M5–M6 |
 | **The run ends in a fail condition** | §13.1, at the end | M3 (#78) |
+
+**There is no such thing as losing a battle.** `battles.md` §6 has no rout and no
+surrender — two companies exchange casualties and both walk away poorer — so an
+optic priced on *a battle lost* could never fire. The discrete defeat the court
+actually hears about is **a company wiped out**, and that is what is priced.
 
 ### 🔒 The money is not counted twice
 

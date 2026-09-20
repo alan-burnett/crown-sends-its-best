@@ -205,9 +205,13 @@ turn back.
 
 ### A deliberate exception to the one-at-a-time rule
 
-`CLAUDE.md` holds that **no single event ever costs a town more than one
-population.** An expedition is not a town, and this is the one place the
-proportional rule applies instead.
+`CLAUDE.md` holds that **no event of hardship costs a town more than one
+population** — famine, shortage, a bad winter, all one at a time.
+
+**A body of people in the open is not a town.** An expedition loses a share, and
+so does a company under arms (`battles.md`); armed attack on a town is the third
+case. What unites them is that the rule protects a settled population going
+about its business, and none of these three is that.
 
 The reason is that the rule exists to keep per-population consequences uniform
 and legible inside a settled town. An expedition is a single body of people in the

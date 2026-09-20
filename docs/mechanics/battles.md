@@ -277,7 +277,24 @@ population — famine, shortage, a bad winter, all one at a time.
 and a town facing it loses people quickly. A rule that metered a massacre out one
 man a month would make it read as a bad harvest.
 
-## 10. What the PC can actually do
+## 10. What a battle reaches beyond the map
+
+Two systems read combat and neither is named anywhere else in this document.
+
+**Quality of life's `safety`.** `quality-of-life.md` §4 defines it as *is the
+population being attacked, and is it safe to travel* — pinned at 1.0 and excluded
+from the sum until the military exists. **This is what brings it alive.** A town
+under attack, or cut off by a company sitting on its roads, is a town whose safety
+falls, and §6 of that document is already written around the consequence: life
+under threat is worse, which feeds rebel sentiment, which is the PC's foothold for
+quelling a rebellion — and the loop runs both ways when the rebels win.
+
+**Prestige's optics.** A **company destroyed** is a fixed, undecaying debt
+(`prestige.md` §4), as is **a town lost**. Note what is *not* priced: an
+exchange of casualties is not a defeat, because §6 has no such thing. The court
+hears about annihilation, not about a bad month.
+
+## 11. What the PC can actually do
 
 Nothing, directly, and that is the point (§12.6, locked). His instruments are:
 
@@ -290,7 +307,7 @@ Nothing, directly, and that is the point (§12.6, locked). His instruments are:
 
 Every one of those is a letter, and every one of them is a month or more early.
 
-## 11. Tuning targets
+## 12. Tuning targets
 
 - `LETHALITY`, and whether the curve should be steeper than linear in the ratio.
 - Want-per-head for guns, tools and horses, and each one's multiplier.
@@ -299,7 +316,7 @@ Every one of those is a letter, and every one of them is a month or more early.
 - How long a leaderless militia stands before disbanding.
 - Attrition per month while unsupported.
 
-## 12. Open items
+## 13. Open items
 
 - **Whether a battle should cost the attacker anything beyond casualties.** Time
   and position are already spent; there may be no need for more.

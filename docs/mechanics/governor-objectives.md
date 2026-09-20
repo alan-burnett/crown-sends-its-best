@@ -46,7 +46,7 @@ Mapped onto the World Month:
 | World phase | What happens |
 | :--- | :--- |
 | 1 Arrivals | the post reaches the colony |
-| 4 Colony Month, step 8 Settle | the town reconsiders its objective (§7) |
+| 4 Colony Month, step 9 Settle | the town reconsiders its objective (§7) |
 | 7 Reckoning | the governor reads the post; compliance sets his posture |
 | 8 Intent | the governor commits to an intent |
 | 9 Dispatch | he writes, announcing what he means to do |

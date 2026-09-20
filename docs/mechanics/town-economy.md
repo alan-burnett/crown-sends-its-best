@@ -258,6 +258,25 @@ that list until the purse reserve stops it. Valuation already carries the
 priority — a need far below desired stock has an enormous gap and therefore an
 enormous score.
 
+### Companies eat before the objective
+
+A town that has raised a company **counts its men as mouths** and victuals them
+(`battles.md` §3). They sit in a fixed place in the order:
+
+1. **The townspeople's own needs** — food and clothing
+2. **Every company the town supports**
+3. The objective
+4. Wants
+
+So a governor cannot starve his citizens to feed his soldiers, and he cannot raise
+a chapel while his men go hungry. **A town cannot disband its way out of famine
+either**: if it cannot cover a company it simply sends nothing and that company
+goes unsupported, which costs the company and not the purse.
+
+Militia are therefore a **standing charge on the town**, not a lever it can drop
+in a bad year — and one more claim on a purse three other tiers are already
+pulling at.
+
 ### The tiers favour, they do not gate
 
 SPEC §11.3:

@@ -126,9 +126,15 @@ attack, he dies with probability `1 / new_population`. Going from ten to nine is
 a long shot; going from two to one is certain. A town reduced to nothing takes
 him with it.
 
-**No event ever costs more than one population** (see `CLAUDE.md`), so this is
-always a single roll against `old - 1`. Five lost battles in a month are five
-separate losses and five separate rolls, not one large one.
+**No event of hardship costs more than one population** (see `CLAUDE.md`) —
+famine, shortage, a bad winter — so for those this is always a single roll
+against `old - 1`.
+
+**Armed attack is the exception** (`battles.md` §9): overwhelming force takes a
+share, and a town can lose several people to one assault. Whether that is one roll
+or one per head is **not settled** and is listed in `battles.md` §13. Several
+companies attacking in a month are still several battles, and each resolves
+separately whichever way it goes.
 
 Note what this excludes: **population lost to famine does not endanger him.** Only
 enemies do.
