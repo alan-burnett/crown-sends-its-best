@@ -129,30 +129,34 @@ There is no blockade bulletin — the man whose fields they are asks the PC to d
 with these people, and the ask is also how the player learns that tile denial
 exists and that money answers it.
 
-## 6. Spawning is the Squeeze's decision, not this document's
+## 6. A duke arrives as the Squeeze's fourth dimension
 
-**Prospering does not attract rivals.** A duke arrives because the run has reached
-the point where the Squeeze puts a new strain on the player, and *spawning one of
-the unspawned rivals and beginning to demand tribute* is one of the strains
-available to it.
+**Prospering does not attract rivals.** A duke arrives because the Squeeze has
+decided to put a new strain on the player — and that decision is already
+specified. It is **`crown-demands.md` §6, dimension 4, *more hands out***, whose
+catalogue of new sources names rival dukes alongside Crown officers who were not
+asking before and, from M7, patrons.
 
-The three dukes therefore arrive **staggered**, each announced by a first demand,
-and the colony faces one, then two, then three over a run. That gives §12.4's
-"pressure grows as a run goes on" a mechanism, and it stops year two arriving as
-three simultaneous demands.
+**There is no second schedule and no separate director.** A duke spawns when the
+annual draw lands on dimension 4 and the source taken from the catalogue is a
+rival. That is the whole of it.
 
-### The schedule is not defined here
+Three things fall straight out:
 
-**Which strain the Squeeze imposes, and when, is a larger mechanism than this
-document.** `crown-demands.md` implements one slice of it — the annual draw over
-four dimensions of demand growth, using the bucket pattern of its §7 — and rival
-spawning is a second slice. The director that chooses among them is not yet
-written, and this doc deliberately does not invent it.
+**They arrive staggered.** One source enters per draw, so the colony faces one
+duke, then two, then three across a run rather than three demands in one spring.
+§12.4's "pressure grows as a run goes on" needs no mechanism of its own.
 
-What this doc fixes is the **consequence**: when the Squeeze spawns a duke, he
-arrives at a starting loyalty, opens with a tribute demand, and from then on
-behaves as §3 describes. A dev implementing rivals does not need the schedule to
-build any of that.
+**They cannot bunch.** §7's bucket guarantees dimension 4 is drawn at most twice
+in any four years, so the worst case is bounded and an aberrant run is impossible
+rather than unlikely.
+
+**And a duke is the sharpest thing dimension 4 can produce**, which §6 says
+already: his demands cost **prestige** rather than standing, so he adds pressure
+of a kind the player's existing defences do not answer.
+
+What this doc owns is the **consequence**: on arrival he has a starting loyalty,
+opens with a tribute demand, and behaves thereafter as §3 describes.
 
 ## 7. Misleading about intentions is prose
 
@@ -200,9 +204,6 @@ for it.
 
 ## 10. Open items
 
-- **The Squeeze director itself.** Which strains exist, how one is chosen, and
-  how rival spawning sits beside `crown-demands.md`'s annual growth draw. The
-  largest unwritten thing this doc leans on.
 - Whether a duke's demands should ever be **resources** rather than gold, as the
   Marshal's are. §8.4 says they bully the PC into giving them *resources*, which
   reads like they should.

@@ -376,6 +376,17 @@ them.
 So when a later mechanic removes a source or softens an axis, it does so as a
 **stated interaction with this document**, and the interaction is the feature.
 
+### 🔒 And the draw never eases off on its own
+
+Author-confirmed, and worth stating outright because easing off is the obvious
+thing to reach for when a long run turns grim: **the growth draw has no reverse
+gear, skips no years, and retires no source.** It only ever adds.
+
+Relief will come from **buildings, policies, and particular contacts' abilities**,
+and those are built once the Squeeze is solid — not before, and never as an
+escape hatch inside it. A draw that eased off by itself would be exactly the
+pressure-with-its-relief-built-in that this section exists to forbid.
+
 ## 11. Open items
 
 - The size of the year-one gap between demand and output. This single number sets
