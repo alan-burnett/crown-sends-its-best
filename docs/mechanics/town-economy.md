@@ -382,7 +382,7 @@ cotton, rather than making it hoard indiscriminately.
 
 **The minimum M2 needed is built** — #64 shipped conversion in the Work phase, so
 the six conversions of §10.1 all happen and clothing need not be bought.
-`buildings.md` §5 now defines the ratios and which building improves each.
+`buildings.md` §6 now defines the ratios and which building improves each.
 
 **The larger mechanic remains deferred by the Author** (#92): improvements,
 building bonuses, experts, and the full allocation of labour between fields and
