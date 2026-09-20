@@ -247,6 +247,14 @@ static func _building_axes(id: StringName) -> Dictionary:
 		+ float(building.effect("counts_distant_experts", 0.0)) * EXPERTS_A_TOWN_MIGHT_HOLD
 	)
 
+	# **Drawing people is expansion** (#170). A fairgrounds brings settlers and a
+	# printing press brings the kind worth having, and a governor set on growing
+	# his population can want either for that reason.
+	axes["expansion"] = float(axes.get("expansion", 0.0)) + (
+		float(building.effect("immigration", 0.0)) * 0.6
+		+ float(building.effect("draws_experts", 0.0)) * 0.3
+	)
+
 	axes["capacity"] = (
 		learning * 0.4
 		+ reserved * 0.5

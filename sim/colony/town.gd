@@ -85,6 +85,15 @@ var last_completed_month: int = -1
 ## and not the run's. A governor writes about the month that just happened.
 var traded_value: float = 0.0
 
+## Settlers owed but not yet landed, and scholars among them (#170).
+##
+## **Arrivals are fractional and the remainder is kept.** A town's figure is
+## something like `+4.5 workers and +0.1 experts` a month; the workers land and
+## the fraction waits, so a town that draws a tenth of a scholar a month gets one
+## in the tenth month rather than never.
+var arrivals_accrued: float = 0.0
+var experts_accrued: float = 0.0
+
 ## Births owed but not yet born.
 ##
 ## **Natural growth starts slowly and snowballs** (SPEC §12.1), which for a town
@@ -348,6 +357,8 @@ func to_dict() -> Dictionary:
 		"dark_buildings": dark_buildings.duplicate(),
 		"quality_of_life": quality_of_life,
 		"education": education,
+		"arrivals_accrued": arrivals_accrued,
+		"experts_accrued": experts_accrued,
 		"rebel_sentiment": rebel_sentiment,
 		"growth_accrued": growth_accrued,
 		"traded_value": traded_value,
@@ -388,6 +399,8 @@ static func from_dict(data: Dictionary) -> Town:
 	town.dark_buildings = PackedStringArray(data.get("dark_buildings", []))
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.education = float(data.get("education", 0.0))
+	town.arrivals_accrued = float(data.get("arrivals_accrued", 0.0))
+	town.experts_accrued = float(data.get("experts_accrued", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))
 	town.rebelling_since = int(data.get("rebelling_since", -1))
 	town.embargo_months = int(data.get("embargo_months", 0))
