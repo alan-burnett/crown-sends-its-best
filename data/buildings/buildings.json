@@ -218,7 +218,8 @@
 	},
 	"upkeep": 5,
 	"effects": {
-	  "amusement": 0.4
+	  "amusement": 0.4,
+	  "immigration": 1.5
 	}
   },
   {
@@ -261,7 +262,8 @@
 	"upkeep": 5,
 	"effects": {
 	  "amusement": 0.5,
-	  "education": 1.0
+	  "education": 1.0,
+	  "draws_experts": 1.0
 	},
 	"requires": []
   },
@@ -311,7 +313,8 @@
 	"upkeep": 10,
 	"effects": {
 	  "amusement": 0.3,
-	  "education": 3.0
+	  "education": 3.0,
+	  "draws_experts": 1.0
 	}
   },
   {
@@ -415,7 +418,8 @@
 	"upkeep": 5,
 	"effects": {
 	  "amusement": 0.2,
-	  "education_per_expert": 1.0
+	  "education_per_expert": 1.0,
+	  "draws_experts": 1.0
 	}
   },
   {

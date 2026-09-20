@@ -1,0 +1,189 @@
+class_name Immigration
+extends RefCounted
+
+## Who arrives, and what they bring (#170, `docs/mechanics/immigration.md`).
+##
+## ## Where it sits
+##
+## **World month phase 1, Arrivals**, alongside everything else crossing from the
+## Crown. Immigrants land with their own supplies and gold and join at once; the
+## town pays nothing for them (SPEC §12.1).
+##
+## It reads the quality of life **last month's Settle** wrote, so arrivals are a
+## consequence of how the town was doing — which is precisely the lever the PC's
+## letters reach.
+##
+## ## 🔒 Each town computes its own, and there is no pool
+##
+## Settlers are not divided between towns. A town worth coming to gets people
+## whether or not its neighbour does, and two identical towns receive identical
+## arrivals however many others exist. A pool would make a good town's reward
+## depend on somebody else's failure, which is not what emigration is.
+##
+##     arrivals = crown_flow x appeal
+##     appeal   = pull(quality of life) + buildings + policy
+##
+## Multiplicative on `crown_flow`, because **if nobody is leaving home no amount
+## of appeal conjures settlers out of nothing.**
+##
+## ## 🔒 Immigration is flat; births are proportional
+##
+## Arrivals do not scale with town size, so immigration dominates when a town is
+## small and natural growth when it is large — both halves falling out of one
+## decision rather than being balanced against each other.
+##
+## It also lets a town founded late in a run catch up, because the same trickle
+## is transformative at twelve and trivial at two hundred.
+##
+## ## The pull is steep, and that is the point
+##
+## Near zero below a floor — **nobody emigrates to a miserable place** — and
+## rising sharply above it. A good town gets a virtuous circle and a bad one a
+## stagnation that is *breakable*, because quality of life is exactly what the
+## PC's letters reach.
+
+const EVENT_ARRIVED: StringName = &"settlers_arrived"
+
+## What the Crown's circumstances send, before any town's appeal.
+##
+## **The seam for §5**, which ties the flow to the Crown's decline: as things
+## worsen at home more people leave, so immigration rises over a run precisely as
+## demands grow and the PC can least afford to feed them. Nothing drives it yet
+## (#171); reading it here means that ticket is a driver rather than a rewrite.
+const FLOW_KEY: String = "crown.emigration"
+const FLOW_BASE: float = 1.0
+
+## Quality of life below which essentially nobody comes.
+const MISERY_FLOOR: float = 0.35
+
+## How sharply appeal climbs above the floor. Tuning.
+const PULL_STEEPNESS: float = 2.5
+
+## What a thriving town pulls, at the top of the curve. Tuning.
+const PULL_AT_BEST: float = 4.0
+
+## What a fraction of an expert is worth carrying month to month.
+const EXPERT_SHARE: float = 0.04
+
+## What each settler brings with him, in gold. They land with their own supplies
+## and their own coin, and that coin feeds `means` in quality of life — so a wave
+## of settlers is a windfall before it is a burden (§6).
+const PURSE_PER_HEAD: float = 12.0
+
+
+## How many people a town would draw this month, and of what kind.
+##
+## Returns `{workers, experts, appeal}`. `experts` is fractional on purpose —
+## §7 keeps the remainder and lands a whole person when it reaches one.
+static func due(town: Town, context: ColonyContext) -> Dictionary:
+	var flow := FLOW_BASE
+	if context != null and context.state != null:
+		flow += maxf(0.0, float(context.state.get_value(FLOW_KEY, 0.0)))
+
+	var appeal := pull_of(town) + _from_buildings(town)
+	var arriving := maxf(0.0, flow * appeal)
+
+	# **Education gates natural growth, not arrivals** (`the-provost.md` §3). A
+	# town with no learning can still be *sent* scholars; what its own schooling
+	# decides is whether it ever raises one. So the share here is a property of
+	# the crossing rather than of the town's library.
+	var scholars := arriving * EXPERT_SHARE * (1.0 + _draws_experts(town))
+	return {
+		"workers": maxf(0.0, arriving - scholars),
+		"experts": scholars,
+		"appeal": appeal,
+	}
+
+
+## What a town's quality of life is worth as a reason to cross an ocean.
+##
+## 🔒 **Not linear.** Below the floor it is near zero, because nobody emigrates
+## to a miserable place; above it, it climbs steeply.
+static func pull_of(town: Town) -> float:
+	var above := (town.quality_of_life - MISERY_FLOOR) / maxf(0.0001, 1.0 - MISERY_FLOOR)
+	if above <= 0.0:
+		return 0.0
+	return PULL_AT_BEST * pow(clampf(above, 0.0, 1.0), PULL_STEEPNESS)
+
+
+## What the town has built that draws people.
+static func _from_buildings(town: Town) -> float:
+	var total := 0.0
+	for id in town.buildings:
+		var building := Building.find(StringName(id))
+		if building != null and Building.is_lit(town, StringName(id)):
+			total += float(building.effect("immigration", 0.0))
+	return total
+
+
+## What shifts the composition towards scholars rather than raising the count.
+static func _draws_experts(town: Town) -> float:
+	var total := 0.0
+	for id in town.buildings:
+		var building := Building.find(StringName(id))
+		if building != null and Building.is_lit(town, StringName(id)):
+			total += float(building.effect("draws_experts", 0.0))
+	return total
+
+
+## Land this month's settlers (Seam A).
+##
+## 🔒 **A town never turns arrivals away** (§10). Whatever lands, joins — and a
+## town that cannot support them may shed an expedition later, which is #175's
+## business rather than this one's.
+static func arrive(town: Town, context: ColonyContext) -> void:
+	var owed := due(town, context)
+	town.arrivals_accrued += float(owed["workers"])
+	town.experts_accrued += float(owed["experts"])
+
+	var landed := int(floorf(town.arrivals_accrued))
+	town.arrivals_accrued -= float(landed)
+
+	# **Experts arrive as fractions** (§7). The remainder is kept, and when it
+	# reaches one a scholar appears — whichever specialism would be worth most to
+	# this town, decided at the moment he does rather than authored.
+	var scholars := int(floorf(town.experts_accrued))
+	town.experts_accrued -= float(scholars)
+
+	if landed <= 0 and scholars <= 0:
+		return
+
+	town.workers += landed
+	var trade := &""
+	if scholars > 0:
+		trade = _what_this_town_needs(town)
+		town.add_experts(trade, scholars)
+	town.receive_gold(float(landed + scholars) * PURSE_PER_HEAD)
+
+	# 🔒 **No letter announces that settlers are sailing** (§11). The PC learns of
+	# them when they land, in the same month's report — he could have inferred it
+	# from a town whose quality of life he was raising, and nothing spells it out.
+	context.log.emit(EVENT_ARRIVED, town.id, context.state.month, {
+		"town": String(town.id),
+		"workers": landed,
+		"experts": scholars,
+		"expert_in": String(trade),
+		"brought": float(landed + scholars) * PURSE_PER_HEAD,
+	}, WorldPhase.ARRIVALS)
+
+
+## Which specialism a scholar turns out to have.
+##
+## **Whatever this town would value most**, by the same measure it values
+## anything else — so a fur town gets a trapper, then a farmer, and a weaver once
+## it starts turning furs into cloth. Nothing about the list is authored.
+static func _what_this_town_needs(town: Town) -> StringName:
+	var colony := Colony.new()
+	colony.add(town)
+	var desired := DesiredStock.for_town(town, ColonySnapshot.of(colony))
+
+	var best := &""
+	var best_worth := -1.0
+	for resource in ResourceCatalogue.ids():
+		var id := StringName(resource)
+		var worth := Valuation.town(id, desired, town.held(id))
+		if worth > best_worth + 0.0001 \
+				or (absf(worth - best_worth) <= 0.0001 and String(id) < String(best)):
+			best = id
+			best_worth = worth
+	return best

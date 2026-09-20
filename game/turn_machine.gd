@@ -165,14 +165,19 @@ func _init(p_run: RunState) -> void:
 	# settled and orders have resolved (#71).
 	var grievances := GrievanceDriver.new(run.colony, run.grievances)
 
+	# Phase 1. Settlers land before the colony works its month, so the people who
+	# arrived are counted in it — and they are drawn by the quality of life last
+	# month's Settle wrote (#170).
+	var immigration := ImmigrationDriver.new(run.colony)
+
 	# Phase 7, before compliance. Every contact judges the Crown by how the
 	# things he cares about are going, so a governor answers this month's letter
 	# in the mood this month has already put him in (#126).
 	var drift := DriftDriver.new(run)
 
 	month_runner.drivers = [
-		crown_affairs, territory, colony_month, promise_driver, policies,
-		crown_standing, drift, orders, silence, governors, grievances,
+		immigration, crown_affairs, territory, colony_month, promise_driver,
+		policies, crown_standing, drift, orders, silence, governors, grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
