@@ -174,25 +174,82 @@ company will ever have. Whatever he turns out to do, it acts there.
 
 ### The journalist
 
+**🔒 His prominence equals the governor's.** No other resident comes close, and
+nothing else in the game gives one building a second voice as loud as the man who
+runs the town. **This is the sharpest sword in the tree**, and everything below
+follows from holding it by the blade.
+
+**What his loyalty does.** At high regard he unlocks **policies** — ordinary ones
+in `policy.md`'s sense, recurring monthly cost, carried by him, renegotiated
+rather than cancelled, with the 3x asymmetry on non-payment.
+
+They sway public opinion, which nothing else can do directly. **It is a deep
+unlock**: a press requires a college and a stockade, and the policies require the
+man who comes with it to think well of the PC on top. A colony reaches this late
+or not at all.
+
+He also **moves prestige** — a contented journalist prints well of the Crown and
+banks it, a slighted one prints the other thing. **He cannot touch an optic**:
+`prestige.md` §4 locks that optics never decay, and good press is not a pardon.
+
+**How he gets loyalty.** Beyond his own dealings with the PC, he reads **the
+quality of life of the worst town in the colony** — not the average.
+
+People write to him and he prints what they send, so he holds the PC to account
+for the bleakest headline available. **One neglected hamlet poisons him no matter
+how well the capital lives.** And that gets harder as the colony spreads: the
+wider the PC goes, the likelier he is to own somewhere wretched, so the most
+influential man in the colony becomes harder to please the more of it there is.
+
+**What he asks for.** Not gold. He asks the PC to move **every standing
+arrangement with the Crown** in one direction:
+
+- duties lower
+- Crown troops sent home
+- immigration well funded, and arriving equipped rather than destitute
+
+Each of these is a kindness, and each is easy to grant.
+
+#### 🔒 Granting them builds the thing that leaves
+
+**This is the point of the contact and it should not be tuned away.**
+
+His programme is not misery. It is a colony **lightly taxed, ungarrisoned, well
+peopled and well built** — and `rebel-sentiment.md` §6 makes development a
+multiplier on the stakes while `immigration.md` §9 makes growth the engine of
+rebellion. A prosperous, populous, unpoliced colony is precisely a colony that
+does not need the Crown.
+
+So the trap closes from both ends at once:
+
 | | |
 | :--- | :--- |
-| **Wants** | to be told things, and to print them. Access, and to be left alone |
-| **Cares about** | whether the PC deals honestly with him |
-| **Can do** | **he moves prestige.** A contented journalist prints well of the Crown and banks it; a slighted one prints the other thing |
+| **His regard** | pushes **his own town's** sentiment down, hard, at a governor's weight |
+| **His programme** | raises the stakes **everywhere else**, over years |
 
-**He cannot touch an optic.** `prestige.md` §4 locks that optics never decay, and
-good press is not a pardon — he adds to the prestige tally, he does not erase a
-debt. A PC who lost a town stays a man who lost a town, however friendly the
-press.
+**A PC who keeps him happy is buying local quiet with colony-wide loosening**, and
+the ledger never shows it. He is sincerely trying to help, he is the most
+respected voice the PC has, and he is connecting the colony to itself in a way
+that ends in independence.
 
-**And he is dangerous to own by design.** `buildings.md` §4 has the printing press
-raising rebel sentiment by name, and his prominence is the highest of the four —
-he is the most famous man in the town and everyone reads him.
+Insidious is the word, and it is the only contact in the game whose *cooperation*
+is the danger.
 
-So the PC holds a contact who **prints prestige and breeds sedition at the same
-time**, and the obvious response to the second is the thing that destroys the
-first. Censoring him lowers sentiment, craters his loyalty, and costs prestige
-directly. That decision is the whole point of the building.
+**His bias.** He thinks every problem is equally important, so **small troubles
+move him nearly as far as large ones.**
+
+Code it as the **shape** of his lean rather than its size: steep near zero and
+flattening out, where most contacts are the reverse. A minor shortage in a hamlet
+reads to him almost as loudly as a famine in the capital, because in his
+newspaper it gets the same headline.
+
+That makes him the mirror of the Marshal, whose leans **minimise every threat**
+(`the-marshal.md` §6) — flat near zero where the journalist is steep. The same
+machinery, opposite curves, and the player has to learn two different discounts.
+
+**`perception.md`'s one-rung cap bounds him**, which is what keeps this readable:
+he is reliably one notch more alarmed than the truth, not hysterical. And the
+player who learns to discount him is the player who will miss the real famine.
 
 He has **no extension**. The press is already the end of its branch.
 
