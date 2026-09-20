@@ -101,6 +101,9 @@ const KEY_CLOSING: String = "closing"
 const KEY_PROMPT: String = "prompt"
 const KEY_LABEL: String = "label"
 const KEY_EFFECT: String = "effect"
+
+## An option the PC writes as a command rather than a request (#71).
+const KEY_HARSH: String = "harsh"
 const KEY_INSERT: String = "insert"
 const KEY_MEASURE: String = "measure"
 const KEY_PURPOSE: String = "purpose"

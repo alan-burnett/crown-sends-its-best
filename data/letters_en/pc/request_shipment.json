@@ -2,21 +2,51 @@
   "id": "pc.request_shipment",
   "type": "request",
   "purpose": "Ask a governor to ship goods to the Crown",
-  "to_roles": ["governor"],
-  "params": { "to": "contact", "resource": "resource", "amount": "integer", "payment": "gold" },
+  "to_roles": [
+    "governor"
+  ],
+  "params": {
+    "to": "contact",
+    "resource": "resource",
+    "amount": "integer",
+    "payment": "gold"
+  },
   "compose_defaults": {
-    "resource": { "from": "town_surplus", "fallback": "iron" },
-    "amount": { "from": "town_surplus_amount" },
-    "payment": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 1.0, "minimum": 50, "maximum": 4000 }
+    "resource": {
+      "from": "town_surplus",
+      "fallback": "iron"
+    },
+    "amount": {
+      "from": "town_surplus_amount"
+    },
+    "payment": {
+      "from": "scaled_world_value",
+      "key": "colony_revenue",
+      "factor": 1.0,
+      "minimum": 50,
+      "maximum": 4000
+    }
   },
   "reply": {
     "tone": {
       "text": "I write to you {choice}.",
       "options": [
-        { "tone": "dutiful",   "text": "on the Crown's business, which is now yours" },
-        { "tone": "pleased",   "text": "with a good deal of confidence in you" },
-        { "tone": "desperate", "text": "with less time than the matter deserves" },
-        { "tone": "annoyed",   "text": "having had to write it twice already" }
+        {
+          "tone": "dutiful",
+          "text": "on the Crown's business, which is now yours"
+        },
+        {
+          "tone": "pleased",
+          "text": "with a good deal of confidence in you"
+        },
+        {
+          "tone": "desperate",
+          "text": "with less time than the matter deserves"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having had to write it twice already"
+        }
       ]
     },
     "steps": [
@@ -24,22 +54,66 @@
         "id": "purse",
         "prompt": "What the Crown will pay for it",
         "options": [
-          { "id": "double", "label": "pay double — call the shipment vital",
+          {
+            "id": "double",
+            "label": "pay double — call the shipment vital",
             "text": "Set aside {param:amount} of {param:resource} for the Crown. This is vital, and the Treasury will pay twice over for it — the gold is yours, for the town, and I do not want to hear it went anywhere else{insert:warmth}.",
-            "insert": { "warmth": { "pleased": ". You will know better than I do where it is wanted" } },
-            "effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": "{payment}" } } },
-          { "id": "fair", "label": "pay a fair price",
+            "insert": {
+              "warmth": {
+                "pleased": ". You will know better than I do where it is wanted"
+              }
+            },
+            "effect": {
+              "ship_resource": {
+                "to": "{to}",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "payment": "{payment}"
+              }
+            }
+          },
+          {
+            "id": "fair",
+            "label": "pay a fair price",
             "text": "Set aside {param:amount} of {param:resource} for the Crown. The Treasury will pay for it, and I have seen to it that the sum is not an insult.",
-            "effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": "{payment}" } } },
-          { "id": "nothing", "label": "pay nothing at all",
+            "effect": {
+              "ship_resource": {
+                "to": "{to}",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "payment": "{payment}"
+              }
+            }
+          },
+          {
+            "id": "nothing",
+            "label": "pay nothing at all",
             "text": "Set aside {param:amount} of {param:resource} for the Crown. There is no money for it{insert:apology}. I am aware of what I am asking.",
-            "insert": { "apology": { "desperate": ", and I have stopped pretending otherwise" } },
-            "effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": 0 } } }
+            "insert": {
+              "apology": {
+                "desperate": ", and I have stopped pretending otherwise"
+              }
+            },
+            "effect": {
+              "ship_resource": {
+                "to": "{to}",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "payment": 0
+              }
+            },
+            "harsh": true
+          }
         ]
       }
     ],
     "closing": [
-      { "text": "Your servant,", "tone": { "annoyed": "I shall expect word that it is under way." } }
+      {
+        "text": "Your servant,",
+        "tone": {
+          "annoyed": "I shall expect word that it is under way."
+        }
+      }
     ]
   }
 }

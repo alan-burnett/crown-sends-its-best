@@ -296,6 +296,7 @@ func _check_option(option: Variant, letter: Letter, path: String) -> void:
 
 	_check_line(option, letter, path)
 	_check_slots(String(option.get(LetterSchema.KEY_LABEL, "")), option, letter, "%s.label" % path)
+	_check_harshness(option, path)
 
 	var effect: Variant = option.get(LetterSchema.KEY_EFFECT)
 	if effect == null:
@@ -309,6 +310,30 @@ func _check_option(option: Variant, letter: Letter, path: String) -> void:
 			_problem("%s.effect.%s" % [path, effect_id], "expected an object of params")
 			continue
 		_check_effect_args(String(effect_id), args, letter, "%s.effect.%s" % [path, effect_id])
+
+
+## 🔒 **An option that says it is harsh must say so in a way the engine reads.**
+##
+## `harsh` is the one property of a reply option that changes what the order
+## *does* rather than how it reads — it buys compliance at the price of the
+## governor's regard and the town's patience (#71) — and a misspelled key or a
+## string where a boolean belongs would leave the prose promising a command the
+## engine delivers as a request. Silently, and in the direction that flatters the
+## content.
+##
+## It is also meaningless without an order to attach to, so an option that is
+## harsh and has no effect is a mistake rather than a harmless decoration.
+func _check_harshness(option: Dictionary, path: String) -> void:
+	if not option.has(LetterSchema.KEY_HARSH):
+		return
+	if typeof(option[LetterSchema.KEY_HARSH]) != TYPE_BOOL:
+		_problem("%s.harsh" % path, "must be true or false")
+		return
+	if not bool(option[LetterSchema.KEY_HARSH]):
+		return
+	var effect: Variant = option.get(LetterSchema.KEY_EFFECT)
+	if typeof(effect) != TYPE_DICTIONARY or (effect as Dictionary).is_empty():
+		_problem("%s.harsh" % path, "is harsh but carries no effect, so it orders nothing")
 
 
 func _check_effect_args(effect_id: String, args: Dictionary, letter: Letter, path: String) -> void:

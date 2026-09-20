@@ -85,6 +85,33 @@ func _read(event: SimEvent, month: int, log: EventLog) -> void:
 				# loyalty *and* it raises the town's sentiment, because the people
 				# learn the Crown would not help them.
 				_against(event.subject, Grievances.REFUSED, month, log)
+			elif _is_harsh(order) and _was_borne(event.type):
+				_against(event.subject, Grievances.HARSH_ORDER, month, log)
+
+
+## An order the PC wrote as a command rather than a request (§4).
+##
+## **Declared by the letter, never inferred from the order.** Which rung is harsh
+## is a thing the prose says, because the PC chose it; reading it off the params
+## instead would tell a generous requisition from a punitive one by arithmetic
+## rather than by what he actually wrote.
+##
+## It is deliberately **not** the duty on a purchase. Towns resent a duty *as they
+## pay it*, per transaction, which `RebelSentiment._tax` already counts; reading
+## the rate as a harsh order as well would charge the same squeeze twice.
+static func _is_harsh(order: Dictionary) -> bool:
+	return bool(order.get("harsh", false))
+
+
+## Whether the town actually bore it.
+##
+## **A refusal is news the moment it is written; a harsh order is only a grievance
+## once it lands.** A governor who refuses to strip his own stores has spared his
+## people, and they have nothing to hold against the Crown — his loyalty pays for
+## that instead, which is the trade the compliance model exists to make.
+static func _was_borne(outcome_event: StringName) -> bool:
+	return outcome_event == Compliance.OUTCOME_EVENTS[Compliance.COMPLY] \
+		or outcome_event == Compliance.OUTCOME_EVENTS[Compliance.PARTIAL]
 
 
 ## Whether this town has been carrying the colony for too long.
