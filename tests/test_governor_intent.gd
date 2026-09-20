@@ -419,19 +419,27 @@ func test_a_town_that_is_really_going_nowhere_gives_up() -> void:
 
 # --- 🔒 Sunk progress -------------------------------------------------------
 
-func _half_built(objective: StringName, months_done: int) -> Town:
+## A build with `share` of its materials already in the frame.
+##
+## **Materials, not months** (#148). This used to invest the whole cost and then
+## set a month count, because progress was half one and half the other; now the
+## materials *are* the progress, so investing everything makes a finished build
+## rather than a half-raised one.
+func _part_built(objective: StringName, share: float) -> Town:
 	var town := _town(GovernorIntent.ECONOMY)
 	town.objective = objective
 	town.objective_intent = GovernorIntent.ECONOMY
-	for resource in Building.find(objective).costed_resources():
-		town.store(StringName(resource), Building.find(objective).cost_of(StringName(resource)))
-		town.invest(StringName(resource), Building.find(objective).cost_of(StringName(resource)))
-	town.objective_progress = months_done
+	var building := Building.find(objective)
+	for resource in building.costed_resources():
+		var cost := building.cost_of(StringName(resource))
+		town.store(StringName(resource), cost)
+		town.invest(StringName(resource), cost * share)
+	town.objective_progress = 1
 	return town
 
 
 func test_a_routine_change_of_intent_does_not_abandon_a_project_underway() -> void:
-	var town := _half_built(&"storehouse", 1)
+	var town := _part_built(&"storehouse", 0.5)
 	var harness := _harness(town)
 	assert_true(Objective.progress_fraction(town) > Reconsideration.ROUTINE_SUNK)
 
@@ -443,7 +451,7 @@ func test_a_routine_change_of_intent_does_not_abandon_a_project_underway() -> vo
 func test_a_crisis_overrides_substantial_sunk_progress() -> void:
 	# The natives are burning the outskirts. The town must not spend eleven more
 	# months on a dock.
-	var town := _half_built(&"storehouse", 1)
+	var town := _part_built(&"storehouse", 0.5)
 	var harness := _harness(town)
 
 	town.intent = GovernorIntent.SURVIVAL
@@ -452,7 +460,7 @@ func test_a_crisis_overrides_substantial_sunk_progress() -> void:
 
 
 func test_even_a_crisis_finishes_what_is_nearly_done() -> void:
-	var town := _half_built(&"church", 3)  # four months, three of them served
+	var town := _part_built(&"church", 0.9)  # nine parts in ten already raised
 	var harness := _harness(town)
 	assert_true(Objective.progress_fraction(town) >= Reconsideration.CRISIS_SUNK)
 
@@ -463,13 +471,17 @@ func test_even_a_crisis_finishes_what_is_nearly_done() -> void:
 
 func test_abandoning_forfeits_what_was_invested() -> void:
 	# The timber is already cut and standing in the half-built frame.
-	var town := _half_built(&"storehouse", 1)
+	var town := _part_built(&"storehouse", 0.5)
 	var harness := _harness(town)
+	var spare := town.held(&"wood")   # never went into the frame, so never at risk
+	var sunk := town.invested(&"wood")
+	assert_true(sunk > 0.0, "the fixture put nothing in the frame, so there is nothing to forfeit")
+
 	Reconsideration.abandon(town, Reconsideration.INTENT_CHANGED, harness["context"])
 
 	assert_eq(String(town.objective), "")
 	assert_empty(town.objective_invested)
-	assert_almost_eq(town.held(&"wood"), 0.0, 0.001, "the timber came back out of the frame")
+	assert_almost_eq(town.held(&"wood"), spare, 0.001, "the timber came back out of the frame")
 
 	var events: Array = harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED)
 	assert_eq(events.size(), 1)
@@ -534,7 +546,7 @@ func test_an_urging_that_names_no_intent_comes_to_nothing_loudly() -> void:
 # --- Saving -----------------------------------------------------------------
 
 func test_intent_and_objective_survive_save_and_reload() -> void:
-	var town := _half_built(&"storehouse", 1)
+	var town := _part_built(&"storehouse", 0.5)
 	town.intent = GovernorIntent.DEFENCE
 	town.intent_since = 7
 	town.urged_intent = GovernorIntent.POPULATION

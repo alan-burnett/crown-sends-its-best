@@ -362,7 +362,7 @@ func test_effects_persist_through_save_and_reload() -> void:
 
 	var restored := Town.from_dict(town.to_dict())
 	assert_almost_eq(Building.yield_bonus_for(restored, &"wood"), before)
-	assert_true(Building.reserve_months_for(restored) > 0.0)
+	assert_true(Building.reserve_months_for(restored, &"food") > 0.0)
 	assert_true(Building.quality_of_life_for(restored) > 0.0)
 
 

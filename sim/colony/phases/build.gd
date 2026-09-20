@@ -25,12 +25,19 @@ extends ColonyPhase
 ##   stone and a build that has to start over.
 ## - Abandoning the objective forfeits them, because the frame is already up.
 ##
-## ## Labour after materials
+## ## 🔒 The materials are the time (#148)
 ##
-## A build needs its materials *and* its months. Months only start counting once
-## every resource is in — a crew does not raise a wall it has no stone for — so a
-## town short of one thing stalls with its progress intact and picks up where it
-## left off.
+## A build used to need its materials gathered **and** its months elapsed, with
+## the months authored beside the cost and kept plausible against it by hand.
+## Now a town has a **build capacity** — resources a month it can put into
+## construction, from its population and its `build_speed` — and only that much
+## goes into the frame each month. A granary of sixty resources takes a town of
+## capacity thirty exactly two months, and nothing had to be authored to say so.
+##
+## So stalling is one condition rather than two: the town cannot get the
+## resources, or it has no capacity. A town short of one thing still stalls with
+## its progress intact and picks up where it left off — what it has invested is
+## in the frame.
 
 const EVENT_ADVANCED: StringName = &"build_advanced"
 const EVENT_STALLED: StringName = &"build_stalled"
@@ -43,53 +50,52 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 	if not Objective.completes(town.objective):
 		return
 
+	# **Only what a month's hands can raise.** Sorted, so which resource goes into
+	# the frame first is the colony's rather than the iteration order's.
+	var capacity := Objective.build_capacity(town)
 	var invested: Dictionary = {}
 	var outstanding := Objective.outstanding(town)
 	var ids: PackedStringArray = PackedStringArray(outstanding.keys())
 	ids.sort()
 	for resource in ids:
-		var moved := town.invest(StringName(resource), float(outstanding[resource]))
+		if capacity <= 0.0:
+			break
+		var moved := town.invest(StringName(resource), minf(float(outstanding[resource]), capacity))
 		if moved > 0.0:
 			invested[resource] = moved
+			capacity -= moved
 
 	if not Objective.materials_complete(town):
 		# **Stalled, not reset.** Everything moved above stays in the frame.
 		#
 		# A month only counts against the objective if **nothing at all** went
-		# into it. A town buying its tools a few at a time is gathering, not
-		# going nowhere, and counting those months would have it give up on
-		# everything expensive and then give up on the replacement for the same
-		# reason, for ever (#53, soft stall).
-		if invested.is_empty():
-			town.objective_idle_months += 1
-		else:
-			town.objective_idle_months = 0
-		context.log.emit(EVENT_STALLED, town.id, context.state.month, {
-			"town": String(town.id),
-			"objective": String(town.objective),
-			"name": Objective.display_name(town.objective),
-			"invested": invested,
-			"still_needed": Objective.outstanding(town),
-			"progress": Objective.progress_fraction(town),
-			"months_done": town.objective_progress,
-		}, WorldPhase.COLONY_MONTH)
+		# into it. A town putting a month's capacity into the frame is *advancing*
+		# — that is now the whole of what advancing means (#148) — and a town
+		# buying its tools a few at a time is gathering rather than going nowhere.
+		# Counting those months would have it give up on everything expensive and
+		# then give up on the replacement for the same reason, for ever (#53).
+		var moving := not invested.is_empty()
+		town.objective_progress += 1 if moving else 0
+		town.objective_idle_months = 0 if moving else town.objective_idle_months + 1
+		context.log.emit(
+			EVENT_ADVANCED if moving else EVENT_STALLED,
+			town.id, context.state.month, {
+				"town": String(town.id),
+				"objective": String(town.objective),
+				"name": Objective.display_name(town.objective),
+				"invested": invested,
+				"still_needed": Objective.outstanding(town),
+				"progress": Objective.progress_fraction(town),
+				"months_done": town.objective_progress,
+				"months_required": Objective.months_required(town),
+			}, WorldPhase.COLONY_MONTH)
 		return
 
 	town.objective_progress += 1
 	town.objective_idle_months = 0
-	var required := Objective.months_required(town)
-
-	if town.objective_progress < required:
-		context.log.emit(EVENT_ADVANCED, town.id, context.state.month, {
-			"town": String(town.id),
-			"objective": String(town.objective),
-			"name": Objective.display_name(town.objective),
-			"invested": invested,
-			"months_done": town.objective_progress,
-			"months_required": required,
-			"progress": Objective.progress_fraction(town),
-		}, WorldPhase.COLONY_MONTH)
-		return
+	# **What it actually took**, not what it was projected to take. The projection
+	# is the selector's business; a governor writing home reports the months.
+	var required := town.objective_progress
 
 	# Done. The effect comes from the thing standing, never from this phase
 	# copying numbers onto the town — which is why completion only has to record

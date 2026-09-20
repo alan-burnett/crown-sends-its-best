@@ -113,10 +113,10 @@ static func for_town(town: Town, before: ColonySnapshot) -> DesiredStock:
 
 	# 1. **What the coming months' needs require.** This month's meal and the
 	# months of reserve behind it, which is what the town's storehouses extend.
-	var extra_months := Building.reserve_months_for(town)
 	for resource in ColonyNeeds.needed_resources():
 		var id := StringName(resource)
 		var monthly := mouths * ColonyNeeds.per_head(id)
+		var extra_months := Building.reserve_months_for(town, id)
 		desired._want(id, monthly * (1.0 + ColonyNeeds.reserve_months(id) + extra_months), REACH_NEED)
 
 		# **A need's want extends to what the need is made of** (#64). Cloth is
@@ -164,4 +164,30 @@ static func for_town(town: Town, before: ColonySnapshot) -> DesiredStock:
 			continue
 		desired._want(recipe.input, recipe.consumes_for(town) * USE_MONTHS, REACH_USE)
 
+	# **And what they want laid in by name** (#148). A blanket reserve only made
+	# a town sell less of everything, which is not an effect anybody would
+	# choose; per-resource, it changes behaviour — a weavers' loom gives the town
+	# a real reason to stockpile cotton instead of selling it.
+	#
+	# Months of *draw*, not months of consumption, because the resources a
+	# building wants laid in are mostly ones nobody eats.
+	for resource in Building.reserved_resources(town):
+		var id := StringName(resource)
+		var months := Building.reserve_months_for(town, id)
+		desired._want(id, monthly_draw(town, id, mouths) * months, REACH_USE)
+
 	return desired
+
+
+## How much of a resource this town gets through in a month.
+##
+## What its people eat, or what its buildings put through the recipe that
+## consumes it — whichever is larger. **A month has to mean something for a
+## resource nobody eats**, or `reserve_months` on cotton would reserve nothing.
+static func monthly_draw(town: Town, resource: StringName, mouths: float) -> float:
+	var draw := mouths * ColonyNeeds.per_head(resource)
+	for entry in Conversion.all():
+		var recipe: Conversion = entry
+		if recipe.input == resource and recipe.available_to(town):
+			draw = maxf(draw, recipe.consumes_for(town))
+	return draw

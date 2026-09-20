@@ -9,8 +9,7 @@ data, and nothing in code names a building.
 | Field | Meaning |
 | :--- | :--- |
 | `requires` | Buildings that must already stand. All of them, not any |
-| `months` | How long it takes once the resources are there |
-| `cost` | Resources consumed, by the Build phase (#49) |
+| `cost` | Resources consumed, by the Build phase (#49). **This is also the schedule** — see below |
 | `effects` | What it does once it stands — see below |
 | `grants_contact` | **Uncommon.** A church brings a clergyman, an armoury a quartermaster (SPEC §8.2). Declared here; nothing consumes it until M7 |
 
@@ -20,11 +19,45 @@ data, and nothing in code names a building.
 | :--- | :--- |
 | `yield_bonus` | Raises the town's production of a resource, as a share |
 | `quality_of_life` | Added to the town's standing quality of life |
-| `reserve_months` | Extra months of need the town holds back before selling |
+| `reserve_months` | Extra months of a **named resource** the town holds back — see below |
 | `build_speed` | Shortens later builds, as a share |
 | `defence` | M6 |
 | `converts` | Conversions the town can now perform |
 | `conversions` | **The terms of a conversion** — see below |
+
+## There is no `months`
+
+**A building authors its cost and not its duration** (#148). A town has a *build
+capacity* — resources a month it can put into construction, from its population,
+multiplied by `build_speed` — and the time falls out:
+
+> A granary costing 40 wood and 20 stone is 60 resources. A town with a capacity
+> of 30 builds it in exactly two months.
+
+One authored number instead of two, and they can no longer disagree. A large
+town builds fast, a small one takes an age over the same structure, and nothing
+has to be re-tuned when a cost changes. The validator rejects an authored
+`months`.
+
+It also collapses two gates into one: materials are consumed into the work at
+the capacity rate, so **the materials are the time**, and stalling is a single
+condition — the town cannot get the resources.
+
+## Reserves name their resources
+
+```json
+"effects": { "reserve_months": { "cotton": 2 } }
+```
+
+**Per-resource only. No wildcard**, and the validator rejects both a blanket
+figure and a `"*"` key. A blanket reserve made a granary hold guns and rum back
+as readily as grain, which only made the town sell less of everything — not an
+effect anybody would choose. Targeted, it changes behaviour: a weavers' loom
+gives a town a real reason to stockpile cotton instead of selling it.
+
+A month is measured in what the town actually gets through — what its people eat,
+or what its buildings put through the recipe that consumes it — so a month means
+something for a resource nobody eats.
 
 ## Conversions: two dials, not one
 

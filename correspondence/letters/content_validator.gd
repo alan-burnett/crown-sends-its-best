@@ -412,6 +412,48 @@ func check_trigger_params(content: ContentDatabase) -> void:
 ## **Conditions and param sources are deliberately not checked.** An unused
 ## condition is vocabulary waiting for a letter to want it; an unused effect is a
 ## verb the game claims to have and does not.
+## 🔒 **A reserve must name its resources** (#148).
+##
+## A blanket figure made a granary add two months of desired stock to guns and
+## rum as readily as to grain, which only made the town sell less of everything —
+## not an effect anybody would choose. Per-resource it changes behaviour instead:
+## a weavers' loom gives a town a real reason to stockpile cotton.
+##
+## **No wildcard either.** A `"*"` key would reintroduce the blanket form through
+## the door the per-resource shape was built to close, and it would do it
+## quietly.
+func check_building_reserves(content: ContentDatabase) -> void:
+	for collection in ["buildings", "improvements"]:
+		for id in content.ids(collection):
+			_file = "%s/%s" % [collection, id]
+			var record: Dictionary = content.collection(collection)[id]
+			var effects: Dictionary = record.get("effects", {})
+			if not effects.has("reserve_months"):
+				continue
+			var reserve: Variant = effects["reserve_months"]
+			if typeof(reserve) != TYPE_DICTIONARY:
+				_problem("effects.reserve_months", "a blanket figure; it must name its resources")
+				continue
+			for resource in reserve:
+				if String(resource) == "*":
+					_problem("effects.reserve_months", "uses a wildcard, which is the blanket form again")
+				elif ResourceCatalogue.get_kind(StringName(resource)) == null:
+					_problem("effects.reserve_months", "names '%s', which is not a resource" % resource)
+
+
+## 🔒 **A building authors its cost and not its duration** (#148).
+##
+## Time is the cost divided by what the town can put into construction in a
+## month, so a `months` field is a second authored number that can disagree with
+## the first — and used to.
+func check_no_authored_durations(content: ContentDatabase) -> void:
+	for collection in ["buildings", "improvements"]:
+		for id in content.ids(collection):
+			_file = "%s/%s" % [collection, id]
+			if content.collection(collection)[id].has("months"):
+				_problem("months", "authored; build time is derived from cost and capacity")
+
+
 func check_effects_are_reachable(content: ContentDatabase) -> void:
 	var used: Dictionary = {}
 	for id in content.ids("letters"):
