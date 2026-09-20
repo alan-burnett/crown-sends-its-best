@@ -222,8 +222,8 @@ did not.
 - Whether a town can be **too crowded to appeal** — a large town's appeal
   falling on its own, independent of quality of life, so that growth spreads
   rather than concentrating.
-- What exactly triggers the overflow expedition (§10). The threshold is
-  #99's to settle, but immigration is one of its inputs and they should be
-  designed together.
+- The crowding threshold itself — how full is too full. The *quantity* is settled
+  (`founding-towns.md` §2: population against workable ground, as its own
+  consideration beside `room_to_grow`); the number is not.
 - Whether livestock arrivals need a pasture to be worth anything, or simply eat
   (§12.2) until one exists.

@@ -46,6 +46,35 @@ they can carry.
 
 Same objective, same machinery, opposite outcomes.
 
+### But two motives, and therefore two considerations
+
+The cargo rule handles the difference. **The intent does not**, and it must, or
+only one kind of expedition ever launches.
+
+A governor adopts the settlement intent for one of two unrelated reasons:
+
+| Consideration | Measures | The expedition it produces |
+| :--- | :--- | :--- |
+| **`room_to_grow`** | unclaimed land worth taking | the grand one — opportunity |
+| **`crowding`** | people the town's ground cannot carry | the thin one — pressure |
+
+**These must not be merged into one number.** `deliberation.md` makes personality
+a weight vector over considerations, so two considerations give two weights and
+therefore two kinds of governor: the ambitious man who settles because there is
+land, and the pragmatic one who settles because there are too many mouths. A
+single blended term collapses both into the same character.
+
+It also fixes a chicken and egg. `room_to_grow` alone **cannot fire in a one-town
+colony**, because one town never sees enough unclaimed land to justify leaving —
+so the first daughter town can never be founded and the measure never rises.
+Crowding has no such floor: a town too full for its fields is too full whether or
+not anybody has surveyed the frontier.
+
+**Crowding is population against workable ground**, not population alone. A town
+of two hundred with room to work is not crowded; a town of forty on six tiles is.
+Which means the expansion branch of the building tree (`buildings.md` §4) lowers
+crowding by raising influence — a town can build its way out of needing to leave.
+
 ### It takes its share of the purse
 
 **The departing population takes the share of the town's gold that its numbers
