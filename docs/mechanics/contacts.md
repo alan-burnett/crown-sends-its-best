@@ -125,7 +125,77 @@ Neither alone is enough. Deeds without drift means a contact is indifferent to a
 colony falling apart around him as long as the PC is polite. Drift without deeds
 means the PC's choices do not matter, which is the game.
 
-## 6. The Relationship is the single source of truth
+## 6. The victim writes
+
+**The PC learns what is happening to the colony from the people it is happening
+to.** There is no narrator, no bulletin, and no report from nobody in particular.
+A governor whose fields are blockaded writes to say so. If no one is affected
+enough to put pen to paper, **the PC does not hear about it at all.**
+
+That is the Correspondence pillar taken literally, and it means the world's
+events reach the desk already attached to somebody's interest in them.
+
+### `cares_about` does two jobs
+
+It already drifts loyalty (§5). The same list also says **what a contact
+considers his business** — and therefore what he writes to the PC about,
+unprompted, when something happens to it.
+
+One field, two uses. A contact who cares about the Crown's finances writes when
+they worsen; a governor who cares about his town writes when it is harmed. **No
+second list, and no per-contact table of subscriptions.**
+
+### One event, several letters, several complaints
+
+The same thing happening produces **different letters from different people, each
+with a different ask** — which is §9.1's framing clause working as a content
+multiplier rather than as a caveat.
+
+The PC begins paying tribute to a rival:
+
+| Who writes | What he says |
+| :--- | :--- |
+| **The Steward** | questions the spending. He watches the money and this is money leaving |
+| **The Marshal** | insists the PC stop. He is funding an enemy's war effort |
+
+Neither is wrong and neither is the same letter. A duke's tile denial, meanwhile,
+brings a letter from **the governor whose fields they are** — *deal with these men
+blocking our people* — and from nobody else, because nobody else is losing
+anything.
+
+### Who writes tells the player how bad it is
+
+**This is the part worth protecting.** A complaint's sender is information.
+
+If only the local governor writes about the blockade, it is a local problem. When
+the Diplomat starts mentioning it, it has become the colony's problem. When a
+Crown officer writes, it has reached the capital — and that is much worse news
+than anything in the letter's text.
+
+So escalation is **characterisation rather than a severity field**. The player
+reads the envelope before the letter.
+
+### And the complaint carries the remedy
+
+A letter naming a problem is usually also how the PC learns there is anything he
+can do about it. *Deal with these men* tells him tile denial exists, that it is
+his to answer, and — by who is asking — roughly what it will cost to answer it.
+
+**A problem no one writes about is a problem the player cannot act on**, which is
+the correct consequence and not a gap to be papered over with a notifications
+panel.
+
+### The volume rule
+
+SPEC §9.6 caps the desk, and a rule that *everyone who cares writes about
+everything* would flood it in a year.
+
+So the **most affected party writes first**, and others write when the matter
+escalates or when the PC's silence lets it. That is the same machinery the
+director already uses to cull, and it makes the escalation above fall out of
+letter volume rather than needing its own mechanism.
+
+## 7. The Relationship is the single source of truth
 
 Everything about where the PC and a contact stand lives in **one** place:
 loyalty, outstanding promises, what has been granted and refused and delivered
@@ -165,7 +235,7 @@ Three properties make this work:
   contact in a save. Keep the most significant and the most recent, and let the
   middle fall away — which is also how people remember.
 
-## 7. Death, and what does not happen
+## 8. Death, and what does not happen
 
 **A contact can be killed.** The conditions belong to whatever kills him and are
 that mechanic's business, not this doc's.
@@ -182,7 +252,7 @@ loss rather than an inconvenience.
 "through death, replacement, promotion, or defection." The spec needs amending;
 until it is, the spec wins.
 
-## 8. Loyalty can always be recovered
+## 9. Loyalty can always be recovered
 
 **The base rule is that there is no permanent break.** Loyalty can always be
 gained and always be lost, for every contact, at any point.
@@ -195,7 +265,7 @@ code outside that contact's own definition may create one.
 Note what this is not: SPEC §12.5 lets a native tribe's *trust* break
 permanently. Trust is not loyalty and tribes are not contacts.
 
-## 9. Tuning targets
+## 10. Tuning targets
 
 - The loyalty bands in §4, and what each means in the compliance scoring.
 - The balance between the standing drift term and accumulated deeds (§5). Too
@@ -205,7 +275,7 @@ permanently. Trust is not loyalty and tribes are not contacts.
   than characterful.
 - How many events a Relationship keeps, and how significance is scored (§6).
 
-## 10. Open items
+## 11. Open items
 
 - Whether the drift term should be capable of moving loyalty faster than deeds
   can repair it. A contact whose world is falling apart may be unreachable by any

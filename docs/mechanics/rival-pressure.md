@@ -124,6 +124,11 @@ It also lands somewhere nothing else has touched: **the Work phase's tile list**
 rather than population or stockpiles. A town under denial is not being hurt, it
 is being *diminished*, and its governor's letters should read differently for it.
 
+**And the governor is how the PC finds out.** `contacts.md` §6: the victim writes.
+There is no blockade bulletin — the man whose fields they are asks the PC to deal
+with these people, and the ask is also how the player learns that tile denial
+exists and that money answers it.
+
 ## 6. Spawning is the Squeeze's decision, not this document's
 
 **Prospering does not attract rivals.** A duke arrives because the run has reached
