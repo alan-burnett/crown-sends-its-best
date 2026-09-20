@@ -22,6 +22,7 @@ being rewritten every iteration.
 | [town-economy.md](town-economy.md) | Prices, reserve, buying, and working the tiles | M2 |
 | [buildings.md](buildings.md) | The tree, what each does, and what it costs to keep | M2 |
 | [immigration.md](immigration.md) | Who comes, why, and why you might not want them | M4 |
+| [founding-towns.md](founding-towns.md) | Two ways to plant a town, and what each costs | M4 |
 | [crown-standing.md](crown-standing.md) | The bottomless pit, and when it stops being one | M3 |
 | [crown-demands.md](crown-demands.md) | A fixed bar, then a moving one — and bucket randomisation | M3 |
 | [trade-protests.md](trade-protests.md) | When a town refuses the Crown's duty, and what it costs | M3 |
@@ -38,7 +39,6 @@ first needs it. That list is the live one; this table is the map.
 | :--- | :--- | :--- |
 | Production and conversion | #92 | M2 |
 | Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
-| Founding towns and expeditions | #99 | M4 |
 | The Provost | #100 | M4 |
 | Native behaviour and trust | #101 | M5 |
 | Trading with natives | #102 | M5 |
