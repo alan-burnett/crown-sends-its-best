@@ -44,6 +44,21 @@ const IMPROVEMENT: StringName = &"improvement"
 ## A standing posture. No cost, no completion.
 const POSTURE: StringName = &"posture"
 
+## **Amassing an expedition's supplies** (#175, `founding-towns.md` §2).
+##
+## A project like a building, and deliberately so: the town gathers toward a
+## target over months and launches when it is met, through the same
+## gather-and-complete path Build already runs.
+##
+## What is different is that **the target is not authored**. The governor sets it
+## when he takes the objective, from what his town can spare — and that one rule
+## produces both kinds of expedition. A prosperous town sets a grand target and
+## sends a colony that will leap ahead of its parent; a crowded, poor town
+## shedding mouths it cannot feed sets a target of almost nothing and sends
+## people with what they can carry. Same objective, same machinery, opposite
+## outcomes.
+const EXPEDITION: StringName = &"expedition"
+
 ## **A cost is met when it is met to within this.**
 ##
 ## Resources are floats and arrive by purchase, so the last unit of a thirty-unit
@@ -54,6 +69,9 @@ const MET: float = 0.001
 
 ## Posture id -> its record. Data, like everything else the town does.
 static var _postures: Dictionary = {}
+
+## Expedition id -> its record. One today; the shape is the postures'.
+static var _expeditions: Dictionary = {}
 
 ## Intent id -> how a letter says it.
 ##
@@ -66,6 +84,12 @@ static var _intents: Dictionary = {}
 
 
 static func load_from(record: Dictionary) -> void:
+	_expeditions = {}
+	for entry in record.get("expeditions", []):
+		var expedition := String(entry.get("id", ""))
+		if not expedition.is_empty():
+			_expeditions[expedition] = {"name": String(entry.get("name", expedition))}
+
 	_postures = {}
 	var records: Array = record.get("postures", [])
 	for entry in records:
@@ -92,6 +116,7 @@ static func load_from(record: Dictionary) -> void:
 
 static func reset() -> void:
 	_postures = {}
+	_expeditions = {}
 	_intents = {}
 
 
@@ -137,6 +162,16 @@ static func is_posture(id: StringName) -> bool:
 	return _postures.has(String(id))
 
 
+static func expedition_ids() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray(_expeditions.keys())
+	out.sort()
+	return out
+
+
+static func is_expedition(id: StringName) -> bool:
+	return _expeditions.has(String(id))
+
+
 ## Which sort of objective this is. **A building id that is not a known building
 ## and not a known posture is `NONE`**, not a crash: content can be wrong.
 static func kind_of(id: StringName) -> StringName:
@@ -148,12 +183,16 @@ static func kind_of(id: StringName) -> StringName:
 		return IMPROVEMENT
 	if is_posture(id):
 		return POSTURE
+	if is_expedition(id):
+		return EXPEDITION
 	return NONE
 
 
 static func display_name(id: StringName) -> String:
 	if Building.has(id):
 		return Building.find(id).display_name
+	if is_expedition(id):
+		return String(_expeditions[String(id)].get("name", String(id)))
 	if Improvement.has(id):
 		return Improvement.find(id).display_name
 	if is_posture(id):
@@ -214,6 +253,10 @@ static func costed_resources(town: Town) -> PackedStringArray:
 			return Building.find(town.objective).costed_resources()
 		IMPROVEMENT:
 			return Improvement.find(town.objective).costed_resources()
+		EXPEDITION:
+			var named: PackedStringArray = PackedStringArray(town.objective_cargo.keys())
+			named.sort()
+			return named
 	return PackedStringArray()
 
 
@@ -223,13 +266,19 @@ static func cost_of(town: Town, resource: StringName) -> float:
 			return Building.find(town.objective).cost_of(resource)
 		IMPROVEMENT:
 			return Improvement.find(town.objective).cost_of(resource)
+		EXPEDITION:
+			# **Derived when he took it, never authored.** The cargo is this
+			# town's answer to "what can we spare", written down at the moment
+			# the governor decided, so the target does not move under the town
+			# as its stores do.
+			return float(town.objective_cargo.get(String(resource), 0.0))
 	return 0.0
 
 
 ## Whether this is a thing that finishes at all.
 static func completes(id: StringName) -> bool:
 	var kind := kind_of(id)
-	return kind == CONSTRUCTION or kind == IMPROVEMENT
+	return kind == CONSTRUCTION or kind == IMPROVEMENT or kind == EXPEDITION
 
 
 ## What the build still needs that the town does not already have to hand.

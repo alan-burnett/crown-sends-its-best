@@ -129,6 +129,20 @@ static func candidates(town: Town, context: ColonyContext, intent: StringName = 
 			"score": _scored(sited["axes"], intent, _months_for(town, improvement.cost)),
 		})
 
+	# **An expedition is an ordinary candidate** (#175). It is scored on the same
+	# axes as everything else, so a governor set on settling wants one for the
+	# reason he wants one and nothing here branches on which intent it is.
+	#
+	# 🔒 A rebel town never takes it — a filter, not a weight, so a very
+	# expansionist rebel governor cannot outvote SPEC §11.4.
+	if Expedition.may_launch(town):
+		for id in Objective.expedition_ids():
+			out.append({
+				"id": StringName(id),
+				"target": Vector2i(-1, -1),
+				"score": _scored(_expedition_axes(town), intent, EXPEDITION_MONTHS),
+			})
+
 	for id in Objective.posture_ids():
 		out.append({
 			"id": StringName(id),
@@ -180,6 +194,34 @@ const EXPERTS_A_TOWN_MIGHT_HOLD: float = 3.0
 ## a scale to sit on the same axis. Generous, because unlike a comfort bought
 ## with gold it cannot be cut off — and tuning.
 const AMUSEMENT_WORTH: float = 3.0
+
+
+## How long a governor reckons an expedition takes to gather.
+##
+## Not derived from its cargo, because the cargo is derived from what the town
+## can spare and a town that can spare a great deal would otherwise reckon its
+## expedition *quick* — the opposite of true. Tuning.
+const EXPEDITION_MONTHS: int = 4
+
+
+## What founding another town is good for.
+##
+## **Expansion, and nothing else.** It costs the parent people, stores and coin,
+## so a governor who is not trying to grow the colony should never want one, and
+## the axes say so rather than a rule saying so.
+static func _expedition_axes(town: Town) -> Dictionary:
+	# A crowded town gets more out of shedding people than a roomy one, which is
+	# the overflow case arriving through the same scoring as the deliberate one.
+	var crowding := clampf(float(town.population()) / CROWDED, 0.0, 2.0)
+	return {"expansion": 0.5 + 0.5 * crowding}
+
+
+## The population at which a governor starts thinking about room.
+##
+## **The shared open item** between this and `immigration.md` §10 — how crowded
+## and how poor before a town sheds people — and it wants tuning against #170
+## rather than being settled here.
+const CROWDED: float = 60.0
 
 
 ## What a building is good for, read out of its effects rather than its name.
