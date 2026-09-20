@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.2: Under Author ownership, actively being read by PO and Dev
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.3: Under Author ownership, actively being read by PO and Dev
 
 ---
 
@@ -557,7 +557,7 @@ A town tracks three distinct types of population
 
 - **🔒 Prestige measures only how the Crown benefits from the colony, not how the colonists fared.** Nobody at court cares how the colonists fared. Prestige comes from:  
   - **Patrons:** helping them and keeping their loyalty.  
-  - **Gold:** the PC's financial contribution to the Crown. How this is measured is deferred until the gold model is designed (§17).  
+  - **Gold:** the PC's financial contribution to the Crown.  
   - **Optics**: Public perception of the crown is important to people way above your pay grade. Trade protests, rebellion, paying tribute to a rival, being defeated by natives or rivals, all make the crown look bad and will become prestige penalties in the final score.   
 - How the run ended, whether by retirement or by a fail condition, affects the final score and the epitaph.  
 - Prestige is measurable at any point in the game before retirement, and some contacts will change what they ask of you or how they respond based on your prestige (especially patrons) 
