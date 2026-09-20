@@ -100,12 +100,31 @@ actually need."**
 hope = FITNESS_SHARE * fitness + PROGRESS_SHARE * progress
 ```
 
-- **Fitness** — does the current objective address the town's largest unmet need,
-  as Reckon computed it? A starving town building cannons scores near zero. A
-  starving town building farms, or begging the Crown for the means to, scores
-  high.
+- **Fitness** — does what the town is doing address its largest unmet need, as
+  Reckon computed it, worst-first? A starving town building cannons scores near
+  zero. A starving town building farms, or begging the Crown for the means to,
+  scores high.
+
+  **The bare intent counts, not only the project.** Fitness takes the better of
+  two readings: the objective addressing the need, or `INTENT_SHARE` times the
+  *intent* addressing it. A governor who has resolved to feed his people earns
+  most of the credit the month he resolves it, before any project serving that
+  resolve has been chosen.
+
+  This is what makes the claim below true rather than aspirational. Under an
+  objective-only fitness, hope could not move until the next Settle chose a new
+  project — a month later — and writing to a governor would be the *slowest*
+  lever rather than the fastest.
+
+  **A town with no unmet need scores 1.0.** A comfortable town does not resent
+  its governor for building a church.
 - **Progress** — is it actually moving? A town stalled four months at 80% has
   little hope; a town visibly advancing at 20% has more.
+
+  **Idle months divide rather than merely failing to add**: progress is the
+  completed fraction over `1 + idle months`, so standing still actively erodes
+  hope instead of holding it. A **standing posture** has no fraction to report
+  and sits at 0.5 — it is neither advancing nor stuck, the town simply does it.
 
 **Fitness weighs more than progress.** A town forgives slow work on the right
 problem far more readily than fast work on the wrong one. This is where the
@@ -117,10 +136,27 @@ objective raises hope as soon as he adopts it, well before anything is finished.
 
 ### Pleasure
 
-Luxury consumption: sugar, tobacco, tea, rum, cigars, beer.
+Luxury consumption: sugar, tobacco, tea, rum, cigars, beer — **and amusement**,
+which is pleasure that arrives without a ship (`buildings.md` §7).
 
 Scaled by the fraction of the population served, with a **variety bonus** — beer
 alone is worth less than beer, rum and tea together.
+
+```
+pleasure = served * (VARIETY_FLOOR + (1 - VARIETY_FLOOR) * min(kinds / VARIETY_TARGET, 1))
+```
+
+**Amusement joins both numbers.** A theatre adds to how much of the town was
+served *and* counts as one of the kinds. It is therefore a full participant in
+variety, not a bonus bolted on beside it.
+
+### One draw, read by two phases
+
+`marginal_pleasure()` — what another measure of something would be worth — is the
+same computation Consume uses when the town actually drinks. **The buying side
+and the drinking side must not hold two theories of what a cellar is worth**, or
+a town buys a heap of beer and wonders why it feels no better for it. Exchange
+scores luxuries by marginal quality of life per gold through this one function.
 
 Note what this does to **tea**. §10.1 says the colony can never produce it, so it
 comes only from the Crown. The variety bonus therefore makes tea the luxury a
@@ -136,8 +172,14 @@ Starting weights — all tuning, all to be revised against the harness:
 ```
 w_health 0.30   w_safety 0.25   w_means 0.20   w_hope 0.25
 PLEASURE_LIFT 0.45
-FITNESS_SHARE 0.65   PROGRESS_SHARE 0.35
+FITNESS_SHARE 0.65   PROGRESS_SHARE 0.35   INTENT_SHARE 0.7
+SECURE_MONTHS 3.0    FOOD_SHARE 0.7       COMFORTABLE_PURSE 30.0
+VARIETY_TARGET 3.0   VARIETY_FLOOR 0.6
 ```
+
+`SECURE_MONTHS` is the food reserve health measures against and `FOOD_SHARE`
+splits health between the larder and the wardrobe. `COMFORTABLE_PURSE` is the
+gold per head `means` treats as comfortable.
 
 ### While safety is inert, drop it and renormalise
 
@@ -154,6 +196,11 @@ three:**
 ```
 w_health 0.40   w_means 0.267   w_hope 0.333
 ```
+
+**The code derives these rather than carrying them.** `live_weight()` sums the
+weights of the live components and each component divides by that, so the
+authored numbers stay 0.30 / 0.25 / 0.20 / 0.25 and nothing hardcodes 0.40 where
+0.30 is written. Restoring safety is one flag, not five edits.
 
 Same relative balance between them, full 0–1 range reachable. The worked example
 below then reads 0.91 / 0.21 / 0.56 for thriving, struggling and starving-drunk,
@@ -242,10 +289,16 @@ combat reaches quality of life, rather than a restoration of the old weights.
 ## 9. Open items
 
 - Every constant above. They are a starting point, not a design.
-- Whether the variety bonus should be a count of luxury types or something
-  smoother. Count is simpler and probably enough.
-- The target food reserve, in months. This single number does more to set the
-  colony's difficulty than any other value here.
+- **Amusement counts toward variety, and that cuts across the tea argument
+  above.** With `VARIETY_TARGET` at three, a town holding beer, rum and a theatre
+  reaches full variety exactly as one holding beer, rum and tea does — so a
+  building the colony can raise for itself substitutes for the luxury it can
+  never produce. The tea case survives through `served`, but it is weaker than
+  §4 claims. **Worth the Author's eye**: either tea is less uniquely valuable
+  than the design wants, or amusement should feed `served` without counting as a
+  kind.
+- The target food reserve, in months, currently three. This single number does
+  more to set the colony's difficulty than any other value here.
 - Whether `means` should scale its target with the colony's price level, once
   prices exist as more than a constant.
 - Whether pleasure should saturate below 1.0, so that no amount of rum fully
