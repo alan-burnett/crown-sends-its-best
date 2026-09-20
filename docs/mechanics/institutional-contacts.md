@@ -158,17 +158,59 @@ pull in different directions.
 
 **The cathedral** widens what he can do.
 
-### The quartermaster — deferred
+### The quartermaster
 
-**Not specified yet, at the Author's direction.** He turns on what guns are *for*,
-and that is a larger question than this contact: §10.1 has guns arming the militia
-and coveted by the natives, `battles.md` makes them a supply ratio fixed at
-launch, and `buildings.md` gates them behind the only locked conversion in the
-tree. What the quartermaster does depends on where that settles.
+> **Placeholder.** What guns are *for* is a larger question than this contact —
+> §10.1 has them arming the militia and coveted by the natives, `battles.md` makes
+> them a supply ratio fixed at launch, and `buildings.md` gates them behind the
+> only locked conversion in the tree. This is enough to build him; expect the
+> particulars to move when that settles.
 
-What is fixed is the shape of the hole he fills. `battles.md` §2: **arms are fixed
-at launch and never resupplied**, so *who equipped you* is the whole of what a
-company will ever have. Whatever he turns out to do, it acts there.
+**What his loyalty does.** At high regard he grants **contracts to make guns and
+ship them to the Crown**, which cannot happen without him at all.
+
+They are **very lucrative**. They are also the single most unpopular thing the PC
+can do to his own colony, and half the residents will write to say so.
+
+**It needs no new authority over the towns.** SPEC §11.3 locks that towns run
+themselves and the PC never manages them directly — so a contract is **a price**,
+not an order. It raises what the Crown pays for guns; town valuation does the
+rest, and towns turn to muskets because muskets are suddenly worth making. The
+sim needs no override and the PC issues no instruction.
+
+**Who complains, and why they are right.** Guns raise a town's defence (§10.1),
+so a contract is the colony **manufacturing its own safety and selling it
+abroad**. The clergy objects on conscience, the scholar on principle, the
+journalist on both and loudly. Governors watch plantations turn into forges.
+
+#### 🔒 The contract unmakes the man who grants it
+
+**He gains loyalty from the colony being well armed** — guns in the stockpiles,
+guns in the companies' hands.
+
+Shipping them to the Crown is the precise opposite of that. **So the harder the PC
+works the contract, the faster he loses the only man who can grant it**, and the
+instrument closes itself. No cap is needed and none should be added.
+
+It is the quartermaster's mirror of the journalist: one man's cooperation loosens
+the colony, the other's enriches the Crown by disarming it. **Both are traps, and
+they point opposite ways.**
+
+**What he asks for.** Iron, gold to buy iron, help moving guns where they are
+needed — and money, of course. And **lower duty on iron**.
+
+That makes three residents asking for relief on three different things: the
+**clergy** wants the duty off what the poor cannot do without, the **scholar**
+wants it off luxuries, and the **quartermaster** wants it off iron. One
+instrument, three claimants, and a PC who can afford to please one of them.
+
+**His bias.** The stockpiles are **always dangerously low** and the duty on iron
+is **always too high** — at every level of supply and every rate, exactly as the
+Provost is permanently certain the colony is under-schooled.
+
+Unlike education, though, **the player can check**. The stockpile is a number the
+letters quote, so his alarm is verifiable and therefore learnable, which makes him
+the easiest of the four to discount correctly.
 
 **The armoury** extends him.
 
