@@ -397,3 +397,88 @@ func test_a_buildings_reserve_reaches_the_same_desired_stock_as_everything_else(
 
 	assert_true(equipped.wanted(&"cotton") > bare.wanted(&"cotton"),
 		"a weavers' loom gives the town no reason to lay in cotton")
+
+
+# --- 🔒 A governor can want every building for the right reason -------------
+
+## Effects that reach `ObjectiveSelector._building_axes`, and so can be a reason
+## a governor chooses to build a thing.
+const REACHES_THE_GOVERNOR: Array[String] = [
+	"amusement", "build_speed", "defence", "pasture", "quality_of_life",
+	"reserve_months", "yield_bonus",
+]
+
+## And effects that deliberately do not, with why.
+##
+## `converts` and `conversions` are terms, not reasons: a town wants a smithy for
+## the iron it will yield, which arrives through `yield_bonus` or through the
+## recipe being worth running, rather than because the building has an opinion
+## about ratios.
+const DELIBERATELY_SILENT: Array[String] = ["conversions", "converts"]
+
+
+func test_every_building_effect_is_something_a_governor_can_weigh() -> void:
+	# 🔒 **The claim `_building_axes` makes about itself**: nothing there knows
+	# what a granary is, so adding a building to the data is enough for a governor
+	# to want it for the right reasons.
+	#
+	# An effect it has not been told about breaks that **silently**, and this has
+	# now happened three times in one milestone — `reserve_months` read as a float
+	# in #148 and again in #151, and `amusement` unread in #153, where the colony
+	# built fourteen of the eighteen buildings in the tree and never the two that
+	# exist to make people happy.
+	#
+	# So a new effect is now a decision: either it is a reason to build, or it is
+	# listed above as one that is not.
+	var seen: Dictionary = {}
+	for id in Building.ids():
+		for effect in Building.find(StringName(id)).effects:
+			seen[String(effect)] = true
+
+	var unclassified: PackedStringArray = PackedStringArray()
+	for effect in seen:
+		if not REACHES_THE_GOVERNOR.has(String(effect)) \
+				and not DELIBERATELY_SILENT.has(String(effect)):
+			unclassified.append(String(effect))
+	unclassified.sort()
+	assert_empty(unclassified,
+		"%s reaches no governor and is not listed as deliberately silent, so no town will ever build for it" % [unclassified])
+
+
+## A value of the right shape for an effect, so it can be scored on its own.
+func _sample_for(effect: String) -> Variant:
+	match effect:
+		"yield_bonus":
+			return {"wood": 0.5}
+		"reserve_months":
+			return {"food": 2}
+		"pasture":
+			return 12
+		_:
+			return 1.0
+
+
+func test_an_effect_that_reaches_the_governor_actually_moves_his_score() -> void:
+	# **Listing it is not the same as wiring it**, and asking whether any real
+	# building carrying it scores anything is not the same either: the theatre
+	# also carries `quality_of_life`, so unwiring `amusement` entirely left that
+	# version of this test green.
+	#
+	# So each effect is put on a building of its own, with nothing else on it.
+	# Then the only thing that can produce a score is the effect under test.
+	for effect in REACHES_THE_GOVERNOR:
+		Building.load_from([{
+			"id": "probe", "name": "a probe", "cost": {"wood": 10},
+			"effects": {effect: _sample_for(effect)},
+		}])
+		var axes := ObjectiveSelector.building_axes(&"probe")
+		var moved := false
+		for axis in axes:
+			if absf(float(axes[axis])) > 0.0001:
+				moved = true
+		assert_true(moved,
+			"a building whose only effect is '%s' is worth nothing to any governor" % effect)
+
+	# Put the real tree back for whatever runs next.
+	Building.reset()
+	M1Registrations.load_resources(content)
