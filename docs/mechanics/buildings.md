@@ -48,6 +48,13 @@ month. A town that cannot pay **keeps the building and loses the effect**, and i
 switches back on the moment it can afford it again. Upkeep is a squeeze, not a
 punishment.
 
+**Four buildings bring a contact, and three more extend one.** The church brings
+the clergy, the gunsmith the quartermaster, the printing press the journalist and
+the library the scholar. The cathedral, armoury and college **widen what those men
+can do rather than adding anyone**. No other building brings a contact — one whose
+man would have nothing unique to offer brings none, which is why the theatre does
+not. See `institutional-contacts.md`.
+
 **There is no *nearby*.** A building affects **one town or every town**, and no
 distance is ever considered. People travel to the fair from anywhere in the
 colony. This is deliberate: it saves an entire distance system and nothing in the
@@ -90,7 +97,7 @@ wants both: food capacity has to keep climbing as a town grows.
 | :--- | :--- | :--- | :--- | :--- |
 | **wharf** | 50 wood, 20 stone, 4 tools | **none** | All gold received in trade with the Crown **+10%** | dock |
 | *conversion buildings* | 40 wood, 10 stone, 10 iron, 8 tools | medium | See §6 | crane |
-| **gunsmith** | 20 iron, 20 stone, 20 wood, 25 tools | **high** | **Allows guns to be made at all** — the only gated conversion | foundry |
+| **gunsmith** | 20 iron, 20 stone, 20 wood, 25 tools | **high** | **Allows guns to be made at all** — the only gated conversion. Brings the **quartermaster** | foundry |
 
 ### Defence
 
@@ -117,12 +124,12 @@ building for defence gets an economy as a side effect.
 
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
-| **church** | 30 wood, 10 stone | low | Amusement, **perceived safety**, brings a clergyman | — |
-| **cathedral** | 120 stone, 15 tools | high | Increases the church's effect, and extends **safety and amusement to every town without a church** — but not the contact | church |
+| **church** | 30 wood, 10 stone | low | Amusement, **perceived safety**, brings the **clergy** | — |
+| **cathedral** | 120 stone, 15 tools | high | Increases the church's effect, and extends **safety and amusement to every town without a church**, and **widens what the clergy can do** — but brings no second contact | church |
 | **theatre** | 20 stone, 30 wood, 4 tools | medium | Amusement. Attracts experts | — |
 | **tea house** | 20 wood, 10 stone | **none** | More quality of life from tea. Raises tea's desired stock | — |
 | **ale house** | 20 wood, 10 stone | **none** | More quality of life from beer. Raises beer's desired stock | — |
-| **printing press** | 10 stone, 10 wood, 10 iron, 25 tools | **high** | Attracts experts. Amusement **in every town**. **Raises rebel sentiment.** Brings a contact | college, stockade |
+| **printing press** | 10 stone, 10 wood, 10 iron, 25 tools | **high** | Attracts experts. Amusement **in every town**. **Raises rebel sentiment.** Brings the **journalist** | college, stockade |
 
 ### Capacity
 
@@ -134,8 +141,8 @@ building for defence gets an economy as a side effect.
 | **stonecutters** | 20 wood, 20 iron, 15 tools | medium | More stone | — |
 | **sawmill** | 20 stone, 20 iron, 15 tools | medium | More wood | — |
 | **mineworks** | 20 wood, 20 stone, 15 tools | medium | More ore | — |
-| **library** | 30 wood, 10 stone | medium | Amusement. **Turns resident experts into education**, so experts here generate more experts. Brings a contact who wants them spread about the colony | theatre |
-| **college** | 50 wood, 30 stone, 20 iron, 15 tools | **high** | **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
+| **library** | 30 wood, 10 stone | medium | Amusement. **Turns resident experts into education**, so experts here generate more experts. Brings the **scholar**, who moves experts between towns | theatre |
+| **college** | 50 wood, 30 stone, 20 iron, 15 tools | **high** | Extends the **scholar**. **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
 
 Stonecutters and sawmill each cost the resource the other produces, which makes
 them a natural pair rather than a choice.
@@ -239,7 +246,7 @@ a tool factory is shipped far more iron than a village blacksmith ever was.
 | sugar → rum | **distillery** | 20 → 2 | 40 → 8 *(5:1)* |
 | food → beer | **brewhouse** | 8 → 2 | 16 → 8 *(2:1)* |
 | iron → tools | **toolworks** | 6 → 2 | 12 → 6 *(2:1)* |
-| iron → guns | **armoury** | 6 → 2 | 12 → 6 *(2:1)* |
+| iron → guns | **armoury** — extends the quartermaster | 6 → 2 | 12 → 6 *(2:1)* |
 
 Every ratio here is authored; **every throughput is derived.** Base throughput is
 `2 x ratio` and a building's is twice that, so a change to a ratio carries its
@@ -326,8 +333,9 @@ M3 playtest exercises the capacity and trade branches only.
   upkeep** partly offsets the duty forever, and at 50 wood and 20 stone it is an
   automatic build for any town that trades. Worth watching in the harness.
 - Whether a **second** conversion building tier is ever wanted. Currently not.
-- What the library's contact and the cathedral's "more with the contact" actually
-  unlock. Both are M7.
+- Whether the journalist's prestige contribution wants a cap, so a PC cannot
+  build a press in every town and print his way to a score
+  (`institutional-contacts.md` §6).
 - How the printing press's rebel sentiment compares with its amusement. It is the
   clearest case of a building that is worth having and dangerous to own, and it
   should be tuned so that both are true.
