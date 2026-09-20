@@ -139,13 +139,10 @@ coat — growth for gold — and it carries the Provost's consequence too, since
 `immigration.md` §9 makes growth the engine of rebellion. **A pilgrim town is
 future sentiment, bought.**
 
-**And it is how the priest grows his own institution.** A town of pilgrims that
-arrives with a church standing brings a clergyman of its own, which is a second
-resident voice, a second scaled safety bonus, and a second man asking for
-charity.
-
-The PC is being invited to fund that with his own gold, and the letter will not
-mention it.
+**🔒 A pilgrim town does not arrive with a church.** It arrives devout and
+unbuilt, like any other founding, and must raise one for itself if it wants one.
+The priest gathers people, not institutions — and he does not get to seed a second
+clergyman on the PC's money.
 
 **His bias.** He talks to the poorest of the poor, the ones with nowhere else to
 go, **so he believes the colony is far worse off than it is.** Every welfare
@@ -161,21 +158,19 @@ pull in different directions.
 
 **The cathedral** widens what he can do.
 
-### The quartermaster
+### The quartermaster — deferred
 
-| | |
-| :--- | :--- |
-| **Wants** | iron, guns, and gold for the armoury |
-| **Cares about** | whether the colony is defended. He reads walls, arms and the strength of what stands in them |
-| **Can do** | **companies raised in his town launch better armed** |
+**Not specified yet, at the Author's direction.** He turns on what guns are *for*,
+and that is a larger question than this contact: §10.1 has guns arming the militia
+and coveted by the natives, `battles.md` makes them a supply ratio fixed at
+launch, and `buildings.md` gates them behind the only locked conversion in the
+tree. What the quartermaster does depends on where that settles.
 
-That capability lands exactly where `battles.md` §2 leaves a gap: arms are **fixed
-at launch** and never resupplied, so *who equipped you* is the whole of what a
-company will ever have. A quartermaster is therefore worth more than the guns he
-represents — he is the difference between a militia and a company that can
-campaign.
+What is fixed is the shape of the hole he fills. `battles.md` §2: **arms are fixed
+at launch and never resupplied**, so *who equipped you* is the whole of what a
+company will ever have. Whatever he turns out to do, it acts there.
 
-**The armoury** extends him to arming companies raised elsewhere in the colony.
+**The armoury** extends him.
 
 ### The journalist
 
@@ -256,9 +251,6 @@ why the theatre does not.
   safety. If that holds for all four it is an elegant pattern: the building gives
   the effect, the man decides how much of it the town actually gets. If it holds
   only for the clergy it should be said plainly, or a dev will infer the rule.
-- **Whether a pilgrim town arrives with a church.** It is the natural character
-  for one, and it would mean the clergy uses the PC's gold to seed a second
-  clergyman. That is either the best thing about him or one too many priests.
 - **Whether towns anticipate an announced holy day.** They buy monthly on
   valuation and know nothing of the calendar, so a known month of free trade is
   simply a windfall they do not plan for. Making them save for it would be a new
