@@ -132,7 +132,10 @@ and it is what makes the Marshal's officer (§8.6) worth something structural.
 
 **Commanders are contacts.** Colonial and rebel commanders both, which is how a
 rebel general comes to be negotiating with the Crown by letter — a correspondence
-channel §12.3 implies and never names.
+channel §12.3 implies and never names. See `commanders.md`, which also settles
+that **a commander can refuse to attack**: he scores every option including
+withdrawal, and refusal is attack scoring below retreat rather than a branch in
+the code.
 
 ## 5. Force
 
@@ -304,6 +307,5 @@ Every one of those is a letter, and every one of them is a month or more early.
   tools they cannot make.
 - Whether the Diplomat's death roll fires on a town's battle losses as it does on
   other population loss (`the-diplomat.md`).
-- Whether a commander can refuse to attack. §8.5 says orders are requests and
-  §12.6 says Crown troops may refuse orders against Crown interests — so probably
-  yes, and it belongs in `commanders.md` (#106) rather than here.
+- Whether a native company's leadership works as anybody else's, or whether a
+  tribe's war party answers to the village rather than to a man.
