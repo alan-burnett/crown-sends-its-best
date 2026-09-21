@@ -66,39 +66,64 @@ mechanism for half this catalog.
 
 ---
 
-## 3. 🔒 One cutscene a turn
+## 3. As many as the month earned, in the order they happened
 
-The PC opens his post once a month. A month that opened with three paintings
-would be a slideshow, and the screen would stop meaning anything.
+A turn shows **every cutscene it triggered**, one after another, ordered by event
+`seq` — which is the order they happened inside the month, and the same order the
+map has just played them in.
 
-**A turn shows at most one**, and the rules for choosing are short:
+**Nothing waits, nothing expires, nothing is dropped.** There is no budget.
 
-- **A first outranks a recurrence.** The first battle of the run will never come
-  again; the first battle of *this* turn will come again next time there is one.
-- **Among firsts, the earliest event wins**, by `seq`. Deterministic, and it
-  matches the order the map just played them in.
+### 🔒 The catalog is the discipline, not a budget
 
-### A first that loses waits. A recurrence that loses is spent.
+An earlier draft capped this at one a turn and deferred the rest. Simulating
+twelve turns showed the cap was solving a problem the catalog already solves.
 
-A first is a moment that cannot be re-staged, so **it holds and fires next turn**.
-A recurrence is by definition going to recur, so it is simply dropped.
+**Almost every cutscene here is a first**, and a first can fire once in a run. So
+the ceiling is the catalog's own length, and the shape falls out on its own: the
+early run is busy because the early run is when things happen for the first time,
+and it thins out because it has run out of firsts, not because anything throttled
+it.
 
-**A held first expires after three turns.** *The First Works* arriving four
-months after the building went up is a caption about nothing, and a small backlog
-early in a run — landfall, the first building, the first immigrants, all within a
-few months of each other — is exactly when this would happen. Three is a tuning
-target.
+**What keeps this from being a slideshow is §7** — refusing the slot to anything
+that happens most months. A budget was a second mechanism doing the same job
+worse, and it was doing real damage: it made *Landfall* lose its own month.
 
----
+### A recurrence is still once a turn
+
+*The first trade protest of each turn* is one painting, however many towns
+protest. That is what makes it a recurrence rather than an event.
+
+**And a recurrence never fires in the turn its first counterpart did** — *The
+First Blood* and *Shots Exchanged* are the same event seen twice.
+
+### What this actually produces
+
+Measured over the first twelve turns, three seeds, with the month-1 rival bug
+(#300) set aside:
+
+| Turn | Shown |
+| :--- | :--- |
+| m0 | *Your Appointment* |
+| m1 | *Landfall*, then the desk firsts the player's own post earned |
+| m2 | *New Arrivals* |
+| m3–4 | *The First Works* |
+| m9 | *The Colony Grows* |
+| m10 | *A Man Who Knows His Trade* |
+| m7, m8, m11, m12 | nothing |
+
+**Month 1 is the busiest turn in the run** and everything after it is sparse.
+That is the correct shape for a game about a colony being founded, and it is the
+shape a budget destroyed by spreading month one across six.
 
 ## 4. After the playback, before the desk
 
-The order of a turn's opening is **map playback, then the cutscene, then the
-desk.**
+The order of a turn's opening is **map playback, then the turn's cutscenes, then
+the desk.**
 
-The painting is punctuation on the month, not a title card for it. Shown first,
+The paintings are punctuation on the month, not title cards for it. Shown first,
 *Meeting the Natives* tells the player what the map is about to play; shown
-after, it is the thing he is left holding when he sits down to answer his post.
+after, they are what he is left holding when he sits down to answer his post.
 
 ---
 
@@ -236,9 +261,10 @@ everything here is a first.
 
 ## 8. Tuning targets
 
-- Turns a held first waits before it expires (§3, starting at three).
-- Whether one a turn is right, or whether the early run wants two while the
-  backlog drains.
+- How long a painting holds before advance is offered, and whether a run of
+  several in one turn wants any pause between them.
+- Whether month one stays comfortable once the catalog is fully painted — it is
+  the busiest turn in the run by design, and the only one worth re-measuring.
 
 ## 9. Open items
 
