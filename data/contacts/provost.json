@@ -1,0 +1,25 @@
+[
+  {
+    "id": "provost",
+    "name": "Dr Silas Meakin",
+    "title": "Provost of the Colony",
+    "role": "crown_officer",
+    "portrait": "portrait.provost",
+    "loyalty": 58,
+    "weights": {
+      "loyalty": 0.9,
+      "payment_offered": 1.5,
+      "cost_of_request": 0.4,
+      "autonomy": 0.5,
+      "order_clarity": 0.8
+    },
+    "leans": {
+      "colony_quality_of_life": -0.2,
+      "colony_food_security": -0.15
+    },
+    "cares_about": [
+      "colony_quality_of_life",
+      "colony_food_security"
+    ]
+  }
+]

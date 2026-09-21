@@ -1,0 +1,229 @@
+{
+  "id": "provost.who_comes",
+  "sender": "provost",
+  "type": "request",
+  "skippable": false,
+  "body": [
+    {
+      "text": "You will forgive a long letter at the outset. It is the first of two, and between them they settle matters that are very difficult to settle later."
+    },
+    {
+      "text": "There is a colony now, which means there is a question of who comes to it. Three parts of that question are below. I have put each as a single line, being told the post is heavy."
+    },
+    {
+      "text": "I shall say at the start that I will ask for more of all of them than you will want to give, and that I shall go on asking. I would rather tell you that now than have you work it out."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "Dr Meakin — I have read your letter and am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "minded to settle it properly"
+        },
+        {
+          "tone": "pleased",
+          "text": "glad of the thoroughness"
+        },
+        {
+          "tone": "annoyed",
+          "text": "conscious of its length"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "volume",
+        "prompt": "How many come at all",
+        "options": [
+          {
+            "id": "volume_none",
+            "label": "none",
+            "text": "No encouragement. The colony will grow by what it is, or not at all.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_volume",
+                "cost": 0,
+                "split": "none",
+                "level": "nothing"
+              }
+            }
+          },
+          {
+            "id": "volume_little",
+            "label": "a little",
+            "text": "A little encouragement, and no more than a little.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_volume",
+                "cost": 79,
+                "split": "all",
+                "level": "a_little"
+              }
+            }
+          },
+          {
+            "id": "volume_lot",
+            "label": "a lot",
+            "text": "Encourage them properly. I would rather have the hands.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_volume",
+                "cost": 158,
+                "split": "all",
+                "level": "a_lot"
+              }
+            }
+          },
+          {
+            "id": "volume_great",
+            "label": "a great deal",
+            "text": "Fill it. Whatever it costs, fill it.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_volume",
+                "cost": 240,
+                "split": "all",
+                "level": "a_great_deal"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "provision",
+        "prompt": "What they bring with them",
+        "options": [
+          {
+            "id": "provision_none",
+            "label": "nothing",
+            "text": "They may bring what they can carry.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_provision",
+                "cost": 0,
+                "split": "none",
+                "level": "nothing"
+              }
+            }
+          },
+          {
+            "id": "provision_little",
+            "label": "a little",
+            "text": "See that they are not destitute when they land.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_provision",
+                "cost": 66,
+                "split": "all",
+                "level": "a_little"
+              }
+            }
+          },
+          {
+            "id": "provision_lot",
+            "label": "a lot",
+            "text": "Supply them well. A settler who lands with nothing is a settler the town must feed.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_provision",
+                "cost": 132,
+                "split": "all",
+                "level": "a_lot"
+              }
+            }
+          },
+          {
+            "id": "provision_great",
+            "label": "a great deal",
+            "text": "Send them out equipped for a country none of them has seen.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_provision",
+                "cost": 200,
+                "split": "all",
+                "level": "a_great_deal"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "experts",
+        "prompt": "How many of them know a trade",
+        "options": [
+          {
+            "id": "experts_none",
+            "label": "none",
+            "text": "Hands will do. We are not founding a university.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_experts",
+                "cost": 0,
+                "split": "none",
+                "level": "nothing"
+              }
+            }
+          },
+          {
+            "id": "experts_little",
+            "label": "a little",
+            "text": "A few who know something, where they can be had.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_experts",
+                "cost": 99,
+                "split": "all",
+                "level": "a_little"
+              }
+            }
+          },
+          {
+            "id": "experts_lot",
+            "label": "a lot",
+            "text": "Seek out the skilled. One of them is worth several of the others.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_experts",
+                "cost": 198,
+                "split": "all",
+                "level": "a_lot"
+              }
+            }
+          },
+          {
+            "id": "experts_great",
+            "label": "a great deal",
+            "text": "The best men you can find, and outbid whoever else is bidding.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_experts",
+                "cost": 300,
+                "split": "all",
+                "level": "a_great_deal"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I am, sir, your obedient servant,"
+      }
+    ]
+  }
+}

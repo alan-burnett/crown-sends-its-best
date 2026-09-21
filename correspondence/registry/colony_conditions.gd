@@ -117,6 +117,13 @@ static func register_all() -> void:
 	# condition that could compare the figure to anything would be the first step
 	# to printing it.
 	ContentRegistry.register_condition(
+		"the_colony_has_lived", {"months": "integer"},
+		ColonyConditions.the_colony_has_lived,
+	)
+	ContentRegistry.register_condition(
+		"he_holds_a_policy", {}, ColonyConditions.he_holds_a_policy
+	)
+	ContentRegistry.register_condition(
 		"crown_standing_is", {"band": "string"}, ColonyConditions.crown_standing_is
 	)
 	ContentRegistry.register_condition(
@@ -133,6 +140,29 @@ static func register_all() -> void:
 		"a_neighbour_declared", {"within": "integer"},
 		ColonyConditions.a_neighbour_declared,
 	)
+
+
+## Whether the colony has actually lived some months yet (#173).
+##
+## **Not a month number.** A town founded in year four has its own first month,
+## and a letter about how the place is getting on must not fire before there is a
+## place. Counted off the log, which is where every other "has this happened"
+## question is answered.
+static func the_colony_has_lived(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.log == null:
+		return false
+	return context.log.of_type(SettlePhase.EVENT_LIVED).size() >= maxi(1, int(args.get("months", 1)))
+
+
+## Whether this sender already has a standing policy of his own (#173).
+##
+## The Provost's second letter waits on his first being answered: a man does not
+## write about the smaller matters before he knows whether the larger ones were
+## granted.
+static func he_holds_a_policy(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.policies == null or context.sender == null:
+		return false
+	return not context.policies.held_by(context.sender.id).is_empty()
 
 
 ## Which of the four bands the Crown is in (#82, `crown-standing.md`).

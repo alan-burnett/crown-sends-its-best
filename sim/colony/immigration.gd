@@ -70,6 +70,9 @@ const EXPERT_SHARE: float = 0.04
 ## of settlers is a windfall before it is a burden (§6).
 const PURSE_PER_HEAD: float = 12.0
 
+## Beasts per settler at the top of the Provost's livestock knob. Tuning.
+const BEASTS_PER_HEAD: float = 0.08
+
 
 ## How many people a town would draw this month, and of what kind.
 ##
@@ -80,14 +83,21 @@ static func due(town: Town, context: ColonyContext) -> Dictionary:
 	if context != null and context.state != null:
 		flow += maxf(0.0, float(context.state.get_value(FLOW_KEY, 0.0)))
 
-	var appeal := pull_of(town) + _from_buildings(town)
+	# **The Provost's volume knob** (#173, `the-provost.md` §2). It multiplies,
+	# because a policy that added a flat number would send the same wave to a
+	# wretched town as to a thriving one — and §4's whole point is that the
+	# colony has to be worth coming to first.
+	var appeal := (pull_of(town) + _from_buildings(town)) 		* (1.0 + _knob(context, PolicyEffects.VOLUME_KEY))
 	var arriving := maxf(0.0, flow * appeal)
 
 	# **Education gates natural growth, not arrivals** (`the-provost.md` §3). A
 	# town with no learning can still be *sent* scholars; what its own schooling
 	# decides is whether it ever raises one. So the share here is a property of
 	# the crossing rather than of the town's library.
-	var scholars := arriving * EXPERT_SHARE * (1.0 + _draws_experts(town))
+	# The expert knob rides alongside the buildings that draw scholars, so a
+	# printing press and the Provost's policy compound rather than one shadowing
+	# the other.
+	var scholars := arriving 		* (EXPERT_SHARE + _knob(context, PolicyEffects.EXPERTS_KEY)) 		* (1.0 + _draws_experts(town))
 	return {
 		"workers": maxf(0.0, arriving - scholars),
 		"experts": scholars,
@@ -150,7 +160,11 @@ static func arrive(town: Town, context: ColonyContext) -> void:
 
 	town.workers += landed
 	var trade: StringName = appeared["specialism"]
-	town.receive_gold(float(landed + scholars) * PURSE_PER_HEAD)
+	# **Provision** (#173): how well supplied they come. A settler lands with his
+	# own coin either way; the Provost's knob decides how much of it there is.
+	var purse := float(landed + scholars) * PURSE_PER_HEAD 		* (1.0 + _knob(context, PolicyEffects.PROVISION_KEY))
+	town.receive_gold(purse)
+	var beasts := _livestock_with_them(town, landed + scholars, context)
 
 	# 🔒 **No letter announces that settlers are sailing** (§11). The PC learns of
 	# them when they land, in the same month's report — he could have inferred it
@@ -160,5 +174,47 @@ static func arrive(town: Town, context: ColonyContext) -> void:
 		"workers": landed,
 		"experts": scholars,
 		"expert_in": String(trade),
-		"brought": float(landed + scholars) * PURSE_PER_HEAD,
+		"brought": purse,
+		"livestock": beasts,
 	}, WorldPhase.ARRIVALS)
+
+
+## What the Provost's knob is set to, as a share. Zero when he has none.
+##
+## **Read as a world value**, which `PolicyEffects.pressure` recomputes from the
+## book every month — so a knob the PC turned down, or a policy the Crown stopped
+## paying for, stops pressing the month it does.
+static func _knob(context: ColonyContext, key: String) -> float:
+	if context == null or context.state == null:
+		return 0.0
+	return maxf(0.0, float(context.state.get_value(key, 0.0)))
+
+
+## The beasts that come over with them (#173, `immigration.md` §7).
+##
+## **Livestock occasionally, shifted by policy** — and only by policy, so a
+## colony whose Provost buys none never sees a cow it did not pay for. The
+## fraction is carried like everything else here: a knob worth a tenth of a beast
+## a month lands one in the tenth month rather than never.
+static func _livestock_with_them(town: Town, people: int, context: ColonyContext) -> int:
+	var knob := _knob(context, PolicyEffects.LIVESTOCK_KEY)
+	if knob <= 0.0 or people <= 0:
+		return 0
+	var owed := float(town.livestock_accrued.get("arriving", 0.0)) 		+ float(people) * knob * BEASTS_PER_HEAD
+	var landed := int(floorf(owed))
+	town.livestock_accrued["arriving"] = owed - float(landed)
+	if landed <= 0:
+		return 0
+
+	# **Whatever the town is shortest of**, so the knob answers a need rather
+	# than always sending the same animal. Ties break on the catalogue's sorted
+	# order, which is the colony's business rather than a dictionary's.
+	var kinds := ResourceCatalogue.livestock()
+	if kinds.is_empty():
+		return 0
+	var fewest := kinds[0]
+	for id in kinds:
+		if town.livestock_head(StringName(id)) < town.livestock_head(StringName(fewest)):
+			fewest = id
+	town.add_livestock(StringName(fewest), landed)
+	return landed
