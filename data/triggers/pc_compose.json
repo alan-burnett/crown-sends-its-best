@@ -28,5 +28,16 @@
     "letter": "pc.ask_for_a_policy",
     "offers_composition": true,
     "conditions": []
+  },
+  {
+    "id": "trigger.pc.state_a_preference",
+    "letter": "pc.state_a_preference",
+    "urgency": 0.5,
+    "cooldown": 1,
+    "conditions": [
+      {
+        "town_is_preparing_to_leave": {}
+      }
+    ]
   }
 ]

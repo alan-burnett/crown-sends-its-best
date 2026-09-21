@@ -43,6 +43,9 @@ const SHARE_OF_PEOPLE: float = 0.25
 ## The fewest people worth calling an expedition.
 const FEWEST: int = 4
 
+## How far out the governor looks for new country, in tiles. Tuning.
+const REGION_DISTANCE: int = 5
+
 ## How many months of the cargo's own keep it carries.
 ##
 ## Supplies for the crossing and something to start on. Tuning.
@@ -97,6 +100,28 @@ static func may_launch(town: Town) -> bool:
 	return not town.rebelling and people_for(town) >= FEWEST
 
 
+## The area the governor sets out for (#177).
+##
+## **Far enough to be a journey and near enough to be his colony's.** Nothing
+## clever: a step outward from the parent town, away from the middle of the map,
+## which gives a region without needing a survey the colony has not done.
+##
+## 🔒 Deterministic. The same town on the same map sets out for the same country,
+## so a save reloaded at the gate goes to the same place.
+static func region_for(town: Town, context: ColonyContext) -> Vector2i:
+	if context.map == null or town.at == Vector2i(-1, -1):
+		return Vector2i(-1, -1)
+	var middle := Vector2i(context.map.width / 2, context.map.height / 2)
+	var outward := town.at - middle
+	if outward == Vector2i.ZERO:
+		outward = Vector2i(1, 0)
+	var step := Vector2i(signi(outward.x), signi(outward.y))
+	var region := town.at + step * REGION_DISTANCE
+	region.x = clampi(region.x, 0, maxi(0, context.map.width - 1))
+	region.y = clampi(region.y, 0, maxi(0, context.map.height - 1))
+	return region
+
+
 ## Send it. The parent loses its people and the matching share of its coin.
 ##
 ## Returns the party that set out (#176), or null. **It becomes a unit on the
@@ -130,9 +155,12 @@ static func launch(town: Town, context: ColonyContext) -> ExpeditionParty:
 	party.gold = purse
 	party.at = town.at
 	party.launched_month = context.state.month
-	# 🔒 **Where it is going is #177's question.** A party with no destination
-	# waits at the gate rather than wandering, so that ticket is a driver setting
-	# a field and not a rewrite of the journey.
+	# 🔒 **A region, and not a tile** (#177, SPEC §11.4). The governor sets out
+	# toward an area with his own idea of what he is looking for; the PC's
+	# preferences arrive in his reply to the governor's first letter and shift him
+	# while he travels. A site fixed here would make that letter a month too late.
+	party.region = region_for(town, context)
+	party.preference = SitePreference.GOOD_GROUND
 	context.parties.append(party)
 
 	context.log.emit(EVENT_LAUNCHED, town.id, context.state.month, {
