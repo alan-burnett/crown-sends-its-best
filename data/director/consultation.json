@@ -1,0 +1,7 @@
+{
+  "id": "consultation",
+  "note": "How often a man at a given loyalty still asks the PC rather than settling it himself. The director's section 10: loyalty gates the kind of letter and not the number, so a disliked PC's desk is the same size and has far fewer decisions in it. Questions and offers pass through this; requests and demands never do, because being disliked must not spare the PC the begging. Above always_above he always consults - and that is the low band's boundary from the relationship, not a second definition of low regard. At or below at_bottom he consults floor_chance of the time; straight between. Never nought: a man who has entirely stopped consulting is a man the PC cannot reach, and the game has an ending for that rather than a silence. All of it is tuning.",
+  "always_above": 34.0,
+  "at_bottom": 5.0,
+  "floor_chance": 0.4
+}

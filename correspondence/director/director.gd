@@ -31,6 +31,11 @@ const LATE_BUDGET: int = 20
 ## `cooldown`; a standing report wants a short one, a crisis letter a long one.
 const DEFAULT_COOLDOWN: int = 3
 
+## The stream both draws come from: who still consults, and who survives a
+## cull. **Named, like every other** — the month's post must not shift because
+## mapgen happened to draw a different number of times.
+const STREAM: String = "letters"
+
 const EVENT_CULLED: StringName = &"letter_culled"
 const EVENT_DISPATCHED: StringName = &"letter_dispatched"
 
@@ -109,7 +114,86 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 			continue
 
 		fired.append(_inbound(trigger, letter, contact, context, run))
-	return _only_what_they_want_to_say(fired, run)
+	return _only_what_they_want_to_say(_still_consulting(fired, run), run)
+
+
+## Take out the questions and offers of the men who have stopped asking.
+##
+## 🔒 **Loyalty gates the kind of letter, not the number** (#259, §10). A disliked
+## PC's desk is not quieter — it is **hollowed out**. The same stack of paper
+## arrives and far fewer of them are decisions: he is still being asked for
+## things, he has simply stopped being consulted.
+##
+## So the gate runs **before** selection. A question a man will not ask is not a
+## candidate at all, and the report or request he also had to send takes the slot
+## instead. Raising his threshold would have made him quieter, which is the one
+## thing §10 says this must not do.
+##
+## **One draw per man per month, not one per letter.** Whether he still consults
+## the Crown is a fact about him this month; drawing per letter would let him ask
+## one question and withhold another in the same post, which is a man in two minds
+## rather than a man who has given up on his governor.
+##
+## He settles the strongest of them himself, by the path a culled question takes
+## (§12). No loyalty is lost either way — **he never asked.**
+func _still_consulting(fired: Array[InboundLetter], run: RunState) -> Array[InboundLetter]:
+	var withheld: Dictionary = {}
+	var senders: Array = []
+	for inbound in fired:
+		if not senders.has(String(inbound.sender)):
+			senders.append(String(inbound.sender))
+	senders.sort()
+
+	var rng := run.streams.stream(STREAM)
+	for sender in senders:
+		var contact := run.contact(StringName(sender))
+		if Consultation.consults(contact, rng):
+			continue
+		var his: Array[InboundLetter] = []
+		# Withheld **by position**, because two letters on one desk may share an
+		# id and §13 means to allow that.
+		for index in fired.size():
+			if String(fired[index].sender) != sender:
+				continue
+			if Consultation.is_consultative(_type_of(fired[index])):
+				his.append(fired[index])
+				withheld[index] = true
+		_settles_it_himself(contact, his, run)
+
+	if withheld.is_empty():
+		return fired
+
+	var asking: Array[InboundLetter] = []
+	for index in fired.size():
+		if not withheld.has(index):
+			asking.append(fired[index])
+	return asking
+
+
+## The one he would have raised, settled without the PC.
+##
+## **The strongest of them**, ties on the letter id, which is the same order
+## severity would have put them in (#257, §7) without needing his pressure — the
+## question here is not which letter he sends but which one he has had to decide
+## for himself.
+func _settles_it_himself(contact: Contact, his: Array[InboundLetter], run: RunState) -> void:
+	if contact == null or his.is_empty():
+		return
+	var loudest: InboundLetter = null
+	var speaks_to := -1.0
+	for inbound in his:
+		var felt := Severity.of(content.record("letters", inbound.letter_id))
+		if loudest == null or felt > speaks_to + 0.0001 \
+				or (absf(felt - speaks_to) <= 0.0001
+					and inbound.letter_id < loudest.letter_id):
+			loudest = inbound
+			speaks_to = felt
+	var letter := Letter.from_record(content.record("letters", loudest.letter_id))
+	Silence.decide_alone(contact, letter, loudest, run, false)
+
+
+func _type_of(inbound: InboundLetter) -> StringName:
+	return StringName(content.record("letters", inbound.letter_id).get("type", ""))
 
 
 ## Thin the true letters down to the ones their senders actually want to send.
@@ -376,6 +460,17 @@ func _acknowledgement_trigger(sender: String, outcome: String) -> Dictionary:
 ## **Letters marked `skippable: false` always reach the desk**, and so does
 ## anything acknowledging last month's post. Only skippable letters are culled,
 ## and the outcome derives from the letter's `type`, needing no extra authoring.
+##
+## 🔒 **The budget is a ceiling and there is no floor** (#259, §11). A quiet month
+## is a thin desk, and a thin desk is the correct reward for a colony running
+## well. Nothing here manufactures post.
+##
+## 🔒 **And the desk plays out over budget when it must** (§13). The contact
+## damper is per contact, so ending a policy six churches cared about brings six
+## letters, and the PC answers all six or takes the loss with each. That is not
+## the budget failing — the volume is the consequence, and letters of that kind
+## are `skippable: false` precisely because escaping them through a cull would be
+## escaping the decision.
 func _cull(fired: Array[InboundLetter], acknowledging: Array[InboundLetter], run: RunState) -> Array[InboundLetter]:
 	var budget := budget_for_year(run.world.year_index())
 
@@ -389,13 +484,56 @@ func _cull(fired: Array[InboundLetter], acknowledging: Array[InboundLetter], run
 		else:
 			kept.append(inbound)
 
-	for inbound in cullable:
-		if kept.size() < budget:
-			kept.append(inbound)
+	# 🔒 **Kept by position, never by id.** Two letters of the same kind can be on
+	# one desk — six churches writing about one revoked policy is §13's whole
+	# point — and a draw that indexed by letter id would keep or cull all six
+	# together.
+	var surviving := _draw_survivors(cullable, budget - kept.size(), run)
+	for index in cullable.size():
+		if surviving.has(index):
+			kept.append(cullable[index])
 		else:
-			_cull_one(inbound, run)
+			_cull_one(cullable[index], run)
 
 	return kept
+
+
+## Which skippable letters live, when there is not room for all of them.
+##
+## 🔒 **Drawn at random from a named stream, with no priority ordering** (#259,
+## §11). Importance is the player's judgement, and a director ranking a famine
+## above a charity appeal would be doing the player's job with worse information.
+##
+## **A seeded draw silences nobody systematically; a sort silences the same men
+## in every run for ever.** Taking them in the order they fired meant taking them
+## in trigger id order, so the desk was culled alphabetically and a contact whose
+## triggers sorted late was quiet in every run ever played.
+##
+## Fisher-Yates on the stream rather than `Array.shuffle()`, which draws from the
+## global RNG the lint forbids.
+func _draw_survivors(cullable: Array[InboundLetter], room: int, run: RunState) -> Dictionary:
+	var surviving: Dictionary = {}
+	if room >= cullable.size():
+		for index in cullable.size():
+			surviving[index] = true
+		return surviving
+	if room <= 0:
+		return surviving
+
+	var order: Array[int] = []
+	for index in cullable.size():
+		order.append(index)
+
+	var rng := run.streams.stream(STREAM)
+	for index in range(order.size() - 1, 0, -1):
+		var swap := rng.randi_range(0, index)
+		var held := order[index]
+		order[index] = order[swap]
+		order[swap] = held
+
+	for index in room:
+		surviving[order[index]] = true
+	return surviving
 
 
 ## What happens to a letter the player never sees.

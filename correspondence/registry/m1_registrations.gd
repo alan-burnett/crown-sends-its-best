@@ -100,6 +100,11 @@ static func load_resources(content: ContentDatabase) -> void:
 	# *enough to write about* is a harness sweep rather than a judgement.
 	if content.has_record(Threshold.COLLECTION, Threshold.RECORD):
 		Threshold.load_from(content.record(Threshold.COLLECTION, Threshold.RECORD))
+	# And whether he still bothers to ask (#259). Loyalty gates the kind of
+	# letter, never the number, so this is a filter on questions and offers and
+	# leaves every request alone.
+	if content.has_record(Consultation.COLLECTION, Consultation.RECORD):
+		Consultation.load_from(content.record(Consultation.COLLECTION, Consultation.RECORD))
 
 
 static func register_all() -> void:

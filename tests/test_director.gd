@@ -11,6 +11,7 @@ var content: ContentDatabase = null
 
 func before_each() -> void:
 	Deliberation.reset()
+	Consultation.reset()
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
 	ResourceCatalogue.reset()
@@ -30,6 +31,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	Deliberation.reset()
+	Consultation.reset()
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
 	content.free()
@@ -74,6 +76,11 @@ func test_a_trigger_whose_conditions_hold_and_whose_sender_minds_fires() -> void
 	# true letter fires, which is the gate this milestone replaced with a want.
 	run.world.values["colony_revenue"] = 4.0
 	run.world.values[WorldValues.REVENUE_BASELINE] = 60.0
+	# And he is still on terms that let him ask. The Chancellor starts at twelve
+	# and at twelve he often settles it himself instead (#259, §10) — which is a
+	# different rule, tested elsewhere, and would make this one unreadable.
+	run.contact(&"chancellor").relationship = Relationship.new(
+		&"chancellor", Relationship.HIGH_AT)
 	var ids: PackedStringArray = PackedStringArray()
 	for inbound in machine.director.compose_inbox(run):
 		ids.append(inbound.letter_id)

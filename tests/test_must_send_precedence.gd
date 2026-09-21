@@ -22,6 +22,7 @@ var content: ContentDatabase = null
 
 func before_each() -> void:
 	Deliberation.reset()
+	Consultation.reset()
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
 	ResourceCatalogue.reset()
@@ -37,6 +38,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	Deliberation.reset()
+	Consultation.reset()
 	ContentRegistry.reset()
 	MeasureRegistry.reset()
 	ResourceCatalogue.reset()
@@ -58,6 +60,12 @@ func _clamouring() -> Dictionary:
 	# The returns are dreadful, which makes his routine question true and gives
 	# him real pressure to ask it.
 	run.world.values["colony_revenue"] = 4.0
+	# And he still consults the PC, which the Chancellor at his starting twelve
+	# very often does not (#259, §10). This file is about precedence: a man who
+	# has stopped asking has no routine question to be crowded out by, so the
+	# fixture would prove nothing about the rule it is here to hold.
+	run.contact(&"chancellor").relationship = Relationship.new(
+		&"chancellor", Relationship.HIGH_AT)
 	run.world.values[WorldValues.REVENUE_BASELINE] = 60.0
 	return {"run": run, "machine": machine}
 

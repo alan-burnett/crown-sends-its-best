@@ -31,6 +31,7 @@ func before_each() -> void:
 	MeasureRegistry.reset()
 	Deliberation.reset()
 	Threshold.reset()
+	Consultation.reset()
 	M1Registrations.register_all()
 	content = ContentDatabase.new()
 	content.load_all("en")
@@ -47,6 +48,7 @@ func after_each() -> void:
 	MeasureRegistry.reset()
 	Deliberation.reset()
 	Threshold.reset()
+	Consultation.reset()
 	content.free()
 
 
