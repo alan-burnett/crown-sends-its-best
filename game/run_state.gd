@@ -117,6 +117,11 @@ var tribes: Tribes = null
 ## belongs to neither.
 var native_trade: TradeBook = null
 
+## Which dukes have reached the bottom (#209). 🔒 **The only thing stored about a
+## band** — everything else they do is read off loyalty, and this one fact is not
+## derivable from the number afterwards.
+var rivals: RivalBook = null
+
 ## How hard the Crown is leaning, and how far the bar has moved (#69).
 ##
 ## **Serialised in full.** The bucket's contents and the draw order are part of
@@ -250,6 +255,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	# being anywhere in the codebase, and kept clear of the colony's own site.
 	run.tribes.settle(run.map, run.starting_site, run.streams)
 	run.native_trade = TradeBook.new()
+	run.rivals = RivalBook.new()
 	run.prestige = Prestige.new()
 	run.ending = RunEnding.new()
 	run.refusal = CrownRefusal.new()
@@ -392,6 +398,7 @@ func to_dict() -> Dictionary:
 		"foundings": _foundings_to_list(),
 		"tribes": tribes.to_dict() if tribes != null else {},
 		"native_trade": native_trade.to_dict() if native_trade != null else {},
+		"rivals": rivals.to_dict() if rivals != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
@@ -431,6 +438,7 @@ static func from_dict(data: Dictionary) -> RunState:
 		run.foundings.append(CrownFounding.from_dict(entry))
 	run.tribes = Tribes.from_dict(data.get("tribes", {}))
 	run.native_trade = TradeBook.from_dict(data.get("native_trade", {}))
+	run.rivals = RivalBook.from_dict(data.get("rivals", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))

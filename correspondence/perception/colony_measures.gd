@@ -47,6 +47,25 @@ const TRADE_VOLUME: String = "trade_volume"
 ## keeps standing from ever being a number the player sees (SPEC §12.5).
 const NATIVE_REGARD: String = "native_regard"
 
+## How far the colony has got, nought to one (#209).
+##
+## 🔒 **Towns, population and territory — what a man across a border can see.**
+## Never `net_position`: the Crown's ledger is the Crown's and a rival has no
+## sight of it. If rival aggression read net position, the same number would
+## drive Crown Standing, prestige *and* the rivals, and the PC would be punished
+## three ways for the single thing the Crown demands of him
+## (`rival-pressure.md` §2).
+const COLONY_REACH: String = "colony_reach"
+
+## The same thing asked the other way round: **is it still small?** (#209)
+##
+## 🔒 **This is the whole of "a contact with his values inverted".** A duke cares
+## about the colony not having got far, so a prospering colony drags him down by
+## exactly the machinery a failing colony drags a governor down — no second
+## scalar, no inversion flag, no bespoke drift. Defined off `COLONY_REACH` in one
+## place, so the two can never disagree about how far the colony has got.
+const COLONY_IS_NO_THREAT: String = "colony_is_no_threat"
+
 ## How much of this town's own ground is in their hands, nought to one (#208).
 ##
 ## **The thing a governor can see with his eyes**, as distinct from what they
@@ -73,6 +92,13 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	var measures := WorldValues.measures(run.world)
 	if contact == null or run.colony == null:
 		return measures
+
+	# **What anybody across a border can see** (#209). On every contact, because
+	# it is a fact about the world rather than a thing only one man is placed to
+	# judge — the Crown's officers read it as progress and a duke reads it as a
+	# threat, which is the whole of the inversion.
+	measures[COLONY_REACH] = reach_of(run)
+	measures[COLONY_IS_NO_THREAT] = 1.0 - reach_of(run)
 
 	# **The Diplomat before the governors**, because he governs nothing and would
 	# otherwise fall out here with the Crown's officers — and he is the one man
@@ -181,6 +207,34 @@ static func pressure_on(run: RunState, town: Town) -> float:
 	if looked <= 0:
 		return 0.0
 	return clampf(float(held) / float(looked), 0.0, 1.0)
+
+
+## How far the colony has got, nought to one.
+##
+## Towns, population and ground, each against what a colony of this age might
+## have reached, and the three averaged so no one of them can carry the figure
+## alone. **Nothing here reads gold**, and a reader looking for where the money
+## comes in will not find it.
+static func reach_of(run: RunState) -> float:
+	if run == null or run.colony == null:
+		return 0.0
+	var towns := float(run.colony.size())
+	var people := 0.0
+	for town in run.colony.in_order():
+		people += float(town.population())
+	var ground := float(run.knowledge.explored_count()) if run.knowledge != null else 0.0
+
+	return clampf((
+		clampf(towns / TOWNS_AT_FULL_REACH, 0.0, 1.0)
+		+ clampf(people / PEOPLE_AT_FULL_REACH, 0.0, 1.0)
+		+ clampf(ground / GROUND_AT_FULL_REACH, 0.0, 1.0)
+	) / 3.0, 0.0, 1.0)
+
+
+## What a colony that has got as far as it is going to looks like. Tuning.
+const TOWNS_AT_FULL_REACH: float = 8.0
+const PEOPLE_AT_FULL_REACH: float = 900.0
+const GROUND_AT_FULL_REACH: float = 420.0
 
 
 ## How busy this town has been against the colony's average, where `1.0` is a

@@ -210,6 +210,11 @@ func _init(p_run: RunState) -> void:
 	# in the mood this month has already put him in (#126).
 	var drift := DriftDriver.new(run)
 
+	# Phase 7, after the drift. A duke's loyalty is moved by the same machinery
+	# as everybody else's; this only notices the one thing that is not derivable
+	# from the number afterwards — that he has been to the bottom (#209).
+	var rivals := RivalDriver.new(run)
+
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and
 	# prestige reads the accounts standing has just judged.
@@ -253,7 +258,7 @@ func _init(p_run: RunState) -> void:
 	month_runner.drivers = [
 		immigration, native_help, crown_foundings, expeditions, crown_affairs, territory,
 		colony_month, villages, promise_driver, standings, native_trade,
-		policies, crown_standing, prestige, drift, orders, silence, governors,
+		policies, crown_standing, prestige, drift, rivals, orders, silence, governors,
 		grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
