@@ -49,7 +49,7 @@ put it down"* — and **conditions 2, 3 and 4 are what it means.** The Crown has
 out of money, out of men on the ground, and out of the one officer willing to send
 any.
 
-## 2. \U0001f512 The last-chance stage is not a mechanism
+## 2. 🔒 The last-chance stage is not a mechanism
 
 §13.1 locks that every fail condition passes through a last-chance stage with a
 formal Chancellor warning, so that **defeat is never a surprise.**
@@ -95,7 +95,7 @@ He writes **as each condition flips**, naming which are true and what still stan
 between the PC and the end. Grimmer in content each time, and never in register:
 **gilded leaves, a flowery hand, and the warmest possible phrasing.**
 
-### \U0001f512 His tone runs opposite to his circumstance
+### 🔒 His tone runs opposite to his circumstance
 
 Every other contact's tone compresses loyalty, personality and urgency into
 something that matches the news (§9.1). Low regard and a disaster would ordinarily

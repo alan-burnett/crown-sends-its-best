@@ -345,6 +345,13 @@ Budgets are by **calendar year**, locked to it rather than to the colony's size
 **They are a ceiling and there is no floor.** A quiet month is a thin desk, and a
 thin desk is the correct reward for a colony that is running well.
 
+**The spec states averages, not floors** — 5 early, 9 mid, 14 late (§9.6, v2.4).
+Those are the midpoints of the budgets above, which is the arithmetic a ceiling
+with no floor produces: months run under it, a busy one presses against it, and
+the year averages out below. A doc that owed the spec a *minimum* of four letters
+a month would have to manufacture post on a quiet colony, and §12 is the whole
+argument against doing that.
+
 ### Over budget
 
 - **Unskippable letters are never skipped.** The desk plays out over budget.

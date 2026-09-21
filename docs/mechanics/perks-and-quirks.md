@@ -215,6 +215,28 @@ way must not multiply into a run the design never intended. *Boom town* with
 numbs the feedback, and together they may produce a colony that grows explosively
 and never notices it is in trouble.
 
+### 🔒 Sharper is allowed. Stronger is not
+
+SPEC §14.3, v2.4, adds the test every future unlock has to pass:
+
+> Though his access to more options allows sharper, more specialized play, new
+> potential from your first run must bring new drawbacks.
+
+This answers the obvious objection to *any number of quirks* — that a player who
+picks his own will pick the good ones, and the veteran's run ends up strictly
+stronger than the newcomer's, which §14.3 locks against.
+
+**There is nothing to pick.** A quirk with a clean upside is not a quirk that
+happens to be strong, it is a quirk that was written wrong, and the fix is on the
+quirk. *Busy patrons* is the model: a player who works patrons is sharper for
+having it and a player who ignores them is drowned by it, and neither of those is
+*more powerful*.
+
+The sentence also grants something the doc had been cautious about. **Specialised
+is the intended shape** — a veteran is meant to assemble a run that is pointed at
+one thing and soft everywhere else. The constraint is on the soft part being real,
+not on the point being sharp.
+
 ## 6. Tuning targets
 
 - Every magnitude here, and whether the perks land on one power level.
