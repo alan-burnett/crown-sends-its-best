@@ -8,12 +8,32 @@
 
 ---
 
-## 1. Two endings, one condition
+## 1. Two endings, and they are not the same shape
 
-SPEC §13.1 reads as two fail conditions that happen to share a clause. They are
-better understood as **one condition with two epitaphs.**
+### Colony Overrun — one test
 
-**All four of these, together:**
+> **The population of the colony and all its expeditions is zero.**
+
+Nothing else. Not standing, not troops, not the Marshal.
+
+**Because there is nothing left to save.** The PC may have a full treasury, a
+willing Marshal and Crown troops standing on an empty map, and it buys him
+nothing: no immigration is coming to a colony that no longer exists.
+
+The Provost might in time propose a fresh expedition and the PC might outfit it.
+**But watching nothing happen until he does is not a game**, and a run that has
+reached zero people has reached its ending whatever the Crown still thinks of the
+man who lost them.
+
+**An expedition in the field keeps the run alive.** A colony whose last town falls
+while a body of settlers is still crossing the map has not ended — it has one
+chance left, walking. That is why the test counts them.
+
+**A rebel town's people are still the colony's people.** §13.1 counts every town
+the colony holds, *loyal or rebel*, so a colony entirely in revolt is populous and
+is not this ending at all.
+
+### Independence — four conditions
 
 | | |
 | :-- | :--- |
@@ -22,30 +42,23 @@ better understood as **one condition with two epitaphs.**
 | 3 | **No Crown troops remain in the colony** |
 | 4 | **The Marshal will send no more** |
 
-And then the ending is only a question of what is left standing:
+All four, together.
 
-| | |
-| :--- | :--- |
-| **Colony Overrun** | nothing remains — **no towns and no expeditions** |
-| **Independence** | towns remain, and every one of them is in rebellion |
-
-**An expedition in the field keeps the run alive.** A colony whose last town falls
-while a body of settlers is still crossing the map has not ended; it has one
-chance left, walking.
-
-### What this replaces
-
-§13.1 gives each condition an undefined clause — *"the Crown will commit no more
-resources"* and *"the Crown refuses to send more troops."* **Conditions 2, 3 and 4
-are what those phrases mean**, and they are the same three in both cases.
+§13.1 gives this an undefined clause — *"the Crown refuses to send more troops to
+put it down"* — and **conditions 2, 3 and 4 are what it means.** The Crown has run
+out of money, out of men on the ground, and out of the one officer willing to send
+any.
 
 ## 2. \U0001f512 The last-chance stage is not a mechanism
 
 §13.1 locks that every fail condition passes through a last-chance stage with a
 formal Chancellor warning, so that **defeat is never a surprise.**
 
-That needs no timer, because **none of the four flips quietly and two of them
-cannot flip quickly.**
+It needs no timer, and **the two endings satisfy it differently.**
+
+### Independence: the four flip one at a time
+
+**None of them flips quietly, and two cannot flip quickly.**
 
 **Standing descends a ladder.** `crown-standing.md` §2: the Steward writes at
 Concern, writes again at Alarm, and only then does the Chancellor arrive at all —
@@ -59,6 +72,19 @@ writes naming the season it ends, and only then do they sail.
 
 So the invariant is satisfied **structurally**. A dev who finds himself building a
 countdown for it has built a third timer alongside two that were already running.
+
+### Colony Overrun: the colony visibly dies
+
+There is no conjunction to watch approach here — only a number falling.
+
+But it falls **slowly and in the open.** Population moves one at a time under
+hardship and in shares under arms (`CLAUDE.md`), every loss emits its own event,
+and the map shows towns shrinking month by month. **A colony does not arrive at
+zero people from a comfortable position.**
+
+**The Chancellor writes as it becomes dire**, on a population threshold rather
+than a conjunction, and again as it worsens. That is the formal warning §13.1
+requires, and by the time it arrives the player has watched it coming for a year.
 
 ## 3. The Chancellor is delighted
 
@@ -108,9 +134,13 @@ The Crown that loses a colony this way does not lose a battle. **It stops being
 willing to pay for the next one**, and the man who decides that is an officer
 watching his own account and his own casualty lists.
 
-## 5. Four doors out, and one of them is locked
+## 5. Four doors out of Independence, and one is locked
 
-The stage ends the moment **any one** condition stops being true.
+**Overrun has no doors.** Its only remedy is not losing the people in the first
+place, and once the last of them is gone nothing reverses it.
+
+Independence is the recoverable one. Its stage ends the moment **any one**
+condition stops being true.
 
 | | How it reverses |
 | :-- | :--- |
@@ -173,15 +203,12 @@ of the run and the one he has been waiting for.
 
 ## 9. Open items
 
-- **A colony with nothing left but healthy standing.** No towns, no expeditions,
-  and conditions 2–4 unmet: the run does not end, and the player watches an empty
-  map while standing drifts down on a `monthly_net` of nothing.
-  **Standing should probably collapse outright when there is no colony to be
-  solvent about** — the Crown's whole interest is the place — but that is a change
-  to `crown-standing.md`'s arithmetic and wants the Author.
-- Whether the Crown ever **retakes** a colony it has not given up on. §13.1 implies
-  it by making the ending conditional on the Crown declining to commit resources,
-  and nothing currently spends them.
+- **The population threshold the Chancellor writes at**, and whether it reads the
+  colony's total or its largest town. Six hamlets dying evenly is a different
+  letter from one great town with everything else already gone.
+- Whether the Crown ever **retakes** a colony it has not given up on. §13.1's
+  Independence clause is conditional on the Crown declining to commit resources,
+  and nothing currently spends any.
 - Whether a rebel town that is the **last** town behaves differently. It has won
   and does not know it, and §12.3's peaceful return is still open to it.
 - Whether the last-chance stage should be visible anywhere but the post. It is the
