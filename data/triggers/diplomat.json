@@ -1,0 +1,109 @@
+[
+  {
+    "id": "trigger.diplomat.colony_report",
+    "letter": "diplomat.colony_report",
+    "urgency": 0.22,
+    "cooldown": 3,
+    "params": {
+      "town": {
+        "from": "worst_town",
+        "field": "name"
+      },
+      "suggestion": {
+        "from": "worst_town",
+        "field": "suggestion"
+      }
+    },
+    "conditions": [
+      {
+        "he_still_writes": {
+          "about": "colony"
+        }
+      },
+      {
+        "he_has_something_to_report": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.diplomat.home_report",
+    "letter": "diplomat.home_report",
+    "urgency": 0.18,
+    "cooldown": 5,
+    "params": {
+      "town": {
+        "from": "his_town",
+        "field": "name"
+      },
+      "governor": {
+        "from": "his_town",
+        "field": "governor"
+      },
+      "intent": {
+        "from": "his_town",
+        "field": "intent"
+      },
+      "regard": {
+        "from": "his_town",
+        "field": "loyalty"
+      },
+      "refused": {
+        "from": "his_town",
+        "field": "refused"
+      }
+    },
+    "conditions": [
+      {
+        "he_still_writes": {
+          "about": "home"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.diplomat.ask_to_move",
+    "letter": "diplomat.ask_to_move",
+    "urgency": 0.62,
+    "cooldown": 6,
+    "params": {
+      "town": {
+        "from": "his_town",
+        "field": "name"
+      },
+      "to": {
+        "from": "his_town",
+        "field": "destination"
+      },
+      "amount": {
+        "from": "literal",
+        "value": "240"
+      }
+    },
+    "conditions": [
+      {
+        "he_wants_moving": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.diplomat.ask_for_himself",
+    "letter": "diplomat.ask_for_himself",
+    "urgency": 0.3,
+    "cooldown": 10,
+    "params": {
+      "town": {
+        "from": "his_town",
+        "field": "name"
+      },
+      "amount": {
+        "from": "literal",
+        "value": "90"
+      }
+    },
+    "conditions": [
+      {
+        "he_wants_paying": {}
+      }
+    ]
+  }
+]

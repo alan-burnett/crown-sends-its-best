@@ -1,0 +1,35 @@
+{
+  "id": "diplomat.ask_to_move",
+  "sender": "diplomat",
+  "type": "request",
+  "skippable": false,
+  "params": { "town": "town", "to": "town", "amount": "gold" },
+  "body": [
+    { "text": "I must ask you to move me out of {param:town}." },
+    { "text": "I will not dress it up. The mood here has turned and the watch is thin, and a man who writes to London every month is not a popular figure in a town of that temper." },
+    { "text": "{param:to} would answer. The passage and the setting up would come to {param:amount}." },
+    { "text": "You should know what it costs you as well as what it costs the Crown. I will be two months at sea and writing nothing, and what I can tell you about this place I will stop being able to tell you about it." },
+    { "text": "I would rather not put it more plainly than that. I think you can see what I am not saying." }
+  ],
+  "reply": {
+    "tone": {
+      "text": "On the matter of your posting, I am {choice}.",
+      "options": [
+        { "tone": "dutiful", "text": "minded to consider it properly" },
+        { "tone": "pleased", "text": "glad you wrote and quick to answer" },
+        { "tone": "annoyed", "text": "unimpressed by the timing" }
+      ]
+    },
+    "steps": [
+      { "id": "move", "prompt": "The Diplomat's posting", "options": [
+        { "id": "move_him", "label": "move him",
+          "text": "Go to {param:to}. The Crown will meet the cost of it.",
+          "effect": { "promise_gold": { "to": "diplomat", "amount": 240 } } },
+        { "id": "stay", "label": "he stays where he is",
+          "text": "You will remain where you are. I need eyes in that town more than you need a quiet one.",
+          "effect": { "adjust_loyalty": { "to": "diplomat", "amount": -6 } } }
+      ] }
+    ],
+    "closing": [ { "text": "Your servant," } ]
+  }
+}

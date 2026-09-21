@@ -1,0 +1,24 @@
+[
+  {
+    "id": "diplomat",
+    "name": "Mr Ambrose Kettle",
+    "title": "Resident of the Crown",
+    "role": "diplomat",
+    "portrait": "portrait.diplomat",
+    "loyalty": 60,
+    "weights": {
+      "loyalty": 1.2,
+      "payment_offered": 1.4,
+      "cost_of_request": 0.5,
+      "autonomy": 0.6
+    },
+    "leans": {
+      "colony_quality_of_life": -0.18,
+      "colony_food_security": -0.12
+    },
+    "cares_about": [
+      "colony_quality_of_life",
+      "colony_food_security"
+    ]
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "id": "diplomat.home_report",
+  "sender": "diplomat",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "town": "town",
+    "governor": "contact",
+    "intent": "intent",
+    "regard": "regard",
+    "refused": "integer"
+  },
+  "body": [
+    {
+      "text": "From {param:town}, where I sit, and where I can tell you rather more than I can about anywhere else."
+    },
+    {
+      "text": "{param:governor} has set himself on {param:intent}, and speaks of you {param:regard}."
+    },
+    {
+      "text": "Your instructions have been refused here {param:refused} times since you took the desk. I doubt anyone else has told you that number, and I doubt he would recognise it if you put it to him."
+    },
+    {
+      "text": "I dine there on Thursdays. It is not an imposition; the cellar is better than mine.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    }
+  ]
+}

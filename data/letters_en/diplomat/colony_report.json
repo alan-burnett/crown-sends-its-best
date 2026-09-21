@@ -1,0 +1,32 @@
+{
+  "id": "diplomat.colony_report",
+  "sender": "diplomat",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "town": "town",
+    "suggestion": "remedy"
+  },
+  "body": [
+    {
+      "text": "I have been about the colony this month and there is one thing I would put before you."
+    },
+    {
+      "text": "{param:town} is in a bad way. I would {param:suggestion}."
+    },
+    {
+      "text": "I am aware you have a great many things to weigh that I do not see from here. I mention it because somebody ought to, and there is nobody else who will.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    },
+    {
+      "text": "I have said so before. I do not expect it to be acted on this time either.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    }
+  ]
+}

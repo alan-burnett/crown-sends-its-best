@@ -28,6 +28,12 @@ const ROLE_PATRON: StringName = &"patron"
 const ROLE_RIVAL: StringName = &"rival"
 const ROLE_INSTITUTIONAL: StringName = &"institutional"
 
+## **The PC's only resident eyes** (#81, SPEC §8.1). A role of his own because
+## nothing else in the game is a Crown officer who lives in a town — he is
+## prominent where he lives, and his regard governs what he tells rather than
+## what he does.
+const ROLE_DIPLOMAT: StringName = &"diplomat"
+
 ## Personality weights are drawn from this range. A weight of 1.0 is average
 ## interest in a consideration. Tuning: `docs/mechanics/deliberation.md` §9 flags
 ## how far weights should be allowed to spread before a contact reads as broken
@@ -44,6 +50,10 @@ const PROMINENCE: Dictionary = {
 	"governor": 1.0,
 	"commander": 0.5,
 	"institutional": 0.3,
+	# **A resident Crown man, and the town knows it.** He looms smaller than the
+	# governor and larger than a merchant: he dines with the quality and writes
+	# home about them, and a town can see him doing it.
+	"diplomat": 0.4,
 	"patron": 0.0,
 	"rival": 0.0,
 	"crown_officer": 0.0,
@@ -89,6 +99,18 @@ var portrait_asset: String = ""
 ## Crown officers, who are an ocean away.
 var town: String = ""
 
+## **Gone, and not replaced** (#81, SPEC §8.1). Only the Diplomat can die so far,
+## and nobody will take his post — so this is not a slot to be refilled, it is a
+## fact the letters and the run have to live with.
+var is_dead: bool = false
+
+## The month he is writing again, if he is at sea (#81, `the-diplomat.md` §3).
+##
+## **A real blackout.** Agreeing to move him costs the PC two months of not
+## knowing, which is the price of agreeing and the reason refusing is a genuine
+## option rather than a formality.
+var travelling_until: int = -1
+
 ## Signed bias per topic, in `[-1, +1]`, applied in normalised space by the
 ## perception resolver (#10). The machinery is
 ## `docs/mechanics/perception.md`; this is only where a contact's values live.
@@ -130,6 +152,8 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.prominence_override = float(record.get("prominence", -1.0))
 	contact.portrait_asset = String(record.get("portrait", ""))
 	contact.town = String(record.get("town", ""))
+	contact.is_dead = bool(record.get("is_dead", false))
+	contact.travelling_until = int(record.get("travelling_until", -1))
 	contact.leans = record.get("leans", {}).duplicate()
 	contact.cares_about = PackedStringArray(record.get("cares_about", []))
 	contact.relationship = Relationship.new(
@@ -178,6 +202,8 @@ func to_dict() -> Dictionary:
 		"prominence": prominence_override,
 		"portrait": portrait_asset,
 		"town": town,
+		"is_dead": is_dead,
+		"travelling_until": travelling_until,
 		"leans": leans.duplicate(),
 		"cares_about": cares_about.duplicate(),
 		"relationship": relationship.to_dict(),

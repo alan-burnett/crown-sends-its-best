@@ -59,6 +59,13 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"protest", {"field": "string", "within": "integer"}, ColonyParamSources.protest
 	)
+	# The Diplomat (#81). Every one of these is a fact about a town he can see.
+	ContentRegistry.register_param_source(
+		"worst_town", {"field": "string"}, ColonyParamSources.worst_town
+	)
+	ContentRegistry.register_param_source(
+		"his_town", {"field": "string"}, ColonyParamSources.his_town
+	)
 	ContentRegistry.register_param_source(
 		"recalled", {"reach": "string", "field": "string"}, ColonyParamSources.recalled
 	)
@@ -357,6 +364,101 @@ static func policy(args: Dictionary, context: LetterContext) -> Variant:
 			"months":
 				return maxi(0, held.ends_month - context.month)
 	return 0
+
+
+## The town in the worst state of one trouble, and what he would do about it.
+##
+## 🔒 **The suggestion comes from the registry, not from the prose** (#81, §2).
+## A remedy written into a letter file is a remedy nobody would think to check
+## when the mechanic behind it changed, and the one rule his advice must keep is
+## that it is never mechanically false.
+static func worst_town(args: Dictionary, context: LetterContext) -> Variant:
+	var pressing := DiplomatReport.most_pressing(context)
+	var field := String(args.get("field", "name"))
+	if pressing.is_empty():
+		return 0 if field == "months" else ""
+	var town: Town = pressing["town"]
+	match field:
+		"suggestion":
+			return DiplomatReport.suggestion_for(String(pressing["trouble"]))
+		"months":
+			return town.months_hungry
+		_:
+			return town.display_name
+
+
+## A fact about the town he lives in (#81, §2).
+##
+## The **sharp** half of his reporting, and the half his regard takes away first.
+## `governor` is the man he dines with; `refused` is how many of the PC's orders
+## that man has turned down, which nobody else in the game will tell the PC at
+## all.
+static func his_town(args: Dictionary, context: LetterContext) -> Variant:
+	var field := String(args.get("field", "name"))
+	var him: Contact = context.sender if context != null else null
+	var town: Town = null
+	if him != null and context.colony != null:
+		town = Diplomat.home_of(him, context.colony)
+	if town == null:
+		return 0 if field == "refused" else ""
+
+	match field:
+		"governor":
+			var governor: Contact = context.contacts.get(String(town.governor_id))
+			return governor.display_name if governor != null else "their governor"
+		"intent":
+			return Objective.intent_name(town.intent)
+		"loyalty":
+			# **A judgement, never a figure.** SPEC §8.5 keeps loyalty off the
+			# player's screens; what the Diplomat gives is a resident's read of a
+			# man, which is what a resident would actually write.
+			return _regard_for(context.contacts.get(String(town.governor_id)))
+		"refused":
+			return _refusals_in(town, context)
+		"destination":
+			# **Where he would ask to go**: least trouble, ties to the largest.
+			var to := Diplomat.destination_for(town, context.colony)
+			# A one-town colony has nowhere to send him, which is a real state of
+			# the game and not an error — he asks to come home instead.
+			return to.display_name if to != null else "England"
+		_:
+			return town.display_name
+
+
+## How many of the PC's orders have been refused in his town (#81, §2).
+##
+## Counted off the log, so it is the record rather than anybody's memory of it —
+## and it is the one thing in the game only the Diplomat will tell the PC, since
+## the man who refused is not going to write and say so.
+static func _refusals_in(town: Town, context: LetterContext) -> int:
+	if context == null or context.log == null:
+		return 0
+	var refused := 0
+	var theirs: Dictionary = {}
+	for id in context.contacts:
+		var contact: Contact = context.contacts[id]
+		if contact != null and RebelSentiment.lives_in(contact, town):
+			theirs[String(id)] = true
+	for event in context.log.of_type(StringName(Compliance.OUTCOME_EVENTS[Compliance.REFUSE])):
+		if theirs.has(String(event.subject)):
+			refused += 1
+	return refused
+
+
+## How a resident would describe a man's regard for the Crown.
+static func _regard_for(contact: Contact) -> String:
+	if contact == null:
+		return "hard to read"
+	var loyalty := contact.loyalty()
+	if loyalty >= 75.0:
+		return "warmly, and says so in company"
+	if loyalty >= 55.0:
+		return "correctly, and no more than that"
+	if loyalty >= 35.0:
+		return "coolly, though he is careful about it"
+	if loyalty >= 15.0:
+		return "badly, and has stopped troubling to hide it"
+	return "as an enemy, and the table knows it"
 
 
 ## What the Steward knows about the latest refusal (#75, SPEC §8.1).
