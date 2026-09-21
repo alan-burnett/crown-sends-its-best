@@ -33,6 +33,10 @@ var territory_driver: TerritoryDriver = null
 var native_trade: TradeBook = null
 var natives: Tribes = null
 
+## Ground a rival has parked men on (#188), so Work's candidate list does not
+## contain it.
+var denied: DeniedTiles = null
+
 
 func _init(p_colony: Colony = null, p_map: WorldMap = null, p_run_seed: int = 0) -> void:
 	colony = p_colony
@@ -56,6 +60,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.contacts = contacts
 	context.native_trade = native_trade
 	context.natives = natives
+	context.denied = denied
 	if territory_driver != null:
 		context.territory = territory_driver.territory
 

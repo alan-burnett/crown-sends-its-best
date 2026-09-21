@@ -109,6 +109,28 @@
     ]
   },
   {
+    "id": "trigger.governor.they_are_on_my_fields",
+    "urgency": 0.85,
+    "letter": "governor.they_are_on_my_fields",
+    "cooldown": 6,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "fields": {
+        "from": "denied_fields"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "they_are_on_my_fields": {}
+      }
+    ]
+  },
+  {
     "id": "trigger.governor.i_have_made_a_bargain",
     "letter": "governor.i_have_made_a_bargain",
     "urgency": 0.6,

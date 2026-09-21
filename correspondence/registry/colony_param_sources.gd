@@ -67,6 +67,9 @@ static func register_all() -> void:
 		ColonyParamSources.bargain,
 	)
 	ContentRegistry.register_param_source(
+		"denied_fields", {}, ColonyParamSources.denied_fields
+	)
+	ContentRegistry.register_param_source(
 		"tribute_amount", {}, ColonyParamSources.tribute_amount
 	)
 	ContentRegistry.register_param_source(
@@ -608,3 +611,12 @@ static func tribute_resource(args: Dictionary, context: LetterContext) -> Varian
 	# thing all run and the player learns what each of them wants.
 	var who := String(context.sender.id) if context.sender != null else ""
 	return wantable[StableHash.of_string(who) % wantable.size()]
+
+
+## How many of this town's fields somebody's men are standing on (#188).
+##
+## **A count a governor could make by walking out to them**, which is the whole
+## of what he can report: there is no casualty to name and no damage to describe,
+## only less country than there was last month.
+static func denied_fields(_args: Dictionary, context: LetterContext) -> Variant:
+	return ColonyConditions.denied_count(context)

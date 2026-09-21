@@ -131,6 +131,12 @@ func _init(p_run: RunState) -> void:
 
 	territory = TerritoryDriver.new(run.map, run.colony, run.knowledge)
 	territory.natives = run.tribes
+	territory.denied = run.denied
+	run.territory_driver = territory
+
+	# Phase 3, straight after territory. A duke sits on ground the colony
+	# actually holds, so the influence areas have to be this month's (#188).
+	var rival_tiles := RivalTileDriver.new(run)
 
 	# Phase 4. The colony month replaces the stub's colony half; the phases
 	# themselves arrive one ticket at a time (#44 to #50).
@@ -254,9 +260,11 @@ func _init(p_run: RunState) -> void:
 	native_trade.map = run.map
 	colony_month.native_trade = run.native_trade
 	colony_month.natives = run.tribes
+	colony_month.denied = run.denied
 
 	month_runner.drivers = [
 		immigration, native_help, crown_foundings, expeditions, crown_affairs, territory,
+		rival_tiles,
 		colony_month, villages, promise_driver, standings, native_trade,
 		policies, crown_standing, prestige, drift, rivals, orders, silence, governors,
 		grievances,

@@ -50,6 +50,7 @@ func observe(
 	month: int,
 	towns_present: Array = [],
 	natives: Tribes = null,
+	denied: DeniedTiles = null,
 ) -> void:
 	in_sight = {}
 	for at in territory.visible:
@@ -65,6 +66,11 @@ func observe(
 			# `natives.md` §10 leaves to the Author who actually works it. The
 			# map draws the contest; nothing in the sim decides it.
 			"native": _native_name(natives, at),
+			# 🔒 **Soldiers on your own doorstep are not a secret** (#188). SPEC
+			# §11.2's lock is satisfied without an exception: a tile a duke has
+			# parked men on is a tile inside the colony's own influence, so the
+			# colony is looking straight at it.
+			"denied_by": String(denied.denied_by(at)) if denied != null else "",
 		}
 
 	for town in towns_present:
@@ -129,6 +135,15 @@ func inside_border(at: Vector2i) -> bool:
 ## needs no access to `Tribes`.
 func native_at(at: Vector2i) -> String:
 	return String(seen.get(at, {}).get("native", ""))
+
+
+## Which rival has men on this tile, as last seen, or empty.
+##
+## **The id, because presentation may not reach a duke to ask his name** — the
+## lint keeps `RivalDuke` out of that layer for the same reason it keeps `Tribe`
+## out. What the map needs is that the ground is not the colony's to work.
+func denied_at(at: Vector2i) -> String:
+	return String(seen.get(at, {}).get("denied_by", ""))
 
 
 ## The tribe whose village stands here, as last seen, or empty.

@@ -1,0 +1,114 @@
+{
+  "id": "governor.they_are_on_my_fields",
+  "sender": "governor_ashmere",
+  "type": "request",
+  "skippable": false,
+  "params": {
+    "town": "town",
+    "fields": "integer",
+    "governor": "contact"
+  },
+  "perception": {
+    "spirits": {
+      "measure": "quality_of_life",
+      "ladder": [
+        "wretched",
+        "low",
+        "settled",
+        "in good heart"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "There are soldiers on {param:fields} of our fields at {param:town}. They are not ours."
+    },
+    {
+      "text": "I want to be exact, because I expect you will hear a worse account than mine. Nobody has been hurt. Nothing has been burned. They came up the valley, they set their tents at the edge of the ploughing, and they have been sitting in them since."
+    },
+    {
+      "text": "Our people go out in the morning, see them, and come back. I cannot send a man to work ground with a company standing on it, and I will not send one to be killed proving a point about whose ground it is."
+    },
+    {
+      "text": "So we are simply smaller than we were. The harvest will come in short by whatever those fields would have given and by nothing else, and the people are {perception:spirits}."
+    },
+    {
+      "text": "I have no remedy here. I cannot fight them and I am not going to ask your leave to try. Whatever moves that gentleman, it is not anything I can do from this valley."
+    },
+    {
+      "text": "Deal with these people, sir. That is a thing you can do and I cannot."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the men on your fields, I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "seized of the matter"
+        },
+        {
+          "tone": "desperate",
+          "text": "more troubled by this than by anything else in the post"
+        },
+        {
+          "tone": "annoyed",
+          "text": "displeased to be told what only I can do"
+        },
+        {
+          "tone": "hateful",
+          "text": "not minded to be lectured by a man standing in a field"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What is to come first at {param:town}",
+        "options": [
+          {
+            "id": "endure",
+            "label": "attend to the colony's profit",
+            "text": "Attend to the colony's profit with what ground you still have. I will see to the gentleman; that is not your affair.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "increase_economic_output"
+              }
+            }
+          },
+          {
+            "id": "survive",
+            "label": "your people's survival must come first",
+            "text": "Your people's survival must come first. If the fields are short, feed them from whatever else there is and let the ledgers look how they look.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "secure_survival"
+              }
+            }
+          },
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your defences — not to move them, but so that the next man who tries it has to think about it first.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "strengthen_defences"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,",
+        "tone": {
+          "annoyed": "Your servant, and still short of those fields,"
+        }
+      }
+    ]
+  }
+}

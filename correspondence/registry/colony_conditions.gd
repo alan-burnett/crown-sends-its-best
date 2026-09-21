@@ -161,6 +161,9 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"a_rival_has_a_hand_out", {}, ColonyConditions.a_rival_has_a_hand_out
 	)
+	ContentRegistry.register_condition(
+		"they_are_on_my_fields", {}, ColonyConditions.they_are_on_my_fields
+	)
 
 
 ## Whether this sender is a governor-elect who has only just set out (#178).
@@ -739,3 +742,35 @@ static func bargain_arms_them(context: LetterContext) -> bool:
 ## slightly more gold.
 static func a_rival_has_a_hand_out(_args: Dictionary, context: LetterContext) -> bool:
 	return DemandSchedule.rivals_are_asking(context.demands)
+
+
+## 🔒 Whether somebody's men are standing on this governor's fields (#188).
+##
+## **The victim writes** (`contacts.md` §6, `rival-pressure.md` §5). There is no
+## blockade bulletin and no announcement from the duke: the man whose fields they
+## are asks the PC to deal with these people, and the ask is also how the player
+## learns that tile denial exists and that money is the only answer to it.
+static func they_are_on_my_fields(_args: Dictionary, context: LetterContext) -> bool:
+	return not _denied_tiles(context).is_empty()
+
+
+## The tiles of this man's town that somebody is sitting on.
+static func _denied_tiles(context: LetterContext) -> Array:
+	var out: Array = []
+	if context == null or context.log == null or context.town == null:
+		return out
+	for event in context.log.of_type(DeniedTiles.EVENT_PARKED):
+		if String(event.payload.get("town", "")) != String(context.town.id):
+			continue
+		out.append(event.payload)
+	return out
+
+
+## How many of them, for the letter to name.
+static func denied_count(context: LetterContext) -> int:
+	var seen: Dictionary = {}
+	for payload in _denied_tiles(context):
+		var at: Array = payload.get("at", [])
+		if at.size() >= 2:
+			seen["%d,%d" % [int(at[0]), int(at[1])]] = true
+	return seen.size()

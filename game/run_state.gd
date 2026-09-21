@@ -122,6 +122,15 @@ var native_trade: TradeBook = null
 ## derivable from the number afterwards.
 var rivals: RivalBook = null
 
+## Ground a rival has parked men on (#188). Held on the run rather than on a
+## town, because it is a fact about the map and a duke rather than about a
+## settlement — and because a town that is lost takes its tiles with it.
+var denied: DeniedTiles = null
+
+## The latest territory, set by the driver that computes it in phase 3. Read by
+## anything in a later phase that needs to know what ground the colony holds.
+var territory_driver: TerritoryDriver = null
+
 ## How hard the Crown is leaning, and how far the bar has moved (#69).
 ##
 ## **Serialised in full.** The bucket's contents and the draw order are part of
@@ -256,6 +265,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.tribes.settle(run.map, run.starting_site, run.streams)
 	run.native_trade = TradeBook.new()
 	run.rivals = RivalBook.new()
+	run.denied = DeniedTiles.new()
 	run.prestige = Prestige.new()
 	run.ending = RunEnding.new()
 	run.refusal = CrownRefusal.new()
@@ -399,6 +409,7 @@ func to_dict() -> Dictionary:
 		"tribes": tribes.to_dict() if tribes != null else {},
 		"native_trade": native_trade.to_dict() if native_trade != null else {},
 		"rivals": rivals.to_dict() if rivals != null else {},
+		"denied": denied.to_dict() if denied != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
@@ -439,6 +450,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.tribes = Tribes.from_dict(data.get("tribes", {}))
 	run.native_trade = TradeBook.from_dict(data.get("native_trade", {}))
 	run.rivals = RivalBook.from_dict(data.get("rivals", {}))
+	run.denied = DeniedTiles.from_dict(data.get("denied", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
@@ -463,3 +475,11 @@ static func from_dict(data: Dictionary) -> RunState:
 ## Identical runs hash identically, in any process and on any platform.
 func state_hash() -> String:
 	return Canonical.hash_of(to_dict())
+
+
+## What ground the colony holds, as of phase 3 of this month.
+##
+## Null before the first territory recomputation, which is the honest answer:
+## nothing knows what the colony works until the phase that decides it has run.
+func territory_now() -> Territory:
+	return territory_driver.territory if territory_driver != null else null
