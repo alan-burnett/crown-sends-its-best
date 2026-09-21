@@ -48,6 +48,22 @@ two panels; a caption with no image is not a cutscene.
 ends with one (§13); neither competes with anything, because nothing else is
 happening in those turns.
 
+### 🔒 The trigger source is the event log, and the desk is in it
+
+Not every cutscene is about the world. **A governor refusing, a contact acting
+without asking, the Marshal pulling troops back — those happen on the desk**, and
+they deserve a painting as much as a battle does.
+
+They need no new machinery, because the correspondence layer already emits into
+the same log the sim does: `compliance.gd` logs all six outcomes —
+`order_refused` and `contact_acted_alone` among them — and the director logs what
+it dispatched, culled and ignored.
+
+**So there is one trigger source, not two.** `CLAUDE.md`'s Seam A is written
+about the sim emitting; it is worth saying plainly here that correspondence
+emits too, because a reader who assumed otherwise would build a second
+mechanism for half this catalog.
+
 ---
 
 ## 3. 🔒 One cutscene a turn
@@ -124,7 +140,7 @@ counts are suggestions.
 **Overrun needs variants.** SPEC §13.1: *the ending names who overran it.* At
 minimum natives and rivals are different paintings.
 
-### Firsts of the run
+### Firsts of the run — from the world
 
 | Caption | Fires on the first | Panels | Owns the moment |
 | :--- | :--- | :--: | :--- |
@@ -151,6 +167,29 @@ minimum natives and rivals are different paintings.
 | **The Hungry Month** | town loses someone to hunger | 1 | `quality-of-life.md` |
 | **A Town Refuses** | town declares rebellion | 1 | `rebel-sentiment.md` |
 | **The Chancellor Writes** | formal last-chance warning | 1 | `endings.md` §2 |
+| **The Colony Grows** | town that grows of its own accord | 1 | SPEC §12.1 |
+| **The Land Improved** | improvement built | 1 | `tiles-and-improvements.md` |
+| **Blooded** | company gains a level | 1 | `commanders.md` |
+| **The Fort Falls** | fort destroyed by ground troops | 1 | `battles.md` |
+| **They Do Not Return** | expedition lost | 1 | `founding-towns.md` §7 |
+| **The Cost of It** | town loses people to an attack | 1 | `battles.md` |
+| **The Ground Is Taken** | rivals block tiles the colony would have worked | 1 | `rival-pressure.md` |
+| **They Burned It** | rivals destroy an improvement | 1 | `tiles-and-improvements.md` |
+
+**They Do Not Return needs variants** — rebels, natives and rivals are three
+different paintings, the same question Overrun asks.
+
+### Firsts of the run — from the desk
+
+Nothing in the world moved. **A man you wrote to did something**, and the
+painting is about that.
+
+| Caption | Fires on the first | Panels | Emitted by |
+| :--- | :--- | :--: | :--- |
+| **He Will Not Do It** | a contact refuses an order | 1 | `order_refused` · SPEC §8.5 |
+| **The Steward Acts** | a contact acts unilaterally | 1 | `contact_acted_alone` · SPEC §8.5 |
+| **The Marshal Withdraws** | the Marshal pulls the troops back | 1 | `the-marshal.md` §4 |
+| **A Promise Unpaid** | standing falls with promises outstanding | 1 | `crown-standing.md`, SPEC §9.5 |
 
 ### Recurring — the first of each turn
 
@@ -171,15 +210,27 @@ that will not come again.
 The catalog is bounded by §3. One a turn means anything that happens most months
 can never hold the slot, so it should not ask for it:
 
-- **Crown demands, taxes, duties, standing.** Monthly, and they belong to the
-  letters and the ledger.
+- **The monthly machinery.** A demand arriving, a duty paid, standing ticking
+  down, a harvest, a birth, the fourth building. These belong to the map, the
+  letters and the ledger, and a painting each month would mean nothing by the
+  fifth.
 - **Anything a letter already carries.** A painting that restates a letter the
   player is about to read wastes the one slot.
-- **Routine growth, births, harvests, buildings after the first.** The map plays
-  these.
 
-**The test is whether the moment would still be worth a painting on the fortieth
-turn.** *Meeting the natives* would. *A good harvest* would not.
+### It is never the topic that disqualifies a moment
+
+Taxes and standing are on that list and **The Steward Acts** and **A Promise
+Unpaid** are in the catalog, which looks like a contradiction and is not.
+
+The Steward raising rates unilaterally is not *taxes* — it is a man doing
+something without asking. Standing falling with promises outstanding is not
+*standing* — it is a promise broken. **The topic is the same and the moment is
+not**, and the catalog is a list of moments.
+
+**The test is whether it would still be worth a painting on the fortieth turn.**
+*Meeting the natives* would. *A good harvest* would not. A man refusing you for
+the first time would; the ninth man refusing you would not, which is why almost
+everything here is a first.
 
 ---
 
@@ -191,9 +242,12 @@ turn.** *Meeting the natives* would. *A good harvest* would not.
 
 ## 9. Open items
 
-- **The cut.** Thirty cutscenes at one to three panels each is roughly forty
-  paintings. That is the real cost of this document and the Author should set the
-  number before anything is commissioned.
+- **The cut.** Forty-two cutscenes at one to three panels each, plus the
+  variants below, is somewhere near sixty paintings. That is the real cost of
+  this document and the Author should set the number before anything is
+  commissioned. **The desk firsts are the cheapest to paint** — a man at a desk,
+  a letter, a closed door — and among the most characterful, which is an argument
+  for cutting elsewhere first.
 - **Do the four institutional contacts each want their own?** Four paintings for
   four arrivals, against one *A New Face in the Colony* reused. They are
   distinctive men, but they are also the cheapest four to collapse.
