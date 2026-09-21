@@ -114,6 +114,17 @@
                 "intent": "settle_a_new_town"
               }
             }
+          },
+          {
+            "id": "be_rid_of_them",
+            "label": "be rid of them",
+            "text": "Be rid of them. I confess I do not follow the difficulty: the land is good, the Crown has asked me for sugar, and you tell me there are people standing on it. Move them along and let us hear no more about the fields.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "drive_them_off"
+              }
+            }
           }
         ]
       }

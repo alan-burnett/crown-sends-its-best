@@ -95,6 +95,12 @@ const SEDITION: StringName = &"prepare_for_rebellion"
 ## 🔒 **Visible to the tribe from the month he adopts it**, before anything is
 ## built. There is no hiding a purpose from people who live next door.
 ##
+## **And the PC may ask for it.** It is an intent like any other, so it reaches
+## the governor as an Order resolved by his own compliance — which means a man
+## who thinks it monstrous refuses it, a man who is minded that way was going to
+## get there anyway, and the PC never learns which of the two he has until the
+## letter comes back.
+##
 ## **Reachable only by a governor who has somebody to drive off**, enforced as a
 ## filter rather than a weight (`deliberation.md` §5): a man whose town has never
 ## seen a native cannot want this, however warlike he is, and a weight can lose a
@@ -136,21 +142,24 @@ static func is_sedition(id: StringName) -> bool:
 
 ## Whether this is an intent **a governor reaches entirely on his own**.
 ##
-## 🔒 There is no letter in which the PC asks for one of these, and there should
-## not be. Both are things the colony arrives at because of how it has been
-## treated and how it has behaved, which makes them consequences rather than one
-## more thing the PC decides from an armchair — and that is worth more than the
-## instrument would be.
+## 🔒 **Sedition, and only sedition.** There is no letter in which the Crown asks
+## a man to turn against it, and there should not be: it is the one intent that
+## is a consequence of how he has been treated rather than one more thing the PC
+## decides.
 ##
-## He is not powerless about either. He argues by urging something else, and a
-## governor who takes the other course has been talked round. What he cannot do
-## is **ask** for a rebellion, or for a people to be driven off their land.
+## 🔒 **Driving them off is not on this list, and that is the point** (#204,
+## Author). *Natives you say? Why simply exterminate them and farm me my sugar*
+## is exactly what an aristocrat who has never seen one says from three thousand
+## miles away, and the game is worse without his being able to say it. The man
+## who has to do it then interprets, as he interprets every other order — so the
+## PC can ask for a thing he has no conception of and watch a governor decide
+## what it actually means.
 ##
 ## `test_colony_letters` reads this: an intent outside it with no letter option
 ## is a hole, and one inside it with a letter option is a different kind of
 ## mistake.
 static func is_his_alone(id: StringName) -> bool:
-	return id == SEDITION or id == DRIVE_OFF
+	return id == SEDITION
 
 
 ## What the town is being steered towards, on each axis an objective can serve.

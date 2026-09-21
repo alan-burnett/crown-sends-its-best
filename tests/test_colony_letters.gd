@@ -99,22 +99,21 @@ func test_every_intent_is_something_the_pc_can_actually_say() -> void:
 	# letter option, that intent would exist in the sim and be unreachable by
 	# correspondence, which is the one way the PC is allowed to act.
 	#
-	# **The exceptions are the interesting ones**, and there are two.
+	# **Sedition is the exception, and it is the interesting one** (#128). The PC
+	# cannot argue for a governor to prepare his town for rebellion — there is no
+	# letter in which the Crown asks a man to turn against it, and there should
+	# not be. It is the one intent a governor reaches entirely on his own, which
+	# is what makes it a consequence of how he has been treated rather than
+	# another thing the PC decides.
 	#
-	# Sedition (#128): the PC cannot argue for a governor to prepare his town for
-	# rebellion — there is no letter in which the Crown asks a man to turn
-	# against it, and there should not be. It is an intent a governor reaches
-	# entirely on his own, which is what makes it a consequence of how he has
-	# been treated rather than another thing the PC decides.
-	#
-	# Driving off the natives (#204) is the same shape from the other side. The
-	# ticket says the PC "can argue against it and cannot forbid it" and does not
-	# say he may ask for it — and arguing against an intent already has a
-	# mechanism, which is urging a different one. So the colony's worst act is
-	# something the colony arrives at while the PC writes letters about it, which
-	# is a better story than an instruction from three thousand miles away. **An
-	# assumption, flagged on #204 for the Author**: if he wants it urgeable, it
-	# is one letter option and one word here.
+	# 🔒 **Driving off the natives is not an exception** (#204, Author). I had put
+	# it in this list on the reasoning that the ticket says the PC may argue
+	# against it and does not say he may ask for it. That was the wrong read of
+	# what the game is about: *Natives you say? Why simply exterminate them and
+	# farm me my sugar* is exactly what a man who has never seen one says from
+	# three thousand miles away, and the governor who has to carry it out is the
+	# one who decides what it actually means. Taking the instrument away took the
+	# satire with it.
 	var reachable: Dictionary = {}
 	for letter in _governor_letters():
 		if not letter.has_reply():

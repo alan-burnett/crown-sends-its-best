@@ -283,6 +283,44 @@ func test_a_man_with_nobody_to_drive_off_cannot_want_to() -> void:
 		"a governor with a village in his fields could not intend anything about it")
 
 
+func test_the_pc_may_ask_for_it_and_the_governor_decides_what_it_means() -> void:
+	# 🔒 #204, Author. *Natives you say? Why simply exterminate them and farm me
+	# my sugar* is exactly what a man who has never seen one says from three
+	# thousand miles away — and the whole of the game is that the man who has to
+	# carry it out then interprets it.
+	#
+	# So the instrument exists, and it is an Order like every other: it reaches
+	# the governor through compliance, which is where a man may comply, delay,
+	# reinterpret, refuse, or do something else entirely.
+	assert_false(GovernorIntent.is_his_alone(GovernorIntent.DRIVE_OFF),
+		"the PC cannot ask a governor to be rid of the natives")
+	assert_true(GovernorIntent.is_his_alone(GovernorIntent.SEDITION),
+		"the PC can ask a governor to prepare a rebellion against the Crown")
+
+	var reachable: Dictionary = {}
+	for id in content.ids("letters"):
+		var letter := Letter.from_record(content.record("letters", String(id)))
+		if not letter.has_reply():
+			continue
+		for step in letter.steps():
+			for option in step.get(LetterSchema.KEY_OPTIONS, []):
+				var effect: Dictionary = option.get("effect", {})
+				if effect.has("urge_intent"):
+					reachable[String(effect["urge_intent"].get("intent", ""))] = true
+	assert_true(reachable.has(String(GovernorIntent.DRIVE_OFF)),
+		"there is no letter in which the PC says it")
+
+	# 🔒 And it is not an instruction that executes. It urges, like the rest —
+	# there is no effect anywhere that sets a town's intent directly.
+	for id in content.ids("letters"):
+		var record: Dictionary = content.record("letters", String(id))
+		for step in record.get("reply", {}).get("steps", []):
+			for option in step.get("options", []):
+				for name in option.get("effect", {}):
+					assert_false(String(name) == "set_intent",
+						"%s makes an intent happen instead of asking for it" % id)
+
+
 # --- 🔒 Only aggression reaches the point of no return ----------------------
 
 func test_a_lifetime_of_intrusion_never_carries_them_over() -> void:
