@@ -85,9 +85,32 @@ func _step(party: ExpeditionParty, context: ColonyContext) -> bool:
 	if party.destination == Vector2i(-1, -1):
 		return false
 
-	party.advance(party.destination, context)
-	# Arrival is #179's. It stands at its site until that ticket founds a town.
-	return false
+	if not party.advance(party.destination, context) and party.at != party.destination:
+		return false
+
+	# **It is there.** The town is founded with exactly what it carried (#179).
+	var town := party.found(_name_for(party), _display_name_for(party), context)
+	if town == null:
+		return true
+	colony.add(town)
+	# 🔒 **Border and vision extend through the existing territory phase**, which
+	# runs later in the same month. Nothing here touches the map: a town in the
+	# colony is a town territory already knows how to account for, and a bespoke
+	# path would be a second answer to a question already answered.
+	return true
+
+
+## What the new town is called, in the save and in the prose.
+##
+## **Derived from the party**, so it is the same on a reload and the same on two
+## machines — a name drawn from a list would need a stream of its own, and the
+## stream would have to be the party's, which is what the id already is.
+func _name_for(party: ExpeditionParty) -> StringName:
+	return StringName("town_%s" % String(party.id).replace("expedition_", ""))
+
+
+func _display_name_for(party: ExpeditionParty) -> String:
+	return String(_name_for(party)).replace("town_", "").capitalize()
 
 
 func _town(id: StringName) -> Town:
