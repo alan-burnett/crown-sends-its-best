@@ -132,6 +132,8 @@ func _context(run: RunState, contact: Contact) -> LetterContext:
 	context.town = run.colony.governed_by(contact.id) if run.colony != null else null
 	context.refusal = run.refusal
 	context.prestige = run.prestige
+	context.colony = run.colony
+	context.contacts = run.contacts
 	context.demands = run.demands
 	context.demand_book = run.demand_book
 	context.log = run.log

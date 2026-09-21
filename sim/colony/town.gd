@@ -61,6 +61,15 @@ var quality_of_life: float = 0.0
 ## rather than a worker.
 var education: float = 0.0
 
+## How safe the town felt this month (#81).
+##
+## **Stored and moved only in Settle**, exactly as quality of life is and for the
+## same reason: it is one of the five parts of that figure, and a reader that
+## recomputed it would get a different answer halfway through a month. The
+## Diplomat reports it and asks to be moved on it, so the figure he writes about
+## and the figure the town lived by must be the same one.
+var safety: float = 1.0
+
 ## How close the town is to deciding it would be better off without the Crown
 ## (#71). Written by Settle each month; see `RebelSentiment`.
 ##
@@ -391,6 +400,7 @@ func to_dict() -> Dictionary:
 		"dark_buildings": dark_buildings.duplicate(),
 		"quality_of_life": quality_of_life,
 		"education": education,
+		"safety": safety,
 		"arrivals_accrued": arrivals_accrued,
 		"experts_accrued": experts_accrued,
 		"rebel_sentiment": rebel_sentiment,
@@ -436,6 +446,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.dark_buildings = PackedStringArray(data.get("dark_buildings", []))
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.education = float(data.get("education", 0.0))
+	town.safety = float(data.get("safety", 1.0))
 	town.arrivals_accrued = float(data.get("arrivals_accrued", 0.0))
 	town.experts_accrued = float(data.get("experts_accrued", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))

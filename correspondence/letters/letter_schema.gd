@@ -51,6 +51,15 @@ const PARAM_TYPES: Array[StringName] = [
 	# kind, because the four in `CLAUDE.md` are a contract and this needs no
 	# exception to it.
 	&"pc",
+	# **What the Diplomat proposes, and how he says a man speaks of the Crown**
+	# (#81). Two kinds of thing rather than one free-text type: a remedy comes
+	# from `DiplomatReport`, which is the one place the rule that his advice is
+	# never mechanically false can be kept, and a regard is a resident's read of a
+	# man — never the loyalty figure, which SPEC §8.5 keeps off the player's
+	# screens. A generic "string" would have let either of those be written into a
+	# letter file where nothing would check it again.
+	&"remedy",
+	&"regard",
 ]
 
 ## Param types that are whole numbers.

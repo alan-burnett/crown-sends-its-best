@@ -133,6 +133,14 @@ func _take_the_temperature(town: Town, context: ColonyContext) -> void:
 	# a town that declares in March is judged as a rebel from April.
 	if Rebellion.resolve(town, context) == Rebellion.EVENT_DECLARED:
 		town.rebelling_since = context.state.month
+		# 🔒 **Rebellion kills the Diplomat outright** (#81, `the-diplomat.md`
+		# §6). No roll. It is what gives his rehoming letter teeth: the letter is
+		# the warning, and ignoring it is how the man is lost. Nobody takes his
+		# place, and the run goes on blind.
+		for id in _sorted(context.contacts):
+			var contact: Contact = context.contacts[id]
+			if contact != null and contact.role == Contact.ROLE_DIPLOMAT:
+				Diplomat.rebellion_took_him(contact, town, context)
 
 	# **An embargo runs down whether anybody remembers it or not.** A punishment
 	# with no end is a punishment the PC cannot take back, and SPEC §12.3's
@@ -145,6 +153,14 @@ func _take_the_temperature(town: Town, context: ColonyContext) -> void:
 				"months": 0,
 				"rebelling": town.rebelling,
 			}, WorldPhase.COLONY_MONTH)
+
+
+## Contact ids in a fixed order, since who is asked first must not depend on the
+## order a dictionary happens to hold them in.
+func _sorted(contacts: Dictionary) -> Array:
+	var ids: Array = contacts.keys()
+	ids.sort()
+	return ids
 
 
 ## Which contributor is doing the most to a town's sentiment right now.
@@ -171,6 +187,10 @@ func _live(town: Town, context: ColonyContext) -> void:
 	var parts := QualityOfLife.of(town, context)
 	var before := town.quality_of_life
 	town.quality_of_life = float(parts["quality_of_life"])
+	# **Alongside it, from the same reckoning** (#81). Safety is one of the five
+	# parts, and the Diplomat asks to be moved on it — so it is written where
+	# quality of life is rather than measured again wherever it is wanted.
+	town.safety = clampf(float(parts["safety"]), 0.0, 1.0)
 
 	# **Alongside quality of life, and for the same reason** (#168): a reader
 	# that recomputed it mid-month would get a different answer from the one the

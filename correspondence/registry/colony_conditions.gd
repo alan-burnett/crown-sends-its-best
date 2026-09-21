@@ -98,6 +98,89 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"the_court_is_cooling", {}, ColonyConditions.the_court_is_cooling
 	)
+	# The Diplomat (#81). His regard governs **what he tells**, so every one of
+	# these is a gate on his own reporting rather than on the colony.
+	ContentRegistry.register_condition(
+		"he_still_writes", {"about": "string"}, ColonyConditions.he_still_writes
+	)
+	ContentRegistry.register_condition(
+		"he_wants_moving", {}, ColonyConditions.he_wants_moving
+	)
+	ContentRegistry.register_condition(
+		"he_wants_paying", {}, ColonyConditions.he_wants_paying
+	)
+	ContentRegistry.register_condition(
+		"he_has_something_to_report", {}, ColonyConditions.he_has_something_to_report
+	)
+
+
+## Whether the Diplomat is writing at all, and at what depth (#81, §5).
+##
+## 🔒 **Low loyalty spoils the intelligence, not the compliance.** Every other
+## contact answers a letter worse when he is slighted; this one tells you less.
+## `about` is `colony` for the broad reports and `home` for the sharp ones, and
+## **home goes first** — a cooling man stops telling you his own business before
+## he stops telling you the colony's.
+##
+## Silence while he is at sea is not the same thing and is handled here too: a
+## man on a ship writes nothing whatever his regard.
+static func he_still_writes(args: Dictionary, context: LetterContext) -> bool:
+	var him := _the_diplomat(context)
+	if him == null or him.is_dead or Diplomat.is_travelling(him, context.month):
+		return false
+	var tier := Diplomat.reporting_at(him.loyalty())
+	if String(args.get("about", "colony")) == "home":
+		# **He reports the town he has lived in**, not the one he has just been
+		# handed: before its first Settle there is nothing he could have seen.
+		return tier == Diplomat.EVERYTHING \
+			and DiplomatReport.has_lived(_his_town(context, him), context)
+	return tier != Diplomat.SILENT
+
+
+## Whether his town has become somewhere he would rather not be (§3).
+##
+## 🔒 **Asked whatever his regard.** At no loyalty at all he writes two letters
+## and this is one of them — and granting it is a way back, which is what stops a
+## neglected Diplomat being a permanently blind PC.
+static func he_wants_moving(_args: Dictionary, context: LetterContext) -> bool:
+	var him := _the_diplomat(context)
+	if him == null or him.is_dead or Diplomat.is_travelling(him, context.month):
+		return false
+	return Diplomat.wants_to_move(_his_town(context, him))
+
+
+## Whether he is asking for money for himself (§4).
+##
+## He is never lying about the town. He simply also wants a better dinner in it.
+static func he_wants_paying(_args: Dictionary, context: LetterContext) -> bool:
+	var him := _the_diplomat(context)
+	if him == null or him.is_dead or Diplomat.is_travelling(him, context.month):
+		return false
+	return Diplomat.wants_paying(_his_town(context, him))
+
+
+## Whether anything in the colony is worth a letter (#81, §2).
+##
+## **Asked of the colony**, because he is aware of every town, and answered by
+## whichever of his four troubles is nearest a crisis anywhere. One question and
+## one letter: a Diplomat filing four reports a month would crowd the Crown out
+## of the post.
+static func he_has_something_to_report(_args: Dictionary, context: LetterContext) -> bool:
+	return not DiplomatReport.most_pressing(context).is_empty()
+
+
+static func _the_diplomat(context: LetterContext) -> Contact:
+	if context == null:
+		return null
+	if context.sender != null and context.sender.role == Contact.ROLE_DIPLOMAT:
+		return context.sender
+	return null
+
+
+static func _his_town(context: LetterContext, him: Contact) -> Town:
+	if context == null or context.colony == null:
+		return null
+	return Diplomat.home_of(him, context.colony)
 
 
 ## Whether the court thinks worse of the PC this month than last (#76).

@@ -91,6 +91,20 @@ var log: EventLog = null
 ## write about the colony and have no town of their own.
 var town: Town = null
 
+## **Everyone the PC corresponds with**, for the one contact who reports on other
+## contacts (#81, `the-diplomat.md` §2).
+##
+## The Diplomat's home-town reporting is the intent, loyalty and relationship of
+## the governor and every other man living there — the sharpest intelligence in
+## the game, covering exactly one town. Nothing else needs this.
+var contacts: Dictionary = {}
+
+## **Every town**, for the one contact who is aware of all of them (#81).
+##
+## The Diplomat reports on the colony and most sharply on the town he lives in,
+## so he is the only sender who needs more than his own. Nothing else reads it.
+var colony: Colony = null
+
 
 func _init(p_state: WorldState = null, p_sender: Contact = null, p_tone: StringName = &"") -> void:
 	state = p_state
