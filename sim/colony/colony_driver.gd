@@ -16,6 +16,10 @@ var run_seed: int = 0
 ## The run's live Intents, so Reckon can see what a town owes the Crown (#69).
 var intents: IntentBook = null
 
+## Expeditions in the open (#176). Shared with `ExpeditionDriver`, so a party
+## launched in the Colony Month is on the map without anything copying it across.
+var parties: Array = []
+
 ## What each town holds against the Crown, and who lives where (#71).
 var grievances: Grievances = null
 var contacts: Dictionary = {}
@@ -41,6 +45,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	var context := ColonyContext.new(state, log, streams, map)
 	context.run_seed = run_seed
 	context.intents = intents
+	context.parties = parties
 	context.grievances = grievances
 	context.contacts = contacts
 	if territory_driver != null:

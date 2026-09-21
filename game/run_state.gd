@@ -89,6 +89,13 @@ var prestige: Prestige = null
 ## outlived the run still says the run is over instead of quietly continuing.
 var ending: RunEnding = null
 
+## **Expeditions in the open** (#176), crossing to their sites over months.
+##
+## Part of the state rather than rebuilt, because a party is months of a town's
+## people and stores walking about outside it — losing them to a reload would
+## lose the town's investment with them.
+var parties: Array = []
+
 ## How hard the Crown is leaning, and how far the bar has moved (#69).
 ##
 ## **Serialised in full.** The bucket's contents and the draw order are part of
@@ -309,6 +316,14 @@ func inbound(id: StringName) -> InboundLetter:
 
 # --- Serialisation ---------------------------------------------------------
 
+## Every party in the open, as plain data.
+func _parties_to_list() -> Array:
+	var out: Array = []
+	for party in parties:
+		out.append((party as ExpeditionParty).to_dict())
+	return out
+
+
 func to_dict() -> Dictionary:
 	var contact_entries: Dictionary = {}
 	for id in contact_ids():
@@ -336,6 +351,7 @@ func to_dict() -> Dictionary:
 		"standing": standing.to_dict() if standing != null else {},
 		"prestige": prestige.to_dict() if prestige != null else {},
 		"ending": ending.to_dict() if ending != null else {},
+		"parties": _parties_to_list(),
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
@@ -369,6 +385,8 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.standing = CrownStanding.from_dict(data.get("standing", {}))
 	run.prestige = Prestige.from_dict(data.get("prestige", {}))
 	run.ending = RunEnding.from_dict(data.get("ending", {}))
+	for entry in data.get("parties", []):
+		run.parties.append(ExpeditionParty.from_dict(entry))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
