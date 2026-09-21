@@ -10,7 +10,10 @@ extends Control
 ## on desktop the same column sits in more visible desk. Every control is
 ## tap-sized and keyboard-reachable (SPEC §15).
 ##
-## Retire is out of scope for M1 — it arrives with prestige in M3.
+## **Leaving is a desk decision** (#77, SPEC §13.2). It sits with the post rather
+## than in a menu, and it is confirmed like sending is — the two irreversible
+## things on this desk, with their own wording each, because a confirmation that
+## reads like every other confirmation is one the player stops reading.
 
 var run: RunState = null
 var machine: TurnMachine = null
@@ -24,6 +27,10 @@ var _send: Button = null
 var _send_reason: Label = null
 var _letter_view: LetterView = null
 var _confirm: ConfirmationDialog = null
+var _compose: Button = null
+var _retire: Button = null
+var _retire_confirm: ConfirmationDialog = null
+var _ended: Label = null
 var _margins: MarginContainer = null
 
 
@@ -82,9 +89,9 @@ func _build() -> void:
 	_post_box.add_theme_constant_override("separation", DeskTheme.GAP)
 	scrolled.add_child(_post_box)
 
-	var compose := DeskTheme.button("Write a letter")
-	compose.pressed.connect(_open_compose)
-	inner.add_child(compose)
+	_compose = DeskTheme.button("Write a letter")
+	_compose.pressed.connect(_open_compose)
+	inner.add_child(_compose)
 
 	# **Look, do not touch.** Both of these show information and neither has a
 	# decision on it; only the desk does (SPEC §7).
@@ -109,15 +116,54 @@ func _build() -> void:
 	_send.pressed.connect(_ask_to_send)
 	inner.add_child(_send)
 
+	# **Leaving is a desk decision** (#77, SPEC §13.2), so it sits with the desk
+	# and not in a menu — but **beneath the post and on its own line**, not in the
+	# row with the map and the ledger. Two reasons: those two are look-and-don't-
+	# touch and this is the most irreversible decision in the game, and a third
+	# button in that row wraps its own label at phone width and takes the row with
+	# it. It is always available and almost never what the player came here to do.
+	_retire = DeskTheme.button("Ask to be relieved of the colony")
+	_retire.add_theme_font_size_override("font_size", DeskTheme.SIZE_SMALL)
+	_retire.pressed.connect(_ask_to_retire)
+	inner.add_child(_retire)
+
 	# **🔒 Irreversible actions are confirmed** (SPEC §15).
 	_confirm = ConfirmationDialog.new()
 	_confirm.title = "Send the post"
 	_confirm.ok_button_text = "Send it"
 	_confirm.cancel_button_text = "Not yet"
 	_confirm.confirmed.connect(_send_the_post)
+	_fits_a_phone(_confirm)
 	add_child(_confirm)
 
+	# **The other irreversible action on this desk**, and the more irreversible of
+	# the two. Its own dialog rather than a shared one, so the wording can be its
+	# own — a confirmation that reads like every other confirmation is a
+	# confirmation the player stops reading.
+	_retire_confirm = ConfirmationDialog.new()
+	_retire_confirm.title = "Ask to be relieved"
+	_retire_confirm.ok_button_text = "Write the letter"
+	_retire_confirm.cancel_button_text = "Stay on"
+	_retire_confirm.confirmed.connect(_retire_from_the_desk)
+	_fits_a_phone(_retire_confirm)
+	add_child(_retire_confirm)
+
+	_ended = DeskTheme.label("", DeskTheme.SIZE_LABEL, DeskTheme.PAPER)
+	_ended.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	inner.add_child(_ended)
+
 	_apply_measure()
+
+
+## Keep a dialog inside a portrait phone (SPEC §15).
+##
+## **A `ConfirmationDialog` sizes itself to its longest line**, which on a phone
+## means a confirmation whose text runs off both edges — and the one screen that
+## must be read before it is agreed to is the one screen that must not be cut
+## off. Wrapping, and capped a gutter in from each side.
+func _fits_a_phone(dialog: ConfirmationDialog) -> void:
+	dialog.dialog_autowrap = true
+	dialog.max_size = Vector2i(DeskTheme.LETTER_MEASURE, 0)
 
 
 ## Open the map over the desk, and put the desk back when it closes.
@@ -185,6 +231,22 @@ func refresh() -> void:
 	_send.disabled = not bool(permission["ok"])
 	# A send button that silently does nothing is worse than one that explains.
 	_send_reason.text = String(permission["reason"])
+
+	# 🔒 **An ended run does not become a desk again** (SPEC §16.2). The summary
+	# and the epitaph are #78; until then the desk says plainly that it is over
+	# and stops offering anything that would carry on.
+	var over := machine.is_over()
+	_retire.disabled = over
+	# **Nothing that would carry the run on.** The post already refuses; writing a
+	# letter nobody will ever send is worse than not offering to.
+	_compose.disabled = over
+	_send.disabled = _send.disabled or over
+	_ended.visible = over
+	if over:
+		_ended.text = (
+			"You asked to be relieved, in year %d. The desk is closed; what the court "
+			+ "made of you is not yours to read."
+		) % [run.world.year_index()]
 
 
 ## **Handled letters are visibly distinct from unread**, by paper colour and by
@@ -328,6 +390,35 @@ func _ask_to_send() -> void:
 		% [run.post.size(), "" if run.post.size() == 1 else "s"]
 	)
 	_confirm.popup_centered()
+
+
+## Ask to be relieved. **Cancelling changes nothing at all** (SPEC §15).
+##
+## Available from any desk phase, including with letters unread and a post
+## half-written — a man who has decided to go does not owe the Crown his
+## correspondence first.
+func _ask_to_retire() -> void:
+	if machine.is_over():
+		return
+	_retire_confirm.dialog_text = (
+		"You will write to the Crown asking to be relieved of the colony, and the "
+		+ "post will carry it.
+
+"
+		+ "There is no coming back to this desk, and no later month in which to "
+		+ "do better.
+
+"
+		+ "Ask to be relieved?"
+	)
+	_retire_confirm.popup_centered()
+
+
+## 🔒 **The run ends here and the save is closed out.** Ironman means there is no
+## coming back to it (SPEC §16.2).
+func _retire_from_the_desk() -> void:
+	machine.retire()
+	refresh()
 
 
 ## **Sending commits every decision in it and saves the game. There is no going

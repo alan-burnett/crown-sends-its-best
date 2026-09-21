@@ -16,8 +16,9 @@ func _init() -> void:
 	var width: int = int(arguments[1]) if arguments.size() > 1 else 540
 	var height: int = int(arguments[2]) if arguments.size() > 2 else 960
 	# "open" opens the first letter, "reply" also walks the wizard to the end,
-	# "map" opens the map over the desk, "ledger" opens the Ledger, and
-	# "ledger:N" turns to its Nth page.
+	# "map" opens the map over the desk, "ledger" opens the Ledger, "ledger:N"
+	# turns to its Nth page, "retire" opens the retirement confirmation and
+	# "retired" goes through with it.
 	var mode: String = arguments[3] if arguments.size() > 3 else ""
 
 	var window := get_root()
@@ -39,7 +40,11 @@ func _init() -> void:
 	for i in SETTLE_FRAMES:
 		await process_frame
 
-	if mode.begins_with("ledger"):
+	if mode == "retire" or mode == "retired":
+		_retire(instance, mode == "retired")
+		for i in SETTLE_FRAMES:
+			await process_frame
+	elif mode.begins_with("ledger"):
 		_open_the_ledger(instance, mode)
 		for i in SETTLE_FRAMES:
 			await process_frame
@@ -58,6 +63,24 @@ func _init() -> void:
 		"ok" if error == OK else "FAILED", out_path, width, height, image.get_width(), image.get_height(),
 	])
 	quit(0 if error == OK else 1)
+
+
+## Open the retirement confirmation, or go through with it (#77).
+##
+## Both are worth looking at: the dialog is the last thing between the player and
+## the end of his run, and the closed desk is the only screen M3 has for a
+## finished one until #78 gives it a summary.
+func _retire(instance: Node, through_with_it: bool) -> void:
+	for child in instance.get_children():
+		if not (child is DeskScreen):
+			continue
+		var desk := child as DeskScreen
+		if through_with_it:
+			desk._retire_from_the_desk()
+		else:
+			desk._ask_to_retire()
+		return
+	print("no desk to retire from")
 
 
 ## Open the Ledger, optionally turned to a page.

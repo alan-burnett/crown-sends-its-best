@@ -291,11 +291,42 @@ func at_desk() -> bool:
 	return run.phase == DESK
 
 
+## Whether this run is finished, by any route.
+func is_over() -> bool:
+	return run.ending != null and run.ending.is_over()
+
+
+## Leave the desk for good (#77, SPEC §13.2).
+##
+## 🔒 **Scored from the state at that moment.** Prestige reflects the Crown's
+## current view and can fall, so retiring from a losing position can beat hanging
+## on while gold and goodwill drain away — and the score is the one the PC is
+## standing on rather than one waiting at the finish line.
+##
+## 🔒 **Ironman: the save is closed out** (SPEC §16.2). A retired run cannot be
+## resumed, and this is where that becomes true.
+##
+## Confirmation is the caller's job, exactly as it is for `send_post` — this is
+## the irreversible half. **Available from any desk phase**, including with
+## letters unanswered and a post half-written: a man who has decided to go does
+## not owe the Crown his correspondence first.
+func retire() -> bool:
+	if is_over():
+		return false
+	run.ending = RunEnding.end(RunEnding.RETIRED, run.log, run.world.month)
+	run.phase = RESOLUTION
+	if saves_on_send:
+		SaveGame.delete_save(save_path)
+	return true
+
+
 ## Whether the post may be sent.
 ##
 ## Blocked while any incoming letter is still unread, **with a reason**, because
 ## a send button that simply does nothing is worse than one that explains itself.
 func can_send() -> Dictionary:
+	if is_over():
+		return {"ok": false, "reason": "The run is over."}
 	if run.phase != DESK:
 		return {"ok": false, "reason": "The post can only be sent from the desk."}
 	var unread := run.unread()
