@@ -24,6 +24,9 @@
       "vanity": 0.3,
       "mettle": 1.5,
       "pity": 0.4
+    },
+    "wants": {
+      "crown_war_intensity": 0.15
     }
   },
   {
