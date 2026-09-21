@@ -129,10 +129,15 @@ reasoning truthfully.
 
 Two properties of `crown_urging` that decide how the lever actually feels.
 
-**It decays.** A letter is **not a standing order**. Its pull halves over a few
-months, and a governor who was urged a year ago is running his own town again. A
-PC who says a thing once and never returns to it has not set policy; he has made
-a remark.
+**It decays, with a half-life of a year.** A letter is **not a standing order** —
+but it is not a passing remark either. A governor urged this spring still feels it
+next spring at half strength, and has largely forgotten it the year after.
+
+A year is deliberate. Much shorter and the PC is re-sending the same instruction
+every few months to hold a governor in place, watching him drift back and
+wondering why; **that is nagging, not ruling.** Much longer and a single letter
+sets a town's course for a decade, which makes the lever too strong for how
+little it costs to pull.
 
 **It adds to the urged intent and penalises nothing.** Contrast the **mandate**,
 which pushes *away* from every intent that is not the Crown's — the Crown's
