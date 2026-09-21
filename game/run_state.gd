@@ -102,6 +102,16 @@ var parties: Array = []
 ## that forgot one would be a reload that spent his standing on nothing.
 var foundings: Array = []
 
+## **The three peoples already here** (#203, SPEC §12.5).
+##
+## Part of the state because their opinion of the colony is a thing the colony
+## earned over months — and because none of it is recoverable from a seed once
+## the colony has started acting.
+##
+## 🔒 **Not contacts.** They have never heard of the PC and never write to him;
+## what he knows arrives through his own people.
+var tribes: Tribes = null
+
 ## How hard the Crown is leaning, and how far the bar has moved (#69).
 ##
 ## **Serialised in full.** The bucket's contents and the draw order are part of
@@ -228,6 +238,9 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
 	run.standing = CrownStanding.new()
+	# **From the map's stream, like the country itself** (#203). They are part of
+	# what the New World is rather than something that happened to it.
+	run.tribes = Tribes.generate(run.streams)
 	run.prestige = Prestige.new()
 	run.ending = RunEnding.new()
 	run.refusal = CrownRefusal.new()
@@ -367,6 +380,7 @@ func to_dict() -> Dictionary:
 		"ending": ending.to_dict() if ending != null else {},
 		"parties": _parties_to_list(),
 		"foundings": _foundings_to_list(),
+		"tribes": tribes.to_dict() if tribes != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
@@ -404,6 +418,7 @@ static func from_dict(data: Dictionary) -> RunState:
 		run.parties.append(ExpeditionParty.from_dict(entry))
 	for entry in data.get("foundings", []):
 		run.foundings.append(CrownFounding.from_dict(entry))
+	run.tribes = Tribes.from_dict(data.get("tribes", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
