@@ -1,0 +1,46 @@
+{
+  "id": "governor.the_course_i_must_take",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": false,
+  "params": {
+    "town": "town",
+    "intent": "intent"
+  },
+  "body": [
+    {
+      "text": "{param:town} is to be {param:intent}. I am telling you because you will find out."
+    },
+    {
+      "text": "I am doing it because I must. The ground and the season and the men I have leave me one course, and I have taken it."
+    },
+    {
+      "text": "I do not ask your opinion of it. You are welcome to have one."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to your course, I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "obliged for the notice"
+        },
+        {
+          "tone": "annoyed",
+          "text": "not much taken with your manner"
+        },
+        {
+          "tone": "hateful",
+          "text": "beginning to wonder whose colony this is"
+        }
+      ]
+    },
+    "steps": [],
+    "closing": [
+      {
+        "text": "I remain your servant,"
+      }
+    ]
+  }
+}

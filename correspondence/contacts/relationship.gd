@@ -75,6 +75,37 @@ var contact_id: StringName = &""
 
 var loyalty: float = NEUTRAL_LOYALTY
 
+## 🔒 **What his regard lets the PC hear** (#258, `the-director.md` §2).
+##
+## **Consulted, informed, bypassed** — one event, three entirely different
+## months. A governor changing his intent tells a man he likes and asks what he
+## would rather; tells a man he is merely obliged to; and does not mention it at
+## all to a man he does not.
+##
+## Bands rather than a figure, because SPEC §8.5 keeps loyalty off the player's
+## screens: what reaches him is which of three letters arrived, or none.
+const HIGH: StringName = &"high"
+const MEDIUM: StringName = &"medium"
+const LOW: StringName = &"low"
+
+const BANDS: Array[StringName] = [HIGH, LOW, MEDIUM]
+
+## Tuning.
+const HIGH_AT: float = 62.0
+const MEDIUM_AT: float = 34.0
+
+
+## Which band a regard sits in.
+static func band_of(regard: float) -> StringName:
+	if regard >= HIGH_AT:
+		return HIGH
+	return MEDIUM if regard >= MEDIUM_AT else LOW
+
+
+## And his.
+func band() -> StringName:
+	return band_of(loyalty)
+
 ## Promise ids the PC still owes this contact. The promise model itself is #17;
 ## this holds the reference so a contact knows what is outstanding.
 var outstanding_promises: PackedStringArray = PackedStringArray()

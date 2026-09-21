@@ -5,107 +5,107 @@
   "skippable": true,
   "speaks_to": 0,
   "params": {
-    "governor": "contact",
-    "town": "town"
+	"governor": "contact",
+	"town": "town"
   },
   "perception": {
-    "stores": {
-      "measure": "stockpile_health",
-      "ladder": [
-        "bare",
-        "thin",
-        "sufficient",
+	"stores": {
+	  "measure": "stockpile_health",
+	  "ladder": [
+		"bare",
+		"thin",
+		"sufficient",
         "comfortable"
-      ]
-    }
+	  ]
+	}
   },
   "body": [
-    {
-      "text": "There is nothing to report from {param:town} this month. Our stores are {perception:stores} and the work goes on."
-    },
-    {
-      "text": "I have put the men to the walls and to the powder store. You did not ask me to and I did not ask you. It seemed to me a thing worth doing and I have done it."
-    },
-    {
-      "text": "We are laying in grain beyond what we will eat. I would not want it said that this town could be made to do anything by a bad winter."
-    },
-    {
-      "text": "I imagine none of this troubles you. It has been some time since anything I wrote did.",
-      "only_tones": [
-        "annoyed",
+	{
+	  "text": "There is nothing to report from {param:town} this month. Our stores are {perception:stores} and the work goes on."
+	},
+	{
+	  "text": "I have put the men to the walls and to the powder store. You did not ask me to and I did not ask you. It seemed to me a thing worth doing and I have done it."
+	},
+	{
+	  "text": "We are laying in grain beyond what we will eat. I would not want it said that this town could be made to do anything by a bad winter."
+	},
+	{
+	  "text": "I imagine none of this troubles you. It has been some time since anything I wrote did.",
+	  "only_tones": [
+		"annoyed",
         "hateful"
-      ]
-    },
-    {
-      "text": "I tell you plainly because I would rather you heard it from me.",
-      "only_tones": [
+	  ]
+	},
+	{
+	  "text": "I tell you plainly because I would rather you heard it from me.",
+	  "only_tones": [
         "dutiful"
-      ]
-    }
+	  ]
+	}
   ],
   "reply": {
-    "tone": {
-      "text": "I read your report {choice}.",
-      "options": [
-        {
-          "tone": "dutiful",
-          "text": "with more attention than you may expect"
-        },
-        {
-          "tone": "pleased",
-          "text": "and am glad of a quiet month"
-        },
-        {
-          "tone": "annoyed",
-          "text": "and did not care for its tone"
-        },
-        {
-          "tone": "desperate",
-          "text": "and find I have very little to send you"
-        }
-      ]
-    },
-    "steps": [
-      {
-        "id": "answer",
-        "prompt": "Your answer to the report",
-        "options": [
-          {
-            "id": "turn",
-            "label": "tell him the town's business is its prosperity",
-            "text": "Walls do not feed anybody and powder is not a crop. Turn this town to what it is for{insert:edge}, and let the Crown worry about who might come.",
-            "insert": {
-              "edge": {
-                "annoyed": ", which is trade and not soldiering"
-              }
-            },
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "increase_economic_output"
-              }
-            }
-          },
-          {
-            "id": "grant",
-            "label": "tell him you have not forgotten him",
-            "text": "You have had little from me and I know it. I would rather you asked me for something than built against the day you could not."
-          },
-          {
-            "id": "nothing",
-            "label": "say nothing about the walls",
-            "text": "Noted. Carry on."
-          }
-        ]
-      }
-    ],
-    "closing": [
-      {
-        "text": "Yours,",
-        "tone": {
-          "hateful": "I shall read the next one more carefully."
-        }
-      }
-    ]
+	"tone": {
+	  "text": "I read your report {choice}.",
+	  "options": [
+		{
+		  "tone": "dutiful",
+		  "text": "with more attention than you may expect"
+		},
+		{
+		  "tone": "pleased",
+		  "text": "and am glad of a quiet month"
+		},
+		{
+		  "tone": "annoyed",
+		  "text": "and did not care for its tone"
+		},
+		{
+		  "tone": "desperate",
+		  "text": "and find I have very little to send you"
+		}
+	  ]
+	},
+	"steps": [
+	  {
+		"id": "answer",
+		"prompt": "Your answer to the report",
+		"options": [
+		  {
+			"id": "turn",
+			"label": "tell him the town's business is its prosperity",
+			"text": "Walls do not feed anybody and powder is not a crop. Turn this town to what it is for{insert:edge}, and let the Crown worry about who might come.",
+			"insert": {
+			  "edge": {
+				"annoyed": ", which is trade and not soldiering"
+			  }
+			},
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "increase_economic_output"
+			  }
+			}
+		  },
+		  {
+			"id": "grant",
+			"label": "tell him you have not forgotten him",
+			"text": "You have had little from me and I know it. I would rather you asked me for something than built against the day you could not."
+		  },
+		  {
+			"id": "nothing",
+			"label": "say nothing about the walls",
+			"text": "Noted. Carry on."
+		  }
+		]
+	  }
+	],
+	"closing": [
+	  {
+		"text": "Yours,",
+		"tone": {
+		  "hateful": "I shall read the next one more carefully."
+		}
+	  }
+	]
   }
 }

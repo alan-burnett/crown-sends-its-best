@@ -1,0 +1,84 @@
+{
+  "id": "diplomat.he_did_otherwise",
+  "sender": "diplomat",
+  "type": "report",
+  "skippable": false,
+  "params": {
+    "governor": "contact",
+    "town": "town",
+    "asked": "intent",
+    "did": "intent"
+  },
+  "body": [
+    {
+      "text": "A small thing, and I set it down because nobody else will."
+    },
+    {
+      "text": "I noted the letter Your Grace sent to {param:town} — that they were to be {param:asked}. The governor has continued at {param:did} regardless, and I do not believe he has written to you about it."
+    },
+    {
+      "text": "I am not accusing him of anything. He gave his reasons out loud and they were not foolish ones; a man who has decided a thing tends to have decided it for a reason. Whether they are reasons you would accept is not for me to say, which is rather my point — you were not asked."
+    },
+    {
+      "text": "You keep me here to tell you what the post does not. This is that."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the governor of {param:town}, I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "obliged to you for the notice"
+        },
+        {
+          "tone": "pleased",
+          "text": "glad somebody there writes to me plainly"
+        },
+        {
+          "tone": "annoyed",
+          "text": "less pleased with him than I was"
+        },
+        {
+          "tone": "hateful",
+          "text": "done being managed by my own servants"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "watch",
+        "prompt": "What he is to do about it",
+        "options": [
+          {
+            "id": "keep_writing",
+            "label": "go on telling me",
+            "text": "Go on telling me. A governor who does not write is a governor I cannot govern, and I would rather hear it from you than not at all.",
+            "effect": {
+              "adjust_loyalty": {
+                "to": "diplomat",
+                "amount": 3
+              }
+            }
+          },
+          {
+            "id": "not_your_office",
+            "label": "that is not your office",
+            "text": "That is not your office. You are there to report a colony, not to carry tales about the men running it.",
+            "effect": {
+              "adjust_loyalty": {
+                "to": "diplomat",
+                "amount": -4
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,"
+      }
+    ]
+  }
+}
