@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.3: Under Author ownership, actively being read by PO and Dev
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.4: Under Author ownership, actively being read by PO and Dev
 
 ---
 
@@ -141,7 +141,7 @@ The spec uses a small set of words precisely. Most are defined where their mecha
 
 A run opens with a short **introductory cutscene** that sets up the PC's appointment. The player customizes his PC and chooses other presentations that add flavor (such as portrait or colony color) without affecting any mechanics of the run. The player then makes a series of **starting decisions** that shape the colony, not the PC. Examples:
 
-- **Colony site:** a choice among a few generated regions, each with different terrain, native neighbors, and rival proximity.  
+- **Colony site:** a choice of circumstances of the starting town in the world map \- nearby tiles, proximity natives.  
 - **Mandate:** the Crown's stated goal for the colony, such as profit, a strategic foothold, or settlement. It is the founding governor's starting intent, and it shapes his early objectives. As the run goes on it is increasingly likely to be displaced by an intent born of his own circumstances.  
 - **Starting assets:** how the initial grant is split between the town’s population, the town’s gold, and the town’s resources.
 
@@ -204,7 +204,7 @@ These five contacts are the same in every run and are **not randomized**. Each o
 ### 8.2 Colony Contacts (semi-random)
 
 - **Governors:** one per town, and the main contact for that town's affairs. A governor holds an **Intent**: a standing goal such as growing the town, raising its defenses, increasing its output, or settling a new town. Intent is his, not the town's, and it comes from his personality, his circumstances, the Crown's mandate early in a run, and the PC's letters. An intent can hold for many months while the town works through several objectives under it.  
-- **Institutional contacts:** some buildings bring a new contact, such as a church bringing a clergyman or an armory bringing a quartermaster. Each has their own agenda and loyalty.  
+- **Institutional contacts:** some buildings bring a new contact, such as a church bringing a clergyman or a gunsmith bringing a quartermaster. Each has their own agenda and loyalty and potential.  
 - Personalities are **generated semi-randomly** for each run.
 
 ### 8.3 Patrons (semi-random)
@@ -292,11 +292,11 @@ Turns can get tedious if there are too many letters, giving the player too many 
 
 A typical run will only have so many letters per turn, increasing as the game goes on. Playing wide (building many small towns), or sending many unprompted letters to contacts, can put you in a position where these numbers are exceeded.
 
-| Phase of run | Typical Incoming letters per turn |
+| Phase of run | Average typical Incoming letters per turn |
 | :---- | :---- |
-| Early game (year 1-2) | 4–6 |
-| Mid game (year 3-5) | 6–12 |
-| Late game (year 6+) | 8–20 |
+| Early game (year 1-2) | 5 |
+| Mid game (year 3-5) | 9 |
+| Late game (year 6+) | 14 |
 
 **🔒 The phase of a run is set by the calendar year**, not by the colony's size. The exact year boundaries are a tuning value, set to match the difficulty curve in §6.2. Within each range, volume grows with the colony's size and complexity. 
 
@@ -569,7 +569,7 @@ A town tracks three distinct types of population
 ### 14.3 Meta-Progression
 
 - Runs that hit a certain level of prestige and/or meet certain requirements **unlock new options**, such as starting choices, colony sites, mandates, and content.  
-- **🔒 Unlocks add variety, not power.** A veteran's run is not strictly stronger than a new player's.  
+- **🔒 Unlocks add variety, not power.** A veteran's run is not strictly stronger than a new player's. Though his access to more options allows sharper, more specialized play, new potential from your first run must bring new drawbacks.   
 - A **hall of records** of past runs and their epitaphs is part of the meta layer.
 
 ---
