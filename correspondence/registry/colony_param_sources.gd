@@ -67,6 +67,9 @@ static func register_all() -> void:
 		"his_town", {"field": "string"}, ColonyParamSources.his_town
 	)
 	ContentRegistry.register_param_source(
+		"what_he_carries", {}, ColonyParamSources.what_he_carries
+	)
+	ContentRegistry.register_param_source(
 		"recalled", {"reach": "string", "field": "string"}, ColonyParamSources.recalled
 	)
 	ContentRegistry.register_param_source(
@@ -385,6 +388,19 @@ static func worst_town(args: Dictionary, context: LetterContext) -> Variant:
 			return town.months_hungry
 		_:
 			return town.display_name
+
+
+## What the Provost is paying for out of his own pocket (#174, §7).
+##
+## 🔒 **The cost is always in the advice.** "When he advises, he also advises
+## that the PC pay for it" — an advice letter with no figure in it would be him
+## asking a favour rather than presenting a bill. And the figure is what he is
+## **already carrying**, never a larger one, because he does not escalate.
+static func what_he_carries(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null or context.policies == null:
+		return 0
+	var asking := Provost.advises(context.policies)
+	return 0 if asking.is_empty() else int(roundf(float(asking["monthly"])))
 
 
 ## A fact about the town he lives in (#81, §2).

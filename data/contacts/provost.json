@@ -14,12 +14,15 @@
       "order_clarity": 0.8
     },
     "leans": {
-      "colony_quality_of_life": -0.2,
-      "colony_food_security": -0.15
+      "colony_education": -0.28,
+      "quality_of_life": -0.2,
+      "food_security": -0.16,
+      "colony_revenue": -0.12
     },
     "cares_about": [
-      "colony_quality_of_life",
-      "colony_food_security"
+      "colony_education",
+      "quality_of_life",
+      "food_security"
     ]
   }
 ]

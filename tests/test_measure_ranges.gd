@@ -178,6 +178,10 @@ func test_no_measure_is_normalised_against_a_raw_quantity() -> void:
 		"food_security",          # stockpile over consumption
 		"quality_of_life",        # a share, by definition
 		"tax_burden",             # a rate, 0 to 1
+		# **A mean over towns, not a total** (#174), so it reads the same in a
+		# colony of one town and a colony of ten — which is what keeps the
+		# Provost's ladder reachable for the whole run.
+		WorldValues.EDUCATION,
 		"colony_revenue",         # duty against what a month lately brings
 		"crown_war_intensity",    # the Crown's war, not the colony's size
 		"supply_situation",       # a synthetic 0-100 condition

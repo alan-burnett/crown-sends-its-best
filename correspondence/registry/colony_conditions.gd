@@ -124,6 +124,9 @@ static func register_all() -> void:
 		"he_holds_a_policy", {}, ColonyConditions.he_holds_a_policy
 	)
 	ContentRegistry.register_condition(
+		"he_is_carrying_the_cost", {}, ColonyConditions.he_is_carrying_the_cost
+	)
+	ContentRegistry.register_condition(
 		"crown_standing_is", {"band": "string"}, ColonyConditions.crown_standing_is
 	)
 	ContentRegistry.register_condition(
@@ -152,6 +155,17 @@ static func the_colony_has_lived(args: Dictionary, context: LetterContext) -> bo
 	if context == null or context.log == null:
 		return false
 	return context.log.of_type(SettlePhase.EVENT_LIVED).size() >= maxi(1, int(args.get("months", 1)))
+
+
+## Whether the Provost is paying for a policy out of his own pocket (#174, §7).
+##
+## 🔒 **He advises; he does not act.** This is the only letter he sends about a
+## policy after it is in force, and what it asks for is that the Crown take up a
+## charge he is already carrying — never a larger one.
+static func he_is_carrying_the_cost(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.policies == null:
+		return false
+	return not Provost.advises(context.policies).is_empty()
 
 
 ## Whether this sender already has a standing policy of his own (#173).
