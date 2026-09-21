@@ -26,6 +26,32 @@
     ]
   },
   {
+    "id": "trigger.diplomat.the_neighbours",
+    "letter": "diplomat.the_neighbours",
+    "urgency": 0.16,
+    "cooldown": 10,
+    "params": {
+      "tribe": {
+        "from": "neighbour_tribe",
+        "fallback": "natives"
+      },
+      "town": {
+        "from": "his_town",
+        "field": "name"
+      }
+    },
+    "conditions": [
+      {
+        "he_still_writes": {
+          "about": "colony"
+        }
+      },
+      {
+        "i_have_neighbours": {}
+      }
+    ]
+  },
+  {
     "id": "trigger.diplomat.home_report",
     "letter": "diplomat.home_report",
     "urgency": 0.18,

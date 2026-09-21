@@ -105,6 +105,15 @@ var contacts: Dictionary = {}
 ## so he is the only sender who needs more than his own. Nothing else reads it.
 var colony: Colony = null
 
+## The peoples already here (#208, `natives.md` §1).
+##
+## 🔒 **Nothing about a tribe reaches the PC except through his own people.**
+## They are here so a governor's letter can say *which* people he borders and a
+## condition can ask whether he borders any — never so a letter can render what
+## they think of him. The figure goes through a `{perception:}` ladder or it does
+## not go at all.
+var natives: Tribes = null
+
 
 func _init(p_state: WorldState = null, p_sender: Contact = null, p_tone: StringName = &"") -> void:
 	state = p_state

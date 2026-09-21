@@ -34,6 +34,25 @@ const STOCKPILE_HEALTH: String = "stockpile_health"
 ## What the town bought and sold this month, in gold.
 const TRADE_VOLUME: String = "trade_volume"
 
+## How the people next door regard the colony, nought to a hundred (#208).
+##
+## 🔒 **Present only for a contact who has somebody next door.** A governor who
+## has never seen a tribe has nothing to say about one, and the way that is made
+## true is that the measure is simply not in his dictionary — so a letter of his
+## that asked for it would have nothing to judge, and the condition that gates
+## such letters asks the same question.
+##
+## 🔒 **And it is never rendered.** It reaches the page through a
+## `{perception:}` ladder and a contact's lean, or not at all, which is what
+## keeps standing from ever being a number the player sees (SPEC §12.5).
+const NATIVE_REGARD: String = "native_regard"
+
+## How much of this town's own ground is in their hands, nought to one (#208).
+##
+## **The thing a governor can see with his eyes**, as distinct from what they
+## think of him, which he can only guess at.
+const NATIVE_PRESSURE: String = "native_pressure"
+
 ## Months of stock that counts as a healthy store. Matches the food ladder in
 ## `docs/mechanics/perception.md` §4 so the two read alike.
 const HEALTHY_MONTHS: float = 3.0
@@ -55,6 +74,13 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	if contact == null or run.colony == null:
 		return measures
 
+	# **The Diplomat before the governors**, because he governs nothing and would
+	# otherwise fall out here with the Crown's officers — and he is the one man
+	# §8.1 says reports more widely than his own doorstep (#208).
+	if contact.role == Contact.ROLE_DIPLOMAT:
+		_add_the_neighbours(measures, run, contact, Diplomat.home_of(contact, run.colony))
+		return measures
+
 	var town := run.colony.governed_by(contact.id)
 	if town == null:
 		return measures
@@ -64,7 +90,97 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	measures[OBJECTIVE_PROGRESS] = Objective.progress_fraction(town)
 	measures[STOCKPILE_HEALTH] = stockpile_health(town)
 	measures[TRADE_VOLUME] = trade_standing(run.colony, town)
+	_add_the_neighbours(measures, run, contact, town)
 	return measures
+
+
+## What this man knows of the people next door, if anybody is next door (#208).
+##
+## 🔒 **Governors report on the tribes their towns touch, and only those.** The
+## Diplomat is the exception §8.1 makes him: he reports **more widely**, on the
+## worst of them anywhere in the colony, which is what he is for.
+static func _add_the_neighbours(
+	measures: Dictionary,
+	run: RunState,
+	contact: Contact,
+	town: Town,
+) -> void:
+	if run.tribes == null:
+		return
+
+	if contact.role == Contact.ROLE_DIPLOMAT:
+		var angriest := run.tribes.the_angriest()
+		if angriest != null and colony_touches_anybody(run):
+			measures[NATIVE_REGARD] = angriest.trust()
+			measures[NATIVE_PRESSURE] = pressure_on(run, town)
+		return
+
+	var neighbour := tribe_beside(run, town)
+	if neighbour == null:
+		return
+	measures[NATIVE_REGARD] = neighbour.trust()
+	measures[NATIVE_PRESSURE] = pressure_on(run, town)
+
+
+## The people this town borders, or null.
+##
+## **Borders** rather than *works the fields of*: a village three tiles past a
+## town's border is still a village its people walk past, and SPEC §11.4's
+## "near or beyond" is the same distinction. `Intrusion` already answers it, so
+## this is the same measure the sim charges standing against rather than a second
+## one that could drift away from it.
+static func tribe_beside(run: RunState, town: Town) -> Tribe:
+	if run.tribes == null or town == null:
+		return null
+	var nearest: Dictionary = Intrusion.at(town.at, run.tribes)
+	if float(nearest["depth"]) <= 0.0:
+		return null
+	return run.tribes.find(StringName(nearest["tribe"]))
+
+
+## Whether anybody in the colony has a tribe for a neighbour.
+static func colony_touches_anybody(run: RunState) -> bool:
+	if run.colony == null:
+		return false
+	for town in run.colony.in_order():
+		if tribe_beside(run, town) != null:
+			return true
+	return false
+
+
+## Whether any town that has actually lived a month has a tribe for a neighbour.
+##
+## The Diplomat's form of the question: he reports across the colony, so his
+## letter waits on *some* town having settled rather than on his own.
+static func colony_touches_anybody_who_has_lived(context: LetterContext) -> bool:
+	if context.sender == null or context.sender.role != Contact.ROLE_DIPLOMAT:
+		return false
+	if context.colony == null:
+		return false
+	for town in context.colony.in_order():
+		if DiplomatReport.has_lived(town, context):
+			return true
+	return false
+
+
+## How much of this town's ground somebody else holds, nought to one.
+static func pressure_on(run: RunState, town: Town) -> float:
+	if town == null or run.tribes == null:
+		return 0.0
+	var reach := Territory.reach_of(town)
+	var held := 0
+	var looked := 0
+	for dy in range(-reach, reach + 1):
+		for dx in range(-reach, reach + 1):
+			var tile := town.at + Vector2i(dx, dy)
+			if run.map != null and not run.map.in_bounds(tile.x, tile.y):
+				continue
+			looked += 1
+			if not String(run.tribes.holder_of(tile)).is_empty():
+				held += 1
+	if looked <= 0:
+		return 0.0
+	return clampf(float(held) / float(looked), 0.0, 1.0)
 
 
 ## How busy this town has been against the colony's average, where `1.0` is a

@@ -57,6 +57,12 @@ static func register_all() -> void:
 		"town_months_out", {}, ColonyParamSources.town_months_out
 	)
 	ContentRegistry.register_param_source(
+		"neighbour_tribe", {"fallback": "string"}, ColonyParamSources.neighbour_tribe
+	)
+	ContentRegistry.register_param_source(
+		"neighbour_fields", {}, ColonyParamSources.neighbour_fields
+	)
+	ContentRegistry.register_param_source(
 		"protest", {"field": "string", "within": "integer"}, ColonyParamSources.protest
 	)
 	# The Diplomat (#81). Every one of these is a fact about a town he can see.
@@ -503,3 +509,44 @@ static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:
 
 static func town_population(_args: Dictionary, context: LetterContext) -> Variant:
 	return 0 if context.town == null else context.town.population()
+
+
+## The name of the people this man borders (#208).
+##
+## 🔒 **A name and nothing else.** It is the one fact about a tribe that reaches
+## the page exactly: which people these are. What they think of the colony goes
+## through a `{perception:}` ladder or nowhere, and there is deliberately no
+## param source here that could carry it.
+static func neighbour_tribe(args: Dictionary, context: LetterContext) -> Variant:
+	if context.natives == null:
+		return args.get("fallback", "the natives")
+
+	var tribe: Tribe = null
+	if context.town != null:
+		var nearest: Dictionary = Intrusion.at(context.town.at, context.natives)
+		if float(nearest["depth"]) > 0.0:
+			tribe = context.natives.find(StringName(nearest["tribe"]))
+	if tribe == null and context.sender != null \
+			and context.sender.role == Contact.ROLE_DIPLOMAT:
+		# §8.1: he reports more widely, so the people he names are whichever of
+		# them the colony has most to worry about.
+		tribe = context.natives.the_angriest()
+	if tribe == null:
+		return args.get("fallback", "the natives")
+	return tribe.display_name
+
+
+## How many of this town's own fields they work.
+##
+## **A count he could make himself**, walking out to the edge of his ground.
+static func neighbour_fields(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.town == null or context.natives == null:
+		return 0
+	var reach := Territory.reach_of(context.town)
+	var held := 0
+	for dy in range(-reach, reach + 1):
+		for dx in range(-reach, reach + 1):
+			if not String(context.natives.holder_of(
+					context.town.at + Vector2i(dx, dy))).is_empty():
+				held += 1
+	return held

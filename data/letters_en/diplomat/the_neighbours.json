@@ -1,0 +1,50 @@
+{
+  "id": "diplomat.the_neighbours",
+  "sender": "diplomat",
+  "type": "report",
+  "skippable": true,
+  "params": { "tribe": "tribe", "town": "town" },
+  "perception": {
+    "their_humour": {
+      "measure": "native_regard",
+      "ladder": [
+        "have done with us",
+        "cold",
+        "wary",
+        "civil",
+        "warm"
+      ]
+    }
+  },
+  "body": [
+    { "text": "Nobody else will write to you about the {param:tribe}, so I shall." },
+    { "text": "Your governors report the natives the way a man reports weather — when it is on top of him, and in whatever humour he happens to be in. I have gone out and sat with them, which is not the same thing and is why you keep me." },
+    { "text": "They are {perception:their_humour}. I put it in one word because one word is what I have; I cannot tell you what is said in their own councils and I will not invent it for you." },
+    { "text": "What I can tell you is what they see. They see {param:town} where there was nothing, and more of us every ship, and fields worked this year that were theirs last year. They are not confused about it. Nobody here is confused about it except us." },
+    { "text": "I have no remedy to propose and I notice that is unlike me." }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the {param:tribe}, I am {choice}.",
+      "options": [
+        { "tone": "dutiful", "text": "grateful for an account nobody else sends" },
+        { "tone": "pleased", "text": "glad somebody out there has gone and looked" },
+        { "tone": "desperate", "text": "more troubled by this than by the ledgers" },
+        { "tone": "annoyed", "text": "unconvinced it is any business of yours" }
+      ]
+    },
+    "steps": [
+      { "id": "watch", "prompt": "What he is to do about it", "options": [
+        { "id": "keep_looking", "label": "go on going out and looking",
+          "text": "Go on going out and looking, and go on writing it down. I would rather be told a thing I cannot mend than find it out from a governor when it is too late to mend.",
+          "effect": { "adjust_loyalty": { "to": "diplomat", "amount": 3 } } },
+        { "id": "mind_the_town", "label": "mind the town you are paid to mind",
+          "text": "Mind the town you are paid to mind. The natives are a matter for the men who live beside them, and I have governors for that.",
+          "effect": { "adjust_loyalty": { "to": "diplomat", "amount": -4 } } }
+      ] }
+    ],
+    "closing": [
+      { "text": "Your servant,", "tone": { "annoyed": "Your servant, for what the office is worth," } }
+    ]
+  }
+}

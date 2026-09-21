@@ -157,6 +157,20 @@ const SENTIMENT_NAMES: Array[Array] = [
 ## screen, never a bar.** It reaches the player as a second dial in the tone of
 ## Crown officers' letters, alongside loyalty — and if it were ever rendered, the
 ## satire would stop being satire and become a leaderboard.
+## 🔒 SPEC §12.5, `docs/mechanics/natives.md` §1. **The player never sees a
+## number, a bar, or a word that maps one-to-one onto standing.** He sees a
+## governor who is uneasy, a Diplomat who is blunt, and a tribe that has stopped
+## trading — and the point of no return is never announced at all.
+##
+## So nothing in `presentation/` may reach a tribe or the things that move one.
+## What it may read is a `{perception:}` ladder in a letter, like everything else
+## it is not allowed to know exactly.
+const NATIVE_NAMES: Array[Array] = [
+	["Tribe", "reads a tribe's standing instead of a letter about it"],
+	["TribeStanding", "reads what moved a tribe's standing"],
+	["Intrusion", "reads how far into somebody's country a town sits"],
+]
+
 const PRESTIGE_NAMES: Array[Array] = [
 	["Prestige", "reads what the court makes of the PC"],
 	["OpticsRegister", "reads what made the Crown look foolish, and its price"],
@@ -264,6 +278,9 @@ func _check(path: String) -> void:
 			for rule in PRESTIGE_NAMES:
 				if line.contains(rule[0]):
 					_report(path, index, "presentation/ %s (SPEC 14.1: it is never a number the player sees)" % rule[1])
+			for rule in NATIVE_NAMES:
+				if line.contains(rule[0]):
+					_report(path, index, "presentation/ %s (SPEC 12.5: standing is never shown and never named)" % rule[1])
 
 		if not VILLAGE_EXEMPT.has(path):
 			_match(path, index, line, VILLAGE_BIRTH,

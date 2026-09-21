@@ -358,6 +358,14 @@ static func register_measures() -> void:
 	# shares; trade is in gold and needs a scale.
 	MeasureRegistry.register_linear(ColonyMeasures.OBJECTIVE_PROGRESS, 0.0, 1.0)
 	MeasureRegistry.register_linear(ColonyMeasures.STOCKPILE_HEALTH, 0.0, 1.0)
+	# 🔒 **The whole of the player's sight of the natives** (#208). Across the
+	# full range, so the bottom rung covers a people who have concluded the
+	# colony means them destroyed *and* a people who very nearly have — which is
+	# why the latch is never announced: there is no word that means only the one.
+	MeasureRegistry.register_linear(
+		ColonyMeasures.NATIVE_REGARD, Tribe.MINIMUM, Tribe.MAXIMUM
+	)
+	MeasureRegistry.register_linear(ColonyMeasures.NATIVE_PRESSURE, 0.0, 0.6)
 	# Likewise a ratio: a town's month against the colony's average town, so a
 	# governor calling his month brisk means brisk for the place he governs.
 	MeasureRegistry.register_linear(
