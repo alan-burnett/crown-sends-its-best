@@ -55,11 +55,31 @@ extends RefCounted
 const GAP_SCALE: float = 100.0
 const NEWS_SCALE: float = 20.0
 
-## What a recent writing takes off. **A placeholder**: §6 tunes this in writings
-## rather than in months, which is #256's, and this is a flat recency subtraction
-## until then.
-const TOPIC_DAMPER: float = 5.0
-const DAMPER_MONTHS: int = 6
+## What having already said a thing takes off.
+##
+## 🔒 **Counted in his own writings, not in months** (#256, §6). *The topic
+## damper should last about as long as it takes him to say everything else he has
+## to say* — so a man with five concerns damps each for roughly five writings,
+## and rotation falls out instead of being enforced. Nothing tracks which topics
+## he has used.
+const TOPIC_DAMPER: float = 28.0
+
+## And what having written at all takes off, for a month or two after.
+##
+## **The contact damper is why a man writes one letter and not five.** He picks
+## his loudest concern, writes it, and the rest go below the line for a while —
+## *I shall not pester the Crown.*
+##
+## 🔒 **Per individual contact, never per role.** Ending a policy six churches
+## cared about brings six letters, and that is correct.
+const CONTACT_DAMPER: float = 16.0
+const CONTACT_MONTHS: int = 3
+
+## The fewest writings a topic is damped for, however few concerns he has.
+##
+## A man with one concern would otherwise be undamped the moment he had written,
+## and would write about the same thing every month for ever.
+const FEWEST_WRITINGS: int = 2
 
 ## Where a man with no role and no history gives out.
 ##
@@ -79,7 +99,7 @@ static func for_contact(
 	measures: Dictionary,
 	log: EventLog,
 	month: int,
-	last_wrote: Dictionary = {},
+	book: WritingBook = null,
 ) -> Dictionary:
 	var out: Dictionary = {}
 	if contact == null:
@@ -95,7 +115,7 @@ static func for_contact(
 		out[String(topic)] = maxf(0.0,
 			gap_on(String(topic), measures, contact)
 			+ (NEWS_SCALE if moved.has(String(topic)) else 0.0)
-			- damper_on(contact, String(topic), month, last_wrote))
+			- damper_on(contact, String(topic), month, book))
 	return out
 
 
@@ -120,20 +140,44 @@ static func gap_on(topic: String, measures: Dictionary, contact: Contact = null)
 	return GAP_SCALE * clampf(absf(where - wanted), 0.0, 1.0)
 
 
-## What a recent letter on this topic takes off.
+## Both dampers, added.
+##
+## 🔒 **They are set together and decay independently** (§6), which is the whole
+## reason there are two: one is about *having said this* and the other about
+## *having written at all*.
 static func damper_on(
 	contact: Contact,
 	topic: String,
 	month: int,
-	last_wrote: Dictionary,
+	book: WritingBook,
 ) -> float:
-	var key := "%s/%s" % [contact.id, topic]
-	if not last_wrote.has(key):
+	if book == null or contact == null:
 		return 0.0
-	var ago := month - int(last_wrote[key])
-	if ago < 0 or ago >= DAMPER_MONTHS:
+	return topic_damper(contact, topic, book) + contact_damper(contact, month, book)
+
+
+## *I have said this.* Counted in his letters.
+##
+## The span is **how many concerns he has**, so he works through them and comes
+## round again — a man with five damps each for five writings and a man with two
+## for two. The floor keeps a single-minded man from writing the same letter
+## every month for ever.
+static func topic_damper(contact: Contact, topic: String, book: WritingBook) -> float:
+	var since := book.writings_since(contact.id, topic)
+	if since < 0:
 		return 0.0
-	return TOPIC_DAMPER * (1.0 - float(ago) / float(DAMPER_MONTHS))
+	var span := maxi(FEWEST_WRITINGS, contact.cares_about.size())
+	if since >= span:
+		return 0.0
+	return TOPIC_DAMPER * (1.0 - float(since) / float(span))
+
+
+## *I shall not pester the Crown.* Counted in months, on every concern he has.
+static func contact_damper(contact: Contact, month: int, book: WritingBook) -> float:
+	var ago := book.months_since(contact.id, month)
+	if ago < 0 or ago >= CONTACT_MONTHS:
+		return 0.0
+	return CONTACT_DAMPER * (1.0 - float(ago) / float(CONTACT_MONTHS))
 
 
 ## The one topic he would raise, and what it is worth — or empty.

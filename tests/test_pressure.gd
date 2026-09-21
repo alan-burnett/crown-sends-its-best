@@ -207,7 +207,8 @@ func test_the_mandate_changing_does_not_crash_the_month() -> void:
 func test_a_man_who_has_just_written_has_less_to_say() -> void:
 	var him := _man(["supply_situation"])
 	var measures := {"supply_situation": 70.0}
-	var fresh := {"him/supply_situation": 5}
+	var fresh := WritingBook.new()
+	fresh.record(him.id, "supply_situation", 5)
 
 	assert_true(
 		float(Pressure.for_contact(him, measures, EventLog.new(), 5, fresh)["supply_situation"])
@@ -216,19 +217,27 @@ func test_a_man_who_has_just_written_has_less_to_say() -> void:
 
 
 func test_the_damper_wears_off() -> void:
+	# **In his letters**, not in months (#256). He has to work through the rest
+	# of what he had to say, which for a man with one concern is the floor.
 	var him := _man(["supply_situation"])
 	var measures := {"supply_situation": 70.0}
-	var long_ago := {"him/supply_situation": 0}
+	var long_ago := WritingBook.new()
+	long_ago.record(him.id, "supply_situation", 0)
+	for _more in Pressure.FEWEST_WRITINGS:
+		long_ago.record(him.id, "something_else", 1)
+
 	assert_almost_eq(
 		float(Pressure.for_contact(him, measures, EventLog.new(), 40, long_ago)["supply_situation"]),
 		float(Pressure.for_contact(him, measures, EventLog.new(), 40)["supply_situation"]),
-		0.0001, "a letter he wrote three years ago still stopped him writing")
+		0.0001, "he said everything else he had to say and still could not raise it")
 
 
 func test_pressure_never_goes_below_nothing() -> void:
 	var him := _man(["food_security"])
+	var fresh := WritingBook.new()
+	fresh.record(him.id, "food_security", 5)
 	var felt := Pressure.for_contact(
-		him, {"food_security": 3.0}, EventLog.new(), 5, {"him/food_security": 5})
+		him, {"food_security": 3.0}, EventLog.new(), 5, fresh)
 	assert_true(float(felt["food_security"]) >= 0.0,
 		"a contented man who had just written was in debt about it")
 
@@ -333,9 +342,9 @@ func test_an_unskippable_letter_goes_however_he_feels() -> void:
 
 func test_what_he_has_had_his_say_about_survives_a_save() -> void:
 	var run := RunState.new_run(SEED)
-	run.wrote_about["chancellor/colony_revenue"] = 7
+	run.writings.record(&"chancellor", "colony_revenue", 7)
 	var restored := RunState.from_dict(run.to_dict())
-	assert_eq(int(restored.wrote_about["chancellor/colony_revenue"]), 7,
+	assert_eq(restored.writings.writings_by(&"chancellor"), 1,
 		"a reload gave a man back everything he had already said")
 
 

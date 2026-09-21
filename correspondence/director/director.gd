@@ -166,7 +166,7 @@ func _only_what_they_want_to_say(
 
 		var contact := run.contact(inbound.sender)
 		var felt := Pressure.for_contact(
-			contact, inbound.measures, run.log, run.world.month, run.wrote_about)
+			contact, inbound.measures, run.log, run.world.month, run.writings)
 		var loudest := Pressure.loudest(
 			felt, Threshold.for_contact(contact, int(ranks.get(sender, 0))))
 		if loudest.is_empty():
@@ -175,11 +175,17 @@ func _only_what_they_want_to_say(
 		spoken[sender] = String(loudest["topic"])
 		kept.append(inbound)
 
-	# **What he wrote about, so he has less to say about it next month.** Written
-	# here rather than in `Pressure` so the damper records a letter that was
-	# actually sent, not one that merely could have been.
-	for sender in spoken:
-		run.wrote_about["%s/%s" % [sender, spoken[sender]]] = run.world.month
+	# **What he wrote, and about what.** Recorded here rather than in `Pressure`
+	# so the dampers count a letter that was actually sent, not one that merely
+	# could have been.
+	#
+	# 🔒 **Must-sends are not recorded** (§6, §2). They bypass both dampers, so a
+	# governor reporting that the natives have attacked has not thereby had his
+	# say about anything, and next month he can still raise what he meant to.
+	var senders: Array = spoken.keys()
+	senders.sort()
+	for sender in senders:
+		run.writings.record(StringName(sender), String(spoken[sender]), run.world.month)
 	return kept
 
 
