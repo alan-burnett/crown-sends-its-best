@@ -44,7 +44,8 @@ being rewritten every iteration.
 | [policy.md](policy.md) | How the Crown puts its thumb on the scale, and who pays | M3 |
 | [rebel-sentiment.md](rebel-sentiment.md) | Who gets blamed, and when a town stops asking | M3 |
 | [the-diplomat.md](the-diplomat.md) | The PC's only resident eyes, and his price | M3 |
-| [beats.md](beats.md) | One queue for animation and sound, and what a skip must never change | M9 |
+| [beats.md](beats.md) | One queue for animation and sound, and what a skip must never change | M8 |
+| [cutscenes.md](cutscenes.md) | Paintings with a line of text, and the one a turn that earns the slot | M8 |
 
 ## Still to write
 

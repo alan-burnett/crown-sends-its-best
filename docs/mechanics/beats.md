@@ -12,7 +12,7 @@ letters/map desync Seam A exists to prevent, arriving through a different door.
 
 ---
 
-## 1. One queue, three producers
+## 1. One queue, two producers
 
 What the screens share is **not** the event log. It is the queue and the
 fast-forward contract. The event log is only the largest of three producers.
@@ -21,12 +21,15 @@ fast-forward contract. The event log is only the largest of three producers.
 | :--- | :--- | :--- |
 | **The event log** | map playback, the end-of-run recap | **Yes** — hundreds of events, a handful of beats |
 | **The reply wizard** | the drafting hand | **None** — one beat per choice, in order |
-| **A cutscene script** | cutscenes | **None** — authored; the only choice is *which* cutscene |
 
-So the selector is one component that only the first producer uses, and the queue
-is the component all three share. **Building the queue first is the cheaper
-order**, because the hand and the cutscene need it without needing the selector at
-all.
+**Cutscenes are not a producer.** They are still paintings with text, never
+animation (§7), so they need no queue and no tween — which is the single largest
+simplification in this design and it comes from the Author's ruling, not from
+anything here.
+
+So the selector is a component that only the event log needs, and the queue is
+shared by two things rather than three. **Build the queue first**: the drafting
+hand is the whole of M9's desk work and it needs nothing else.
 
 ### The split follows the house style
 
@@ -55,6 +58,22 @@ beats wait.
 **The bed runs under everything and survives a fast-forward.** Music playing while
 the player drafts is a bed; it does not restart when the hand is skipped, and it
 does not restart when he moves from the desk to the map.
+
+### 🔒 The bed never reacts to the colony
+
+No darkening strings as things go wrong, no swell when a town is founded. **The
+bed is the PC's taste, not the colony's mood.**
+
+The reason is characterisation rather than restraint. He is a pampered
+aristocrat an ocean away; opening these letters is his one chore of the month,
+and he puts on the music he likes while he does it. Music that grieved for a
+famine would be music belonging to somebody who cared, and the joke of the whole
+game is that he is not that man.
+
+It also protects the letters. Adaptive scoring would tell the player how bad
+things are **before he reads a word**, which is the job of the post and of nobody
+else — the same reason `perception.md` keeps judgement in the sender's voice
+rather than in the interface.
 
 ---
 
@@ -194,14 +213,18 @@ drop things.
 
 ---
 
-## 7. Cutscenes have no fast-forward
+## 7. 🔒 Cutscenes are paintings, not animation
 
-SPEC §15: *the only input is advance.* **Advance is the skip** — it moves to the
-next beat of an authored sequence rather than collapsing the whole thing.
+**A cutscene is a still image and a line of text.** *Meeting the natives.*
+*Colony holds trade protest.* Some carry several images with several texts, and
+**advance** cycles them — SPEC §15 allows exactly that, and it is the only input.
 
-So a cutscene needs the queue and nothing else. **The only selection is which
-cutscene fires**, and that reads the event log the way a letter trigger does.
-A run opens with one (§6.1).
+**Nothing in a cutscene moves.** The map is the animated screen; the cutscene is
+the painting you are shown about it. So a cutscene uses the bed and a sound on
+each panel change, and it touches none of this document's machinery — no queue,
+no beats, no fast-forward, because there is nothing running to get ahead of.
+
+**Which cutscene fires, and how often, is `cutscenes.md`.**
 
 ---
 
@@ -209,9 +232,8 @@ A run opens with one (§6.1).
 
 Recorded because it shapes the work, not because it belongs in a design doc.
 
-- **`AnimationPlayer` for authored sequences** — the fold-and-post flourish,
-  cutscene transitions. `seek(t, true)` snaps to a time, which is fast-forward
-  for free.
+- **`AnimationPlayer` for authored sequences** — the fold-and-post flourish.
+  `seek(t, true)` snaps to a time, which is fast-forward for free.
 - **`Tween` for procedural motion** — the hand along a line of text. Fast-forward
   is kill the tween and set the final value, which is only safe because of §3.
 - **Sound is non-positional.** The map is read-only and browsable; audio that
@@ -236,9 +258,6 @@ Recorded because it shapes the work, not because it belongs in a design doc.
   than a month, and 20 seconds of it would be a slideshow. It likely wants
   scoring by magnitude across the run with no per-month floor at all — but that
   is a different selector, and it is M9's problem rather than this doc's.
-- **Does the bed know the colony's condition?** Music that darkens as the colony
-  fails is cheap to state and easy to overdo, and it risks telling the player
-  something the letters are supposed to tell him. Author's call.
 - **Placeholder sound during development.** Silence is a defensible placeholder;
   a beep per beat would surface missing registry entries early. Worth a cheap
   decision before M9.
