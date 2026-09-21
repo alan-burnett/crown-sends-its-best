@@ -6,12 +6,11 @@
     "cooldown": 14,
     "params": {
       "resource": {
-        "from": "literal",
-        "value": "iron"
+        "from": "tribute_resource",
+        "fallback": "iron"
       },
       "amount": {
-        "from": "literal",
-        "value": "60"
+        "from": "tribute_amount"
       },
       "town": {
         "from": "town_name"
@@ -19,7 +18,7 @@
     },
     "conditions": [
       {
-        "crown_first_leaned_harder": {}
+        "a_rival_has_a_hand_out": {}
       }
     ]
   },
@@ -30,12 +29,11 @@
     "cooldown": 14,
     "params": {
       "resource": {
-        "from": "literal",
-        "value": "iron"
+        "from": "tribute_resource",
+        "fallback": "iron"
       },
       "amount": {
-        "from": "literal",
-        "value": "60"
+        "from": "tribute_amount"
       },
       "town": {
         "from": "town_name"
@@ -43,7 +41,7 @@
     },
     "conditions": [
       {
-        "crown_first_leaned_harder": {}
+        "a_rival_has_a_hand_out": {}
       }
     ]
   },
@@ -54,12 +52,11 @@
     "cooldown": 14,
     "params": {
       "resource": {
-        "from": "literal",
-        "value": "iron"
+        "from": "tribute_resource",
+        "fallback": "iron"
       },
       "amount": {
-        "from": "literal",
-        "value": "60"
+        "from": "tribute_amount"
       },
       "town": {
         "from": "town_name"
@@ -67,7 +64,7 @@
     },
     "conditions": [
       {
-        "crown_first_leaned_harder": {}
+        "a_rival_has_a_hand_out": {}
       }
     ]
   }

@@ -32,7 +32,13 @@ extends IntentExecutor
 ## same second letter to a governor who may refuse — and a governor who refuses
 ## to be bullied is a man the player may find he agrees with.
 
-const EVENT_PAID: StringName = &"tribute_paid"
+## The world value being written — **not the optic**.
+##
+## 🔒 These were the same string until #210, so every payment emitted
+## `tribute_paid` twice and `OpticsRegister` charged the court a thousand gold
+## for a five-hundred-gold embarrassment. A state change and a thing the court
+## hears about are two different events and must never share a name.
+const EVENT_DEFERRED: StringName = &"tribute_quiet_bought"
 
 const KIND: StringName = &"pay_tribute"
 
@@ -55,7 +61,7 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 
 	# **Through `apply`, like any other world value** (Seam A). M6 reads this and
 	# decides whether he comes; nothing here knows what an attack is.
-	state.apply(log, EVENT_PAID, StringName(to), {
+	state.apply(log, EVENT_DEFERRED, StringName(to), {
 		DEFERRED_PREFIX + to: float(quiet_until),
 	}, WorldPhase.MOVEMENT)
 

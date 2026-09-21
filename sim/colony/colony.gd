@@ -3,6 +3,15 @@ extends RefCounted
 
 ## Everything the PC administers: every town he still holds, loyal or in
 ## rebellion, their people and their lands (SPEC §4).
+##
+## 🔒 **A rebel town is still part of the colony** (SPEC §12.3). In the Crown's
+## eyes it still belongs to the PC and his job is to bring it back into line.
+## What is *not* part of it any more is a **lost town** — one rivals or natives
+## have destroyed or taken — and `lost()` below is the only way out.
+
+## The one thing that can happen to a town that ends its membership of the
+## colony (#210, SPEC §12.3; `prestige.md` §4).
+const EVENT_LOST: StringName = &"town_lost"
 
 var towns: Array[Town] = []
 
@@ -10,6 +19,36 @@ var towns: Array[Town] = []
 func add(town: Town) -> Town:
 	towns.append(town)
 	return town
+
+
+## A town has been destroyed or taken, and is no longer the PC's (Seam A).
+##
+## 🔒 **The only way out of the colony**, and deliberately the only one. A rebel
+## town has not left; it is misbehaving, and §12.3 is explicit that the Crown
+## still holds the PC responsible for it. The day a dev makes rebellion remove a
+## town from this list, an optic worth three thousand gold starts firing on a
+## thing the spec says has not happened.
+##
+## 🔒 **The optic fires here and exactly once**, because a town can only be
+## removed once. `prestige.md` §4 prices it; this file only says it happened, and
+## the court decides what to make of it.
+##
+## **Nothing calls this yet.** Taking a town needs rivals and natives who can
+## fight, which is M6 — so this is the seam that milestone fills, said out loud
+## rather than left as a gap somebody has to discover.
+func lost(town: Town, to: StringName, why: String, context: ColonyContext) -> bool:
+	if town == null or by_id(town.id) == null:
+		return false
+	towns.erase(town)
+	context.log.emit(EVENT_LOST, town.id, context.state.month, {
+		"town": String(town.id),
+		"name": town.display_name,
+		"to": String(to),
+		"why": why,
+		"population": town.population(),
+		"at": [town.at.x, town.at.y],
+	}, WorldPhase.COLONY_MONTH)
+	return true
 
 
 func by_id(id: StringName) -> Town:

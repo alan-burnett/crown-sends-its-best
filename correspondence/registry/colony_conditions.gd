@@ -158,6 +158,9 @@ static func register_all() -> void:
 		"i_struck_a_bargain", {"within": "integer"},
 		ColonyConditions.i_struck_a_bargain,
 	)
+	ContentRegistry.register_condition(
+		"a_rival_has_a_hand_out", {}, ColonyConditions.a_rival_has_a_hand_out
+	)
 
 
 ## Whether this sender is a governor-elect who has only just set out (#178).
@@ -720,3 +723,19 @@ static func bargain_field(context: LetterContext, field: String) -> String:
 ## Whether the bargain he struck put guns or horses in their hands.
 static func bargain_arms_them(context: LetterContext) -> bool:
 	return bool(_bargain({"within": 3}, context).get("arms_them", false))
+
+
+## 🔒 Whether a rival is among the hands out yet (#210, `crown-demands.md` §6).
+##
+## **Dimension 4 and nothing else.** A duke demanding tribute is the fourth
+## dimension selecting him from the catalogue that already names him, so there is
+## no second clock: he arrives when the bucket says more sources are demanding,
+## staggered because one source is drawn per year and unable to bunch because §7
+## caps that dimension at twice in four years.
+##
+## A `crown_first_leaned_harder` gate used to stand here, which fired on the
+## first growth of *any* dimension — so a run whose first draw was `size` had a
+## foreign power writing for tribute as its reward for the Steward asking for
+## slightly more gold.
+static func a_rival_has_a_hand_out(_args: Dictionary, context: LetterContext) -> bool:
+	return DemandSchedule.rivals_are_asking(context.demands)
