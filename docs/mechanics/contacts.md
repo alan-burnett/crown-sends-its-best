@@ -44,6 +44,56 @@ untrue.
 SPEC §8 requires when it says personality drives behaviour and not merely prose,
 and it is why a new contact is a new data file rather than a new branch.
 
+### 🔒 Five men keep their names. Everyone else is generated
+
+**The five Crown officers are fixed and named**, because SPEC §8.1 says so: *the
+same in every run and not randomized*. The Marshal is always the Marshal. They
+are the fixed points a player learns across runs, and generating them would cost
+the meta-progression its furniture.
+
+**Everyone else is named from a seeded pool** — governors, patrons, commanders,
+rivals, and the institutional contacts as they arrive.
+
+| | Named |
+| :--- | :--- |
+| Marshal, Chancellor, Steward, Provost, Diplomat | **fixed, in data** |
+| Governors, patrons, commanders, rivals, clergy, quartermaster, journalist, scholar | **generated** |
+
+### A name is drawn from the contact's own stream
+
+`CLAUDE.md`: per-contact streams derive lazily as `hash(run_seed, contact_id)`.
+**A name is drawn from that stream and nothing else**, so the same seed produces
+the same men whatever else happens in the run, and generating a name never moves
+another system's rolls.
+
+### 🔒 A pool has an origin, and a rival's origin is not the colony's
+
+The three dukes shipped today are Don Íñigo de Alcaraz, Le Duc de Montargis and
+Grevé Anders Vasterholm — Spanish, French and Scandinavian — against titles
+reading *Windward Coast*, *Leeward Isles* and *Northern Reach*.
+
+**That is not decoration and a single flat pool would destroy it.** A rival duke
+is a foreign power's man and must sound like one; a colonial governor must sound
+like he came from the same country the PC serves. So pools are **keyed by
+origin**, and a contact's role says which origin it draws from.
+
+This is also the cheapest lever the setting has. The colony's neighbours being
+audibly foreign is most of what makes the map feel like a contested coast rather
+than an empty one.
+
+### It is data, like everything else
+
+```
+data/names/<origin>.json    given names, family names, and how they join
+```
+
+Prose is not involved, so there is **no language suffix** — a name pool is not
+translated (`CLAUDE.md`'s content pipeline). Letters already reach a contact's
+name through `{sender:}`, so a generated name needs nothing new in the renderer.
+
+**No two live contacts share a name**, which is a redraw rather than a rule the
+pools have to guarantee.
+
 ## 2. Loyalty is one knob, read differently by role
 
 Loyalty is a single scalar, `0–100`, neutral at `50`. **It is not a measure of

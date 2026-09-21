@@ -44,6 +44,7 @@ being rewritten every iteration.
 | [policy.md](policy.md) | How the Crown puts its thumb on the scale, and who pays | M3 |
 | [rebel-sentiment.md](rebel-sentiment.md) | Who gets blamed, and when a town stops asking | M3 |
 | [the-diplomat.md](the-diplomat.md) | The PC's only resident eyes, and his price | M3 |
+| [the-steward.md](the-steward.md) | The one officer asked to do what he already wants | M8 |
 | [beats.md](beats.md) | One queue for animation and sound, and what a skip must never change | M8 |
 | [cutscenes.md](cutscenes.md) | Paintings with a line of text, and the one a turn that earns the slot | M8 |
 
@@ -79,6 +80,12 @@ override doc for each contact that breaks those rules. Most will need one — a 
 *because* it does something special, and the override is where that something
 gets written down.
 
-**Chancellor and Steward are deferred, not exempt.** SPEC §10.3 and §10.2 cover
-them well enough today. The moment anything is built on top of them that the spec
-does not describe, they need docs too.
+**The Chancellor is deferred, not exempt.** SPEC §10.3 covers him well enough
+today. The moment anything is built on top of him that the spec does not
+describe, he needs a doc too.
+
+**The Steward's deferral ended**, exactly that way. `set_tax_rate` orders were
+built on top of him, nothing was written down, and he refused a tax rise on turn
+one of a real run (#302). [the-steward.md](the-steward.md) is the result, and the
+lesson is that "the spec covers it well enough" expires the first time code
+touches it.
