@@ -3,6 +3,7 @@
   "sender": "steward",
   "type": "report",
   "skippable": true,
+  "speaks_to": 0,
   "perception": {
     "purse": {
       "measure": "colony_revenue",

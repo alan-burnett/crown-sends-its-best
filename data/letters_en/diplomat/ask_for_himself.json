@@ -3,32 +3,77 @@
   "sender": "diplomat",
   "type": "request",
   "skippable": true,
-  "params": { "town": "town", "amount": "gold" },
+  "speaks_to": 46,
+  "params": {
+    "town": "town",
+    "amount": "gold"
+  },
   "body": [
-    { "text": "A small and frankly selfish request, which I set down after the rest of this month's news and not before it." },
-    { "text": "Life in {param:town} has become very hard. I have written to you about that and I stand by every word of it." },
-    { "text": "It has also become very hard for me, in a smaller way that I am aware does not signify beside theirs. There is no coffee. There is no decent candle. I am asking for {param:amount}, for myself, and it will not reach the town." },
-    { "text": "I tell you that plainly rather than dress it as a subscription for their relief. You would find out, and then you would not believe the rest of my letters, which would cost you more than the money." }
+    {
+      "text": "A small and frankly selfish request, which I set down after the rest of this month's news and not before it."
+    },
+    {
+      "text": "Life in {param:town} has become very hard. I have written to you about that and I stand by every word of it."
+    },
+    {
+      "text": "It has also become very hard for me, in a smaller way that I am aware does not signify beside theirs. There is no coffee. There is no decent candle. I am asking for {param:amount}, for myself, and it will not reach the town."
+    },
+    {
+      "text": "I tell you that plainly rather than dress it as a subscription for their relief. You would find out, and then you would not believe the rest of my letters, which would cost you more than the money."
+    }
   ],
   "reply": {
     "tone": {
       "text": "As to your own circumstances, I am {choice}.",
       "options": [
-        { "tone": "pleased", "text": "sorry to hear it" },
-        { "tone": "dutiful", "text": "willing to consider it" },
-        { "tone": "annoyed", "text": "astonished you asked" }
+        {
+          "tone": "pleased",
+          "text": "sorry to hear it"
+        },
+        {
+          "tone": "dutiful",
+          "text": "willing to consider it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "astonished you asked"
+        }
       ]
     },
     "steps": [
-      { "id": "purse", "prompt": "His own comfort", "options": [
-        { "id": "pay", "label": "send him the money",
-          "text": "Draw what you need. A man reporting honestly from a bad place should not also be cold.",
-          "effect": { "promise_gold": { "to": "diplomat", "amount": 90 } } },
-        { "id": "refuse", "label": "he can do without",
-          "text": "You will do without, as they are doing without.",
-          "effect": { "adjust_loyalty": { "to": "diplomat", "amount": -5 } } }
-      ] }
+      {
+        "id": "purse",
+        "prompt": "His own comfort",
+        "options": [
+          {
+            "id": "pay",
+            "label": "send him the money",
+            "text": "Draw what you need. A man reporting honestly from a bad place should not also be cold.",
+            "effect": {
+              "promise_gold": {
+                "to": "diplomat",
+                "amount": 90
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "he can do without",
+            "text": "You will do without, as they are doing without.",
+            "effect": {
+              "adjust_loyalty": {
+                "to": "diplomat",
+                "amount": -5
+              }
+            }
+          }
+        ]
+      }
     ],
-    "closing": [ { "text": "Your obedient servant," } ]
+    "closing": [
+      {
+        "text": "Your obedient servant,"
+      }
+    ]
   }
 }

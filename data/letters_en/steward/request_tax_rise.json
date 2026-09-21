@@ -3,45 +3,121 @@
   "sender": "steward",
   "type": "request",
   "skippable": true,
-  "params": { "resource": "resource", "amount": "gold" },
+  "speaks_to": 44,
+  "params": {
+    "resource": "resource",
+    "amount": "gold"
+  },
   "perception": {
-    "purse": { "measure": "colony_revenue",
-               "ladder": ["ruinous", "thin", "tolerable", "handsome"] },
-    "larder": { "measure": "food_security",
-                "ladder": ["in genuine want", "managing", "amply provisioned"] }
+    "purse": {
+      "measure": "colony_revenue",
+      "ladder": [
+        "ruinous",
+        "thin",
+        "tolerable",
+        "handsome"
+      ]
+    },
+    "larder": {
+      "measure": "food_security",
+      "ladder": [
+        "in genuine want",
+        "managing",
+        "amply provisioned"
+      ]
+    }
   },
   "body": [
-    { "text": "The returns are {perception:purse}, and I have a remedy: a firmer rate on {param:resource}." },
-    { "text": "It would bring perhaps {param:amount} more in the year. The colony is {perception:larder} and will hardly notice it." },
-    { "text": "I have proposed this before. I shall go on proposing it.",
-      "only_tones": ["annoyed", "hateful"] }
+    {
+      "text": "The returns are {perception:purse}, and I have a remedy: a firmer rate on {param:resource}."
+    },
+    {
+      "text": "It would bring perhaps {param:amount} more in the year. The colony is {perception:larder} and will hardly notice it."
+    },
+    {
+      "text": "I have proposed this before. I shall go on proposing it.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    }
   ],
   "reply": {
     "tone": {
       "text": "I find the proposal {choice}.",
       "options": [
-        { "tone": "pleased",   "text": "sound, and overdue" },
-        { "tone": "dutiful",   "text": "worth the Crown's consideration" },
-        { "tone": "annoyed",   "text": "tiresome, as ever" },
-        { "tone": "hateful",   "text": "exactly what I expect of you" }
+        {
+          "tone": "pleased",
+          "text": "sound, and overdue"
+        },
+        {
+          "tone": "dutiful",
+          "text": "worth the Crown's consideration"
+        },
+        {
+          "tone": "annoyed",
+          "text": "tiresome, as ever"
+        },
+        {
+          "tone": "hateful",
+          "text": "exactly what I expect of you"
+        }
       ]
     },
     "steps": [
-      { "id": "rate", "prompt": "The rate on {param:resource}", "options": [
-        { "id": "raise", "label": "raise the rate on {param:resource}",
-          "text": "Raise it, then, and let the ledger speak for itself{insert:caution}.",
-          "insert": { "caution": { "dutiful": ", though I should like to hear no complaints of it" } },
-          "effect": { "set_tax_rate": { "to": "steward", "resource": "{resource}", "steps": 1 } } },
-        { "id": "lower", "label": "lower the rate instead",
-          "text": "Lower it. The colony has paid enough for one winter.",
-          "effect": { "set_tax_rate": { "to": "steward", "resource": "{resource}", "steps": -1 } } },
-        { "id": "hold", "label": "leave the rate where it stands",
-          "text": "It stands as it is, and we shall speak of it again in the spring.",
-          "effect": { "refuse": { "to": "steward" } } }
-      ] }
+      {
+        "id": "rate",
+        "prompt": "The rate on {param:resource}",
+        "options": [
+          {
+            "id": "raise",
+            "label": "raise the rate on {param:resource}",
+            "text": "Raise it, then, and let the ledger speak for itself{insert:caution}.",
+            "insert": {
+              "caution": {
+                "dutiful": ", though I should like to hear no complaints of it"
+              }
+            },
+            "effect": {
+              "set_tax_rate": {
+                "to": "steward",
+                "resource": "{resource}",
+                "steps": 1
+              }
+            }
+          },
+          {
+            "id": "lower",
+            "label": "lower the rate instead",
+            "text": "Lower it. The colony has paid enough for one winter.",
+            "effect": {
+              "set_tax_rate": {
+                "to": "steward",
+                "resource": "{resource}",
+                "steps": -1
+              }
+            }
+          },
+          {
+            "id": "hold",
+            "label": "leave the rate where it stands",
+            "text": "It stands as it is, and we shall speak of it again in the spring.",
+            "effect": {
+              "refuse": {
+                "to": "steward"
+              }
+            }
+          }
+        ]
+      }
     ],
     "closing": [
-      { "text": "Your servant,", "tone": { "pleased": "With my thanks for your diligence," } }
+      {
+        "text": "Your servant,",
+        "tone": {
+          "pleased": "With my thanks for your diligence,"
+        }
+      }
     ]
   }
 }

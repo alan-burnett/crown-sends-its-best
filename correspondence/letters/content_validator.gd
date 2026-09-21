@@ -487,6 +487,39 @@ func check_no_authored_durations(content: ContentDatabase) -> void:
 ##
 ## The general form — a record with no `band` — is what makes that cheap: one
 ## file gives an outcome a floor, and the bands worth sharpening are sharpened.
+## 🔒 What a letter declares about its own strength (#257).
+##
+## **`urgency` is tone's and `speaks_to` is severity's**, and the two must stay
+## apart: SPEC §9.1 makes urgency one of tone's three inputs and the director
+## feeds it straight into `tone_for`. A letter carrying `urgency` would be one
+## trying to decide how it reads *and* whether it is reached for.
+func check_severity(content: ContentDatabase) -> void:
+	for id in content.ids("letters"):
+		var record := content.record("letters", id)
+		_file = String(record.get(JsonLoader.SOURCE_KEY, "?"))
+
+		if record.has("urgency"):
+			_problem(id, "declares 'urgency', which belongs to the trigger and to tone. "
+				+ "A letter says how hard it speaks with 'speaks_to'")
+
+		if not record.has(Severity.KEY):
+			continue
+		var speaks_to: Variant = record[Severity.KEY]
+		if not (speaks_to is float or speaks_to is int):
+			_problem(id, "'%s' is %s rather than a number" % [Severity.KEY, speaks_to])
+			continue
+		if float(speaks_to) < 0.0:
+			_problem(id, "'%s' is %s, and a letter cannot speak to less than nothing"
+				% [Severity.KEY, speaks_to])
+
+		# 🔒 A must-send bypasses pressure entirely (§2), so a strength on one is
+		# a figure nothing will ever read — and a reader would reasonably assume
+		# it did something.
+		if not bool(record.get(LetterSchema.KEY_SKIPPABLE, true)):
+			_problem(id, "is unskippable and declares '%s'. A must-send bypasses "
+				% Severity.KEY + "pressure, so nothing would ever read it")
+
+
 func check_epitaphs(content: ContentDatabase) -> void:
 	for id in content.ids(Epitaph.COLLECTION):
 		var record := content.record(Epitaph.COLLECTION, id)

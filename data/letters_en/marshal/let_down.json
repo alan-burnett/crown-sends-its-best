@@ -3,6 +3,7 @@
   "sender": "marshal",
   "type": "report",
   "skippable": true,
+  "speaks_to": 62,
   "params": {},
   "body": [
     {

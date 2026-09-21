@@ -3,6 +3,7 @@
   "sender": "diplomat",
   "type": "report",
   "skippable": true,
+  "speaks_to": 24,
   "params": {
     "town": "town",
     "suggestion": "remedy"

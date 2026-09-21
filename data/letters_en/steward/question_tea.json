@@ -3,35 +3,85 @@
   "sender": "steward",
   "type": "question",
   "skippable": true,
-  "params": { "amount": "gold" },
+  "speaks_to": 26,
+  "params": {
+    "amount": "gold"
+  },
   "perception": {
-    "purse": { "measure": "colony_revenue",
-               "ladder": ["ruinous", "thin", "tolerable", "handsome"] }
+    "purse": {
+      "measure": "colony_revenue",
+      "ladder": [
+        "ruinous",
+        "thin",
+        "tolerable",
+        "handsome"
+      ]
+    }
   },
   "body": [
-    { "text": "A small matter, and entirely yours to decide: the tea." },
-    { "text": "The colony cannot grow it and must buy it, at {param:amount} the season. The returns being {perception:purse}, I could tax it heavily and nobody would starve of it." },
-    { "text": "They would, of course, be extremely annoyed. That is rather the charm of the thing." }
+    {
+      "text": "A small matter, and entirely yours to decide: the tea."
+    },
+    {
+      "text": "The colony cannot grow it and must buy it, at {param:amount} the season. The returns being {perception:purse}, I could tax it heavily and nobody would starve of it."
+    },
+    {
+      "text": "They would, of course, be extremely annoyed. That is rather the charm of the thing."
+    }
   ],
   "reply": {
     "tone": {
       "text": "On the tea I am {choice}.",
       "options": [
-        { "tone": "dutiful", "text": "minded to be careful" },
-        { "tone": "pleased", "text": "inclined to be generous" },
-        { "tone": "annoyed", "text": "in no mood for small matters" }
+        {
+          "tone": "dutiful",
+          "text": "minded to be careful"
+        },
+        {
+          "tone": "pleased",
+          "text": "inclined to be generous"
+        },
+        {
+          "tone": "annoyed",
+          "text": "in no mood for small matters"
+        }
       ]
     },
     "steps": [
-      { "id": "tea", "prompt": "The duty on tea", "options": [
-        { "id": "tax", "label": "tax the tea heavily",
-          "text": "Tax it, and let them write to me about it.",
-          "effect": { "set_tax_rate": { "to": "steward", "resource": "tea", "steps": 1 } } },
-        { "id": "spare", "label": "leave the tea alone",
-          "text": "Leave the tea alone. A colony with no small comforts is a colony with nothing to lose.",
-          "effect": { "adjust_loyalty": { "to": "steward", "amount": -2 } } }
-      ] }
+      {
+        "id": "tea",
+        "prompt": "The duty on tea",
+        "options": [
+          {
+            "id": "tax",
+            "label": "tax the tea heavily",
+            "text": "Tax it, and let them write to me about it.",
+            "effect": {
+              "set_tax_rate": {
+                "to": "steward",
+                "resource": "tea",
+                "steps": 1
+              }
+            }
+          },
+          {
+            "id": "spare",
+            "label": "leave the tea alone",
+            "text": "Leave the tea alone. A colony with no small comforts is a colony with nothing to lose.",
+            "effect": {
+              "adjust_loyalty": {
+                "to": "steward",
+                "amount": -2
+              }
+            }
+          }
+        ]
+      }
     ],
-    "closing": [ { "text": "Yours in the matter," } ]
+    "closing": [
+      {
+        "text": "Yours in the matter,"
+      }
+    ]
   }
 }

@@ -3,21 +3,49 @@
   "sender": "steward",
   "type": "report",
   "skippable": true,
-  "params": { "town": "town", "resource": "resource", "rate": "integer" },
+  "speaks_to": 56,
+  "params": {
+    "town": "town",
+    "resource": "resource",
+    "rate": "integer"
+  },
   "perception": {
     "purse": {
       "measure": "colony_revenue",
-      "ladder": ["ruinous", "thin", "tolerable", "handsome"]
+      "ladder": [
+        "ruinous",
+        "thin",
+        "tolerable",
+        "handsome"
+      ]
     }
   },
   "body": [
-    { "text": "A disagreeable piece of news from {param:town}. They will not deal in {param:resource} — not buy it of the Crown, not sell it to the Crown, not at the duty of {param:rate} in the hundred nor at any other." },
-    { "text": "They have put it about that this is a matter of principle. It is a matter of sixpence." },
-    { "text": "The returns being {perception:purse}, I would not have chosen this month for it." },
-    { "text": "There is no order that ends it. They will trade again when it suits them, and what would suit them is a lower duty — which I need hardly say I do not recommend.",
-      "only_tones": ["dutiful", "pleased"] },
-    { "text": "You will lower the duty, I expect. You generally do.",
-      "only_tones": ["annoyed", "hateful"] },
-    { "text": "I have not asked their governor to intervene. He could not if he wished to; it is not his decision and never was." }
+    {
+      "text": "A disagreeable piece of news from {param:town}. They will not deal in {param:resource} — not buy it of the Crown, not sell it to the Crown, not at the duty of {param:rate} in the hundred nor at any other."
+    },
+    {
+      "text": "They have put it about that this is a matter of principle. It is a matter of sixpence."
+    },
+    {
+      "text": "The returns being {perception:purse}, I would not have chosen this month for it."
+    },
+    {
+      "text": "There is no order that ends it. They will trade again when it suits them, and what would suit them is a lower duty — which I need hardly say I do not recommend.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    },
+    {
+      "text": "You will lower the duty, I expect. You generally do.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I have not asked their governor to intervene. He could not if he wished to; it is not his decision and never was."
+    }
   ]
 }

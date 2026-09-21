@@ -3,17 +3,42 @@
   "sender": "chancellor",
   "type": "news",
   "skippable": true,
-  "params": { "amount": "integer" },
+  "speaks_to": 22,
+  "params": {
+    "amount": "integer"
+  },
   "perception": {
-    "mood": { "measure": "crown_war_intensity",
-              "ladder": ["untroubled", "watchful", "anxious", "in open alarm"] }
+    "mood": {
+      "measure": "crown_war_intensity",
+      "ladder": [
+        "untroubled",
+        "watchful",
+        "anxious",
+        "in open alarm"
+      ]
+    }
   },
   "body": [
-    { "text": "The court is {perception:mood} this month, and I thought you would want to know why." },
-    { "text": "Peltham Sound is lost. {param:amount} men, and every gun on the headland." },
-    { "text": "I mention it only because your name came up in the discussion afterward. Twice.",
-      "only_tones": ["annoyed", "hateful"] },
-    { "text": "Your name did not come up, which in this weather is the best a man can hope for.",
-      "only_tones": ["dutiful", "pleased", "desperate"] }
+    {
+      "text": "The court is {perception:mood} this month, and I thought you would want to know why."
+    },
+    {
+      "text": "Peltham Sound is lost. {param:amount} men, and every gun on the headland."
+    },
+    {
+      "text": "I mention it only because your name came up in the discussion afterward. Twice.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "Your name did not come up, which in this weather is the best a man can hope for.",
+      "only_tones": [
+        "dutiful",
+        "pleased",
+        "desperate"
+      ]
+    }
   ]
 }

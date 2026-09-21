@@ -3,6 +3,7 @@
   "sender": "governor_ashmere",
   "type": "report",
   "skippable": true,
+  "speaks_to": 0,
   "params": {
     "town": "town",
     "people": "integer",

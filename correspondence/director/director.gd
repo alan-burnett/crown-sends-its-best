@@ -123,10 +123,10 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 ## threshold*, because there is no deliberation about whether to trouble the
 ## Crown with the natives attacking. **No new field.**
 ##
-## Which of his true letters he sends when he does write is `urgency`'s for now
-## and severity's in #257 — a topic usually has several letters, and the one he
-## picks should be the strongest whose bar the pressure clears rather than the
-## loudest trigger in the file.
+## 🔒 **Which of his true letters he sends is severity's** (#257, §7). A topic
+## usually has several letters — *give us a break* and *they cannot bear it* are
+## the same concern said at two strengths — and he sends the strongest whose bar
+## the pressure clears.
 func _only_what_they_want_to_say(
 	fired: Array[InboundLetter],
 	run: RunState,
@@ -161,9 +161,6 @@ func _only_what_they_want_to_say(
 			continue
 
 		var sender := String(inbound.sender)
-		if spoken.has(sender):
-			continue
-
 		var contact := run.contact(inbound.sender)
 		var felt := Pressure.for_contact(
 			contact, inbound.measures, run.log, run.world.month, run.writings)
@@ -172,7 +169,24 @@ func _only_what_they_want_to_say(
 		if loudest.is_empty():
 			continue
 
-		spoken[sender] = String(loudest["topic"])
+		# 🔒 **The strongest whose bar the pressure clears** (#257). A letter that
+		# speaks to more than he feels is out of reach; among the rest he sends
+		# the one that says it hardest, rather than whichever trigger id sorted
+		# first — which is what decided it before, and made a letter late in the
+		# alphabet unreachable for any man who had an earlier one to send.
+		var speaks_to := Severity.of(record)
+		if speaks_to > float(loudest["pressure"]):
+			continue
+		if spoken.has(sender) and speaks_to <= float(spoken[sender]["speaks_to"]):
+			continue
+
+		if spoken.has(sender):
+			kept.erase(spoken[sender]["letter"])
+		spoken[sender] = {
+			"topic": String(loudest["topic"]),
+			"speaks_to": speaks_to,
+			"letter": inbound,
+		}
 		kept.append(inbound)
 
 	# **What he wrote, and about what.** Recorded here rather than in `Pressure`
@@ -185,7 +199,8 @@ func _only_what_they_want_to_say(
 	var senders: Array = spoken.keys()
 	senders.sort()
 	for sender in senders:
-		run.writings.record(StringName(sender), String(spoken[sender]), run.world.month)
+		run.writings.record(
+			StringName(sender), String(spoken[sender]["topic"]), run.world.month)
 	return kept
 
 
