@@ -26,6 +26,11 @@ var colony: Colony = null
 ## step with the book the executor works from.
 var intents: IntentBook = null
 
+## Expeditions in the open (#176). Set by the turn loop and shared with the
+## driver that moves them, so a party launched in the Colony Month is already on
+## the map when phase 2 next comes round.
+var parties: Array = []
+
 ## What each town holds against the Crown (#71). Null in fixtures that do not
 ## care, which is why every reader checks.
 var grievances: Grievances = null

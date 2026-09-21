@@ -44,6 +44,7 @@ const EVENT_ORDER_ISSUED: StringName = &"order_issued"
 var run: RunState = null
 var month_runner: WorldMonth = null
 var prestige: PrestigeDriver = null
+var expeditions: ExpeditionDriver = null
 
 ## Where letter templates come from. Supplied rather than reached for: the
 ## `Content` autoload only exists when the project boots normally, and this loop
@@ -182,13 +183,20 @@ func _init(p_run: RunState) -> void:
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and
 	# prestige reads the accounts standing has just judged.
+	# Phase 2. Expeditions cross country before territory is recomputed, so a
+	# party that came home is part of its town before that town works (#176).
+	expeditions = ExpeditionDriver.new()
+	expeditions.colony = run.colony
+	expeditions.parties = run.parties
+	colony_month.parties = run.parties
+
 	crown_affairs.colony = run.colony
 	crown_affairs.contacts = run.contacts
 
 	prestige = PrestigeDriver.new(run.prestige)
 
 	month_runner.drivers = [
-		immigration, crown_affairs, territory, colony_month, promise_driver,
+		immigration, expeditions, crown_affairs, territory, colony_month, promise_driver,
 		policies, crown_standing, prestige, drift, orders, silence, governors,
 		grievances,
 	]

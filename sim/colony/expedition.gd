@@ -98,10 +98,14 @@ static func may_launch(town: Town) -> bool:
 
 
 ## Send it. The parent loses its people and the matching share of its coin.
-static func launch(town: Town, context: ColonyContext) -> void:
+##
+## Returns the party that set out (#176), or null. **It becomes a unit on the
+## map** rather than vanishing into an arrival: the PC can watch it go, because
+## it is his colony's own and the map shows what the colony knows.
+static func launch(town: Town, context: ColonyContext) -> ExpeditionParty:
 	var going := people_for(town)
 	if going <= 0:
-		return
+		return null
 
 	# **The share its numbers represent**, taken before the people are, so the
 	# proportion is of the town that mounted it rather than of what is left.
@@ -118,9 +122,24 @@ static func launch(town: Town, context: ColonyContext) -> void:
 	# with — and a shed expedition is mouths rather than talent.
 	town.workers = maxi(0, town.workers - going)
 
+	var party := ExpeditionParty.new()
+	party.id = StringName("expedition_%s_%d" % [town.id, context.state.month])
+	party.parent = town.id
+	party.people = going
+	party.cargo = carried
+	party.gold = purse
+	party.at = town.at
+	party.launched_month = context.state.month
+	# 🔒 **Where it is going is #177's question.** A party with no destination
+	# waits at the gate rather than wandering, so that ticket is a driver setting
+	# a field and not a rewrite of the journey.
+	context.parties.append(party)
+
 	context.log.emit(EVENT_LAUNCHED, town.id, context.state.month, {
 		"town": String(town.id),
+		"expedition": String(party.id),
 		"people": going,
 		"gold": purse,
 		"cargo": carried,
 	}, WorldPhase.COLONY_MONTH)
+	return party
