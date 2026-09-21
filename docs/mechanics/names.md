@@ -45,15 +45,26 @@ rule rather than new state.
 
 ### The qualifier is data, not a branch
 
-**One field on the role, holding a template.** Not three cases in code, which is
-what the two examples above would otherwise become.
+**A field holding a template, defaulted from the role and settled when the
+contact is created.** Not a lookup by role, and not cases in code.
+
+It has to be on the contact rather than the role because **a commander is one
+role with three origins** (`commanders.md` §1: *colonial, Crown and rebel
+commanders are the same object*). A man raised in Ashmere is *of Ashmere*; a man
+the Marshal sent is *in the Crown's service*. Same role, same object, different
+line — and the difference is known when he is raised, not when the role is
+declared.
+
+A rebel commander keeps ` of {town}` and that is the point: *Captain Harker of
+Ashmere*, while Ashmere is in revolt, is the whole situation in four words.
 
 | Role | Qualifier | Reads |
 | :--- | :--- | :--- |
 | Governor | ` of {town}` | *Governor Don Johnson of Morrisville* |
 | Clergyman, quartermaster, journalist, scholar | ` of {town}` — the town he is resident in | *Father Aldous Crane of Kettleburn* |
 | Patron | `, patron to the crown` | *Lord Mingle Welkington, patron to the crown* |
-| Commander | **open** — see §7 | |
+| Commander, colonial or rebel | ` of {town}` — the town that raised him | *Captain Ames Harker of Ashmere* |
+| Commander, Crown | `, in the Crown's service` | *Captain Ames Harker, in the Crown's service* |
 | Crown officer | *(empty)* | *Steward of the Revenue Corvyn Thrale* |
 | Rival | *(empty)* — his title already names his coast | *Le Duc de Montargis* |
 
@@ -164,10 +175,14 @@ empty, and no bag is too small to fill a long run without repeating.
   commanders similar. Twenty given and twenty family per bag is almost certainly
   ample, but the validator's "too small" threshold should be set from a measured
   long run rather than guessed.
-- **What is a commander's qualifier?** Every other role has one settled and his
-  does not. `, in the Crown's service` would match the patron's shape and needs
-  nothing named; ` of the {company}` reads better and presumes companies have
-  names, which nothing has decided. A company may simply be *Ashcombe's*, after
-  the man — in which case the qualifier is the only place a company name would
-  ever appear, and inventing one for that alone is a poor trade. **Author's
-  call**, and the cheapest answer is the patron's.
+- **Do Crown commanders draw from the colonial bag?** They are the same role and
+  the same object, so one bag is the simple answer and matches the ruling that
+  every bag is one register. But a man the Marshal sends comes from the old
+  country and a man raised in Ashmere does not, and that is the same distinction
+  that earns the rivals their hand-written names. **One bag is cheap and
+  probably fine**; two is one more file and slightly truer. Author's call, and
+  nothing blocks on it.
+- **Companies appear to need no names.** The commander's qualifier was the only
+  place one would have shown, and it now names his town or the Crown instead. If
+  nothing else wants them, they are *Ashcombe's*, after the man, and there is no
+  bag to write.
