@@ -77,6 +77,11 @@ func set_handler(phase: StringName, handler: ColonyPhase) -> void:
 func run(colony: Colony, context: ColonyContext) -> void:
 	context.colony = colony
 	_settle_upkeep(colony, context)
+	# **Before the first phase, and once for the colony** (#75). A duty is the
+	# colony's, so how used to it the towns are must be settled where every town
+	# then reads the same figure — a town that advanced it on its own way through
+	# Settle would judge a rise against a different number than its neighbour.
+	TradeProtest.settle_familiarity(context)
 	for phase in ORDER:
 		_run_phase(phase, colony, context)
 

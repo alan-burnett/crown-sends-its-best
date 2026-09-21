@@ -57,6 +57,9 @@ static func register_all() -> void:
 		"town_months_out", {}, ColonyParamSources.town_months_out
 	)
 	ContentRegistry.register_param_source(
+		"protest", {"field": "string", "within": "integer"}, ColonyParamSources.protest
+	)
+	ContentRegistry.register_param_source(
 		"recalled", {"reach": "string", "field": "string"}, ColonyParamSources.recalled
 	)
 	ContentRegistry.register_param_source(
@@ -354,6 +357,26 @@ static func policy(args: Dictionary, context: LetterContext) -> Variant:
 			"months":
 				return maxi(0, held.ends_month - context.month)
 	return 0
+
+
+## What the Steward knows about the latest refusal (#75, SPEC §8.1).
+##
+## **The fact, not the figure.** Which town and which resource, and the duty that
+## is on it — never the score, which SPEC §12.3 keeps off the player's screens
+## for the same reason sentiment is kept off them.
+static func protest(args: Dictionary, context: LetterContext) -> Variant:
+	var within := maxi(1, int(args.get("within", 2)))
+	var payload := ColonyConditions._latest_protest(context, within)
+	var field := String(args.get("field", "resource"))
+	if payload.is_empty():
+		return 0 if field == "rate" else ""
+	match field:
+		"town":
+			return String(payload.get("town", ""))
+		"rate":
+			return int(roundf(float(payload.get("rate", 0.0)) * 100.0))
+		_:
+			return String(payload.get("resource", ""))
 
 
 static func town_trade(_args: Dictionary, context: LetterContext) -> Variant:
