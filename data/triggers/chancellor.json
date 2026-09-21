@@ -245,5 +245,16 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.chancellor.the_court_has_noticed",
+    "letter": "chancellor.the_court_has_noticed",
+    "urgency": 0.3,
+    "cooldown": 9,
+    "conditions": [
+      {
+        "the_court_is_cooling": {}
+      }
+    ]
   }
 ]

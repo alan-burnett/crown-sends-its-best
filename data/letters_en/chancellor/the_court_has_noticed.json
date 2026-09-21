@@ -1,0 +1,16 @@
+{
+  "id": "chancellor.the_court_has_noticed",
+  "sender": "chancellor",
+  "type": "report",
+  "skippable": true,
+  "body": [
+    { "text": "A word, since nobody else will trouble to send you one." },
+    { "text": "Your name came up at Whitehall last week. It did not come up well." },
+    { "text": "I am not speaking of the accounts. The accounts are the Steward's affair and he will tell you about them at length. I am speaking of the impression, which is a separate thing and moves faster." },
+    { "text": "I defended you, naturally. It is not a thing I enjoy, and I should prefer not to make a habit of it.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "I did not defend you. I have my own standing to think of.",
+      "only_tones": ["annoyed", "hateful"] },
+    { "text": "You cannot answer this letter. There is nothing to answer. I mention it only so that you cannot later say nobody told you." }
+  ]
+}

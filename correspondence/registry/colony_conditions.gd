@@ -95,6 +95,19 @@ static func register_all() -> void:
 		"a_town_began_a_protest", {"within": "integer"},
 		ColonyConditions.a_town_began_a_protest,
 	)
+	ContentRegistry.register_condition(
+		"the_court_is_cooling", {}, ColonyConditions.the_court_is_cooling
+	)
+
+
+## Whether the court thinks worse of the PC this month than last (#76).
+##
+## 🔒 **The direction, never the figure** (`prestige.md` §7). A letter may notice
+## that the wind has changed; it may not read the number, and there is no
+## condition here that would let it compare the number to anything.
+static func the_court_is_cooling(_args: Dictionary, context: LetterContext) -> bool:
+	return context != null and context.prestige != null \
+		and context.prestige.direction() == "falling"
 
 
 ## Whether any town has refused the Crown a resource lately (#75, SPEC §8.1).
