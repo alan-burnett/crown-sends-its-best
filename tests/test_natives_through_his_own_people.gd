@@ -62,14 +62,27 @@ func _put_a_village_beside(run: RunState, town: Town) -> Village:
 	return village
 
 
+## The corner of the map furthest from this town.
+##
+## **Computed rather than written down.** A fixed corner was fine until #271 made
+## the country out of two fields: the first town now lands wherever the geography
+## puts it, and a village parked at `1,1` to be out of the way turned out to be
+## next door.
+func _far_from(run: RunState, town: Town, index: int = 0) -> Vector2i:
+	var x := 2 if town.at.x > run.map.width / 2 else run.map.width - 3
+	var y := 2 if town.at.y > run.map.height / 2 else run.map.height - 3
+	return Vector2i(x, clampi(y - index * 2, 2, run.map.height - 3))
+
+
 ## And move every other village out of the way, so only one people is in view.
 func _clear_the_rest(run: RunState, keep: Village) -> void:
+	var town := run.colony.in_order()[0]
 	var index := 0
 	for village in run.tribes.villages_in_order():
 		if (village as Village).id == keep.id:
 			continue
-		(village as Village).at = Vector2i(1, 1 + index)
-		index += 2
+		(village as Village).at = _far_from(run, town, index)
+		index += 1
 
 
 ## A month lived in the town, so the "has he been there" half of the gate is
@@ -120,8 +133,10 @@ func test_a_governor_with_no_neighbours_has_nothing_to_say_about_them() -> void:
 	# and the way that is made true is that he has nothing to judge.
 	var run := _run()
 	var town := run.colony.in_order()[0]
+	var index := 0
 	for village in run.tribes.villages_in_order():
-		(village as Village).at = Vector2i(1, 1)
+		(village as Village).at = _far_from(run, town, index)
+		index += 1
 
 	# **A month lived, so only the neighbours can decide this.** Without it the
 	# gate says no for the other reason and the test passes for the wrong one.
@@ -338,9 +353,14 @@ func test_a_governor_beside_a_village_writes_home_about_it() -> void:
 	machine.use_content(content)
 	machine.saves_on_send = false
 
+	# **Four years, not two** (#254). A governor writes one letter a month now,
+	# about whichever of his concerns is loudest, and this one has a year's
+	# cooldown besides — so it waits its turn among the harvest, the shortages
+	# and the men in his fields. Two years was enough when every true letter
+	# fired; it is not enough when he has to *want* to send this one.
 	var wrote := false
 	var named := false
-	for _month in 24:
+	for _month in 48:
 		machine.begin_turn()
 		for inbound in run.inbox:
 			if inbound.letter_id == "governor.the_people_next_door":
@@ -354,5 +374,5 @@ func test_a_governor_beside_a_village_writes_home_about_it() -> void:
 		machine.send_post()
 
 	assert_true(wrote,
-		"two years beside a village and no governor mentioned it once")
+		"four years beside a village and no governor mentioned it once")
 	assert_true(named, "he wrote about the natives without saying which people")
