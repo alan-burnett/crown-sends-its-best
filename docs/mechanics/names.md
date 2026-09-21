@@ -123,17 +123,38 @@ before he reads a word.
 
 ---
 
-## 3. One bag per kind
+## 3. A bag is a register, and roles map onto it
 
-**Every role draws from its own bag**, and so does every kind of place. Every
-journalist from the journalists', every governor from the governors', every town
-from the towns'.
+**Not one bag per role.** Several roles can draw from one bag, and two of them do.
 
-Not one pool, and not pools keyed by country. **Two men from the same country
-should still not sound alike** — a clergyman and a journalist may both be the
-PC's countrymen and want different registers, one scriptural and old, the other
-plainer. A key based on where a man is from cannot express that. A key based on
-what he is can.
+| Bag | Drawn by |
+| :--- | :--- |
+| **`aristocrats`** | patrons, **Crown commanders** |
+| **`colonists`** | governors, **colony commanders**, and the institutional contacts |
+| **`towns`** | towns |
+
+**A company is given to the same sort of man either way.** The Marshal's
+commander comes from the pool of aristocrats a patron comes from; a colonial
+company is handed to one of the well-to-do colonists a governor comes from. That
+is simpler than a bag each and truer than a bag each, which is the good kind of
+simplification.
+
+**A rebel commander draws nothing.** He was a colony commander who turned, so he
+keeps the name he already had — only his qualifier changes (§2).
+
+### Two men from the same bag still differ, and that is fine
+
+An earlier draft gave every role its own bag, arguing a clergyman and a
+journalist should sound unalike. **They are both colonists**, and the register
+that actually matters is *aristocrat or colonist*, not *what he does for a
+living*. A colony is not so large that its journalist and its clergyman came from
+different peoples.
+
+### 🔒 Every bag is one register
+
+All colonists from one bag whatever the colony's settlers happen to be, and all
+aristocrats from another. **An artistic liberty, taken deliberately** — nothing
+downstream should try to be cleverer about where a man is from.
 
 ### Given and family, not whole names
 
@@ -148,11 +169,6 @@ held whole names because the rivals' bag would have mixed nations, and drawing
 parts separately would eventually pair a French given name with a Spanish
 surname. **The Author then made rivals hardcoded**, which removed the only bag
 that mixed cultures — and with it the whole argument.
-
-**Every bag is one register**, by the Author's ruling: all governors draw from
-one bag whatever the colony's settlers happen to be, and that is an artistic
-liberty taken deliberately rather than an oversight. So recombining inside a bag
-is always safe.
 
 **A role that needs particular men does what the rivals did**: names them in
 data. That is the escape hatch, and it is already proven.
@@ -193,7 +209,8 @@ bags must guarantee.
 ## 6. Data
 
 ```
-data/names/<kind>.json    given[] and family[] for people; names[] for towns
+data/names/<bag>.json     given[] and family[] for people; names[] for towns
+                          aristocrats · colonists · towns
 ```
 
 **No language suffix.** A bag carries no prose and is not translated, unlike
@@ -211,13 +228,11 @@ empty, and no bag is too small to fill a long run without repeating.
   commanders similar. Twenty given and twenty family per bag is almost certainly
   ample, but the validator's "too small" threshold should be set from a measured
   long run rather than guessed.
-- **Do Crown commanders draw from the colonial bag?** They are the same role and
-  the same object, so one bag is the simple answer and matches the ruling that
-  every bag is one register. But a man the Marshal sends comes from the old
-  country and a man raised in Ashmere does not, and that is the same distinction
-  that earns the rivals their hand-written names. **One bag is cheap and
-  probably fine**; two is one more file and slightly truer. Author's call, and
-  nothing blocks on it.
+- **Do the institutional contacts really share `colonists`?** §3 puts them there
+  and the reasoning holds — they are colonists, and a colony is not large enough
+  for its clergyman and its journalist to come from different peoples. But the
+  Author ruled only on commanders, so this is my extension of it rather than his
+  ruling, and it is one file either way.
 - **Companies appear to need no names.** The commander's qualifier was the only
   place one would have shown, and it now names his town or the Crown instead. If
   nothing else wants them, they are *Ashcombe's*, after the man, and there is no
