@@ -258,7 +258,51 @@ player's only read on a man before he must trust him. **It gives away exactly as
 much as his voice does**, which is the right amount and needs no new machinery to
 deliver.
 
-## 8. Harsh is the second axis
+## 8. 🔒 He tells you how it landed
+
+§5 gives every contact three traits and **nothing shows them to the player.** A
+hateful letter to a proud man and a hateful letter to a bully produce different
+outcomes months apart, through a compliance roll he never sees.
+
+> **A hidden number nobody can infer is a random number generator.**
+
+Without feedback, vanity, mettle and pity are not character — they are noise that
+happens to the player, and even an attentive one has no way to learn that this
+governor should never be shouted at.
+
+### The reply says how the tone was taken
+
+**His next letter acknowledges the manner of the last one**, and what it says
+depends on how his trait took it:
+
+| The tone's effect on him | He | For example |
+| :--- | :--- | :--- |
+| **magnified** — the trait is high | resents it, or is visibly moved by it | *Your Grace's letter was abusive* |
+| **inverted** — the trait is negative | takes it the other way entirely | *I confess I admire Your Grace's directness* |
+| **barely registered** — near zero | does not mention it at all | — |
+
+Two letters, the same words from the PC, and **the difference between them is the
+man.** That is the whole of how a player learns whom he can lean on.
+
+### It needs no new machinery
+
+`choose()` already emits its scoring trace, and the tone consideration's
+contribution is in it — **signed, and sized.** The reply keys an `{insert:}` on
+that contribution exactly as it keys one on the tone itself.
+
+It is the same mechanism that lets the Diplomat name a governor's excuse
+truthfully (`the-director.md` §2): **the reason in the prose is the reason in the
+trace.** Nothing here reads a personality vector and announces it — it reports
+what the letter did, which the contact is entitled to have noticed.
+
+### And it is the only route in
+
+Prominence, loyalty and compliance all reach the player through letters already.
+**These three traits reach him through nothing at all** unless the reply carries
+them, which makes this less a nicety than the thing that turns §5 from a
+simulation detail into something worth playing around.
+
+## 9. Harsh is the second axis
 
 **A separate yes-or-no**, set after the tone, and the two are orthogonal — five
 tones times harsh-or-not is **ten registers**. See `contacts.md` §3.
@@ -277,7 +321,7 @@ you are the one deciding, and *do it or else* has no object.
 sentence is a tone-keyed `{insert:}` fragment, so the same flag reads as velvet
 from a pleased PC and as a threat from an annoyed one.
 
-## 9. Two things that will look like bugs
+## 10. Two things that will look like bugs
 
 **🔒 Desperate removes delay. It does not weigh against it.**
 `deliberation.md` §5: hard rules are **filters**, applied before scoring. A large
@@ -289,7 +333,7 @@ Urging weight is only ever consulted **if he complied**, so the two touch
 different moments. He is less likely to take the order, and harder-driven when he
 does.
 
-## 10. Tuning targets
+## 11. Tuning targets
 
 - Every magnitude in §4, and the loyalty figures against the shipped
   `TONE_WEIGHT` table.
@@ -303,11 +347,15 @@ does.
 - What *increase* and *decrease* on desire-to-write are worth against the
   director's thresholds (`the-director.md` §4).
 
-## 11. Open items
+## 12. Open items
 
 - **Whether a register and the three reading traits should correlate.** A
   choleric man who is also unmoved by being shouted at is coherent; a sanguine one
-  who takes courtesy for weakness is a contradiction. Nothing yet stops either.
+  who takes courtesy for weakness is a contradiction. Nothing yet stops either, and
+  §8's feedback makes an incoherent pairing visible rather than merely present.
+- **How strong a contribution must be before he mentions it** (§8). Too low and
+  every letter comments on the PC's manner, which is tiresome; too high and the
+  traits stay invisible in all but the extreme cases.
 - **How the three traits are drawn**, and whether they correlate with the
   personality weights a contact already carries. A proud man who is also
   indifferent to cost is a different problem from a proud man who is not, and
