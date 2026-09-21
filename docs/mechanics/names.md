@@ -73,11 +73,27 @@ contact is created.**
 | Commander, rebel | ` of the independent nation` | *Commander Ames Harker of the independent nation* |
 | Patron | *(empty)* | *Patron Mingle Welkington* |
 | Marshal, Chancellor, Steward, Provost | *(empty)* | *Steward Corvyn Thrale* |
-| Rival | **open — see §7** | |
+| Rival | *(empty)* — **and no role word either** | *Le Duc de Montargis* |
 
 **The patron's qualifier went empty when the title became his role.** It read
 *, patron to the crown*, which said what *Lord* could not. *Patron* says it in
 the first word, and saying it twice is worse than saying it once.
+
+### A rival is the one exception, and it is a principled one
+
+**His name is the whole letterhead.** *Le Duc de Montargis*. No role word, because
+*Rival* is a game term and no man was ever called one.
+
+The rule survives it because of **why** the rule exists. The role word is a
+crutch for a name the player has never seen: a generated *Ames Harker* means
+nothing until *Commander* is in front of it. **Rivals are a hardcoded cast of
+three whose names carry their own titles** — *Le Duc*, *Grevé*, *Don* — so the
+fiction has already done the job the role word was hired for.
+
+It does not extend to the Crown officers, who are equally fixed and equally
+learned. *Master Corvyn Thrale* does not say **Steward**, so he keeps his word.
+**The test is whether the name itself announces the man**, and only the rivals'
+do.
 
 It has to be on the contact rather than the role because **a commander is one
 role with three allegiances** (`commanders.md` §1: *colonial, Crown and rebel
@@ -195,13 +211,6 @@ empty, and no bag is too small to fill a long run without repeating.
   commanders similar. Twenty given and twenty family per bag is almost certainly
   ample, but the validator's "too small" threshold should be set from a measured
   long run rather than guessed.
-- **What is a rival's letterhead?** Every other role leads with a word that says
-  what he is, and *Rival* is the only one that is a game term rather than
-  something a man would be called. But rivals are hardcoded and their names carry
-  their own titles — *Le Duc de Montargis* — so leaving the role word off them
-  would break the scanning rule for the one sender whose tribute demand most
-  needs recognising at a glance. **Author's call.** The options are *Rival*,
-  which scans and reads oddly, or nothing, which reads well and scans worst.
 - **Do Crown commanders draw from the colonial bag?** They are the same role and
   the same object, so one bag is the simple answer and matches the ruling that
   every bag is one register. But a man the Marshal sends comes from the old
