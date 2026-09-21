@@ -1,0 +1,26 @@
+[
+  {
+    "id": "trigger.rival_duke.tribute_demand",
+    "letter": "rival_duke.tribute_demand",
+    "urgency": 0.7,
+    "cooldown": 14,
+    "params": {
+      "resource": {
+        "from": "literal",
+        "value": "iron"
+      },
+      "amount": {
+        "from": "literal",
+        "value": "60"
+      },
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "crown_first_leaned_harder": {}
+      }
+    ]
+  }
+]

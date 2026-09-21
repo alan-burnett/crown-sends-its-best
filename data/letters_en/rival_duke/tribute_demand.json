@@ -1,0 +1,83 @@
+{
+  "id": "rival_duke.tribute_demand",
+  "sender": "rival_duke",
+  "type": "demand",
+  "skippable": false,
+  "params": {
+    "resource": "resource",
+    "amount": "integer",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "Sir — we have not met, and I hope we shall not have to."
+    },
+    {
+      "text": "My people at the southern anchorage report that your settlement at {param:town} is prospering, and that its stores are better kept than mine. I congratulate you. I am obliged to add that they are also nearer to me than to you."
+    },
+    {
+      "text": "I ask for {param:amount} of {param:resource}. I do not ask it as a duty, and I am not entitled to it, and we may both be clear that this is not a trade."
+    },
+    {
+      "text": "You will understand that I am not threatening you. I am describing a difficulty I have, which is that my captains are idle and my season is long. Should it be resolved I expect I shall not need to write again for some while."
+    },
+    {
+      "text": "Your Crown will not hear of this from me. I find these things are generally heard of anyway."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "To the Governor of the Windward Coast — I write {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "having considered your letter"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having read your letter twice"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "tribute",
+        "prompt": "The Windward Coast's request",
+        "options": [
+          {
+            "id": "pay",
+            "label": "send the goods",
+            "text": "The goods will be sent. I trust your season improves.",
+            "effect": {
+              "pay_tribute": {
+                "to": "rival_duke",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "months": 9
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "refuse him",
+            "text": "You will have nothing from me, this season or any other.",
+            "effect": {
+              "refuse": {
+                "to": "rival_duke"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, your servant,"
+      }
+    ]
+  }
+}

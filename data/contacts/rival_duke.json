@@ -1,0 +1,22 @@
+[
+  {
+    "id": "rival_duke",
+    "name": "Don Íñigo de Alcaraz",
+    "title": "Governor of the Windward Coast",
+    "role": "rival",
+    "portrait": "portrait.rival_duke",
+    "loyalty": 30,
+    "weights": {
+      "loyalty": 0.3,
+      "payment_offered": 1.6,
+      "cost_of_request": 0.2,
+      "autonomy": 1.4
+    },
+    "leans": {
+      "crown_war_intensity": 0.3
+    },
+    "cares_about": [
+      "crown_war_intensity"
+    ]
+  }
+]
