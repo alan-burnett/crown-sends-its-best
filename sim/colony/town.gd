@@ -141,6 +141,17 @@ var intent_since: int = 0
 var urged_intent: StringName = &""
 var urged_month: int = 0
 
+## The manner the PC wrote it in (#262, `tone.md` §4).
+##
+## 🔒 **Intensity is the axis, not warmth.** A letter read as *the Crown is truly
+## angry we have not built the second town* still pulls next spring; one that was
+## flowery, or merely peevish, is easy to roll one's eyes at and get on with
+## one's own life — the out-of-touch aristocrat being out of touch again.
+##
+## Empty where the urging predates the field or came from nowhere in particular,
+## which reads as the plain register.
+var urged_tone: StringName = &""
+
 ## What the town is working towards. **The town chooses it, deterministically,
 ## to serve the intent** — a building, an improvement, or a standing posture.
 ## See `Objective` and `ObjectiveSelector`.
@@ -414,6 +425,7 @@ func to_dict() -> Dictionary:
 		"intent_since": intent_since,
 		"urged_intent": String(urged_intent),
 		"urged_month": urged_month,
+		"urged_tone": String(urged_tone),
 		"objective": String(objective),
 		"objective_target": objective_target,
 		"objective_intent": String(objective_intent),
@@ -463,6 +475,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.intent_since = int(data.get("intent_since", 0))
 	town.urged_intent = StringName(data.get("urged_intent", ""))
 	town.urged_month = int(data.get("urged_month", 0))
+	town.urged_tone = StringName(data.get("urged_tone", ""))
 	town.objective = StringName(data.get("objective", ""))
 	town.objective_target = data.get("objective_target", Vector2i(-1, -1))
 	town.objective_intent = StringName(data.get("objective_intent", ""))

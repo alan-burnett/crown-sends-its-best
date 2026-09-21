@@ -85,6 +85,7 @@ func _decide(
 		"mandate": String(state.get_value(WorldValues.MANDATE, "")),
 		"urged": String(town.urged_intent),
 		"urged_month": town.urged_month,
+		"urged_tone": String(town.urged_tone),
 	}
 
 	var candidates: Array = []

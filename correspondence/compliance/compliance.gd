@@ -54,6 +54,10 @@ const MONTHS_FOR: Dictionary = {
 	ACT_ALONE: 2,
 }
 
+## The key the manner of the letter travels under, from the desk to the
+## deliberation months later (#262).
+const URGED_TONE: String = "urged_tone"
+
 ## What a partial compliance actually delivers. Tuning.
 const PARTIAL_SHARE: float = 0.5
 
@@ -270,6 +274,17 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 		# they cost his town rather than as how he felt about being asked.
 		params["tier"] = String(Shipment.tier_for(outcome))
 		params["shipped"] = 0.0
+
+	# **The manner it was written in travels with it** (#262, `tone.md` §4). An
+	# urging is consulted for months after the letter was read, and how hard it
+	# pulls is a property of the letter rather than of the month it is read in —
+	# so the tone has to survive the journey from the desk to the deliberation.
+	#
+	# 🔒 **Only where it was the PC who wrote.** A contact who acted alone wrote
+	# nobody a letter, so there is no manner to carry and the entry is absent
+	# rather than defaulted.
+	if outcome != ACT_ALONE and Tone.is_tone(order.tone):
+		params[URGED_TONE] = String(order.tone)
 
 	var intent := Intent.new(
 		&"",

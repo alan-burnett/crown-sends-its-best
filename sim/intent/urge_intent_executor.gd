@@ -56,12 +56,17 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 
 	town.urged_intent = wanted
 	town.urged_month = state.month
+	# **And how hard it was said** (#262, `tone.md` §4). Carried from the letter
+	# rather than read off the man, because the urging outlives the month it
+	# arrived in and it is the letter that was emphatic, not the reader.
+	town.urged_tone = StringName(intent.data.get(Compliance.URGED_TONE, ""))
 
 	log.emit(EVENT_URGED, intent.source, state.month, {
 		"intent": String(intent.id),
 		"town": String(town.id),
 		"governor": String(town.governor_id),
 		"urged": String(wanted),
+		"tone": String(town.urged_tone),
 		"held": String(town.intent),
 		"already_agreed": town.intent == wanted,
 	}, WorldPhase.MOVEMENT)
