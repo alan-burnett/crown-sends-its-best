@@ -32,14 +32,6 @@ const LAND_SHARE: float = 0.42
 ## How strongly a growing landmass prefers to stay compact rather than sprawl.
 const COMPACTNESS: float = 0.65
 
-## Terrain weights inland. Mountains cluster, deserts are rare.
-const INLAND_WEIGHTS: Dictionary = {
-	"plains": 0.30, "grassland": 0.28, "forest": 0.27, "mountains": 0.10, "desert": 0.05,
-}
-## Coastal land is gentler — nobody lands on a mountain.
-const COASTAL_WEIGHTS: Dictionary = {
-	"plains": 0.38, "grassland": 0.36, "forest": 0.22, "desert": 0.04,
-}
 
 
 ## Generate a map. `rng` must be the `mapgen` stream.
@@ -54,7 +46,11 @@ static func generate(rng: RandomNumberGenerator, width: int = DEFAULT_WIDTH, hei
 
 	var map := WorldMap.new(width, height, &"ocean")
 	var land := _grow_land(rng, map)
-	_paint_terrain(rng, map, land)
+	# 🔒 **The world is made first, and the colony arrives into it** (§2). The
+	# country is drawn on its own terms and a site is found in it afterwards —
+	# which is why `choose_starting_site` reads the finished map rather than the
+	# generator arranging one for it.
+	_paint_terrain(Geography.of(rng, width, height), map, land)
 	_cut_shallows(map)
 	return map
 
@@ -107,7 +103,14 @@ static func _grow_land(rng: RandomNumberGenerator, map: WorldMap) -> Dictionary:
 	return land
 
 
-static func _paint_terrain(rng: RandomNumberGenerator, map: WorldMap, land: Dictionary) -> void:
+## Read the terrain off the two fields.
+##
+## 🔒 **No die is thrown here** (#271). Every tile's terrain is a function of
+## where it sits, so a mountain has a range around it and a desert has a region.
+## The coastal-versus-inland weight tables are **gone rather than layered on
+## top**: low elevation at a coastline already does that work, and a second rule
+## saying the same thing is a second rule to fall out of step.
+static func _paint_terrain(country: Geography, map: WorldMap, land: Dictionary) -> void:
 	# Sorted, so the order tiles are painted in does not depend on how the
 	# dictionary happened to be built.
 	var positions: Array = land.keys()
@@ -115,27 +118,7 @@ static func _paint_terrain(rng: RandomNumberGenerator, map: WorldMap, land: Dict
 		return a.y < b.y or (a.y == b.y and a.x < b.x))
 
 	for at in positions:
-		var coastal := false
-		for neighbour in map.neighbours(at.x, at.y):
-			if not land.has(neighbour):
-				coastal = true
-				break
-		map.set_terrain(at.x, at.y, _weighted_terrain(rng, COASTAL_WEIGHTS if coastal else INLAND_WEIGHTS))
-
-
-static func _weighted_terrain(rng: RandomNumberGenerator, weights: Dictionary) -> StringName:
-	var names: Array = weights.keys()
-	names.sort()
-	var total: float = 0.0
-	for name in names:
-		total += float(weights[name])
-
-	var roll := rng.randf() * total
-	for name in names:
-		roll -= float(weights[name])
-		if roll <= 0.0:
-			return StringName(name)
-	return StringName(names[names.size() - 1])
+		map.set_terrain(at.x, at.y, country.terrain_at(at.x, at.y))
 
 
 ## Water touching land becomes sea; the rest stays ocean.
