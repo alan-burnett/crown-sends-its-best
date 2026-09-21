@@ -130,6 +130,7 @@ func _params_for(letter: Letter, run: RunState, to: StringName) -> Dictionary:
 	context.prestige = run.prestige
 	context.colony = run.colony
 	context.contacts = run.contacts
+	context.natives = run.tribes
 	context.demands = run.demands
 	context.demand_book = run.demand_book
 	context.log = run.log

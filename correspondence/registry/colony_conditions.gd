@@ -147,6 +147,13 @@ static func register_all() -> void:
 		"a_neighbour_declared", {"within": "integer"},
 		ColonyConditions.a_neighbour_declared,
 	)
+	ContentRegistry.register_condition(
+		"i_have_neighbours", {}, ColonyConditions.i_have_neighbours
+	)
+	ContentRegistry.register_condition(
+		"their_land_is_in_my_way", {"value": "number"},
+		ColonyConditions.their_land_is_in_my_way,
+	)
 
 
 ## Whether this sender is a governor-elect who has only just set out (#178).
@@ -639,3 +646,34 @@ static func town_measure_above(args: Dictionary, context: LetterContext) -> bool
 	if context.town == null:
 		return false
 	return context.measure(String(args.get("measure", "")), 0.0) > float(args.get("value", 0.0))
+
+
+## 🔒 Whether this man has anybody next door to write about (#208).
+##
+## **The lock in `natives.md` §1, as a gate rather than as prose.** A governor
+## who has never seen a tribe has nothing to say about one, so every letter that
+## mentions the neighbours sits behind this — and a letter file cannot forget to,
+## because the measure it would judge is not in his dictionary either.
+##
+## The Diplomat passes wherever anybody in the colony has a neighbour, which is
+## §8.1's *more widely*.
+static func i_have_neighbours(_args: Dictionary, context: LetterContext) -> bool:
+	if not context.measures.has(ColonyMeasures.NATIVE_REGARD):
+		return false
+	# **And his town has lived a month there** (#81's lesson, #208's turn to
+	# learn it). A governor writing home about the neighbours in the month he
+	# stepped off the boat has not met them; he has seen smoke. Folded in here
+	# rather than repeated in every trigger, because a trigger that forgot it
+	# would put the natives on the desk before the colony has a first harvest.
+	return DiplomatReport.has_lived(context.town, context) \
+		or ColonyMeasures.colony_touches_anybody_who_has_lived(context)
+
+
+## Whether enough of this man's ground is in somebody else's hands to mention.
+##
+## What he can see with his eyes, as distinct from what they think of him.
+static func their_land_is_in_my_way(args: Dictionary, context: LetterContext) -> bool:
+	if not context.measures.has(ColonyMeasures.NATIVE_PRESSURE):
+		return false
+	return context.measure(ColonyMeasures.NATIVE_PRESSURE, 0.0) \
+		>= float(args.get("value", 0.1))

@@ -41,6 +41,14 @@ const WEIGHTED: PackedStringArray = [
 ## make him a lens rather than a readout.**
 const LEANED: PackedStringArray = [
 	"food_security", "supply_situation", "colony_revenue", "quality_of_life",
+	# 🔒 **How the people next door regard the colony** (#208). Two governors
+	# describing the same tribe in the same month may disagree and both be
+	# telling the truth, which is SPEC §9.1 working rather than failing — and it
+	# is the only way the player ever sees a standing at all.
+	#
+	# Harmless on a governor with no neighbours: the measure is not in his
+	# dictionary, so there is nothing for the lean to bend.
+	"native_regard",
 ]
 
 ## How far a governor's report may stray from the truth. The perception resolver

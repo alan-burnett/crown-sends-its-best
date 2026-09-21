@@ -109,6 +109,37 @@
     ]
   },
   {
+    "id": "trigger.governor.the_people_next_door",
+    "letter": "governor.the_people_next_door",
+    "urgency": 0.28,
+    "cooldown": 12,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "neighbour_tribe",
+        "fallback": "natives"
+      },
+      "fields": {
+        "from": "neighbour_fields"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "i_have_neighbours": {}
+      },
+      {
+        "their_land_is_in_my_way": {
+          "value": 0.12
+        }
+      }
+    ]
+  },
+  {
     "id": "trigger.governor.question_duty",
     "letter": "governor.question_duty",
     "urgency": 0.3,

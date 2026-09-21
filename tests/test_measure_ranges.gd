@@ -188,6 +188,13 @@ func test_no_measure_is_normalised_against_a_raw_quantity() -> void:
 		ColonyMeasures.OBJECTIVE_PROGRESS,
 		ColonyMeasures.STOCKPILE_HEALTH,
 		ColonyMeasures.TRADE_VOLUME,
+		# **A standing on a fixed nought-to-a-hundred scale** (#208), like the
+		# Crown's war. It does not grow with the colony because it is not a
+		# quantity of anything — it is what one people think of another.
+		ColonyMeasures.NATIVE_REGARD,
+		# **A share of this town's own ground**, so a town of four hundred with a
+		# village in its fields reads the same as a town of forty with one.
+		ColonyMeasures.NATIVE_PRESSURE,
 	]
 	for id in MeasureRegistry.ids():
 		assert_true(bounded.has(String(id)),
