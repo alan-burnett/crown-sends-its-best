@@ -82,10 +82,49 @@ is sent, and what it chooses to mention.
 ### Receiving an order
 
 Compliance resolves an Order into one of six outcomes — comply, partial, delay,
-reinterpret, refuse, act alone — through the deliberation kernel. **Loyalty is
-the heaviest consideration in that decision**, well ahead of the cost of the
-request, the payment offered, the clarity of the order, and the contact's taste
-for autonomy.
+reinterpret, refuse, act alone — through the deliberation kernel.
+
+**The considerations**, each weighted by personality like any other:
+
+| | Reads | Pulls toward |
+| :--- | :--- | :--- |
+| **loyalty** | his regard for the PC | **the heaviest of them.** High complies, low refuses or acts alone |
+| **cost** | what the order asks in **gold** | a large ask is easier to shave, put off or decline |
+| **payment** | what the PC offered against that cost | comply |
+| **harshness** | whether the letter leaned on him | comply, and **away from the sideways answers** — a man told plainly does not quietly reinterpret |
+| **clarity** | how vague the order is | **reinterpret**, which without this axis could never happen at all |
+| **autonomy** | his disaffection | act alone, reinterpret |
+
+**And one filter.** Full payment is a guaranteed yes while Crown Standing can
+cover it (§12.6) — a filter rather than a heavy weight, because a guarantee that
+can lose a close vote is not a guarantee.
+
+Two of these are worth reading twice. **Harshness is the surest way to be
+obeyed**, which is the whole reason the PC would write one, and he pays for it
+twice — in the governor's regard and in what the town holds against the Crown
+afterwards (`rebel-sentiment.md` §4). And **clarity means saying exactly what you
+want is a real choice**: an order with no figure in it leaves room to decide what
+the PC must have meant.
+
+### 🔒 Compliance asks whether he engages, not whether he agrees
+
+**None of these reads what the order is for.** `cost` measures gold, so an order
+that costs none — urging a governor's intent, most obviously — is decided almost
+entirely on regard and wording.
+
+**That is correct and deliberate.** Whether a governor *agrees* is settled in his
+own deliberation afterwards, where the urging meets his reading of his town as
+two of eight weighted considerations (`governor-objectives.md` §4). Compliance
+decides whether he listens; deliberation decides what he concludes. **Collapsing
+the two would put the PC's letter and the governor's judgement in the same
+scoring pass, and the argument would stop being an argument.**
+
+What the list is missing is smaller and real: the **manner** of his answer takes
+no account of the conflict, so a governor with a tribe on his border and one in a
+quiet province reinterpret an unwelcome order at the same rate. A ninth
+consideration belongs here for that, pulling toward reinterpretation and acting
+alone — and pointedly **not** toward refusal, because refusing is about regard,
+and a man who disagrees with the PC but likes him finds a way to do both.
 
 The outcome becomes an Intent the sim executes (`world-month.md`). Which is the
 important part: **a contact does not merely accept or decline. He forms an
