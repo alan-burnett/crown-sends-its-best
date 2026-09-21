@@ -240,10 +240,14 @@ panel.
 SPEC §9.6 caps the desk, and a rule that *everyone who cares writes about
 everything* would flood it in a year.
 
-So the **most affected party writes first**, and others write when the matter
-escalates or when the PC's silence lets it. That is the same machinery the
-director already uses to cull, and it makes the escalation above fall out of
-letter volume rather than needing its own mechanism.
+**`cares_about` is therefore also the input to how loudly a man wants to speak.**
+Each concern carries a **pressure** — how far the world is from what he wants,
+plus what happened last month — and he writes when one clears a threshold of his
+own. Writing damps that concern and, more gently, every other concern he has.
+
+So the most affected party writes first because his gap is largest, and the
+escalation above falls out of pressure rather than needing a rule. See
+`the-director.md`.
 
 ## 7. The Relationship is the single source of truth
 
