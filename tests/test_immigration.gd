@@ -169,6 +169,62 @@ func test_the_accrued_fractions_survive_a_save() -> void:
 	assert_almost_eq(restored.experts_accrued, town.experts_accrued, 0.0001)
 
 
+# --- 🔒 Crown flow rises as the Crown declines -------------------------------
+
+func test_a_declining_crown_sends_more_people() -> void:
+	# 🔒 §5, and the town is **identical**: same quality of life, same buildings,
+	# same everything. The only difference is how bad things have got at home.
+	var town := _town(&"ashmere", 0.9)
+	var settled := _context([town])
+	var declining := _context([town])
+	declining.state.values[Immigration.FLOW_KEY] = 1.0
+
+	assert_true(float(Immigration.due(town, declining)["workers"])
+			> float(Immigration.due(town, settled)["workers"]),
+		"the Crown fell apart and nobody left it")
+
+
+func test_the_flow_comes_off_the_same_decline_as_the_demands() -> void:
+	# 🔒 The acceptance, and the reason it is worth stating: the Crown's
+	# obligations growing and its people leaving are **one fact about the
+	# Crown**, and two independent curves would eventually disagree about how bad
+	# things have got at home.
+	var state := WorldValues.initial_state()
+	var log := EventLog.new()
+	var streams := RngStreams.new(SEED)
+	var affairs := CrownAffairs.new()
+	affairs.growth = DemandGrowth.new()
+
+	state.month = 12
+	affairs.on_phase(WorldPhase.CROWNS_MONTH, state, log, streams)
+	var early := float(state.get_value(Immigration.FLOW_KEY, 0.0))
+	assert_almost_eq(early, 0.0, 0.0001,
+		"people were leaving before the Crown was past its peak")
+
+	# Years four onward: the bar moves once a year, and the flow moves with it.
+	for year in range(DemandGrowth.FIRST_GROWTH_YEAR, DemandGrowth.FIRST_GROWTH_YEAR + 5):
+		state.month = year * 12
+		affairs.on_phase(WorldPhase.CROWNS_MONTH, state, log, streams)
+	var late := float(state.get_value(Immigration.FLOW_KEY, 0.0))
+	assert_true(late > early, "five years of decline sent nobody anywhere")
+	assert_almost_eq(late, float(affairs.growth.history.size()) * CrownAffairs.FLOW_PER_DECLINE,
+		0.0001, "the flow is on a schedule of its own rather than on the Crown's decline")
+
+
+func test_a_flow_that_has_not_moved_says_nothing() -> void:
+	# It is settled every month and writes only when it changes, so a quiet
+	# decade does not fill the log with a figure repeating itself.
+	var state := WorldValues.initial_state()
+	var log := EventLog.new()
+	var affairs := CrownAffairs.new()
+	affairs.growth = DemandGrowth.new()
+	for month in 24:
+		state.month = month
+		affairs.on_phase(WorldPhase.CROWNS_MONTH, state, log, RngStreams.new(SEED))
+	assert_true(log.of_type(CrownAffairs.EVENT_EMIGRATION).size() <= 6,
+		"the emigration figure was written to the log every month it did not move")
+
+
 # --- 🔒 Education gates growth, not arrivals ---------------------------------
 
 func test_an_unlettered_town_can_still_be_sent_scholars() -> void:
