@@ -27,7 +27,74 @@ extends RefCounted
 const IMMIGRATION: StringName = &"encourage_immigration"
 const FAVOUR_OUR_MARKET: StringName = &"favour_our_market"
 
-const ALL: Array[StringName] = [IMMIGRATION, FAVOUR_OUR_MARKET]
+## The Provost's five (#173, `the-provost.md` §2).
+##
+## **Four of one shape and one of another.** The first four set how many people
+## cross and what they bring; the fifth buys books, costs almost nothing, and
+## reaches every town in the colony.
+const VOLUME: StringName = &"immigration_volume"
+const PROVISION: StringName = &"immigration_provision"
+const EXPERTS: StringName = &"immigration_experts"
+const LIVESTOCK: StringName = &"immigration_livestock"
+const CURRICULUM: StringName = &"curriculum"
+
+const PROVOST_KNOBS: Array[StringName] = [VOLUME, PROVISION, EXPERTS, LIVESTOCK, CURRICULUM]
+
+const ALL: Array[StringName] = [
+	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK, CURRICULUM,
+]
+
+## What each knob is set to. **Four settings and no numbers**, because the PC is
+## writing a letter and not filling in a form (`the-provost.md` §2).
+const NOTHING: StringName = &"nothing"
+const A_LITTLE: StringName = &"a_little"
+const A_LOT: StringName = &"a_lot"
+const A_GREAT_DEAL: StringName = &"a_great_deal"
+
+const SETTINGS: Array[StringName] = [NOTHING, A_LITTLE, A_LOT, A_GREAT_DEAL]
+
+## How far up each setting sits, from nought to one. The knobs differ in what
+## they *buy*, below; they do not differ in what the words mean.
+const SETTING_STRENGTH: Dictionary = {
+	"nothing": 0.0,
+	"a_little": 0.33,
+	"a_lot": 0.66,
+	"a_great_deal": 1.0,
+}
+
+## What a knob at its top setting is worth, per knob. All tuning
+## (`the-provost.md` §9).
+##
+## 🔒 **Curriculum is the cheap one and the wide one.** It is the counterweight
+## to the library: a library is expensive and raises one town a great deal, this
+## is almost nothing and raises all of them slightly, so **a colony too poor to
+## build anything can still have some learning**. Its figure is small on purpose
+## and should stay small.
+const AT_A_GREAT_DEAL: Dictionary = {
+	"immigration_volume": 1.6,
+	"immigration_provision": 2.0,
+	"immigration_experts": 0.12,
+	"immigration_livestock": 1.4,
+	"curriculum": 1.2,
+}
+
+## What the colony is charged a month, per knob, at its top setting. Tuning.
+##
+## Curriculum is a **meagre payment** (§2) and costs a fraction of the others.
+const MONTHLY_AT_A_GREAT_DEAL: Dictionary = {
+	"immigration_volume": 240.0,
+	"immigration_provision": 200.0,
+	"immigration_experts": 300.0,
+	"immigration_livestock": 160.0,
+	"curriculum": 35.0,
+}
+
+## Where each knob's pressure lands, so the sim reads a world value and never
+## the policy book.
+const VOLUME_KEY: String = "policy.immigration.volume"
+const PROVISION_KEY: String = "policy.immigration.provision"
+const EXPERTS_KEY: String = "policy.immigration.experts"
+const LIVESTOCK_KEY: String = "policy.immigration.livestock"
 
 ## World value prefix for a policy's standing pressure on a Crown price.
 ##
@@ -75,7 +142,55 @@ static func pressure(book: PolicyBook) -> Dictionary:
 			IMMIGRATION:
 				values[WorldValues.IMMIGRATION] = \
 					float(values.get(WorldValues.IMMIGRATION, 0.0)) + IMMIGRATION_LIFT
+			_:
+				# The Provost's five (#173). Each presses on its own world value,
+				# so the sim reads a figure and never the policy book.
+				var knob := knob_key(policy.effect)
+				if not knob.is_empty():
+					values[knob] = float(values.get(knob, 0.0)) + worth_of(policy)
 	return values
+
+
+## The world value one of the Provost's knobs presses on.
+static func knob_key(effect: StringName) -> String:
+	match effect:
+		VOLUME:
+			return VOLUME_KEY
+		PROVISION:
+			return PROVISION_KEY
+		EXPERTS:
+			return EXPERTS_KEY
+		LIVESTOCK:
+			return LIVESTOCK_KEY
+		CURRICULUM:
+			# **The seam #168 cut and left open.** `Education` has read this key
+			# since the month it was written; this is what finally writes it.
+			return Education.CURRICULUM_KEY
+		_:
+			return ""
+
+
+## What a knob at its setting is actually worth.
+static func worth_of(policy: Policy) -> float:
+	if policy == null:
+		return 0.0
+	var setting := String(policy.params.get("level", String(NOTHING)))
+	return float(SETTING_STRENGTH.get(setting, 0.0)) \
+		* float(AT_A_GREAT_DEAL.get(String(policy.effect), 0.0))
+
+
+## What a knob at a setting costs the colony a month.
+##
+## Exposed so a letter can say the figure before the PC commits to it — **every
+## choice's mechanical effect is understandable from its wording** (SPEC §9.2).
+static func monthly_for(effect: StringName, setting: StringName) -> float:
+	return float(SETTING_STRENGTH.get(String(setting), 0.0)) \
+		* float(MONTHLY_AT_A_GREAT_DEAL.get(String(effect), 0.0))
+
+
+## Whether this effect is one of the Provost's, for a letter or a test to ask.
+static func is_a_knob(effect: StringName) -> bool:
+	return PROVOST_KNOBS.has(effect)
 
 
 ## What the Crown pays for a resource, after whatever its officers have been

@@ -1,0 +1,174 @@
+{
+  "id": "provost.two_smaller_matters",
+  "sender": "provost",
+  "type": "request",
+  "skippable": false,
+  "body": [
+    {
+      "text": "Two smaller matters, which I held back so as not to put five questions in one letter."
+    },
+    {
+      "text": "The first is stock. A colony that must buy its own beef is a colony paying for it twice, and the beasts travel badly but they do travel."
+    },
+    {
+      "text": "The second is the cheapest thing I shall ever ask you for, and the one I press hardest. Books for the schoolrooms. Every town has children in a shack somewhere with somebody standing in front of them; what they lack is not a schoolroom but anything worth teaching in it."
+    },
+    {
+      "text": "A library raises one town a great deal and costs a great deal. This raises all of them a little and costs almost nothing, which means a colony too poor to build anything at all can still have some learning in it.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "Dr Meakin — on your two smaller matters I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "content to decide them now"
+        },
+        {
+          "tone": "pleased",
+          "text": "glad you kept them short"
+        },
+        {
+          "tone": "annoyed",
+          "text": "aware there is always one more letter"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "livestock",
+        "prompt": "What comes over on four legs",
+        "options": [
+          {
+            "id": "livestock_none",
+            "label": "none",
+            "text": "No beasts. They can buy what they need when they are here.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_livestock",
+                "cost": 0,
+                "split": "none",
+                "level": "nothing"
+              }
+            }
+          },
+          {
+            "id": "livestock_little",
+            "label": "a little",
+            "text": "A few head, to start them off.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_livestock",
+                "cost": 53,
+                "split": "all",
+                "level": "a_little"
+              }
+            }
+          },
+          {
+            "id": "livestock_lot",
+            "label": "a lot",
+            "text": "Send stock. A colony that must buy its own beef is a colony paying twice.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_livestock",
+                "cost": 106,
+                "split": "all",
+                "level": "a_lot"
+              }
+            }
+          },
+          {
+            "id": "livestock_great",
+            "label": "a great deal",
+            "text": "Herds, and the men who know what to do with them.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "immigration_livestock",
+                "cost": 160,
+                "split": "all",
+                "level": "a_great_deal"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "curriculum",
+        "prompt": "Books for the schoolrooms",
+        "options": [
+          {
+            "id": "curriculum_none",
+            "label": "nothing",
+            "text": "They will manage as they have been managing.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "curriculum",
+                "cost": 0,
+                "split": "none",
+                "level": "nothing"
+              }
+            }
+          },
+          {
+            "id": "curriculum_little",
+            "label": "a little",
+            "text": "Something for the schoolrooms. It costs little enough.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "curriculum",
+                "cost": 12,
+                "split": "all",
+                "level": "a_little"
+              }
+            }
+          },
+          {
+            "id": "curriculum_lot",
+            "label": "a lot",
+            "text": "Books, and enough of them to go round.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "curriculum",
+                "cost": 23,
+                "split": "all",
+                "level": "a_lot"
+              }
+            }
+          },
+          {
+            "id": "curriculum_great",
+            "label": "a great deal",
+            "text": "Furnish every schoolroom in the colony properly. It is the cheapest thing in your letter.",
+            "effect": {
+              "set_knob": {
+                "to": "provost",
+                "effect": "curriculum",
+                "cost": 35,
+                "split": "all",
+                "level": "a_great_deal"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I am, sir, your obedient servant,"
+      }
+    ]
+  }
+}

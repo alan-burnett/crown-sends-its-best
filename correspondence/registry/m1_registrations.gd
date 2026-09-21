@@ -142,6 +142,25 @@ static func register_effects() -> void:
 		{"to": "contact", "effect": "string", "cost": "gold", "split": "string"},
 		ORDER_ENACT_POLICY,
 	)
+	# **The Provost's knobs are a different shape** (#173, `the-provost.md` §2),
+	# so they are a different effect rather than `enact_policy` with an optional
+	# field. His five run nothing / a little / a lot / a great deal: the letter
+	# names a **setting** and `PolicyEffects` decides what that setting is worth,
+	# which is the same declare-and-supply split the content pipeline uses
+	# everywhere else.
+	#
+	# It produces the same Order kind, because turning a knob **is** enacting a
+	# policy — the recurring cost, the split, the 3x asymmetry on non-payment and
+	# the renegotiation when the Crown stops paying are all `policy.md`'s and none
+	# of them is reimplemented here.
+	ContentRegistry.register_effect(
+		"set_knob",
+		{
+			"to": "contact", "effect": "string", "cost": "gold",
+			"split": "string", "level": "string",
+		},
+		ORDER_ENACT_POLICY,
+	)
 	# **The PC's only power over goods he has already promised** (#69). He cannot
 	# move a town's stockpile — SPEC §11.3 locks that towns run themselves — so he
 	# writes to the governor and the governor decides what priority to give it.

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "trigger.provost.who_comes",
+    "letter": "provost.who_comes",
+    "urgency": 0.8,
+    "cooldown": 240,
+    "conditions": [
+      {
+        "the_colony_has_lived": {
+          "months": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.provost.two_smaller_matters",
+    "letter": "provost.two_smaller_matters",
+    "urgency": 0.5,
+    "cooldown": 240,
+    "conditions": [
+      {
+        "he_holds_a_policy": {}
+      }
+    ]
+  }
+]
