@@ -146,7 +146,102 @@ The case actually worth accepting is the other one: a contact with two loud
 concerns **never reaches his quiet ones**. That is also right. A clergyman with a
 famine and a plague does not write about the library roof.
 
-## 7. Loyalty gates the kind of letter, not the number
+## 7. Which letter, and why severity is not tone
+
+A topic usually has several letters. *Give us a break* and *we cannot bear this*
+are the same concern at two pressures.
+
+Three things choose between them, in order:
+
+1. **Conditions** say whether a letter is **true** — ids into the code-side
+   registry, tested against the month's state. A letter that is not true is not a
+   candidate, whatever he feels.
+2. **Pressure** says whether he **bothers** (§3).
+3. Among letters that are both true and worth writing, **the one that speaks to
+   the highest pressure wins.**
+
+### That needs a field of its own
+
+**`urgency` is already taken.** SPEC §9.1 makes urgency one of tone's three
+inputs, alongside loyalty and personality, and the director feeds it straight
+into `tone_for`. It cannot also select severity.
+
+### The two axes are easy to confuse and must stay apart
+
+| | Comes from | Decides |
+| :--- | :--- | :--- |
+| **Severity** | pressure | **which letter** he sends |
+| **Tone** | loyalty, personality, urgency | **how it reads** |
+
+A clergyman at the end of his patience but fond of the PC sends the severe letter
+in a **dutiful** register. A trivial complaint from a man who despises him is the
+mild letter, **hatefully**.
+
+**Collapse the two and every serious letter is also an angry one**, which would
+cost the game its most useful character note: the people who like the PC are the
+ones who tell him how bad it is.
+
+## 8. Params: a contract between three things
+
+The director's other job. A letter is a shape with holes in it, and **the
+director is what fills them.**
+
+| | Declares |
+| :--- | :--- |
+| **The letter file** | the slots it needs — `{param:amount}` and the rest |
+| **The trigger** | where each one comes from |
+| **The director** | computes the value and supplies it |
+
+Shipped, from the Chancellor:
+
+```json
+"params": {
+  "amount": { "from": "scaled_world_value", "key": "colony_revenue",
+              "factor": 0.1, "minimum": 5, "maximum": 2000 }
+}
+```
+
+**The letter never re-decides what it is about.** It does not read the world, it
+does not know what `colony_revenue` is, and it cannot disagree with the trigger
+about what the month contained.
+
+That is what keeps §9.7's two engines apart, and it is why **a second language is
+a copied folder where only `text` changes** — the trigger holds no prose and the
+letter holds no logic.
+
+**The content validator is the enforcement**: every `{param:}` a letter uses must
+be declared, every source must resolve, every condition and effect id must be
+registered. A letter with a hole nobody fills is a build failure, not a blank in
+the post.
+
+## 9. When the gap never closes
+
+A rival duke is the test of §3, because **nothing in his world has to change for
+him to write.**
+
+His concern is that the PC has not paid him, and that gap is permanent — he is
+never satisfied, so it never closes. He spawns, his pressure is over the
+threshold at once, he demands tribute, his dampers fire, they decay, and he
+demands it again.
+
+**So the dampers are his entire schedule.** Nothing else paces him.
+
+That is the property worth naming, because it means one mechanism covers two
+kinds of correspondent without a special case:
+
+| | Paced by |
+| :--- | :--- |
+| A governor whose town is fine | **the world** — he writes when something happens |
+| A duke who will never be satisfied | **the dampers** — he writes on a rhythm |
+
+A contact sits somewhere on that line according to whether his gap can be closed
+at all, and **the director does not need to know which kind it is dealing with.**
+
+It also hands tribute frequency a single honest knob: **a duke's topic damper is
+how often he asks.** `rival-pressure.md` §3 has his band setting how *much* he
+demands; the damper is free to set how *often*, and the two move independently.
+
+## 10. Loyalty gates the kind of letter, not the number
 
 SPEC §9.6 suggests low-loyalty contacts should more often decide for themselves.
 The refinement is that this is **not a volume control**:
@@ -165,7 +260,7 @@ That is what makes §12's *he has lost the power to influence the world* somethi
 the player reads rather than merely suffers — and it removes any reward for being
 disliked, because the volume never drops.
 
-## 8. The budget, and what happens when it breaks
+## 11. The budget, and what happens when it breaks
 
 Budgets are by **calendar year**, locked to it rather than to the colony's size
 (§9.6): about **6** early, **12** mid, **20** late.
@@ -183,7 +278,7 @@ a director that ranked a famine above a charity appeal would be doing the
 player's job with worse information. A seeded draw silences nobody
 systematically; a sort would silence the same men in every run forever.
 
-## 9. 🔒 A culled letter is not an ignored one
+## 12. 🔒 A culled letter is not an ignored one
 
 **Culled** means the contact never consulted the PC and handled it himself.
 **No loyalty is lost.** A request becomes a polite no; a question he decides
@@ -194,7 +289,7 @@ alone, through the kernel, serving himself (§8.5, Seam C).
 The two look similar in the world and are opposite in the Relationship, which is
 why the distinction has to live here and not in the letter.
 
-## 10. A flooded desk is information
+## 13. A flooded desk is information
 
 The contact damper is **per contact, never per role**. So ending a policy that
 six churches cared about brings six letters, and **the PC must answer all six or
@@ -205,7 +300,7 @@ that upset a great many people produces a morning's post that says so, and
 letters of that kind are `skippable: false` precisely because escaping them
 through a cull would be escaping the decision.
 
-## 11. Tuning targets
+## 14. Tuning targets
 
 - Base thresholds by role, and how steeply redundancy raises them.
 - Damper sizes, and the topic damper measured **in writings** per §6.
@@ -214,8 +309,12 @@ through a cull would be escaping the decision.
 - How far personality may move a threshold before two contacts of a role stop
   reading as the same office.
 - The three budgets and the two year boundaries.
+- **A duke's topic damper**, which is how often he demands tribute (§9) — and
+  whether his band should move it as well as moving what he asks for.
+- The pressure bands a topic's letters speak to (§7), which decide how quickly a
+  contact escalates from a complaint to a plea.
 
-## 12. Open items
+## 15. Open items
 
 - **Whether a contact may write twice in a month at all.** Currently no — the
   contact damper takes his other topics down the moment he writes. A genuine
@@ -224,6 +323,12 @@ through a cull would be escaping the decision.
 - Whether the PC ever learns he was *not* written to. Currently never, and the
   consequences of `decide_alone` are how he finds out. That is probably right and
   is worth confirming in playtest rather than by argument.
+- **Whether a topic's letters need an authored severity ladder or can infer one.**
+  §7 gives each letter a pressure it speaks to, which is a new field. A cheaper
+  reading is that `conditions` already discriminate — a letter conditioned on a
+  15% duty is self-evidently the severe one — but that makes severity an accident
+  of how the conditions happened to be written, and two letters whose conditions
+  both hold would have no ordering at all.
 - Whether the news term should read events the contact could not plausibly know
   about. It currently reads the log; §11.2 locks that the map shows only what the
   colony knows, and the same question applies to a man's correspondence.
