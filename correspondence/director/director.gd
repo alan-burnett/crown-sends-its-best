@@ -138,6 +138,21 @@ func _only_what_they_want_to_say(
 		var record: Dictionary = content.record("letters", inbound.letter_id)
 		if not bool(record.get(LetterSchema.KEY_SKIPPABLE, true)):
 			# The natives have attacked and the governor wants orders. It goes.
+			#
+			# 🔒 **An unskippable letter always wins selection** (SPEC §10.3).
+			# It is kept before pressure is consulted and it does not touch
+			# `spoken`, so it neither loses its place to a routine question nor
+			# spends the one letter the man had this month.
+			#
+			# The standing warning is the case that matters: it is unskippable
+			# and its trigger id sorts *after* the Chancellor's routine question,
+			# so a rule that took the first true letter a contact had would lose
+			# a letter §10.3 guarantees — and `crown-standing.md` §3 makes it a
+			# gate, so the Crown could then never refuse either.
+			#
+			# #257 is about to rank a contact's letters against one another.
+			# `test_must_send_precedence` is what stops that ranking reaching a
+			# letter that was never a candidate for ranking.
 			kept.append(inbound)
 			continue
 
@@ -161,6 +176,8 @@ func _only_what_they_want_to_say(
 	for sender in spoken:
 		run.wrote_about["%s/%s" % [sender, spoken[sender]]] = run.world.month
 	return kept
+
+
 
 
 ## Whether this letter arrived too recently to arrive again.

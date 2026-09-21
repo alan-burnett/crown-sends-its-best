@@ -324,6 +324,6 @@ what the colony *does* next is what moves it.
 
 - **How much of the governor's disposition his opening letter gives away** is not
   this document's to decide, and not the letter's either. **It gives away exactly
-  what his tone gives away** — which is why `tone.md` §6 now has a register, so
+  what his tone gives away** — which is why `tone.md` §7 now has a register, so
   that two governors rolled differently open a run in different voices. Nothing
   here digs into a personality vector to announce what sort of man he is.
