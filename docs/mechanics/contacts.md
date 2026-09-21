@@ -106,6 +106,37 @@ afterwards (`rebel-sentiment.md` §4). And **clarity means saying exactly what y
 want is a real choice**: an order with no figure in it leaves room to decide what
 the PC must have meant.
 
+### 🔒 Harsh is a second axis, not a sixth tone
+
+**The PC chooses both, separately.** Harshness is a yes-or-no the wizard asks
+after the tone is set, and the two are orthogonal: five tones times harsh-or-not
+is **ten registers**, and every one of them is a letter somebody might send.
+
+**Saying yes adds a sentence.** Nothing else about the letter changes, and the
+sentence is a tone-keyed `{insert:}` fragment — the same machinery every other
+tone-varying line uses:
+
+> **pleased** — *Please see to this matter most promptly, lest we allow room for
+> unpleasantness.*
+> **annoyed** — *Failure to meet this requirement will be met with most dire
+> consequences.*
+
+Saying no adds nothing at all. **A harsh letter is a letter with one more line in
+it**, and that line is what the governor's town remembers.
+
+### Harsh and urgency are on opposite sides of the desk
+
+They sound alike and are easy to confuse. They have nothing to do with each
+other:
+
+| | Set by | Direction | Feeds |
+| :--- | :--- | :--- | :--- |
+| **harsh** | **the player**, per letter | **outbound** | compliance, and rebel sentiment |
+| **urgency** | **the trigger**, authored | **inbound only** | the *sender's* choice of tone (§9.1) |
+
+**The PC never sets urgency and a contact never sets harshness.** A dev who
+wires either across the desk has crossed two unrelated systems.
+
 ### 🔒 Compliance asks whether he engages, not whether he agrees
 
 **None of these reads what the order is for.** `cost` measures gold, so an order
