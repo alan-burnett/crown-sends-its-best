@@ -33,20 +33,20 @@ world.
 - **Shallows cut** around the coast, which is what separates *sea* from *ocean*
   and therefore separates a tile worth working from one worth almost nothing.
 
-## 3. 🔒 A map must be able to answer every request
+## 3. 🔒 One guarantee, and it is the only one
 
-§4 lets the player state what he wants from his ground. **A seed that cannot
-honour one of those requests is a broken seed, not an unlucky one.**
+**Every map must offer at least one site with shallow sea adjacent to workable
+land** (§6). A seed that cannot is a broken seed, not an unlucky one, and mapgen
+repairs it.
 
-Generation therefore guarantees, and mapgen retries or repairs until it does:
+**Nothing else needs guaranteeing**, because §4's requests never demand terrain the
+map may not have. A request **tilts the score of a generally good site**; it does
+not go hunting for a rare one. And the single request that *does* need a
+particular tile gets it by fiat rather than by search.
 
-- at least one **coastal mountain**, or the defensive request cannot be met
-- enough contiguous **grassland and plains** for the cultivation request
-- enough **forest and mountain** together for the economic one
-- **shallow sea** adjacent to workable land, which §5 requires of every start
-
-That last is the one to watch: shallows are cut after the land is grown, so a map
-can in principle produce a coastline with no sea worth working.
+Watch the shallows: they are cut **after** the land is grown, so a map can in
+principle produce a coastline with only ocean beside it and nothing worth
+working.
 
 ## 4. You state what you want. You do not choose a tile
 
@@ -63,23 +63,86 @@ It is also the only version that is honestly playable. **A coordinate means
 nothing to a player who has never played**, and three of them mean nothing three
 times.
 
+### 🔒 A request tilts a good site. It does not pick a strange one
+
+There is a **base score** for a site — what the ground around it is worth, with
+**desert always the lowest-valued terrain there is**. A request adds weight on top
+of that; it never replaces it.
+
+So *prioritise sea* does not find the most maritime tile on the map regardless of
+what surrounds it. **It finds a good site that happens to lean seaward**, and a
+player who asks for one thing is never handed somewhere bad at everything else.
+
 ### The four requests
 
-| | Values highly | Values moderately |
-| :--- | :--- | :--- |
-| **"We want quick growth"** | **sea** | grassland, plains |
-| **"We want economic opportunity"** | **forest, mountains** | grassland, plains |
-| **"We want a defensive position"** | **mountain — the town stands on one** | nearby mountain and forest |
-| **"We want long-term cultivation"** | **grassland, plains, mountains** | — |
+| | Tilts toward |
+| :--- | :--- |
+| **"We want quick growth"** | **sea** |
+| **"We want economic opportunity"** | **forest, mountains** |
+| **"We want long-term cultivation"** | **grassland, plains, mountains** |
+| **"We want a defensive position"** | **nothing — see below** |
 
-Each is a **weight vector over terrain**, scored across the tiles a town would
-work. Adding a request is adding a row, not a branch — the same shape as a
+Each tilt is a **weight vector over terrain**, scored across the tiles a town
+would work. Adding a request is adding a row, not a branch — the same shape as a
 governor's intent profiles in `governor-objectives.md` §5.
 
-**The defensive request is the only one that constrains the town's own tile.** The
-others describe the country around it.
+### The defensive request is answered by fiat
 
-## 5. 🔒 Every starting town has sea within reach
+It takes the **highest-scoring site with no tilt at all**, and then **the tile
+beneath the town is made a mountain.**
+
+No search, no guarantee, no rare-terrain hunt. **The colony gets its high ground
+and no say in what surrounds it** — which is honest, since it asked for a
+position rather than a country, and the site underneath was a good one before the
+mountain arrived.
+
+## 5. 🔒 The player never sees the site, because he is asked by letter
+
+**He does not see where he is going and he does not approve it.** Showing him
+invites re-rolling until the map looks pretty, which is choosing a tile by the
+back door and undoes §4 entirely.
+
+Instead, **the first thing that happens in a run is a letter.**
+
+### The Governor's opening letter
+
+The founding governor writes before he has landed anywhere. He introduces
+himself, the PC learns a little of **what sort of man he is**, and he speaks about
+**the supplies and the mandate the PC chose** — addressing him by the name and
+title the PC picked, which is the first and best use of §5's flavour.
+
+Then he asks his two questions: **what is this colony for, and how close do we
+settle to the tribes.**
+
+**It is a simpler letter than most: no tone and no harshness.** The PC is not
+granting, denying, urging or leaning on anybody. He is answering a question from
+a man he has not met, and the reply wizard should offer nothing but the two
+choices.
+
+### This is the same act as any other founding
+
+`founding-towns.md` §5: *the governor sets out toward an intended region, and the
+PC's letter can shift him while he travels.* **The opening is that, at the start
+of the run** — an expedition in transit, and the PC's first letter directing where
+it lands.
+
+Which means the colony begins with **no towns and one expedition**, and the
+Overrun test counting expeditions (`endings.md` §1) is what stops month one being
+a fail condition. That is not a coincidence; it is the same rule.
+
+### Where the other decisions live
+
+| | Chosen |
+| :--- | :--- |
+| Seed, PC name and title, portrait, colour, **perk and quirks**, **mandate**, **the grant's split** | in the **main menu**, before the run loads |
+| **The site request** and **the tribes** | **turn one, by letter** |
+
+**Acceptable fallback.** If a world month with no towns proves awkward — a colony
+month has a great deal to say about towns and there are none — putting both
+questions in the run-start menu beside mandate and supplies is fine. **The letter
+is better and it is not worth a fortnight.**
+
+## 6. 🔒 Every starting town has sea within reach
 
 **Not negotiable, whatever was asked for.**
 
@@ -102,7 +165,7 @@ eventually come by sea. **Run start does not say so**, and should not — the pl
 who asks for quick growth is buying a shoreline, and finding out what a shoreline
 costs is a thing that happens in year six.
 
-## 6. The real question is speed against ceiling
+## 7. The real question is speed against ceiling
 
 The four requests read as flavour and are not. **They are a choice about how soon
 the colony eats and how high it can climb**, and the tree is what makes them
@@ -131,7 +194,7 @@ by being told.
 supply wood, stone and ore — the things everything else is *built* from — so that
 colony can raise anything and must buy or farm its dinner.
 
-## 7. The natives are placed after the site, and relative to it
+## 8. The natives are placed after the site, and relative to it
 
 **The order matters and it is the whole of how the second question is honoured.**
 
@@ -175,7 +238,7 @@ inoffensive ground first.
 choose its neighbours' land — it was put there. Standing starts where it starts;
 what the colony *does* next is what moves it.
 
-## 8. Tuning targets
+## 9. Tuning targets
 
 - The four weight vectors, and whether a request reliably produces a site a
   player would recognise as answering it.
@@ -185,17 +248,15 @@ what the colony *does* next is what moves it.
 - Whether three requests would do. Four is a lot to read on a phone before a
   player knows what any of it means.
 
-## 9. Open items
+## 10. Open items
 
-- **Whether the player should see the chosen site before committing.** Showing it
-  makes the request legible; it also invites re-rolling until the map gives
-  something that looks nice, which is choosing a tile by the back door.
 - **What the second and third tribes do.** The question places the nearest; the
   others fall where the map allows, and nothing says whether that should be
   deliberate too.
-- Whether **desert** should feature in any request. It is the one terrain no
-  profile wants, which either makes it the map's honest bad ground or makes it
-  content nobody meets.
-- Whether the **defensive** request should be available at all before the player
-  has met anything that attacks him. It is the only one whose payoff is invisible
-  for several years.
+- Whether the **defensive** request should be offered at all before the player has
+  met anything that attacks him. It is the only one whose payoff is invisible for
+  several years, and the only one a first-time player cannot possibly evaluate.
+- **How much of the governor's disposition his opening letter should give away.**
+  It is the player's only read on the man before he has to trust him, and
+  `contacts.md` makes personality data rather than a label — so this is a question
+  about prose, not about what the letter knows.
