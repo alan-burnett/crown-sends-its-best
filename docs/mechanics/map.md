@@ -21,17 +21,79 @@ colony is meant to face a legible question about its ground, not a spreadsheet.
 What each yields is `tiles-and-improvements.md` §1, and not repeated here. This
 document is about **how the world is made and how a colony is placed in it.**
 
-## 2. Generation
+## 2. 🔒 The world is made first. The colony arrives into it
 
-A map is grown from the seed, and §16.1 locks that the same seed produces the same
-world.
+**The map is not a surface for towns to be placed on.** It is a country, made on
+its own terms, and the colony is put down somewhere in it afterwards.
+
+That ordering is the whole of whether the map reads as a place. A world generated
+to suit a colony produces sites; **a world generated as geography produces a
+swath of desert, a ridge of mountains, a forest with grassland dotted through
+it** — and then somebody finds a place to land in it.
+
+§16.1 locks that the same seed produces the same world.
+
+### What is wrong with what ships
+
+Terrain is currently a **per-tile weighted draw** — 30% plains, 28% grassland, 27%
+forest, 10% mountains, 5% desert, with a gentler table near the coast.
+
+Every tile is rolled **independently of its neighbours.** That does not make
+country, it makes **confetti**: a mountain beside a desert beside a forest, no
+ranges, no regions, and a desert that is five per cent of everywhere rather than
+a place.
+
+### Two fields, and the geography falls out of them
+
+**Elevation** and **moisture**, each a continuous field across the grid.
+
+| | |
+| :--- | :--- |
+| **Elevation** | high ground is mountains; the sea floor is ocean, and shallow water near land is sea |
+| **Moisture** | dry is desert, open country is grassland and plains, wet is forest |
+
+Nothing is placed. **A ridge of mountains is a ridge because elevation runs in
+ridges**, and a forest is a region because moisture is. The seven terrains of
+§1 are read off two numbers, and their arrangement is a consequence rather than
+an authoring job.
+
+### Rain shadow, which is why a desert is where it is
+
+**Moisture falls away behind high ground.** That single rule gives the driest
+country a reason to sit where it does — inland, behind a range, in the lee of the
+weather — instead of appearing as scattered tiles nobody can explain.
+
+It also gives the map its shape without a second system: **wet coasts, a spine,
+and dry country behind it.**
+
+### Regions are not uniform, and that is the point
+
+**A forest has grassland dotted through it.** Where the moisture field dips inside
+a wet region, the terrain dips with it, and clearings appear without anybody
+authoring clearings.
+
+That is the difference between a region and a blob, and it comes free: a little
+noise on both fields is all it takes. **Homogeneous patches read as a map editor.
+Mixed ones read as country.**
+
+### And the rest
 
 - **Two to four landmasses**, grown to a share of the grid, with a compactness
   term so they read as country rather than as noise.
-- **Terrain painted by weighted draw**, with **coastal and inland tables that
-  differ** — so a shoreline is not simply the inland map with water beside it.
-- **Shallows cut** around the coast, which is what separates *sea* from *ocean*
-  and therefore separates a tile worth working from one worth almost nothing.
+- **Shallows cut** around the coast, separating *sea* from *ocean* — and therefore
+  separating a tile worth working from one worth almost nothing.
+
+### Seeds will differ in character, not merely in layout
+
+A world made on its own terms **will not serve all four of §4's requests equally.**
+One seed has a great belt of forest and mountain and answers *economic
+opportunity* handsomely; another is open country from end to end and has little to
+offer it.
+
+**That is correct and should not be corrected.** §4 finds the best site available
+for what was asked, and sometimes the best available is modest. A generator that
+guaranteed every request a fine answer would be back to building a surface for
+towns.
 
 ## 3. 🔒 One guarantee, and it is the only one
 
@@ -246,6 +308,12 @@ what the colony *does* next is what moves it.
 
 - The four weight vectors, and whether a request reliably produces a site a
   player would recognise as answering it.
+- **The scale of the two fields** — how many tiles a ridge runs for, how wide a
+  desert gets. Tuned to make a 34 by 26 grid read as a continent, and **not** to
+  any town's influence area, which is a consequence of where a town lands rather
+  than a target to hit.
+- How much noise the fields carry. Too little and regions are blobs; too much and
+  the confetti comes back wearing two fields instead of one.
 - **Medium and far**, in tiles, against how fast a colony's influence grows.
 - The generation guarantees in §3, and how often a seed needs repairing to meet
   them — a high rate means the weights are wrong, not the guarantees.
