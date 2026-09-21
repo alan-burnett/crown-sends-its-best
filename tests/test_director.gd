@@ -68,12 +68,34 @@ func test_a_trigger_whose_conditions_fail_does_not_fire() -> void:
 			"the Chancellor wrote although revenue was high")
 
 
-func test_a_trigger_whose_conditions_hold_fires() -> void:
-	run.world.values["colony_revenue"] = 200.0
+func test_a_trigger_whose_conditions_hold_and_whose_sender_minds_fires() -> void:
+	# 🔒 **Conditions are no longer enough** (#254). They say whether a letter is
+	# *true*; pressure says whether he bothers. This test used to assert that a
+	# true letter fires, which is the gate this milestone replaced with a want.
+	run.world.values["colony_revenue"] = 4.0
+	run.world.values[WorldValues.REVENUE_BASELINE] = 60.0
 	var ids: PackedStringArray = PackedStringArray()
 	for inbound in machine.director.compose_inbox(run):
 		ids.append(inbound.letter_id)
 	assert_true(ids.has("chancellor.how_to_answer"), "got %s" % ids)
+
+
+func test_a_true_letter_from_a_contented_man_does_not_fire() -> void:
+	# The other half, and the point of the ticket. The arrears letter is *true*
+	# whenever the returns are under the bar — but a Chancellor whose colony is
+	# returning handsomely has nothing he wants to say about the returns.
+	run.world.values["colony_revenue"] = 300.0
+	run.world.values[WorldValues.REVENUE_BASELINE] = 60.0
+
+	var context := LetterContext.new(run.world, run.contact(&"chancellor"))
+	context.measures = ColonyMeasures.for_contact(run, run.contact(&"chancellor"))
+	assert_true(ContentRegistry.test_condition(
+		"world_value_below", {"key": "colony_revenue", "value": 1400}, context),
+		"the fixture did not leave the letter true")
+
+	for inbound in machine.director.compose_inbox(run):
+		assert_ne(inbound.letter_id, "chancellor.how_to_answer",
+			"a contented Chancellor wrote to complain about the returns")
 
 
 func test_selection_is_deterministic() -> void:

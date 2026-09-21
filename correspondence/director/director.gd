@@ -102,11 +102,65 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 			continue
 
 		var context := _context(run, contact)
+		# 🔒 **Conditions still gate** (#254). They say whether a letter is
+		# *true*; pressure says whether he *bothers*. A letter that is not true is
+		# never a candidate whatever he feels about the world.
 		if not _conditions_hold(trigger, context):
 			continue
 
 		fired.append(_inbound(trigger, letter, contact, context, run))
-	return fired
+	return _only_what_they_want_to_say(fired, run)
+
+
+## Thin the true letters down to the ones their senders actually want to send.
+##
+## 🔒 **A contact writes one letter per month at most** (#254, §3), and only when
+## a topic he cares about clears his threshold. A man with three grievances
+## writes about the worst of them.
+##
+## 🔒 **A must-send letter bypasses pressure** (§2). `skippable: false` already
+## meant *never culled*; it now also means *ignores the dampers and the
+## threshold*, because there is no deliberation about whether to trouble the
+## Crown with the natives attacking. **No new field.**
+##
+## Which of his true letters he sends when he does write is `urgency`'s for now
+## and severity's in #257 — a topic usually has several letters, and the one he
+## picks should be the strongest whose bar the pressure clears rather than the
+## loudest trigger in the file.
+func _only_what_they_want_to_say(
+	fired: Array[InboundLetter],
+	run: RunState,
+) -> Array[InboundLetter]:
+	var kept: Array[InboundLetter] = []
+	var spoken: Dictionary = {}
+
+	for inbound in fired:
+		var record: Dictionary = content.record("letters", inbound.letter_id)
+		if not bool(record.get(LetterSchema.KEY_SKIPPABLE, true)):
+			# The natives have attacked and the governor wants orders. It goes.
+			kept.append(inbound)
+			continue
+
+		var sender := String(inbound.sender)
+		if spoken.has(sender):
+			continue
+
+		var contact := run.contact(inbound.sender)
+		var felt := Pressure.for_contact(
+			contact, inbound.measures, run.log, run.world.month, run.wrote_about)
+		var loudest := Pressure.loudest(felt)
+		if loudest.is_empty():
+			continue
+
+		spoken[sender] = String(loudest["topic"])
+		kept.append(inbound)
+
+	# **What he wrote about, so he has less to say about it next month.** Written
+	# here rather than in `Pressure` so the damper records a letter that was
+	# actually sent, not one that merely could have been.
+	for sender in spoken:
+		run.wrote_about["%s/%s" % [sender, spoken[sender]]] = run.world.month
+	return kept
 
 
 ## Whether this letter arrived too recently to arrive again.

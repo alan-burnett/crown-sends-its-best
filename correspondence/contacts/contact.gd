@@ -38,6 +38,9 @@ const ROLE_DIPLOMAT: StringName = &"diplomat"
 ## interest in a consideration. Tuning: `docs/mechanics/deliberation.md` §9 flags
 ## how far weights should be allowed to spread before a contact reads as broken
 ## rather than characterful.
+## What a man wants of a topic he has said nothing about: the best there is.
+const WANTS_THE_BEST: float = 1.0
+
 const WEIGHT_MIN: float = 0.5
 const WEIGHT_MAX: float = 1.6
 
@@ -124,6 +127,18 @@ var leans: Dictionary = {}
 ## "going well" half belongs to the measure registry (#10).
 var cares_about: PackedStringArray = PackedStringArray()
 
+## **What he would be content with**, per topic he cares about (#254).
+##
+## Normalised like the measure itself, so `0.2` means *he wants the war nearly
+## over* and `1.0` means *as good as it gets*. Absent means the latter, which is
+## true of nearly everybody: a governor wants his people fed and there is no
+## level of fed he would call too much.
+##
+## 🔒 **Not a second list of concerns.** The concerns are `cares_about`; this is
+## a property of one he already has, and a topic here that he does not care about
+## is read by nothing.
+var wants: Dictionary = {}
+
 ## **What kind of manner moves him** (#260, `tone.md` §5): vanity, mettle, pity.
 ##
 ## Kept beside the weights rather than folded into them, because the three are
@@ -149,6 +164,15 @@ func lean_for(topic: String) -> float:
 	return clampf(float(leans.get(topic, 0.0)), -1.0, 1.0)
 
 
+## What he would be content with, on a topic he cares about (#254).
+##
+## **The best there is, unless he has said otherwise.** A governor wants his
+## people fed and there is no level of fed he would call too much; the Marshal
+## wants his war over, and says so.
+func want_for(topic: String) -> float:
+	return clampf(float(wants.get(topic, WANTS_THE_BEST)), 0.0, 1.0)
+
+
 # --- Construction ----------------------------------------------------------
 
 ## A fixed contact, from a data file. Crown Officers take this path, so adding
@@ -168,6 +192,7 @@ static func from_data(record: Dictionary) -> Contact:
 	# **Authored for a named character**, filled in at the middle for anyone the
 	# data is silent about — a contact with no temperament at all would be one
 	# the tone considerations could never distinguish.
+	contact.wants = record.get("wants", {}).duplicate()
 	contact.traits = Temperament.from_record(record.get("traits", {}))
 	Temperament.write_into(contact.traits, contact)
 	contact.relationship = Relationship.new(
@@ -225,6 +250,7 @@ func to_dict() -> Dictionary:
 		"travelling_until": travelling_until,
 		"leans": leans.duplicate(),
 		"cares_about": cares_about.duplicate(),
+		"wants": wants.duplicate(),
 		"traits": traits.duplicate(),
 		"relationship": relationship.to_dict(),
 	}

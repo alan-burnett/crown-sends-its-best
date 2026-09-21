@@ -174,6 +174,14 @@ var promises: PromiseBook = null
 ## repeating itself.
 var letters_sent: Dictionary = {}
 
+## `"<contact>/<topic>" -> the month he last wrote about it` (#254).
+##
+## **The topic damper's memory.** A man who wrote about the beer duty in the
+## spring has less to say about it in the summer, and this is the only record of
+## that — kept beside `letters_sent` because the two answer different questions:
+## one is *has this letter been sent lately*, the other is *has he had his say*.
+var wrote_about: Dictionary = {}
+
 ## This turn's desk.
 var inbox: Array[InboundLetter] = []
 var post: Post = null
@@ -419,6 +427,7 @@ func to_dict() -> Dictionary:
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"letters_sent": letters_sent.duplicate(),
+		"wrote_about": wrote_about.duplicate(),
 		"post": post.to_dict(),
 	}
 
@@ -459,6 +468,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.setup = RunSetup.from_dict(data.get("setup", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
+	run.wrote_about = data.get("wrote_about", {}).duplicate()
 
 	var saved_contacts: Dictionary = data.get("contacts", {})
 	var ids: Array = saved_contacts.keys()
