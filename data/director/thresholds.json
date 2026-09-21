@@ -1,0 +1,23 @@
+{
+  "id": "thresholds",
+  "note": "How much a man has to mind before he writes. The director's section 4: pressure is about the world and the threshold is about the man. Base is per role - a governor reports often and the Chancellor almost never. Redundancy raises it for each further contact of a role, which is the only volume control that scales with a colony - but only for roles the colony accumulates. The Crown's officers share one role and are four distinct offices that do different work, so a fourth of them is not a third clergyman. All of it is tuning.",
+  "base": {
+    "governor": 22.0,
+    "diplomat": 26.0,
+    "institutional": 30.0,
+    "commander": 28.0,
+    "crown_officer": 38.0,
+    "rival": 44.0,
+    "patron": 34.0
+  },
+  "default": 30.0,
+  "redundancy_step": 0.45,
+  "redundancy_ceiling": 2.6,
+  "personality_spread": 0.35,
+  "redundant_roles": [
+    "governor",
+    "institutional",
+    "commander",
+    "patron"
+  ]
+}

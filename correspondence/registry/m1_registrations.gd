@@ -96,6 +96,10 @@ static func load_resources(content: ContentDatabase) -> void:
 
 	if content.has_record("crown", "demands"):
 		DemandSchedule.load_from(content.record("crown", "demands"))
+	# What a man has to mind before he writes (#255). Per role, in data, because
+	# *enough to write about* is a harness sweep rather than a judgement.
+	if content.has_record(Threshold.COLLECTION, Threshold.RECORD):
+		Threshold.load_from(content.record(Threshold.COLLECTION, Threshold.RECORD))
 
 
 static func register_all() -> void:

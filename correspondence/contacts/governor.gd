@@ -158,6 +158,12 @@ static func _draw(id: StringName, streams: RngStreams, title: String) -> Contact
 	# would take being leaned on identically.
 	contact.traits = Temperament.draw(rng)
 	Temperament.write_into(contact.traits, contact)
+	# **How readily he reaches for a pen** (#255). Drawn here as well as in
+	# `Contact.generate` because a governor is built on his own path — and a
+	# roster where every man of a role shared one temperament would be one where
+	# redundancy was the only thing telling them apart.
+	contact.writes_readily = rng.randf_range(
+		Contact.WRITES_READILY_MIN, Contact.WRITES_READILY_MAX)
 
 	var topics := LEANED.duplicate()
 	topics.sort()

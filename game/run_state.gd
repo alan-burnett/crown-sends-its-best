@@ -348,6 +348,11 @@ func contact(id: StringName) -> Contact:
 
 
 func add_contact(entry: Contact) -> Contact:
+	# 🔒 **When he arrived**, for redundancy to rank by (#255). Set here because
+	# this is the one door into the roster, so a contact cannot join without the
+	# answer being recorded.
+	if entry != null and entry.known_since <= 0:
+		entry.known_since = world.month if world != null else 0
 	contacts[String(entry.id)] = entry
 	return entry
 

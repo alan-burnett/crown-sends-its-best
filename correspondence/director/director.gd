@@ -133,6 +133,10 @@ func _only_what_they_want_to_say(
 ) -> Array[InboundLetter]:
 	var kept: Array[InboundLetter] = []
 	var spoken: Dictionary = {}
+	# 🔒 **Redundancy is the only volume control that scales** (#255). Computed
+	# once for the roster rather than per man, because the answer is about the
+	# roster and a wide colony has a great many men in it.
+	var ranks := Threshold.ranks_in(run.contacts)
 
 	for inbound in fired:
 		var record: Dictionary = content.record("letters", inbound.letter_id)
@@ -163,7 +167,8 @@ func _only_what_they_want_to_say(
 		var contact := run.contact(inbound.sender)
 		var felt := Pressure.for_contact(
 			contact, inbound.measures, run.log, run.world.month, run.wrote_about)
-		var loudest := Pressure.loudest(felt)
+		var loudest := Pressure.loudest(
+			felt, Threshold.for_contact(contact, int(ranks.get(sender, 0))))
 		if loudest.is_empty():
 			continue
 
