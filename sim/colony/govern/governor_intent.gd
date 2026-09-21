@@ -135,6 +135,47 @@ const AXES: Array[String] = ["capacity", "comfort", "defence", "expansion", "foo
 
 
 ## How much an intent values one axis.
+## How far apart two intents are, from nought to one (#213).
+##
+## **Measured off the profile table and nothing else.** The table already *is*
+## what an intent means, so "settling a new town and securing survival want
+## opposite things" falls out of the numbers rather than being written down
+## somewhere a later edit could contradict. Adding an intent adds a row and this
+## keeps working.
+##
+## Normalised by the widest gap the table can produce, so the figure means the
+## same thing whatever the axes are worth.
+static func distance_between(a: StringName, b: StringName) -> float:
+	if String(a).is_empty() or String(b).is_empty() or a == b:
+		return 0.0
+	var first: Dictionary = PROFILES.get(a, {})
+	var second: Dictionary = PROFILES.get(b, {})
+	if first.is_empty() or second.is_empty():
+		return 0.0
+
+	var axes: Array = first.keys()
+	axes.sort()
+	var apart := 0.0
+	for axis in axes:
+		apart += absf(float(first[axis]) - float(second.get(axis, 0.0)))
+	return clampf(apart / maxf(0.0001, _widest_gap()), 0.0, 1.0)
+
+
+## The largest distance any two profiles in the table are apart, unnormalised.
+static func _widest_gap() -> float:
+	var widest := 0.0
+	for a in IN_ORDER:
+		for b in IN_ORDER:
+			if a == b:
+				continue
+			var apart := 0.0
+			var first: Dictionary = PROFILES.get(a, {})
+			for axis in first:
+				apart += absf(float(first[axis]) - float(PROFILES.get(b, {}).get(axis, 0.0)))
+			widest = maxf(widest, apart)
+	return widest
+
+
 static func value_of(intent: StringName, axis: String) -> float:
 	var profile: Dictionary = PROFILES.get(intent, {})
 	return float(profile.get(axis, 0.0))

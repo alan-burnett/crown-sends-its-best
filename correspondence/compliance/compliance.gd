@@ -93,6 +93,22 @@ static func resolve(
 		# way to be obeyed and the PC pays for it twice — in the governor's regard
 		# below, and in what the town holds against the Crown afterwards.
 		"harsh": order.harsh,
+		# **How far the letter cuts against what he already wants** (#213).
+		#
+		# 🔒 It changes the **manner** of his answer, never the decision. A
+		# governor whose town is threatened, told to chase profit, is markedly
+		# likelier to reinterpret the instruction into something he can live with
+		# — *"I have applied Your Grace's instruction regarding our profits to the
+		# timber we shall need for the palisade"* — and that letter is
+		# unreachable if compliance cannot tell an agreeable order from an
+		# unwelcome one.
+		#
+		# **Compliance still does not decide the intent.** `contacts.md` §3 locks
+		# the split: compliance decides whether he listens, phase 8's
+		# deliberation decides what he concludes, and collapsing them would put
+		# the PC's letter and the governor's judgement in one scoring pass and
+		# stop the argument being an argument.
+		"dissonance": dissonance_of(order, rebel),
 	}
 
 	var decision := Deliberation.choose(contact, _candidates(), context)
@@ -287,6 +303,24 @@ static func cost_of(order: Order) -> float:
 ## than claiming your letter admitted of more than one reading. Judging it vague
 ## made every governor reinterpret or refuse every priority he was ever sent,
 ## which read as a man who could not follow plain English.
+## How far an order cuts against what the contact currently wants (#213).
+##
+## **Zero where nothing applies**, exactly as harshness is zero for a mild
+## letter. Only `urge_intent` can be read this way today: it is the one order
+## kind that names what the PC wants the town to be *for*, which is the thing a
+## governor can hold a contrary opinion about. Another kind that acquires an
+## answer to "against his judgement" adds a branch here and nothing else.
+static func dissonance_of(order: Order, town: Town) -> float:
+	if order == null or town == null:
+		return 0.0
+	if order.kind != M1Registrations.ORDER_URGE_INTENT:
+		return 0.0
+	var urged := StringName(order.get_param("intent", ""))
+	if not GovernorIntent.is_intent(urged):
+		return 0.0
+	return GovernorIntent.distance_between(urged, town.intent)
+
+
 static func vagueness_of(order: Order) -> float:
 	if order.kind == M1Registrations.ORDER_URGE_INTENT:
 		return 0.0
