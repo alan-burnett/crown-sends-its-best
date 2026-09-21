@@ -1,0 +1,22 @@
+{
+  "id": "governor.setting_out",
+  "sender": "governor",
+  "type": "report",
+  "skippable": false,
+  "params": { "town": "town" },
+  "body": [
+    { "text": "You will not know my name and I did not expect to be writing to you. The people who are leaving {param:town} chose me on Tuesday, in the yard, by a show of hands." },
+    { "text": "We are some ninety miles from anywhere by the time you read this. I shall write again when there is a town to write from.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "I am told I should write to you. So: I have written to you.",
+      "only_tones": ["annoyed", "hateful"] },
+    { "text": "I am given to understand you may have views about where we settle. I shall be glad of them if they arrive before we stop walking.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "I am given to understand you may have views about where we settle. They will find me on the road, or they will not.",
+      "only_tones": ["annoyed", "hateful"] },
+    { "text": "I have never governed anything. Neither, I am reliably informed, had the man who governs the place we are leaving.",
+      "only_tones": ["annoyed", "hateful"] },
+    { "text": "I have never governed anything, and I would rather you heard that from me than worked it out.",
+      "only_tones": ["dutiful", "pleased", "desperate"] }
+  ]
+}

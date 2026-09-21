@@ -161,11 +161,23 @@ static func launch(town: Town, context: ColonyContext) -> ExpeditionParty:
 	# while he travels. A site fixed here would make that letter a month too late.
 	party.region = region_for(town, context)
 	party.preference = SitePreference.GOOD_GROUND
+
+	# 🔒 **Elected the month it launches, not the month it arrives** (#178, §4).
+	# The PC has no say whatever in who he is, and his regard for the Crown starts
+	# where the man who sent him stood — which is what makes disloyalty propagate
+	# geographically, a colony growing a sour second town before the PC has done
+	# anything wrong at all.
+	var elected := Governor.generate_for(
+		party, context.contacts.get(String(town.governor_id)), context.streams)
+	party.governor = elected.id
+	context.contacts[String(elected.id)] = elected
+
 	context.parties.append(party)
 
 	context.log.emit(EVENT_LAUNCHED, town.id, context.state.month, {
 		"town": String(town.id),
 		"expedition": String(party.id),
+		"governor": String(elected.id),
 		"people": going,
 		"gold": purse,
 		"cargo": carried,

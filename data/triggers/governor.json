@@ -367,5 +367,23 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.governor.setting_out",
+    "letter": "governor.setting_out",
+    "urgency": 0.7,
+    "cooldown": 120,
+    "params": {
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "he_has_just_been_elected": {
+          "within": 2
+        }
+      }
+    ]
   }
 ]

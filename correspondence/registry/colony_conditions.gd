@@ -121,6 +121,10 @@ static func register_all() -> void:
 		ColonyConditions.the_colony_has_lived,
 	)
 	ContentRegistry.register_condition(
+		"he_has_just_been_elected", {"within": "integer"},
+		ColonyConditions.he_has_just_been_elected,
+	)
+	ContentRegistry.register_condition(
 		"he_holds_a_policy", {}, ColonyConditions.he_holds_a_policy
 	)
 	ContentRegistry.register_condition(
@@ -143,6 +147,24 @@ static func register_all() -> void:
 		"a_neighbour_declared", {"within": "integer"},
 		ColonyConditions.a_neighbour_declared,
 	)
+
+
+## Whether this sender is a governor-elect who has only just set out (#178).
+##
+## 🔒 **He writes the month the expedition launches** (§4, SPEC §11.4), not the
+## month it arrives — which is what gives the PC something to answer while there
+## is still a journey in which to answer it, and makes the tone of the letter his
+## only warning that the rot has spread.
+static func he_has_just_been_elected(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.log == null or context.sender == null:
+		return false
+	var within := maxi(1, int(args.get("within", 1)))
+	for event in context.log.of_type(Expedition.EVENT_LAUNCHED):
+		if String(event.payload.get("governor", "")) != String(context.sender.id):
+			continue
+		if context.month - event.month < within:
+			return true
+	return false
 
 
 ## Whether the colony has actually lived some months yet (#173).

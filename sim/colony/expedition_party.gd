@@ -53,6 +53,13 @@ var id: StringName = &""
 ## The town that sent it, and the town it comes home to.
 var parent: StringName = &""
 
+## The man the people setting out elected (#178).
+##
+## **Generated the month it launches**, so he can write to the PC while there is
+## still a journey in which to answer — and so the tone of that first letter is
+## the player's only warning that the rot has spread.
+var governor: StringName = &""
+
 var people: int = 0
 var experts: Dictionary = {}
 var cargo: Dictionary = {}
@@ -294,6 +301,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": String(id),
 		"parent": String(parent),
+		"governor": String(governor),
 		"people": people,
 		"experts": experts.duplicate(),
 		"cargo": cargo.duplicate(),
@@ -312,6 +320,7 @@ static func from_dict(data: Dictionary) -> ExpeditionParty:
 	var party := ExpeditionParty.new()
 	party.id = StringName(data.get("id", ""))
 	party.parent = StringName(data.get("parent", ""))
+	party.governor = StringName(data.get("governor", ""))
 	party.people = int(data.get("people", 0))
 	party.experts = data.get("experts", {}).duplicate()
 	party.cargo = data.get("cargo", {}).duplicate()
