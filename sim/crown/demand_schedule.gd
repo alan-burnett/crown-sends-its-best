@@ -112,6 +112,26 @@ static func askers(growth: DemandGrowth) -> int:
 	return mini(ceiling, base + step * int(_level(growth, DemandGrowth.REACH)))
 
 
+## How many hands are out before a rival is one of them.
+##
+## 🔒 **Dimension 4 and nothing else** (#210, `crown-demands.md` §6). A duke
+## demanding tribute is the fourth dimension selecting him from §4's catalogue —
+## *more sources of demand* — so there is **no second clock anywhere** and no
+## schedule of his own. Two things fall out of the bucket rather than needing
+## code: rivals arrive staggered, one source per draw, and they cannot bunch,
+## because §7 guarantees dimension 4 at most twice in four years.
+##
+## Third, behind the Marshal, because a foreign power with its hand out is the
+## sharpest version of *more hands out* and should not be the first thing a run
+## meets. Tuning.
+const ASKERS_FOR_RIVALS: int = 3
+
+
+## Whether a rival duke is among the hands out yet.
+static func rivals_are_asking(growth: DemandGrowth) -> bool:
+	return askers(growth) >= ASKERS_FOR_RIVALS
+
+
 ## How long the colony has to reach a revenue target.
 ##
 ## **Does not grow.** None of the four axes is "less time", and adding a fifth

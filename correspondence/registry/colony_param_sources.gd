@@ -67,6 +67,13 @@ static func register_all() -> void:
 		ColonyParamSources.bargain,
 	)
 	ContentRegistry.register_param_source(
+		"tribute_amount", {}, ColonyParamSources.tribute_amount
+	)
+	ContentRegistry.register_param_source(
+		"tribute_resource", {"fallback": "string"},
+		ColonyParamSources.tribute_resource,
+	)
+	ContentRegistry.register_param_source(
 		"protest", {"field": "string", "within": "integer"}, ColonyParamSources.protest
 	)
 	# The Diplomat (#81). Every one of these is a fact about a town he can see.
@@ -566,3 +573,38 @@ static func bargain(args: Dictionary, context: LetterContext) -> Variant:
 	var field := String(args.get("field", "they_give"))
 	var value := ColonyConditions.bargain_field(context, field)
 	return value if not value.is_empty() else args.get("fallback", "goods")
+
+
+## How much this duke is asking for (#210, `rival-pressure.md` §3).
+##
+## 🔒 **Scaled by his band**, which is read off his loyalty like everything else
+## he does: reasonable while he is being paid, dearer once he is not. Priced
+## against the Crown's own demand so the two weigh comparably on a colony, and
+## so the `size` dimension reaches both without a second table.
+static func tribute_amount(_args: Dictionary, context: LetterContext) -> Variant:
+	var band := RivalDuke.band_of(context.loyalty())
+	var gold := DemandSchedule.gold_target(context.demands) \
+		* RivalDuke.tribute_multiple(band)
+	var resource := StringName(tribute_resource({}, context))
+	return maxi(1, int(roundf(gold / maxf(0.5, ResourceCatalogue.price_of(resource)))))
+
+
+## What he is asking for.
+##
+## **Something a colony makes and a navy wants.** Never a comfort: a duke idling
+## his captains through a long season is not writing about tea.
+static func tribute_resource(args: Dictionary, context: LetterContext) -> Variant:
+	var wantable: PackedStringArray = PackedStringArray()
+	for id in ResourceCatalogue.ids():
+		var candidate := StringName(id)
+		if ResourceCatalogue.is_luxury(candidate) \
+				or ResourceCatalogue.is_livestock(candidate):
+			continue
+		wantable.append(String(candidate))
+	if wantable.is_empty():
+		return args.get("fallback", "iron")
+	wantable.sort()
+	# **Off the sender rather than a die**, so the same duke asks for the same
+	# thing all run and the player learns what each of them wants.
+	var who := String(context.sender.id) if context.sender != null else ""
+	return wantable[StableHash.of_string(who) % wantable.size()]

@@ -94,7 +94,7 @@ func test_the_deferral_goes_through_apply_like_any_world_value() -> void:
 	# Seam A. A value written around `apply` is a change to the world nothing
 	# else can see happen.
 	var run := _paid()
-	assert_not_empty(run["log"].of_type(TributeExecutor.EVENT_PAID),
+	assert_not_empty(run["log"].of_type(TributeExecutor.EVENT_DEFERRED),
 		"the world moved and nothing said so")
 
 
