@@ -26,6 +26,13 @@ const ORDER_END_POLICY: StringName = &"end_policy"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 const ORDER_SET_POLICY: StringName = &"set_policy"
+
+## **Paying a foreigner to leave you alone** (#69, `crown-demands.md` §4).
+##
+## The fourth asker's currency, and the reason he is in the table at all: a PC
+## can be solvent, meeting every Crown demand, and still despised at court for
+## having done this.
+const ORDER_PAY_TRIBUTE: StringName = &"pay_tribute"
 const ORDER_REQUEST_TROOPS: StringName = &"request_troops"
 const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
 const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
@@ -170,6 +177,17 @@ static func register_effects() -> void:
 	)
 	ContentRegistry.register_effect(
 		"grant_favor", {"to": "contact", "favor": "string"}, ORDER_GRANT_FAVOR
+	)
+	# **The fourth currency** (#69, `crown-demands.md` §4). A rival bullies the PC
+	# into handing over goods, and **accepting defers the risk of an attack
+	# without ever buying peace**. It costs **prestige** rather than standing —
+	# the Crown's books are untouched and the court hears about it anyway — which
+	# is the whole reason the rival is in the table of askers: a fourth pocket the
+	# player's existing defences do not reach.
+	ContentRegistry.register_effect(
+		"pay_tribute",
+		{"to": "contact", "resource": "resource", "amount": "integer", "months": "integer"},
+		ORDER_PAY_TRIBUTE,
 	)
 	ContentRegistry.register_effect(
 		"set_policy", {"policy": "string", "value": "string"}, ORDER_SET_POLICY

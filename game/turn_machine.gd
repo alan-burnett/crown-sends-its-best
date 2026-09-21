@@ -98,6 +98,9 @@ func _init(p_run: RunState) -> void:
 	var shipments := ShipmentExecutor.new()
 	shipments.colony = run.colony
 	# The Crown's one punishment before it has troops (#73, #74).
+	# **The fourth asker's currency** (#69). Paying a rival costs prestige rather
+	# than standing, so it goes nowhere near the Crown's books.
+	var tribute := TributeExecutor.new()
 	var embargoes := EmbargoExecutor.new()
 	embargoes.colony = run.colony
 	urging.colony = run.colony
@@ -188,7 +191,7 @@ func _init(p_run: RunState) -> void:
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
-	month_runner.executors = [urging, shipments, embargoes, executor]
+	month_runner.executors = [urging, shipments, embargoes, tribute, executor]
 
 
 ## What each kind of Order does to the world.
@@ -244,6 +247,9 @@ static func order_effects() -> Dictionary:
 		# An embargo reaches a town rather than a world value, through
 		# `EmbargoExecutor`.
 		String(M1Registrations.ORDER_EMBARGO): {"target": ""},
+		# **Tribute touches the Crown's books not at all**, which is exactly what
+		# makes it dangerous: nothing in standing notices, and the court does.
+		String(M1Registrations.ORDER_PAY_TRIBUTE): {"target": ""},
 		# A policy is enacted when the enactor agrees to it, in phase 7, and
 		# billed from phase 5 thereafter. It moves no world value on its own.
 		String(M1Registrations.ORDER_ENACT_POLICY): {"target": ""},
