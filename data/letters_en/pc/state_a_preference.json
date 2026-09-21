@@ -1,0 +1,35 @@
+{
+  "id": "pc.state_a_preference",
+  "type": "request",
+  "purpose": "Tell a governor on the march what you would have him look for",
+  "to_roles": ["governor"],
+  "params": { "to": "contact" },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}, while you are still on the road.",
+      "options": [
+        { "tone": "dutiful", "text": "having thought further on the matter" },
+        { "tone": "pleased", "text": "with every confidence in your judgement" },
+        { "tone": "annoyed", "text": "because I should have said this before you left" },
+        { "tone": "desperate", "text": "and I hope this finds you in time" }
+      ]
+    },
+    "steps": [
+      { "id": "preference", "prompt": "What he should look for", "options": [
+        { "id": "good_ground", "label": "the best ground he can find",
+          "text": "Settle where the land is best. I will not pretend to know it better than you do from here.",
+          "effect": { "prefer_site": { "to": "{to}", "preference": "good_ground" } } },
+        { "id": "the_coast", "label": "toward the coast",
+          "text": "Keep toward the water. I would rather a poorer harvest that a ship can reach than a fat one that nothing can.",
+          "effect": { "prefer_site": { "to": "{to}", "preference": "the_coast" } } },
+        { "id": "the_ore", "label": "near the ore",
+          "text": "Look to the rock. Grain we can buy; iron we cannot, and I am tired of paying for it.",
+          "effect": { "prefer_site": { "to": "{to}", "preference": "the_ore" } } },
+        { "id": "away_from_tribes", "label": "away from the tribes",
+          "text": "Go wide of the people who are already there. I am aware what it will cost you in ground, and I would rather pay it than the other thing.",
+          "effect": { "prefer_site": { "to": "{to}", "preference": "away_from_tribes" } } }
+      ] }
+    ],
+    "closing": [ { "text": "Written in haste, and sent after you," } ]
+  }
+}

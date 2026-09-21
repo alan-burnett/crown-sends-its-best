@@ -39,6 +39,7 @@ const EVENT_ATTACKED: StringName = &"expedition_attacked"
 const EVENT_TURNED_BACK: StringName = &"expedition_turned_back"
 const EVENT_DESTROYED: StringName = &"expedition_destroyed"
 const EVENT_CAME_HOME: StringName = &"expedition_came_home"
+const EVENT_PREFERENCE: StringName = &"expedition_preference_changed"
 
 ## How many attacks it will take before turning for home. Tuning (§7 says two).
 const ATTACKS_BEFORE_TURNING: int = 2
@@ -59,9 +60,23 @@ var gold: float = 0.0
 
 var at: Vector2i = Vector2i(-1, -1)
 
-## Where it is going. **Left open for #177**, which gives the governor a site
-## preference and lets a letter shift him; until then whatever launched it says
-## where, and a party with no destination simply waits.
+## The **region** it is crossing to (#177), not a tile.
+##
+## 🔒 **The PC never chooses a tile** (SPEC §11.4). The governor heads for an
+## area and settles on ground of his own choosing inside it — which is also why
+## the site cannot be fixed at launch: the PC's preferences arrive in his reply
+## to the governor's first letter, and a site chosen the month the party left
+## would make them a month too late and worth nothing.
+var region: Vector2i = Vector2i(-1, -1)
+
+## What he has been asked to look for. A **name**, never a coordinate.
+var preference: StringName = SitePreference.GOOD_GROUND
+
+## Where it is going this month.
+##
+## **Derived, never assigned from a letter.** While it is crossing it heads for
+## the region; once it is inside the region it heads for the ground the governor
+## picked. There is deliberately no path by which an Order sets this.
 var destination: Vector2i = Vector2i(-1, -1)
 
 var launched_month: int = 0
@@ -90,6 +105,41 @@ func souls() -> int:
 ## Where it is heading this month — its site, or home if it has turned.
 func heading_for() -> Vector2i:
 	return at if turning_back and destination == Vector2i(-1, -1) else destination
+
+
+## Work out the ground it is walking to, from the region and the preference.
+##
+## 🔒 **Recomputed every month while it travels**, which is the whole of #177:
+## a preference letter that arrives mid-crossing changes where it ends up, and
+## the same letter arriving after it has settled changes nothing because there is
+## no party left to read it.
+func settle_destination(map: WorldMap, colony: Colony = null) -> Vector2i:
+	if region == Vector2i(-1, -1):
+		destination = Vector2i(-1, -1)
+		return destination
+	var site := SitePreference.site_in(region, preference, map, colony)
+	destination = site if site != Vector2i(-1, -1) else region
+	return destination
+
+
+## Take a new preference, and say so (Seam A).
+##
+## 🔒 **A name, never a tile.** The whole signature is the lock: there is nowhere
+## in it to put a coordinate, so a dev adding one has to change the shape of the
+## thing rather than pass an extra argument.
+func prefer(what: StringName, context: ColonyContext) -> bool:
+	if not SitePreference.is_preference(what) or what == preference:
+		return false
+	var was := preference
+	preference = what
+	context.log.emit(EVENT_PREFERENCE, id, context.state.month, {
+		"expedition": String(id),
+		"town": String(parent),
+		"was": String(was),
+		"now": String(what),
+		"months_out": context.state.month - launched_month,
+	}, WorldPhase.MOVEMENT)
+	return true
 
 
 ## Move one step (Seam A).
@@ -250,6 +300,8 @@ func to_dict() -> Dictionary:
 		"gold": gold,
 		"at": [at.x, at.y],
 		"destination": [destination.x, destination.y],
+		"region": [region.x, region.y],
+		"preference": String(preference),
 		"launched_month": launched_month,
 		"attacks": attacks,
 		"turning_back": turning_back,
@@ -266,6 +318,9 @@ static func from_dict(data: Dictionary) -> ExpeditionParty:
 	party.gold = float(data.get("gold", 0.0))
 	party.at = _point(data.get("at", [-1, -1]))
 	party.destination = _point(data.get("destination", [-1, -1]))
+	party.region = _point(data.get("region", [-1, -1]))
+	party.preference = StringName(
+		data.get("preference", String(SitePreference.GOOD_GROUND)))
 	party.launched_month = int(data.get("launched_month", 0))
 	party.attacks = int(data.get("attacks", 0))
 	party.turning_back = bool(data.get("turning_back", false))

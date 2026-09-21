@@ -33,6 +33,13 @@ const ORDER_SET_POLICY: StringName = &"set_policy"
 ## can be solvent, meeting every Crown demand, and still despised at court for
 ## having done this.
 const ORDER_PAY_TRIBUTE: StringName = &"pay_tribute"
+
+## **A preference about where a town goes** (#177, SPEC §11.4).
+##
+## 🔒 The PC approves, refuses, or states a preference. **He never chooses a
+## tile**, and the effect's params are where that is enforced: there is nowhere
+## in them to put a coordinate.
+const ORDER_PREFER_SITE: StringName = &"prefer_site"
 const ORDER_REQUEST_TROOPS: StringName = &"request_troops"
 const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
 const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
@@ -153,6 +160,14 @@ static func register_effects() -> void:
 	# policy — the recurring cost, the split, the 3x asymmetry on non-payment and
 	# the renegotiation when the Crown stops paying are all `policy.md`'s and none
 	# of them is reimplemented here.
+	# 🔒 **A name, never a coordinate** (#177, SPEC §11.4). `preference` is one of
+	# `SitePreference.ALL`; a `tile` param here would be the locked invariant
+	# broken, and `test_no_letter_can_name_a_tile_for_a_town` says so out loud.
+	ContentRegistry.register_effect(
+		"prefer_site",
+		{"to": "contact", "preference": "string"},
+		ORDER_PREFER_SITE,
+	)
 	ContentRegistry.register_effect(
 		"set_knob",
 		{

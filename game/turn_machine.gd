@@ -101,6 +101,11 @@ func _init(p_run: RunState) -> void:
 	# The Crown's one punishment before it has troops (#73, #74).
 	# **The fourth asker's currency** (#69). Paying a rival costs prestige rather
 	# than standing, so it goes nowhere near the Crown's books.
+	# **Only while he is walking** (#177). A preference that arrived after he had
+	# settled is overtaken by events, and the reply says so.
+	var preferences := PreferenceExecutor.new()
+	preferences.parties = run.parties
+
 	var tribute := TributeExecutor.new()
 	var embargoes := EmbargoExecutor.new()
 	embargoes.colony = run.colony
@@ -187,6 +192,7 @@ func _init(p_run: RunState) -> void:
 	# party that came home is part of its town before that town works (#176).
 	expeditions = ExpeditionDriver.new()
 	expeditions.colony = run.colony
+	expeditions.map = run.map
 	expeditions.parties = run.parties
 	colony_month.parties = run.parties
 
@@ -202,7 +208,7 @@ func _init(p_run: RunState) -> void:
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
-	month_runner.executors = [urging, shipments, embargoes, tribute, executor]
+	month_runner.executors = [urging, shipments, embargoes, tribute, preferences, executor]
 
 
 ## What each kind of Order does to the world.
@@ -261,6 +267,9 @@ static func order_effects() -> Dictionary:
 		# **Tribute touches the Crown's books not at all**, which is exactly what
 		# makes it dangerous: nothing in standing notices, and the court does.
 		String(M1Registrations.ORDER_PAY_TRIBUTE): {"target": ""},
+		# A preference moves no world value. What it moves is a governor already
+		# walking, which is `PreferenceExecutor`'s business (#177).
+		String(M1Registrations.ORDER_PREFER_SITE): {"target": ""},
 		# A policy is enacted when the enactor agrees to it, in phase 7, and
 		# billed from phase 5 thereafter. It moves no world value on its own.
 		String(M1Registrations.ORDER_ENACT_POLICY): {"target": ""},

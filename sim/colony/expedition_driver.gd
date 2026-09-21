@@ -27,6 +27,9 @@ extends RefCounted
 
 var colony: Colony = null
 
+## The ground itself, for working out where a region's best site actually is.
+var map: WorldMap = null
+
 ## The parties in the open. The same array the colony context carries, so a
 ## launch in the Colony Month is on the map without anything copying it across.
 var parties: Array = []
@@ -36,7 +39,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	if phase != WorldPhase.MOVEMENT:
 		return
 
-	var context := ColonyContext.new(state, log, streams, null)
+	var context := ColonyContext.new(state, log, streams, map)
 	context.colony = colony
 	context.parties = parties
 
@@ -71,9 +74,14 @@ func _step(party: ExpeditionParty, context: ColonyContext) -> bool:
 			return true
 		return false
 
-	# 🔒 A party with no destination **waits**. #177 is what gives it one, and a
-	# party that wandered in the meantime would be a party the player watched go
-	# nowhere for reasons nobody wrote down.
+	# 🔒 **The ground is worked out afresh every month** (#177). That is what makes
+	# a preference letter an instrument rather than a courtesy: it arrives
+	# mid-crossing and the governor's answer to "where exactly" changes with it.
+	#
+	# A party with no region **waits** rather than wandering. Only a launch gives
+	# it one, and a party the player watched go nowhere for reasons nobody wrote
+	# down would be worse than one standing still.
+	party.settle_destination(map, colony)
 	if party.destination == Vector2i(-1, -1):
 		return false
 
