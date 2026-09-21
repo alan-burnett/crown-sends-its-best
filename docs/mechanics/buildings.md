@@ -43,6 +43,12 @@ month it can put into construction, derived from its population and multiplied b
 `build_speed` effects. Duration is cost divided by capacity, so a large town
 raises a granary in weeks and a hamlet labours over it for a year.
 
+**🔒 The crane speeds buildings and nothing else.** Improvements are built out of
+the same capacity but answer to **worker cabins** instead
+(`tiles-and-improvements.md` §4). That pair is deliberate: **the crane is to
+buildings what worker cabins are to improvements**, so building up and spreading
+out are separate investments and no single project makes a town good at both.
+
 **Upkeep disables; it never destroys.** Many buildings cost the town gold every
 month. A town that cannot pay **keeps the building and loses the effect**, and it
 switches back on the moment it can afford it again. Upkeep is a squeeze, not a
