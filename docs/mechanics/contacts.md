@@ -44,75 +44,18 @@ untrue.
 SPEC §8 requires when it says personality drives behaviour and not merely prose,
 and it is why a new contact is a new data file rather than a new branch.
 
-### 🔒 Five men keep their names. Everyone else is generated
+### Names are `names.md`
 
-**The five Crown officers are fixed and named**, because SPEC §8.1 says so: *the
-same in every run and not randomized*. The Marshal is always the Marshal. They
-are the fixed points a player learns across runs, and generating them would cost
-the meta-progression its furniture.
+**The five Crown officers and the three rivals are fixed and named in data.**
+Everybody else — governors, patrons, commanders, and the institutional contacts
+as they arrive — is generated from a bag per role.
 
-**Everyone else is named from a seeded pool** — governors, patrons, commanders,
-rivals, and the institutional contacts as they arrive.
+A contact's letterhead is **`<title> <name> of <location>`**, which uses
+`display_name`, `title` and `town` as they already stand.
 
-| | Named |
-| :--- | :--- |
-| Marshal, Chancellor, Steward, Provost, Diplomat | **fixed, in data** |
-| Governors, patrons, commanders, rivals, clergy, quartermaster, journalist, scholar | **generated** |
+`names.md` owns the bags, the letterhead, the places, and the streams they draw
+from. It is not repeated here.
 
-### A name is drawn from the contact's own stream
-
-`CLAUDE.md`: per-contact streams derive lazily as `hash(run_seed, contact_id)`.
-**A name is drawn from that stream and nothing else**, so the same seed produces
-the same men whatever else happens in the run, and generating a name never moves
-another system's rolls.
-
-### 🔒 One bag per role
-
-**Every role carries its own bag of names.** Every journalist is drawn from the
-journalists' bag, every governor from the governors', every clergyman from the
-clergy's, and so on.
-
-Not one pool, and not pools keyed by country. Role is the sharper key for two
-reasons:
-
-**A rival must sound foreign and a governor must not.** The three dukes shipped
-today are Don Íñigo de Alcaraz, Le Duc de Montargis and Grevé Anders Vasterholm
-— against titles reading *Windward Coast*, *Leeward Isles* and *Northern Reach*.
-A colonial governor drawn from that bag would wreck the setting, and this is the
-cheapest lever the game has for making the coast feel contested rather than
-empty.
-
-**And two men from the same country should still not sound alike.** A clergyman
-and a journalist may both be the PC's countrymen and still want different
-registers — one scriptural and old, one plainer and more modern. A key based on
-where a man is from cannot express that. A key based on what he is can.
-
-### 🔒 A bag holds whole names
-
-`Don Íñigo de Alcaraz` is **one entry**, not a given name and a family name to be
-recombined.
-
-The rivals' bag holds men of several nations, so drawing the parts separately
-would eventually produce a French given name against a Spanish surname —
-Frankenstein men, in the one role where sounding foreign is the entire job.
-Whole names cost more entries and cannot produce that.
-
-The counts are small enough for this to be comfortable: a long run founds towns
-in the ten-ish range and takes on a similar number of patrons and commanders, so
-a bag is tens of names, not hundreds.
-
-### It is data, like everything else
-
-```
-data/names/<role>.json    whole names, one bag per role
-```
-
-Prose is not involved, so there is **no language suffix** — a name pool is not
-translated (`CLAUDE.md`'s content pipeline). Letters already reach a contact's
-name through `{sender:}`, so a generated name needs nothing new in the renderer.
-
-**No two live contacts share a name**, which is a redraw rather than a rule the
-pools have to guarantee.
 
 ## 2. Loyalty is one knob, read differently by role
 

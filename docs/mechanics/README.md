@@ -45,6 +45,7 @@ being rewritten every iteration.
 | [rebel-sentiment.md](rebel-sentiment.md) | Who gets blamed, and when a town stops asking | M3 |
 | [the-diplomat.md](the-diplomat.md) | The PC's only resident eyes, and his price | M3 |
 | [the-steward.md](the-steward.md) | The one officer asked to do what he already wants | M8 |
+| [names.md](names.md) | Who is named, who is not, and the letterhead a letter arrives under | M7 |
 | [beats.md](beats.md) | One queue for animation and sound, and what a skip must never change | M8 |
 | [cutscenes.md](cutscenes.md) | Paintings with a line of text, and the one a turn that earns the slot | M8 |
 
