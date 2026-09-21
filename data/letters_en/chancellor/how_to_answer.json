@@ -3,18 +3,35 @@
   "sender": "chancellor",
   "type": "question",
   "skippable": true,
-  "params": { "amount": "gold" },
+  "speaks_to": 34,
+  "params": {
+    "amount": "gold"
+  },
   "body": [
-    { "text": "The court asks what is to be done about the colony's {param:amount} in arrears." },
-    { "text": "I shall need an answer, and I should not like to invent one{insert:barb}.",
-      "insert": { "barb": { "hateful": ", though inventing one would amuse me" } } }
+    {
+      "text": "The court asks what is to be done about the colony's {param:amount} in arrears."
+    },
+    {
+      "text": "I shall need an answer, and I should not like to invent one{insert:barb}.",
+      "insert": {
+        "barb": {
+          "hateful": ", though inventing one would amuse me"
+        }
+      }
+    }
   ],
   "reply": {
     "tone": {
       "text": "I am {choice} to be asked.",
       "options": [
-        { "tone": "dutiful", "text": "content" },
-        { "tone": "annoyed", "text": "in no humour" }
+        {
+          "tone": "dutiful",
+          "text": "content"
+        },
+        {
+          "tone": "annoyed",
+          "text": "in no humour"
+        }
       ]
     },
     "steps": [
@@ -22,17 +39,37 @@
         "id": "answer",
         "prompt": "The arrears",
         "options": [
-          { "id": "pay", "label": "settle them from the Crown's purse",
+          {
+            "id": "pay",
+            "label": "settle them from the Crown's purse",
             "text": "Settle them, and say no more of it.",
-            "effect": { "promise_gold": { "to": "chancellor", "amount": "{amount}" } } },
-          { "id": "deny", "label": "refuse to settle them",
+            "effect": {
+              "promise_gold": {
+                "to": "chancellor",
+                "amount": "{amount}"
+              }
+            }
+          },
+          {
+            "id": "deny",
+            "label": "refuse to settle them",
             "text": "They may wait.",
-            "effect": { "refuse": { "to": "chancellor" } } }
+            "effect": {
+              "refuse": {
+                "to": "chancellor"
+              }
+            }
+          }
         ]
       }
     ],
     "closing": [
-      { "text": "Yours,", "tone": { "annoyed": "Briefly yours," } }
+      {
+        "text": "Yours,",
+        "tone": {
+          "annoyed": "Briefly yours,"
+        }
+      }
     ]
   }
 }

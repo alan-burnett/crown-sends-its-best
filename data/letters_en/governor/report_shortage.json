@@ -3,6 +3,7 @@
   "sender": "governor_ashmere",
   "type": "request",
   "skippable": true,
+  "speaks_to": 52,
   "params": {
     "town": "town",
     "lacking": "resource",

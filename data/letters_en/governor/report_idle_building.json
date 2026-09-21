@@ -3,6 +3,7 @@
   "sender": "governor_ashmere",
   "type": "warning",
   "skippable": true,
+  "speaks_to": 30,
   "params": {
     "town": "town",
     "building": "building",
@@ -11,24 +12,59 @@
   "perception": {
     "spirits": {
       "measure": "quality_of_life",
-      "ladder": ["wretched", "low", "settled", "in good heart"]
+      "ladder": [
+        "wretched",
+        "low",
+        "settled",
+        "in good heart"
+      ]
     }
   },
   "body": [
-    { "text": "I have had to shut {param:building} at {param:town}. There is no coin to run it and I will not pretend otherwise." },
-    { "text": "It stands where it stood. Nothing is pulled down and nothing is sold, and the day we can meet the charge it opens again — but until then it does nothing for us at all." },
-    { "text": "The people are {perception:spirits}, and they can see the doors shut as well as I can." },
-    { "text": "I had not thought to write you such a letter about a thing we built ourselves.", "only_tones": ["annoyed", "hateful"] },
-    { "text": "I would rather you heard it from me than found it in a ledger a year from now.", "only_tones": ["dutiful", "pleased"] }
+    {
+      "text": "I have had to shut {param:building} at {param:town}. There is no coin to run it and I will not pretend otherwise."
+    },
+    {
+      "text": "It stands where it stood. Nothing is pulled down and nothing is sold, and the day we can meet the charge it opens again — but until then it does nothing for us at all."
+    },
+    {
+      "text": "The people are {perception:spirits}, and they can see the doors shut as well as I can."
+    },
+    {
+      "text": "I had not thought to write you such a letter about a thing we built ourselves.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I would rather you heard it from me than found it in a ledger a year from now.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    }
   ],
   "reply": {
     "tone": {
       "text": "As to {param:building}, I am {choice}.",
       "options": [
-        { "tone": "dutiful", "text": "obliged to you for writing" },
-        { "tone": "pleased", "text": "sorry you have had to do it" },
-        { "tone": "desperate", "text": "in no better case here" },
-        { "tone": "annoyed", "text": "less surprised than I should like to be" }
+        {
+          "tone": "dutiful",
+          "text": "obliged to you for writing"
+        },
+        {
+          "tone": "pleased",
+          "text": "sorry you have had to do it"
+        },
+        {
+          "tone": "desperate",
+          "text": "in no better case here"
+        },
+        {
+          "tone": "annoyed",
+          "text": "less surprised than I should like to be"
+        }
       ]
     },
     "steps": [
@@ -36,20 +72,50 @@
         "id": "priority",
         "prompt": "What is to come first at {param:town}",
         "options": [
-          { "id": "profit", "label": "put the town back in profit",
+          {
+            "id": "profit",
+            "label": "put the town back in profit",
             "text": "Put the town back in profit. A place that cannot meet its own charges is not a colony, it is an expense.",
-            "effect": { "urge_intent": { "to": "{governor}", "intent": "increase_economic_output" } } },
-          { "id": "survival", "label": "let it stand idle and see to your people",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "increase_economic_output"
+              }
+            }
+          },
+          {
+            "id": "survival",
+            "label": "let it stand idle and see to your people",
             "text": "Let it stand idle. Doors can be opened again; the people cannot, and I would rather you had them fed than had the thing running.",
-            "effect": { "urge_intent": { "to": "{governor}", "intent": "secure_survival" } } },
-          { "id": "growth", "label": "the town is too small to carry it",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "secure_survival"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "the town is too small to carry it",
             "text": "The town is too small to carry what it has built. See that it grows, and the charge will stop looking so large.",
-            "effect": { "urge_intent": { "to": "{governor}", "intent": "grow_the_population" } } }
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "grow_the_population"
+              }
+            }
+          }
         ]
       }
     ],
     "closing": [
-      { "text": "I remain your servant,", "tone": { "pleased": "You did right to write,", "annoyed": "See that it does not become a habit," } }
+      {
+        "text": "I remain your servant,",
+        "tone": {
+          "pleased": "You did right to write,",
+          "annoyed": "See that it does not become a habit,"
+        }
+      }
     ]
   }
 }

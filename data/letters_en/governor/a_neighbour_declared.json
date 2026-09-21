@@ -3,14 +3,33 @@
   "sender": "governor",
   "type": "report",
   "skippable": true,
-  "params": { "town": "town" },
+  "speaks_to": 64,
+  "params": {
+    "town": "town"
+  },
   "body": [
-    { "text": "You will have heard about our neighbours before this reaches you. I write about my own town, which is still yours." },
-    { "text": "The news came up the road in three days and has been the only subject since. Men who have never had an opinion about the Crown have one now, and they have it in the street rather than in their own kitchens." },
-    { "text": "I am not warning you. I would not presume. I am telling you that the argument has been made out loud, here, by people who had not made it before, and that arguments made out loud are harder to unmake.",
-      "only_tones": ["dutiful", "desperate"] },
-    { "text": "I am told they have not been punished for it. That is the part that is being repeated.",
-      "only_tones": ["annoyed", "hateful"] },
-    { "text": "I should be glad of something to tell them. Almost anything would do." }
+    {
+      "text": "You will have heard about our neighbours before this reaches you. I write about my own town, which is still yours."
+    },
+    {
+      "text": "The news came up the road in three days and has been the only subject since. Men who have never had an opinion about the Crown have one now, and they have it in the street rather than in their own kitchens."
+    },
+    {
+      "text": "I am not warning you. I would not presume. I am telling you that the argument has been made out loud, here, by people who had not made it before, and that arguments made out loud are harder to unmake.",
+      "only_tones": [
+        "dutiful",
+        "desperate"
+      ]
+    },
+    {
+      "text": "I am told they have not been punished for it. That is the part that is being repeated.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I should be glad of something to tell them. Almost anything would do."
+    }
   ]
 }

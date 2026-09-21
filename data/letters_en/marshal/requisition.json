@@ -3,34 +3,76 @@
   "sender": "marshal",
   "type": "demand",
   "skippable": true,
-
-  "params": { "resource": "resource", "amount": "integer", "months": "integer", "turns_left": "integer" },
-
+  "speaks_to": 54,
+  "params": {
+    "resource": "resource",
+    "amount": "integer",
+    "months": "integer",
+    "turns_left": "integer"
+  },
   "perception": {
     "northern_front": {
       "measure": "crown_war_intensity",
-      "ladder": ["quiet", "troubled", "hard-pressed", "desperate"]
+      "ladder": [
+        "quiet",
+        "troubled",
+        "hard-pressed",
+        "desperate"
+      ]
     }
   },
-
   "body": [
-    { "text": "This is not one of my letters asking. The {perception:northern_front} north has gone past asking, and a requisition has been set against your colony." },
-    { "text": "{param:amount} of {param:resource}, inside {param:months} months. I am told your colony makes it. I am not told whether your colony will part with it, which is rather the whole of my difficulty." },
-    { "text": "You have {param:turns_left} more posts in which to answer. I mention the number because men in your position tend to read a deadline as an opening bid." },
-    { "text": "If you have any sense you will write to whoever actually holds the stuff before you write to me. He is the man who decides, whatever the two of us put on paper." },
-    { "text": "I would rather have a plain refusal by the next post than a yes I have to chase across a winter.", "only_tones": ["dutiful", "pleased"] },
-    { "text": "Your predecessor understood what the Crown's wars cost. He understood it late.", "only_tones": ["annoyed", "hateful"] }
+    {
+      "text": "This is not one of my letters asking. The {perception:northern_front} north has gone past asking, and a requisition has been set against your colony."
+    },
+    {
+      "text": "{param:amount} of {param:resource}, inside {param:months} months. I am told your colony makes it. I am not told whether your colony will part with it, which is rather the whole of my difficulty."
+    },
+    {
+      "text": "You have {param:turns_left} more posts in which to answer. I mention the number because men in your position tend to read a deadline as an opening bid."
+    },
+    {
+      "text": "If you have any sense you will write to whoever actually holds the stuff before you write to me. He is the man who decides, whatever the two of us put on paper."
+    },
+    {
+      "text": "I would rather have a plain refusal by the next post than a yes I have to chase across a winter.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    },
+    {
+      "text": "Your predecessor understood what the Crown's wars cost. He understood it late.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    }
   ],
-
   "reply": {
     "tone": {
       "text": "Your requisition finds me {choice}.",
       "options": [
-        { "tone": "pleased",   "text": "in the very best of humours" },
-        { "tone": "dutiful",   "text": "attentive to the Crown's need" },
-        { "tone": "annoyed",   "text": "short of both time and patience" },
-        { "tone": "desperate", "text": "at the very end of my means" },
-        { "tone": "hateful",   "text": "exactly as you intended it to" }
+        {
+          "tone": "pleased",
+          "text": "in the very best of humours"
+        },
+        {
+          "tone": "dutiful",
+          "text": "attentive to the Crown's need"
+        },
+        {
+          "tone": "annoyed",
+          "text": "short of both time and patience"
+        },
+        {
+          "tone": "desperate",
+          "text": "at the very end of my means"
+        },
+        {
+          "tone": "hateful",
+          "text": "exactly as you intended it to"
+        }
       ]
     },
     "steps": [
@@ -42,27 +84,46 @@
             "id": "full",
             "label": "undertake the full {param:amount}",
             "text": "You shall have {param:amount} of {param:resource} inside {param:months} months{insert:barb}. I will write to the town this week, and you may hold me to it — though you will understand that I am now holding somebody else to it in turn.",
-            "insert": { "barb": { "annoyed": ", though it beggars the colony to do it" } },
+            "insert": {
+              "barb": {
+                "annoyed": ", though it beggars the colony to do it"
+              }
+            },
             "effect": {
-              "promise_shipment": { "to": "marshal", "resource": "{resource}", "amount": "{amount}", "months": "{months}" }
+              "promise_shipment": {
+                "to": "marshal",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "months": "{months}"
+              }
             }
           },
           {
             "id": "none",
             "label": "decline plainly, and now",
             "text": "The colony can spare nothing this season{insert:apology}. I would rather tell you today than have you counting crates in the spring that were never coming.",
-            "insert": { "apology": { "desperate": ", and I am sorry for it" } },
-            "effect": { "decline_demand": { "to": "marshal" } }
+            "insert": {
+              "apology": {
+                "desperate": ", and I am sorry for it"
+              }
+            },
+            "effect": {
+              "decline_demand": {
+                "to": "marshal"
+              }
+            }
           }
         ]
       }
     ],
     "closing": [
-      { "text": "Your servant,",
+      {
+        "text": "Your servant,",
         "tone": {
           "pleased": "Your most affectionate servant,",
           "hateful": "Do not write to me again this season."
-        } }
+        }
+      }
     ]
   }
 }

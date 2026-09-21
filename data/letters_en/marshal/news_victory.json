@@ -3,15 +3,35 @@
   "sender": "marshal",
   "type": "news",
   "skippable": true,
-  "params": { "amount": "integer" },
+  "speaks_to": 0,
+  "params": {
+    "amount": "integer"
+  },
   "perception": {
-    "front": { "measure": "crown_war_intensity",
-               "ladder": ["all but won", "turning our way", "grinding", "going badly"] }
+    "front": {
+      "measure": "crown_war_intensity",
+      "ladder": [
+        "all but won",
+        "turning our way",
+        "grinding",
+        "going badly"
+      ]
+    }
   },
   "body": [
-    { "text": "You will have heard. The line held at Vellan Reach, and the war is {perception:front}." },
-    { "text": "{param:amount} of ours are in the ground there, which the broadsheets will not print." },
-    { "text": "I am told there will be a medal struck. I am told there is to be a parade.",
-      "only_tones": ["annoyed", "hateful", "desperate"] }
+    {
+      "text": "You will have heard. The line held at Vellan Reach, and the war is {perception:front}."
+    },
+    {
+      "text": "{param:amount} of ours are in the ground there, which the broadsheets will not print."
+    },
+    {
+      "text": "I am told there will be a medal struck. I am told there is to be a parade.",
+      "only_tones": [
+        "annoyed",
+        "hateful",
+        "desperate"
+      ]
+    }
   ]
 }
