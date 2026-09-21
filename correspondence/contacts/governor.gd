@@ -153,6 +153,12 @@ static func _draw(id: StringName, streams: RngStreams, title: String) -> Contact
 	for consideration in weights:
 		contact.set_weight(StringName(consideration), rng.randf_range(Contact.WEIGHT_MIN, Contact.WEIGHT_MAX))
 
+	# 🔒 **After the ordinary draw** (#260). Harshness is among the ids above, so
+	# a mettle written first would be rolled over and every governor in the game
+	# would take being leaned on identically.
+	contact.traits = Temperament.draw(rng)
+	Temperament.write_into(contact.traits, contact)
+
 	var topics := LEANED.duplicate()
 	topics.sort()
 	for topic in topics:

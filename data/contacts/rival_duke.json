@@ -19,7 +19,12 @@
     "cares_about": [
       "crown_war_intensity",
       "colony_is_no_threat"
-    ]
+    ],
+    "traits": {
+      "vanity": -0.6,
+      "mettle": -0.5,
+      "pity": 0.2
+    }
   },
   {
     "id": "rival_duke_montargis",
@@ -39,7 +44,12 @@
     },
     "cares_about": [
       "colony_is_no_threat"
-    ]
+    ],
+    "traits": {
+      "vanity": 0.2,
+      "mettle": 1.4,
+      "pity": 0.3
+    }
   },
   {
     "id": "rival_duke_vasterholm",
@@ -61,6 +71,11 @@
     "cares_about": [
       "crown_war_intensity",
       "colony_is_no_threat"
-    ]
+    ],
+    "traits": {
+      "vanity": 0.4,
+      "mettle": 0.9,
+      "pity": 0.1
+    }
   }
 ]

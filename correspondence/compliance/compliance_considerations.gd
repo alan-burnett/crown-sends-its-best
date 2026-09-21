@@ -30,6 +30,11 @@ static func register_all() -> void:
 	Deliberation.register_consideration(HarshnessConsideration.new(&"harshness"), KINDS)
 	Deliberation.register_consideration(DissonanceConsideration.new(&"against_his_judgement"), KINDS)
 	Deliberation.register_filter(FullPaymentIsAYes.new(&"full_payment_is_a_yes"), KINDS)
+	# 🔒 **Tone belongs to compliance and sits in this kernel** (#260,
+	# `tone.md` §5). A sibling file only because five tables and five classes
+	# would bury the rest of this one — it registers here, against this decision
+	# kind, and is weighted by personality like everything above it.
+	ToneConsiderations.register_all(KINDS)
 
 
 ## Being leaned on (`rebel-sentiment.md` §4).
@@ -47,6 +52,12 @@ static func register_all() -> void:
 ## It is a **weight, not a rule**, so personality still decides. A proud man
 ## minds being commanded more than a dutiful one, and the same letter lands
 ## differently on the two of them.
+##
+## 🔒 **And that weight is mettle** (#260, `tone.md` §5). The trait that decides
+## how he takes the hostile tones decides how he takes being commanded, because a
+## man who resents being bullied resents the threat and the contempt alike. This
+## class does not know that: `Temperament` writes the number and the kernel
+## reads it, which is why there is no branch here on who is reading.
 class HarshnessConsideration:
 	extends Consideration
 

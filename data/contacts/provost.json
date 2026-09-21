@@ -23,6 +23,11 @@
       "colony_education",
       "quality_of_life",
       "food_security"
-    ]
+    ],
+    "traits": {
+      "vanity": 0.9,
+      "mettle": 0.5,
+      "pity": 1.5
+    }
   }
 ]

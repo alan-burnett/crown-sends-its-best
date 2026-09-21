@@ -19,6 +19,11 @@
     "cares_about": [
       "colony_quality_of_life",
       "colony_food_security"
-    ]
+    ],
+    "traits": {
+      "vanity": 1.0,
+      "mettle": 0.4,
+      "pity": 1.2
+    }
   }
 ]
