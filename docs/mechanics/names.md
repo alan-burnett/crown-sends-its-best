@@ -35,18 +35,49 @@ place, and a name with no mechanics behind it was a thing to maintain for nothin
 
 ## 2. 🔒 The letterhead
 
-**`<title> <name>` and then a qualifier.**
+**`<Role> <name>` and then a qualifier.**
 
 > **Governor Don Johnson of Morrisville**
-> **Lord Mingle Welkington, patron to the crown**
+> **Commander Ames Harker of the town of Ashmere**
+> **Patron Mingle Welkington**
 
-`Contact` already carries `display_name`, `title` and `town`, so this is a render
-rule rather than new state.
+### 🔒 The first word is always the role
+
+Not an honorific. No *Captain*, no *Lord*, no *Father*.
+
+**It is there to be scanned, not to be flavour.** An experienced player should be
+able to look at the stack and know what came in without opening anything, and a
+desk of *Lord*, *Sir* and *Captain* tells him nothing about who wants what. A
+desk of **Governor. Commander. Patron. Journalist.** tells him the whole month.
+
+This costs a little colour and buys a real thing, and it is the same trade
+`the-director.md` makes when it refuses to sort the stack by importance: the
+player does the judging, so the interface owes him legible inputs.
+
+`Contact` already carries `display_name` and `town`. **The role word comes from
+the role, not from the `title` field** — that field holds flavour like *Steward
+of the Revenue*, no letter currently uses it, and the letterhead must not.
 
 ### The qualifier is data, not a branch
 
 **A field holding a template, defaulted from the role and settled when the
-contact is created.** Not a lookup by role, and not cases in code.
+contact is created.**
+
+| Role | Qualifier | Reads |
+| :--- | :--- | :--- |
+| Governor | ` of {town}` | *Governor Don Johnson of Morrisville* |
+| Clergyman, quartermaster, journalist, scholar | ` of {town}` | *Journalist Aldous Crane of Kettleburn* |
+| Diplomat | ` of {town}` | *Diplomat Wren Halloway of Ashmere* |
+| Commander, town | ` of the town of {town}` | *Commander Ames Harker of the town of Ashmere* |
+| Commander, Crown | ` of the Crown's service` | *Commander Ames Harker of the Crown's service* |
+| Commander, rebel | ` of the independent nation` | *Commander Ames Harker of the independent nation* |
+| Patron | *(empty)* | *Patron Mingle Welkington* |
+| Marshal, Chancellor, Steward, Provost | *(empty)* | *Steward Corvyn Thrale* |
+| Rival | **open — see §7** | |
+
+**The patron's qualifier went empty when the title became his role.** It read
+*, patron to the crown*, which said what *Lord* could not. *Patron* says it in
+the first word, and saying it twice is worse than saying it once.
 
 It has to be on the contact rather than the role because **a commander is one
 role with three allegiances** (`commanders.md` §1: *colonial, Crown and rebel
@@ -67,38 +98,12 @@ It also says the right thing. A rebel commander is not a local difficulty in
 Ashmere — **he serves a nation now**, which is exactly what SPEC §13.1 means
 when it says the colony becomes one.
 
-| Role | Qualifier | Reads |
-| :--- | :--- | :--- |
-| Governor | ` of {town}` | *Governor Don Johnson of Morrisville* |
-| Clergyman, quartermaster, journalist, scholar | ` of {town}` — the town he is resident in | *Father Aldous Crane of Kettleburn* |
-| Patron | `, patron to the crown` | *Lord Mingle Welkington, patron to the crown* |
-| Commander, town | ` of the town of {town}` | *Captain Ames Harker of the town of Ashmere* |
-| Commander, Crown | ` of the Crown's service` | *Captain Ames Harker of the Crown's service* |
-| Commander, rebel | ` of the independent nation` | *Captain Ames Harker of the independent nation* |
-| Crown officer | *(empty)* | *Steward of the Revenue Corvyn Thrale* |
-| Rival | *(empty)* — his title already names his coast | *Le Duc de Montargis* |
-
-A patron needs no location because his qualifier is not a place. **That is what
-made patron homes unnecessary**, rather than a decision to do without them.
-
-### A patron's title is drawn too
-
-*Lord Mingle Welkington* is **three words from the bag** — honorific, given name,
-family name. A governor is always *Governor*, so his title is fixed by his role
-and only two words are drawn.
-
-So **a bag may carry a `titles` list**, and where it does the title is drawn with
-the rest. Where it does not, the role's own title stands.
-
 ### It follows that the Diplomat's name changes
 
 He lives in a town and asks to be rehomed when it turns dangerous (SPEC §8.1).
 His qualifier is ` of {town}`, so **his letterhead moves with him**, and a player
 who notices *of Ashmere* become *of Kettleburn* has been told something real
 before he reads a word.
-
-That is a consequence of the rule rather than a feature bolted on, which is the
-sign the rule is the right one.
 
 ---
 
@@ -116,9 +121,11 @@ what he is can.
 
 ### Given and family, not whole names
 
-A bag holds **a list of given names and a list of family names**, joined on draw
-— and a list of titles where the role's title varies (§2). Twenty of each is four
-hundred men.
+A bag holds **a list of given names and a list of family names**, joined on
+draw. Twenty of each is four hundred men.
+
+**No titles in a bag.** The letterhead's first word is the role (§2), so there is
+nothing per-man to draw.
 
 **This reverses an earlier draft**, and the reason is worth keeping. That draft
 held whole names because the rivals' bag would have mixed nations, and drawing
@@ -170,8 +177,7 @@ bags must guarantee.
 ## 6. Data
 
 ```
-data/names/<kind>.json    given[] and family[] for people, titles[] where the
-                          role's title varies; names[] for towns
+data/names/<kind>.json    given[] and family[] for people; names[] for towns
 ```
 
 **No language suffix.** A bag carries no prose and is not translated, unlike
@@ -189,6 +195,13 @@ empty, and no bag is too small to fill a long run without repeating.
   commanders similar. Twenty given and twenty family per bag is almost certainly
   ample, but the validator's "too small" threshold should be set from a measured
   long run rather than guessed.
+- **What is a rival's letterhead?** Every other role leads with a word that says
+  what he is, and *Rival* is the only one that is a game term rather than
+  something a man would be called. But rivals are hardcoded and their names carry
+  their own titles — *Le Duc de Montargis* — so leaving the role word off them
+  would break the scanning rule for the one sender whose tribute demand most
+  needs recognising at a glance. **Author's call.** The options are *Rival*,
+  which scans and reads oddly, or nothing, which reads well and scans worst.
 - **Do Crown commanders draw from the colonial bag?** They are the same role and
   the same object, so one bag is the simple answer and matches the ruling that
   every bag is one register. But a man the Marshal sends comes from the old
