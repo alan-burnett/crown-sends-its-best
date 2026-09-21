@@ -1,0 +1,37 @@
+[
+  {
+    "id": "epitaph.retired.ruinous",
+    "outcome": "retired",
+    "band": "ruinous",
+    "text": "The accounting took four years and was never published. You were not asked to explain it, which you understood at the time to be a kindness and later understood otherwise. There is a house in Dorset, not large, and an annuity that arrives without fail on the quarter day. You are invited to very few things. When you are, nobody mentions the colony, and you find you cannot tell whether that is tact or whether they have simply forgotten which one you were."
+  },
+  {
+    "id": "epitaph.retired.obscure",
+    "outcome": "retired",
+    "band": "obscure",
+    "text": "You came home to no particular reception. The Crown thanked you in a letter of eleven lines, nine of which were formula. You have a house within a day of London and a pension that does not require you to think about it. Occasionally a man at a dinner asks what it was like out there, and you find that the answer takes either four words or four hours, and that he wanted the four words."
+  },
+  {
+    "id": "epitaph.retired.respectable",
+    "outcome": "retired",
+    "band": "respectable",
+    "text": "A solid return, dutifully rendered. You are spoken of as sound, which in that company means profitable and not interesting. There is a house with a park, a seat on two boards, and a standing invitation to a shoot in Norfolk that you accept about half the time. Your name appears in a ledger in Whitehall that nobody outside the building has ever read, and it appears in black."
+  },
+  {
+    "id": "epitaph.retired.handsome",
+    "outcome": "retired",
+    "band": "handsome",
+    "text": "The returns were handsome and the Crown said so in public, which it does not often do. You came back to an estate, a knighthood in the second rank, and the particular warmth of men who expect to be asked for nothing. Young officers write to you for advice about postings. You give it. They do not take it, and go anyway, and you find you would have gone too."
+  },
+  {
+    "id": "epitaph.retired.celebrated",
+    "outcome": "retired",
+    "band": "celebrated",
+    "text": "There is a portrait. It hangs in a hall where portraits hang, and in it you are holding a chart of a coastline you saw perhaps six times. Two ships and a street are named for you, and a boy's adventure book was written about your administration in which the colony is a backdrop and the colonists do not speak. You have read it. It is not accurate and you have never said so."
+  },
+  {
+    "id": "epitaph.retired.any",
+    "outcome": "retired",
+    "text": "You left the desk and the Crown found somebody else to sit at it. There is a house, and an income, and a great deal of time."
+  }
+]

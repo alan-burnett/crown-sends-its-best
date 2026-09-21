@@ -1,0 +1,12 @@
+[
+  {
+    "id": "epitaph.term_expired.any",
+    "outcome": "term_expired",
+    "text": "Fifty years is the term and you served it out, which few do and fewer intend to. They gave you a dinner. Most of the men who could have spoken about the early years were dead, so a younger man spoke instead, from the record, and got the dates right and everything else wrong. There is a house, and an income, and no great deal of time."
+  },
+  {
+    "id": "epitaph.failed.any",
+    "outcome": "failed",
+    "text": "The colony was lost and an inquiry was convened, as is customary, and concluded — as is also customary — that the causes were various. You gave evidence for a morning. There is a house, smaller than the last one and in a duller county, and an annuity that arrives on the quarter day. The Crown's losses were entered in a column and the column was ruled off. Nobody entered anyone else's."
+  }
+]

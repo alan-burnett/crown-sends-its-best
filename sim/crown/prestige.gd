@@ -86,6 +86,43 @@ static func of(log: EventLog) -> Dictionary:
 	}
 
 
+## What the court would call a score of this size.
+##
+## **Five bands, and every threshold is a placeholder.** `prestige.md` §10 and
+## §12 both leave them open — §10 warns that net gold accumulates with time, so
+## a long run almost always out-scores a short one and thresholds set against
+## long runs put them out of reach of the players who most need them. M7 sets
+## these once the range of achievable scores is actually known.
+##
+## They exist now because #78's epitaph has to choose *something*, and choosing
+## on the raw figure would put the number into the content files.
+const BANDS: Array[Array] = [
+	[&"ruinous", -1.0e30],
+	[&"obscure", 0.0],
+	[&"respectable", 4_000.0],
+	[&"handsome", 20_000.0],
+	[&"celebrated", 60_000.0],
+]
+
+
+## Which band a score falls in. Never shown as a figure during a run.
+static func band_of(score: float) -> StringName:
+	var band: StringName = BANDS[0][0]
+	for entry in BANDS:
+		if score >= float(entry[1]):
+			band = entry[0]
+	return band
+
+
+## Every band's name, for a validator to check content against.
+static func band_names() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	for entry in BANDS:
+		out.append(String(entry[0]))
+	out.sort()
+	return out
+
+
 ## What the PC's patrons are worth to his name.
 ##
 ## **Named, and reads zero.** Patrons are M7 (SPEC §8.3). §5 has the shape ready
