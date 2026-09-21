@@ -59,12 +59,69 @@ const SURNAMES: PackedStringArray = [
 ]
 
 
+## How much of the launcher's regard a daughter town's governor starts with.
+##
+## 🔒 **This is what makes disloyalty propagate geographically** (#178,
+## `founding-towns.md` §4). A sour governor seeds a sour daughter town, which
+## will in turn seed another — so a colony with one bad town can be growing its
+## second **before the PC has done anything wrong at all**. It runs the other way
+## too: a patron the PC has treated well hands him a man already inclined to
+## listen.
+##
+## Not all of it, because he is his own man and was elected by the people setting
+## out rather than appointed by his old master. Tuning.
+const INHERITED_SHARE: float = 0.65
+
+
+## Make the governor an expedition elected as it set out (#178, §4).
+##
+## **Generated the month the expedition launches**, not the month it arrives —
+## the same month the town commits and consumes the cargo — so that he can write
+## to the PC immediately and the PC can hear what he sounds like while there is
+## still a journey in which to answer.
+##
+## 🔒 **The PC has no say whatever in who he is.** He is elected by the people
+## setting out, and there is no argument here that the PC could reach.
+##
+## His id is the party's rather than a town's, because the town does not exist
+## yet — #179 founds it around him.
+static func generate_for(
+	party: ExpeditionParty,
+	launched_by: Contact,
+	streams: RngStreams,
+) -> Contact:
+	var id := StringName("governor_%s" % party.id)
+	var contact := _draw(id, streams, "Governor-elect")
+
+	# 🔒 **Inherited, not neutral.** A man's regard for the Crown starts where the
+	# man who sent him stood, pulled part of the way back toward whatever he would
+	# have been on his own.
+	if launched_by != null and launched_by.relationship != null:
+		var his_own := contact.relationship.loyalty
+		contact.relationship.loyalty = clampf(
+			launched_by.loyalty() * INHERITED_SHARE + his_own * (1.0 - INHERITED_SHARE),
+			Relationship.MIN_LOYALTY, Relationship.MAX_LOYALTY)
+	return contact
+
+
 ## Make the governor of a town.
 ##
 ## Everything is drawn from **his own** stream, so adding a second governor in M4
 ## changes nothing about the first.
 static func generate(town: Town, streams: RngStreams) -> Contact:
 	var id := StringName("governor_%s" % town.id)
+	var contact := _draw(id, streams, "Governor of %s" % town.display_name)
+	contact.town = town.display_name
+	town.governor_id = id
+	return contact
+
+
+## Draw a man from his own stream.
+##
+## 🔒 **Everything comes from `hash(run_seed, contact_id)`**, so the same seed
+## yields the same man regardless of what happened elsewhere — and adding a
+## second governor changes nothing about the first.
+static func _draw(id: StringName, streams: RngStreams, title: String) -> Contact:
 	var rng := streams.contact_stream(String(id))
 
 	var contact := Contact.new(id, {})
@@ -73,9 +130,8 @@ static func generate(town: Town, streams: RngStreams) -> Contact:
 		FORENAMES[rng.randi_range(0, FORENAMES.size() - 1)],
 		SURNAMES[rng.randi_range(0, SURNAMES.size() - 1)],
 	]
-	contact.title = "Governor of %s" % town.display_name
+	contact.title = title
 	contact.portrait_asset = "portrait.governor"
-	contact.town = town.display_name
 
 	# Sorted, so the draws are consumed in a fixed order and the same seed gives
 	# the same man however the lists were assembled.
@@ -91,6 +147,4 @@ static func generate(town: Town, streams: RngStreams) -> Contact:
 
 	contact.cares_about = topics
 	contact.relationship = Relationship.new(id, rng.randf_range(START_LOYALTY_MIN, START_LOYALTY_MAX))
-
-	town.governor_id = id
 	return contact
