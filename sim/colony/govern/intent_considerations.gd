@@ -42,14 +42,30 @@ const ROOM: StringName = &"room_to_grow"
 ## by construction. **A town too full for its fields is too full whether or not
 ## anyone has surveyed the frontier.**
 const CROWDING: StringName = &"crowding"
+
+## **How much of the ground this town could work belongs to somebody else**
+## (#204).
+##
+## Deliberately separate from `native_threat`, and for the reason `crowding` is
+## separate from `room_to_grow`: two considerations give two weights and
+## therefore **two kinds of governor who want the natives gone** — the frightened
+## man, who weighs the threat, and the covetous one, who weighs the fields. A
+## single blended term would collapse a man who is afraid and a man who is greedy
+## into the same character, and they are not the same character at all.
+##
+## It argues for settling elsewhere just as readily as for driving them off,
+## which is what keeps it a measure of the situation rather than an argument for
+## one answer.
+const NATIVE_LAND: StringName = &"native_land"
+
 const MANDATE: StringName = &"mandate"
 const URGING: StringName = &"crown_urging"
 
 ## Consideration ids this system introduces, sorted. `Governor` gives each new
 ## governor a weight for every one of them.
 const ALL: PackedStringArray = [
-	"crowding", "crown_urging", "food_security", "mandate", "native_threat",
-	"quality_of_life", "revenue", "room_to_grow",
+	"crowding", "crown_urging", "food_security", "mandate", "native_land",
+	"native_threat", "quality_of_life", "revenue", "room_to_grow",
 ]
 
 ## How long the Crown's Mandate keeps half its pull. SPEC §6.1 says "especially
@@ -86,10 +102,12 @@ static func register_all() -> void:
 	Deliberation.register_consideration(NativeThreat.new(), kinds)
 	Deliberation.register_consideration(RoomToGrow.new(), kinds)
 	Deliberation.register_consideration(Crowding.new(), kinds)
+	Deliberation.register_consideration(NativeLand.new(), kinds)
 	Deliberation.register_consideration(Mandate.new(), kinds)
 	Deliberation.register_consideration(CrownUrging.new(), kinds)
 	Deliberation.register_filter(RoomToSettle.new(), kinds)
 	Deliberation.register_filter(OnlyIfHeLoathesYou.new(), kinds)
+	Deliberation.register_filter(SomebodyToDriveOff.new(), kinds)
 
 
 ## Halve every `half_life` months. Used for both decaying pulls.
@@ -194,6 +212,12 @@ class NativeThreat extends Consideration:
 
 		match candidate.id:
 			GovernorIntent.DEFENCE:
+				return threat
+			GovernorIntent.DRIVE_OFF:
+				# **The frightened man's answer.** A governor who reads the
+				# neighbours as dangerous and has a heavy weight here stops
+				# thinking about walls and starts thinking about the people
+				# behind them.
 				return threat
 			GovernorIntent.SURVIVAL:
 				return threat * 0.5
@@ -349,6 +373,44 @@ class OnlyIfHeLoathesYou extends DeliberationFilter:
 			and contact.loyalty() <= IntentConsiderations.SEDITION_AT
 
 
+## How much of the ground this town could work is somebody else's.
+##
+## **The covetous man's argument**, and the second route to wanting them gone.
+class NativeLand extends Consideration:
+	func _init() -> void:
+		super(IntentConsiderations.NATIVE_LAND)
+
+	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+		var pressed := IntentConsiderations.land_in_other_hands(context)
+		match candidate.id:
+			GovernorIntent.DRIVE_OFF:
+				return pressed
+			GovernorIntent.SETTLEMENT:
+				# The other answer to the same problem, and the cheap one: go
+				# somewhere nobody is.
+				return pressed * 0.6
+			GovernorIntent.ECONOMY:
+				# Fields he cannot work are fields that will not pay.
+				return -pressed * 0.4
+		return 0.0
+
+
+## 🔒 **A man cannot intend to drive off people he has never met** (#204).
+##
+## A filter and not a weight (`deliberation.md` §5): a weight can lose a close
+## vote, and a governor four hundred miles from the nearest village adopting
+## *drive them off* is not a close vote, it is nonsense. The intent is reachable
+## only where there is somebody in reach to mean it about.
+class SomebodyToDriveOff extends DeliberationFilter:
+	func _init() -> void:
+		super(&"somebody_to_drive_off")
+
+	func permits(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> bool:
+		if candidate.id != GovernorIntent.DRIVE_OFF:
+			return true
+		return IntentConsiderations.land_in_other_hands(context) > 0.0
+
+
 class RoomToSettle extends DeliberationFilter:
 	func _init() -> void:
 		super(&"somewhere_to_settle")
@@ -357,6 +419,31 @@ class RoomToSettle extends DeliberationFilter:
 		if candidate.id != GovernorIntent.SETTLEMENT:
 			return true
 		return IntentConsiderations.room_in_the_colony(context) > 0.0
+
+
+## The share of this town's own fields that a tribe holds, nought to one.
+##
+## Shared by the consideration and the filter so that "their land is in my way"
+## cannot come to mean two different things — the same arrangement `room_to_grow`
+## and its filter have, and for the same reason.
+##
+## 🔒 **It counts, it does not adjudicate.** `natives.md` §10 leaves who works a
+## contested tile to the Author; this says only how many of them there are.
+static func land_in_other_hands(context: DeliberationContext) -> float:
+	var town: Town = context.get_value("town")
+	var territory: Territory = context.get_value("territory")
+	var natives: Tribes = context.get_value("natives")
+	if town == null or territory == null or natives == null:
+		return 0.0
+
+	var tiles := territory.tiles_of(town.id)
+	if tiles.is_empty():
+		return 0.0
+	var theirs := 0
+	for tile in tiles:
+		if not String(natives.holder_of(tile)).is_empty():
+			theirs += 1
+	return clampf(float(theirs) / float(tiles.size()), 0.0, 1.0)
 
 
 ## The share of the land the colony can see that no town has claimed.

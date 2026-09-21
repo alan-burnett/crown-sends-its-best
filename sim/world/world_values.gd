@@ -31,6 +31,16 @@ const MANDATE: String = "crown_mandate"
 ## computes each town's and this is what the Crown's officers see of it.
 const QUALITY_OF_LIFE: String = "quality_of_life"
 
+## How dangerous the neighbours look from inside the colony, nought to one
+## (#204).
+##
+## 🔒 **The colony's reading of them and not the tribes' own standing.** A
+## governor writing about "the natives" has no more idea than the PC which of
+## three peoples the men on the ridge belong to, so this is taken off whichever
+## of them holds the colony in the lowest regard — and it is what the governors
+## weigh, never the figure itself (`natives.md` §1).
+const NATIVE_THREAT: String = "native_threat"
+
 ## What the colony has worth teaching, averaged over its towns (#174).
 ##
 ## The measure the Provost reports on and the one his regard answers to. A mean
@@ -77,6 +87,7 @@ static func initial_state() -> WorldState:
 		MANDATE: GovernorIntent.ECONOMY,
 		QUALITY_OF_LIFE: 0.5,
 		EDUCATION: 0.0,
+		NATIVE_THREAT: 0.0,
 		REVENUE_BASELINE: 50.0,
 	})
 	for key in TaxRates.initial_values():

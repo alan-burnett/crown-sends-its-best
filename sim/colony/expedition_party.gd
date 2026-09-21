@@ -121,11 +121,15 @@ func heading_for() -> Vector2i:
 ## a preference letter that arrives mid-crossing changes where it ends up, and
 ## the same letter arriving after it has settled changes nothing because there is
 ## no party left to read it.
-func settle_destination(map: WorldMap, colony: Colony = null) -> Vector2i:
+func settle_destination(
+	map: WorldMap,
+	colony: Colony = null,
+	natives: Tribes = null,
+) -> Vector2i:
 	if region == Vector2i(-1, -1):
 		destination = Vector2i(-1, -1)
 		return destination
-	var site := SitePreference.site_in(region, preference, map, colony)
+	var site := SitePreference.site_in(region, preference, map, colony, natives)
 	destination = site if site != Vector2i(-1, -1) else region
 	return destination
 

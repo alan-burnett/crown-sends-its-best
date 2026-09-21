@@ -30,6 +30,10 @@ var colony: Colony = null
 ## The ground itself, for working out where a region's best site actually is.
 var map: WorldMap = null
 
+## The peoples already here (#204). *Away from the tribes* means nothing without
+## them, and a party recomputes its site every month it walks.
+var natives: Tribes = null
+
 ## The parties in the open. The same array the colony context carries, so a
 ## launch in the Colony Month is on the map without anything copying it across.
 var parties: Array = []
@@ -81,7 +85,7 @@ func _step(party: ExpeditionParty, context: ColonyContext) -> bool:
 	# A party with no region **waits** rather than wandering. Only a launch gives
 	# it one, and a party the player watched go nowhere for reasons nobody wrote
 	# down would be worse than one standing still.
-	party.settle_destination(map, colony)
+	party.settle_destination(map, colony, natives)
 	if party.destination == Vector2i(-1, -1):
 		return false
 

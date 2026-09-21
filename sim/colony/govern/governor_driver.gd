@@ -36,6 +36,10 @@ var actors: Dictionary = {}
 ## Supplied by the territory driver, which runs in phase 3.
 var territory_driver: TerritoryDriver = null
 
+## The peoples already here (#204). A governor weighs how much of his own ground
+## is somebody else's, and cannot intend to drive off people he has never met.
+var natives: Tribes = null
+
 
 func _init(p_colony: Colony = null, p_map: WorldMap = null) -> void:
 	colony = p_colony
@@ -77,6 +81,7 @@ func _decide(
 		"colony": colony,
 		"map": map,
 		"territory": territory,
+		"natives": natives,
 		"mandate": String(state.get_value(WorldValues.MANDATE, "")),
 		"urged": String(town.urged_intent),
 		"urged_month": town.urged_month,

@@ -74,6 +74,7 @@ static func site_in(
 	preference: StringName,
 	map: WorldMap,
 	colony: Colony = null,
+	natives: Tribes = null,
 ) -> Vector2i:
 	if map == null or region == Vector2i(-1, -1):
 		return Vector2i(-1, -1)
@@ -95,7 +96,9 @@ static func site_in(
 			if _too_near_a_town(at, colony):
 				continue
 			var merit := _ground_merit(at, map)
-			candidates.append({"at": at, "merit": merit, "want": _wanted(at, preference, map)})
+			candidates.append({
+				"at": at, "merit": merit, "want": _wanted(at, preference, map, natives),
+			})
 			best_merit = maxf(best_merit, merit)
 			worst_merit = minf(worst_merit, merit)
 	if candidates.is_empty():
@@ -120,7 +123,12 @@ static func site_in(
 ## 🔒 **A preference shades the answer; it does not replace it.** A PC who asks
 ## for the coast gets the best coastal ground rather than the first wet tile in
 ## the list, because the merit of the ground is still in the sum.
-static func _wanted(at: Vector2i, preference: StringName, map: WorldMap) -> float:
+static func _wanted(
+	at: Vector2i,
+	preference: StringName,
+	map: WorldMap,
+	natives: Tribes = null,
+) -> float:
 	match preference:
 		THE_COAST:
 			return _coastal(at, map)
@@ -130,7 +138,7 @@ static func _wanted(at: Vector2i, preference: StringName, map: WorldMap) -> floa
 			# 🔒 **The expensive preference.** It pays nothing for good ground and
 			# buys distance instead, which is the whole design: safety is bought
 			# with harvests.
-			return 1.0 - intrusion_at(at, map)
+			return 1.0 - intrusion_at(at, map, natives)
 		_:
 			return 0.0
 
@@ -148,14 +156,15 @@ static func _ground_merit(at: Vector2i, map: WorldMap) -> float:
 
 ## How much settling here would intrude on somebody, from nought to one.
 ##
-## 🔒 **The seam SPEC §11.4 needs, and nothing fills it yet.** Tribes are M5, so
-## this answers zero everywhere — deliberately, and said out loud, because the
-## alternative is a preference that costs nothing and reads as free.
+## 🔒 **The one function that knows about the natives**, so the preference the PC
+## states and the offence the founding causes cannot come to mean two different
+## things (#204). `Intrusion` answers it; this stays as the name the governor's
+## side of the seam calls.
 ##
-## When natives arrive, this is the one function that has to learn about them,
-## and both the preference and the founding offence read it.
-static func intrusion_at(_at: Vector2i, _map: WorldMap) -> float:
-	return 0.0
+## Zero where there is nobody — which is not the same claim as the stub that used
+## to live here. A map with no tribes on it genuinely offends nobody.
+static func intrusion_at(at: Vector2i, _map: WorldMap, natives: Tribes = null) -> float:
+	return Intrusion.depth_at(at, natives)
 
 
 ## Whether a site sits on somebody else's doorstep.
