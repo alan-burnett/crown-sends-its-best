@@ -63,9 +63,20 @@ const MEMORY_RECENT: int = 4
 ## compared with what the letter actually grants or promises (SPEC §9.2).
 ##
 ## A table keyed per tone, never a scale: the five tones are not ordered.
+##
+## 🔒 **Dutiful is nought, and not a gain** (#262, `tone.md` §4). Its identity
+## is *costs nothing, buys nothing* — the safe choice a player who never thinks
+## about tone can take and lose very little by. A positive figure quietly makes
+## it the best letter to send about anything, which is the one thing it must not
+## be.
+##
+## 🔒 **And desperate keeps its slight loss.** Pleading diminishes you in the
+## reader's eyes: a man who begs is a man who has lost his grip, and he is
+## writing it down. It is half of what stops desperation being the answer to
+## everything, the other half being the permanent mark on prestige.
 const TONE_WEIGHT: Dictionary = {
 	Tone.PLEASED: 0.6,
-	Tone.DUTIFUL: 0.4,
+	Tone.DUTIFUL: 0.0,
 	Tone.ANNOYED: -0.5,
 	Tone.DESPERATE: -0.2,
 	Tone.HATEFUL: -0.9,

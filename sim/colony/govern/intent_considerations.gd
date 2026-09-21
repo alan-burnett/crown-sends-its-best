@@ -87,6 +87,54 @@ const MANDATE_HALF_LIFE: float = 18.0
 ## for a decade is too strong for how little it costs to send.
 const URGING_HALF_LIFE: float = 12.0
 
+## What the manner of the letter does to how hard it pulls, and for how long
+## (#262, `docs/mechanics/tone.md` §4).
+##
+## ## 🔒 The axis is intensity, not warmth
+##
+## Pleased and annoyed both **lower** it; desperate and hateful both **raise**
+## it. That is not accidental symmetry.
+##
+## A governor who reads a letter as *the Crown is truly angry we have not built
+## the second town* **still remembers it next spring.** A letter that is flowery,
+## or merely peevish, is easy to **roll your eyes at and get on with your own
+## life** — the out-of-touch aristocrat being out of touch again.
+##
+## **Mild feeling reads as fussiness. Extreme feeling reads as meaning it.**
+##
+## ## 🔒 And hateful raising it is not a contradiction
+##
+## §4 has hateful pushing toward refusal *and* raising the urging. The two touch
+## different moments: this is consulted only **if he complied.** He is less likely
+## to take the order, and harder-driven when he does. *He did it because he was
+## afraid, and he has not forgotten why.*
+##
+## One factor, applied to the weight and to the half-life alike, because the
+## thing that varies is how much he took the letter to mean. A table per tone,
+## never a scale — the five are not ordered, and pleased and annoyed differ here
+## because flattery says nothing at all about how much the Crown wants a thing
+## while peevishness at least says it is wanted.
+##
+## Desperate is the strongest: §6 has it pulling harder and for longer than any
+## other tone, which is what the loyalty and the permanent prestige mark buy.
+## Dutiful is one, being the plain register. All of it is tuning.
+const URGING_INTENSITY: Dictionary = {
+	Tone.PLEASED: 0.65,
+	Tone.DUTIFUL: 1.0,
+	Tone.ANNOYED: 0.8,
+	Tone.DESPERATE: 1.5,
+	Tone.HATEFUL: 1.3,
+}
+
+
+## How much a letter written in this manner was taken to mean.
+##
+## **One for anything unrecognised**, which is the plain register — a saved run
+## from before the field existed, or an urging that came from nowhere in
+## particular, must pull exactly as it always did.
+static func intensity_of(tone: StringName) -> float:
+	return float(URGING_INTENSITY.get(tone, 1.0))
+
 ## Months of food at which a town stops thinking about food at all.
 const COMFORTABLE_MONTHS: float = 4.0
 
@@ -338,9 +386,27 @@ class CrownUrging extends Consideration:
 		var urged := StringName(context.get_value("urged", ""))
 		if String(urged).is_empty():
 			return 0.0
+		if candidate.id != urged:
+			return 0.0
+		# 🔒 **Both knobs, from one factor, and the factor is the half-life**
+		# (#262, §4). How hard it pulls and how long it lasts are the same question
+		# — how much he took the letter to mean — and a letter read as the Crown
+		# meaning it is one he is still thinking about next spring.
+		#
+		# **Not a multiplier on the pull as well.** A consideration scores in
+		# `[-1, +1]`, so a fresh urging is already at the ceiling and multiplying
+		# it is thrown away by the clamp — which looks like a second knob and is
+		# nothing at all. The month the letter lands every urging is at full
+		# strength, which is true; what differs is how fast it goes.
+		#
+		# Measured at any month after that, this is both: a desperate urging
+		# scores higher than a dutiful one **and** is still scoring when the
+		# dutiful one has gone.
+		var intensity := IntentConsiderations.intensity_of(
+			StringName(context.get_value("urged_tone", "")))
 		var age := float(context.month - int(context.get_value("urged_month", 0)))
-		var pull := IntentConsiderations.decayed(age, IntentConsiderations.URGING_HALF_LIFE)
-		return pull if candidate.id == urged else 0.0
+		return IntentConsiderations.decayed(
+			age, IntentConsiderations.URGING_HALF_LIFE * intensity)
 
 
 # --- The filter -------------------------------------------------------------
