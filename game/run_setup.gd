@@ -49,12 +49,6 @@ const MANDATES: Array[StringName] = [
 	GovernorIntent.SETTLEMENT,
 ]
 
-## How many sites the player is offered.
-##
-## Three is enough to be a choice and few enough to read on a phone. They are
-## spread across the ranked list rather than taken from the top, or all three
-## would be the same good ground with different coordinates.
-const SITES_OFFERED: int = 3
 
 ## How the opening grant may be split.
 ##
@@ -82,34 +76,21 @@ var quirks: PackedStringArray = PackedStringArray()
 var mandate: StringName = GovernorIntent.ECONOMY
 var split: StringName = SPLIT_STORES
 
-## Which of the offered sites was taken, as an index into `sites_for`.
-var site_choice: int = 0
-
-
-## The sites this seed offers.
+## 🔒 **What the colony is for, not where it goes** (#273, `map.md` §4).
 ##
-## **Spread across the ranked list, not the top of it.** Three neighbouring
-## tiles of the same good ground is not a decision; a rich site, a middling one
-## and a hard one is. M5 gives natives and rivals, and the same three sites will
-## then differ in neighbours as well as in soil.
-static func sites_for(seed_value_in: int) -> Array[Vector2i]:
-	var streams := RngStreams.new(seed_value_in)
-	var ranked := MapGenerator.sites_by_score(MapGenerator.generate(streams.stream("mapgen")))
-	var out: Array[Vector2i] = []
-	if ranked.is_empty():
-		return out
-	for at in SITES_OFFERED:
-		var index := int(float(ranked.size() - 1) * (float(at) / float(SITES_OFFERED)) * 0.7)
-		out.append(ranked[clampi(index, 0, ranked.size() - 1)])
-	return out
+## This replaced a `site_choice` index into a list of three coordinates. §11.4
+## locks that the PC never chooses a tile when founding a town — run start is the
+## same act by the same sort of person — and a coordinate means nothing to a
+## player who has never played.
+var request: StringName = SiteRequest.QUICK_GROWTH
 
 
 ## Where this setup puts the first town.
-func site() -> Vector2i:
-	var offered := sites_for(seed_value)
-	if offered.is_empty():
-		return Vector2i(-1, -1)
-	return offered[clampi(site_choice, 0, offered.size() - 1)]
+##
+## **The map answers.** The request tilts a good site and never picks a strange
+## one, and every answer has sea within reach whatever was asked for.
+func site_in(map: WorldMap) -> Vector2i:
+	return SiteRequest.choose(map, request)
 
 
 func has_perk(id: StringName) -> bool:
@@ -127,7 +108,7 @@ func to_dict() -> Dictionary:
 		"quirks": Array(quirks),
 		"mandate": String(mandate),
 		"split": String(split),
-		"site_choice": site_choice,
+		"request": String(request),
 	}
 
 
@@ -144,5 +125,5 @@ static func from_dict(data: Dictionary) -> RunSetup:
 	setup.quirks = PackedStringArray(data.get("quirks", []))
 	setup.mandate = StringName(data.get("mandate", GovernorIntent.ECONOMY))
 	setup.split = StringName(data.get("split", SPLIT_STORES))
-	setup.site_choice = int(data.get("site_choice", 0))
+	setup.request = StringName(data.get("request", SiteRequest.QUICK_GROWTH))
 	return setup
