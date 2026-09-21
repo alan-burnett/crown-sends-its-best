@@ -118,7 +118,33 @@ func _map() -> WorldMap:
 ## consideration can answer. So a world where anything else gets to decide is a
 ## world where the mandate has faded, and that is the design rather than a
 ## workaround: a letter from the PC matters more in year four than in year one.
-func _context(town: Town, values: Dictionary = {}, month: int = 6) -> DeliberationContext:
+## The peoples already here, put where they will be in a town's way.
+##
+## **Villages rather than a bare tribe**, because `native_land` measures fields
+## and a tribe with nowhere to live holds none of them.
+func _natives(where: Array = []) -> Tribes:
+	var natives := Tribes.new()
+	var tribe := Tribe.new()
+	tribe.id = &"tribe_test"
+	tribe.display_name = "Test"
+	tribe.standing = {String(Tribe.COLONY): 50.0}
+	natives.all.append(tribe)
+	for index in where.size():
+		var village := Village.new()
+		village.id = StringName("village_test_%d" % index)
+		village.tribe = tribe.id
+		village.at = where[index]
+		village.people = 30
+		natives.villages.append(village)
+	return natives
+
+
+func _context(
+	town: Town,
+	values: Dictionary = {},
+	month: int = 6,
+	natives: Tribes = null,
+) -> DeliberationContext:
 	var state := WorldValues.initial_state()
 	for key in values:
 		state.values[key] = values[key]
@@ -143,6 +169,7 @@ func _context(town: Town, values: Dictionary = {}, month: int = 6) -> Deliberati
 		"mandate": String(GovernorIntent.ECONOMY),
 		"urged": String(town.urged_intent),
 		"urged_month": town.urged_month,
+		"natives": natives if natives != null else _natives(),
 	}
 	return context
 
@@ -237,8 +264,19 @@ func _worlds_for(id: StringName) -> Array:
 					town.urged_month = month
 					worlds.append(_context(town, {}, month))
 		IntentConsiderations.THREAT:
-			for month in MONTHS:
-				worlds.append(_context(_town(), {}, month))
+			# **Across how dangerous the neighbours look**, which is what #204
+			# made a real figure. Before it, every world here read zero and the
+			# consideration was correctly inert.
+			for threat in [0.0, 0.3, 0.7, 1.0]:
+				for month in MONTHS:
+					worlds.append(_context(
+						_town(), {WorldValues.NATIVE_THREAT: threat}, month))
+		IntentConsiderations.NATIVE_LAND:
+			# **Across how much of the town's own ground is somebody else's**,
+			# from nobody within a day's walk to a village in the middle of it.
+			for where in [[], [Vector2i(18, 18)], [Vector2i(6, 4)], [Vector2i(4, 4)]]:
+				for month in MONTHS:
+					worlds.append(_context(_town(), {}, month, _natives(where)))
 	return worlds
 
 
@@ -365,19 +403,38 @@ func _crowded_context(town: Town, month: int = 6, revenue: float = 40.0) -> Deli
 
 # --- 🔒 And the ones that cannot, and why -----------------------------------
 
-func test_native_threat_is_inert_and_that_is_correct() -> void:
-	# **Distinct from a bug.** Natives are M5. `deliberation.md` requires a
-	# consideration whose inputs do not move yet to read as *no opinion* rather
-	# than as *no* — a consideration quietly scoring against a candidate because
-	# its system does not exist would suppress intents for a reason nobody
-	# intended.
+func test_native_threat_says_nothing_about_a_country_with_nobody_in_it() -> void:
+	# 🔒 `deliberation.md`: a consideration whose input has not moved reads as
+	# **no opinion** rather than as *no*. One quietly scoring against a candidate
+	# because nothing has happened yet would suppress intents for a reason nobody
+	# intended — which is what this asserted before #204, when it was true
+	# everywhere. It is now true only where the neighbours are content.
 	var town := _town()
 	for candidate in _candidates():
 		var score := IntentConsiderations.NativeThreat.new().score(
 			_ordinary(), candidate, _context(town)
 		)
 		assert_almost_eq(score, 0.0, 0.0001,
-			"native threat has an opinion about %s before natives exist" % candidate.id)
+			"native threat has an opinion about %s with nothing to fear" % candidate.id)
+
+
+func test_native_threat_can_decide() -> void:
+	# **The milestone landed.** This test was `..._is_inert_and_that_is_correct`
+	# and the file said plainly that it would start failing when M5 arrived, and
+	# that somebody should look at it then. #204 is that moment: standing moves,
+	# so the threat a governor reads moves with it.
+	assert_true(_matters_somewhere(IntentConsiderations.THREAT,
+		_worlds_for(IntentConsiderations.THREAT)),
+		"caring how dangerous the neighbours are never changed a governor's mind")
+
+
+func test_native_land_can_decide() -> void:
+	# **The covetous man**, who is not the frightened one. The two are separate
+	# considerations so that two weights make two kinds of governor, and this is
+	# the half that has to be shown to carry a vote on its own.
+	assert_true(_matters_somewhere(IntentConsiderations.NATIVE_LAND,
+		_worlds_for(IntentConsiderations.NATIVE_LAND)),
+		"caring that their fields are in the way never changed a governor's mind")
 
 
 # --- 🔒 The whole set is accounted for --------------------------------------
@@ -389,8 +446,10 @@ func test_every_registered_consideration_is_covered_here() -> void:
 	# The two that cannot decide anything yet, each waiting on a milestone rather
 	# than on a tuning pass. **Anything else joining them is a bug**, and
 	# anything leaving them means its milestone has landed.
+	# **`native_threat` left this list in #204** and did not have to be tuned to
+	# do it: M5 gave it a figure that moves. That is what the note below always
+	# said would happen.
 	var waiting: PackedStringArray = [
-		IntentConsiderations.THREAT,  # natives are M5
 		IntentConsiderations.ROOM,    # a second town is M4
 	]
 	for id in waiting:
@@ -406,6 +465,7 @@ func test_every_registered_consideration_is_covered_here() -> void:
 		IntentConsiderations.MANDATE,
 		IntentConsiderations.URGING,
 		IntentConsiderations.THREAT,
+		IntentConsiderations.NATIVE_LAND,
 	]
 	for id in IntentConsiderations.ALL:
 		assert_true(covered.has(String(id)),

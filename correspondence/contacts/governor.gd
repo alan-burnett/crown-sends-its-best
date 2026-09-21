@@ -30,6 +30,11 @@ const WEIGHTED: PackedStringArray = [
 	"loyalty", "cost_of_request", "payment_offered", "autonomy", "order_clarity",
 	"quality_of_life", "food_security", "revenue", "native_threat",
 	"room_to_grow", "mandate", "crown_urging",
+	# **Every id `IntentConsiderations.ALL` declares.** One left out is not a
+	# missing line, it is a consideration every governor in the game weighs
+	# identically — which quietly deletes the character the consideration was
+	# split out to create. `crowding` was in that state (#175, #204).
+	"crowding", "native_land",
 ]
 
 ## Topics a governor shades when he writes about his own town. **These are what

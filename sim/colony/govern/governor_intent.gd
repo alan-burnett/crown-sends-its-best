@@ -79,12 +79,36 @@ const SURVIVAL: StringName = &"secure_survival"
 ## won back stops preparing for a rebellion he no longer wants.
 const SEDITION: StringName = &"prepare_for_rebellion"
 
-const ALL: Array[StringName] = [ECONOMY, POPULATION, DEFENCE, SETTLEMENT, SURVIVAL, SEDITION]
+## **The one intent directed against the people already here** (#204, SPEC
+## §11.3, §12.5; `natives.md` §3).
+##
+## A governor who has decided the tribe beside him is the problem, and means to
+## be rid of them. It is the clearest route to the point of no return — not
+## because the intent itself is unforgivable, but because a town set on this is a
+## town whose next act is the one that is.
+##
+## 🔒 **The PC can argue against it and cannot forbid it.** §11.3 locks that a
+## governor's intent is his to judge, so a determined man drives them off at his
+## people's expense while the PC writes letters about it. That is the whole of
+## why this is an intent rather than a policy.
+##
+## 🔒 **Visible to the tribe from the month he adopts it**, before anything is
+## built. There is no hiding a purpose from people who live next door.
+##
+## **Reachable only by a governor who has somebody to drive off**, enforced as a
+## filter rather than a weight (`deliberation.md` §5): a man whose town has never
+## seen a native cannot want this, however warlike he is, and a weight can lose a
+## close vote where a filter cannot.
+const DRIVE_OFF: StringName = &"drive_them_off"
+
+const ALL: Array[StringName] = [
+	ECONOMY, POPULATION, DEFENCE, SETTLEMENT, SURVIVAL, SEDITION, DRIVE_OFF,
+]
 
 ## Sorted for iteration, since the order intents are weighed in must not depend
 ## on the order they happen to be declared in.
 const IN_ORDER: Array[StringName] = [
-	ECONOMY, POPULATION, DEFENCE, SETTLEMENT, SEDITION, SURVIVAL,
+	DRIVE_OFF, ECONOMY, POPULATION, DEFENCE, SETTLEMENT, SEDITION, SURVIVAL,
 ]
 
 
@@ -110,6 +134,25 @@ static func is_sedition(id: StringName) -> bool:
 	return id == SEDITION
 
 
+## Whether this is an intent **a governor reaches entirely on his own**.
+##
+## 🔒 There is no letter in which the PC asks for one of these, and there should
+## not be. Both are things the colony arrives at because of how it has been
+## treated and how it has behaved, which makes them consequences rather than one
+## more thing the PC decides from an armchair — and that is worth more than the
+## instrument would be.
+##
+## He is not powerless about either. He argues by urging something else, and a
+## governor who takes the other course has been talked round. What he cannot do
+## is **ask** for a rebellion, or for a people to be driven off their land.
+##
+## `test_colony_letters` reads this: an intent outside it with no letter option
+## is a hole, and one inside it with a letter option is a different kind of
+## mistake.
+static func is_his_alone(id: StringName) -> bool:
+	return id == SEDITION or id == DRIVE_OFF
+
+
 ## What the town is being steered towards, on each axis an objective can serve.
 ##
 ## **This table is the whole of "serving an intent".** `ObjectiveSelector` scores
@@ -127,6 +170,11 @@ const PROFILES: Dictionary = {
 	# profile that wants the colony's commerce to *fall*, because every shilling
 	# of it is a thread back to London.
 	SEDITION:   {"food": 0.9, "trade": -0.8, "defence": 1.0, "comfort": 0.2, "capacity": 0.6, "expansion": -0.5},
+	# **Guns and land.** A governor set on driving them off wants his militia
+	# armed and his border pushed, and has no patience for anything that is not
+	# one of those two — least of all the trade with them that comfort would
+	# otherwise come from.
+	DRIVE_OFF:  {"food": 0.5, "trade": -0.2, "defence": 1.0, "comfort": 0.0, "capacity": 0.5, "expansion": 0.8},
 }
 
 ## The axes, sorted. Iterating the profile dictionary directly would make the
@@ -170,8 +218,10 @@ static func _widest_gap() -> float:
 				continue
 			var apart := 0.0
 			var first: Dictionary = PROFILES.get(a, {})
-			for axis in first:
-				apart += absf(float(first[axis]) - float(PROFILES.get(b, {}).get(axis, 0.0)))
+			# Over `AXES` rather than the dictionary: a floating-point sum taken
+			# in insertion order is a sum that can change when a row is edited.
+			for axis in AXES:
+				apart += absf(float(first.get(axis, 0.0)) - float(PROFILES.get(b, {}).get(axis, 0.0)))
 			widest = maxf(widest, apart)
 	return widest
 

@@ -91,6 +91,17 @@
         "food": 2.5,
         "stone": 1.2
       }
+    },
+    {
+      "id": "drive_them_off",
+      "name": "the question of our neighbours",
+      "pursuing": "settling the question of our neighbours once and for all",
+      "stocks": {
+        "guns": 1.1,
+        "horses": 0.5,
+        "iron": 0.5,
+        "food": 1.8
+      }
     }
   ],
   "expeditions": [

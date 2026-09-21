@@ -253,15 +253,55 @@ func test_a_preference_nobody_has_heard_of_is_abandoned() -> void:
 
 # --- 🔒 Away from the tribes has a price -----------------------------------
 
-func test_the_intrusion_seam_is_cut_and_reads_zero() -> void:
-	# 🔒 SPEC §11.4: founding near or beyond native land offends the nearby tribes
-	# **in proportion to the intrusion**. Tribes are M5, so this answers zero
-	# everywhere — said out loud, because a preference that costs nothing reads as
-	# free, and this is the one function M5 has to teach about natives.
+func test_a_country_with_nobody_in_it_offends_nobody() -> void:
+	# This test used to say the seam was cut and read zero everywhere, and that it
+	# was the one function M5 would have to teach about natives. **M5 taught it**
+	# (#204): it now answers zero only where there is genuinely nobody, which is a
+	# different claim and the honest one.
 	var map := _map()
 	for at in [Vector2i(3, 3), Vector2i(7, 7), Vector2i(12, 11)]:
-		assert_almost_eq(SitePreference.intrusion_at(at, map), 0.0, 0.0001,
-			"something already answers for the tribes, and M5 will answer twice")
+		assert_almost_eq(SitePreference.intrusion_at(at, map, null), 0.0, 0.0001,
+			"an empty country offended somebody")
+
+
+func test_the_intrusion_seam_now_costs_something_where_somebody_lives() -> void:
+	var map := _map()
+	var natives := Tribes.new()
+	var tribe := Tribe.new()
+	tribe.id = &"tribe_test"
+	natives.all.append(tribe)
+	var village := Village.new()
+	village.id = &"village_test_0"
+	village.tribe = tribe.id
+	village.at = Vector2i(7, 7)
+	village.people = 30
+	natives.villages.append(village)
+
+	assert_true(SitePreference.intrusion_at(Vector2i(7, 7), map, natives) > 0.5,
+		"settling on their houses read as an empty field")
+	assert_almost_eq(SitePreference.intrusion_at(Vector2i(20, 20), map, natives),
+		0.0, 0.0001, "a tile nowhere near them was an intrusion")
+
+
+func test_away_from_the_tribes_now_steers_away_from_a_village() -> void:
+	# 🔒 The preference SPEC §11.4 locks, doing the thing its name says at last.
+	var map := _map()
+	var natives := Tribes.new()
+	var tribe := Tribe.new()
+	tribe.id = &"tribe_test"
+	natives.all.append(tribe)
+	var village := Village.new()
+	village.id = &"village_test_0"
+	village.tribe = tribe.id
+	village.at = Vector2i(9, 7)
+	village.people = 30
+	natives.villages.append(village)
+
+	var safe := SitePreference.site_in(
+		Vector2i(9, 7), SitePreference.AWAY_FROM_TRIBES, map, null, natives)
+	assert_true(Intrusion.depth_at(safe, natives)
+			< Intrusion.depth_at(Vector2i(9, 7), natives) - 0.0001,
+		"a governor told to keep clear of them settled in their village")
 
 
 func test_going_wide_of_the_tribes_is_not_free() -> void:

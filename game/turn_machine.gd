@@ -153,6 +153,9 @@ func _init(p_run: RunState) -> void:
 	# Settle turns into a project (#53).
 	governors = GovernorDriver.new(run.colony, run.map)
 	governors.territory_driver = territory
+	# A governor weighs how much of his own ground is somebody else's, and cannot
+	# intend to drive off people he has never met (#204).
+	governors.natives = run.tribes
 	for id in run.contact_ids():
 		var contact := run.contact(StringName(id))
 		if contact != null and contact.role == Governor.ROLE:
@@ -207,6 +210,7 @@ func _init(p_run: RunState) -> void:
 	expeditions.colony = run.colony
 	expeditions.map = run.map
 	expeditions.parties = run.parties
+	expeditions.natives = run.tribes
 	colony_month.parties = run.parties
 
 	crown_affairs.colony = run.colony
@@ -219,9 +223,17 @@ func _init(p_run: RunState) -> void:
 	# so the order between the two decides nothing.
 	var villages := VillageDriver.new(run.tribes, run.map)
 
+	# Phase 7. What the month did to the neighbours, asked after the Colony Month
+	# so the fields a town worked are fields it has actually worked (#204).
+	var standings := StandingDriver.new()
+	standings.colony = run.colony
+	standings.natives = run.tribes
+	standings.map = run.map
+	standings.territory_driver = territory
+
 	month_runner.drivers = [
 		immigration, crown_foundings, expeditions, crown_affairs, territory,
-		colony_month, villages, promise_driver,
+		colony_month, villages, promise_driver, standings,
 		policies, crown_standing, prestige, drift, orders, silence, governors,
 		grievances,
 	]
