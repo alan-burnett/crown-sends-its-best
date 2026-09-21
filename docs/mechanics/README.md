@@ -25,6 +25,7 @@ being rewritten every iteration.
 | [perks-and-quirks.md](perks-and-quirks.md) | Facts about you, and facts about the world you were given | M7 |
 | [endings.md](endings.md) | The four conditions, two epitaphs, and why the warning needs no timer | M6 |
 | [prestige.md](prestige.md) | The Crown's running account of the PC, and the final score | M3 |
+| [map.md](map.md) | How a world is made, and how a colony asks for its ground | M7 |
 | [tiles-and-improvements.md](tiles-and-improvements.md) | What a tile yields, what sits on it, and razing as harassment | M2 |
 | [buildings.md](buildings.md) | The tree, what each does, and what it costs to keep | M2 |
 | [immigration.md](immigration.md) | Who comes, why, and why you might not want them | M4 |

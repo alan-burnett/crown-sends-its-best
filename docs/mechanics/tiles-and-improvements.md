@@ -21,6 +21,9 @@ none 0    low 1    medium 3    high 6
 separate table says what high is worth. Balancing every forest in the game is
 then one number rather than seven files that have to agree.
 
+How a world of these is generated, and how a colony is placed in one, is
+`map.md`.
+
 A worker eats **1 food** a month, so a hand on high-food plains feeds six and one
 on medium grassland feeds three. **That ratio is the foundation the whole colony
 sits on** — see `town-economy.md` §11 for what multiplies it.
