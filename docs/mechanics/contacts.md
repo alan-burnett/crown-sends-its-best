@@ -92,6 +92,7 @@ reinterpret, refuse, act alone — through the deliberation kernel.
 | **cost** | what the order asks in **gold** | a large ask is easier to shave, put off or decline |
 | **payment** | what the PC offered against that cost | comply |
 | **harshness** | whether the letter leaned on him | comply, and **away from the sideways answers** — a man told plainly does not quietly reinterpret |
+| **tone** | which of the five the PC chose | five considerations, one per tone, weighted by three traits (`tone.md` §5) |
 | **clarity** | how vague the order is | **reinterpret**, which without this axis could never happen at all |
 | **autonomy** | his disaffection | act alone, reinterpret |
 

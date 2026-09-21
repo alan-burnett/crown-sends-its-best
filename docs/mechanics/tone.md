@@ -78,7 +78,72 @@ being out of touch again.
 
 **Mild feeling reads as fussiness. Extreme feeling reads as meaning it.**
 
-## 5. What each one is for
+## 5. 🔒 Tone lives inside the kernel, not on top of it
+
+**Each tone is a consideration**, scoring zero unless the letter carries it. It
+sits alongside loyalty, cost, payment, harshness, clarity and autonomy, and is
+weighted by personality like every one of them.
+
+**This is not a detail of where the code goes.** The kernel's whole design is that
+a consideration produces a score and the actor's personality supplies a weight
+(`deliberation.md` §4). Build tone *outside* that — as a table applied to the
+result — and every contact in the game reacts to a hateful letter identically,
+and making one react differently needs a branch on who he is. `CLAUDE.md` forbids
+exactly that: **no contact has bespoke behavioural code.**
+
+Inside the kernel it costs nothing. **A man who minds being shouted at is one
+number in a vector that is already being filled in when he is generated.**
+
+### Three traits, not five weights
+
+A weight per tone is what makes the difference expressive — *how much manner
+matters to him* is a poor question, *what kind of manner moves him* is a good one.
+
+But five weights drawn independently, on top of the six a contact already carries,
+produce **a man who loves being flattered and also loves being threatened**. That
+is not a personality, it is a dice roll.
+
+So the tone weights are generated from **three traits**:
+
+| Trait | Scales | The man it describes |
+| :--- | :--- | :--- |
+| **Vanity** | `pleased` | flattery works on him |
+| **Mettle** | `annoyed`, `hateful`, **and harshness** | how he takes being leaned on |
+| **Pity** | `desperate` | he is moved by need |
+
+**Dutiful carries no weight at all**, which is the tell that this is the right
+cut. Its identity in §6 is *costs nothing, buys nothing* — there is nothing in it
+for a personality to have an opinion about.
+
+**Mettle is already half-built.** `HarshnessConsideration` carries a personality
+weight today, and its own note reads *"a proud man minds being commanded more than
+a dutiful one, and the same letter lands differently on the two of them."* One
+trait driving both the harsh clause and the hostile tones is right: a man who
+resents being bullied resents the threat and the contempt alike.
+
+### What the three produce
+
+| | Vanity | Mettle | Pity | |
+| :--- | --: | --: | --: | :--- |
+| **The proud man** | low | **high** | low | hateful drives him to refusal; flattery bounces off |
+| **The timid man** | high | low | mid | pleased moves him; contempt barely registers |
+| **The bully** | **negative** | **negative** | low | takes courtesy for weakness, and responds to force |
+| **The decent man** | mid | mid | **high** | a desperate letter reaches him where nothing else would |
+
+**A negative weight inverts that tone's whole table for him.** The bully falls out
+of the same machinery rather than needing a case of his own — he is not a special
+contact, he is two numbers below zero.
+
+### 🔒 Which makes §4 the centre of a distribution
+
+Everything in the table above describes **the average reader.** A *slight loyalty
+loss* for annoyed is slight for a typical man, and the proud one takes it far
+harder.
+
+So the figures there are a **midpoint to tune**, not a value to set — and what
+they buy is five tones times every personality in the game rather than five tones.
+
+## 6. What each one is for
 
 ### pleased — makes friends, and is not taken seriously
 
@@ -137,7 +202,7 @@ because he was afraid, and he has not forgotten why.
 and real: a man whose regard you have already lost, where refusal was likely
 anyway and what you want is maximum pull if it lands.
 
-## 6. Harsh is the second axis
+## 7. Harsh is the second axis
 
 **A separate yes-or-no**, set after the tone, and the two are orthogonal — five
 tones times harsh-or-not is **ten registers**. See `contacts.md` §3.
@@ -156,7 +221,7 @@ you are the one deciding, and *do it or else* has no object.
 sentence is a tone-keyed `{insert:}` fragment, so the same flag reads as velvet
 from a pleased PC and as a threat from an annoyed one.
 
-## 7. Two things that will look like bugs
+## 8. Two things that will look like bugs
 
 **🔒 Desperate removes delay. It does not weigh against it.**
 `deliberation.md` §5: hard rules are **filters**, applied before scoring. A large
@@ -168,23 +233,30 @@ Urging weight is only ever consulted **if he complied**, so the two touch
 different moments. He is less likely to take the order, and harder-driven when he
 does.
 
-## 8. Tuning targets
+## 9. Tuning targets
 
 - Every magnitude in §4, and the loyalty figures against the shipped
   `TONE_WEIGHT` table.
 - **Desperate's prestige mark.** Small enough to be worth paying once, large
   enough that a run of them tells at retirement. That one number decides whether
   desperate is a tool or the answer.
-- How far harshness stacks with annoyed, since both push toward partial.
+- How far harshness stacks with annoyed, since both push toward partial — and
+  they now share a trait, so a high-mettle man feels the pair twice.
+- The spread of the three traits. Too narrow and every contact reads the same;
+  too wide and half the colony is a caricature.
 - What *increase* and *decrease* on desire-to-write are worth against the
   director's thresholds (`the-director.md` §4).
 
-## 9. Open items
+## 10. Open items
 
-- **Whether tone should be conditioned on the reader.** If it enters compliance as
-  a consideration it carries a personality weight for free, and *hateful* could
-  work on a frightened man and fail on a proud one. Nothing here requires it and
-  it would be a large gain in character.
+- **How the three traits are drawn**, and whether they correlate with the
+  personality weights a contact already carries. A proud man who is also
+  indifferent to cost is a different problem from a proud man who is not, and
+  nothing yet says whether traits are independent.
+- Whether **annoyed and hateful** should ever separate. Mettle moves them
+  together, which says a man who resents being commanded resents contempt too.
+  A man who takes a rebuke well and contempt badly is plausible and currently
+  inexpressible.
 - Whether a contact's tone should read the PC's last tone to him. Two proud men
   exchanging colder and colder letters is a good story and an easy spiral.
 - Whether **answering** wants any second axis at all, now that harshness is not
