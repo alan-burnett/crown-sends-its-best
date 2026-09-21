@@ -1,5 +1,5 @@
 class_name Tribe
-extends RefCounted
+extends DeliberationActor
 
 ## A people already living here (#203, SPEC §12.5;
 ## `docs/mechanics/natives.md` §1, §2).
@@ -29,6 +29,16 @@ extends RefCounted
 ##
 ## Held per faction means a tribe can be hostile to the colony and civil with a
 ## rival — **and then deal with that rival about the colony.**
+##
+## ## 🔒 A people has a temperament, like anybody else who chooses
+##
+## `Tribe` is a `DeliberationActor`, so what one of them offers the colony in
+## trade comes out of a **weight vector over considerations** and not out of a
+## branch — the same mechanism as a governor's intent and a contact's compliance
+## (`deliberation.md` §4). One people trade what they can spare; another will not
+## sell a gun to anybody whatever it is worth.
+##
+## That is what SPEC §12.5's "full actors in the simulation" has to mean in code.
 ##
 ## ## 🔒 The point of no return is a latch, not a threshold
 ##
@@ -67,7 +77,6 @@ const MAXIMUM: float = 100.0
 ## tribe can still be talked out of, and a point past it where it cannot.
 const IRRECONCILABLE_BELOW: float = 12.0
 
-var id: StringName = &""
 var display_name: String = ""
 
 ## Standing toward every faction it can name. Faction id -> nought to a hundred.
@@ -158,6 +167,7 @@ func to_dict() -> Dictionary:
 	return {
 		"id": String(id),
 		"name": display_name,
+		"weights": weights.duplicate(),
 		"standing": standing.duplicate(),
 		"irreconcilable": irreconcilable.duplicate(),
 	}
@@ -167,6 +177,7 @@ static func from_dict(data: Dictionary) -> Tribe:
 	var tribe := Tribe.new()
 	tribe.id = StringName(data.get("id", ""))
 	tribe.display_name = String(data.get("name", ""))
+	tribe.weights = data.get("weights", {}).duplicate()
 	tribe.standing = data.get("standing", {}).duplicate()
 	tribe.irreconcilable = data.get("irreconcilable", {}).duplicate()
 	return tribe

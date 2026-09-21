@@ -371,12 +371,44 @@ func _shop(
 	return got
 
 
-## **The M5 seam.** Natives come ahead of the Crown in SPEC §11.3 and there are
-## none yet, so this buys nothing — but it buys nothing *in the right place*.
+## 🔒 **Natives ahead of the Crown** (SPEC §11.3), and **no duty** (§10.1).
+##
+## The seam this file cut in M2 is now filled, and it was worth cutting: nothing
+## else in Exchange had to change, because "buy" never meant "buy from the Crown"
+## anywhere but here.
+##
+## The exemption is not a rate of zero anywhere — it is that this path **never
+## goes near `Trade`**, so there is nothing for a duty to be charged on. A town
+## with a standing agreement is buying from its neighbours, and the Crown does
+## not have a customs house in a village.
 func _buy_from_natives(
-	_town: Town,
-	_resource: StringName,
-	_wanted: float,
-	_context: ColonyContext,
+	town: Town,
+	resource: StringName,
+	wanted: float,
+	context: ColonyContext,
 ) -> float:
-	return 0.0
+	if context.native_trade == null or context.natives == null or wanted <= 0.0:
+		return 0.0
+	var deal := context.native_trade.of_town(town.id)
+	if deal == null or deal.they_give != resource:
+		return 0.0
+
+	var village := _their_village(deal, context)
+	if village == null:
+		return 0.0
+
+	# What Reckon has put by of the thing the town is giving away. A town does
+	# not trade away the grain it is going to eat, however good the bargain.
+	var reserve := context.reckoning_for(town).reserve_of(deal.we_give)
+	var got := deal.run(town, village, reserve, context)
+	# The trade moves what both sides can spare rather than what the shopping
+	# list asked for, so a month may bring more than was wanted — which is what
+	# a standing agreement is, as against a purchase.
+	return minf(got, wanted)
+
+
+## The village on the other end of an agreement.
+func _their_village(deal: TradeAgreement, context: ColonyContext) -> Village:
+	for village in context.natives.villages_of(deal.tribe):
+		return village
+	return null

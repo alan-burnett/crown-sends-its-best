@@ -109,6 +109,41 @@
     ]
   },
   {
+    "id": "trigger.governor.i_have_made_a_bargain",
+    "letter": "governor.i_have_made_a_bargain",
+    "urgency": 0.6,
+    "cooldown": 2,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "neighbour_tribe",
+        "fallback": "natives"
+      },
+      "theirs": {
+        "from": "bargain",
+        "field": "they_give",
+        "fallback": "food"
+      },
+      "ours": {
+        "from": "bargain",
+        "field": "we_give",
+        "fallback": "tools"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "i_struck_a_bargain": {
+          "within": 2
+        }
+      }
+    ]
+  },
+  {
     "id": "trigger.governor.the_people_next_door",
     "letter": "governor.the_people_next_door",
     "urgency": 0.28,

@@ -154,11 +154,25 @@ func live(its_tribe: Tribe, context: ColonyContext) -> void:
 	decide(its_tribe, months, context)
 
 	# What the land gives them, at the reach they hold.
+	#
+	# **Everything the ground offers, not only the food** (#206). A village that
+	# gathered nothing but grain would have nothing but grain to trade, and
+	# `natives.md` §5 has them offering *what the village is actually producing*.
+	# They take the raw things: they do not work iron and they do not brew.
 	if context.map != null:
-		var gathered := 0.0
-		for tile in land(context.map):
-			gathered += context.map.yield_at(tile.x, tile.y, &"food")
-		held += gathered * (1.3 if objective == WORK_MORE_LAND else 1.0)
+		var working := 1.3 if objective == WORK_MORE_LAND else 1.0
+		var fields := land(context.map)
+		for resource in _what_the_land_gives():
+			var gathered := 0.0
+			for tile in fields:
+				gathered += context.map.yield_at(tile.x, tile.y, resource)
+			if gathered <= 0.0:
+				continue
+			if resource == &"food":
+				held += gathered * working
+			else:
+				stores[String(resource)] = float(
+					stores.get(String(resource), 0.0)) + gathered * working
 
 	held = maxf(0.0, held - eaten)
 	stores["food"] = held
@@ -193,6 +207,29 @@ func live(its_tribe: Tribe, context: ColonyContext) -> void:
 			"reach": influence(),
 			"was": reach,
 		}, WorldPhase.COLONY_MONTH)
+
+
+## The raw things a village takes off its land.
+##
+## 🔒 **Nothing processed and nothing that wants a craft they do not have.**
+## `natives.md` §5 and SPEC §12.2: what they cannot make is exactly what they
+## trade *for*, so a village that gathered tools would have no reason to deal
+## with the colony at all.
+static func _what_the_land_gives() -> Array[StringName]:
+	var out: Array[StringName] = []
+	for id in ResourceCatalogue.ids():
+		var resource := StringName(id)
+		if ResourceCatalogue.is_livestock(resource):
+			continue
+		if ResourceCatalogue.native_worth(resource) > CRAFT_THEY_LACK:
+			continue
+		out.append(resource)
+	return out
+
+
+## Above this, a thing takes a craft they do not have, and they gather none of
+## it however much of it is lying about. Tuning.
+const CRAFT_THEY_LACK: float = 1.0
 
 
 ## How fast they grow, which is faster when they are at ease. Tuning.
