@@ -45,6 +45,7 @@ var run: RunState = null
 var month_runner: WorldMonth = null
 var prestige: PrestigeDriver = null
 var expeditions: ExpeditionDriver = null
+var crown_foundings: CrownFoundingDriver = null
 
 ## Where letter templates come from. Supplied rather than reached for: the
 ## `Content` autoload only exists when the project boots normally, and this loop
@@ -105,6 +106,17 @@ func _init(p_run: RunState) -> void:
 	# settled is overtaken by events, and the reply says so.
 	var preferences := PreferenceExecutor.new()
 	preferences.parties = run.parties
+
+	# **The Crown's own foundings** (#180). No map unit at any point: they are
+	# proposed here and appear in phase 1 months later.
+	var foundings := FoundingExecutor.new()
+	foundings.foundings = run.foundings
+
+	crown_foundings = CrownFoundingDriver.new()
+	crown_foundings.colony = run.colony
+	crown_foundings.map = run.map
+	crown_foundings.contacts = run.contacts
+	crown_foundings.foundings = run.foundings
 
 	var tribute := TributeExecutor.new()
 	var embargoes := EmbargoExecutor.new()
@@ -202,13 +214,16 @@ func _init(p_run: RunState) -> void:
 	prestige = PrestigeDriver.new(run.prestige)
 
 	month_runner.drivers = [
-		immigration, expeditions, crown_affairs, territory, colony_month, promise_driver,
+		immigration, crown_foundings, expeditions, crown_affairs, territory,
+		colony_month, promise_driver,
 		policies, crown_standing, prestige, drift, orders, silence, governors,
 		grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
-	month_runner.executors = [urging, shipments, embargoes, tribute, preferences, executor]
+	month_runner.executors = [
+		urging, shipments, embargoes, tribute, preferences, foundings, executor,
+	]
 
 
 ## What each kind of Order does to the world.
@@ -270,6 +285,10 @@ static func order_effects() -> Dictionary:
 		# A preference moves no world value. What it moves is a governor already
 		# walking, which is `PreferenceExecutor`'s business (#177).
 		String(M1Registrations.ORDER_PREFER_SITE): {"target": ""},
+		# The cost of a Crown founding lands through the letter's other effect, a
+		# `promise_gold` on the ordinary promise path — not here (#180).
+		String(M1Registrations.ORDER_FUND_FOUNDING): {"target": ""},
+		String(M1Registrations.ORDER_DISSUADE_FOUNDING): {"target": ""},
 		# A policy is enacted when the enactor agrees to it, in phase 7, and
 		# billed from phase 5 thereafter. It moves no world value on its own.
 		String(M1Registrations.ORDER_ENACT_POLICY): {"target": ""},

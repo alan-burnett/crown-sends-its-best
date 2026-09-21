@@ -40,6 +40,13 @@ const ORDER_PAY_TRIBUTE: StringName = &"pay_tribute"
 ## tile**, and the effect's params are where that is enforced: there is nowhere
 ## in them to put a coordinate.
 const ORDER_PREFER_SITE: StringName = &"prefer_site"
+
+## **The Crown sends a town** (#180, `founding-towns.md` §3), and the PC argues
+## about it. Two kinds, because agreeing and objecting are not the same act: the
+## first settles what the town is equipped with, the second is a letter the
+## contact may simply not take.
+const ORDER_FUND_FOUNDING: StringName = &"fund_founding"
+const ORDER_DISSUADE_FOUNDING: StringName = &"dissuade_founding"
 const ORDER_REQUEST_TROOPS: StringName = &"request_troops"
 const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
 const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
@@ -163,6 +170,24 @@ static func register_effects() -> void:
 	# 🔒 **A name, never a coordinate** (#177, SPEC §11.4). `preference` is one of
 	# `SitePreference.ALL`; a `tile` param here would be the locked invariant
 	# broken, and `test_no_letter_can_name_a_tile_for_a_town` says so out loud.
+	# 🔒 **The correspondence determines what it starts with** (#180, §3). What
+	# the PC promises is what it is equipped with, so the letter names how
+	# handsomely and `CrownFounding.EQUIPPED` says what that buys — declare and
+	# supply, as everywhere else.
+	ContentRegistry.register_effect(
+		"fund_founding",
+		{
+			"to": "contact", "equipped": "string", "expert": "resource",
+			"building": "building", "intent": "string",
+		},
+		ORDER_FUND_FOUNDING,
+	)
+	# 🔒 **He may dissuade; he does not decide.** SPEC §11.4 presses these on the
+	# colony, so this is an ordinary Order resolved by ordinary compliance — a
+	# determined patron founds his town over it.
+	ContentRegistry.register_effect(
+		"dissuade_founding", {"to": "contact"}, ORDER_DISSUADE_FOUNDING
+	)
 	ContentRegistry.register_effect(
 		"prefer_site",
 		{"to": "contact", "preference": "string"},

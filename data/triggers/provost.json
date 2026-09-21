@@ -38,5 +38,24 @@
         "he_is_carrying_the_cost": {}
       }
     ]
+  },
+  {
+    "id": "trigger.provost.propose_a_founding",
+    "letter": "provost.propose_a_founding",
+    "urgency": 0.55,
+    "cooldown": 36,
+    "params": {
+      "amount": {
+        "from": "literal",
+        "value": "1600"
+      }
+    },
+    "conditions": [
+      {
+        "year_at_least": {
+          "year": 2
+        }
+      }
+    ]
   }
 ]

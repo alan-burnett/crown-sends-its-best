@@ -1,0 +1,122 @@
+{
+  "id": "provost.propose_a_founding",
+  "sender": "provost",
+  "type": "offer",
+  "skippable": false,
+  "params": {
+    "amount": "gold"
+  },
+  "body": [
+    {
+      "text": "A proposal, and I will put it to you before I put it to anybody else."
+    },
+    {
+      "text": "I know of a very wise botanist much taken with the cultivation of sugar cane in the colonies. He is presently in Bristol, being disagreed with. I could see him equipped with supplies and a labour force, and he will found a settlement in country suited to the purpose."
+    },
+    {
+      "text": "It will not walk there. The Crown will carry it — ships, guards, a surgeon, the whole business — and it will be five months before you see it. Nothing will happen to it on the way, which is what you are paying for."
+    },
+    {
+      "text": "What it arrives as depends entirely on what you are willing to put behind it. I have set out three answers below and I will not pretend to be neutral between them."
+    },
+    {
+      "text": "{param:amount} for the handsome version. Less for less. I would take the least of them over nothing, but I would think less of the arrangement."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "Dr Meakin — on your botanist I am {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "taken with the idea"
+        },
+        {
+          "tone": "dutiful",
+          "text": "willing to consider it properly"
+        },
+        {
+          "tone": "annoyed",
+          "text": "conscious of what it costs"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "founding",
+        "prompt": "The botanist's settlement",
+        "options": [
+          {
+            "id": "handsomely",
+            "label": "equip it handsomely",
+            "text": "Equip it properly. If we are doing this we are not doing it by halves.",
+            "effect": {
+              "fund_founding": {
+                "to": "provost",
+                "equipped": "handsomely",
+                "expert": "sugar",
+                "building": "granary",
+                "intent": "increase_economic_output"
+              },
+              "promise_gold": {
+                "to": "provost",
+                "amount": 1600
+              }
+            }
+          },
+          {
+            "id": "adequately",
+            "label": "equip it adequately",
+            "text": "Enough to stand it up, and no more. They may earn the rest.",
+            "effect": {
+              "fund_founding": {
+                "to": "provost",
+                "equipped": "adequately",
+                "expert": "sugar",
+                "building": "",
+                "intent": "increase_economic_output"
+              },
+              "promise_gold": {
+                "to": "provost",
+                "amount": 900
+              }
+            }
+          },
+          {
+            "id": "meanly",
+            "label": "send them with what you can spare",
+            "text": "Send them. I cannot pretend to furnish them, and I will not pretend it is generous.",
+            "effect": {
+              "fund_founding": {
+                "to": "provost",
+                "equipped": "meanly",
+                "expert": "",
+                "building": "",
+                "intent": ""
+              },
+              "promise_gold": {
+                "to": "provost",
+                "amount": 300
+              }
+            }
+          },
+          {
+            "id": "argue",
+            "label": "argue him out of it",
+            "text": "I would rather you did not. We have towns enough that cannot feed themselves without adding another.",
+            "effect": {
+              "dissuade_founding": {
+                "to": "provost"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I am, sir, your obedient servant,"
+      }
+    ]
+  }
+}

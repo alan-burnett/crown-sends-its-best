@@ -96,6 +96,12 @@ var ending: RunEnding = null
 ## lose the town's investment with them.
 var parties: Array = []
 
+## **Towns the Crown is sending** (#180), proposed and not yet arrived.
+##
+## Part of the state because the PC has already promised gold for them: a reload
+## that forgot one would be a reload that spent his standing on nothing.
+var foundings: Array = []
+
 ## How hard the Crown is leaning, and how far the bar has moved (#69).
 ##
 ## **Serialised in full.** The bucket's contents and the draw order are part of
@@ -324,6 +330,14 @@ func _parties_to_list() -> Array:
 	return out
 
 
+## Every Crown founding still at sea, as plain data.
+func _foundings_to_list() -> Array:
+	var out: Array = []
+	for founding in foundings:
+		out.append((founding as CrownFounding).to_dict())
+	return out
+
+
 func to_dict() -> Dictionary:
 	var contact_entries: Dictionary = {}
 	for id in contact_ids():
@@ -352,6 +366,7 @@ func to_dict() -> Dictionary:
 		"prestige": prestige.to_dict() if prestige != null else {},
 		"ending": ending.to_dict() if ending != null else {},
 		"parties": _parties_to_list(),
+		"foundings": _foundings_to_list(),
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
@@ -387,6 +402,8 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.ending = RunEnding.from_dict(data.get("ending", {}))
 	for entry in data.get("parties", []):
 		run.parties.append(ExpeditionParty.from_dict(entry))
+	for entry in data.get("foundings", []):
+		run.foundings.append(CrownFounding.from_dict(entry))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
