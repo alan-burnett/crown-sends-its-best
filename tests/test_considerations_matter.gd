@@ -321,6 +321,26 @@ func test_the_mandate_can_decide() -> void:
 		"caring what the Crown sent him for never changed what a governor wanted")
 
 
+func test_a_letter_is_not_a_standing_order_and_not_a_shout_either() -> void:
+	# 🔒 The shape of the decay, not the figure. `URGING_HALF_LIFE` is tuning and
+	# a test pinned to it would be a test against a moving value — but the
+	# property either side of it is the design (#212):
+	#
+	# | | |
+	# | :--- | :--- |
+	# | Ruling | a governor urged this spring is still leaning that way in the autumn |
+	# | Not nagging | and the PC did not have to write three times to get there |
+	# | Not a standing order | and he is running his own town again years later |
+	#
+	# At six months the middle row failed: the PC re-sent the same instruction
+	# two or three times a year to hold a man on course.
+	var half_life := IntentConsiderations.URGING_HALF_LIFE
+	assert_true(IntentConsiderations.decayed(6.0, half_life) > 0.5,
+		"half a year on, the PC's letter is already spent and he must write again")
+	assert_true(IntentConsiderations.decayed(60.0, half_life) < 0.1,
+		"one letter was still steering the town five years later, which is a standing order")
+
+
 func test_crown_urging_can_decide() -> void:
 	# **The one the whole game rests on.** SPEC §8.5 makes a letter arguing for a
 	# goal the PC's only lever on a town; a consideration that could not move a

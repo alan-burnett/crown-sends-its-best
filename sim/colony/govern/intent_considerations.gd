@@ -56,9 +56,20 @@ const ALL: PackedStringArray = [
 ## in the early game" and nothing more, so this is tuning.
 const MANDATE_HALF_LIFE: float = 18.0
 
-## How long the PC's last pronouncement keeps half its pull. A letter is not a
-## standing order; a governor remembers it and it fades.
-const URGING_HALF_LIFE: float = 6.0
+## How long the PC's last pronouncement keeps half its pull.
+##
+## **A letter is not a standing order** — a governor remembers it and it fades,
+## and one urged this spring is running his own town again eighteen months later.
+## That property is the point and is not up for negotiation.
+##
+## 🔒 **A year, and not six months** (#212). At six the PC re-sent the same
+## instruction two or three times a year to hold a man on course, watched him
+## drift back in between, and wondered why. **That is nagging, not ruling**, and
+## it turned the game's central lever into an upkeep chore.
+##
+## Much longer would be wrong the other way: one letter setting a town's course
+## for a decade is too strong for how little it costs to send.
+const URGING_HALF_LIFE: float = 12.0
 
 ## Months of food at which a town stops thinking about food at all.
 const COMFORTABLE_MONTHS: float = 4.0
