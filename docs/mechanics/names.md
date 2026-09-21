@@ -49,22 +49,32 @@ rule rather than new state.
 contact is created.** Not a lookup by role, and not cases in code.
 
 It has to be on the contact rather than the role because **a commander is one
-role with three origins** (`commanders.md` §1: *colonial, Crown and rebel
-commanders are the same object*). A man raised in Ashmere is *of Ashmere*; a man
-the Marshal sent is *in the Crown's service*. Same role, same object, different
-line — and the difference is known when he is raised, not when the role is
-declared.
+role with three allegiances** (`commanders.md` §1: *colonial, Crown and rebel
+commanders are the same object*), and each names a different master.
 
-A rebel commander keeps ` of {town}` and that is the point: *Captain Harker of
-Ashmere*, while Ashmere is in revolt, is the whole situation in four words.
+### 🔒 And a commander's qualifier changes when he turns
+
+A town commander whose town goes into revolt stops being *of the town of
+Ashmere* and becomes **of the independent nation**. He is the same contact, the
+same object and the same company; what changed is who he serves.
+
+**That is why the qualifier is mutable state on the contact and not a lookup.** A
+qualifier derived from his role would have to be recomputed by something that
+knew what a rebellion was; a qualifier he carries is simply rewritten by the
+thing that turned him, and nothing else in the game needs to know.
+
+It also says the right thing. A rebel commander is not a local difficulty in
+Ashmere — **he serves a nation now**, which is exactly what SPEC §13.1 means
+when it says the colony becomes one.
 
 | Role | Qualifier | Reads |
 | :--- | :--- | :--- |
 | Governor | ` of {town}` | *Governor Don Johnson of Morrisville* |
 | Clergyman, quartermaster, journalist, scholar | ` of {town}` — the town he is resident in | *Father Aldous Crane of Kettleburn* |
 | Patron | `, patron to the crown` | *Lord Mingle Welkington, patron to the crown* |
-| Commander, colonial or rebel | ` of {town}` — the town that raised him | *Captain Ames Harker of Ashmere* |
-| Commander, Crown | `, in the Crown's service` | *Captain Ames Harker, in the Crown's service* |
+| Commander, town | ` of the town of {town}` | *Captain Ames Harker of the town of Ashmere* |
+| Commander, Crown | ` of the Crown's service` | *Captain Ames Harker of the Crown's service* |
+| Commander, rebel | ` of the independent nation` | *Captain Ames Harker of the independent nation* |
 | Crown officer | *(empty)* | *Steward of the Revenue Corvyn Thrale* |
 | Rival | *(empty)* — his title already names his coast | *Le Duc de Montargis* |
 
@@ -135,6 +145,10 @@ fifth — run start is a founding like any other (`map.md` §5).
 Nothing else on the map has a name. Tribes do not (§1), patrons have no home
 (§2), and a rival's coast is part of his hand-written title rather than a place
 the generator knows about.
+
+**The independent nation is not named either.** A rebel commander is *of the
+independent nation*, in those words — the Crown does not dignify it with a name,
+which is the joke and also one less bag.
 
 ---
 
