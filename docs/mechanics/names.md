@@ -13,8 +13,8 @@
 | **Rivals** | **fixed in data** — three named dukes, hand-written |
 | Governors, patrons, commanders, clergy, quartermasters, journalists, scholars | **generated** |
 | **Towns** | **generated** |
-| **Patron homes** | **generated** |
 | **Tribes** | **not named at all** |
+| **Patron homes** | **there are none** |
 
 **Rivals are hardcoded on purpose.** They are a fixed cast like the officers, they
 carry hand-written letters already (`tribute_demand_montargis.json`), and their
@@ -27,34 +27,54 @@ already say.
 and where they are, not by what they call themselves — which is the colonial view
 the game is written from, and cheaper besides.
 
+**A patron has no home**, by the same ruling. An earlier draft invented one so he
+would have somewhere to be *of*; §2's qualifier does that job without inventing a
+place, and a name with no mechanics behind it was a thing to maintain for nothing.
+
 ---
 
 ## 2. 🔒 The letterhead
 
-**`<title> <name> of <location>`**
+**`<title> <name>` and then a qualifier.**
 
 > **Governor Don Johnson of Morrisville**
+> **Lord Mingle Welkington, patron to the crown**
 
 `Contact` already carries `display_name`, `title` and `town`, so this is a render
 rule rather than new state.
 
-**The `of <location>` clause appears only when he has a location.** The Crown
-officers do not — they are an ocean away and their titles are self-contained
-(*Steward of the Revenue*), so they render as title and name and nothing else.
+### The qualifier is data, not a branch
 
-| Contact | Location is |
-| :--- | :--- |
-| Governor | his town |
-| Clergyman, quartermaster, journalist, scholar | the town he is resident in (`institutional-contacts.md` §2) |
-| Commander | his company |
-| Patron | his home, back in the old country |
-| Crown officer | none — no clause |
+**One field on the role, holding a template.** Not three cases in code, which is
+what the two examples above would otherwise become.
+
+| Role | Qualifier | Reads |
+| :--- | :--- | :--- |
+| Governor | ` of {town}` | *Governor Don Johnson of Morrisville* |
+| Clergyman, quartermaster, journalist, scholar | ` of {town}` — the town he is resident in | *Father Aldous Crane of Kettleburn* |
+| Patron | `, patron to the crown` | *Lord Mingle Welkington, patron to the crown* |
+| Commander | **open** — see §7 | |
+| Crown officer | *(empty)* | *Steward of the Revenue Corvyn Thrale* |
+| Rival | *(empty)* — his title already names his coast | *Le Duc de Montargis* |
+
+A patron needs no location because his qualifier is not a place. **That is what
+made patron homes unnecessary**, rather than a decision to do without them.
+
+### A patron's title is drawn too
+
+*Lord Mingle Welkington* is **three words from the bag** — honorific, given name,
+family name. A governor is always *Governor*, so his title is fixed by his role
+and only two words are drawn.
+
+So **a bag may carry a `titles` list**, and where it does the title is drawn with
+the rest. Where it does not, the role's own title stands.
 
 ### It follows that the Diplomat's name changes
 
 He lives in a town and asks to be rehomed when it turns dangerous (SPEC §8.1).
-**His letterhead moves with him**, and a player who notices *of Ashmere* become
-*of Kettleburn* has been told something real before he reads a word.
+His qualifier is ` of {town}`, so **his letterhead moves with him**, and a player
+who notices *of Ashmere* become *of Kettleburn* has been told something real
+before he reads a word.
 
 That is a consequence of the rule rather than a feature bolted on, which is the
 sign the rule is the right one.
@@ -75,15 +95,20 @@ what he is can.
 
 ### Given and family, not whole names
 
-A bag holds **a list of given names and a list of family names**, joined on draw.
-Twenty of each is four hundred men.
+A bag holds **a list of given names and a list of family names**, joined on draw
+— and a list of titles where the role's title varies (§2). Twenty of each is four
+hundred men.
 
 **This reverses an earlier draft**, and the reason is worth keeping. That draft
 held whole names because the rivals' bag would have mixed nations, and drawing
 parts separately would eventually pair a French given name with a Spanish
 surname. **The Author then made rivals hardcoded**, which removed the only bag
-that mixed cultures — and with it the whole argument. Every remaining bag is one
-register, so recombining inside it is safe.
+that mixed cultures — and with it the whole argument.
+
+**Every bag is one register**, by the Author's ruling: all governors draw from
+one bag whatever the colony's settlers happen to be, and that is an artistic
+liberty taken deliberately rather than an oversight. So recombining inside a bag
+is always safe.
 
 **A role that needs particular men does what the rivals did**: names them in
 data. That is the escape hatch, and it is already proven.
@@ -92,19 +117,13 @@ data. That is the escape hatch, and it is already proven.
 
 ## 4. Places
 
-**Towns** are named when founded (SPEC §11.4), from the towns' bag. The first
-town is named the same way as the fifth — run start is a founding like any other
-(`map.md` §5).
+**Towns are the only generated places.** They are named when founded (SPEC
+§11.4), from the towns' bag, and the first town is named the same way as the
+fifth — run start is a founding like any other (`map.md` §5).
 
-**Patron homes** are a new thing this document introduces, because a patron needs
-a location for §2's letterhead and `patrons.md` has never had one. A home is a
-name and nothing else: **no tile, no map presence, no mechanics.** It exists so
-that *Lord Ashcombe of Hartleigh* is possible, and it should stay that thin
-unless the Author wants otherwise.
-
-**They are separate bags.** A colonial town and a gentleman's seat in the old
-country are different registers, and a town called *Hartleigh Hall* would be as
-wrong as a patron of *Morrisville*.
+Nothing else on the map has a name. Tribes do not (§1), patrons have no home
+(§2), and a rival's coast is part of his hand-written title rather than a place
+the generator knows about.
 
 ---
 
@@ -126,7 +145,8 @@ bags must guarantee.
 ## 6. Data
 
 ```
-data/names/<kind>.json    given[] and family[] for people; names[] for places
+data/names/<kind>.json    given[] and family[] for people, titles[] where the
+                          role's title varies; names[] for towns
 ```
 
 **No language suffix.** A bag carries no prose and is not translated, unlike
@@ -140,14 +160,14 @@ empty, and no bag is too small to fill a long run without repeating.
 
 ## 7. Open items
 
-- **Are governors always the PC's countrymen?** `immigration.md` brings settlers
-  in; if the colony draws them from several nations then a governor's bag is not
-  one register after all, and §3's recombination argument weakens. Worth checking
-  before the bags are written rather than after.
 - **How many names does a long run need?** Towns in the tens, patrons and
   commanders similar. Twenty given and twenty family per bag is almost certainly
   ample, but the validator's "too small" threshold should be set from a measured
   long run rather than guessed.
-- **Does a company's name follow its commander, or the reverse?** §2 gives a
-  commander his company as a location, which presumes companies are named. They
-  may simply be *Ashcombe's*, after the man.
+- **What is a commander's qualifier?** Every other role has one settled and his
+  does not. `, in the Crown's service` would match the patron's shape and needs
+  nothing named; ` of the {company}` reads better and presumes companies have
+  names, which nothing has decided. A company may simply be *Ashcombe's*, after
+  the man — in which case the qualifier is the only place a company name would
+  ever appear, and inventing one for that alone is a poor trade. **Author's
+  call**, and the cheapest answer is the patron's.
