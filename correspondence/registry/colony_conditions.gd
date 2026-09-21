@@ -164,6 +164,19 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"they_are_on_my_fields", {}, ColonyConditions.they_are_on_my_fields
 	)
+	# 🔒 **Consulted, informed, bypassed** (#258). One event, three entirely
+	# different months, decided by what the man thinks of the PC.
+	ContentRegistry.register_condition(
+		"my_regard_is", {"band": "string"}, ColonyConditions.my_regard_is
+	)
+	ContentRegistry.register_condition(
+		"i_changed_my_intent", {"within": "integer"},
+		ColonyConditions.i_changed_my_intent,
+	)
+	ContentRegistry.register_condition(
+		"he_did_otherwise", {"within": "integer"},
+		ColonyConditions.he_did_otherwise,
+	)
 
 
 ## Whether this sender is a governor-elect who has only just set out (#178).
@@ -774,3 +787,80 @@ static func denied_count(context: LetterContext) -> int:
 		if at.size() >= 2:
 			seen["%d,%d" % [int(at[0]), int(at[1])]] = true
 	return seen.size()
+
+
+## 🔒 What his regard lets the PC hear (#258, `the-director.md` §2).
+##
+## **A band, never the figure.** SPEC §8.5 keeps loyalty off the player's
+## screens; what reaches him is which of three letters arrived, or none at all.
+static func my_regard_is(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null:
+		return false
+	if context.sender.relationship == null:
+		return false
+	return context.sender.relationship.band() == StringName(args.get("band", ""))
+
+
+## Whether this governor has lately settled on a new purpose for his town.
+##
+## **The most consequential thing he does** (`governor-objectives.md` §2), and
+## the thing the PC most wants to hear about — which is why whether he hears it
+## at all is a question about the man rather than about the event.
+static func i_changed_my_intent(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.log == null or context.town == null:
+		return false
+	var within := maxi(1, int(args.get("within", 1)))
+	for event in context.log.of_type(GovernorDriver.EVENT_INTENT_SET):
+		if String(event.payload.get("town", "")) != String(context.town.id):
+			continue
+		if context.month - event.month < within:
+			return true
+	return false
+
+
+## 🔒 The gap between what the PC wrote and what the town did (#258).
+##
+## **How the PC learns what people are not telling him.** A governor who says
+## nothing has not hidden it from everybody: the Diplomat reads the same log, and
+## can name the man's reason truthfully because `choose()` emitted its trace
+## (SPEC §9.1).
+##
+## It is a different job from reporting the world, and it is what prices his
+## death — he is never replaced (§8.1), so a PC who loses him goes blind to
+## disloyalty and every governor who has quietly stopped writing becomes one he
+## knows nothing about.
+static func he_did_otherwise(args: Dictionary, context: LetterContext) -> bool:
+	return not diverged(args, context).is_empty()
+
+
+## The most recent divergence, or empty.
+##
+## **Read off the towns**, because the town already carries what the PC urged and
+## when. Reconstructing it from the log would be a second account of the same
+## fact, and the two would disagree the first time an urging expired.
+static func diverged(args: Dictionary, context: LetterContext) -> Dictionary:
+	if context == null or context.colony == null:
+		return {}
+	var within := maxi(1, int(args.get("within", 6)))
+
+	var latest: Dictionary = {}
+	var when := -1
+	for town in context.colony.in_order():
+		if String(town.urged_intent).is_empty():
+			continue
+		if context.month - town.urged_month > within:
+			continue
+		if town.intent == town.urged_intent:
+			continue
+		if town.intent_since < town.urged_month:
+			# He has not answered yet; a man who has not moved has not refused.
+			continue
+		if town.intent_since >= when:
+			when = town.intent_since
+			latest = {
+				"governor": String(town.governor_id),
+				"town": String(town.id),
+				"asked": String(town.urged_intent),
+				"did": String(town.intent),
+			}
+	return latest

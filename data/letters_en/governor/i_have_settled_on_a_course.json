@@ -1,0 +1,102 @@
+{
+  "id": "governor.i_have_settled_on_a_course",
+  "sender": "governor_ashmere",
+  "type": "question",
+  "skippable": false,
+  "params": {
+    "town": "town",
+    "intent": "intent",
+    "governor": "contact"
+  },
+  "body": [
+    {
+      "text": "I have settled on what {param:town} is for, and I should rather you heard it from me than from the returns."
+    },
+    {
+      "text": "It is to be {param:intent}. I have turned it over a good while and I think it is right, though I am the first to say I see one valley and you see an ocean."
+    },
+    {
+      "text": "If you would have me elsewhere, say so and say it plainly. I will not pretend a letter from you weighs nothing with me; it does, and I would rather be argued with now than found fault with in three years."
+    },
+    {
+      "text": "Nothing is spent yet. The men are told what they are doing this month and no further."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the course you have set, I am {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "glad of your judgement and glad you asked"
+        },
+        {
+          "tone": "dutiful",
+          "text": "content to hear it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "less certain of it than you are"
+        },
+        {
+          "tone": "desperate",
+          "text": "uneasy, and I will say why"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What {param:town} is for",
+        "options": [
+          {
+            "id": "leave_him",
+            "label": "carry on as you have decided",
+            "text": "Carry on as you have decided. You are the man on the spot and I am not."
+          },
+          {
+            "id": "profit",
+            "label": "attend to the colony's profit",
+            "text": "Attend to the colony's profit. That is what you are there for, and what the Crown will ask me about.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "increase_economic_output"
+              }
+            }
+          },
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your defences. I would rather pay for walls I did not need than explain why there were none.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "strengthen_defences"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "see that the town grows",
+            "text": "See that the town grows. A place with nobody in it returns nothing, whatever the ledgers say.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "grow_the_population"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,",
+        "tone": {
+          "pleased": "With every confidence in you,"
+        }
+      }
+    ]
+  }
+}

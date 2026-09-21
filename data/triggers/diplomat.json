@@ -131,5 +131,45 @@
         "he_wants_paying": {}
       }
     ]
+  },
+  {
+    "id": "trigger.diplomat.he_did_otherwise",
+    "letter": "diplomat.he_did_otherwise",
+    "urgency": 0.42,
+    "cooldown": 5,
+    "params": {
+      "governor": {
+        "from": "divergence",
+        "field": "governor",
+        "fallback": "the governor"
+      },
+      "town": {
+        "from": "divergence",
+        "field": "town",
+        "fallback": "the town"
+      },
+      "asked": {
+        "from": "divergence",
+        "field": "asked",
+        "fallback": "the work"
+      },
+      "did": {
+        "from": "divergence",
+        "field": "did",
+        "fallback": "the work"
+      }
+    },
+    "conditions": [
+      {
+        "he_still_writes": {
+          "about": "colony"
+        }
+      },
+      {
+        "he_did_otherwise": {
+          "within": 6
+        }
+      }
+    ]
   }
 ]

@@ -70,6 +70,10 @@ static func register_all() -> void:
 		"denied_fields", {}, ColonyParamSources.denied_fields
 	)
 	ContentRegistry.register_param_source(
+		"divergence", {"field": "string", "fallback": "string"},
+		ColonyParamSources.divergence,
+	)
+	ContentRegistry.register_param_source(
 		"tribute_amount", {}, ColonyParamSources.tribute_amount
 	)
 	ContentRegistry.register_param_source(
@@ -265,7 +269,8 @@ static func town_surplus(args: Dictionary, context: LetterContext) -> Variant:
 		var resource := StringName(id)
 		if ResourceCatalogue.is_luxury(resource) or ResourceCatalogue.is_livestock(resource):
 			continue
-		var keep := mouths * ColonyNeeds.per_head(resource) 			* (1.0 + ColonyNeeds.reserve_months(resource))
+		var keep := mouths * ColonyNeeds.per_head(resource) \
+			* (1.0 + ColonyNeeds.reserve_months(resource))
 		var spare := context.town.held(resource) - keep
 		if spare > most + 0.001 or (absf(spare - most) <= 0.001 and best != "" and String(id) < best):
 			most = spare
@@ -284,7 +289,8 @@ static func town_surplus_amount(_args: Dictionary, context: LetterContext) -> Va
 		return 0
 	var resource := StringName(town_surplus({"fallback": "iron"}, context))
 	var mouths := maxf(1.0, float(context.town.population()))
-	var keep := mouths * ColonyNeeds.per_head(resource) 		* (1.0 + ColonyNeeds.reserve_months(resource))
+	var keep := mouths * ColonyNeeds.per_head(resource) \
+		* (1.0 + ColonyNeeds.reserve_months(resource))
 	return maxi(1, int(roundf(maxf(0.0, context.town.held(resource) - keep) * 0.5)))
 
 
@@ -620,3 +626,27 @@ static func tribute_resource(args: Dictionary, context: LetterContext) -> Varian
 ## only less country than there was last month.
 static func denied_fields(_args: Dictionary, context: LetterContext) -> Variant:
 	return ColonyConditions.denied_count(context)
+
+
+## One field of the gap between what the PC wrote and what a town did (#258).
+##
+## 🔒 **He can name the man's reason truthfully** because `choose()` emitted its
+## trace (SPEC §9.1). The Diplomat is not guessing and he is not inventing; he is
+## reading the same record the sim wrote, which is exactly what makes him worth
+## keeping and what his death costs.
+static func divergence(args: Dictionary, context: LetterContext) -> Variant:
+	var found := ColonyConditions.diverged({"within": 6}, context)
+	var field := String(args.get("field", "governor"))
+	if found.is_empty() or not found.has(field):
+		return args.get("fallback", "the work")
+
+	var value := String(found[field])
+	# An intent is named as a letter would name it, not by its id.
+	if field == "asked" or field == "did":
+		var name := Objective.intent_name(StringName(value))
+		return name if not name.is_empty() else value
+	if field == "town" and context.colony != null:
+		var town := context.colony.by_id(StringName(value))
+		if town != null:
+			return town.display_name
+	return value

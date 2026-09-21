@@ -57,6 +57,61 @@
     ]
   },
   {
+    "id": "trigger.governor.i_have_settled_on_a_course",
+    "letter": "governor.i_have_settled_on_a_course",
+    "urgency": 0.5,
+    "cooldown": 4,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "intent": {
+        "from": "intent_name"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "i_changed_my_intent": {
+          "within": 2
+        }
+      },
+      {
+        "my_regard_is": {
+          "band": "high"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.the_course_i_must_take",
+    "letter": "governor.the_course_i_must_take",
+    "urgency": 0.5,
+    "cooldown": 4,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "intent": {
+        "from": "intent_name"
+      }
+    },
+    "conditions": [
+      {
+        "i_changed_my_intent": {
+          "within": 2
+        }
+      },
+      {
+        "my_regard_is": {
+          "band": "medium"
+        }
+      }
+    ]
+  },
+  {
     "id": "trigger.governor.report_completed",
     "letter": "governor.report_completed",
     "urgency": 0.4,
