@@ -211,7 +211,8 @@ static func from_setup(setup: RunSetup) -> RunState:
 	# **The request rather than a coordinate** (#273). The map is made inside
 	# `new_run`, so the site has to be chosen there — passing one in would mean
 	# generating the world twice and hoping the two agreed.
-	var run := new_run(setup.seed_value, Vector2i(-1, -1), setup.request)
+	var run := new_run(
+		setup.seed_value, Vector2i(-1, -1), setup.request, setup.proximity)
 	run.setup = setup
 
 	# **The perk, applied where the mechanic already was.** `CrownRefusal` has
@@ -257,6 +258,7 @@ static func new_run(
 	seed_value: int,
 	site: Vector2i = Vector2i(-1, -1),
 	request: StringName = &"",
+	proximity: StringName = Tribes.APART,
 ) -> RunState:
 	var run := RunState.new()
 	run.run_seed = seed_value
@@ -283,7 +285,7 @@ static func new_run(
 	run.tribes = Tribes.generate(run.streams)
 	# 🔒 **Their villages, once** (#205). The only moment a village comes into
 	# being anywhere in the codebase, and kept clear of the colony's own site.
-	run.tribes.settle(run.map, run.starting_site, run.streams)
+	run.tribes.settle(run.map, run.starting_site, run.streams, proximity)
 	run.native_trade = TradeBook.new()
 	run.rivals = RivalBook.new()
 	run.denied = DeniedTiles.new()

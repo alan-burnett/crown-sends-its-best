@@ -80,18 +80,74 @@ static func generate(streams: RngStreams) -> Tribes:
 	return tribes
 
 
+## How near the colony settles to its neighbours (#274, `map.md` §8).
+##
+## 🔒 **Only the nearest neighbour is in question.** Two tribes are distant
+## whatever the PC answers, so the rest of the native game arrives in its own
+## time however he chose — what he is deciding is **who is over the next ridge,
+## not how many there are.**
+const NEAR: StringName = &"near"
+const APART: StringName = &"apart"
+
+const PROXIMITIES: Array[StringName] = [APART, NEAR]
+
+## The bands, in tiles from the colony's site. Tuning.
+##
+## The first tribe moves between the first two; the other two are always far and
+## very far.
+const CLOSE: int = 6
+const MEDIUM: int = 12
+const FAR: int = 18
+const VERY_FAR: int = 24
+
+## How near a tribe's second village sits to its first. They are one people, and
+## a people scattered to opposite ends of the map is two peoples.
+const VILLAGES_APART: int = 4
+
+
+static func is_proximity(id: StringName) -> bool:
+	return PROXIMITIES.has(id)
+
+
+## Where each tribe sits, nearest first.
+static func bands_for(proximity: StringName) -> Array[int]:
+	return [CLOSE if proximity == NEAR else MEDIUM, FAR, VERY_FAR]
+
+
 ## Put their villages on the map. 🔒 **Once, at generation**, which is the only
 ## moment a village ever comes into being.
 ##
-## Kept clear of the colony's own site, because a tribe whose village the colony
-## was founded on top of would be a tribe the run had already decided about.
-func settle(map: WorldMap, away_from: Vector2i, streams: RngStreams) -> void:
+## 🔒 **After the site, and relative to it** (#274, §8). The order is the whole
+## of how the second question is honoured: searching for ground that happened to
+## sit the right distance from a village would fight the terrain request and
+## lose, because a good defensive mountain that is *also* exactly six tiles from
+## a tribe is a great deal to ask of one seed. Placing the villages afterwards
+## honours both questions exactly, on every seed.
+##
+## 🔒 **And being placed near a tribe is not itself an offence.** The colony did
+## not choose its neighbours' land; it was put there. Standing starts where it
+## starts and what the colony does next is what moves it — there is no call to
+## `TribeStanding` anywhere in this file.
+func settle(
+	map: WorldMap,
+	away_from: Vector2i,
+	streams: RngStreams,
+	proximity: StringName = APART,
+) -> void:
 	if map == null or streams == null:
 		return
 	var rng := streams.stream(STREAM)
+	var bands := bands_for(proximity)
+
+	var rank := 0
 	for tribe in in_order():
+		# The people, then their second village beside them.
+		var anchor := _somewhere_at(
+			map, away_from, bands[mini(rank, bands.size() - 1)], rng)
+		if anchor == Vector2i(-1, -1):
+			anchor = _somewhere_to_live(map, away_from, rng)
 		for index in VILLAGES_EACH:
-			var at := _somewhere_to_live(map, away_from, rng)
+			var at := anchor if index == 0 else _beside(map, anchor, rng)
 			if at == Vector2i(-1, -1):
 				continue
 			var village := Village.new()
@@ -101,10 +157,54 @@ func settle(map: WorldMap, away_from: Vector2i, streams: RngStreams) -> void:
 			village.people = rng.randi_range(START_PEOPLE_MIN, START_PEOPLE_MAX)
 			village.stores = {"food": float(village.people) * 3.0}
 			villages.append(village)
+		rank += 1
 
 
-## Ground a village could stand on: land, and not on the colony's doorstep or
-## another village's.
+## Ground about this far from the colony, or nowhere.
+func _somewhere_at(
+	map: WorldMap,
+	from: Vector2i,
+	band: int,
+	rng: RandomNumberGenerator,
+) -> Vector2i:
+	# Widened a ring at a time, so a band nothing sits in exactly is answered by
+	# the nearest thing to it rather than by giving up.
+	for slack in range(1, 6):
+		for _attempt in 120:
+			var at := Vector2i(
+				rng.randi_range(0, map.width - 1), rng.randi_range(0, map.height - 1))
+			if not map.is_land(at.x, at.y) or _crowded(at):
+				continue
+			if from == Vector2i(-1, -1):
+				return at
+			var away := sqrt(float(at.distance_squared_to(from)))
+			if absf(away - float(band)) <= float(slack):
+				return at
+	return Vector2i(-1, -1)
+
+
+## And a second village within a short walk of the first.
+func _beside(map: WorldMap, anchor: Vector2i, rng: RandomNumberGenerator) -> Vector2i:
+	for _attempt in 120:
+		var at := anchor + Vector2i(
+			rng.randi_range(-VILLAGES_APART, VILLAGES_APART),
+			rng.randi_range(-VILLAGES_APART, VILLAGES_APART))
+		if not map.in_bounds(at.x, at.y) or not map.is_land(at.x, at.y):
+			continue
+		if not _crowded(at):
+			return at
+	return Vector2i(-1, -1)
+
+
+func _crowded(at: Vector2i) -> bool:
+	for other in villages:
+		if (other as Village).at.distance_squared_to(at) < 9:
+			return true
+	return false
+
+
+## Ground a village could stand on when no band could be answered: land, clear of
+## the colony's doorstep and of another village.
 func _somewhere_to_live(map: WorldMap, away_from: Vector2i, rng: RandomNumberGenerator) -> Vector2i:
 	for _attempt in 200:
 		var at := Vector2i(rng.randi_range(0, map.width - 1), rng.randi_range(0, map.height - 1))
@@ -112,12 +212,7 @@ func _somewhere_to_live(map: WorldMap, away_from: Vector2i, rng: RandomNumberGen
 			continue
 		if away_from != Vector2i(-1, -1) and at.distance_squared_to(away_from) < 36:
 			continue
-		var crowded := false
-		for other in villages:
-			if (other as Village).at.distance_squared_to(at) < 25:
-				crowded = true
-				break
-		if not crowded:
+		if not _crowded(at):
 			return at
 	return Vector2i(-1, -1)
 

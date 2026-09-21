@@ -84,6 +84,27 @@ var split: StringName = SPLIT_STORES
 ## player who has never played.
 var request: StringName = SiteRequest.QUICK_GROWTH
 
+## The two answers, named here as well as in `sim/`.
+##
+## **Not a second source of truth**: they are the sim's ids, aliased so the setup
+## screen can offer them. `tools/lint.gd` keeps `Tribes` out of `presentation/`
+## entirely — the rule exists so no screen can leak a village's position or a
+## people's regard, and it is worth more than the convenience of naming the class
+## in one more place.
+const PROXIMITY_NEAR: StringName = Tribes.NEAR
+const PROXIMITY_APART: StringName = Tribes.APART
+const PROXIMITIES: Array[StringName] = Tribes.PROXIMITIES
+
+## 🔒 **How close the colony settles to the tribes** (#274, `map.md` §8).
+##
+## The villages are placed **after** the site and relative to it, so both
+## questions are honoured exactly on every seed. Only the nearest neighbour is in
+## question: two tribes are distant whatever he answers.
+##
+## 🔒 **Being placed near a tribe is not itself an offence.** The colony did not
+## choose its neighbours' land, it was put there.
+var proximity: StringName = Tribes.APART
+
 
 ## Where this setup puts the first town.
 ##
@@ -109,6 +130,7 @@ func to_dict() -> Dictionary:
 		"mandate": String(mandate),
 		"split": String(split),
 		"request": String(request),
+		"proximity": String(proximity),
 	}
 
 
@@ -126,4 +148,5 @@ static func from_dict(data: Dictionary) -> RunSetup:
 	setup.mandate = StringName(data.get("mandate", GovernorIntent.ECONOMY))
 	setup.split = StringName(data.get("split", SPLIT_STORES))
 	setup.request = StringName(data.get("request", SiteRequest.QUICK_GROWTH))
+	setup.proximity = StringName(data.get("proximity", Tribes.APART))
 	return setup

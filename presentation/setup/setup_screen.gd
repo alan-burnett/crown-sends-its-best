@@ -60,6 +60,19 @@ const REQUEST_NAMES: Dictionary = {
 	SiteRequest.DEFENSIVE_POSITION: "A defensible position",
 }
 
+## 🔒 **Who is over the next ridge, not how many there are** (#274, `map.md` §8).
+const PROXIMITY_NAMES: Dictionary = {
+	RunSetup.PROXIMITY_NEAR: "Settle close to them",
+	RunSetup.PROXIMITY_APART: "Keep our distance",
+}
+
+const PROXIMITY_NOTES: Dictionary = {
+	RunSetup.PROXIMITY_NEAR:
+		"Trade within reach early, and their people may join yours. Your expansion offends sooner.",
+	RunSetup.PROXIMITY_APART:
+		"A ridge between us. Slower to know them, and slower to give offence.",
+}
+
 const REQUEST_NOTES: Dictionary = {
 	SiteRequest.QUICK_GROWTH:
 		"Put them on a shore with ships in it. What grows quickest also lies most open.",
@@ -80,6 +93,7 @@ var _title_field: LineEdit = null
 var _mandate_buttons: Array[Button] = []
 var _split_buttons: Array[Button] = []
 var _request_buttons: Array[Button] = []
+var _proximity_buttons: Array[Button] = []
 
 
 func begin(p_setup: RunSetup) -> void:
@@ -149,6 +163,12 @@ func _build() -> void:
 	_note("Say what the place is for. The surveyors will find it; you will not be shown it.")
 	_request_buttons = _choices(
 		SiteRequest.ALL, REQUEST_NAMES, REQUEST_NOTES, _on_request)
+
+	_rule()
+	_heading("The neighbours")
+	_note("There are people there already. How close do we settle to them?")
+	_proximity_buttons = _choices(
+		RunSetup.PROXIMITIES, PROXIMITY_NAMES, PROXIMITY_NOTES, _on_proximity)
 
 	_rule()
 	_seed_label = _note("")
@@ -260,6 +280,11 @@ func _on_request(at: int) -> void:
 	_refresh()
 
 
+func _on_proximity(at: int) -> void:
+	setup.proximity = RunSetup.PROXIMITIES[at]
+	_refresh()
+
+
 ## A different world.
 ##
 ## **The request is not a function of the seed**, so it survives a reseed — the
@@ -289,6 +314,8 @@ func _refresh() -> void:
 		_split_buttons[at].button_pressed = setup.split == RunSetup.SPLITS[at]
 	for at in _request_buttons.size():
 		_request_buttons[at].button_pressed = setup.request == SiteRequest.ALL[at]
+	for at in _proximity_buttons.size():
+		_proximity_buttons[at].button_pressed = setup.proximity == RunSetup.PROXIMITIES[at]
 	if _seed_label != null:
 		_seed_label.text = "Chart no. %d. Write it down if you want this world again." \
 			% setup.seed_value
