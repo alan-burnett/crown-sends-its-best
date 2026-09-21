@@ -179,5 +179,62 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.steward.standing_concern",
+    "letter": "steward.standing_concern",
+    "urgency": 0.55,
+    "cooldown": 6,
+    "params": {
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "colony_revenue",
+        "factor": 0.45,
+        "minimum": 60,
+        "maximum": 6000
+      }
+    },
+    "conditions": [
+      {
+        "crown_standing_is": {
+          "band": "concern"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.steward.standing_alarm",
+    "letter": "steward.standing_alarm",
+    "urgency": 0.75,
+    "cooldown": 5,
+    "params": {
+      "amount": {
+        "from": "scaled_world_value",
+        "key": "colony_revenue",
+        "factor": 0.45,
+        "minimum": 60,
+        "maximum": 6000
+      }
+    },
+    "conditions": [
+      {
+        "crown_standing_is": {
+          "band": "alarm"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.steward.standing_recovering",
+    "letter": "steward.standing_recovering",
+    "urgency": 0.4,
+    "cooldown": 4,
+    "conditions": [
+      {
+        "crown_standing_changed": {
+          "direction": "up"
+        }
+      }
+    ]
   }
 ]

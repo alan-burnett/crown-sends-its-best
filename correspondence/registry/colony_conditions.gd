@@ -112,6 +112,116 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"he_has_something_to_report", {}, ColonyConditions.he_has_something_to_report
 	)
+	# The standing ladder (#82). 🔒 **The band, never the figure** — these letters
+	# are the entire interface to a number SPEC §10.3 forbids showing, so a
+	# condition that could compare the figure to anything would be the first step
+	# to printing it.
+	ContentRegistry.register_condition(
+		"crown_standing_is", {"band": "string"}, ColonyConditions.crown_standing_is
+	)
+	ContentRegistry.register_condition(
+		"crown_standing_changed", {"direction": "string"},
+		ColonyConditions.crown_standing_changed,
+	)
+	ContentRegistry.register_condition(
+		"a_town_declared", {"within": "integer"}, ColonyConditions.a_town_declared
+	)
+	ContentRegistry.register_condition(
+		"my_town_declared", {"within": "integer"}, ColonyConditions.my_town_declared
+	)
+	ContentRegistry.register_condition(
+		"a_neighbour_declared", {"within": "integer"},
+		ColonyConditions.a_neighbour_declared,
+	)
+
+
+## Which of the four bands the Crown is in (#82, `crown-standing.md`).
+##
+## 🔒 **The band, never the figure.** Standing is invisible (SPEC §10.3), so
+## these letters are the whole of the player's view of it — and they must be
+## unmistakable in tone, because there is nothing else to read.
+##
+## Taken off the log rather than off a field, so the answer is the month's
+## judgement rather than whatever a later reader recomputes.
+static func crown_standing_is(args: Dictionary, context: LetterContext) -> bool:
+	var moved := _standing_moved(context)
+	return not moved.is_empty() and String(moved.get("band", "")) == String(args.get("band", ""))
+
+
+## Whether the Crown's opinion moved a band this month, and which way (#82).
+##
+## 🔒 **The ladder runs both ways.** A player climbing back out of Alarm must
+## hear about it: a Crown that went quiet on the way up would teach him that
+## recovering is not a thing that happens.
+static func crown_standing_changed(args: Dictionary, context: LetterContext) -> bool:
+	var moved := _standing_moved(context)
+	if moved.is_empty() or not bool(moved.get("changed_band", false)):
+		return false
+	var order := CrownStanding.BANDS
+	var now := order.find(StringName(moved.get("band", "")))
+	var was := order.find(StringName(moved.get("was", "")))
+	if now < 0 or was < 0:
+		return false
+	# BANDS runs worst to best, so a higher index is a better opinion.
+	return now > was if String(args.get("direction", "up")) == "up" else now < was
+
+
+## The month's judgement, or empty if the Crown has not thought about him yet.
+static func _standing_moved(context: LetterContext) -> Dictionary:
+	if context == null or context.log == null:
+		return {}
+	var latest: Dictionary = {}
+	var at := -1
+	for event in context.log.of_type(CrownStanding.EVENT_MOVED):
+		if event.month > at and event.month <= context.month:
+			at = event.month
+			latest = event.payload
+	return latest
+
+
+## Whether any town has declared against the Crown lately (#82).
+static func a_town_declared(args: Dictionary, context: LetterContext) -> bool:
+	return not _declared_within(args, context).is_empty()
+
+
+## Whether **this letter's own town** has declared lately (#82).
+##
+## The governor's last letter. Asked of his town and not of the colony, because a
+## man writing "we have declared" about somewhere else would be the wrong letter
+## entirely — and with only `a_town_declared` to go on, every governor in the
+## colony would have written it at once.
+static func my_town_declared(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.town == null:
+		return false
+	for event in _declared_within(args, context):
+		if event.subject == context.town.id:
+			return true
+	return false
+
+
+## Whether a town **other than this letter's** has declared lately (#82).
+##
+## The spread letter: a governor writing about the place next door, which is how
+## a rebellion becomes news rather than a private matter between one town and the
+## Crown.
+static func a_neighbour_declared(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.town == null:
+		return false
+	for event in _declared_within(args, context):
+		if event.subject != context.town.id:
+			return true
+	return false
+
+
+static func _declared_within(args: Dictionary, context: LetterContext) -> Array:
+	var out: Array = []
+	if context == null or context.log == null:
+		return out
+	var within := maxi(1, int(args.get("within", 2)))
+	for event in context.log.of_type(Rebellion.EVENT_DECLARED):
+		if context.month - event.month < within:
+			out.append(event)
+	return out
 
 
 ## Whether the Diplomat is writing at all, and at what depth (#81, §5).

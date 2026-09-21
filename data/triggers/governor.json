@@ -331,5 +331,41 @@
         "town_has_an_idle_building": {}
       }
     ]
+  },
+  {
+    "id": "trigger.governor.town_has_declared",
+    "letter": "governor.town_has_declared",
+    "urgency": 0.95,
+    "cooldown": 24,
+    "params": {
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "my_town_declared": {
+          "within": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.a_neighbour_declared",
+    "letter": "governor.a_neighbour_declared",
+    "urgency": 0.6,
+    "cooldown": 6,
+    "params": {
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "a_neighbour_declared": {
+          "within": 3
+        }
+      }
+    ]
   }
 ]

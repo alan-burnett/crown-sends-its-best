@@ -1,0 +1,13 @@
+{
+  "id": "governor.town_has_declared",
+  "sender": "governor",
+  "type": "report",
+  "skippable": false,
+  "params": { "town": "town" },
+  "body": [
+    { "text": "This is the last letter I shall send you from {param:town}, and I send it because you are owed it and not because I am obliged." },
+    { "text": "The town has declared. It was not a thing I did and it was not a thing I could have stopped by the time I understood it was coming. The men who came to the hall were not a mob. They had a list." },
+    { "text": "I have not been harmed. I do not think I shall be. They have been careful to be civil with me, which I find I mind more than if they had not been." },
+    { "text": "You will want to know what is to be done. I am no longer the man to ask." }
+  ]
+}
