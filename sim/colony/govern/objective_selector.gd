@@ -301,6 +301,17 @@ static func _building_axes(id: StringName) -> Dictionary:
 		learning * 0.4
 		+ reserved * 0.5
 		+ float(building.effect("pasture", 0)) * 0.03
+		# **A granary is capacity and not expansion** (#172). It grows the town
+		# from inside, which is what `POPULATION` wants; `expansion` is the axis
+		# for founding a second town, and it is weighed by `SETTLEMENT` alone. A
+		# governor told to settle who answered with a granary would be a governor
+		# who had not understood the order.
+		#
+		# **Small against the same building's reserve**, deliberately. Half again
+		# on the birth rate of a town of twenty is under a person a year; the food
+		# that granary is holding matters to the same governor every month. He
+		# wants it for the store first and the children second.
+		+ float(building.effect("growth", 0.0)) * 0.25
 		+ float(building.effect("build_speed", 0.0)) * 0.5
 	)
 	return axes

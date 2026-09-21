@@ -4,101 +4,101 @@
   "type": "news",
   "skippable": false,
   "params": {
-    "months": "integer"
+	"months": "integer"
   },
   "perception": {
-    "winter": {
-      "measure": "quality_of_life",
-      "ladder": [
-        "a ruin",
-        "very thin",
-        "bearable",
+	"winter": {
+	  "measure": "quality_of_life",
+	  "ladder": [
+		"a ruin",
+		"very thin",
+		"bearable",
         "well enough"
-      ]
-    }
+	  ]
+	}
   },
   "body": [
-    {
-      "text": "I am instructed by the people of this town to inform you that we are again the Crown's."
-    },
-    {
-      "text": "We were {param:months} months outside it. I will not tell you it was a mistake, because they do not think it was, and I would rather write you something true than something comfortable."
-    },
-    {
-      "text": "What I will tell you is that we are {perception:winter}, and that a man cannot eat a principle. The warehouses are full of what nobody would come and buy. That argument was made to me by people who had made the other one very loudly in the spring."
-    },
-    {
-      "text": "Nobody marched in here and made us. You should know that, whatever is said in London about your firmness.",
-      "only_tones": [
-        "annoyed",
+	{
+	  "text": "I am instructed by the people of this town to inform you that we are again the Crown's."
+	},
+	{
+	  "text": "We were {param:months} months outside it. I will not tell you it was a mistake, because they do not think it was, and I would rather write you something true than something comfortable."
+	},
+	{
+	  "text": "What I will tell you is that we are {perception:winter}, and that a man cannot eat a principle. The warehouses are full of what nobody would come and buy. That argument was made to me by people who had made the other one very loudly in the spring."
+	},
+	{
+	  "text": "Nobody marched in here and made us. You should know that, whatever is said in London about your firmness.",
+	  "only_tones": [
+		"annoyed",
         "hateful"
-      ]
-    },
-    {
-      "text": "I ask one thing, and it is not for me. Do not make them right the second time.",
-      "only_tones": [
-        "dutiful",
+	  ]
+	},
+	{
+	  "text": "I ask one thing, and it is not for me. Do not make them right the second time.",
+	  "only_tones": [
+		"dutiful",
         "desperate"
-      ]
-    }
+	  ]
+	}
   ],
   "reply": {
-    "tone": {
-      "text": "I have your letter {choice}.",
-      "options": [
-        {
-          "tone": "pleased",
-          "text": "and it is the best news I have had in a year"
-        },
-        {
-          "tone": "dutiful",
-          "text": "and receive the town back into the Crown's peace"
-        },
-        {
-          "tone": "annoyed",
-          "text": "and note how long it took you to write it"
-        },
-        {
-          "tone": "hateful",
-          "text": "and shall remember the spring as clearly as you do"
-        }
-      ]
-    },
-    "steps": [
-      {
-        "id": "terms",
-        "prompt": "How the town is received",
-        "options": [
-          {
-            "id": "clemency",
-            "label": "let the matter rest there",
-            "text": "The matter is closed{insert:warmth}. I have no interest in punishing men for a hunger I did not relieve, and if the convoys are still stopped I shall write and stop the stopping of them.",
-            "insert": {
-              "warmth": {
-                "pleased": ", and gladly"
-              }
-            }
-          },
-          {
-            "id": "conditions",
-            "label": "receive them back, and say what it cost",
-            "text": "You are received back. I will not pretend the year did not happen, and neither should you when your people ask why the Crown is slow to trust them."
-          },
-          {
-            "id": "future",
-            "label": "ask what would keep them",
-            "text": "Tell me plainly what would keep this town in the Crown's peace, and I will tell you plainly which of it I can get."
-          }
-        ]
-      }
-    ],
-    "closing": [
-      {
-        "text": "Yours,",
-        "tone": {
-          "hateful": "We will speak of the spring another time."
-        }
-      }
-    ]
+	"tone": {
+	  "text": "I have your letter {choice}.",
+	  "options": [
+		{
+		  "tone": "pleased",
+		  "text": "and it is the best news I have had in a year"
+		},
+		{
+		  "tone": "dutiful",
+		  "text": "and receive the town back into the Crown's peace"
+		},
+		{
+		  "tone": "annoyed",
+		  "text": "and note how long it took you to write it"
+		},
+		{
+		  "tone": "hateful",
+		  "text": "and shall remember the spring as clearly as you do"
+		}
+	  ]
+	},
+	"steps": [
+	  {
+		"id": "terms",
+		"prompt": "How the town is received",
+		"options": [
+		  {
+			"id": "clemency",
+			"label": "let the matter rest there",
+			"text": "The matter is closed{insert:warmth}. I have no interest in punishing men for a hunger I did not relieve, and if the convoys are still stopped I shall write and stop the stopping of them.",
+			"insert": {
+			  "warmth": {
+				"pleased": ", and gladly"
+			  }
+			}
+		  },
+		  {
+			"id": "conditions",
+			"label": "receive them back, and say what it cost",
+			"text": "You are received back. I will not pretend the year did not happen, and neither should you when your people ask why the Crown is slow to trust them."
+		  },
+		  {
+			"id": "future",
+			"label": "ask what would keep them",
+			"text": "Tell me plainly what would keep this town in the Crown's peace, and I will tell you plainly which of it I can get."
+		  }
+		]
+	  }
+	],
+	"closing": [
+	  {
+		"text": "Yours,",
+		"tone": {
+		  "hateful": "We will speak of the spring another time."
+		}
+	  }
+	]
   }
 }

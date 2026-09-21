@@ -101,6 +101,13 @@ var experts_accrued: float = 0.0
 ## stops a small town growing not at all while a large one grows smoothly.
 var growth_accrued: float = 0.0
 
+## Calves owed but not yet born, by livestock kind (#172).
+##
+## The herds carry their own remainder for the same reason people do: two cows
+## breeding at two percent a month is a calf every two years, and a figure that
+## rounded to nothing each month would give a small herd no future at all.
+var livestock_accrued: Dictionary = {}
+
 ## **What the governor wants for the town** — a standing goal that may hold for
 ## twenty months (`GovernorIntent`). He chooses it; the town works out what to
 ## do about it.
@@ -381,6 +388,7 @@ func to_dict() -> Dictionary:
 		"experts_accrued": experts_accrued,
 		"rebel_sentiment": rebel_sentiment,
 		"growth_accrued": growth_accrued,
+		"livestock_accrued": livestock_accrued.duplicate(),
 		"traded_value": traded_value,
 		"last_completed": String(last_completed),
 		"last_completed_month": last_completed_month,
@@ -427,6 +435,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.embargo_months = int(data.get("embargo_months", 0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.growth_accrued = float(data.get("growth_accrued", 0.0))
+	town.livestock_accrued = data.get("livestock_accrued", {}).duplicate()
 	town.traded_value = float(data.get("traded_value", 0.0))
 	town.last_completed = StringName(data.get("last_completed", ""))
 	town.last_completed_month = int(data.get("last_completed_month", -1))

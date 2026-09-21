@@ -384,6 +384,21 @@ static func pasture_capacity_for(town: Town) -> int:
 	return head
 
 
+## What the town has built that makes it grow faster, people and herds alike.
+##
+## **One figure for both** (`buildings.md` §4): the granary is stored food, and
+## stored food is what carries a household through a winter and a herd through a
+## lean spring. A building that sped children but not calves would be two
+## mechanics wearing one name.
+static func growth_bonus_for(town: Town) -> float:
+	var total := 0.0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building != null and is_lit(town, StringName(id)):
+			total += float(building.effect("growth", 0.0))
+	return total
+
+
 func to_dict() -> Dictionary:
 	return {
 		"id": String(id),
