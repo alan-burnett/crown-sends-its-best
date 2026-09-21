@@ -97,10 +97,50 @@ and gives the player something he can see coming.
 
 ### How it is chosen
 
-Through the **deliberation kernel**. Candidates are the intents available;
-considerations score them; the governor's personality is the weight vector.
-Locked spec rules are filters. `choose()` emits its trace, which is what lets his
-letter state his reasoning truthfully.
+Through the **deliberation kernel**, in world phase 8. Candidates are the intents
+available; considerations score them; the governor's personality is the weight
+vector. `choose()` emits its trace, which is what lets his letter state his
+reasoning truthfully.
+
+**Eight considerations**, and a governor carries a weight for every one:
+
+| | Reads |
+| :--- | :--- |
+| `food_security` | months of food in hand |
+| `quality_of_life` | how the town is living |
+| `revenue` | what it is earning the Crown |
+| `native_threat` | the tribes on its border |
+| `room_to_grow` | unclaimed land worth taking |
+| `crowding` | people against workable ground (§6 of `founding-towns.md`) |
+| `mandate` | what the Crown appointed him to do |
+| `crown_urging` | **what the PC last told him the town was for** |
+
+**Two filters, applied before scoring** — locked rules, never weights
+(`deliberation.md` §5):
+
+- **A town cannot intend to settle nowhere.** No governor, however expansionist,
+  sends an expedition to country the colony has never seen.
+- **Sedition is unreachable above a loyalty floor.** A weight can lose a close
+  vote and then win one; this must be impossible for a man who does not loathe
+  the PC, whatever else his temperament says. It is also what makes recovery
+  work — raise him back over the line and the candidate stops existing for him.
+
+### 🔒 The PC's letter fades, and it only ever pulls
+
+Two properties of `crown_urging` that decide how the lever actually feels.
+
+**It decays.** A letter is **not a standing order**. Its pull halves over a few
+months, and a governor who was urged a year ago is running his own town again. A
+PC who says a thing once and never returns to it has not set policy; he has made
+a remark.
+
+**It adds to the urged intent and penalises nothing.** Contrast the **mandate**,
+which pushes *away* from every intent that is not the Crown's — the Crown's
+appointment shapes what a governor will not do, and the PC's letter only ever
+argues for one thing.
+
+So the PC's instrument is **weaker than the Crown's own appointment and wears
+off**, which is why repetition is a real part of ruling by letter.
 
 ### The Mandate is the starting intent
 
@@ -134,9 +174,17 @@ construction:
 
 ### How it is chosen
 
-**Deterministically.** Score every available objective by how much it advances
-the current intent given the state of the town and the world, and take the best.
-Ties break by a rule fixed by the seed.
+**Deterministically.** Every candidate — a building, an improvement on a named
+tile, a standing posture — is measured on **the same six axes**, and the intent
+says what each axis is worth. Take the best.
+
+That structure is what keeps it extensible without branching: **adding an intent
+is adding a row**, and adding a kind of objective is teaching the scorer to
+measure one more thing. Neither is an `if` on which intent it is.
+
+**Ties break on a hash of the run seed with the town and the candidate** — fixed
+by the seed as required, but deliberately **not drawn from an RNG stream**, so a
+tie cannot shift every later draw in the colony.
 
 No personality, no weights, no randomness. The governor's advisors are good at
 their jobs.
@@ -283,3 +331,7 @@ rather than as character.
 - How hard a crisis intent should override sunk progress.
 - Whether an intent, once abandoned, should be less attractive for a while, so a
   governor does not oscillate between two intents on alternate months.
+- **How fast the PC's urging should fade**, and whether a repeated letter should
+  refresh it or compound it. Currently it refreshes.
+- Whether a town whose governor is missing should keep its intent, as it does
+  now, or fall to survival.
