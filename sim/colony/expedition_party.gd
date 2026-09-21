@@ -40,6 +40,7 @@ const EVENT_TURNED_BACK: StringName = &"expedition_turned_back"
 const EVENT_DESTROYED: StringName = &"expedition_destroyed"
 const EVENT_CAME_HOME: StringName = &"expedition_came_home"
 const EVENT_PREFERENCE: StringName = &"expedition_preference_changed"
+const EVENT_FOUNDED: StringName = &"town_founded"
 
 ## How many attacks it will take before turning for home. Tuning (§7 says two).
 const ATTACKS_BEFORE_TURNING: int = 2
@@ -264,6 +265,78 @@ func turn_back(context: ColonyContext) -> void:
 	}, WorldPhase.MOVEMENT)
 
 
+## Any building the Crown equipped it with (#179, #180). Empty for a
+## town-launched party, which carries stores rather than a standing mill.
+var buildings: Array = []
+
+
+## The expedition becomes a town (#179, `founding-towns.md` §8).
+##
+## 🔒 **Founded with exactly what it carried** — its people, its stores, its
+## gold, its livestock, its experts, and any building the Crown equipped it with.
+## Nothing is added at the moment of founding and nothing is taken away.
+##
+## 🔒 **And there is no fragility penalty.** Quality of life then computes
+## normally from what it holds, so **a well-found town is comfortable on the day
+## it is founded and a shed one is wretched from the start** — which is the whole
+## of §8 and the reason §9 asks for SPEC §11.4 to be rewritten. A dev adding a
+## starting template or a founding malus has undone it.
+##
+## The border and vision extend through the **existing territory phase**, which
+## is why nothing here touches the map: a town in the colony is a town territory
+## already knows how to account for.
+func found(id: StringName, name: String, context: ColonyContext) -> Town:
+	if is_empty() or at == Vector2i(-1, -1):
+		return null
+
+	var town := Town.new(id, name, at)
+	town.governor_id = governor
+	town.workers = people
+	var kinds: Array = experts.keys()
+	kinds.sort()
+	for kind in kinds:
+		town.add_experts(StringName(kind), int(experts[kind]))
+
+	var carried: Array = cargo.keys()
+	carried.sort()
+	for resource in carried:
+		if ResourceCatalogue.is_livestock(StringName(resource)):
+			town.add_livestock(StringName(resource), int(floorf(float(cargo[resource]))))
+		else:
+			town.store(StringName(resource), float(cargo[resource]))
+	town.receive_gold(gold)
+
+	var standing: Array = buildings.duplicate()
+	standing.sort()
+	for building in standing:
+		town.add_building(StringName(building))
+
+	context.log.emit(EVENT_FOUNDED, town.id, context.state.month, {
+		"expedition": String(id),
+		"town": String(town.id),
+		"name": name,
+		"from": String(parent),
+		"governor": String(governor),
+		"at": [at.x, at.y],
+		# **Everything it began with**, because §8's claim is that this is all
+		# there is — a reader should be able to check the town against this list
+		# and find nothing added and nothing missing.
+		"people": people,
+		"experts": experts.duplicate(),
+		"cargo": cargo.duplicate(),
+		"gold": gold,
+		"buildings": standing,
+		"months_out": context.state.month - launched_month,
+	}, WorldPhase.MOVEMENT)
+
+	people = 0
+	experts.clear()
+	cargo.clear()
+	gold = 0.0
+	buildings.clear()
+	return town
+
+
 ## Put what is left back into the town that sent it (Seam A).
 ##
 ## **The months are the loss.** The people come home, the remaining stores come
@@ -310,6 +383,7 @@ func to_dict() -> Dictionary:
 		"destination": [destination.x, destination.y],
 		"region": [region.x, region.y],
 		"preference": String(preference),
+		"buildings": buildings.duplicate(),
 		"launched_month": launched_month,
 		"attacks": attacks,
 		"turning_back": turning_back,
@@ -330,6 +404,7 @@ static func from_dict(data: Dictionary) -> ExpeditionParty:
 	party.region = _point(data.get("region", [-1, -1]))
 	party.preference = StringName(
 		data.get("preference", String(SitePreference.GOOD_GROUND)))
+	party.buildings = data.get("buildings", []).duplicate()
 	party.launched_month = int(data.get("launched_month", 0))
 	party.attacks = int(data.get("attacks", 0))
 	party.turning_back = bool(data.get("turning_back", false))
