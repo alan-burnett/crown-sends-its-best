@@ -47,6 +47,9 @@ var contacts: Dictionary = {}
 var native_trade: TradeBook = null
 var natives: Tribes = null
 
+## Ground a rival has parked men on (#188). Null in fixtures that do not care.
+var denied: DeniedTiles = null
+
 var run_seed: int = 0
 
 ## Town id -> what Reckon worked out this month.
@@ -102,7 +105,20 @@ func reckoning_for(town: Town) -> Reckoning:
 
 ## The tiles a town works. Empty until territory has been computed, which phase 3
 ## does before this phase runs.
+##
+## 🔒 **Ground a rival is sitting on is absent, not scored at zero** (#188). This
+## is the one place it is removed, so Work — and anything else that asks what a
+## town can work — cannot disagree about it. A tile nobody can reach is not a
+## tile the town looked at and rejected.
 func tiles_of(town: Town) -> Array[Vector2i]:
 	if territory == null:
 		return []
-	return territory.tiles_of(town.id)
+	var mine := territory.tiles_of(town.id)
+	if denied == null or denied.held.is_empty():
+		return mine
+
+	var workable: Array[Vector2i] = []
+	for at in mine:
+		if not denied.is_denied(at):
+			workable.append(at)
+	return workable

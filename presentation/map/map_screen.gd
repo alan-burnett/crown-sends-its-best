@@ -171,6 +171,13 @@ func _draw_map() -> void:
 		# 🔒 **The contest, drawn and not resolved.** Both peoples want this tile
 		# and nothing in the game says who gets it — so the map says so plainly
 		# rather than quietly awarding it to one of them.
+		# Somebody else's men, standing on the colony's own fields. Hatched
+		# rather than filled: the ground is still the colony's, and it is the
+		# working of it that has stopped.
+		if not knowledge.denied_at(at).is_empty():
+			_canvas.draw_line(where + Vector2(0.0, side), where + Vector2(side, 0.0),
+				DeskTheme.MAP_DENIED, maxf(1.0, side * 0.14))
+
 		if knowledge.is_contested(at):
 			_canvas.draw_rect(rect, DeskTheme.MAP_CONTESTED, false, maxf(1.0, side * 0.08))
 

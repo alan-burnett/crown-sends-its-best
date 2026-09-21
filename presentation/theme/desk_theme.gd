@@ -37,6 +37,11 @@ const MAP_TOWN: Color = Color(0.90, 0.24, 0.20)
 const MAP_NATIVE: Color = Color(0.42, 0.72, 0.55, 0.55)
 const MAP_VILLAGE: Color = Color(0.36, 0.78, 0.58)
 const MAP_CONTESTED: Color = Color(0.95, 0.58, 0.25, 0.9)
+
+## Ground a rival has parked men on (#188). **Not a battle colour** — nothing is
+## burning and nobody has died; the fields are simply not the colony's to work
+## this month, and the map should read as a town diminished rather than attacked.
+const MAP_DENIED: Color = Color(0.58, 0.55, 0.62, 0.75)
 ## Remembered ground is hatched, so it reads as stale even in one colour.
 const MAP_STALE: Color = Color(0.0, 0.0, 0.0, 0.35)
 
