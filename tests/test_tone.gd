@@ -66,9 +66,22 @@ func _man(traits: Dictionary, loyalty: float = 55.0) -> Contact:
 	return contact
 
 
+## 🔒 **A directing letter, because tone reaches the six outcomes on directing
+## and asking alone** (#261, `tone.md` §3).
+##
+## This fixture used to promise gold, which is *answering* — a man who wrote for
+## money and was sent it does not then deliberate about whether to accept it — so
+## every claim below was being measured against a decision that is not his to
+## make.
+##
+## Directing rather than asking because it **costs him nothing**, and this file is
+## about temperament. A two-hundred-man levy is answered by the size of the levy
+## whatever the man's mettle, which is the cost consideration doing its job and
+## drowning the one under test.
 func _letter(tone: StringName, harsh: bool = false) -> Order:
-	var order := Order.new(
-		M1Registrations.ORDER_PROMISE_GOLD, &"him", {"amount": 200.0})
+	var order := Order.new(M1Registrations.ORDER_URGE_INTENT, &"him", {
+		"intent": String(GovernorIntent.ECONOMY),
+	})
 	order.id = &"order_test"
 	order.tone = tone
 	order.harsh = harsh
