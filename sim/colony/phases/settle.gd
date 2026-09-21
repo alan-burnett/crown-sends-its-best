@@ -80,6 +80,12 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 	# through how the town lived (`rebel-sentiment.md` §4), so it cannot be
 	# worked out until this month's living is settled.
 	_take_the_temperature(town, context)
+	# **After sentiment and never before it** (#75). Sentiment is the largest
+	# input to a protest and a protest is no input at all to sentiment, so the
+	# order is what keeps that one-way (`trade-protests.md` §7). A protest
+	# declared this month is a refusal from next month's Exchange, which is the
+	# same announce-then-act shape rebellion has.
+	TradeProtest.resolve(town, context)
 	_grow(town, context)
 	_reconsider(town, context)
 

@@ -433,7 +433,8 @@ static func can_obtain(town: Town, resource: StringName, context: ColonyContext)
 			return true
 	# Otherwise it has to be bought, which needs somebody to buy from and the
 	# money to do it with.
-	return Trade.may_trade_with_crown(town, context) and town.can_afford(ResourceCatalogue.price_of(resource))
+	return Trade.may_trade_with_crown(town, resource, context) \
+		and town.can_afford(ResourceCatalogue.price_of(resource))
 
 
 ## A tie broken by the seed rather than by a die.

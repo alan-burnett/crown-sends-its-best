@@ -149,5 +149,35 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.steward.protest_reported",
+    "letter": "steward.protest_reported",
+    "urgency": 0.7,
+    "cooldown": 2,
+    "params": {
+      "town": {
+        "from": "protest",
+        "field": "town",
+        "within": 2
+      },
+      "resource": {
+        "from": "protest",
+        "field": "resource",
+        "within": 2
+      },
+      "rate": {
+        "from": "protest",
+        "field": "rate",
+        "within": 2
+      }
+    },
+    "conditions": [
+      {
+        "a_town_began_a_protest": {
+          "within": 2
+        }
+      }
+    ]
   }
 ]

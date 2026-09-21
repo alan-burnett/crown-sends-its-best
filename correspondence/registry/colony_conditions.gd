@@ -91,6 +91,35 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"his_draft_was_returned", {"within": "integer"}, ColonyConditions.his_draft_was_returned
 	)
+	ContentRegistry.register_condition(
+		"a_town_began_a_protest", {"within": "integer"},
+		ColonyConditions.a_town_began_a_protest,
+	)
+
+
+## Whether any town has refused the Crown a resource lately (#75, SPEC §8.1).
+##
+## **Asked of the colony, not of a town.** The Steward is an ocean away and has
+## no town of his own; what reaches him is the news that a market has shut.
+static func a_town_began_a_protest(args: Dictionary, context: LetterContext) -> bool:
+	return not _latest_protest(context, maxi(1, int(args.get("within", 2)))).is_empty()
+
+
+## The most recent declaration inside the window, or empty.
+##
+## Latest rather than first: a Steward writing about a protest should write about
+## the one that just happened.
+static func _latest_protest(context: LetterContext, within: int) -> Dictionary:
+	if context == null or context.log == null:
+		return {}
+	var best: Dictionary = {}
+	var at := -1
+	for event in context.log.of_type(TradeProtest.EVENT_DECLARED):
+		if context.month - event.month >= within or event.month < at:
+			continue
+		at = event.month
+		best = event.payload
+	return best
 
 
 ## Whether this is the month the bar first moved (#69, `crown-demands.md` §3).

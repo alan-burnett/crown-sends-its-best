@@ -52,12 +52,21 @@ const LUXURY_ELASTICITY: float = 2.0
 const EPSILON: float = 0.0001
 
 
-## Whether this town will deal with the Crown at all.
+## Whether this town will deal with the Crown in this resource.
 ##
-## **The M3 exception hook.** Today only an openly rebelling town refuses; trade
-## protests hang off the same gate.
-static func may_trade_with_crown(town: Town, _context: ColonyContext) -> bool:
-	return not town.rebelling
+## 🔒 **It takes a resource, and it must.** A rebelling town refuses everything;
+## a protesting town refuses **one thing** (#75, SPEC §10.2), and a gate that
+## answered all-or-nothing could not express the second at all. Asked before
+## every transaction rather than once per phase, so a town can come to refuse
+## partway through a month as the reasons grow.
+static func may_trade_with_crown(
+	town: Town,
+	resource: StringName,
+	_context: ColonyContext = null,
+) -> bool:
+	if town.rebelling:
+		return false
+	return not TradeProtest.is_protesting(town, resource)
 
 
 ## Buy up to `desired` of a resource from the Crown.
@@ -80,7 +89,7 @@ static func buy(
 	if price <= 0.0:
 		return nothing
 
-	if not may_trade_with_crown(town, context):
+	if not may_trade_with_crown(town, resource, context):
 		context.log.emit(EVENT_REFUSED, town.id, context.state.month, {
 			"town": String(town.id),
 			"resource": String(resource),
@@ -148,7 +157,7 @@ static func sell(town: Town, resource: StringName, quantity: float, context: Col
 	if price <= 0.0:
 		return nothing
 
-	if not may_trade_with_crown(town, context):
+	if not may_trade_with_crown(town, resource, context):
 		context.log.emit(EVENT_REFUSED, town.id, context.state.month, {
 			"town": String(town.id),
 			"resource": String(resource),
