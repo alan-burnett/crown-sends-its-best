@@ -1,0 +1,39 @@
+{
+  "id": "steward.standing_recovering",
+  "sender": "steward",
+  "type": "report",
+  "skippable": true,
+  "perception": {
+    "purse": {
+      "measure": "colony_revenue",
+      "ladder": [
+        "ruinous",
+        "thin",
+        "tolerable",
+        "handsome"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "A better month, and I make a point of saying so, having been so free with the other kind of letter."
+    },
+    {
+      "text": "The returns are still only {perception:purse}. It is the direction of them I am writing about and not the figure, and the direction has been noticed in this office. I have seen to it that it was noticed elsewhere.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "The returns are still only {perception:purse}. I record the improvement. I do not propose to make more of it than that.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I would not ease off. A colony that has climbed once is a colony that has shown it can, and you will find that is remembered as an expectation rather than as a credit."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "id": "steward.standing_concern",
+  "sender": "steward",
+  "type": "report",
+  "skippable": false,
+  "params": { "amount": "gold" },
+  "perception": {
+    "purse": { "measure": "colony_revenue",
+               "ladder": ["ruinous", "thin", "tolerable", "handsome"] }
+  },
+  "body": [
+    { "text": "I am obliged to write to you about the accounts, which I would rather not have had to do this early." },
+    { "text": "The returns are {perception:purse}. Against them the Crown has laid out {param:amount} on your undertakings this year, and the arithmetic of that is not obscure." },
+    { "text": "Nobody is alarmed. I want to be precise about that, because I find men hear alarm in any letter from this office. We are not alarmed. We have noticed." },
+    { "text": "There are two remedies and you know both of them. Do more with what you have, or raise the duties. I have an opinion as to which, and you will not be surprised by it." }
+  ]
+}

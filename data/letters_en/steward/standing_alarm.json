@@ -1,0 +1,17 @@
+{
+  "id": "steward.standing_alarm",
+  "sender": "steward",
+  "type": "report",
+  "skippable": false,
+  "params": { "amount": "gold" },
+  "perception": {
+    "purse": { "measure": "colony_revenue",
+               "ladder": ["ruinous", "thin", "tolerable", "handsome"] }
+  },
+  "body": [
+    { "text": "I wrote to you before about the accounts. I write now in a different spirit." },
+    { "text": "The colony's returns are {perception:purse} and the Crown is {param:amount} out on your word. That is no longer a shortfall. It is a position, and positions of this kind are discussed at a level well above mine." },
+    { "text": "I am not able to go on presenting these figures as a temporary matter. I have done it twice and I will not do it a third time." },
+    { "text": "Raise the duties. I have said so before in a tone you may have found tiresome; I say it now in one I hope you find harder to set aside." }
+  ]
+}
