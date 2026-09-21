@@ -29,6 +29,47 @@ mention, and most months he mentions none of them.
 `skippable: false` already means the first kind, and now means two things at
 once: **it is never culled, and it ignores both dampers.** No new field.
 
+### A must-send letter still asks who would send it
+
+**It bypasses pressure. It does not bypass the man.** A world event does not
+write to the PC; a person does, and whether he does depends on what he thinks of
+him.
+
+**Loyalty picks which letter, or none at all.** Take a governor changing his
+intent — the most consequential thing he does, and the thing the PC most wants to
+hear about:
+
+| His loyalty | What arrives |
+| :--- | :--- |
+| **High** | He tells the PC, **and asks whether he would rather direct him elsewhere** |
+| **Medium** | He tells the PC. *I am doing this because I must.* No question in it |
+| **Low** | **Nothing.** He changes his mind and does not mention it |
+
+That is §10's rule — loyalty gates the kind of letter, not the number — arriving
+in the must-send path as well. At high regard the PC is **consulted**; at medium
+he is **informed**; at low he is **bypassed**, and the same event produces three
+entirely different months.
+
+### And the silence is where the Diplomat earns his place
+
+A governor who says nothing has not hidden it from everybody. The Diplomat
+reports on every town (§8.1), and this is his sharpest use:
+
+> *I noted the letter Your Grace sent the governor, and yet he continues at the
+> stockade, citing the tribes to the north.*
+
+**He is how the PC learns what people are not telling him**, which is a different
+job from reporting the world. A trigger of this kind fires on the *gap between
+what the PC wrote and what the town did* — both of which are in the log — and the
+reason he can name the governor's excuse truthfully is that `choose()` emitted it
+(§9.1).
+
+It also puts a price on losing him. He is **never replaced** (§8.1), so a PC whose
+Diplomat dies does not merely lose a correspondent — **he goes blind to
+disloyalty**, and every governor who has stopped writing becomes a governor he
+knows nothing about. `the-diplomat.md` has his own low loyalty spoiling his
+intelligence; his death removes it altogether.
+
 ## 3. Pressure
 
 Every topic a contact could write about carries a **pressure**, and he writes
@@ -148,17 +189,53 @@ famine and a plague does not write about the library roof.
 
 ## 7. Which letter, and why severity is not tone
 
-A topic usually has several letters. *Give us a break* and *we cannot bear this*
-are the same concern at two pressures.
+A topic usually has several letters. *Give us a break* and *they cannot bear it*
+are the same concern said at two different strengths.
 
-Three things choose between them, in order:
+Each letter declares **the pressure it speaks to**. The director sends **the
+strongest letter whose bar the pressure clears**, among those whose conditions
+hold.
 
-1. **Conditions** say whether a letter is **true** — ids into the code-side
-   registry, tested against the month's state. A letter that is not true is not a
-   candidate, whatever he feels.
-2. **Pressure** says whether he **bothers** (§3).
-3. Among letters that are both true and worth writing, **the one that speaks to
-   the highest pressure wins.**
+### Worked: the clergyman and the beer duty
+
+His concern has three letters authored against it:
+
+| Letter | True when | Speaks to pressure |
+| :--- | :--- | --: |
+| *give us a break* | the duty is above 5% | **20** |
+| *this is now a hardship* | above 10% | **50** |
+| *they cannot bear it* | above 20% | **80** |
+
+**A quiet month.** The duty is 6% and nothing has moved. Pressure is **10** — the
+gap alone. It clears nobody's bar, and his threshold besides. **He writes
+nothing.**
+
+**The duty rises to 12%.** Gap **30**, news **+20**, pressure **50**.
+
+- *give us a break* is true, and speaks to 20. Candidate.
+- *this is now a hardship* is true, and speaks to 50. Candidate.
+- *they cannot bear it* is **not true** — 12% is not above 20%. Not a candidate.
+
+Pressure 50 clears both bars, so he sends **the stronger**: *this is now a
+hardship.*
+
+**Next month.** Still 12%, but the news term is gone and the topic damper is
+fresh: pressure is about **25**. Only *give us a break* is within reach, and his
+threshold may well stop him anyway. **The same duty, and he has nothing more to
+say about it.**
+
+### Why conditions alone cannot do this
+
+**Conditions describe the world. Pressure describes the man.**
+
+Two clergymen facing the identical 12% duty — one patient, one not — must be able
+to write different letters, and conditions cannot tell them apart because the duty
+is 12% for both.
+
+It also handles the case you actually want. In the second month above **the world
+barely moved** — the duty went from 6% to 12%, which is not a catastrophe. What
+tipped him from a polite request to a statement of hardship was the **news** term:
+not how bad it is, but that it **just got worse.**
 
 ### That needs a field of its own
 
