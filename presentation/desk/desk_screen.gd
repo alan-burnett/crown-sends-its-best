@@ -417,8 +417,21 @@ func _ask_to_retire() -> void:
 ## 🔒 **The run ends here and the save is closed out.** Ironman means there is no
 ## coming back to it (SPEC §16.2).
 func _retire_from_the_desk() -> void:
-	machine.retire()
+	if not machine.retire():
+		return
 	refresh()
+	_open_the_summary()
+
+
+## The last screen of the run (#78), laid over the closed desk.
+##
+## **Reached from retirement now, and structured so M6's fail conditions plug in
+## unchanged**: it reads the ending rather than being told which one it is.
+func _open_the_summary() -> void:
+	var screen := SummaryScreen.new()
+	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(screen)
+	screen.begin(run, content)
 
 
 ## **Sending commits every decision in it and saves the game. There is no going

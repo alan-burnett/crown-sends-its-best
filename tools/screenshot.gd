@@ -17,8 +17,9 @@ func _init() -> void:
 	var height: int = int(arguments[2]) if arguments.size() > 2 else 960
 	# "open" opens the first letter, "reply" also walks the wizard to the end,
 	# "map" opens the map over the desk, "ledger" opens the Ledger, "ledger:N"
-	# turns to its Nth page, "retire" opens the retirement confirmation and
-	# "retired" goes through with it.
+	# turns to its Nth page, "retire" opens the retirement confirmation,
+	# "retired" goes through with it, and "summary" goes through and shows the
+	# whole of the closing page.
 	var mode: String = arguments[3] if arguments.size() > 3 else ""
 
 	var window := get_root()
@@ -40,7 +41,14 @@ func _init() -> void:
 	for i in SETTLE_FRAMES:
 		await process_frame
 
-	if mode == "retire" or mode == "retired":
+	if mode == "summary":
+		_retire(instance, true)
+		for i in SETTLE_FRAMES:
+			await process_frame
+		_show_the_lot(instance)
+		for i in SETTLE_FRAMES:
+			await process_frame
+	elif mode == "retire" or mode == "retired":
 		_retire(instance, mode == "retired")
 		for i in SETTLE_FRAMES:
 			await process_frame
@@ -81,6 +89,17 @@ func _retire(instance: Node, through_with_it: bool) -> void:
 			desk._ask_to_retire()
 		return
 	print("no desk to retire from")
+
+
+## Skip the summary's pacing, so a capture shows the whole page (#78).
+func _show_the_lot(instance: Node) -> void:
+	for child in instance.get_children():
+		if not (child is DeskScreen):
+			continue
+		for screen in (child as DeskScreen).get_children():
+			if screen is SummaryScreen:
+				(screen as SummaryScreen)._show_everything()
+		return
 
 
 ## Open the Ledger, optionally turned to a page.

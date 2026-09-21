@@ -479,6 +479,37 @@ func check_no_authored_durations(content: ContentDatabase) -> void:
 				_problem("months", "authored; build time is derived from cost and capacity")
 
 
+## 🔒 **Every way a run can end has something to say about it** (#78).
+##
+## The epitaph is the last screen of a run and there is no next month in which to
+## notice it was blank. So: every outcome resolves for every prestige band, every
+## record names an outcome that can actually happen, and none of them is empty.
+##
+## The general form — a record with no `band` — is what makes that cheap: one
+## file gives an outcome a floor, and the bands worth sharpening are sharpened.
+func check_epitaphs(content: ContentDatabase) -> void:
+	for id in content.ids(Epitaph.COLLECTION):
+		var record := content.record(Epitaph.COLLECTION, id)
+		_file = String(record.get(JsonLoader.SOURCE_KEY, "?"))
+		var outcome := String(record.get("outcome", ""))
+		if not Epitaph.outcomes().has(outcome):
+			_problem(id, "outcome '%s' is not a way a run can end. The three are %s"
+				% [outcome, ", ".join(Epitaph.outcomes())])
+		var band := String(record.get("band", ""))
+		if not band.is_empty() and not Prestige.band_names().has(band):
+			_problem(id, "band '%s' is not a prestige band. They are %s"
+				% [band, ", ".join(Prestige.band_names())])
+		if String(record.get("text", "")).strip_edges().is_empty():
+			_problem(id, "has no text, so a run could end on a blank screen")
+
+	_file = "data/epitaphs"
+	for outcome in Epitaph.outcomes():
+		for band in Prestige.band_names():
+			if Epitaph.for_outcome(StringName(outcome), StringName(band), content).is_empty():
+				_problem("%s/%s" % [outcome, band],
+					"no epitaph answers for it, so that run ends on nothing")
+
+
 func check_effects_are_reachable(content: ContentDatabase) -> void:
 	var used: Dictionary = {}
 	for id in content.ids("letters"):

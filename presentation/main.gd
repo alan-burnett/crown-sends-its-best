@@ -106,6 +106,14 @@ func _open_desk() -> void:
 	add_child(desk)
 	desk.begin(run, machine, content)
 
+	# **A finished run opens on its own ending** (#78). Ironman deletes the save
+	# when a run ends, so this is only reachable if one somehow survived — and it
+	# must not quietly hand the player a live desk.
+	if machine.is_over():
+		desk.refresh()
+		desk._open_the_summary()
+		return
+
 	# Resuming lands back where the player left off; a new run opens the desk.
 	if run.inbox.is_empty() and run.phase != TurnMachine.DESK:
 		machine.begin_turn()
