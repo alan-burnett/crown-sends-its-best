@@ -80,12 +80,15 @@ func test_a_different_seed_produces_a_different_run() -> void:
 		"two seeds put the colony on the same tile")
 
 
-func test_a_different_choice_produces_a_different_run() -> void:
+func test_a_different_request_produces_a_different_run() -> void:
+	# 🔒 The player says what the colony is for, not where it goes (#273). This
+	# test used to pick chart two of three.
 	var first := _setup()
+	first.request = SiteRequest.QUICK_GROWTH
 	var second := _setup()
-	second.site_choice = 2
+	second.request = SiteRequest.ECONOMIC_OPPORTUNITY
 	assert_true(_first(_run(second)).at != _first(_run(first)).at,
-		"choosing a different site put the town in the same place")
+		"two different purposes put the town in the same place")
 
 
 # --- 🔒 The flavour is flavour ----------------------------------------------
@@ -211,29 +214,32 @@ func test_every_split_is_offered_and_each_does_something() -> void:
 		"two different splits opened the colony in the same position")
 
 
-# --- 🔒 The sites are a choice ----------------------------------------------
+# --- 🔒 The request is the choice -------------------------------------------
 
-func test_three_sites_are_offered_and_they_differ() -> void:
-	# Three neighbouring tiles of the same good ground is not a decision. They
-	# are spread across the ranked list so one is rich, one middling, one hard.
-	var offered := RunSetup.sites_for(SEED)
-	assert_eq(offered.size(), RunSetup.SITES_OFFERED)
-	var distinct: Dictionary = {}
-	for at in offered:
-		distinct[str(at)] = true
-	assert_eq(distinct.size(), offered.size(), "two of the offered sites were the same tile")
-
-
-func test_the_same_seed_offers_the_same_sites() -> void:
-	assert_eq(str(RunSetup.sites_for(SEED)), str(RunSetup.sites_for(SEED)),
-		"the choice on offer changed between asking twice")
+func test_every_request_is_answerable() -> void:
+	# 🔒 Four purposes, and each of them lands a town somewhere real. This used
+	# to assert that three charts were offered and differed; §11.4 says the PC
+	# never chooses a tile, and run start is the same act.
+	for request in SiteRequest.ALL:
+		var setup := _setup()
+		setup.request = request
+		assert_true(_first(_run(setup)) != null,
+			"asking for %s founded no town at all" % request)
 
 
-func test_an_out_of_range_choice_lands_somewhere_real() -> void:
-	# A save from a build that offered more sites must not put a town in the sea.
+func test_the_same_seed_and_request_answer_the_same_way() -> void:
 	var setup := _setup()
-	setup.site_choice = 99
-	assert_true(_first(_run(setup)) != null, "a stale choice founded no town at all")
+	setup.request = SiteRequest.LONG_TERM_CULTIVATION
+	assert_eq(_first(_run(setup)).at, _first(_run(setup)).at,
+		"the survey came back differently the second time it was asked")
+
+
+func test_a_setup_from_an_older_build_still_lands_somewhere_real() -> void:
+	# A save with no request in it at all must not put a town in the sea.
+	var setup := RunSetup.from_dict({"seed_value": SEED})
+	assert_true(SiteRequest.is_request(setup.request),
+		"a setup with nothing said about it has no purpose")
+	assert_true(_first(_run(setup)) != null, "a silent setup founded no town")
 
 
 # --- 🔒 It survives a reload ------------------------------------------------
@@ -243,11 +249,11 @@ func test_the_setup_survives_a_round_trip() -> void:
 	setup.pc_name = "Marlborough-Vane"
 	setup.mandate = GovernorIntent.SETTLEMENT
 	setup.split = RunSetup.SPLIT_GOLD
-	setup.site_choice = 2
+	setup.request = SiteRequest.DEFENSIVE_POSITION
 
 	var restored := RunSetup.from_dict(setup.to_dict())
 	assert_eq(restored.pc_name, setup.pc_name)
 	assert_eq(String(restored.mandate), String(setup.mandate))
 	assert_eq(String(restored.split), String(setup.split))
-	assert_eq(restored.site_choice, setup.site_choice)
+	assert_eq(String(restored.request), String(setup.request))
 	assert_eq(restored.seed_value, setup.seed_value)

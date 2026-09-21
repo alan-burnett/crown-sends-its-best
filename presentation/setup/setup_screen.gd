@@ -48,7 +48,28 @@ const SPLIT_NOTES: Dictionary = {
 	RunSetup.SPLIT_STORES: "Grain, timber and tools. The safe answer, and the dullest.",
 }
 
-const SITE_NAMES: Array[String] = ["The first landing", "The middle country", "The far shore"]
+## 🔒 **What the colony is for, not where it goes** (#273, `map.md` §4, §5).
+##
+## The player states a purpose and the map answers. He never sees the site and
+## never approves it — showing him invites re-rolling until the chart looks
+## pretty, which is choosing a tile by the back door.
+const REQUEST_NAMES: Dictionary = {
+	SiteRequest.QUICK_GROWTH: "Quick growth",
+	SiteRequest.ECONOMIC_OPPORTUNITY: "Economic opportunity",
+	SiteRequest.LONG_TERM_CULTIVATION: "Long-term cultivation",
+	SiteRequest.DEFENSIVE_POSITION: "A defensible position",
+}
+
+const REQUEST_NOTES: Dictionary = {
+	SiteRequest.QUICK_GROWTH:
+		"Put them on a shore with ships in it. What grows quickest also lies most open.",
+	SiteRequest.ECONOMIC_OPPORTUNITY:
+		"Timber and ore, and something to sell that is not grain.",
+	SiteRequest.LONG_TERM_CULTIVATION:
+		"Open country. Slow to start, and it does not stop.",
+	SiteRequest.DEFENSIVE_POSITION:
+		"High ground under the town. You will not be consulted about what surrounds it.",
+}
 
 var setup: RunSetup = null
 
@@ -58,7 +79,7 @@ var _name_field: LineEdit = null
 var _title_field: LineEdit = null
 var _mandate_buttons: Array[Button] = []
 var _split_buttons: Array[Button] = []
-var _site_buttons: Array[Button] = []
+var _request_buttons: Array[Button] = []
 
 
 func begin(p_setup: RunSetup) -> void:
@@ -125,8 +146,9 @@ func _build() -> void:
 
 	_rule()
 	_heading("The ground")
-	_note("Three charts came back from the survey. None of the surveyors agreed.")
-	_site_buttons = _sites()
+	_note("Say what the place is for. The surveyors will find it; you will not be shown it.")
+	_request_buttons = _choices(
+		SiteRequest.ALL, REQUEST_NAMES, REQUEST_NOTES, _on_request)
 
 	_rule()
 	_seed_label = _note("")
@@ -197,16 +219,6 @@ func _choices(ids: Array, names: Dictionary, notes: Dictionary, handler: Callabl
 	return made
 
 
-func _sites() -> Array[Button]:
-	var made: Array[Button] = []
-	var offered := RunSetup.sites_for(setup.seed_value)
-	for at in offered.size():
-		var button := _choice(_site_line(at, offered))
-		button.pressed.connect(_on_site.bind(at))
-		made.append(button)
-	return made
-
-
 ## One option on the page.
 ##
 ## **Taken and untaken have to be unmistakable at a glance**, so the chosen one
@@ -231,13 +243,6 @@ func _choice(text: String) -> Button:
 	return button
 
 
-func _site_line(at: int, offered: Array[Vector2i]) -> String:
-	return "%s — %d leagues in, %d along the coast" % [
-		SITE_NAMES[at] if at < SITE_NAMES.size() else "A fourth chart",
-		offered[at].y, offered[at].x,
-	]
-
-
 # --- Choosing ---------------------------------------------------------------
 
 func _on_mandate(at: int) -> void:
@@ -250,23 +255,18 @@ func _on_split(at: int) -> void:
 	_refresh()
 
 
-func _on_site(at: int) -> void:
-	setup.site_choice = at
+func _on_request(at: int) -> void:
+	setup.request = SiteRequest.ALL[at]
 	_refresh()
 
 
-## A different world, and the charts with it.
+## A different world.
 ##
-## **The sites are a function of the seed**, so asking for another chart means
-## asking for another world — which is honest about what a seed is rather than
-## pretending the survey could have come back differently.
+## **The request is not a function of the seed**, so it survives a reseed — the
+## player has said what he wants of a colony, and asking for another world does
+## not change what he wants of it.
 func _on_reseed() -> void:
 	setup.seed_value = (setup.seed_value + 1) % 100_000_000
-	var offered := RunSetup.sites_for(setup.seed_value)
-	for at in _site_buttons.size():
-		if at < offered.size():
-			_site_buttons[at].text = _site_line(at, offered)
-	setup.site_choice = 0
 	_refresh()
 
 
@@ -287,8 +287,8 @@ func _refresh() -> void:
 		_mandate_buttons[at].button_pressed = setup.mandate == RunSetup.MANDATES[at]
 	for at in _split_buttons.size():
 		_split_buttons[at].button_pressed = setup.split == RunSetup.SPLITS[at]
-	for at in _site_buttons.size():
-		_site_buttons[at].button_pressed = setup.site_choice == at
+	for at in _request_buttons.size():
+		_request_buttons[at].button_pressed = setup.request == SiteRequest.ALL[at]
 	if _seed_label != null:
 		_seed_label.text = "Chart no. %d. Write it down if you want this world again." \
 			% setup.seed_value

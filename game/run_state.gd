@@ -208,7 +208,10 @@ var phase: StringName = &"date_card"
 ## seeded run, and `site` remains for the balance harness's poor-ground policy
 ## (#90, #116), which is choosing ground rather than making a run.
 static func from_setup(setup: RunSetup) -> RunState:
-	var run := new_run(setup.seed_value, setup.site())
+	# **The request rather than a coordinate** (#273). The map is made inside
+	# `new_run`, so the site has to be chosen there — passing one in would mean
+	# generating the world twice and hoping the two agreed.
+	var run := new_run(setup.seed_value, Vector2i(-1, -1), setup.request)
 	run.setup = setup
 
 	# **The perk, applied where the mechanic already was.** `CrownRefusal` has
@@ -250,7 +253,11 @@ static func _apply_split(town: Town, split: StringName) -> void:
 ## SPEC §6.1's Run Setup passes it when the player is offered a choice of
 ## regions; the balance harness passes it to study a colony that cannot feed
 ## itself, which is not otherwise reachable (#90, #116).
-static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunState:
+static func new_run(
+	seed_value: int,
+	site: Vector2i = Vector2i(-1, -1),
+	request: StringName = &"",
+) -> RunState:
 	var run := RunState.new()
 	run.run_seed = seed_value
 	run.streams = RngStreams.new(seed_value)
@@ -261,7 +268,13 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.promises = PromiseBook.new()
 	run.last_diff = WorldDiff.new()
 	run.map = MapGenerator.generate(run.streams.stream("mapgen"))
-	run.starting_site = site if site.x >= 0 else MapGenerator.choose_starting_site(run.map)
+	run.starting_site = site if site.x >= 0 else _ground_for(run.map, request)
+	# 🔒 **The defensive request is answered by fiat** (#273, `map.md` §4). The
+	# tile beneath the town becomes a mountain *after* the site is chosen, so the
+	# ground underneath was a good one before the mountain arrived — the colony
+	# gets its high ground and no say in what surrounds it.
+	if site.x < 0 and SiteRequest.wants_high_ground(request):
+		SiteRequest.raise_high_ground(run.map, run.starting_site)
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
 	run.standing = CrownStanding.new()
@@ -493,3 +506,13 @@ func state_hash() -> String:
 ## nothing knows what the colony works until the phase that decides it has run.
 func territory_now() -> Territory:
 	return territory_driver.territory if territory_driver != null else null
+
+
+## Where the first town goes, when nobody named a tile.
+##
+## A request if one was made, and the best ground going otherwise — which is what
+## the harness and the tests ask for when they want a plain seeded run.
+static func _ground_for(map: WorldMap, request: StringName) -> Vector2i:
+	if SiteRequest.is_request(request):
+		return SiteRequest.choose(map, request)
+	return MapGenerator.choose_starting_site(map)
