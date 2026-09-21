@@ -28,6 +28,7 @@ static func register_all() -> void:
 	Deliberation.register_consideration(AutonomyConsideration.new(&"autonomy"), KINDS)
 	Deliberation.register_consideration(ClarityConsideration.new(&"order_clarity"), KINDS)
 	Deliberation.register_consideration(HarshnessConsideration.new(&"harshness"), KINDS)
+	Deliberation.register_consideration(DissonanceConsideration.new(&"against_his_judgement"), KINDS)
 	Deliberation.register_filter(FullPaymentIsAYes.new(&"full_payment_is_a_yes"), KINDS)
 
 
@@ -172,6 +173,49 @@ class ClarityConsideration:
 	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
 		var vagueness: float = float(context.get_value("vagueness", 0.0))
 		return clampf(vagueness * float(PULL.get(candidate.id, 0.0)), -1.0, 1.0)
+
+
+## Being told to do something he thinks is wrong (#213).
+##
+## 🔒 **It changes the manner of his answer and never the decision.**
+## `contacts.md` §3 locks the two-stage split: compliance decides whether he
+## engages with the letter, and his phase 8 deliberation decides whether he
+## agrees with it, where `crown_urging` and `native_threat` meet as two of eight
+## weighted considerations and the better argument wins. This does not move that
+## decision here, and must not.
+##
+## What it fixes is that a governor whose border is threatened and a governor
+## with nothing to worry about answered "attend to the colony's profit"
+## **identically**, because `urge_intent` costs nothing and cost was the only
+## thing carrying the weight of an ask.
+##
+## 🔒 **It does not pull toward refusing.** Refusing is about regard — a man who
+## disagrees but likes the PC finds a way to do both, and the way he finds is
+## reinterpretation:
+##
+## > *I have read Your Grace's instruction regarding our profits, and have
+## > applied it to the timber we shall need for the palisade.*
+##
+## Weighted by personality like every other, so a dutiful man swallows it and a
+## proud one does not.
+class DissonanceConsideration:
+	extends Consideration
+
+	const PULL: Dictionary = {
+		Compliance.REINTERPRET: 1.0,
+		Compliance.ACT_ALONE: 0.8,
+		Compliance.DELAY: 0.35,
+		Compliance.COMPLY: -0.9,
+		# 🔒 Not refuse. Deliberately absent rather than set to zero, so that
+		# anybody adding it has to come past this comment.
+	}
+
+	func applies_to(candidate: Candidate) -> bool:
+		return PULL.has(candidate.id)
+
+	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+		var against: float = clampf(float(context.get_value("dissonance", 0.0)), 0.0, 1.0)
+		return clampf(against * float(PULL.get(candidate.id, 0.0)), -1.0, 1.0)
 
 
 ## **Full payment is a guaranteed yes** while crown standing can cover it
