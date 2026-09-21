@@ -39,6 +39,14 @@ var grievances: Grievances = null
 ## think of the PC. Contact id -> `Contact`.
 var contacts: Dictionary = {}
 
+## Standing agreements with the villages, and the peoples who hold them (#206).
+##
+## 🔒 **SPEC §11.3 puts the natives ahead of the Crown in Exchange**, so a phase
+## that buys has to be able to ask them first. Null in fixtures that do not care,
+## which is why every reader checks.
+var native_trade: TradeBook = null
+var natives: Tribes = null
+
 var run_seed: int = 0
 
 ## Town id -> what Reckon worked out this month.

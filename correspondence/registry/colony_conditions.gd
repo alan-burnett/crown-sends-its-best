@@ -154,6 +154,10 @@ static func register_all() -> void:
 		"their_land_is_in_my_way", {"value": "number"},
 		ColonyConditions.their_land_is_in_my_way,
 	)
+	ContentRegistry.register_condition(
+		"i_struck_a_bargain", {"within": "integer"},
+		ColonyConditions.i_struck_a_bargain,
+	)
 
 
 ## Whether this sender is a governor-elect who has only just set out (#178).
@@ -677,3 +681,42 @@ static func their_land_is_in_my_way(args: Dictionary, context: LetterContext) ->
 		return false
 	return context.measure(ColonyMeasures.NATIVE_PRESSURE, 0.0) \
 		>= float(args.get("value", 0.1))
+
+
+## 🔒 Whether this governor has lately made an agreement with a village (#206).
+##
+## **The PC learns of it afterwards** (`natives.md` §5, SPEC §11.3). The town
+## runs itself; a governor may arm the people beside him on his own judgement,
+## and this is the letter in which the PC finds out. There is no condition here
+## that could fire *before* the bargain is struck, because there is no moment at
+## which the PC could have stopped it.
+static func i_struck_a_bargain(args: Dictionary, context: LetterContext) -> bool:
+	return not _bargain(args, context).is_empty()
+
+
+## The most recent agreement this man's town opened, within the window.
+static func _bargain(args: Dictionary, context: LetterContext) -> Dictionary:
+	if context == null or context.log == null or context.town == null:
+		return {}
+	var within := maxi(1, int(args.get("within", 2)))
+	var latest: Dictionary = {}
+	var when := -1
+	for event in context.log.of_type(TradeAgreement.EVENT_OPENED):
+		if event.subject != context.town.id:
+			continue
+		if context.month - event.month > within:
+			continue
+		if event.month >= when:
+			when = event.month
+			latest = event.payload
+	return latest
+
+
+## One field of that agreement, for the letter to name.
+static func bargain_field(context: LetterContext, field: String) -> String:
+	return String(_bargain({"within": 3}, context).get(field, ""))
+
+
+## Whether the bargain he struck put guns or horses in their hands.
+static func bargain_arms_them(context: LetterContext) -> bool:
+	return bool(_bargain({"within": 3}, context).get("arms_them", false))

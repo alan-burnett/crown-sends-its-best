@@ -63,6 +63,10 @@ static func register_all() -> void:
 		"neighbour_fields", {}, ColonyParamSources.neighbour_fields
 	)
 	ContentRegistry.register_param_source(
+		"bargain", {"field": "string", "fallback": "string"},
+		ColonyParamSources.bargain,
+	)
+	ContentRegistry.register_param_source(
 		"protest", {"field": "string", "within": "integer"}, ColonyParamSources.protest
 	)
 	# The Diplomat (#81). Every one of these is a fact about a town he can see.
@@ -550,3 +554,15 @@ static func neighbour_fields(_args: Dictionary, context: LetterContext) -> Varia
 					context.town.at + Vector2i(dx, dy))).is_empty():
 				held += 1
 	return held
+
+
+## One side of the bargain a governor has struck with a village (#206).
+##
+## 🔒 **What was traded, never what it did to their regard.** The axis is a plain
+## fact the PC is entitled to: his governor gave away so much of one thing for so
+## much of another, and he is reading about it a month late because that is when
+## the post is.
+static func bargain(args: Dictionary, context: LetterContext) -> Variant:
+	var field := String(args.get("field", "they_give"))
+	var value := ColonyConditions.bargain_field(context, field)
+	return value if not value.is_empty() else args.get("fallback", "goods")

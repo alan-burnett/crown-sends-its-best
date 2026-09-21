@@ -1,0 +1,112 @@
+{
+  "id": "governor.i_have_made_a_bargain",
+  "sender": "governor_ashmere",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "town": "town",
+    "tribe": "tribe",
+    "theirs": "resource",
+    "ours": "resource",
+    "governor": "contact"
+  },
+  "body": [
+    {
+      "text": "The {param:tribe} came to me with an offer and I have taken it. They bring us {param:theirs}; we let them have {param:ours}."
+    },
+    {
+      "text": "I did not write first and ask. You will see why when you count the months: the thing was put to me in the spring and you would have answered in the autumn, and they do not wait about for London any more than the weather does."
+    },
+    {
+      "text": "There is no duty on it. Nothing goes through the Crown's hands and nothing is written in the customs book, which I mention because I expect somebody there will want to know why the returns look as they do.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I am aware how it will read at that distance. I will say only that I am the man standing here and you are not.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "It holds as long as both of us have something spare and they think well enough of us to keep it."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to your bargain with the {param:tribe}, I am {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "well pleased with it"
+        },
+        {
+          "tone": "dutiful",
+          "text": "content to leave it in your hands"
+        },
+        {
+          "tone": "annoyed",
+          "text": "not at all pleased to read of it afterwards"
+        },
+        {
+          "tone": "desperate",
+          "text": "alarmed, though I see you had no way to ask"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What is to come first at {param:town}",
+        "options": [
+          {
+            "id": "trade",
+            "label": "attend to the colony's profit",
+            "text": "Attend to the colony's profit, and go on dealing with them while it serves you.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "increase_economic_output"
+              }
+            }
+          },
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your defences. I would be easier if what you were handing over were not the sort of thing that comes back.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "strengthen_defences"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "see that the town grows",
+            "text": "See that the town grows. If they will feed you, let them feed you, and put the hands you save into the place itself.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "grow_the_population"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,",
+        "tone": {
+          "pleased": "With every confidence in you,",
+          "annoyed": "And I shall expect to be told next time,"
+        }
+      }
+    ]
+  }
+}

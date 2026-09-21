@@ -231,9 +231,19 @@ func _init(p_run: RunState) -> void:
 	standings.map = run.map
 	standings.territory_driver = territory
 
+	# Phase 7, after the standing movers. What a people will offer depends on
+	# what the month has just done to their regard for the colony (#206).
+	var native_trade := NativeTradeDriver.new()
+	native_trade.colony = run.colony
+	native_trade.natives = run.tribes
+	native_trade.book = run.native_trade
+	native_trade.map = run.map
+	colony_month.native_trade = run.native_trade
+	colony_month.natives = run.tribes
+
 	month_runner.drivers = [
 		immigration, crown_foundings, expeditions, crown_affairs, territory,
-		colony_month, villages, promise_driver, standings,
+		colony_month, villages, promise_driver, standings, native_trade,
 		policies, crown_standing, prestige, drift, orders, silence, governors,
 		grievances,
 	]

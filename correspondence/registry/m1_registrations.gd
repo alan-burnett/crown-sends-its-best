@@ -115,6 +115,10 @@ static func register_considerations() -> void:
 	ComplianceConsiderations.register_all()
 	UnansweredConsiderations.register_all()
 	IntentConsiderations.register_all()
+	# 🔒 **`faction_posture` finally has something registered against it** (#206).
+	# It has been a decision kind with no considerations since the kernel was
+	# built, which is a decision nobody could make.
+	TradeConsiderations.register_all()
 
 
 # --- Effects ---------------------------------------------------------------

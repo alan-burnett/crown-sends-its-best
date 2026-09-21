@@ -27,6 +27,12 @@ var contacts: Dictionary = {}
 ## Supplied by the territory driver, which runs in phase 3 — before this.
 var territory_driver: TerritoryDriver = null
 
+## Standing agreements with the villages, and the peoples who hold them (#206).
+## Exchange tries the natives before the Crown (SPEC §11.3) and this is what it
+## reaches for when it does.
+var native_trade: TradeBook = null
+var natives: Tribes = null
+
 
 func _init(p_colony: Colony = null, p_map: WorldMap = null, p_run_seed: int = 0) -> void:
 	colony = p_colony
@@ -48,6 +54,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.parties = parties
 	context.grievances = grievances
 	context.contacts = contacts
+	context.native_trade = native_trade
+	context.natives = natives
 	if territory_driver != null:
 		context.territory = territory_driver.territory
 
