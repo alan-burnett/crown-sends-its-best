@@ -130,6 +130,7 @@ func _init(p_run: RunState) -> void:
 	silence.run = run
 
 	territory = TerritoryDriver.new(run.map, run.colony, run.knowledge)
+	territory.natives = run.tribes
 
 	# Phase 4. The colony month replaces the stub's colony half; the phases
 	# themselves arrive one ticket at a time (#44 to #50).
@@ -213,9 +214,14 @@ func _init(p_run: RunState) -> void:
 
 	prestige = PrestigeDriver.new(run.prestige)
 
+	# Phase 4, beside the Colony Month. The villages work their land and feed
+	# their people on the same ground the towns do (#205). Nothing reads across,
+	# so the order between the two decides nothing.
+	var villages := VillageDriver.new(run.tribes, run.map)
+
 	month_runner.drivers = [
 		immigration, crown_foundings, expeditions, crown_affairs, territory,
-		colony_month, promise_driver,
+		colony_month, villages, promise_driver,
 		policies, crown_standing, prestige, drift, orders, silence, governors,
 		grievances,
 	]

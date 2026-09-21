@@ -17,6 +17,11 @@ var map: WorldMap = null
 var colony: Colony = null
 var knowledge: MapKnowledge = null
 
+## The peoples already here (#205). What the colony can see of them is recorded
+## here with everything else it can see, so `presentation/` still has exactly one
+## object to ask.
+var natives: Tribes = null
+
 ## The latest result, for whoever needs to know what a town can work.
 var territory: Territory = null
 
@@ -33,7 +38,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 
 	territory = Territory.compute(map, colony.in_order())
 	if knowledge != null:
-		knowledge.observe(map, territory, state.month, colony.in_order())
+		knowledge.observe(map, territory, state.month, colony.in_order(), natives)
 
 	log.emit(EVENT_TERRITORY, &"colony", state.month, {
 		"worked": territory.influence.size(),

@@ -160,6 +160,20 @@ func _draw_map() -> void:
 				DeskTheme.MAP_WORKED,
 			)
 
+		# Ground a village works. Marked in the far corner from the town's mark,
+		# so a tile carrying both shows both rather than one covering the other.
+		if not knowledge.native_at(at).is_empty():
+			_canvas.draw_rect(
+				Rect2(where + Vector2(side * 0.66, side * 0.12), Vector2(side, side) * 0.2),
+				DeskTheme.MAP_NATIVE,
+			)
+
+		# 🔒 **The contest, drawn and not resolved.** Both peoples want this tile
+		# and nothing in the game says who gets it — so the map says so plainly
+		# rather than quietly awarding it to one of them.
+		if knowledge.is_contested(at):
+			_canvas.draw_rect(rect, DeskTheme.MAP_CONTESTED, false, maxf(1.0, side * 0.08))
+
 		var improvement := knowledge.improvement_at(at)
 		if not String(improvement).is_empty():
 			_canvas.draw_rect(
@@ -173,6 +187,19 @@ func _draw_map() -> void:
 	for at in knowledge.towns:
 		var centre := (Vector2(at) + Vector2(0.5, 0.5)) * side + _offset
 		_canvas.draw_circle(centre, maxf(3.0, side * 0.3), DeskTheme.MAP_TOWN)
+
+	# **A different shape, not a smaller circle.** There is nobody in a village
+	# the PC could write to, and a marker that read as a settlement of his own
+	# would be the map making a promise the correspondence cannot keep.
+	for at in knowledge.villages:
+		var corner := Vector2(at) * side + _offset
+		var span := maxf(4.0, side * 0.58)
+		var middle := corner + Vector2(side, side) * 0.5
+		_canvas.draw_colored_polygon(PackedVector2Array([
+			middle + Vector2(0.0, -span * 0.5),
+			middle + Vector2(span * 0.5, span * 0.4),
+			middle + Vector2(-span * 0.5, span * 0.4),
+		]), DeskTheme.MAP_VILLAGE)
 
 
 func _redraw() -> void:
@@ -188,7 +215,19 @@ func _describe() -> void:
 		places.append(String(knowledge.towns[at]))
 	places.sort()
 	var where := ", ".join(places) if not places.is_empty() else "nowhere yet"
-	_caption.text = "%d tiles known · %s" % [knowledge.seen.size(), where]
+
+	# Who else the colony has found. **Named only once somebody has seen them**,
+	# because the map shows what the colony knows and nothing more.
+	var peoples: Dictionary = {}
+	for at in knowledge.villages:
+		peoples[String(knowledge.villages[at])] = true
+	var neighbours: PackedStringArray = PackedStringArray(peoples.keys())
+	neighbours.sort()
+
+	var line := "%d tiles known · %s" % [knowledge.seen.size(), where]
+	if not neighbours.is_empty():
+		line += " · neighbours: %s" % ", ".join(neighbours)
+	_caption.text = line
 
 
 # --- Looking about ----------------------------------------------------------
