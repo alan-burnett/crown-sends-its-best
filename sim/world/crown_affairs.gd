@@ -27,7 +27,15 @@ const EVENT_WAR_MOVED: StringName = &"crown_war_moved"
 const EVENT_CAMPAIGN_BEGAN: StringName = &"crown_campaign_began"
 const EVENT_CAMPAIGN_ENDED: StringName = &"crown_campaign_ended"
 
+const EVENT_EMIGRATION: StringName = &"crown_emigration_changed"
+
 # --- Tuning ----------------------------------------------------------------
+
+## What one year of the Crown's decline adds to the flow of people leaving it.
+##
+## Against `Immigration.FLOW_BASE` of 1.0, so a run that reaches its eighth year
+## is drawing on something like twice the emigration it began with. Tuning.
+const FLOW_PER_DECLINE: float = 0.22
 
 const WAR_MIN: float = 0.0
 const WAR_MAX: float = 100.0
@@ -54,7 +62,34 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		growth.advance(state.year_index(), streams, log, state.month)
 		if demands != null:
 			demands.advance(state.month, growth, streams, log)
+		_settle_emigration(state, log)
 	_advance_war(state, log, streams.stream("sim"))
+
+
+## How many people are leaving home (#171, `immigration.md` §5).
+##
+## 🔒 **Derived from the same decline that drives the demands**, not from a
+## second schedule of its own. The Crown's obligations growing and its people
+## leaving are one fact about the Crown, and two independent curves would
+## eventually disagree about how bad things have got at home.
+##
+## So it reads `DemandGrowth`'s own history — one draw a year from year four,
+## which *is* the measure of how far past its peak the Crown is — and nothing
+## here has a calendar.
+##
+## The consequence is the point: **immigration rises precisely as demands grow
+## and the PC can least afford to feed the arrivals.** It is also the mechanical
+## half of §9, which is the most important claim in that document —
+## immigration feeds population feeds development feeds rebel sentiment — so
+## this is what makes that pressure arrive **on its own** rather than only when
+## the PC invites it by running a pleasant colony.
+func _settle_emigration(state: WorldState, log: EventLog) -> void:
+	var declined := float(growth.history.size())
+	var flow := declined * FLOW_PER_DECLINE
+	if absf(flow - float(state.get_value(Immigration.FLOW_KEY, 0.0))) < 0.0001:
+		return
+	state.apply(log, EVENT_EMIGRATION, &"crown", {Immigration.FLOW_KEY: flow},
+		WorldPhase.CROWNS_MONTH)
 
 
 func _advance_war(state: WorldState, log: EventLog, rng: RandomNumberGenerator) -> void:
