@@ -202,7 +202,63 @@ because he was afraid, and he has not forgotten why.
 and real: a man whose regard you have already lost, where refusal was likely
 anyway and what you want is maximum pull if it lands.
 
-## 7. Harsh is the second axis
+## 7. The register: which tone a contact reaches for
+
+§5 gives every contact three traits for **reading** a tone. This is the other
+side: **which tone he reaches for when he writes one.**
+
+### What is there today, and what is wrong with it
+
+`tone_for` maps loyalty and urgency to a tone by a threshold ladder — above
+seventy `pleased`, above forty-five `dutiful`, above twenty `annoyed`, below that
+`hateful`.
+
+Two things are wrong with it.
+
+**SPEC §9.1 says tone includes the sender's personality**, and this reads none.
+**Every contact at the same regard writes in the same voice**, so two governors
+rolled quite differently open a run identically.
+
+**And it cannot express the Chancellor.** `endings.md` §3 locks that he writes
+**`pleased` about ruin** — gilded leaves over the worst possible news — and his
+loyalty begins very low, so the ladder hands him `hateful` and always will.
+
+### The register
+
+**A per-contact bias over which tones he reaches for**, applied on top of the
+loyalty and urgency reading rather than replacing it. A choleric man at neutral
+regard reaches for `annoyed` where a phlegmatic one reaches for `dutiful`, and
+neither is wrong about how he feels.
+
+**The four humours are the natural authored set**, period-appropriate and
+memorable:
+
+| | Reaches for |
+| :--- | :--- |
+| **Sanguine** | `pleased` |
+| **Phlegmatic** | `dutiful` |
+| **Choleric** | `annoyed`, and `hateful` |
+| **Melancholic** | `desperate` |
+
+A humour is **a label that supplies weights and nothing more.** Nothing branches
+on it, exactly as nothing branches on a personality — it is a convenient way to
+roll four numbers that make a recognisable person rather than four that make
+noise.
+
+**The Chancellor is sanguine**, and that one word is the whole of his joke.
+
+### 🔒 Nothing reads a personality to announce itself
+
+A letter never says *I am a timid man* because a vector said so. **What a contact
+gives away about himself is what his tone gives away**, and the register is what
+makes that worth reading.
+
+This matters most in the governor's opening letter (`map.md` §5), which is the
+player's only read on a man before he must trust him. **It gives away exactly as
+much as his voice does**, which is the right amount and needs no new machinery to
+deliver.
+
+## 8. Harsh is the second axis
 
 **A separate yes-or-no**, set after the tone, and the two are orthogonal — five
 tones times harsh-or-not is **ten registers**. See `contacts.md` §3.
@@ -221,7 +277,7 @@ you are the one deciding, and *do it or else* has no object.
 sentence is a tone-keyed `{insert:}` fragment, so the same flag reads as velvet
 from a pleased PC and as a threat from an annoyed one.
 
-## 8. Two things that will look like bugs
+## 9. Two things that will look like bugs
 
 **🔒 Desperate removes delay. It does not weigh against it.**
 `deliberation.md` §5: hard rules are **filters**, applied before scoring. A large
@@ -233,7 +289,7 @@ Urging weight is only ever consulted **if he complied**, so the two touch
 different moments. He is less likely to take the order, and harder-driven when he
 does.
 
-## 9. Tuning targets
+## 10. Tuning targets
 
 - Every magnitude in §4, and the loyalty figures against the shipped
   `TONE_WEIGHT` table.
@@ -247,8 +303,11 @@ does.
 - What *increase* and *decrease* on desire-to-write are worth against the
   director's thresholds (`the-director.md` §4).
 
-## 10. Open items
+## 11. Open items
 
+- **Whether a register and the three reading traits should correlate.** A
+  choleric man who is also unmoved by being shouted at is coherent; a sanguine one
+  who takes courtesy for weakness is a contradiction. Nothing yet stops either.
 - **How the three traits are drawn**, and whether they correlate with the
   personality weights a contact already carries. A proud man who is also
   indifferent to cost is a different problem from a proud man who is not, and

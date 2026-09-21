@@ -204,13 +204,17 @@ colony can raise anything and must buy or farm its dinner.
 
 > **Do we settle near the natives, or keep our distance?**
 
-| | |
-| :--- | :--- |
-| **Near** | the nearest tribe sits at **medium** distance |
-| **Apart** | it sits **far** |
+**Four bands, and the question moves one tribe between two of them:**
 
-**There is no adjacent.** Even the bold answer is not suicidal, and the timid one
-does not put the tribes off the map.
+| | The first tribe | The other two |
+| :--- | :--- | :--- |
+| **Near** | **close** | far, and very far |
+| **Apart** | **medium** | far, and very far |
+
+**Only the nearest neighbour is in question.** Two tribes are distant whatever the
+PC answers, so the rest of the native game arrives in its own time however he
+chose — what he is deciding is who is over the next ridge, not how many there
+are.
 
 ### Why placement follows the site rather than the site following placement
 
@@ -250,13 +254,8 @@ what the colony *does* next is what moves it.
 
 ## 10. Open items
 
-- **What the second and third tribes do.** The question places the nearest; the
-  others fall where the map allows, and nothing says whether that should be
-  deliberate too.
-- Whether the **defensive** request should be offered at all before the player has
-  met anything that attacks him. It is the only one whose payoff is invisible for
-  several years, and the only one a first-time player cannot possibly evaluate.
-- **How much of the governor's disposition his opening letter should give away.**
-  It is the player's only read on the man before he has to trust him, and
-  `contacts.md` makes personality data rather than a label — so this is a question
-  about prose, not about what the letter knows.
+- **How much of the governor's disposition his opening letter gives away** is not
+  this document's to decide, and not the letter's either. **It gives away exactly
+  what his tone gives away** — which is why `tone.md` §6 now has a register, so
+  that two governors rolled differently open a run in different voices. Nothing
+  here digs into a personality vector to announce what sort of man he is.
