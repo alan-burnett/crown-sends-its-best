@@ -83,6 +83,12 @@ var refusal: CrownRefusal = null
 ## keeps `presentation/` away from it as it does standing and sentiment.
 var prestige: Prestige = null
 
+## **How this run stopped, if it has** (#77, SPEC §13.2).
+##
+## Part of the state rather than a flag beside it, so a save that somehow
+## outlived the run still says the run is over instead of quietly continuing.
+var ending: RunEnding = null
+
 ## How hard the Crown is leaning, and how far the bar has moved (#69).
 ##
 ## **Serialised in full.** The bucket's contents and the draw order are part of
@@ -210,6 +216,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.knowledge = MapKnowledge.new()
 	run.standing = CrownStanding.new()
 	run.prestige = Prestige.new()
+	run.ending = RunEnding.new()
 	run.refusal = CrownRefusal.new()
 	run.demands = DemandGrowth.new()
 	run.demand_book = DemandBook.new()
@@ -328,6 +335,7 @@ func to_dict() -> Dictionary:
 		"knowledge": knowledge.to_dict() if knowledge != null else {},
 		"standing": standing.to_dict() if standing != null else {},
 		"prestige": prestige.to_dict() if prestige != null else {},
+		"ending": ending.to_dict() if ending != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
@@ -360,6 +368,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.knowledge = MapKnowledge.from_dict(data.get("knowledge", {}))
 	run.standing = CrownStanding.from_dict(data.get("standing", {}))
 	run.prestige = Prestige.from_dict(data.get("prestige", {}))
+	run.ending = RunEnding.from_dict(data.get("ending", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
