@@ -26,8 +26,9 @@
       "pity": 0.4
     },
     "wants": {
-      "crown_war_intensity": 0.15
-    }
+      "crown_war_intensity": 0.0
+    },
+    "writes_readily": 1.35
   },
   {
     "id": "chancellor",
@@ -53,7 +54,8 @@
       "vanity": 1.5,
       "mettle": 0.4,
       "pity": 0.3
-    }
+    },
+    "writes_readily": 0.7
   },
   {
     "id": "steward",
@@ -81,6 +83,7 @@
       "vanity": 1.3,
       "mettle": 0.8,
       "pity": 0.2
-    }
+    },
+    "writes_readily": 1.1
   }
 ]

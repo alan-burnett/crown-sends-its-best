@@ -61,12 +61,12 @@ const NEWS_SCALE: float = 20.0
 const TOPIC_DAMPER: float = 5.0
 const DAMPER_MONTHS: int = 6
 
-## Where an ordinary man's patience gives out.
+## Where a man with no role and no history gives out.
 ##
-## **A placeholder.** §4 says the threshold is the character — a base per role,
-## redundancy, and personality — and that is #255's. One number for everybody
-## until then, so that this ticket changes what pressure *is* without also
-## pretending to know who feels it most.
+## 🔒 **Only a fallback now** (#255). §4's threshold is the character — a base
+## per role, redundancy and temperament — and `Threshold` owns it. This is what
+## a caller gets for asking without saying who is asking, which is a fixture
+## rather than a man.
 const THRESHOLD: float = 24.0
 
 

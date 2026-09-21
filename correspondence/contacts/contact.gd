@@ -41,6 +41,10 @@ const ROLE_DIPLOMAT: StringName = &"diplomat"
 ## What a man wants of a topic he has said nothing about: the best there is.
 const WANTS_THE_BEST: float = 1.0
 
+## How far apart two men of one role are in their readiness to write. Tuning.
+const WRITES_READILY_MIN: float = 0.5
+const WRITES_READILY_MAX: float = 1.5
+
 const WEIGHT_MIN: float = 0.5
 const WEIGHT_MAX: float = 1.6
 
@@ -148,6 +152,22 @@ var wants: Dictionary = {}
 ## shows up in a kernel.
 var traits: Dictionary = {}
 
+## **How readily he reaches for a pen** (#255, `the-director.md` §4).
+##
+## Not how strongly he feels — pressure is the world's business. This is the man
+## who writes about a thing his neighbour would have let go, which is most of why
+## two clergymen in two runs feel different. Around one; above it he is
+## importunate and below it he keeps his own counsel.
+var writes_readily: float = 1.0
+
+## The month he joined the correspondence.
+##
+## 🔒 **Redundancy ranks by arrival** (#255). The man who was already writing
+## keeps his low bar; ranking by id would let a governor founded in year six
+## whose name sorts early quietly raise the threshold of one who has been writing
+## since month one.
+var known_since: int = 0
+
 var relationship: Relationship = null
 
 
@@ -195,6 +215,8 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.wants = record.get("wants", {}).duplicate()
 	contact.traits = Temperament.from_record(record.get("traits", {}))
 	Temperament.write_into(contact.traits, contact)
+	contact.writes_readily = float(record.get("writes_readily", 1.0))
+	contact.known_since = int(record.get("known_since", 0))
 	contact.relationship = Relationship.new(
 		contact.id,
 		float(record.get("loyalty", Relationship.NEUTRAL_LOYALTY)),
@@ -230,6 +252,7 @@ static func generate(
 	# then decide nothing and every man would take being leaned on the same way.
 	contact.traits = Temperament.draw(rng)
 	Temperament.write_into(contact.traits, contact)
+	contact.writes_readily = rng.randf_range(WRITES_READILY_MIN, WRITES_READILY_MAX)
 	contact.relationship = Relationship.new(id, starting_loyalty)
 	return contact
 
@@ -252,6 +275,8 @@ func to_dict() -> Dictionary:
 		"cares_about": cares_about.duplicate(),
 		"wants": wants.duplicate(),
 		"traits": traits.duplicate(),
+		"writes_readily": writes_readily,
+		"known_since": known_since,
 		"relationship": relationship.to_dict(),
 	}
 
