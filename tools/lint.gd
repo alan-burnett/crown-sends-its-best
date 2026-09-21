@@ -15,7 +15,8 @@ extends SceneTree
 ##    another's sequence. `randi()`, and also `Array.shuffle()` and
 ##    `pick_random()`, which quietly use the same global generator.
 ##
-## It keeps **Crown standing** and **rebel sentiment** out of `presentation/`
+## It keeps **Crown standing**, **rebel sentiment** and **prestige** out of
+## `presentation/`
 ## entirely — the two jaws of the Squeeze, neither of which is ever a number the
 ## player sees — because SPEC
 ## §10.3 makes the four bands the whole interface and a screen that can read the
@@ -152,6 +153,15 @@ const SENTIMENT_NAMES: Array[Array] = [
 	["Grievances", "reads what a town holds against the Crown"],
 ]
 
+## 🔒 SPEC §14.1, `docs/mechanics/prestige.md` §7. **Never a number, never a
+## screen, never a bar.** It reaches the player as a second dial in the tone of
+## Crown officers' letters, alongside loyalty — and if it were ever rendered, the
+## satire would stop being satire and become a leaderboard.
+const PRESTIGE_NAMES: Array[Array] = [
+	["Prestige", "reads what the court makes of the PC"],
+	["OpticsRegister", "reads what made the Crown look foolish, and its price"],
+]
+
 const MAP_TRUTH_NAMES: Array[Array] = [
 	["WorldMap", "reads the real map instead of MapKnowledge"],
 	["MapGenerator", "reaches into map generation"],
@@ -230,6 +240,9 @@ func _check(path: String) -> void:
 			for rule in SENTIMENT_NAMES:
 				if line.contains(rule[0]):
 					_report(path, index, "presentation/ %s (SPEC 12.3: it is never a number the player sees)" % rule[1])
+			for rule in PRESTIGE_NAMES:
+				if line.contains(rule[0]):
+					_report(path, index, "presentation/ %s (SPEC 14.1: it is never a number the player sees)" % rule[1])
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")

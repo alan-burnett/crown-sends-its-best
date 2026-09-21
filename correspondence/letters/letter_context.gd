@@ -43,6 +43,14 @@ var data_order: Order = null
 ## (SPEC §10.3), and `tools/lint.gd` keeps `presentation/` away from it too.
 var refusal: CrownRefusal = null
 
+## **What the court makes of the PC** (#76, SPEC §14.1, `prestige.md` §7).
+##
+## Here because §7 makes Crown officers the audible channel and says it should be
+## working there **before patrons ever exist**. A letter may ask whether the
+## court is warming or cooling; it may never render the figure, and `tools/lint.gd`
+## keeps `presentation/` away from the class entirely.
+var prestige: Prestige = null
+
 ## How hard the Crown is leaning, and along which axis it last leaned harder.
 ##
 ## **What the Crown did, not what it is worth.** A letter may ask whether the

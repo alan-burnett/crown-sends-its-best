@@ -43,6 +43,7 @@ const EVENT_ORDER_ISSUED: StringName = &"order_issued"
 
 var run: RunState = null
 var month_runner: WorldMonth = null
+var prestige: PrestigeDriver = null
 
 ## Where letter templates come from. Supplied rather than reached for: the
 ## `Content` autoload only exists when the project boots normally, and this loop
@@ -175,9 +176,15 @@ func _init(p_run: RunState) -> void:
 	# in the mood this month has already put him in (#126).
 	var drift := DriftDriver.new(run)
 
+	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
+	# Both settle in phase 6; the order inside a phase is the order here, and
+	# prestige reads the accounts standing has just judged.
+	prestige = PrestigeDriver.new(run.prestige)
+
 	month_runner.drivers = [
 		immigration, crown_affairs, territory, colony_month, promise_driver,
-		policies, crown_standing, drift, orders, silence, governors, grievances,
+		policies, crown_standing, prestige, drift, orders, silence, governors,
+		grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.

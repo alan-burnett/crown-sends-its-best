@@ -75,6 +75,14 @@ var standing: CrownStanding = null
 ## the political process may not.
 var refusal: CrownRefusal = null
 
+## **What the court makes of him**, which is not what the Crown's accountants
+## make of him (SPEC §14.1, #76).
+##
+## Never shown as a number and never a screen; it reaches the player as a second
+## dial in the tone of Crown officers' letters, alongside loyalty. `tools/lint.gd`
+## keeps `presentation/` away from it as it does standing and sentiment.
+var prestige: Prestige = null
+
 ## How hard the Crown is leaning, and how far the bar has moved (#69).
 ##
 ## **Serialised in full.** The bucket's contents and the draw order are part of
@@ -201,6 +209,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	run.colony = Colony.new()
 	run.knowledge = MapKnowledge.new()
 	run.standing = CrownStanding.new()
+	run.prestige = Prestige.new()
 	run.refusal = CrownRefusal.new()
 	run.demands = DemandGrowth.new()
 	run.demand_book = DemandBook.new()
@@ -318,6 +327,7 @@ func to_dict() -> Dictionary:
 		"colony": colony.to_dict() if colony != null else {},
 		"knowledge": knowledge.to_dict() if knowledge != null else {},
 		"standing": standing.to_dict() if standing != null else {},
+		"prestige": prestige.to_dict() if prestige != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
 		"demand_book": demand_book.to_dict() if demand_book != null else {},
@@ -349,6 +359,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.colony = Colony.from_dict(data.get("colony", {}))
 	run.knowledge = MapKnowledge.from_dict(data.get("knowledge", {}))
 	run.standing = CrownStanding.from_dict(data.get("standing", {}))
+	run.prestige = Prestige.from_dict(data.get("prestige", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))
 	run.demand_book = DemandBook.from_dict(data.get("demand_book", {}))
