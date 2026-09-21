@@ -22,5 +22,21 @@
         "he_holds_a_policy": {}
       }
     ]
+  },
+  {
+    "id": "trigger.provost.advice",
+    "letter": "provost.advice",
+    "urgency": 0.35,
+    "cooldown": 7,
+    "params": {
+      "amount": {
+        "from": "what_he_carries"
+      }
+    },
+    "conditions": [
+      {
+        "he_is_carrying_the_cost": {}
+      }
+    ]
   }
 ]

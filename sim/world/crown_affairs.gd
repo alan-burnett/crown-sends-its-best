@@ -54,6 +54,11 @@ var growth: DemandGrowth = null
 ## What the Crown is asking for. Set by the turn machine.
 var demands: DemandBook = null
 
+## The colony, and the men the PC writes to. Set by the turn machine, and absent
+## in the tests that only care about the war — which is why both are checked.
+var colony: Colony = null
+var contacts: Dictionary = {}
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if phase != WorldPhase.CROWNS_MONTH:
@@ -63,7 +68,24 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		if demands != null:
 			demands.advance(state.month, growth, streams, log)
 		_settle_emigration(state, log)
+	_please_the_provost(state, log)
 	_advance_war(state, log, streams.stream("sim"))
+
+
+## A learned colony warms the Provost, whoever paid for the learning (#174).
+##
+## In the Crown's Month because he is a Crown officer and this is his side of the
+## ocean's business. **Nothing about it is a payment**: the gold half of him is
+## `policy.md`'s and runs through the ordinary drain, and this is the other half.
+func _please_the_provost(state: WorldState, log: EventLog) -> void:
+	if colony == null or contacts.is_empty():
+		return
+	var him: Contact = contacts.get(String(Provost.ID))
+	if him == null:
+		return
+	var context := ColonyContext.new(state, log, null, null)
+	context.colony = colony
+	Provost.settle_regard(him, colony, context)
 
 
 ## How many people are leaving home (#171, `immigration.md` §5).

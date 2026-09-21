@@ -1,0 +1,53 @@
+{
+  "id": "provost.advice",
+  "sender": "provost",
+  "type": "request",
+  "skippable": true,
+  "params": { "amount": "gold" },
+  "perception": {
+    "schools": {
+      "measure": "colony_education",
+      "ladder": ["wretched", "thin", "adequate", "creditable"]
+    },
+    "people": {
+      "measure": "quality_of_life",
+      "ladder": ["miserable", "poor", "tolerable", "comfortable"]
+    }
+  },
+  "body": [
+    { "text": "The schools are {perception:schools} and the people are {perception:people}, and I am aware I have written something very like that before." },
+    { "text": "I am carrying {param:amount} a month of what you and I agreed, out of my own pocket, and I should like the Crown to take it back up. I am not asking to enlarge it. I am asking to stop paying for it." },
+    { "text": "You may reasonably observe that I always say the colony wants more of everything. I do. I would ask you to notice that I have never once said it was enough, at any figure, and to draw whatever conclusion you like about how much my opinion is worth on that particular point.",
+      "only_tones": ["dutiful", "pleased"] },
+    { "text": "You may reasonably observe that I always say the same thing. I do. I have not yet been given cause to say anything else.",
+      "only_tones": ["annoyed", "hateful"] },
+    { "text": "If the answer is no, say so plainly. I shall carry it as long as I can and then I shall stop, and I would rather you knew that was coming than discovered it." }
+  ],
+  "reply": {
+    "tone": {
+      "text": "Dr Meakin — on the charge you are carrying I am {choice}.",
+      "options": [
+        { "tone": "dutiful", "text": "willing to look at it" },
+        { "tone": "pleased", "text": "sorry it has fallen on you" },
+        { "tone": "annoyed", "text": "unmoved, and you know why" }
+      ]
+    },
+    "steps": [
+      { "id": "funding", "prompt": "The charge he is carrying", "options": [
+        { "id": "take_it_up", "label": "the Crown will pay it",
+          "text": "The Crown will take it up in full. You should not be paying for the Crown's schools.",
+          "effect": { "fund_policy": { "to": "provost", "split": "all", "bonus": 0 } } },
+        { "id": "halve_it", "label": "the Crown will pay half",
+          "text": "Half, and I will not pretend that is generous.",
+          "effect": { "fund_policy": { "to": "provost", "split": "half", "bonus": 0 } } },
+        { "id": "and_something_for_him", "label": "pay it, and something for him",
+          "text": "In full, and something over for your trouble. You have carried it longer than you should have been asked to.",
+          "effect": { "fund_policy": { "to": "provost", "split": "all", "bonus": 120 } } },
+        { "id": "carry_on", "label": "he carries on",
+          "text": "You will carry it a while longer. I have other calls on the purse.",
+          "effect": { "refuse": { "to": "provost" } } }
+      ] }
+    ],
+    "closing": [ { "text": "I am, sir, your obedient servant," } ]
+  }
+}

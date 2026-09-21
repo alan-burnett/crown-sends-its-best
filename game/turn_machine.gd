@@ -182,6 +182,9 @@ func _init(p_run: RunState) -> void:
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and
 	# prestige reads the accounts standing has just judged.
+	crown_affairs.colony = run.colony
+	crown_affairs.contacts = run.contacts
+
 	prestige = PrestigeDriver.new(run.prestige)
 
 	month_runner.drivers = [

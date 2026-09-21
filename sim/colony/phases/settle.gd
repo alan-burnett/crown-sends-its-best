@@ -376,7 +376,25 @@ func _settle_the_colony(context: ColonyContext) -> void:
 		WorldValues.REVENUE_BASELINE: WorldValues.followed_baseline(state, context.crown_tax),
 		WorldValues.FOOD: _food_security(context),
 		WorldValues.QUALITY_OF_LIFE: _colony_quality_of_life(context),
+		# What the Provost reports on and what his regard answers to (#174).
+		WorldValues.EDUCATION: _colony_education(context),
 	}, WorldPhase.COLONY_MONTH)
+
+
+## What the colony has worth teaching, averaged over its towns (#174).
+##
+## **A mean and not a total**, so a colony does not read as learned merely by
+## being large — and so the figure means the same thing in year one as in year
+## eight.
+func _colony_education(context: ColonyContext) -> float:
+	if context.colony == null or context.colony.is_empty():
+		return 0.0
+	var total := 0.0
+	var towns := 0
+	for town in context.colony.in_order():
+		total += maxf(0.0, town.education)
+		towns += 1
+	return 0.0 if towns == 0 else total / float(towns)
 
 
 ## Months of food the colony is holding, per mouth, capped.

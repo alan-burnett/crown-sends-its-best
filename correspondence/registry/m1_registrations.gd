@@ -326,3 +326,9 @@ static func register_measures() -> void:
 	# How heavily the colony is taxed, which is what the Steward writes about and
 	# what his lean shades.
 	MeasureRegistry.register_linear("tax_burden", 0.0, TaxRates.MAX_RATE)
+	# What the colony has worth teaching, which is what the Provost writes about
+	# and what his lean shades (#174). Scaled to where he stops complaining, which
+	# is above where any real colony gets.
+	MeasureRegistry.register_linear(
+		WorldValues.EDUCATION, 0.0, Provost.LEARNED_ENOUGH
+	)

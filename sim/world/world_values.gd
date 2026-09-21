@@ -31,6 +31,13 @@ const MANDATE: String = "crown_mandate"
 ## computes each town's and this is what the Crown's officers see of it.
 const QUALITY_OF_LIFE: String = "quality_of_life"
 
+## What the colony has worth teaching, averaged over its towns (#174).
+##
+## The measure the Provost reports on and the one his regard answers to. A mean
+## rather than a total, so a colony does not read as learned merely by being
+## large.
+const EDUCATION: String = "colony_education"
+
 ## What a month's duty has lately come to, as a running average.
 ##
 ## **The reference a judgement about the returns is made against** (#63,
@@ -69,6 +76,7 @@ static func initial_state() -> WorldState:
 		CAMPAIGN_MONTHS_LEFT: 0,
 		MANDATE: GovernorIntent.ECONOMY,
 		QUALITY_OF_LIFE: 0.5,
+		EDUCATION: 0.0,
 		REVENUE_BASELINE: 50.0,
 	})
 	for key in TaxRates.initial_values():
@@ -94,6 +102,7 @@ static func measures(state: WorldState) -> Dictionary:
 		SUPPLY: float(state.get_value(SUPPLY, 0.0)),
 		FOOD: float(state.get_value(FOOD, 0.0)),
 		QUALITY_OF_LIFE: float(state.get_value(QUALITY_OF_LIFE, 0.0)),
+		EDUCATION: float(state.get_value(EDUCATION, 0.0)),
 		"tax_burden": TaxRates.burden(state),
 	}
 
