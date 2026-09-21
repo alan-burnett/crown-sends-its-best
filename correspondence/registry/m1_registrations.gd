@@ -370,6 +370,11 @@ static func register_measures() -> void:
 		ColonyMeasures.NATIVE_REGARD, Tribe.MINIMUM, Tribe.MAXIMUM
 	)
 	MeasureRegistry.register_linear(ColonyMeasures.NATIVE_PRESSURE, 0.0, 0.6)
+	# 🔒 **What a man across a border can see** (#209). Already a share of one by
+	# construction, and it reads the same in year one and year eight because it
+	# is measured against what a colony might reach rather than against a total.
+	MeasureRegistry.register_linear(ColonyMeasures.COLONY_REACH, 0.0, 1.0)
+	MeasureRegistry.register_linear(ColonyMeasures.COLONY_IS_NO_THREAT, 0.0, 1.0)
 	# Likewise a ratio: a town's month against the colony's average town, so a
 	# governor calling his month brisk means brisk for the place he governs.
 	MeasureRegistry.register_linear(

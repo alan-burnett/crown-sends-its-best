@@ -1,0 +1,83 @@
+{
+  "id": "rival_duke_vasterholm.tribute_demand",
+  "sender": "rival_duke_vasterholm",
+  "type": "demand",
+  "skippable": false,
+  "params": {
+    "resource": "resource",
+    "amount": "integer",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "Sir. I have no gift for this sort of letter and I will not pretend to one."
+    },
+    {
+      "text": "Men of mine have walked the country inland of {param:town} and come back saying your people are further west each season, and better fed than mine. I do not blame you for that. I am obliged to do something about it."
+    },
+    {
+      "text": "{param:amount} of {param:resource} would answer for this year. Understand that I am not selling you anything: there is nothing you could buy from me and nothing I will offer."
+    },
+    {
+      "text": "If you refuse I shall think no worse of you personally, which I mention because you will hear it said that I am a reasonable man, and it is true, and it will make no difference at all."
+    },
+    {
+      "text": "Burn this. I have."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "To the Warden of the Northern Reach — I write {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "having considered your letter"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having read your letter twice"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "tribute",
+        "prompt": "The Northern Reach's request",
+        "options": [
+          {
+            "id": "pay",
+            "label": "send the goods",
+            "text": "The goods will be sent. I trust your season improves.",
+            "effect": {
+              "pay_tribute": {
+                "to": "rival_duke_vasterholm",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "months": 9
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "refuse him",
+            "text": "You will have nothing from me, this season or any other.",
+            "effect": {
+              "refuse": {
+                "to": "rival_duke_vasterholm"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, your servant,"
+      }
+    ]
+  }
+}

@@ -13,6 +13,7 @@ being rewritten every iteration.
 
 | Doc | What it covers | First needed |
 | :--- | :--- | :--- |
+| [tone.md](tone.md) | The five tones, what the PC's choice buys, and what it costs | M1 |
 | [the-director.md](the-director.md) | Who writes this month, and about what | M1 |
 | [contacts.md](contacts.md) | What is true of every contact, and what loyalty does | M1 |
 | [perception.md](perception.md) | How a truthful number becomes a biased word | M1 |

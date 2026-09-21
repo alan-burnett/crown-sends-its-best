@@ -1,0 +1,83 @@
+{
+  "id": "rival_duke_montargis.tribute_demand",
+  "sender": "rival_duke_montargis",
+  "type": "demand",
+  "skippable": false,
+  "params": {
+    "resource": "resource",
+    "amount": "integer",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "Monsieur. I write in the plainest English I have, which is not much, so that there is no mistaking it."
+    },
+    {
+      "text": "Your settlement at {param:town} grows. I have counted the roofs from the water twice this year and there are more of them each time. This is admirable in you and inconvenient for me."
+    },
+    {
+      "text": "I should like {param:amount} of {param:resource}. It is not a trade; I have nothing to offer you and I would not insult you by pretending otherwise."
+    },
+    {
+      "text": "My frigates winter badly and their officers grow quarrelsome. I say this as a man describing his own difficulties, not yours."
+    },
+    {
+      "text": "I shall not mention the matter to your Crown. Neither, I imagine, will you."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "To the Lieutenant-General of the Leeward Isles — I write {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "having considered your letter"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having read your letter twice"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "tribute",
+        "prompt": "The Leeward Isles' request",
+        "options": [
+          {
+            "id": "pay",
+            "label": "send the goods",
+            "text": "The goods will be sent. I trust your season improves.",
+            "effect": {
+              "pay_tribute": {
+                "to": "rival_duke_montargis",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "months": 9
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "refuse him",
+            "text": "You will have nothing from me, this season or any other.",
+            "effect": {
+              "refuse": {
+                "to": "rival_duke_montargis"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, your servant,"
+      }
+    ]
+  }
+}

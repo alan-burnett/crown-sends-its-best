@@ -13,10 +13,54 @@
       "autonomy": 1.4
     },
     "leans": {
-      "crown_war_intensity": 0.3
+      "crown_war_intensity": 0.3,
+      "colony_is_no_threat": -0.2
     },
     "cares_about": [
-      "crown_war_intensity"
+      "crown_war_intensity",
+      "colony_is_no_threat"
+    ]
+  },
+  {
+    "id": "rival_duke_montargis",
+    "name": "Le Duc de Montargis",
+    "title": "Lieutenant-General of the Leeward Isles",
+    "role": "rival",
+    "portrait": "portrait.rival_duke",
+    "loyalty": 44,
+    "weights": {
+      "loyalty": 0.2,
+      "payment_offered": 2.0,
+      "cost_of_request": 0.1,
+      "autonomy": 1.1
+    },
+    "leans": {
+      "colony_is_no_threat": 0.25
+    },
+    "cares_about": [
+      "colony_is_no_threat"
+    ]
+  },
+  {
+    "id": "rival_duke_vasterholm",
+    "name": "Grevé Anders Vasterholm",
+    "title": "Warden of the Northern Reach",
+    "role": "rival",
+    "portrait": "portrait.rival_duke",
+    "loyalty": 52,
+    "weights": {
+      "loyalty": 0.5,
+      "payment_offered": 1.2,
+      "cost_of_request": 0.4,
+      "autonomy": 1.7
+    },
+    "leans": {
+      "crown_war_intensity": -0.2,
+      "colony_is_no_threat": 0.1
+    },
+    "cares_about": [
+      "crown_war_intensity",
+      "colony_is_no_threat"
     ]
   }
 ]

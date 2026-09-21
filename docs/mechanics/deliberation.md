@@ -110,7 +110,7 @@ Deliberation produces **will**. Will does not change the world. It becomes an
 
 ```
 player letter -> Order -> compliance --+
-                                       +--> Intent -> executed over months -> events
+									   +--> Intent -> executed over months -> events
 NPC deliberation -> will --------------+
 ```
 

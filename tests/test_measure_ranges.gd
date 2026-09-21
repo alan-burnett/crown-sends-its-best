@@ -195,6 +195,12 @@ func test_no_measure_is_normalised_against_a_raw_quantity() -> void:
 		# **A share of this town's own ground**, so a town of four hundred with a
 		# village in its fields reads the same as a town of forty with one.
 		ColonyMeasures.NATIVE_PRESSURE,
+		# **Against what a colony might reach, not against a total** (#209), so a
+		# duke reads the same figure in year one and year eight — and a colony
+		# that has got as far as it is going to reads as far along however many
+		# bushels went through its storehouses.
+		ColonyMeasures.COLONY_REACH,
+		ColonyMeasures.COLONY_IS_NO_THREAT,
 	]
 	for id in MeasureRegistry.ids():
 		assert_true(bounded.has(String(id)),
