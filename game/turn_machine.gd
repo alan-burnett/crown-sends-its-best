@@ -196,6 +196,15 @@ func _init(p_run: RunState) -> void:
 	# month's Settle wrote (#170).
 	var immigration := ImmigrationDriver.new(run.colony)
 
+	# Phase 1, beside the Crown's settlers. A man who walked in from the village
+	# next door is counted in the same month as one who stepped off a ship, and
+	# nothing downstream can tell them apart (#207).
+	var native_help := NativeHelpDriver.new()
+	native_help.colony = run.colony
+	native_help.natives = run.tribes
+	native_help.map = run.map
+	native_help.parties = run.parties
+
 	# Phase 7, before compliance. Every contact judges the Crown by how the
 	# things he cares about are going, so a governor answers this month's letter
 	# in the mood this month has already put him in (#126).
@@ -242,7 +251,7 @@ func _init(p_run: RunState) -> void:
 	colony_month.natives = run.tribes
 
 	month_runner.drivers = [
-		immigration, crown_foundings, expeditions, crown_affairs, territory,
+		immigration, native_help, crown_foundings, expeditions, crown_affairs, territory,
 		colony_month, villages, promise_driver, standings, native_trade,
 		policies, crown_standing, prestige, drift, orders, silence, governors,
 		grievances,
