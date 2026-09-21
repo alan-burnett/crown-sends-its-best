@@ -93,6 +93,10 @@ static func resolve(
 		# way to be obeyed and the PC pays for it twice — in the governor's regard
 		# below, and in what the town holds against the Crown afterwards.
 		"harsh": order.harsh,
+		# **The manner he is being written to in** (#260, `tone.md` §5). One of
+		# five considerations reads it and the other four score nothing, so the
+		# PC's first blank carries a function rather than decorating the page.
+		"tone": order.tone,
 		# **How far the letter cuts against what he already wants** (#213).
 		#
 		# 🔒 It changes the **manner** of his answer, never the decision. A

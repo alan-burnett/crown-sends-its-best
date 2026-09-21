@@ -46,9 +46,30 @@ func test_generation_does_not_depend_on_the_order_of_the_list() -> void:
 
 func test_generated_weights_stay_in_range() -> void:
 	var contact := Contact.generate(&"marshal", Contact.ROLE_CROWN_OFFICER, RngStreams.new(7), CONSIDERATIONS)
+	var derived := Temperament.derived_ids()
 	for id in contact.weighted_ids():
+		# 🔒 **The tone weights are deliberately not ordinary weights** (#260).
+		# A trait may sit below zero, which inverts that tone's whole table and
+		# is the only reason the bully exists without a case of his own. They
+		# have their own range, asserted below.
+		if derived.has(String(id)):
+			continue
 		var weight := contact.weight_for(StringName(id))
 		assert_true(weight >= Contact.WEIGHT_MIN and weight <= Contact.WEIGHT_MAX, "%s = %f" % [id, weight])
+
+
+func test_a_temperament_stays_in_its_own_range() -> void:
+	# The rule still exists for the traits; it is simply a different range, and a
+	# trait outside it would be a man nobody could read.
+	var contact := Contact.generate(&"marshal", Contact.ROLE_CROWN_OFFICER, RngStreams.new(7), CONSIDERATIONS)
+	for trait_id in Temperament.ALL:
+		var value := float(contact.traits[String(trait_id)])
+		assert_true(value >= Temperament.TRAIT_MIN and value <= Temperament.TRAIT_MAX,
+			"%s = %f" % [trait_id, value])
+	for id in Temperament.derived_ids():
+		var weight := contact.weight_for(StringName(id))
+		assert_true(weight >= Temperament.TRAIT_MIN and weight <= Temperament.TRAIT_MAX,
+			"%s = %f" % [id, weight])
 
 
 func test_personality_is_only_weights() -> void:

@@ -124,6 +124,15 @@ var leans: Dictionary = {}
 ## "going well" half belongs to the measure registry (#10).
 var cares_about: PackedStringArray = PackedStringArray()
 
+## **What kind of manner moves him** (#260, `tone.md` §5): vanity, mettle, pity.
+##
+## Kept beside the weights rather than folded into them, because the three are
+## what a save carries and what a reader asks about — the weights they set are
+## derived, and `Temperament` is the only thing that derives them. A man is
+## *proud*; the numbers on `annoyed`, `hateful` and `harshness` are how that
+## shows up in a kernel.
+var traits: Dictionary = {}
+
 var relationship: Relationship = null
 
 
@@ -156,6 +165,11 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.travelling_until = int(record.get("travelling_until", -1))
 	contact.leans = record.get("leans", {}).duplicate()
 	contact.cares_about = PackedStringArray(record.get("cares_about", []))
+	# **Authored for a named character**, filled in at the middle for anyone the
+	# data is silent about — a contact with no temperament at all would be one
+	# the tone considerations could never distinguish.
+	contact.traits = Temperament.from_record(record.get("traits", {}))
+	Temperament.write_into(contact.traits, contact)
 	contact.relationship = Relationship.new(
 		contact.id,
 		float(record.get("loyalty", Relationship.NEUTRAL_LOYALTY)),
@@ -186,6 +200,11 @@ static func generate(
 
 	var contact := Contact.new(id, weights)
 	contact.role = role
+	# 🔒 **After the ordinary draw.** Harshness is among the considerations rolled
+	# above, and a mettle written first would be rolled over — the trait would
+	# then decide nothing and every man would take being leaned on the same way.
+	contact.traits = Temperament.draw(rng)
+	Temperament.write_into(contact.traits, contact)
 	contact.relationship = Relationship.new(id, starting_loyalty)
 	return contact
 
@@ -206,6 +225,7 @@ func to_dict() -> Dictionary:
 		"travelling_until": travelling_until,
 		"leans": leans.duplicate(),
 		"cares_about": cares_about.duplicate(),
+		"traits": traits.duplicate(),
 		"relationship": relationship.to_dict(),
 	}
 
