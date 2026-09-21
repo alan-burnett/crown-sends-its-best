@@ -66,25 +66,45 @@ rivals, and the institutional contacts as they arrive.
 the same men whatever else happens in the run, and generating a name never moves
 another system's rolls.
 
-### 🔒 A pool has an origin, and a rival's origin is not the colony's
+### 🔒 One bag per role
 
-The three dukes shipped today are Don Íñigo de Alcaraz, Le Duc de Montargis and
-Grevé Anders Vasterholm — Spanish, French and Scandinavian — against titles
-reading *Windward Coast*, *Leeward Isles* and *Northern Reach*.
+**Every role carries its own bag of names.** Every journalist is drawn from the
+journalists' bag, every governor from the governors', every clergyman from the
+clergy's, and so on.
 
-**That is not decoration and a single flat pool would destroy it.** A rival duke
-is a foreign power's man and must sound like one; a colonial governor must sound
-like he came from the same country the PC serves. So pools are **keyed by
-origin**, and a contact's role says which origin it draws from.
+Not one pool, and not pools keyed by country. Role is the sharper key for two
+reasons:
 
-This is also the cheapest lever the setting has. The colony's neighbours being
-audibly foreign is most of what makes the map feel like a contested coast rather
-than an empty one.
+**A rival must sound foreign and a governor must not.** The three dukes shipped
+today are Don Íñigo de Alcaraz, Le Duc de Montargis and Grevé Anders Vasterholm
+— against titles reading *Windward Coast*, *Leeward Isles* and *Northern Reach*.
+A colonial governor drawn from that bag would wreck the setting, and this is the
+cheapest lever the game has for making the coast feel contested rather than
+empty.
+
+**And two men from the same country should still not sound alike.** A clergyman
+and a journalist may both be the PC's countrymen and still want different
+registers — one scriptural and old, one plainer and more modern. A key based on
+where a man is from cannot express that. A key based on what he is can.
+
+### 🔒 A bag holds whole names
+
+`Don Íñigo de Alcaraz` is **one entry**, not a given name and a family name to be
+recombined.
+
+The rivals' bag holds men of several nations, so drawing the parts separately
+would eventually produce a French given name against a Spanish surname —
+Frankenstein men, in the one role where sounding foreign is the entire job.
+Whole names cost more entries and cannot produce that.
+
+The counts are small enough for this to be comfortable: a long run founds towns
+in the ten-ish range and takes on a similar number of patrons and commanders, so
+a bag is tens of names, not hundreds.
 
 ### It is data, like everything else
 
 ```
-data/names/<origin>.json    given names, family names, and how they join
+data/names/<role>.json    whole names, one bag per role
 ```
 
 Prose is not involved, so there is **no language suffix** — a name pool is not
