@@ -39,6 +39,7 @@ const EVENT_SETTLED: StringName = &"colony_settled"
 const EVENT_CONVOY_LOST: StringName = &"convoy_lost"
 const EVENT_LIVED: StringName = &"town_lived"
 const EVENT_BORN: StringName = &"town_grew"
+const EVENT_CALVED: StringName = &"livestock_bred"
 
 # --- Population (SPEC §12.1) ------------------------------------------------
 
@@ -52,6 +53,10 @@ const BIRTH_RATE: float = 0.006
 
 ## Below this quality of life nobody is having children.
 const BARREN_BELOW: float = 0.25
+
+## What share of a grazing herd is added a month. Faster than people, because a
+## town that buys two cows should see a herd inside a run rather than a dynasty.
+const LIVESTOCK_RATE: float = 0.02
 
 # --- The drift, which nothing yet replaces ---------------------------------
 
@@ -190,23 +195,87 @@ func _live(town: Town, context: ColonyContext) -> void:
 	}, WorldPhase.COLONY_MONTH)
 
 
-## Births. **Not immigration**, which is M4 and is the larger source.
+## Births (#172, `immigration.md` §3 and §8). **Not immigration**, which lands in
+## phase 1 and is the larger source while a town is small.
+##
+## 🔒 **Proportional to population**, where arrivals are flat. That one difference
+## is what makes immigration dominate at twelve people and natural growth at two
+## hundred, and it falls out of the two formulas rather than being balanced
+## between them.
+##
+## It reads quality of life too — **people have children when life is good** — so
+## a thriving town compounds and a wretched one merely persists.
+##
+## 🔒 **Population moves one at a time — in the log.** The remainder is carried
+## and whole people are delivered, and each of them is **its own event**, exactly
+## as a famine resolves one life at a time. `CLAUDE.md`'s rule is about keeping
+## per-population consequences uniform and legible rather than about the
+## arithmetic, and a cap on the arithmetic would flatly contradict §12.1's
+## snowball: a town past two hundred is owed more than a person a month, and one
+## that could only ever be given one would grow linearly for ever.
 func _grow(town: Town, context: ColonyContext) -> void:
 	if town.quality_of_life < BARREN_BELOW or town.population() <= 0:
 		return
 
-	town.growth_accrued += float(town.population()) * BIRTH_RATE * town.quality_of_life
+	var rate := BIRTH_RATE * (1.0 + Building.growth_bonus_for(town))
+	var people := float(town.population()) * rate * town.quality_of_life
+
+	# **Education gates natural growth, not arrivals** (`the-provost.md` §3). An
+	# unlettered town turns all of its growth into hands; a learned one turns some
+	# of it into expertise, and the fraction waits until it is a whole man (#169).
+	var scholars := people * Experts.share_of_growth(town)
+	Experts.accrue(town, scholars)
+	town.growth_accrued += people - scholars
+
+	_breed(town, context)
+	Experts.materialise(town, context, Experts.RAISED, WorldPhase.COLONY_MONTH)
+
 	var born := int(floor(town.growth_accrued))
 	if born <= 0:
 		return
-
 	town.growth_accrued -= float(born)
-	town.workers += born
-	context.log.emit(EVENT_BORN, town.id, context.state.month, {
-		"town": String(town.id),
-		"born": born,
-		"population": town.population(),
-	}, WorldPhase.COLONY_MONTH)
+	for _each in born:
+		town.workers += 1
+		context.log.emit(EVENT_BORN, town.id, context.state.month, {
+			"town": String(town.id),
+			"born": 1,
+			"population": town.population(),
+		}, WorldPhase.COLONY_MONTH)
+
+
+## The herds breed, up to what there is to graze them on.
+##
+## 🔒 **Pasture is the ceiling, not the rate.** A herd inside its pasture grows;
+## one already over it does not, because the beasts beyond capacity are the ones
+## Consume is buying grain to feed. So a town pastures first and breeds after,
+## and the granary that speeds its children speeds its calves with them
+## (`buildings.md` §4).
+func _breed(town: Town, context: ColonyContext) -> void:
+	var room := float(Building.pasture_capacity_for(town))
+	if context.map != null:
+		for at in context.tiles_of(town):
+			room += float(context.map.livestock_capacity_at(at.x, at.y))
+	if room <= 0.0:
+		return
+
+	var rate := LIVESTOCK_RATE * (1.0 + Building.growth_bonus_for(town))
+	for id in ResourceCatalogue.livestock():
+		var kind := StringName(id)
+		var head := float(town.livestock_head(kind))
+		var grazing := minf(head, room)
+		room -= grazing
+		if grazing < 1.0:
+			continue
+		town.livestock_accrued[id] = float(town.livestock_accrued.get(id, 0.0)) + grazing * rate
+		if float(town.livestock_accrued[id]) < 1.0:
+			continue
+		town.livestock_accrued[id] = float(town.livestock_accrued[id]) - 1.0
+		town.add_livestock(kind, 1)
+		context.log.emit(EVENT_CALVED, town.id, context.state.month, {
+			"town": String(town.id),
+			"kind": id,
+			"head": town.livestock_head(kind),
+		}, WorldPhase.COLONY_MONTH)
 
 
 ## The three tests, and a new objective when one of them fires.

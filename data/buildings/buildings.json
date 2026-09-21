@@ -339,7 +339,8 @@
 	"effects": {
 	  "reserve_months": {
 		"food": 2
-	  }
+	  },
+	  "growth": 0.5
 	},
 	"requires": []
   },

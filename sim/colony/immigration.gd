@@ -134,25 +134,22 @@ static func _draws_experts(town: Town) -> float:
 static func arrive(town: Town, context: ColonyContext) -> void:
 	var owed := due(town, context)
 	town.arrivals_accrued += float(owed["workers"])
-	town.experts_accrued += float(owed["experts"])
+	Experts.accrue(town, float(owed["experts"]))
 
 	var landed := int(floorf(town.arrivals_accrued))
 	town.arrivals_accrued -= float(landed)
 
-	# **Experts arrive as fractions** (§7). The remainder is kept, and when it
-	# reaches one a scholar appears — whichever specialism would be worth most to
-	# this town, decided at the moment he does rather than authored.
-	var scholars := int(floorf(town.experts_accrued))
-	town.experts_accrued -= float(scholars)
+	# **Experts arrive as fractions** (§7). `Experts` owns the remainder and the
+	# specialism both, so a scholar who crossed an ocean and one a library raised
+	# are the same man arriving by two roads.
+	var appeared := Experts.materialise(town, context, Experts.ARRIVED, WorldPhase.ARRIVALS)
+	var scholars := int(appeared["count"])
 
 	if landed <= 0 and scholars <= 0:
 		return
 
 	town.workers += landed
-	var trade := &""
-	if scholars > 0:
-		trade = _what_this_town_needs(town)
-		town.add_experts(trade, scholars)
+	var trade: StringName = appeared["specialism"]
 	town.receive_gold(float(landed + scholars) * PURSE_PER_HEAD)
 
 	# 🔒 **No letter announces that settlers are sailing** (§11). The PC learns of
@@ -165,25 +162,3 @@ static func arrive(town: Town, context: ColonyContext) -> void:
 		"expert_in": String(trade),
 		"brought": float(landed + scholars) * PURSE_PER_HEAD,
 	}, WorldPhase.ARRIVALS)
-
-
-## Which specialism a scholar turns out to have.
-##
-## **Whatever this town would value most**, by the same measure it values
-## anything else — so a fur town gets a trapper, then a farmer, and a weaver once
-## it starts turning furs into cloth. Nothing about the list is authored.
-static func _what_this_town_needs(town: Town) -> StringName:
-	var colony := Colony.new()
-	colony.add(town)
-	var desired := DesiredStock.for_town(town, ColonySnapshot.of(colony))
-
-	var best := &""
-	var best_worth := -1.0
-	for resource in ResourceCatalogue.ids():
-		var id := StringName(resource)
-		var worth := Valuation.town(id, desired, town.held(id))
-		if worth > best_worth + 0.0001 \
-				or (absf(worth - best_worth) <= 0.0001 and String(id) < String(best)):
-			best = id
-			best_worth = worth
-	return best

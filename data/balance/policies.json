@@ -1,119 +1,119 @@
 [
   {
-    "id": "spendthrift",
-    "name": "the spendthrift",
-    "note": "Grants whatever is asked and promises whatever is wanted. The Crown pays for a while.",
-    "prefer": [
-      "full",
-      "grant",
-      "raise",
-      "yes",
-      "settle",
-      "survival",
+	"id": "spendthrift",
+	"name": "the spendthrift",
+	"note": "Grants whatever is asked and promises whatever is wanted. The Crown pays for a while.",
+	"prefer": [
+	  "full",
+	  "grant",
+	  "raise",
+	  "yes",
+	  "settle",
+	  "survival",
       "profit"
-    ],
-    "tone": "pleased",
-    "answers": "all"
+	],
+	"tone": "pleased",
+	"answers": "all"
   },
   {
-    "id": "miser",
-    "name": "the miser",
-    "note": "Refuses on principle and lets the post pile up. Cheap, and nobody likes him.",
-    "prefer": [
-      "refuse",
-      "none",
-      "hold",
-      "lower",
+	"id": "miser",
+	"name": "the miser",
+	"note": "Refuses on principle and lets the post pile up. Cheap, and nobody likes him.",
+	"prefer": [
+	  "refuse",
+	  "none",
+	  "hold",
+	  "lower",
       "no"
-    ],
-    "tone": "annoyed",
-    "answers": "required"
+	],
+	"tone": "annoyed",
+	"answers": "required"
   },
   {
-    "id": "steady",
-    "name": "the steady hand",
-    "note": "Middling: pays part, holds rates, and keeps the governor pointed at survival.",
-    "prefer": [
-      "partial",
-      "half",
-      "hold",
-      "survival",
+	"id": "steady",
+	"name": "the steady hand",
+	"note": "Middling: pays part, holds rates, and keeps the governor pointed at survival.",
+	"prefer": [
+	  "partial",
+	  "half",
+	  "hold",
+	  "survival",
       "growth"
-    ],
-    "tone": "dutiful",
-    "answers": "all"
+	],
+	"tone": "dutiful",
+	"answers": "all"
   },
   {
-    "id": "absentee",
-    "name": "the absentee",
-    "note": "Answers nothing at all. The reference for what silence alone does (SPEC 9.3).",
-    "prefer": [],
-    "tone": "dutiful",
-    "answers": "none"
+	"id": "absentee",
+	"name": "the absentee",
+	"note": "Answers nothing at all. The reference for what silence alone does (SPEC 9.3).",
+	"prefer": [],
+	"tone": "dutiful",
+	"answers": "none"
   },
   {
-    "id": "tea_free",
-    "name": "the steady hand, tea untaxed",
-    "note": "The steady hand with tea at the base rate. The control for the tea duty.",
-    "prefer": [
-      "partial",
-      "half",
-      "hold",
-      "survival",
+	"id": "tea_free",
+	"name": "the steady hand, tea untaxed",
+	"note": "The steady hand with tea at the base rate. The control for the tea duty.",
+	"prefer": [
+	  "partial",
+	  "half",
+	  "hold",
+	  "survival",
       "growth"
-    ],
-    "tone": "dutiful",
-    "answers": "all",
-    "rates": {
-      "tea": 0.1
-    }
+	],
+	"tone": "dutiful",
+	"answers": "all",
+	"rates": {
+	  "tea": 0.1
+	}
   },
   {
-    "id": "tea_duty",
-    "name": "the steady hand, tea taxed hard",
-    "note": "The steady hand with a heavy duty on tea. What taxing the one comfort the colony cannot grow actually does (SPEC 10.2).",
-    "prefer": [
-      "partial",
-      "half",
-      "hold",
-      "survival",
+	"id": "tea_duty",
+	"name": "the steady hand, tea taxed hard",
+	"note": "The steady hand with a heavy duty on tea. What taxing the one comfort the colony cannot grow actually does (SPEC 10.2).",
+	"prefer": [
+	  "partial",
+	  "half",
+	  "hold",
+	  "survival",
       "growth"
-    ],
-    "tone": "dutiful",
-    "answers": "all",
-    "rates": {
-      "tea": 0.9
-    }
+	],
+	"tone": "dutiful",
+	"answers": "all",
+	"rates": {
+	  "tea": 0.9
+	}
   },
   {
-    "id": "poor_ground",
-    "name": "the steady hand on poor ground",
-    "note": "The steady hand, founded well down the list of sites instead of on the best food in reach. What a town that cannot feed itself actually does.",
-    "prefer": [
-      "partial",
-      "half",
-      "hold",
-      "survival",
+	"id": "poor_ground",
+	"name": "the steady hand on poor ground",
+	"note": "The steady hand, founded well down the list of sites instead of on the best food in reach. What a town that cannot feed itself actually does.",
+	"prefer": [
+	  "partial",
+	  "half",
+	  "hold",
+	  "survival",
       "growth"
-    ],
-    "tone": "dutiful",
-    "answers": "all",
-    "ground": "poor",
-    "ground_quantile": 1.0
+	],
+	"tone": "dutiful",
+	"answers": "all",
+	"ground": "poor",
+	"ground_quantile": 1.0
   },
   {
-    "id": "tyrant",
-    "name": "the tyrant",
-    "note": "Raises every rate he is offered and refuses every request. The profile rebel-sentiment.md section 8 names: a player who taxes sharply and denies his governors should see a first rebellion in years 2-3.",
-    "prefer": [
-      "raise",
-      "refuse",
-      "none",
-      "no",
-      "full",
+	"id": "tyrant",
+	"name": "the tyrant",
+	"note": "Raises every rate he is offered and refuses every request. The profile rebel-sentiment.md section 8 names: a player who taxes sharply and denies his governors should see a first rebellion in years 2-3.",
+	"prefer": [
+	  "raise",
+	  "refuse",
+	  "none",
+	  "no",
+	  "full",
       "profit"
-    ],
-    "tone": "annoyed",
-    "answers": "all"
+	],
+	"tone": "annoyed",
+	"answers": "all"
   }
 ]
