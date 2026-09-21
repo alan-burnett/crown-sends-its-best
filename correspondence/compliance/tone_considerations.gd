@@ -154,10 +154,14 @@ class Annoyed:
 ## Away from refusing, and hard away from delay: a letter that says the thing is
 ## urgent is a letter you do not put in a drawer.
 ##
-## 🔒 **Delay is only pushed away from here, not removed.** §4 has desperate
-## *removing* delay as a filter, which is #261's — a close vote could otherwise
-## still land on delay, which is exactly what the tone exists to prevent. Until
-## that lands this is a heavy weight and the difference is a real one.
+## 🔒 **Delay is removed, not weighed against** (#261, §4).
+## `DesperationIsNotPutOff` is a filter and takes delay off the list before any
+## of this is scored, because a weight can lose a close vote and the identity of
+## the tone is that **nothing is delayed.**
+##
+## So there is **no entry for delay here.** A heavy negative weight alongside the
+## filter would be the same rule written twice, and the second copy would go on
+## looking like it was doing the work after somebody removed the first.
 class Desperate:
 	extends OfTone
 
@@ -168,7 +172,6 @@ class Desperate:
 		return {
 			Compliance.COMPLY: 0.6,
 			Compliance.PARTIAL: 0.3,
-			Compliance.DELAY: -1.0,
 			Compliance.REINTERPRET: -0.1,
 			Compliance.REFUSE: -0.6,
 			Compliance.ACT_ALONE: 0.0,

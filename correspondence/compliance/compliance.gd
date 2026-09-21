@@ -57,6 +57,27 @@ const MONTHS_FOR: Dictionary = {
 ## What a partial compliance actually delivers. Tuning.
 const PARTIAL_SHARE: float = 0.5
 
+## What each tone makes of a partial, on an **asking** letter (#261, `tone.md`
+## §3, §4).
+##
+## 🔒 **Annoyed's push toward a partial is worth less if the partial is a tenth
+## of what was asked.** The two knobs move together or the tone's whole identity
+## — *half of it, now* — is a push toward an outcome that means nothing.
+##
+## Pleased is generous because he is glad to; hateful gives the least he can
+## while still not having refused, which is its own kind of answer. Dutiful is
+## the plain register and moves it not at all.
+##
+## Tuning, and the centre of a distribution like every other figure here: the
+## traits scale it per man.
+const PARTIAL_BY_TONE: Dictionary = {
+	Tone.PLEASED: 0.65,
+	Tone.DUTIFUL: 0.5,
+	Tone.ANNOYED: 0.5,
+	Tone.DESPERATE: 0.7,
+	Tone.HATEFUL: 0.3,
+}
+
 ## How much of an `adjust_loyalty` amount counts as one deed's worth. Tuning.
 const LOYALTY_STEP: float = 5.0
 
@@ -115,8 +136,27 @@ static func resolve(
 		"dissonance": dissonance_of(order, rebel),
 	}
 
-	var decision := Deliberation.choose(contact, _candidates(), context)
-	var outcome: StringName = decision.chosen_id() if decision.has_choice() else REFUSE
+	# 🔒 **Answering has no compliance step** (#261, `tone.md` §3). *You* are the
+	# one complying. A man who wrote asking the PC to bear his share does not then
+	# deliberate about whether to accept it, one told to stop is not being asked
+	# either, and a man who was refused has not been handed anything to refuse in
+	# turn — all of them are answers to his own letter.
+	#
+	# **He does not deliberate at all**, rather than deliberating and having the
+	# answer overruled. `choose()` always emits its scoring trace (`CLAUDE.md`),
+	# so the overruled version would write a weighing that never happened into the
+	# log every consumer of that trace reads.
+	#
+	# This was already half here, as the two policy kinds and a comment saying
+	# *being paid is not a request*. `LetterKind` is that rule with a name and the
+	# rest of the list, because half a rule in a comment is a rule the next order
+	# kind does not get.
+	var answering := not LetterKind.deliberates(StringName(order.kind))
+	var decision: Decision = null if answering else Deliberation.choose(
+		contact, _candidates(), context)
+	var outcome: StringName = COMPLY
+	if not answering:
+		outcome = decision.chosen_id() if decision.has_choice() else REFUSE
 
 	# **A rebel town's governor has no loyalty to the Crown** (SPEC §12.3, #72).
 	# A filter rather than a weight, per `CLAUDE.md`: the spec locks that the PC
@@ -134,13 +174,6 @@ static func resolve(
 	# the convoys stop. A rebel governor refusing it would have made the Crown's
 	# only punishment conditional on the goodwill of the man being punished.
 	if order.kind == M1Registrations.ORDER_EMBARGO:
-		outcome = COMPLY
-
-	# **Being paid is not a request.** A man who wrote asking the PC to bear his
-	# share does not then deliberate about whether to accept it, and one told to
-	# stop is not being asked either. Both are answers to his own letter.
-	if order.kind == M1Registrations.ORDER_FUND_POLICY \
-			or order.kind == M1Registrations.ORDER_END_POLICY:
 		outcome = COMPLY
 
 	log.emit(OUTCOME_EVENTS[outcome], contact.id, state.month, {
@@ -223,7 +256,8 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 	match outcome:
 		PARTIAL:
 			if params.has("amount") and JsonTypes.is_int_like(params["amount"]):
-				params["amount"] = int(JsonTypes.to_int(params["amount"], "amount") * PARTIAL_SHARE)
+				params["amount"] = int(
+					JsonTypes.to_int(params["amount"], "amount") * partial_share(order))
 		REINTERPRET:
 			# He does what he thinks you meant, which is not what you wrote.
 			params["reinterpreted"] = true
@@ -390,3 +424,14 @@ static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName
 
 	if not order.tone.is_empty():
 		contact.relationship.record_tone(order.tone)
+
+
+## How much of an asking letter a partial answer actually does.
+##
+## 🔒 **Asking letters only** (`tone.md` §3). Directing has no amount in it — a
+## governor half-persuaded toward profit is not chasing half a profit — and
+## answering never reaches a partial at all.
+static func partial_share(order: Order) -> float:
+	if not LetterKind.has_a_magnitude(StringName(order.kind)):
+		return PARTIAL_SHARE
+	return float(PARTIAL_BY_TONE.get(order.tone, PARTIAL_SHARE))

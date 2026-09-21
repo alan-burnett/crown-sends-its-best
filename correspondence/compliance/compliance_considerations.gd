@@ -30,6 +30,9 @@ static func register_all() -> void:
 	Deliberation.register_consideration(HarshnessConsideration.new(&"harshness"), KINDS)
 	Deliberation.register_consideration(DissonanceConsideration.new(&"against_his_judgement"), KINDS)
 	Deliberation.register_filter(FullPaymentIsAYes.new(&"full_payment_is_a_yes"), KINDS)
+	# 🔒 **Desperate removes delay** (#261, `tone.md` §4). A filter, not a very
+	# large negative weight — see the class.
+	Deliberation.register_filter(DesperationIsNotPutOff.new(&"desperation_is_not_put_off"), KINDS)
 	# 🔒 **Tone belongs to compliance and sits in this kernel** (#260,
 	# `tone.md` §5). A sibling file only because five tables and five classes
 	# would bury the rest of this one — it registers here, against this decision
@@ -247,3 +250,27 @@ class FullPaymentIsAYes:
 		if not bool(context.get_value("can_crown_pay", true)):
 			return true
 		return float(context.get_value("payment", 0.0)) < cost
+
+
+## **A desperate letter is never put off** (#261, `tone.md` §4, §6).
+##
+## 🔒 **A filter, applied before scoring, and not a large negative weight.**
+## `deliberation.md` §5 keeps the two apart for a reason: a weight can lose a
+## close vote, and the whole identity of the tone is that **nothing is delayed.**
+## A desperate letter that lands in a drawer one time in twenty is not the
+## compliance tool §6 says it is, and the player cannot build a plan on it.
+##
+## He may still refuse, reinterpret or act around it. What he cannot do is say
+## *presently*.
+##
+## **This is the whole of what makes desperation worth its price** — loyalty,
+## because a man who begs is a man who has lost his grip, and prestige
+## permanently, because the Crown minds very much that he looked weak in front of
+## his subjects. Take the guarantee away and the cost buys nothing.
+class DesperationIsNotPutOff:
+	extends DeliberationFilter
+
+	func permits(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> bool:
+		if candidate.id != Compliance.DELAY:
+			return true
+		return StringName(context.get_value("tone", &"")) != Tone.DESPERATE
