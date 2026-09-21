@@ -181,6 +181,31 @@ yield. But a town that wants to mine in earnest buys its entry from the Crown,
 and the Crown is therefore selling the means of not needing the Crown. That is
 the Squeeze in a single building.
 
+### 🔒 Measured, and the bands stand
+
+The bands were once reported as a wall (#192): every town completed **exactly
+one** building and ended holding `ore 0, iron 0, tools 0`.
+
+**That measurement was void.** It was taken thirty-five minutes before the fix
+that derives conversion throughput from the ratio (`building.gd`, #185) — so
+every conversion in it ran at half rate, and tools are two conversions deep, so
+they came out at roughly a quarter. The wall was the defect, not the prices.
+
+Re-measured on the same terms, three seeds, five years:
+
+| | then | now |
+| :--- | --: | --: |
+| buildings completed | **1** | **13** |
+| tools held at year five | **0** | **~93** |
+
+A town now raises the mineworks, the stonecutters, the sawmill and the college —
+four of the five *works*-band buildings — **and has ninety tools spare**. Nothing
+in §5 needs repricing, and lowering the bands on the old figures would have left
+the tree far too cheap.
+
+**What did not change is more interesting**, and it is §11's business rather than
+this section's: the buildings a town never gets to are not the expensive ones.
+
 **The crane is the deliberate counterweight.** At four tools it is nearly free,
 and it opens every conversion building in the tree at eight apiece. So the route
 out is cheap to *start* and expensive to *finish*, which is the right way round:
@@ -332,9 +357,22 @@ M3 playtest exercises the capacity and trade branches only.
 
 ## 11. Open items
 
-- **Tool quantities are unmeasured.** The 2/4/8/15/25 bands in §5 are a shape,
-  not a balance. What matters is whether a young town's first mechanical building
-  is a stretch or a wall, and only the harness can say.
+- **No governor has ever wanted a conversion building**, and that is now the
+  tree's real problem rather than any price in §5. Measured: thirteen buildings
+  raised in five years and not one foundry, toolworks, brewhouse, distillery,
+  rolling house, furrier's, weaving shed or armoury — all of which §9 says work
+  today.
+
+  The cause is not cost and not the objective weights. `_building_axes()` in
+  `objective_selector.gd` reads yields, defence, quality of life, amusement,
+  reserves, education, immigration, pasture, growth and build speed. **It has no
+  term for `conversions`**, so a foundry's entire purpose is invisible and it
+  scores only for the two months of ore it shelters — a governor can want it as
+  a shed and for nothing else.
+
+  §5's design argument depends on this chain being walked: *the capacity branch
+  pays for itself in construction*. It is not being walked. Ticketed separately;
+  **do not reprice anything in §5 to compensate.**
 - **The wharf looks underpriced.** A permanent **+10% on all Crown trade for no
   upkeep** partly offsets the duty forever, and at 50 wood and 20 stone it is an
   automatic build for any town that trades. Worth watching in the harness.
