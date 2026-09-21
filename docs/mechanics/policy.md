@@ -135,6 +135,7 @@ opinion he minds a great deal more than he minds the PC's.
 | Contact | The kind of thing he can put his thumb on |
 | :--- | :--- |
 | A Crown officer | Military presence in the colony, immigration, education |
+| **The Diplomat** | **Cultivating the governor he lives with** — the one policy that buys another contact's loyalty (`the-diplomat.md` §7) |
 | A patron | Whatever his **specialty** is (§8) |
 | A governor | How his own town conducts itself — what it makes, how it treats a tribe |
 | A rival duke | **Never.** See below |

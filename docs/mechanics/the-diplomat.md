@@ -147,7 +147,39 @@ needs no special rule: wherever he is will flip, and that kills him.
 Afterwards the run continues with **no Diplomat and no replacement** — SPEC §8.1
 is clear that nobody will take the post.
 
-## 7. Tuning targets
+## 7. He can be sent to win a governor over
+
+**A policy of his own** (`policy.md`), and the only one in the game that buys
+another contact's regard.
+
+The Diplomat undertakes to cultivate the governor of the town he lives in — to
+dine him, flatter him, and be seen at his table — and that **governor's loyalty
+rises for as long as it runs.**
+
+It is an ordinary policy in every respect: a **recurring monthly cost**, borne by
+the Crown's purse if the PC agrees to pay and **by the Diplomat's own loyalty if
+he does not**, with `policy.md`'s 3x asymmetry on non-payment. Wining and dining a
+man out of one's own pocket wears thin at a predictable rate.
+
+### It is the only indirect lever on loyalty
+
+Everywhere else, a contact's regard answers to what the PC does to **him**. This
+buys it with money and somebody else's effort, which makes it the PC's one
+instrument against a governor he cannot otherwise reach — a proud man, a sullen
+one, or one already sliding toward sedition.
+
+### And it makes rehoming a decision rather than a courtesy
+
+§2 has the Diplomat asking to be moved when his town turns dangerous. This gives
+the PC a reason to move him **toward** trouble instead: he can only cultivate the
+governor he lives with.
+
+So the two pulls are opposite and both are legitimate. **He wants to leave the
+town that needs him most**, and the PC must decide whether to spend his safety on
+the province that is slipping. A Diplomat kept in a rebellious town is a Diplomat
+the PC may lose (§6), and the loyalty he was buying dies with him.
+
+## 8. Tuning targets
 
 - The sentiment and safety thresholds that trigger a rehoming request.
 - The gold cost of rehoming, and of his personal requests.
@@ -155,7 +187,7 @@ is clear that nobody will take the post.
 - The loyalty bands at which each tier of reporting stops.
 - How much accepting a request restores.
 
-## 8. Open items
+## 9. Open items
 
 - Whether a second rehoming costs more than the first.
 - Whether he reports on rival or native activity at all, or only on the colony.
