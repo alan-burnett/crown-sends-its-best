@@ -32,6 +32,13 @@ var seen: Dictionary = {}
 ## overlay.
 var towns: Dictionary = {}
 
+## Vector2i -> the name of the tribe whose village stands there, as last seen.
+##
+## 🔒 **The colony learns of a village by seeing it**, like everything else. A
+## village the colony walked past two years ago is drawn where it was, at the
+## size it was, which is the same lie the terrain tells and for the same reason.
+var villages: Dictionary = {}
+
 ## Tiles in sight as of the last recomputation.
 var in_sight: Dictionary = {}
 
@@ -42,6 +49,7 @@ func observe(
 	territory: Territory,
 	month: int,
 	towns_present: Array = [],
+	natives: Tribes = null,
 ) -> void:
 	in_sight = {}
 	for at in territory.visible:
@@ -52,11 +60,35 @@ func observe(
 			"month": month,
 			"border": territory.inside_border(at),
 			"worked_by": String(territory.influenced_by(at)),
+			# 🔒 **Both claims are recorded, and neither is resolved here.** A
+			# tile can be worked by a town and held by a village at once, and
+			# `natives.md` §10 leaves to the Author who actually works it. The
+			# map draws the contest; nothing in the sim decides it.
+			"native": _native_name(natives, at),
 		}
 
 	for town in towns_present:
 		if in_sight.has(town.at):
 			towns[town.at] = town.display_name
+
+	if natives != null:
+		for village in natives.villages_in_order():
+			if in_sight.has((village as Village).at):
+				villages[(village as Village).at] = _tribe_name(natives, (village as Village).tribe)
+
+
+## Whichever tribe works this tile, by name, or empty.
+static func _native_name(natives: Tribes, at: Vector2i) -> String:
+	if natives == null:
+		return ""
+	return _tribe_name(natives, natives.holder_of(at))
+
+
+static func _tribe_name(natives: Tribes, id: StringName) -> String:
+	if natives == null or String(id).is_empty():
+		return ""
+	var tribe := natives.find(id)
+	return tribe.display_name if tribe != null else ""
 
 
 func state_of(at: Vector2i) -> StringName:
@@ -89,6 +121,30 @@ func improvement_at(at: Vector2i) -> StringName:
 ## Whether the tile was inside the colony's border when last seen.
 func inside_border(at: Vector2i) -> bool:
 	return bool(seen.get(at, {}).get("border", false))
+
+
+## Whichever tribe was working this tile when the colony last looked, or empty.
+##
+## **The map's whole knowledge of the natives**, and the reason presentation
+## needs no access to `Tribes`.
+func native_at(at: Vector2i) -> String:
+	return String(seen.get(at, {}).get("native", ""))
+
+
+## The tribe whose village stands here, as last seen, or empty.
+func village_at(at: Vector2i) -> String:
+	return String(villages.get(at, ""))
+
+
+## Ground both a town and a village lay claim to, as last seen.
+##
+## 🔒 **Reports, never resolves.** `natives.md` §10 leaves who actually works a
+## contested tile to the Author, so this answers the question the map asks and
+## refuses the one the sim would want.
+func is_contested(at: Vector2i) -> bool:
+	var tile: Dictionary = seen.get(at, {})
+	return not String(tile.get("worked_by", "")).is_empty() \
+		and not String(tile.get("native", "")).is_empty()
 
 
 ## Which town works this tile, as last seen, or empty.
@@ -154,7 +210,14 @@ func to_dict() -> Dictionary:
 	for at in places:
 		settlements["%d,%d" % [at.x, at.y]] = towns[at]
 
-	return {"seen": entries, "towns": settlements}
+	var homes: Dictionary = {}
+	var sites: Array = villages.keys()
+	sites.sort_custom(func(a: Vector2i, b: Vector2i) -> bool:
+		return a.y < b.y or (a.y == b.y and a.x < b.x))
+	for at in sites:
+		homes["%d,%d" % [at.x, at.y]] = villages[at]
+
+	return {"seen": entries, "towns": settlements, "villages": homes}
 
 
 static func from_dict(data: Dictionary) -> MapKnowledge:
@@ -175,4 +238,12 @@ static func from_dict(data: Dictionary) -> MapKnowledge:
 		var where := String(key).split(",")
 		if where.size() == 2:
 			knowledge.towns[Vector2i(int(where[0]), int(where[1]))] = settlements[key]
+
+	var homes: Dictionary = data.get("villages", {})
+	var sites: Array = homes.keys()
+	sites.sort()
+	for key in sites:
+		var site := String(key).split(",")
+		if site.size() == 2:
+			knowledge.villages[Vector2i(int(site[0]), int(site[1]))] = homes[key]
 	return knowledge

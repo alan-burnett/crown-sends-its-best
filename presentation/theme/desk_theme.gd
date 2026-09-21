@@ -27,6 +27,16 @@ const MAP_BORDER: Color = Color(0.93, 0.85, 0.55, 0.85)
 const MAP_WORKED: Color = Color(0.93, 0.90, 0.82, 0.55)
 const MAP_IMPROVED: Color = Color(0.85, 0.62, 0.30, 0.9)
 const MAP_TOWN: Color = Color(0.90, 0.24, 0.20)
+
+## Ground a village works, the village itself, and ground both it and a town lay
+## claim to (#205).
+##
+## **A village is not drawn as a smaller town.** Different colour, different
+## shape — the player should never mistake one for a settlement he can write to,
+## because there is nobody there to write to.
+const MAP_NATIVE: Color = Color(0.42, 0.72, 0.55, 0.55)
+const MAP_VILLAGE: Color = Color(0.36, 0.78, 0.58)
+const MAP_CONTESTED: Color = Color(0.95, 0.58, 0.25, 0.9)
 ## Remembered ground is hatched, so it reads as stale even in one colour.
 const MAP_STALE: Color = Color(0.0, 0.0, 0.0, 0.35)
 

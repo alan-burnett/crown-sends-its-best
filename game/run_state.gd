@@ -241,6 +241,9 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 	# **From the map's stream, like the country itself** (#203). They are part of
 	# what the New World is rather than something that happened to it.
 	run.tribes = Tribes.generate(run.streams)
+	# 🔒 **Their villages, once** (#205). The only moment a village comes into
+	# being anywhere in the codebase, and kept clear of the colony's own site.
+	run.tribes.settle(run.map, run.starting_site, run.streams)
 	run.prestige = Prestige.new()
 	run.ending = RunEnding.new()
 	run.refusal = CrownRefusal.new()
@@ -260,6 +263,7 @@ static func new_run(seed_value: int, site: Vector2i = Vector2i(-1, -1)) -> RunSt
 		Territory.compute(run.map, run.colony.in_order()),
 		run.world.month,
 		run.colony.in_order(),
+		run.tribes,
 	)
 	return run
 

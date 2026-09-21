@@ -36,6 +36,21 @@ const NAMES: PackedStringArray = [
 
 var all: Array = []
 
+## Every village on the map. 🔒 **Fixed at generation**, and their number never
+## changes by any path — there is no `found` here and nothing that appends after
+## generation.
+var villages: Array = []
+
+## How many villages each tribe is given. **Not a tuning value in the sense of a
+## dial the balance harness sweeps**: §12.5 fixes the tribes and says nothing
+## about villages, and `natives.md` §10 lists this as the open item. Two is the
+## smallest number that lets a tribe be somewhere rather than a point.
+const VILLAGES_EACH: int = 2
+
+## What a village starts with. Tuning.
+const START_PEOPLE_MIN: int = 26
+const START_PEOPLE_MAX: int = 48
+
 
 ## Draw the three, in a fixed order, from the map's own stream.
 static func generate(streams: RngStreams) -> Tribes:
@@ -63,6 +78,75 @@ static func generate(streams: RngStreams) -> Tribes:
 		}
 		tribes.all.append(tribe)
 	return tribes
+
+
+## Put their villages on the map. 🔒 **Once, at generation**, which is the only
+## moment a village ever comes into being.
+##
+## Kept clear of the colony's own site, because a tribe whose village the colony
+## was founded on top of would be a tribe the run had already decided about.
+func settle(map: WorldMap, away_from: Vector2i, streams: RngStreams) -> void:
+	if map == null or streams == null:
+		return
+	var rng := streams.stream(STREAM)
+	for tribe in in_order():
+		for index in VILLAGES_EACH:
+			var at := _somewhere_to_live(map, away_from, rng)
+			if at == Vector2i(-1, -1):
+				continue
+			var village := Village.new()
+			village.id = StringName("village_%s_%d" % [String(tribe.id).replace("tribe_", ""), index])
+			village.tribe = tribe.id
+			village.at = at
+			village.people = rng.randi_range(START_PEOPLE_MIN, START_PEOPLE_MAX)
+			village.stores = {"food": float(village.people) * 3.0}
+			villages.append(village)
+
+
+## Ground a village could stand on: land, and not on the colony's doorstep or
+## another village's.
+func _somewhere_to_live(map: WorldMap, away_from: Vector2i, rng: RandomNumberGenerator) -> Vector2i:
+	for _attempt in 200:
+		var at := Vector2i(rng.randi_range(0, map.width - 1), rng.randi_range(0, map.height - 1))
+		if not map.is_land(at.x, at.y):
+			continue
+		if away_from != Vector2i(-1, -1) and at.distance_squared_to(away_from) < 36:
+			continue
+		var crowded := false
+		for other in villages:
+			if (other as Village).at.distance_squared_to(at) < 25:
+				crowded = true
+				break
+		if not crowded:
+			return at
+	return Vector2i(-1, -1)
+
+
+## Every village, in id order.
+func villages_in_order() -> Array:
+	var out: Array = villages.duplicate()
+	out.sort_custom(func(a: Village, b: Village) -> bool: return String(a.id) < String(b.id))
+	return out
+
+
+## The villages of one tribe.
+func villages_of(tribe: StringName) -> Array:
+	var out: Array = []
+	for village in villages_in_order():
+		if (village as Village).tribe == tribe:
+			out.append(village)
+	return out
+
+
+## Whichever tribe works this tile, or empty.
+##
+## **The question #204 asks of every tile a town wants to work**, and the one the
+## map asks to draw the contest.
+func holder_of(tile: Vector2i) -> StringName:
+	for village in villages_in_order():
+		if (village as Village).holds(tile):
+			return (village as Village).tribe
+	return &""
 
 
 ## Every tribe, in id order. **Sorted**, because anything that iterates them and
@@ -96,11 +180,16 @@ func to_dict() -> Dictionary:
 	var out: Array = []
 	for tribe in in_order():
 		out.append((tribe as Tribe).to_dict())
-	return {"tribes": out}
+	var homes: Array = []
+	for village in villages_in_order():
+		homes.append((village as Village).to_dict())
+	return {"tribes": out, "villages": homes}
 
 
 static func from_dict(data: Dictionary) -> Tribes:
 	var tribes := Tribes.new()
 	for entry in data.get("tribes", []):
 		tribes.all.append(Tribe.from_dict(entry))
+	for entry in data.get("villages", []):
+		tribes.villages.append(Village.from_dict(entry))
 	return tribes

@@ -166,6 +166,27 @@ const MAP_TRUTH_NAMES: Array[Array] = [
 	["WorldMap", "reads the real map instead of MapKnowledge"],
 	["MapGenerator", "reaches into map generation"],
 	["Territory", "reads territory directly instead of MapKnowledge"],
+	# The reason `MapKnowledge` exists at all (#205). A screen that read `Tribes`
+	# would draw every village on the map, including the ones nobody has walked
+	# to — which is precisely the leak SPEC 11.2 is locked against.
+	["Tribes", "reads the real tribes instead of MapKnowledge"],
+	["Village", "reads a village directly instead of MapKnowledge"],
+]
+
+## 🔒 **A tribe never founds a village** (#205, `natives.md` 4).
+##
+## The map's villages are the map's villages: they grow in place, in population
+## and in influence, and their number is fixed at generation. That is what keeps
+## tribes full actors rather than a diminishing obstacle, and it is a property of
+## the whole codebase rather than of one file — so it is checked here, where a
+## new `Village.new()` in a battle resolver or an event handler cannot hide.
+##
+## Generation makes them and the save restores them. Nothing else may.
+const VILLAGE_BIRTH: String = "(^|[^_a-zA-Z0-9.])Village\\s*\\.\\s*new\\s*\\("
+const VILLAGE_APPEND: String = "villages\\s*\\.\\s*(append|push_back|push_front|insert|assign|append_array)\\s*\\("
+const VILLAGE_EXEMPT: PackedStringArray = [
+	"res://sim/natives/tribes.gd",  # generation, and the save
+	"res://sim/natives/village.gd",  # its own from_dict
 ]
 
 ## Seam A and Seam B. Only the sim writes sim state, and inside the sim that
@@ -243,6 +264,12 @@ func _check(path: String) -> void:
 			for rule in PRESTIGE_NAMES:
 				if line.contains(rule[0]):
 					_report(path, index, "presentation/ %s (SPEC 14.1: it is never a number the player sees)" % rule[1])
+
+		if not VILLAGE_EXEMPT.has(path):
+			_match(path, index, line, VILLAGE_BIRTH,
+				"makes a Village — a tribe never founds one, and their number is fixed at generation (natives.md 4)")
+			_match(path, index, line, VILLAGE_APPEND,
+				"adds to a list of villages — their number never changes by any path (natives.md 4)")
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")
