@@ -21,6 +21,23 @@ var navigable: bool = false
 ## Resource id -> level name, as authored.
 var yields: Dictionary = {}
 
+## 🔒 **What the ground is worth to whoever is holding it** (#215,
+## `battles.md` §5, `tiles-and-improvements.md` §6).
+##
+## Mountains high, forest medium, plains low — **authored here, alongside the
+## yields**, because a terrain that produced one thing and defended another from
+## two different files would be two answers to what a mountain is.
+##
+## **One is open ground**, so a terrain that says nothing is no advantage at all
+## and a new terrain cannot silently become cover. Never below one: the ground
+## does not make a man easier to kill.
+##
+## It reaches a battle through `Force` alone. Terrain folds into the defender's
+## force and appears nowhere else (`battles.md` §5), and `test_force` refuses a
+## second reader — so this is the authored figure and `Force.terrain_worth` is
+## the only thing that asks for it.
+var defence: float = 1.0
+
 ## What the map draws this terrain as.
 ##
 ## **Content, not code** (SPEC §16.3). A placeholder palette now; swapping in
@@ -46,6 +63,7 @@ static func load_from(records: Array, levels: Dictionary = {}) -> void:
 		terrain.land = bool(record.get("land", false))
 		terrain.navigable = bool(record.get("navigable", not terrain.land))
 		terrain.yields = record.get("yields", {}).duplicate()
+		terrain.defence = maxf(1.0, float(record.get("defence", 1.0)))
 		_terrains[String(terrain.id)] = terrain
 
 
@@ -86,6 +104,15 @@ static func land_ids() -> PackedStringArray:
 		if _terrains[id].land:
 			out.append(id)
 	return out
+
+
+## What holding this ground is worth, by terrain id.
+##
+## **One for anything unwritten**, including the sea: a company cannot stand on
+## it, and a figure there would be an advantage nobody can take.
+static func defence_of(id: StringName) -> float:
+	var terrain := find(id)
+	return terrain.defence if terrain != null else 1.0
 
 
 static func level_value(level: String) -> float:

@@ -63,46 +63,45 @@ static var _arms_worth: Dictionary = {"guns": 1.5, "tools": 0.5, "horses": 0.4}
 ## deliberately modest, and a leaderless company is not a broken one.
 static var _leadership: float = 1.25
 
-## The three terrain tiers (§5). Tuning, and anything not named here is open
-## ground.
-static var _terrain: Dictionary = {"mountains": 1.8, "forest": 1.4}
-
-## The two fort tiers (§5): a medium boost to a company attacking *from* it, a
-## very high boost to one defending *in* it.
+## 🔒 **The three terrain tiers and the two fort tiers are not here** (#215).
 ##
-## A stubborn rebel company in a fort on a mountain is close to unassailable and
-## is meant to be. The answer is not a better army — it is wearing them down over
-## years, or finding somebody else to do it.
-static var _fort_attacking: float = 1.3
-static var _fort_defending: float = 2.5
+## They are **authored where the thing is** — a terrain's defence sits beside its
+## yields in `data/terrain/`, and a fort's two figures sit beside the cost of
+## raising it in `data/improvements/`. A battle table naming terrains and
+## improvements by id would be a second place they are described, and the first
+## time somebody added a terrain it would be cover in one file and not the other.
+##
+## What stays here is that **they are read in this file and nowhere else**
+## (`battles.md` §5), which is the lock `test_force` enforces.
 
 
 static func load_from(record: Dictionary) -> void:
 	_arms_worth = record.get("arms_worth", _arms_worth).duplicate()
 	_leadership = float(record.get("leadership", _leadership))
-	_terrain = record.get("terrain", _terrain).duplicate()
-	_fort_attacking = float(record.get("fort_attacking", _fort_attacking))
-	_fort_defending = float(record.get("fort_defending", _fort_defending))
 
 
 static func reset() -> void:
 	_arms_worth = {"guns": 1.5, "tools": 0.5, "horses": 0.4}
 	_leadership = 1.25
-	_terrain = {"mountains": 1.8, "forest": 1.4}
-	_fort_attacking = 1.3
-	_fort_defending = 2.5
 
 
 ## What the ground under a tile is worth to whoever is standing on it.
 ##
-## **Open ground is one**, so plains, grassland and desert need no entry and a
-## terrain nobody has written about does not silently become cover.
+## **Authored in `data/terrain/` beside the yields** (#215), and **open ground is
+## one** — so a terrain nobody has written a defence for does not silently become
+## cover, and none of them can make a man easier to kill.
 static func terrain_worth(terrain: StringName) -> float:
-	return maxf(1.0, float(_terrain.get(String(terrain), 1.0)))
+	return Terrain.defence_of(terrain)
 
 
-static func fort_worth(defending: bool) -> float:
-	return _fort_defending if defending else _fort_attacking
+## What an improvement on the tile is worth, attacking or defending.
+##
+## 🔒 **Asked of the improvement rather than of a table of forts** (#215). The
+## fort is the only one that answers anything but one today, and a second
+## fortification is a data file rather than a branch here.
+static func fort_worth(id: StringName, defending: bool) -> float:
+	var improvement := Improvement.find(id)
+	return improvement.defence_for(defending) if improvement != null else 1.0
 
 
 ## What its arms are worth, as one multiplier.
@@ -146,9 +145,7 @@ static func terrain_of(
 static func fortification_of(company: Company, map: WorldMap, defending: bool) -> float:
 	if map == null or company.at == Vector2i(-1, -1):
 		return 1.0
-	if map.improvement_at(company.at.x, company.at.y) != &"fort":
-		return 1.0
-	return fort_worth(defending)
+	return fort_worth(map.improvement_at(company.at.x, company.at.y), defending)
 
 
 ## The whole of it, as one number.

@@ -28,7 +28,8 @@
       "ore": "low",
       "stone": "medium"
     },
-    "colour": "#b8a06a"
+    "colour": "#b8a06a",
+    "defence": 1.0
   },
   {
     "id": "grassland",
@@ -40,7 +41,8 @@
       "wood": "low",
       "stone": "low"
     },
-    "colour": "#7a9a4e"
+    "colour": "#7a9a4e",
+    "defence": 1.0
   },
   {
     "id": "plains",
@@ -52,7 +54,8 @@
       "wood": "low",
       "stone": "low"
     },
-    "colour": "#a3ab5c"
+    "colour": "#a3ab5c",
+    "defence": 1.0
   },
   {
     "id": "forest",
@@ -64,7 +67,8 @@
       "food": "low",
       "stone": "low"
     },
-    "colour": "#3f6b3a"
+    "colour": "#3f6b3a",
+    "defence": 1.4
   },
   {
     "id": "mountains",
@@ -76,6 +80,7 @@
       "furs": "low",
       "wood": "low"
     },
-    "colour": "#7c7268"
+    "colour": "#7c7268",
+    "defence": 1.8
   }
 ]

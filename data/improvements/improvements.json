@@ -198,6 +198,11 @@
       "wood": 30,
       "stone": 20
     },
-    "upkeep": 3
+    "upkeep": 3,
+    "defends": {
+      "attacking": 1.3,
+      "defending": 2.5
+    },
+    "note": "The one improvement that exists to change what happens on a tile rather than what it yields (tiles-and-improvements.md section 6). terrain_factor is 1.0 everywhere because it affects no yield whatsoever, and defends is what it is actually for: a medium boost to a company attacking from it, a very high one to one defending in it (battles.md section 5). Both figures are tuning."
   }
 ]

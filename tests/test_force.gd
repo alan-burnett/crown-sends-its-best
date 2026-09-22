@@ -278,9 +278,9 @@ func test_a_fort_helps_whoever_holds_it_and_helps_a_defender_more() -> void:
 	var company := _raise(run, 20, _arms(20))
 	_fortify(run, company)
 
-	assert_true(Force.fort_worth(false) > 1.0,
+	assert_true(Force.fort_worth(&"fort", false) > 1.0,
 		"a company attacking from a fort got nothing for it")
-	assert_true(Force.fort_worth(true) > Force.fort_worth(false),
+	assert_true(Force.fort_worth(&"fort", true) > Force.fort_worth(&"fort", false),
 		"a fort is worth no more to the man defending it")
 	assert_true(float(Force.breakdown(company, run.map, true)["fortification"]) > 1.0,
 		"the fort on his tile was not read at all")
@@ -306,17 +306,37 @@ func test_a_rebel_in_a_fort_on_a_mountain_is_close_to_unassailable() -> void:
 func test_terrain_and_fortification_appear_in_force_and_nowhere_else() -> void:
 	# 🔒 **The acceptance line, and the double-count guard.** If either term is
 	# ever applied a second time at resolution, it will be because somebody added
-	# a reader outside this file — so this asks the codebase directly.
+	# a **reader** outside this file — so this asks the codebase for call sites
+	# rather than for the words.
+	#
+	# The authored figures themselves live where the thing is (#215): a terrain's
+	# defence beside its yields, a fort's two figures beside its cost. Declaring
+	# them there is not reading them, which is why the tokens below are the
+	# qualified forms a caller writes and never the forms a definition does.
 	var readers := PackedStringArray()
 	for path in _sim_scripts():
-		if path.ends_with("force.gd") or path.ends_with("test_force.gd"):
+		if path.ends_with("force.gd"):
 			continue
-		var text := FileAccess.get_file_as_string(path)
-		for token in ["fort_worth", "terrain_worth", "fort_defending", "fort_attacking"]:
-			if text.contains(token):
-				readers.append("%s names %s" % [path.get_file(), token])
+		var code := _code_of(path)
+		for token in ["Force.terrain_worth", "Force.fort_worth",
+				"Terrain.defence_of", ".defence_for("]:
+			if code.contains(token):
+				readers.append("%s calls %s" % [path.get_file(), token])
 	assert_empty(readers,
 		"terrain or fortification is read outside force: %s" % ", ".join(readers))
+
+
+## A script with its comments taken out.
+##
+## **The lock is about call sites, not prose.** `terrain.gd` says in its header
+## that `Force.terrain_worth` is the only thing that asks for its figure, and a
+## scan that counted the explanation would forbid explaining it.
+func _code_of(path: String) -> String:
+	var kept := PackedStringArray()
+	for line in FileAccess.get_file_as_string(path).split("\n"):
+		if not String(line).strip_edges().begins_with("#"):
+			kept.append(String(line))
+	return "\n".join(kept)
 
 
 func _sim_scripts(at: String = "res://sim") -> PackedStringArray:
