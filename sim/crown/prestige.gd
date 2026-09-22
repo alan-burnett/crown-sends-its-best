@@ -3,7 +3,7 @@ extends RefCounted
 
 ## The Crown's running account of the PC (#76, `docs/mechanics/prestige.md`).
 ##
-##     prestige = net_gold + patron_credit - optics_debt
+##     prestige = net_gold + patron_credit + patron_regard - optics_debt
 ##
 ## ## 🔒 It is denominated in gold
 ##
@@ -62,6 +62,12 @@ const EVENT_MEASURED: StringName = &"prestige_measured"
 ## emitting and what it is worth.
 const EVENT_PATRON_CREDIT: StringName = &"patron_credit_banked"
 
+## What the patrons presently here are worth, this month (#283, §5).
+##
+## **Emitted every month and read one at a time**, never summed. See
+## `patron_regard_in`.
+const EVENT_PATRON_REGARD: StringName = &"patron_regard"
+
 ## The figure as of the month it was last settled.
 ##
 ## **Stored, not recomputed on demand** (§6), as quality of life is, so that two
@@ -85,13 +91,35 @@ var settled_month: int = -1
 static func of(log: EventLog) -> Dictionary:
 	var gold := CrownAccounts.of(log).net_position()
 	var patrons := patron_credit_in(log)
+	var regard := patron_regard_in(log)
 	var optics := OpticsRegister.debt_in(log)
 	return {
 		"net_gold": gold,
 		"patron_credit": patrons,
+		"patron_regard": regard,
 		"optics_debt": optics,
-		"total": gold + patrons - optics,
+		"total": gold + patrons + regard - optics,
 	}
+
+
+## 🔒 **What the patrons presently here think of the PC** (#283, §5's second
+## half).
+##
+## **The latest reading and only the latest**, because it is a *live* term: a
+## present patron's regard rises and falls month to month like anything else, and
+## summing it would make a long-tolerated patron worth more than a beloved one.
+##
+## That is the whole difference from `patron_credit_in` directly below, which
+## sums for ever because a deed is a thing that happened. When a patron leaves he
+## stops appearing in this figure and his final regard banks into that one — so
+## the handover needs no arithmetic anywhere.
+static func patron_regard_in(log: EventLog) -> float:
+	if log == null:
+		return 0.0
+	var told := log.of_type(EVENT_PATRON_REGARD)
+	if told.is_empty():
+		return 0.0
+	return float(told[told.size() - 1].payload.get("amount", 0.0))
 
 
 ## What the court would call a score of this size.

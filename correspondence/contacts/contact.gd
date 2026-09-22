@@ -232,6 +232,19 @@ var need: String = ""
 ## bundle of mechanical behaviour on top of it, and the two words must not merge.
 var vice: StringName = &""
 
+## The month a patron goes home, or `-1` while he has not settled on one (#283,
+## `patrons.md` §8).
+##
+## 🔒 **Hidden, and drawn once.** Every patron stays at least two years; at that
+## mark he privately decides how much longer he wants — anything from nothing to
+## two further years — and **the PC is told none of it.** At two years a man may
+## have a month left or another two, so there is no planning for it, only the six
+## months once they start.
+##
+## Nought on everybody who is not a patron, and `Contact` carries it rather than
+## a book because it saves and loads with him and departs with him.
+var leaves_month: int = -1
+
 var relationship: Relationship = null
 
 
@@ -288,6 +301,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.specialty = String(record.get("specialty", ""))
 	contact.need = String(record.get("need", ""))
 	contact.vice = StringName(record.get("vice", ""))
+	contact.leaves_month = int(record.get("leaves_month", -1))
 	contact.known_since = int(record.get("known_since", 0))
 	contact.relationship = Relationship.new(
 		contact.id,
@@ -363,6 +377,7 @@ func to_dict() -> Dictionary:
 		"specialty": specialty,
 		"need": need,
 		"vice": String(vice),
+		"leaves_month": leaves_month,
 		"known_since": known_since,
 		"relationship": relationship.to_dict(),
 	}
