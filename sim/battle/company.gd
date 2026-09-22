@@ -464,9 +464,7 @@ func advance(toward: Vector2i, context: ColonyContext) -> bool:
 
 	var from := at
 	for _tile in tiles_this_month():
-		if at == toward:
-			break
-		at += Vector2i(signi(toward.x - at.x), signi(toward.y - at.y))
+		step_toward(toward)
 
 	if at == from:
 		return at == toward
@@ -479,6 +477,42 @@ func advance(toward: Vector2i, context: ColonyContext) -> bool:
 		"cavalry": is_cavalry(),
 		"size": size,
 	}, WorldPhase.MOVEMENT)
+	return at == toward
+
+
+## Say where a month's marching took it (Seam A).
+##
+## **Emitted once for the whole month**, however many tiles that was, because the
+## map draws where a company ended up rather than each foot of the road.
+func report_march(from: Vector2i, context: ColonyContext) -> void:
+	context.log.emit(EVENT_MOVED, id, context.state.month, {
+		"company": String(id),
+		"allegiance": String(allegiance),
+		"from": [from.x, from.y],
+		"at": [at.x, at.y],
+		"toward": [destination.x, destination.y],
+		"cavalry": is_cavalry(),
+		"size": size,
+	}, WorldPhase.MOVEMENT)
+
+
+## One tile toward somewhere, and nothing else.
+##
+## 🔒 **Separate from `advance` so a month can interleave** (#217,
+## `battles.md` §8). A normal company moves *and* attacks in the same month —
+## not one or the other, or nothing could ever be chased down — and cavalry does
+## both twice, which is a tempo advantage as much as a combat one: **strike,
+## reposition and strike again while the foot are still marching.**
+##
+## A march that moved its whole allowance before anybody could fight would make
+## that impossible, so the driver walks a tile, resolves what it is now in
+## contact with, and walks again.
+##
+## Returns whether it has arrived.
+func step_toward(toward: Vector2i) -> bool:
+	if toward == NOWHERE or at == NOWHERE or at == toward:
+		return at == toward
+	at += Vector2i(signi(toward.x - at.x), signi(toward.y - at.y))
 	return at == toward
 
 

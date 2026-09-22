@@ -41,6 +41,9 @@ var companies: Companies = null
 var colony: Colony = null
 var map: WorldMap = null
 
+## The roster, so a company can find the man who decides for it (#221).
+var contacts: Dictionary = {}
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if companies == null:
@@ -64,9 +67,124 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 func _march(context: ColonyContext) -> void:
 	for entry in companies.in_resolution_order():
 		var company: Company = entry
-		if company.is_empty() or company.destination == Company.NOWHERE:
+		if company.is_empty():
 			continue
-		company.advance(company.destination, context)
+		_take_the_month(company, context)
+
+
+## One company's month: **move and attack, interleaved** (#217, `battles.md` §8).
+##
+## A normal company moves *and* attacks in the same month — not one or the
+## other, or nothing could ever be chased down. Cavalry does both twice, and
+## taking them a tile at a time is what makes that a tempo advantage as well as a
+## combat one: **strike, reposition and strike again while the foot are still
+## marching.**
+##
+## 🔒 **Whether to attack is his decision, and there is no branch that asks
+## whether he will obey** (#221, `commanders.md` §5). He scores attack, hold,
+## march, withdraw and disband and takes the best, so refusing is attack scoring
+## below retreat.
+func _take_the_month(company: Company, context: ColonyContext) -> void:
+	# 🔒 **A leaderless militia defends its town, and that is the whole of what it
+	# can ever do** (`battles.md` §4). It has nobody to deliberate for it, so it
+	# holds the posture it was raised with — and being attacked is not a decision
+	# and needs none.
+	if company.is_headless():
+		return
+
+	var from := company.at
+	# 🔒 **A month is so many moves and so many attacks, and he spends them**
+	# (§8). A normal company has one of each, which is what *moves and attacks in
+	# the same month* means; cavalry has two of each, which is the tempo
+	# advantage. Asking what he wants each time rather than marching first is the
+	# only way a foot company gets to do both.
+	var moves := company.tiles_this_month()
+	var attacks := company.attacks_this_month()
+
+	while moves > 0 or attacks > 0:
+		match _what_he_decides(company, context):
+			CommanderConsiderations.MARCH:
+				if moves <= 0:
+					break
+				company.step_toward(company.destination)
+				moves -= 1
+			CommanderConsiderations.ATTACK:
+				if attacks <= 0:
+					break
+				_engage(company, context)
+				attacks -= 1
+			CommanderConsiderations.WITHDRAW:
+				if moves <= 0:
+					break
+				# Back to the town that victuals him, a tile at a time. He is not
+				# fleeing a battle — there is no rout — he has decided the field
+				# is not worth his men.
+				company.step_toward(_home_tile(company))
+				moves -= 1
+			CommanderConsiderations.DISBAND:
+				company.stand_down(_home_of(company), context)
+				break
+			_:
+				# 🔒 **Holding ends his month.** The board has not changed, so
+				# asking again would give the same answer for ever.
+				break
+
+		if company.is_empty():
+			break
+
+	if company.at != from and not company.is_empty():
+		company.report_march(from, context)
+
+
+## What his commander decides, this step.
+##
+## 🔒 **Asked afresh for every step**, because cavalry's second move happens on a
+## board its first move changed — and a man who struck and then found the second
+## enemy far stronger should be free to stop.
+func _what_he_decides(company: Company, context: ColonyContext) -> StringName:
+	var commander := companies.commander_of(company, contacts)
+	if commander == null:
+		return CommanderConsiderations.HOLD
+
+	var deliberation := DeliberationContext.new(
+		DecisionKind.COMMANDER_ORDERS, context.state, context.log)
+	deliberation.phase = WorldPhase.MOVEMENT
+	deliberation.data = {"map": map}
+
+	var decision := Deliberation.choose(
+		commander,
+		CommanderConsiderations.options_for(
+			company,
+			_in_contact_with(company),
+			company.destination != Company.NOWHERE and company.at != company.destination),
+		deliberation)
+	return decision.chosen_id() if decision.has_choice() else CommanderConsiderations.HOLD
+
+
+## The first company in front of him that he may fight, in §7's order.
+func _in_contact_with(company: Company) -> Company:
+	for entry in companies.in_resolution_order():
+		var other: Company = entry
+		if Battle.may_fight(company, other) and Battle.are_in_contact(company, other):
+			return other
+	return null
+
+
+## Where withdrawing takes him: the town that victuals him.
+func _home_tile(company: Company) -> Vector2i:
+	var town := _home_of(company)
+	return town.at if town != null else company.at
+
+
+## Fight whatever this company is in contact with.
+##
+## Returns whether a battle was fought, so an attack is spent on a fight and not
+## on an empty field.
+func _engage(company: Company, context: ColonyContext) -> bool:
+	var other := _in_contact_with(company)
+	if other == null:
+		return false
+	return not Battle.resolve(company, other, map, context).is_empty()
 
 
 ## What a month without rations does.
