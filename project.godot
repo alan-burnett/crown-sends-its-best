@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 Content="*res://core/content/content_db.gd"
 Assets="*res://core/assets/asset_registry.gd"
+Sound="*res://presentation/sound/sound_engine.gd"
 
 [display]
 
