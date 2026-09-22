@@ -1,6 +1,7 @@
 [
   {
     "id": "clothing",
+    "war_appetite": 0.35,
     "name": "clothing",
     "luxury": false,
     "producible": true,
@@ -16,6 +17,7 @@
   },
   {
     "id": "iron",
+    "war_appetite": 0.4,
     "name": "iron",
     "luxury": false,
     "producible": true,
@@ -30,6 +32,7 @@
   },
   {
     "id": "tools",
+    "war_appetite": 0.3,
     "name": "tools",
     "luxury": false,
     "producible": true,
@@ -44,6 +47,7 @@
   },
   {
     "id": "guns",
+    "war_appetite": 0.55,
     "name": "guns",
     "luxury": false,
     "producible": true,

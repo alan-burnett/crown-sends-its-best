@@ -70,6 +70,11 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		_settle_emigration(state, log)
 	_please_the_provost(state, log)
 	_advance_war(state, log, streams.stream("sim"))
+	# 🔒 **Beside the war and not in a driver of its own** (#141). Both are the
+	# Crown's own circumstances reaching the colony's prices, both move in phase 5,
+	# and both draw from the same stream — so one seed shorts the same harvest in
+	# the same month of the same campaign.
+	CrownPrices.advance(state, log, streams.stream("sim"))
 
 
 ## A learned colony warms the Provost, whoever paid for the learning (#174).

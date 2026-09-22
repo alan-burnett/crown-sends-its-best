@@ -102,12 +102,20 @@ func test_an_appetite_it_does_not_name_changes_nothing() -> void:
 # --- 🔒 The Crown's can move too --------------------------------------------
 
 func test_the_crowns_valuation_is_a_function_of_the_world() -> void:
-	# A constant is a function with no inputs. Starting it effectively fixed and
-	# adding drivers later costs nothing; declaring it immovable would have to be
-	# undone — and when it does move it is news the Steward can write about.
+	# A constant is a function with no inputs. This one has inputs now (#141): the
+	# Crown's war, and a shortage at home. **When it moves it is news the Steward
+	# can write about**, which is what the shape was reserved for.
+	#
+	# A colony begins with a war already running, so the authored price and the
+	# quoted price differ from the first month of every run — and a resource with
+	# no appetite still quotes exactly what the table says.
 	var state := WorldValues.initial_state()
+	assert_true(Valuation.crown(&"furs", state) > Valuation.crown(&"furs"),
+		"a war is running and the Crown quotes the peacetime price for furs")
+
+	state.values[WorldValues.WAR] = 0.0
 	assert_almost_eq(Valuation.crown(&"furs", state), Valuation.crown(&"furs"), 0.0001,
-		"the Crown's price already depends on something, undocumented")
+		"a quiet year quotes something other than the authored price")
 	assert_true(Valuation.crown(&"furs") > 0.0)
 
 
@@ -128,7 +136,11 @@ func test_trade_goes_through_the_crowns_dictionary() -> void:
 	var deal := Trade.buy(town, &"food", 10.0, context, Trade.TIER_NEED)
 	var bought := context.log.of_type(Trade.EVENT_BOUGHT)
 	assert_eq(bought.size(), 1, "the purchase did not reach the log")
-	assert_almost_eq(float(bought[0].payload["unit_price"]), Valuation.crown(&"food"), 0.0001,
+	# Asked with the state the purchase was made in, because the dictionary is a
+	# function of the world (#141) and quoting it without one asks a different
+	# question.
+	assert_almost_eq(float(bought[0].payload["unit_price"]),
+		Valuation.crown(&"food", context.state), 0.0001,
 		"the town paid a price the Crown's dictionary never quoted")
 	assert_true(float(deal["received"]) > 0.0)
 

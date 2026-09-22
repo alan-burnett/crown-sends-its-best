@@ -165,6 +165,10 @@ func test_a_policy_can_move_what_the_crown_pays() -> void:
 
 func test_it_moves_only_what_it_names() -> void:
 	var state := _state(4)
+	# A quiet year, so the only thing that could move a price is the policy. The
+	# Crown's war lifts what an army consumes (#141) and would otherwise answer
+	# for the difference.
+	state.values[WorldValues.WAR] = 0.0
 	book.enact(Policy.new(&"steward", PolicyEffects.FAVOUR_OUR_MARKET, 80.0,
 		Policy.ALL, {"resource": "horses"}), log, 3)
 	for key in PolicyEffects.pressure(book):

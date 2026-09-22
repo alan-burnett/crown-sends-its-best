@@ -1,6 +1,7 @@
 [
   {
     "id": "food",
+    "war_appetite": 0.3,
     "name": "food",
     "luxury": false,
     "producible": true,
@@ -10,6 +11,7 @@
   },
   {
     "id": "wood",
+    "war_appetite": 0.15,
     "name": "wood",
     "luxury": false,
     "producible": true,
@@ -19,6 +21,7 @@
   },
   {
     "id": "stone",
+    "war_appetite": 0.1,
     "name": "stone",
     "luxury": false,
     "producible": true,
@@ -28,6 +31,7 @@
   },
   {
     "id": "ore",
+    "war_appetite": 0.25,
     "name": "ore",
     "luxury": false,
     "producible": true,
@@ -37,6 +41,7 @@
   },
   {
     "id": "furs",
+    "war_appetite": 0.1,
     "name": "furs",
     "luxury": false,
     "producible": true,
@@ -46,6 +51,7 @@
   },
   {
     "id": "cotton",
+    "war_appetite": 0.2,
     "name": "cotton",
     "luxury": false,
     "producible": true,

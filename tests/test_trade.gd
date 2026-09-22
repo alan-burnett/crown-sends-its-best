@@ -157,9 +157,17 @@ func test_buying_and_selling_move_the_towns_gold() -> void:
 
 func test_a_town_buys_only_what_it_can_afford() -> void:
 	var poor := _town(4, 6.0)
-	var deal := Trade.buy(poor, &"food", 100.0, _context({TaxRates.BASE_KEY: 0.0}))
-	assert_almost_eq(float(deal["spent"]), 6.0, 0.001, "the town spent gold it did not have")
-	assert_almost_eq(float(deal["received"]), 3.0, 0.001)
+	var context := _context({TaxRates.BASE_KEY: 0.0})
+	var deal := Trade.buy(poor, &"food", 100.0, context)
+
+	assert_almost_eq(float(deal["spent"]), 6.0, 0.001,
+		"the town spent gold it did not have")
+	# **What six gold buys, at whatever the Crown is quoting.** Asked of the
+	# dictionary rather than written down, because the quote moves with the
+	# Crown's war and a shortage at home (#141) and a figure here would be a
+	# second, staler copy of the price table.
+	assert_almost_eq(float(deal["received"]),
+		6.0 / Valuation.crown(&"food", context.state), 0.001)
 
 
 # --- Every transaction is in the Ledger's terms -----------------------------

@@ -25,6 +25,7 @@
   },
   {
     "id": "horses",
+    "war_appetite": 0.35,
     "name": "horses",
     "luxury": false,
     "producible": true,

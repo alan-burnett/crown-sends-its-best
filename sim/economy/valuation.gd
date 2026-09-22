@@ -68,7 +68,12 @@ const MERCHANT_MARGIN: float = 0.18
 ## could not have carried this without being rewritten, and the driver the player
 ## actually chose is more interesting than the weather.
 static func crown(resource: StringName, state: WorldState = null) -> float:
-	return ResourceCatalogue.price_of(resource) 		* PolicyEffects.price_multiplier(state, resource)
+	# 🔒 **Multiplied together, never one instead of the other** (#141). A
+	# patron's barony and a war must both be able to act at once, and a shortage
+	# on top of either.
+	return ResourceCatalogue.price_of(resource) \
+		* PolicyEffects.price_multiplier(state, resource) \
+		* CrownPrices.multiplier(state, resource)
 
 
 # --- The town ---------------------------------------------------------------
