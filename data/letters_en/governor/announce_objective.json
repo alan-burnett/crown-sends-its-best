@@ -5,126 +5,126 @@
   "skippable": true,
   "speaks_to": 0,
   "params": {
-    "town": "town",
-    "objective": "objective",
-    "pursuing": "intent",
-    "governor": "contact"
+	"town": "town",
+	"objective": "objective",
+	"pursuing": "intent",
+	"governor": "contact"
   },
   "perception": {
-    "larder": {
-      "measure": "food_security",
-      "ladder": [
-        "all but bare",
-        "thin",
-        "sufficient",
+	"larder": {
+	  "measure": "food_security",
+	  "ladder": [
+		"all but bare",
+		"thin",
+		"sufficient",
         "amply stocked"
-      ]
-    }
+	  ]
+	}
   },
   "body": [
-    {
-      "text": "The next work at {param:town} is {param:objective}, and the men are told."
-    },
-    {
-      "text": "It serves what I take to be the right end here, which is {param:pursuing}. The stores are {perception:larder}, and I judge we can bear the work."
-    },
-    {
-      "text": "Nothing is cut yet. If you would have me turn them to something else, say so and I shall hear it."
-    }
+	{
+	  "text": "The next work at {param:town} is {param:objective}, and the men are told."
+	},
+	{
+	  "text": "It serves what I take to be the right end here, which is {param:pursuing}. The stores are {perception:larder}, and I judge we can bear the work."
+	},
+	{
+	  "text": "Nothing is cut yet. If you would have me turn them to something else, say so and I shall hear it."
+	}
   ],
   "reply": {
-    "tone": {
-      "text": "I have your letter, and I find the plan {choice}.",
-      "options": [
-        {
-          "tone": "pleased",
-          "text": "exactly right"
-        },
-        {
-          "tone": "dutiful",
-          "text": "reasonable enough"
-        },
-        {
-          "tone": "annoyed",
-          "text": "not at all what I had in mind"
-        },
-        {
-          "tone": "hateful",
-          "text": "of a piece with everything else you have done"
-        }
-      ]
-    },
-    "steps": [
-      {
-        "id": "priority",
-        "prompt": "What {param:town} should be for",
-        "options": [
-          {
-            "id": "profit",
-            "label": "attend to the colony's profit",
-            "text": "Attend to the colony's profit. That is what you are there for, and what the Crown will ask me about.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "increase_economic_output"
-              }
-            }
-          },
-          {
-            "id": "growth",
-            "label": "see that the town grows",
-            "text": "See that the town grows. A place with nobody in it returns nothing, whatever the ledgers say.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "grow_the_population"
-              }
-            }
-          },
-          {
-            "id": "defence",
-            "label": "see to your defences",
-            "text": "See to your defences. I would rather pay for walls I did not need than explain why there were none.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "strengthen_defences"
-              }
-            }
-          },
-          {
-            "id": "settle",
-            "label": "plant a new settlement",
-            "text": "Plant a new settlement. One town is a foothold; it is not a colony.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "settle_a_new_town"
-              }
-            }
-          },
-          {
-            "id": "survival",
-            "label": "your people's survival must come first",
-            "text": "Your people's survival must come first. Everything else can wait on it, and I will hear no argument.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "secure_survival"
-              }
-            }
-          }
-        ]
-      }
-    ],
-    "closing": [
-      {
-        "text": "I remain your servant,",
-        "tone": {
-          "pleased": "With every confidence in you,",
-          "annoyed": "I trust I shall not have to write again,"
-        }
-      }
-    ]
+	"tone": {
+	  "text": "I have your letter, and I find the plan {choice}.",
+	  "options": [
+		{
+		  "tone": "pleased",
+		  "text": "exactly right"
+		},
+		{
+		  "tone": "dutiful",
+		  "text": "reasonable enough"
+		},
+		{
+		  "tone": "annoyed",
+		  "text": "not at all what I had in mind"
+		},
+		{
+		  "tone": "hateful",
+		  "text": "of a piece with everything else you have done"
+		}
+	  ]
+	},
+	"steps": [
+	  {
+		"id": "priority",
+		"prompt": "What {param:town} should be for",
+		"options": [
+		  {
+			"id": "profit",
+			"label": "attend to the colony's profit",
+			"text": "Attend to the colony's profit. That is what you are there for, and what the Crown will ask me about.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "increase_economic_output"
+			  }
+			}
+		  },
+		  {
+			"id": "growth",
+			"label": "see that the town grows",
+			"text": "See that the town grows. A place with nobody in it returns nothing, whatever the ledgers say.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "grow_the_population"
+			  }
+			}
+		  },
+		  {
+			"id": "defence",
+			"label": "see to your defences",
+			"text": "See to your defences. I would rather pay for walls I did not need than explain why there were none.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "strengthen_defences"
+			  }
+			}
+		  },
+		  {
+			"id": "settle",
+			"label": "plant a new settlement",
+			"text": "Plant a new settlement. One town is a foothold; it is not a colony.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "settle_a_new_town"
+			  }
+			}
+		  },
+		  {
+			"id": "survival",
+			"label": "your people's survival must come first",
+			"text": "Your people's survival must come first. Everything else can wait on it, and I will hear no argument.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "secure_survival"
+			  }
+			}
+		  }
+		]
+	  }
+	],
+	"closing": [
+	  {
+		"text": "I remain your servant,",
+		"tone": {
+		  "pleased": "With every confidence in you,",
+		  "annoyed": "I trust I shall not have to write again,"
+		}
+	  }
+	]
   }
 }
