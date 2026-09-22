@@ -624,6 +624,48 @@ func check_balance_policies(content: ContentDatabase) -> void:
 				+ "player who was never simulated"
 			) % wanted)
 
+		# 🔒 **And the registers, for the same reason** (#317, `tone.md` §3).
+		# A personality writes a tone per letter kind; a misspelt tone or a kind
+		# that is not one of the three falls back to the plain register and
+		# measures a player nobody wrote.
+		_check_registers(id, policy)
+
+
+## The tone and harshness a personality writes per kind of letter.
+func _check_registers(id: String, policy: Dictionary) -> void:
+	var registers: Variant = policy.get("registers", {})
+	if typeof(registers) != TYPE_DICTIONARY:
+		_problem("policies.%s.registers" % id, "must be a table of letter kinds")
+		return
+
+	for kind in registers:
+		if not LetterKind.ALL.has(StringName(kind)):
+			_problem("policies.%s.registers" % id, (
+				"names the letter kind '%s', which is not one of %s"
+			) % [kind, ContentValidator._join(LetterKind.ALL)])
+			continue
+		var register: Variant = registers[kind]
+		if typeof(register) != TYPE_DICTIONARY:
+			_problem("policies.%s.registers.%s" % [id, kind], "must be a table")
+			continue
+		var tone := String(register.get("tone", ""))
+		if not tone.is_empty() and not Tone.is_tone(StringName(tone)):
+			_problem("policies.%s.registers.%s" % [id, kind],
+				"writes in '%s', which is not one of the five tones" % tone)
+		if register.has("harsh") and typeof(register["harsh"]) != TYPE_BOOL:
+			_problem("policies.%s.registers.%s" % [id, kind],
+				"declares 'harsh' as something other than true or false")
+
+	# 🔒 **Harshness is not offered when answering** (§9), so a personality
+	# asking for it there is asking for something the wizard will refuse — and a
+	# silently refused request is how this ticket's whole class of bug happens.
+	var answering: Dictionary = registers.get(String(LetterKind.ANSWERING), {})
+	if bool(answering.get("harsh", false)):
+		_problem("policies.%s.registers.answering" % id, (
+			"leans on a man about a decision the PC has already made, which §9 "
+			+ "does not offer — there is nothing to lean on"
+		))
+
 
 ## Every reply option id a letter offers.
 ##
