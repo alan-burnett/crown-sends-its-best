@@ -72,6 +72,11 @@ func raise_company(
 		"arms": company.arms.duplicate(),
 		"cavalry": company.is_cavalry(),
 		"at": [at.x, at.y],
+		# 🔒 **What it is worth, said the day it was raised** (#214, §5). Arming a
+		# company is an allocation the PC pays for a month in advance, and a
+		# letter that could only report how many men went out could not tell him
+		# whether the guns he sent made any difference.
+		"force": Force.breakdown(company, context.map),
 	}, WorldPhase.COLONY_MONTH)
 	return company
 
