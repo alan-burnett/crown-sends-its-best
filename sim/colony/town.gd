@@ -103,6 +103,18 @@ var traded_value: float = 0.0
 var arrivals_accrued: float = 0.0
 var experts_accrued: float = 0.0
 
+## Neighbours owed but not yet moved in (#219, found in passing).
+##
+## 🔒 **Its own remainder, and not the one above.** Both are people arriving and
+## both are fractional, but they are different *events*: settlers come off a ship
+## and a tribe's people walk in from the next valley, and Seam A has the log say
+## truthfully which. Sharing one accumulator meant whichever crossed a whole
+## number first spent the other's fraction, so a well-liked colony beside a
+## friendly people recorded every one of them as a passenger from Europe — and
+## the more attractive the colony was, the more reliably it did, because brisk
+## immigration drained the pool every month.
+var native_arrivals_accrued: float = 0.0
+
 ## Births owed but not yet born.
 ##
 ## **Natural growth starts slowly and snowballs** (SPEC §12.1), which for a town
@@ -460,6 +472,7 @@ func to_dict() -> Dictionary:
 		"education": education,
 		"safety": safety,
 		"arrivals_accrued": arrivals_accrued,
+		"native_arrivals_accrued": native_arrivals_accrued,
 		"experts_accrued": experts_accrued,
 		"rebel_sentiment": rebel_sentiment,
 		"growth_accrued": growth_accrued,
@@ -508,6 +521,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.education = float(data.get("education", 0.0))
 	town.safety = float(data.get("safety", 1.0))
 	town.arrivals_accrued = float(data.get("arrivals_accrued", 0.0))
+	town.native_arrivals_accrued = float(data.get("native_arrivals_accrued", 0.0))
 	town.experts_accrued = float(data.get("experts_accrued", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))
 	town.rebelling_since = int(data.get("rebelling_since", -1))

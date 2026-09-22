@@ -49,31 +49,30 @@ extends RefCounted
 
 # --- Weights. All tuning, all to be revised against the harness (#56) -------
 
+## 🔒 **Revisited as a whole when safety came alive** (#219), which is what the
+## Author asked for instead of restoring the numbers #117 set aside.
+##
+## The revisit turned on one observation: **combat reaches more than safety.** A
+## town under attack also feeds the militia standing in it out of the same larder
+## `health` measures, pays for it out of the purse `means` measures, and is
+## judged on whether its governor turned to the actual emergency, which is what
+## `hope` measures. War lands on four axes at once.
+##
+## `W_SAFETY` was set at 0.25 when it was the *only* way a war could be felt.
+## Carrying that figure unchanged into a world where the other three move too
+## would make any war overwhelming and every war read the same. So safety came
+## down to carry the specific dread of being attacked rather than the whole of a
+## campaign, and **hope took what it gave up** — because hope is where the PC's
+## letters land, and a war he can do something about has to be legible in the
+## component he can actually move.
+##
+## 🔒 **Unmeasured.** These are the balance job's to settle, and the harness has
+## not run against them. What is defensible here is the *shape* — safety below
+## health, hope level with health — not the third decimal.
 const W_HEALTH: float = 0.30
-const W_SAFETY: float = 0.25
+const W_SAFETY: float = 0.20
 const W_MEANS: float = 0.20
-const W_HOPE: float = 0.25
-
-## **Safety is inert until M5, so it is left out of the sum** (#117).
-##
-## Pinned at 1.0 and carrying a quarter of the weight, it contributed a flat
-## 0.25 every month — which is not a component, it is a constant, and it put a
-## floor of 0.25 under every town in the game. Across 400 harness runs quality of
-## life never left 0.91–0.98 (#90), so every ladder hung on it had one reachable
-## rung and every governor said the same word about his people for five years.
-##
-## Excluded and the rest renormalised: same relative balance between health,
-## means and hope, and the full range reachable.
-##
-## **This widens the range; it does not create variation.** A town whose health,
-## means and hope all sit near 1.0 still scores near 1.0. Real movement needs the
-## colony to struggle, which is M3's pressures landing. This only removes the
-## structural floor so that when they land, the ladders can discriminate.
-##
-## **Flipping this back is not the M5 plan.** The Author has asked that safety's
-## return be a fresh look at how combat reaches quality of life rather than a
-## restoration of these numbers — safety is not the only component a war touches.
-const SAFETY_IS_INERT: bool = true
+const W_HOPE: float = 0.30
 
 ## How far pleasure carries a town from where it stands towards contentment.
 const PLEASURE_LIFT: float = 0.45
@@ -125,7 +124,7 @@ static func of(town: Town, context: ColonyContext) -> Dictionary:
 
 	var parts: Dictionary = {
 		"health": health_of(town, wellbeing),
-		"safety": safety_of(town),
+		"safety": safety_of(town, context),
 		"means": means_of(town),
 		"hope": hope_of(town, context),
 		"pleasure": pleasure_of(wellbeing),
@@ -142,26 +141,26 @@ static func of(town: Town, context: ColonyContext) -> Dictionary:
 static func substance_of(parts: Dictionary) -> float:
 	var total := (
 		W_HEALTH * float(parts.get("health", 0.0))
+		+ W_SAFETY * float(parts.get("safety", 0.0))
 		+ W_MEANS * float(parts.get("means", 0.0))
 		+ W_HOPE * float(parts.get("hope", 0.0))
 	)
-	if not SAFETY_IS_INERT:
-		total += W_SAFETY * float(parts.get("safety", 0.0))
 	return clampf(total / live_weight(), 0.0, 1.0)
 
 
-## What the weights add up to, over the components that can move.
+## What the weights add up to.
+##
+## **Kept after safety came alive** (#219), though all four now count and it
+## reads 1.0. It is what stops a retune from having to be made twice: raise one
+## weight and the balance between the rest holds, with nothing anywhere carrying
+## a renormalised figure that the authored numbers no longer imply.
 static func live_weight() -> float:
-	var total := W_HEALTH + W_MEANS + W_HOPE
-	if not SAFETY_IS_INERT:
-		total += W_SAFETY
-	return maxf(0.001, total)
+	return maxf(0.001, W_HEALTH + W_SAFETY + W_MEANS + W_HOPE)
 
 
 ## What a component is worth once the sum has been renormalised.
 ##
-## Exposed so a test can state the interim balance without recomputing it, and
-## so nothing has to hardcode 0.40 where 0.30 is written.
+## Exposed so a test can state the balance without recomputing it.
 static func effective_weight(raw: float) -> float:
 	return raw / live_weight()
 
@@ -200,25 +199,25 @@ static func health_of(town: Town, wellbeing: Dictionary) -> float:
 	return clampf(FOOD_SHARE * fed + (1.0 - FOOD_SHARE) * clothed, 0.0, 1.0)
 
 
-## **Safety.** Is the population being attacked, and is it safe to travel.
+## **Safety.** Is the population being attacked, and is it safe to travel (§4).
 ##
-## **Pinned at 1.0 through M2.** Natives arrive in M5 and the military in M6, so
-## this is a component that does nothing for two milestones and then matters
-## enormously — and the weights will want revisiting when it comes alive.
+## 🔒 **Alive since #219**, and computed from what is standing near the town
+## rather than from a flag. `Threat` holds the arithmetic and the argument; what
+## matters here is what it is *not*.
 ##
-## One consequence worth knowing about while tuning: because safety carries a
-## quarter of substance and is always 1.0, **no town in M2 can feel worse than
-## `W_SAFETY`.** The bottom of the range is unreachable, and the lowest rungs of
-## the governor's quality-of-life ladder cannot fire until natives arrive. The
-## doc's own worst worked example needs a raid to get below it.
+## It is **not "is this town at war"** but "is this town threatened by forces it
+## cannot handle". A rebel town that has beaten what was sent against it is
+## *safe*, and that is precisely when it becomes most dangerous to the colony
+## (§6). So this reads facts about the world — who is next to the town, how
+## strong they are, whether the roads are clear — and **never reads rebel
+## sentiment**, which is what keeps a month's computation acyclic while still
+## letting §12.3's spiral run.
 ##
-## Note what it is not. It is **not "is this town at war"** but "is this town
-## threatened by forces it cannot handle". A rebel town that has beaten what was
-## sent against it is *safe*, and that is precisely when it becomes most
-## dangerous to the colony (doc §6). That is why this reads facts about what
-## happened to the town and never reads rebel sentiment.
-static func safety_of(_town: Town) -> float:
-	return 1.0
+## **And it recovers by itself.** Nothing decays and nothing remembers: the month
+## the enemy is gone or destroyed, safety is whole again. §6 asks for exactly
+## that, in both directions.
+static func safety_of(town: Town, context: ColonyContext) -> float:
+	return float(Threat.to(town, context).get("safety", 1.0))
 
 
 ## **Means.** Can the town buy what it wants when the ship docks.

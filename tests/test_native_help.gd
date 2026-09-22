@@ -115,7 +115,10 @@ func test_they_come_one_at_a_time() -> void:
 	# population, and the whole file has to obey it uniformly.
 	var town := _town()
 	var context := _context()
-	town.arrivals_accrued = 0.99
+	# 🔒 **Their own remainder**, not immigration's. Priming the shared one used
+	# to work and silently stopped meaning anything the day a colony attractive
+	# enough to draw settlers spent it on them first.
+	town.native_arrivals_accrued = 0.99
 	assert_eq(NativeHelp.join(_tribe(100.0), _village(), town, context), 1,
 		"a month brought a number of people other than one")
 
@@ -131,7 +134,7 @@ func test_a_village_is_one_fewer_for_every_man_who_goes() -> void:
 	var town := _town()
 	var village := _village()
 	village.people = 30
-	town.arrivals_accrued = 0.99
+	town.native_arrivals_accrued = 0.99
 	NativeHelp.join(_tribe(100.0), village, town, _context())
 	assert_eq(village.people, 29, "a man joined a town and stayed in his village too")
 
@@ -158,7 +161,7 @@ func test_nothing_on_a_town_records_where_a_man_came_from() -> void:
 	# 🔒 The acceptance, asserted on the object. A dev who added a tally of
 	# native-born colonists would find out here.
 	var town := _town()
-	town.arrivals_accrued = 0.99
+	town.native_arrivals_accrued = 0.99
 	NativeHelp.join(_tribe(100.0), _village(), town, _context())
 
 	var fields: Dictionary = {}
@@ -174,7 +177,7 @@ func test_nothing_on_a_town_records_where_a_man_came_from() -> void:
 
 func test_the_event_names_the_tribe_so_a_letter_can_say_who_helped() -> void:
 	var town := _town()
-	town.arrivals_accrued = 0.99
+	town.native_arrivals_accrued = 0.99
 	var context := _context()
 	NativeHelp.join(_tribe(100.0), _village(), town, context)
 
@@ -257,7 +260,7 @@ func test_their_people_do_not_move_the_crowns_books() -> void:
 
 	var before := run.standing.net_position
 	var context := ColonyContext.new(run.world, run.log, run.streams, run.map)
-	town.arrivals_accrued = 0.99
+	town.native_arrivals_accrued = 0.99
 	assert_eq(NativeHelp.join(tribe, village, town, context), 1, "nobody came")
 	NativeHelp.gifts(tribe, village, town, context)
 

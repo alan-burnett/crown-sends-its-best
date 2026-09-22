@@ -82,10 +82,14 @@ static func join(
 	if eagerness <= 0.0:
 		return 0
 
-	town.arrivals_accrued += JOIN_AT_BEST * eagerness
-	if town.arrivals_accrued < 1.0:
+	# 🔒 **Their own remainder** (`Town.native_arrivals_accrued`). Sharing
+	# immigration's pool meant a colony attractive enough to draw settlers spent
+	# this fraction on them, and the neighbours who actually walked in were logged
+	# as passengers off a ship.
+	town.native_arrivals_accrued += JOIN_AT_BEST * eagerness
+	if town.native_arrivals_accrued < 1.0:
 		return 0
-	town.arrivals_accrued -= 1.0
+	town.native_arrivals_accrued -= 1.0
 	town.workers += 1
 	# **And the village is one fewer**, because these are their people and not a
 	# fountain. A tribe that empties itself into a colony is a tribe the colony

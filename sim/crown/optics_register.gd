@@ -60,8 +60,18 @@ extends RefCounted
 ## **Hateful carries no prestige cost at all**, and should not.
 const EVENT_DESPERATE_LETTER: StringName = &"desperate_letter"
 
-## Events nothing emits yet, named here so the milestone that adds them is a
-## mechanic and not a negotiation about what the court thinks of it.
+## Named here before anything emitted them, so that the milestone which adds
+## them is a mechanic and not a negotiation about what the court thinks of it.
+##
+## **Two of them came alive in M6** and the mechanics that emit them still do not
+## know that: a company wiped out is `Company._remove` reaching zero, a town
+## taken is `Colony.lost`, and neither file has ever mentioned prestige. That is
+## §4's rule working — *a mechanic emits the event, it never prices it.*
+##
+## 🔒 **And there is still no such thing as losing a battle.** `battles.md` §6
+## has no rout and no surrender, so a month of heavy casualties is not an optic
+## and cannot become one: the court hears about **annihilation, not about a bad
+## month**. `company_dwindled` is deliberately absent from this list.
 const EVENT_TRIBUTE_PAID: StringName = &"tribute_paid"
 const EVENT_COMPANY_DESTROYED: StringName = &"company_destroyed"
 const EVENT_TOWN_LOST: StringName = &"town_lost"
