@@ -47,6 +47,11 @@ var contacts: Dictionary = {}
 ## What each commander has learned (#223), so a battle can add to it.
 var commanders: CommanderBook = null
 
+## 🔒 **Where the commanders' plans live** (#222). The same book governors and
+## contacts commit to, because a commander's objective is an Intent like any
+## other — Seam C, and the reason coordination needs no structure of its own.
+var book: IntentBook = null
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if companies == null:
@@ -62,6 +67,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 			_march(context)
 		WorldPhase.RECKONING:
 			_victual(context)
+		WorldPhase.INTENT:
+			_settle_objectives(context)
 
 
 ## Everyone marches, in resolution order.
@@ -69,6 +76,23 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 ## 🔒 **The order is §7's, even though nothing fights yet.** Movement is where
 ## two companies first contend for the same tile, and a march ordered by however
 ## the array happened to be built would be a different game on the same seed.
+## Phase 8: every commander decides where he is taking his company (#222).
+##
+## 🔒 **After the month has happened and before the next one starts**, which is
+## the whole of the one-month lag: he commits here and marches on it in phase 2
+## of the month after. What he reads when he chooses are plans committed in
+## earlier months, so the order of this loop cannot become a chain of command —
+## see `CoordinationConsiderations.plans_laid_before_now`.
+func _settle_objectives(context: ColonyContext) -> void:
+	if book == null:
+		return
+	for entry in companies.in_resolution_order():
+		var company: Company = entry
+		if company.is_empty() or company.is_headless():
+			continue
+		MarchingOrders.settle(company, context, book, contacts)
+
+
 func _march(context: ColonyContext) -> void:
 	for entry in companies.in_resolution_order():
 		var company: Company = entry

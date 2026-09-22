@@ -155,6 +155,7 @@ static func register_considerations() -> void:
 	# it** (#221). A commander scores every option open to him, and refusal is
 	# attack scoring below retreat rather than a branch.
 	CommanderConsiderations.register_all()
+	CoordinationConsiderations.register_all()
 	# 🔒 **`faction_posture` finally has something registered against it** (#206).
 	# It has been a decision kind with no considerations since the kernel was
 	# built, which is a decision nobody could make.

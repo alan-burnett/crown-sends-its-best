@@ -63,6 +63,22 @@ const FACTION_POSTURE: StringName = &"faction_posture"
 ## letter moves the weights, it does not move the company.
 const COMMANDER_ORDERS: StringName = &"commander_orders"
 
+## 🔒 **Where a commander is taking his company** (#222, `commanders.md` §4).
+##
+## The eighth point, and separate from the seventh because the two run on
+## different clocks. *What he does this step* is re-asked every move and every
+## attack, on a board his last step changed. *Where he is going* is a standing
+## purpose that survives the month, becomes an **Intent**, and is the only thing
+## another commander can see.
+##
+## 🔒 **This is the one decision that reads other actors' plans.** Everything
+## else in the game deliberates about its own situation alone. §4 is explicit
+## that it needs no faction brain and no general staff to do it: coordination is
+## considerations reading the `IntentBook`, so it **emerges** rather than being
+## directed — which it also has to, because §12.6 locks that the PC never
+## commands and the Marshal is an ocean away. **There is nobody to model.**
+const COMMANDER_OBJECTIVE: StringName = &"commander_objective"
+
 const ALL: Array[StringName] = [
 	GOVERNOR_INTENT,
 	ORDER_COMPLIANCE,
@@ -70,6 +86,7 @@ const ALL: Array[StringName] = [
 	DIRECTOR_URGENCY,
 	FACTION_POSTURE,
 	COMMANDER_ORDERS,
+	COMMANDER_OBJECTIVE,
 ]
 
 
