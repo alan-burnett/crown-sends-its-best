@@ -79,7 +79,7 @@ Four askers, and — the part that matters — **four different currencies**.
 | **Steward** | Gold, as a revenue target | Crown Standing |
 | **Marshal** | Resources for the Crown's wars | Crown Standing, and his loyalty |
 | **Provost** | Gold for a policy | Crown Standing |
-| **A rival duke** | Tribute in resources | **Prestige**, and a deferred attack arriving |
+| **A rival duke** | Tribute in **gold** | **Prestige**, and a deferred attack arriving |
 
 ### Gold — the Steward
 
@@ -111,15 +111,27 @@ the Marshal's war genuinely needs a thing the colony makes.
 Gold promised for a policy: education, immigration. Drawn on the Crown, so it
 costs standing directly.
 
-### Tribute — the rivals
+### 🔒 Tribute — the rivals, and it is gold
 
-§8.4: they bully the PC into giving them resources, and accepting **defers** the
-risk of an attack without ever buying peace.
+**A duke demands gold. Never resources.** Author's ruling, and it overrides the
+reading of §8.4 this section previously took.
 
-The currency is different, and deliberately so. §14.1 makes paying tribute an
-**optics** penalty, so it costs **prestige** rather than standing. A PC can be
-solvent, meeting every Crown demand, and still despised at court for having paid
-a foreigner to leave him alone.
+§8.4 says they bully the PC into giving them *resources*, and building that
+literally would mean a whole second shipping mechanic: a colony sending goods to
+a foreign power, with the routing, the convoys and the losses that implies. That
+is a large system bought for one contact, and none of it is the game. **The
+threat is the point, and gold carries the threat perfectly well.**
+
+> ⚠️ **SPEC §8.4 still reads *resources*** and the Author owns that file. Until it
+> is amended the spec technically disagrees with this paragraph; the ruling is
+> his, so the docs follow it, but the wording is one word he may want to change.
+
+Accepting **defers** the risk of an attack without ever buying peace.
+
+**What is different is what it costs**, not what is sent. §14.1 makes paying
+tribute an **optics** penalty, so it costs **prestige** rather than standing. A
+PC can be solvent, meeting every Crown demand, and still despised at court for
+having paid a foreigner to leave him alone.
 
 ## 5. Delivering, and the governor's cooperation
 

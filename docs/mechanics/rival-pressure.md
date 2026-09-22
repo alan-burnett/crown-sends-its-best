@@ -215,9 +215,6 @@ for it.
 
 ## 10. Open items
 
-- Whether a duke's demands should ever be **resources** rather than gold, as the
-  Marshal's are. §8.4 says they bully the PC into giving them *resources*, which
-  reads like they should.
 - Whether the PC can play dukes against one another. §8.4 forbids them asking for
   help against each other, but says nothing about the PC volunteering it.
 - What a duke does when the colony is plainly dying. Continuing to demand tribute
