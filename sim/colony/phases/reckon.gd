@@ -152,6 +152,24 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 			before.held(town.id, StringName(hoarded)),
 		)
 
+	# 🔒 **Companies eat before the objective and after the people** (#211,
+	# `battles.md` §3). Counted as mouths, in a tier of their own — so the purse
+	# goes shopping for their rations above the project and below survival, and a
+	# town that cannot cover them sends nothing rather than starving its citizens.
+	#
+	# **And held back from Sell**, on top of whatever the town keeps for itself.
+	# A town that sold the grain its militia eats would be unsupported by its own
+	# hand every month, which is not what "cannot disband its way out" means.
+	if context.companies != null:
+		for company in context.companies.supported_by(town.id):
+			var rations := (company as Company).victuals()
+			for resource in rations:
+				var wanted := float(rations[resource])
+				reckoning.companies[resource] = reckoning.company_of(
+					StringName(resource)) + wanted
+				reckoning.reserve[resource] = reckoning.reserve_of(
+					StringName(resource)) + wanted
+
 	# Spare and shortfall fall out of the above, from the town's stores as the
 	# phase began.
 	for resource in ResourceCatalogue.ids():
@@ -169,6 +187,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	context.log.emit(EVENT_RECKONED, town.id, context.state.month, {
 		"town": String(town.id),
 		"needs": reckoning.needs,
+		"companies": reckoning.companies,
 		"objective": reckoning.objective,
 		"wants": reckoning.wants,
 		"reserve": reckoning.reserve,

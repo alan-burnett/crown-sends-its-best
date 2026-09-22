@@ -127,6 +127,15 @@ var rivals: RivalBook = null
 ## regard stood when the court last heard from him.
 var patrons: PatronBook = null
 
+## Every body of armed men in the world (#211, `battles.md` §1, §7).
+##
+## 🔒 **One list, whoever is holding the musket.** Colonial, Crown, rebel, rival
+## and native bodies are all companies, because one structure and one resolver is
+## what stops five kinds of fighting men becoming five kinds of bug — and because
+## §7's resolution order is a property of the whole world rather than of any one
+## faction's list.
+var companies: Companies = null
+
 ## Ground a rival has parked men on (#188). Held on the run rather than on a
 ## town, because it is a fact about the map and a duke rather than about a
 ## settlement — and because a town that is lost takes its tiles with it.
@@ -298,6 +307,7 @@ static func new_run(
 	run.native_trade = TradeBook.new()
 	run.rivals = RivalBook.new()
 	run.patrons = PatronBook.new()
+	run.companies = Companies.new()
 	run.denied = DeniedTiles.new()
 	run.prestige = Prestige.new()
 	run.ending = RunEnding.new()
@@ -457,6 +467,7 @@ func to_dict() -> Dictionary:
 		"native_trade": native_trade.to_dict() if native_trade != null else {},
 		"rivals": rivals.to_dict() if rivals != null else {},
 		"patrons": patrons.to_dict() if patrons != null else {},
+		"companies": companies.to_dict() if companies != null else {},
 		"denied": denied.to_dict() if denied != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
@@ -500,6 +511,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.native_trade = TradeBook.from_dict(data.get("native_trade", {}))
 	run.rivals = RivalBook.from_dict(data.get("rivals", {}))
 	run.patrons = PatronBook.from_dict(data.get("patrons", {}))
+	run.companies = Companies.from_dict(data.get("companies", {}))
 	run.denied = DeniedTiles.from_dict(data.get("denied", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))

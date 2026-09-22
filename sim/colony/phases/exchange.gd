@@ -151,6 +151,13 @@ func _wanted(town: Town, before: ColonySnapshot, reckoning: Reckoning) -> Dictio
 			- before.held(town.id, StringName(resource))
 		if lacking > 0.0:
 			out[String(resource) + "|" + String(Spending.NEED)] = _portioned(lacking)
+	# 🔒 **Companies, above the objective** (#211, `battles.md` §3). What Reckon
+	# wrote down, over what the town already has — the same shape a need takes,
+	# because it is the same food.
+	for resource in reckoning.companies:
+		var rations := reckoning.company_of(StringName(resource)) 			- before.held(town.id, StringName(resource))
+		if rations > 0.0:
+			out[String(resource) + "|" + String(Spending.COMPANY)] = _portioned(rations)
 	for resource in reckoning.objective:
 		var required := float(reckoning.objective[resource])
 		if required > 0.0:
@@ -324,6 +331,11 @@ func _affordable(
 ) -> bool:
 	if tier == Spending.NEED:
 		return town.can_afford(Trade.EPSILON)
+	# 🔒 **The reserve gates the militia, and never the townspeople** (§3). A town
+	# that cannot eat spends its last coin; a town that cannot feed its soldiers
+	# without eating into next month's purse **sends nothing**, and the company
+	# goes unsupported. That is what makes militia a commitment the town cannot
+	# drop rather than a claim that outranks the future.
 	return town.can_afford(landed * step + reserve)
 
 

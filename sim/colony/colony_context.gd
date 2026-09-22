@@ -31,6 +31,13 @@ var intents: IntentBook = null
 ## the map when phase 2 next comes round.
 var parties: Array = []
 
+## Every body of armed men in the world (#211, `battles.md` §3).
+##
+## Here because a town victuals the companies it supports, which is part of its
+## month rather than a thing done to it afterwards — and because §3's order puts
+## them above the objective, which is a decision the Colony Month makes.
+var companies: Companies = null
+
 ## What each town holds against the Crown (#71). Null in fixtures that do not
 ## care, which is why every reader checks.
 var grievances: Grievances = null

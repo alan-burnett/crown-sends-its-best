@@ -230,6 +230,13 @@ func _init(p_run: RunState) -> void:
 	# hears is everything that has happened to him since it last heard.
 	var patron_driver := PatronDriver.new(run)
 
+	# Phases 2 and 7. They march where expeditions march, and a company nobody
+	# fed goes without after the Colony Month has had its chance (#211).
+	var companies := CompanyDriver.new()
+	companies.companies = run.companies
+	companies.colony = run.colony
+	companies.map = run.map
+
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and
 	# prestige reads the accounts standing has just judged.
@@ -241,6 +248,7 @@ func _init(p_run: RunState) -> void:
 	expeditions.parties = run.parties
 	expeditions.natives = run.tribes
 	colony_month.parties = run.parties
+	colony_month.companies = run.companies
 
 	crown_affairs.colony = run.colony
 	crown_affairs.contacts = run.contacts
@@ -282,6 +290,7 @@ func _init(p_run: RunState) -> void:
 		rival_tiles,
 		colony_month, villages, promise_driver, standings, native_trade,
 		policies, crown_standing, run_end, prestige, drift, rivals, patron_driver,
+		companies,
 		orders, silence, governors,
 		grievances,
 	]
