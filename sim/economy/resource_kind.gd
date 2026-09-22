@@ -64,6 +64,21 @@ var town_base: float = 1.0
 ## in the resource data per `town-economy.md` §1 and inert until M5.
 var native_worth: float = 0.0
 
+## How much a Crown at war wants this, as a share added to its price at full
+## intensity (#141, `town-economy.md` §1).
+##
+## 🔒 **Nought by default, and nought for every luxury.** SPEC §12.4 has the
+## Crown's wars reaching the colony through troop availability, demands and
+## treaties; prices are the fourth channel and the cheapest of the four. What an
+## army consumes gets dearer — and what it does not, does not.
+##
+## **A luxury may never carry one.** Tea is the cheapest pleasure a town can
+## never make for itself, and a war that priced it above a luxury the colony can
+## brew would have towns brew instead of buying, with SPEC §10.2's trade protests
+## quietly ceasing to work and nothing failing loudly. The content validator
+## refuses it. It is also simply truer: a Crown at war prices iron, not tea.
+var war_appetite: float = 0.0
+
 ## Food one head eats each month, when it is not on pasture (#48).
 var feed: float = 0.0
 
@@ -101,6 +116,7 @@ static func from_data(record: Dictionary) -> ResourceKind:
 	kind.livestock = bool(record.get("livestock", false))
 	kind.price = float(record.get("price", 1.0))
 	kind.native_worth = float(record.get("native_worth", 0.0))
+	kind.war_appetite = maxf(0.0, float(record.get("war_appetite", 0.0)))
 	kind.town_base = float(record.get("town_base", kind.price))
 	kind.requires_building = bool(record.get("requires_building", false))
 	kind.feed = float(record.get("feed", 0.0))

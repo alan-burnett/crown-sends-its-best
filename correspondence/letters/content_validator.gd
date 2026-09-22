@@ -65,6 +65,7 @@ func validate(content: ContentDatabase) -> bool:
 		validate_trigger(content.collection("triggers")[id])
 	validate_resources(content)
 	validate_clauses()
+	validate_war_appetites(content)
 	return ok()
 
 
@@ -77,6 +78,25 @@ func validate(content: ContentDatabase) -> bool:
 func validate_clauses() -> void:
 	for gap in IndependenceClause.missing():
 		_problem("clauses.independence", "no prose for '%s'" % gap)
+
+
+## 🔒 **No luxury carries a war appetite** (#141, `town-economy.md` §1).
+##
+## What keeps SPEC §10.2's tea rule safe by construction: tea is the cheapest
+## pleasure a town can never make for itself, and a war that priced it above a
+## luxury the colony can brew would have towns brew instead of buying, with trade
+## protests quietly ceasing to work and nothing failing loudly.
+##
+## A test, not a convention — and caught on the build, because the data edit that
+## would break it looks entirely reasonable.
+func validate_war_appetites(content: ContentDatabase) -> void:
+	for id in content.ids("resources"):
+		var record: Dictionary = content.collection("resources")[id]
+		if not bool(record.get("luxury", false)):
+			continue
+		if float(record.get("war_appetite", 0.0)) > 0.0:
+			_problem("resources.%s" % id,
+				"a luxury carries a war appetite. A Crown at war prices iron, not tea")
 
 
 # --- Resources -------------------------------------------------------------

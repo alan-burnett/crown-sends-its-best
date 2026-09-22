@@ -90,6 +90,12 @@ static func price_of(id: StringName) -> float:
 	return kind.price if kind != null else 1.0
 
 
+## How much a Crown at war wants this (#141). Nought for anything unauthored.
+static func war_appetite(id: StringName) -> float:
+	var kind := get_kind(id)
+	return kind.war_appetite if kind != null else 0.0
+
+
 ## Food one head of this eats each month, off pasture.
 static func feed_of(id: StringName) -> float:
 	var kind := get_kind(id)
