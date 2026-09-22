@@ -313,6 +313,39 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 
 ## What the request costs the contact, roughly, in the same units as payment.
 static func cost_of(order: Order) -> float:
+	var priced: Variant = _priced(order)
+	if priced != null:
+		return float(priced)
+
+	# 🔒 **An unlisted order kind is a bug, not a default** (#302).
+	#
+	# This fell through to two hundred, and that figure was **fabricated**: it
+	# said a thing costs the recipient rather a lot on the sole grounds that
+	# nobody had said what it cost. It broke `urge_intent` once — the comment in
+	# `_priced` is the post-mortem — and then broke `set_tax_rate` the same way,
+	# and four more kinds were quietly carrying it when this was written.
+	#
+	# **Nought and loud.** Nought because *we do not know that this costs him
+	# anything* is the honest reading of an omission; loud because the silence is
+	# what let it happen twice.
+	push_error(
+		"cost_of() has no case for order kind '%s', so it is priced at nothing. "
+		% order.kind + "Give it a case in Compliance._priced."
+	)
+	return 0.0
+
+
+## Whether this kind of order has a price at all.
+##
+## **Asked of the same match `cost_of` uses**, so the two cannot drift: a kind
+## added to one is added to both, and `test_compliance` fails the moment a
+## registered kind has no case.
+static func is_priced(kind: StringName) -> bool:
+	return _priced(Order.new(kind, &"anyone", {"resource": "iron", "amount": 1}, 0)) != null
+
+
+## What this order costs the man who receives it, or **null** if nobody has said.
+static func _priced(order: Order) -> Variant:
 	match order.kind:
 		M1Registrations.ORDER_REQUEST_TROOPS:
 			return 1000.0
@@ -354,7 +387,26 @@ static func cost_of(order: Order) -> float:
 			# actually costs him is his own judgement, and that is the `autonomy`
 			# consideration's business rather than a price.
 			return 0.0
-	return 200.0
+		M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY:
+			# 🔒 **A rate costs the colony, not the man who sets it** (#302, SPEC
+			# §8.1). The Steward is being asked to do his job, in the direction he
+			# already wants — and priced at the fall-through's two hundred, against
+			# a man whose heaviest weight is `cost_of_request`, the Steward of the
+			# Revenue refused an order to raise the revenue on turn one.
+			return 0.0
+		M1Registrations.ORDER_PREFER_SITE, M1Registrations.ORDER_DISSUADE_FOUNDING:
+			# **An opinion about where a town goes costs nothing to receive.** What
+			# it costs him is his own judgement, which is `autonomy`'s business
+			# rather than a price — the same argument as an urging, and it must be,
+			# because a preference is an urging about a place.
+			return 0.0
+		M1Registrations.ORDER_ADJUST_LOYALTY, M1Registrations.ORDER_GRANT_FAVOR, \
+		M1Registrations.ORDER_FUND_FOUNDING, M1Registrations.ORDER_PAY_TRIBUTE:
+			# Answering letters (#261). He never deliberates over these, so the
+			# price is moot — but it is written down, because an unpriced kind is
+			# how this went wrong twice and a moot figure is still a figure.
+			return 0.0
+	return null
 
 
 ## How much room the order leaves to decide what the PC meant.
