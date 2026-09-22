@@ -121,6 +121,9 @@ static func load_resources(content: ContentDatabase) -> void:
 	# And what each of §5's six factors is worth (#214).
 	if content.has_record(Force.COLLECTION, Force.RECORD):
 		Force.load_from(content.record(Force.COLLECTION, Force.RECORD))
+	# And how hard a battle hits (#216).
+	if content.has_record(Battle.COLLECTION, Battle.RECORD):
+		Battle.load_from(content.record(Battle.COLLECTION, Battle.RECORD))
 	if content.has_record(Patron.COLLECTION, Patron.CATALOGUE_RECORD):
 		Patron.load_from(content.record(Patron.COLLECTION, Patron.CATALOGUE_RECORD))
 	if content.has_record(PatronVices.COLLECTION, PatronVices.RECORD):

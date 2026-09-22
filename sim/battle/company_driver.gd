@@ -64,7 +64,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 func _march(context: ColonyContext) -> void:
 	for entry in companies.in_resolution_order():
 		var company: Company = entry
-		if company.is_empty() or company.destination == Vector2i(-1, -1):
+		if company.is_empty() or company.destination == Company.NOWHERE:
 			continue
 		company.advance(company.destination, context)
 
