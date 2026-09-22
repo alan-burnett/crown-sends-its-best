@@ -1,6 +1,6 @@
 {
   "id": "governor.i_have_made_a_bargain",
-  "sender": "governor_ashmere",
+  "sender": "governor",
   "type": "report",
   "skippable": true,
   "speaks_to": 25,

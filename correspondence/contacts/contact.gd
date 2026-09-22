@@ -34,6 +34,20 @@ const ROLE_INSTITUTIONAL: StringName = &"institutional"
 ## what he does.
 const ROLE_DIPLOMAT: StringName = &"diplomat"
 
+## 🔒 **Every role there is**, so a letter file can name one (#361).
+##
+## `Director.senders_of` reads a letter's `sender` as a contact id first and as a
+## role second; this is what makes the second reading possible without the
+## director keeping a list of its own that would drift from this one.
+const ROLES: Array[StringName] = [
+	ROLE_COMMANDER, ROLE_CROWN_OFFICER, ROLE_DIPLOMAT, ROLE_GOVERNOR,
+	ROLE_INSTITUTIONAL, ROLE_PATRON, ROLE_RIVAL,
+]
+
+
+static func is_role(name: StringName) -> bool:
+	return ROLES.has(name)
+
 ## Personality weights are drawn from this range. A weight of 1.0 is average
 ## interest in a consideration. Tuning: `docs/mechanics/deliberation.md` §9 flags
 ## how far weights should be allowed to spread before a contact reads as broken

@@ -1,6 +1,6 @@
 {
   "id": "governor.they_are_on_my_fields",
-  "sender": "governor_ashmere",
+  "sender": "governor",
   "type": "request",
   "skippable": false,
   "params": {

@@ -1,6 +1,6 @@
 {
   "id": "governor.report_idle_building",
-  "sender": "governor_ashmere",
+  "sender": "governor",
   "type": "warning",
   "skippable": true,
   "speaks_to": 30,
