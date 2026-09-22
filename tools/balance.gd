@@ -373,9 +373,40 @@ func _row(
 		"rebelling": rebelling,
 		"declared": _counted(fresh, Rebellion.EVENT_DECLARED),
 		"returned": _counted(fresh, Rebellion.EVENT_RETURNED),
+		# 🔒 **Sampled as stored, never recomputed** (#319, `prestige.md` §6).
+		# The month's value is kept on purpose so that two readers cannot
+		# disagree; a harness that worked it out again would be the second reader
+		# the doc exists to prevent.
+		"prestige": run.prestige.value if run.prestige != null else 0.0,
+		"prestige_net_gold": run.prestige.net_gold if run.prestige != null else 0.0,
+		"prestige_optics": run.prestige.optics_debt if run.prestige != null else 0.0,
+		# **Did my letters land** (§2), counted by kind over the year rather than
+		# as a rate, so a year of six refusals and a year of six delays are not
+		# the same row.
+		"protests": _counted(fresh, TradeProtest.EVENT_DECLARED),
+		"promises_broken": _counted(fresh, PromiseBook.EVENT_BROKEN),
 		"intents": "|".join(intents),
 		"objectives": "|".join(objectives),
 	}
+
+	# **What became of the post**, one column per outcome. `crown-standing.md` §4's
+	# cascade and `contacts.md` §2's spine both start here, and the CSV could say
+	# only how many letters went out.
+	for outcome in Compliance.OUTCOMES:
+		row["order_%s" % outcome] = _counted(fresh, Compliance.OUTCOME_EVENTS[outcome])
+
+	# 🔒 **Loyalty per contact, wide** (§5, §10). *Too much drift and the
+	# player's letters stop mattering; too little and a contact ignores a
+	# collapsing world* — and that balance cannot be tuned from a colony-level
+	# summary. It needs the series, per contact, against a personality whose
+	# deeds are known.
+	#
+	# Wide rather than long because a year is already a row: one column per man
+	# charts directly, and a second table keyed on year and contact would have to
+	# be joined before anybody could look at it.
+	for id in _contact_columns(run):
+		var contact := run.contact(StringName(id))
+		row["loyalty_%s" % id] = contact.loyalty() if contact != null else 0.0
 
 	# **What the colony actually bought, by kind.** The column that shows a duty
 	# backfiring: raise the rate on one comfort and the quantity moves onto the
@@ -433,21 +464,51 @@ const COLUMNS: PackedStringArray = [
 	"promises_outstanding", "tile_moves", "rebelling", "declared", "returned",
 	"demand_axis", "demand_interval", "demand_target", "demand_refusal",
 	"demand_askers", "sentiment", "worst_sentiment",
+	"prestige", "prestige_net_gold", "prestige_optics",
+	"protests", "promises_broken",
 ]
+
+
+## The contacts a run's loyalty columns are written for.
+##
+## **Taken from the roster and sorted**, so every row of a batch has the same
+## columns in the same order however the contacts were loaded — a CSV whose
+## columns move between seeds is not a CSV.
+func _contact_columns(run: RunState) -> PackedStringArray:
+	var out := PackedStringArray(run.contact_ids())
+	out.sort()
+	return out
 
 ## The fixed columns, then one per comfort, then the wide text last so a
 ## spreadsheet opens on the numbers.
-func _columns() -> PackedStringArray:
+func _columns(rows: Array = []) -> PackedStringArray:
 	var out := COLUMNS.duplicate()
+	for outcome in Compliance.OUTCOMES:
+		out.append("order_%s" % outcome)
 	for id in ResourceCatalogue.luxuries():
 		out.append("bought_%s" % id)
+
+	# **The loyalty columns are read off the rows**, not off a roster handed in
+	# separately. A batch writes one header for every seed, so a contact who
+	# joined in one run and not another must still get a column — and a header
+	# derived from the rows cannot disagree with them.
+	var contacts: Dictionary = {}
+	for row in rows:
+		for key in row:
+			if String(key).begins_with("loyalty_"):
+				contacts[String(key)] = true
+	var loyalties: PackedStringArray = PackedStringArray(contacts.keys())
+	loyalties.sort()
+	for column in loyalties:
+		out.append(column)
+
 	out.append("intents")
 	out.append("objectives")
 	return out
 
 
 func _years_csv(rows: Array) -> String:
-	var columns := _columns()
+	var columns := _columns(rows)
 	var lines: PackedStringArray = PackedStringArray([",".join(columns)])
 	for row in rows:
 		var cells: PackedStringArray = PackedStringArray()
