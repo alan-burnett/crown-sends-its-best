@@ -43,11 +43,13 @@ month it can put into construction, derived from its population and multiplied b
 `build_speed` effects. Duration is cost divided by capacity, so a large town
 raises a granary in weeks and a hamlet labours over it for a year.
 
-**🔒 The crane speeds buildings and nothing else.** Improvements are built out of
-the same capacity but answer to **worker cabins** instead
-(`tiles-and-improvements.md` §4). That pair is deliberate: **the crane is to
-buildings what worker cabins are to improvements**, so building up and spreading
-out are separate investments and no single project makes a town good at both.
+**🔒 Nothing in the tree speeds building.** Improvements answer to **worker
+cabins** (`tiles-and-improvements.md` §4) and have their own reason to exist;
+buildings have no counterpart and want none.
+
+**Build speed is a policy's business, not a building's** — Author's ruling
+(#327). A building whose only effect is *build faster* is a building a governor
+can never sensibly want, because everything it would accelerate outscores it.
 
 **Upkeep disables; it never destroys.** Many buildings cost the town gold every
 month. A town that cannot pay **keeps the building and loses the effect**, and it
@@ -102,7 +104,7 @@ wants both: food capacity has to keep climbing as a town grows.
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
 | **wharf** | 50 wood, 20 stone, 4 tools | **none** | All gold received in trade with the Crown **+10%** | dock |
-| *conversion buildings* | 40 wood, 10 stone, 10 iron, 8 tools | medium | See §6 | crane |
+| *conversion buildings* | 40 wood, 10 stone, 10 iron, 8 tools | medium | See §6 | — |
 | **gunsmith** | 20 iron, 20 stone, 20 wood, 25 tools | **high** | **Allows guns to be made at all** — the only gated conversion. Brings the **quartermaster** | foundry |
 
 ### Defence
@@ -143,7 +145,6 @@ building for defence gets an economy as a side effect.
 | :--- | :--- | :--- | :--- | :--- |
 | **town pasture** | 20 wood | none | Supports livestock, as the pasture improvement does | — |
 | **granary** | 30 wood | low | Natural population growth is faster, livestock included. Raises food's desired stock | — |
-| **crane** | 30 wood, 20 iron, 4 tools | low | Build speed | — |
 | **stonecutters** | 20 wood, 20 iron, 15 tools | medium | More stone | — |
 | **sawmill** | 20 stone, 20 iron, 15 tools | medium | More wood | — |
 | **mineworks** | 20 wood, 20 stone, 15 tools | medium | More ore | — |
@@ -206,10 +207,17 @@ the tree far too cheap.
 **What did not change is more interesting**, and it is §11's business rather than
 this section's: the buildings a town never gets to are not the expensive ones.
 
-**The crane is the deliberate counterweight.** At four tools it is nearly free,
-and it opens every conversion building in the tree at eight apiece. So the route
-out is cheap to *start* and expensive to *finish*, which is the right way round:
-a town can always begin, and only a prospering one arrives.
+**Nothing gates the way out, and that is the point.** A conversion building is
+eight tools and ten iron, reachable by any town that has ground through enough
+ore to afford one. There is no cheap entry fee ahead of it and no cheaper thing
+to build first.
+
+An earlier draft put a **crane** in front of all nine at four tools, meaning the
+route out to be *cheap to start and expensive to finish*. It failed in play: the
+crane's only effect was build speed, so a governor scored it at **0.07** against
+a foundry at **5.13** and never reached for it — and nine buildings sat behind
+the one thing nobody wanted (#327). **The counterweight was the gate, and the
+gate was the whole problem.**
 
 ### Which buildings cost them
 
@@ -220,7 +228,7 @@ mechanism, a precision or metalwork in it costs tools.
 | Band | Tools | Buildings |
 | :--- | --: | :--- |
 | Fittings | 2 | guard towers, scouts, worker cabins |
-| Gearing | 4 | irrigation station, wharf, palisade, theatre, crane |
+| Gearing | 4 | irrigation station, wharf, palisade, theatre |
 | Machinery | 8 | windmill, river mill, conversion buildings |
 | Works | 15 | mineworks, stonecutters, sawmill, college, cathedral |
 | Precision | 25 | gunsmith, printing press |
@@ -324,7 +332,7 @@ economy rests on rather than a tuning value free to drift.
 
 Every other conversion runs without any building at all. **Guns require a
 gunsmith**, and the armoury that improves them requires the gunsmith in turn,
-which requires the foundry, which requires the crane.
+which requires the foundry.
 
 Guns are the right thing to gate: they arm the militia, they are what SPEC §10.1
 says the natives covet most, and a colony that could arm itself with no
@@ -367,7 +375,7 @@ ale house sets its pleasure in direct competition with its supper.
 
 | Works now | Small additions | M4 — population | M5 — safety | M6 — defence |
 | :--- | :--- | :--- | :--- | :--- |
-| crane, stonecutters, sawmill, mineworks, town pasture, conversion buildings, gunsmith, granary *(reserve)*, tea house, ale house | dock, irrigation station, windmill, river mill, wharf, guard towers *(vision, influence)* | fairgrounds, theatre, printing press, library, college, scouts, worker cabins, granary *(growth)* | church, cathedral *(perceived safety)* | stockade, palisade, trenches, guard towers *(defence)* |
+| stonecutters, sawmill, mineworks, town pasture, conversion buildings, gunsmith, granary *(reserve)*, tea house, ale house | dock, irrigation station, windmill, river mill, wharf, guard towers *(vision, influence)* | fairgrounds, theatre, printing press, library, college, scouts, worker cabins, granary *(growth)* | church, cathedral *(perceived safety)* | stockade, palisade, trenches, guard towers *(defence)* |
 
 **Roughly two thirds of the tree does nothing yet**, which is fine but means an
 M3 playtest exercises the capacity and trade branches only.
