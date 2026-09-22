@@ -763,6 +763,50 @@ func check_name_bags(content: ContentDatabase) -> void:
 			_problem(String(role), "draws from '%s', which is not a bag" % bag)
 
 
+## 🔒 **Every perk and quirk names a knob that exists** (#286,
+## `perks-and-quirks.md` §2).
+##
+## A modifier id nobody has registered would apply **nothing**, so a perk the
+## player chose would be a perk he did not get — and the offered list would go on
+## offering it. That is the whole reason the ids go through a registry rather
+## than being read loosely.
+func check_run_modifiers(content: ContentDatabase) -> void:
+	_file = "data/%s" % RunModifiers.PERKS
+
+	for record in [RunModifiers.PERKS_RECORD, RunModifiers.QUIRKS_RECORD]:
+		if not content.has_record(RunModifiers.PERKS, record):
+			_problem(record, (
+				"does not exist, so adding a %s means adding a file — which is "
+				+ "the one thing the framework is for"
+			) % record.trim_suffix("s"))
+			continue
+
+		var seen: Dictionary = {}
+		for entry in RunModifiers.entries_in(content, record):
+			var id := String((entry as Dictionary).get("id", ""))
+			if id.is_empty():
+				_problem(record, "holds an entry with no id")
+				continue
+			if seen.has(id):
+				_problem("%s.%s" % [record, id], "is declared twice")
+			seen[id] = true
+
+			var modifiers: Variant = (entry as Dictionary).get("modifiers", [])
+			if typeof(modifiers) != TYPE_ARRAY:
+				_problem("%s.%s.modifiers" % [record, id], "expected a list")
+				continue
+			for modifier in modifiers:
+				if typeof(modifier) != TYPE_DICTIONARY:
+					_problem("%s.%s.modifiers" % [record, id],
+						"expected an object mapping a modifier id to its params")
+					continue
+				for modifier_id in modifier:
+					if not RunModifiers.is_modifier(String(modifier_id)):
+						_problem("%s.%s" % [record, id], (
+							"names the knob '%s', which nothing turns — known: %s"
+						) % [modifier_id, ", ".join(RunModifiers.ids())])
+
+
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
 func check_trigger_targets(content: ContentDatabase) -> void:

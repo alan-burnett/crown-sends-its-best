@@ -52,6 +52,11 @@ func _setup() -> RunSetup:
 func _run(setup: RunSetup) -> RunState:
 	var run := RunState.from_setup(setup)
 	ContactRoster.load_into(run, content)
+	# 🔒 **A perk is data now** (#286), so the knobs it names are turned from
+	# the file rather than by a line in `RunState`. A run assembled without this
+	# has no perks to read, which is correct and is why fixtures that care must
+	# ask.
+	RunModifiers.apply_all(run, content)
 	return run
 
 

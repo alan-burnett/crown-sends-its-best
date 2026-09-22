@@ -371,6 +371,12 @@ func use_content(p_content: ContentDatabase) -> void:
 	content = p_content
 	silence.content = p_content
 	director = Director.new(p_content)
+	# 🔒 **The run's perk and quirks turn their knobs here** (#286,
+	# `perks-and-quirks.md` §2), once, because a modifier is a fact about the run
+	# rather than a thing that happens in it — and here rather than in
+	# `new_run`, because a run assembled without content loaded has no perks to
+	# read and must still be a valid run.
+	RunModifiers.apply_all(run, p_content)
 
 
 func begin_turn() -> void:
