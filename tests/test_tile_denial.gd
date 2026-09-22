@@ -45,9 +45,19 @@ func after_each() -> void:
 	content.free()
 
 
+## A run in which a duke has actually turned up.
+##
+## 🔒 **Present as a contact and active in the world are not the same thing**
+## (#300, `rival-pressure.md` §6). All three dukes are on the roster from month
+## one — SPEC §8.4 makes rivals fixed contacts — but a duke arrives as the
+## Squeeze's fourth dimension, so until it has drawn one, nobody parks anything.
+##
+## This file is about **what a duke does once he is here**, so the fixture puts
+## him here. Without it every test below passed by describing an empty map.
 func _run() -> RunState:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
+	run.demands.levels[String(DemandGrowth.REACH)] = DemandSchedule.ASKERS_FOR_RIVALS
 	return run
 
 
@@ -61,7 +71,7 @@ func _context(run: RunState) -> ColonyContext:
 
 ## A duke deep enough in the low band to park men.
 func _a_duke_at(run: RunState, loyalty: float) -> Contact:
-	var duke: Contact = RivalDuke.all_in(run)[0]
+	var duke: Contact = RivalDuke.arrived_in(run, run.demands)[0]
 	duke.relationship.loyalty = loyalty
 	return duke
 

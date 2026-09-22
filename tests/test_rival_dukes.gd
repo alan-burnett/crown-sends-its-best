@@ -47,9 +47,18 @@ func after_each() -> void:
 	content.free()
 
 
+## A run in which a duke has turned up (#300, `rival-pressure.md` §6).
+##
+## 🔒 **Present as a contact and active in the world are not the same thing.**
+## All three are on the roster from month one, because SPEC §8.4 makes rivals
+## fixed contacts; a duke *arrives* when the Squeeze's fourth dimension produces
+## him. Most of this file is about a duke who is already here, so the fixture
+## puts one here — and the test that this is not so before he arrives is in
+## `test_rival_arrival`.
 func _run() -> RunState:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
+	run.demands.levels[String(DemandGrowth.REACH)] = DemandSchedule.ASKERS_FOR_RIVALS
 	return run
 
 

@@ -26,7 +26,10 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	var context := ColonyContext.new(state, log, streams, run.map)
 	context.colony = run.colony
 
-	for duke in RivalDuke.all_in(run):
+	# 🔒 **Only the dukes the Squeeze has produced** (#300). A duke who has not
+	# arrived is still drifting like everyone else, and latching him at the bottom
+	# before he turns up would have him arrive already at war.
+	for duke in RivalDuke.arrived_in(run, run.demands):
 		if duke.relationship == null:
 			continue
 		if RivalDuke.band_of(duke.relationship.loyalty) != RivalDuke.MINIMUM:
