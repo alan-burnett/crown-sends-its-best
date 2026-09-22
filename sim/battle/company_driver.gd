@@ -64,9 +64,59 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 func _march(context: ColonyContext) -> void:
 	for entry in companies.in_resolution_order():
 		var company: Company = entry
-		if company.is_empty() or company.destination == Company.NOWHERE:
+		if company.is_empty():
 			continue
-		company.advance(company.destination, context)
+		_take_the_month(company, context)
+
+
+## One company's month: **move and attack, interleaved** (#217, `battles.md` §8).
+##
+## A normal company moves *and* attacks in the same month — not one or the
+## other, or nothing could ever be chased down. Cavalry does both twice, and
+## taking them a tile at a time is what makes that a tempo advantage as well as a
+## combat one: **strike, reposition and strike again while the foot are still
+## marching.**
+##
+## 🔒 **Whether to attack at all is a decision, and it is not made here** (#221,
+## `commanders.md` §5). A commander scores every option including withdrawal, and
+## refusal is attack scoring below retreat rather than a branch in the code.
+## Until that lands, a company with a commander engages what it is in contact
+## with and a headless militia never initiates — which is `battles.md` §4's table
+## and not a rule of this file's own.
+func _take_the_month(company: Company, context: ColonyContext) -> void:
+	var from := company.at
+	var moves := company.tiles_this_month()
+	var attacks := company.attacks_this_month()
+
+	for _step in moves:
+		if company.destination != Company.NOWHERE:
+			company.step_toward(company.destination)
+		if attacks > 0 and _engage(company, context):
+			attacks -= 1
+		if company.is_empty():
+			break
+
+	if company.at != from and not company.is_empty():
+		company.report_march(from, context)
+
+
+## Fight whatever this company is in contact with, if it is the sort that does.
+##
+## Returns whether a battle was fought, so an attack is spent on a fight and not
+## on an empty field.
+func _engage(company: Company, context: ColonyContext) -> bool:
+	# 🔒 **A leaderless militia defends its town, and that is the whole of what
+	# it can ever do** (`battles.md` §4). It has nobody to decide where to go or
+	# when to stop, so it never initiates — being attacked is not a decision and
+	# needs none.
+	if company.is_headless():
+		return false
+	for entry in companies.in_resolution_order():
+		var other: Company = entry
+		if not Battle.may_fight(company, other) 				or not Battle.are_in_contact(company, other):
+			continue
+		return not Battle.resolve(company, other, map, context).is_empty()
+	return false
 
 
 ## What a month without rations does.
