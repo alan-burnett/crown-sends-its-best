@@ -67,6 +67,16 @@ const KNOWS_THE_COUNTRY: float = 1.25
 ## deliberately modest, and a leaderless company is not a broken one.
 static var _leadership: float = 1.25
 
+## What one point of a town's wall is worth to it (#218, `battles.md` §9).
+##
+## **The points are authored beside the buildings that raise them** and this is
+## what they buy, for the same division #215 drew: how much wall a stockade is
+## belongs with the stockade, and what a wall is worth in a battle belongs here.
+##
+## Tuning. A bare town is two points and a fully built one thirteen, so they read
+## 1.4x and 3.6x defending, against a fort's 2.5x.
+static var _defence_worth: float = 0.2
+
 ## 🔒 **The three terrain tiers and the two fort tiers are not here** (#215).
 ##
 ## They are **authored where the thing is** — a terrain's defence sits beside its
@@ -82,11 +92,13 @@ static var _leadership: float = 1.25
 static func load_from(record: Dictionary) -> void:
 	_arms_worth = record.get("arms_worth", _arms_worth).duplicate()
 	_leadership = float(record.get("leadership", _leadership))
+	_defence_worth = maxf(0.0, float(record.get("defence_worth", _defence_worth)))
 
 
 static func reset() -> void:
 	_arms_worth = {"guns": 1.5, "tools": 0.5, "horses": 0.4}
 	_leadership = 1.25
+	_defence_worth = 0.2
 
 
 ## What the ground under a tile is worth to whoever is standing on it.
@@ -106,6 +118,29 @@ static func terrain_worth(terrain: StringName) -> float:
 static func fort_worth(id: StringName, defending: bool) -> float:
 	var improvement := Improvement.find(id)
 	return improvement.defence_for(defending) if improvement != null else 1.0
+
+
+## What a combatant's own works are worth to it, defending (#218,
+## `battles.md` §9).
+##
+## 🔒 **A town is a company with a wall**, and this is the wall. `Building`
+## counts the points — the town's own, plus its defence branch, read through
+## `is_lit` like every other effect so a town too poor to pay for its palisade
+## does not have one — and **this file decides what they are worth**, which is
+## #215's division and the guard against applying a defence figure twice.
+##
+## **Additive in the points and so linear in the multiplier**, which is what
+## makes the defence branch worth building out a little way rather than worth
+## finishing: each building bought is worth the same as the last, and none of
+## them is a cliff.
+##
+## 🔒 **Defending only.** A town does not march, so there is no second figure to
+## give it — and the shape of the whole ticket is that ground is taken by coming
+## to it, never by a town going out.
+static func wall_worth(points: float, defending: bool) -> float:
+	if not defending:
+		return 1.0
+	return maxf(1.0, 1.0 + maxf(0.0, points) * _defence_worth)
 
 
 ## What its arms are worth, as one multiplier.
@@ -156,13 +191,20 @@ static func terrain_of(
 	return terrain_worth(ground) * (KNOWS_THE_COUNTRY if knows else 1.0)
 
 
-## What a fort on its tile is worth, attacking or defending.
+## What a fort on its tile and its own works are worth, attacking or defending.
+##
+## **Two sources, one conversion.** The tile is read here, as it always was; the
+## combatant contributes only a count of the works it carries itself, because §9's
+## town fortifies without an improvement on the map and must still come down this
+## one path. A company carries none and is worth its fort; a town carries its wall
+## and its defence branch.
 static func fortification_of(
 	company: Company, map: WorldMap, defending: bool, attacker: Company = null
 ) -> float:
 	if map == null or company.at == Company.NOWHERE:
 		return 1.0
-	var worth := fort_worth(map.improvement_at(company.at.x, company.at.y), defending)
+	var worth := fort_worth(map.improvement_at(company.at.x, company.at.y), defending) \
+		* wall_worth(company.own_defence_points(), defending)
 	if worth <= 1.0 or attacker == null:
 		return worth
 	# **Siegecraft** (`commanders.md` §6): *part of a fort's defensive bonus

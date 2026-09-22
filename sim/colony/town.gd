@@ -195,6 +195,22 @@ var objective_invested: Dictionary = {}
 ## month recovers; a town that misses three buries people.
 var months_hungry: int = 0
 
+## Battle casualties this town has taken that do not yet amount to a whole
+## person (#218, `battles.md` §6, §9).
+##
+## **A town is a company with a wall, so it carries the one thing a company
+## carries between months.** Casualties are fractional and they accumulate: a
+## besieger inflicting 0.3 a month kills nobody for three months and then kills
+## somebody, and the town that is visibly dying for those three months is exactly
+## the letter its governor should be writing.
+##
+## 🔒 **This is not siege state.** Nothing here records that a siege is under
+## way, how long it has run or what stage it has reached — it is the same
+## `casualties_owed` every company has, living on the town because the town is
+## the combatant. A dev who finds himself adding a second field beside it has
+## started building the subsystem §9 says does not exist.
+var battle_owed: float = 0.0
+
 ## Relief given away, less relief received, valued at Crown prices.
 ##
 ## **A town that keeps carrying the colony resents the Crown for it** (#45). M3
@@ -281,6 +297,37 @@ func expert_total() -> int:
 	for resource in experts:
 		total += int(experts[resource])
 	return total
+
+
+## Take exactly one life, and say whose. Empty when there is nobody left.
+##
+## 🔒 **Workers before experts, always** (`CLAUDE.md`, `the-provost.md` §4). A
+## colony loses its skilled men last — they are fed by the rest as long as there
+## is anything to feed them with, and it is the workers who take up the pitchforks
+## when the natives come. Accumulated expertise is therefore safe from a bad
+## winter, which is what makes investing in education something other than a
+## gamble.
+##
+## 🔒 **And it is the same rule under arms.** A famine and a storming both come
+## through here, because a sack that ate the schoolmasters first would undo that
+## guarantee at the one moment the player most needs it to hold. What differs
+## between them is *how many* lives are taken — one for hardship, a share for
+## armed attack (`battles.md` §9) — never *whose*.
+##
+## Experts go in sorted order, so which one is lost is the colony's business
+## rather than the dictionary's.
+func take_one_life() -> String:
+	if workers > 0:
+		workers -= 1
+		return "worker"
+
+	var kinds: PackedStringArray = PackedStringArray(experts.keys())
+	kinds.sort()
+	for kind in kinds:
+		if expert_count(StringName(kind)) > 0:
+			add_experts(StringName(kind), -1)
+			return String(kind)
+	return ""
 
 
 # --- Stockpile -------------------------------------------------------------
@@ -435,6 +482,7 @@ func to_dict() -> Dictionary:
 		"objective_invested": objective_invested.duplicate(),
 		"objective_cargo": objective_cargo.duplicate(),
 		"months_hungry": months_hungry,
+		"battle_owed": battle_owed,
 		"relief_balance": relief_balance,
 		"governor": String(governor_id),
 		"rebelling": rebelling,
@@ -485,6 +533,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
 	town.objective_cargo = data.get("objective_cargo", {}).duplicate()
 	town.months_hungry = int(data.get("months_hungry", 0))
+	town.battle_owed = float(data.get("battle_owed", 0.0))
 	town.relief_balance = float(data.get("relief_balance", 0.0))
 	town.governor_id = StringName(data.get("governor", ""))
 	town.rebelling = bool(data.get("rebelling", false))

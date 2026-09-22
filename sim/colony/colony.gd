@@ -33,10 +33,17 @@ func add(town: Town) -> Town:
 ## removed once. `prestige.md` §4 prices it; this file only says it happened, and
 ## the court decides what to make of it.
 ##
-## **Nothing calls this yet.** Taking a town needs rivals and natives who can
-## fight, which is M6 — so this is the seam that milestone fills, said out loud
-## rather than left as a gap somebody has to discover.
-func lost(town: Town, to: StringName, why: String, context: ColonyContext) -> bool:
+## **The phase is the caller's**, because a town can be lost in more than one of
+## them and the log has to say truthfully which. A storming happens in world
+## month phase 2 (#218); anything that takes a town during the colony month says
+## nothing and gets that.
+func lost(
+	town: Town,
+	to: StringName,
+	why: String,
+	context: ColonyContext,
+	phase: StringName = WorldPhase.COLONY_MONTH,
+) -> bool:
 	if town == null or by_id(town.id) == null:
 		return false
 	towns.erase(town)
@@ -47,7 +54,7 @@ func lost(town: Town, to: StringName, why: String, context: ColonyContext) -> bo
 		"why": why,
 		"population": town.population(),
 		"at": [town.at.x, town.at.y],
-	}, WorldPhase.COLONY_MONTH)
+	}, phase)
 	return true
 
 

@@ -107,7 +107,12 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 	var attacks := company.attacks_this_month()
 
 	while moves > 0 or attacks > 0:
-		match _what_he_decides(company, context):
+		# **Asked once and used twice.** What is in front of him decides both what
+		# he may choose and what he swings at, and one of the two things it can be
+		# — a town — is a view built on the spot, so looking twice would build two
+		# of them and let him deliberate about one and attack the other.
+		var enemy := _in_contact_with(company)
+		match _what_he_decides(company, enemy, context):
 			CommanderConsiderations.MARCH:
 				if moves <= 0:
 					break
@@ -116,7 +121,7 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 			CommanderConsiderations.ATTACK:
 				if attacks <= 0:
 					break
-				_engage(company, context)
+				_engage(company, enemy, context)
 				attacks -= 1
 			CommanderConsiderations.WITHDRAW:
 				if moves <= 0:
@@ -146,7 +151,9 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 ## 🔒 **Asked afresh for every step**, because cavalry's second move happens on a
 ## board its first move changed — and a man who struck and then found the second
 ## enemy far stronger should be free to stop.
-func _what_he_decides(company: Company, context: ColonyContext) -> StringName:
+func _what_he_decides(
+	company: Company, enemy: Company, context: ColonyContext
+) -> StringName:
 	var commander := companies.commander_of(company, contacts)
 	if commander == null:
 		return CommanderConsiderations.HOLD
@@ -160,18 +167,37 @@ func _what_he_decides(company: Company, context: ColonyContext) -> StringName:
 		commander,
 		CommanderConsiderations.options_for(
 			company,
-			_in_contact_with(company),
+			enemy,
 			company.destination != Company.NOWHERE and company.at != company.destination),
 		deliberation)
 	return decision.chosen_id() if decision.has_choice() else CommanderConsiderations.HOLD
 
 
-## The first company in front of him that he may fight, in §7's order.
+## The first thing in front of him that he may fight, in §7's order.
+##
+## 🔒 **Companies before towns** (#218). Not a preference — a rule with a
+## consequence: a besieger cannot stroll past the militia drawn up outside a town
+## to storm the town behind it, for the same reason `options_for` will not offer
+## him MARCH while an enemy stands in contact. **Ground is taken only when the
+## last defender is gone**, and a town's field army is a defender.
+##
+## Towns come through `TownCompany`, which is a `Company` and needs nothing here
+## to know that it used to be a town. §12.3's locks are applied by `may_fight`
+## reading its allegiance, so the colony's own militia cannot march on a loyal
+## town and cannot march on a rebel one either.
 func _in_contact_with(company: Company) -> Company:
 	for entry in companies.in_resolution_order():
 		var other: Company = entry
 		if Battle.may_fight(company, other) and Battle.are_in_contact(company, other):
 			return other
+	if colony == null:
+		return null
+	for town in colony.in_order():
+		if not Battle.tiles_in_contact(company.at, town.at):
+			continue
+		var wall := TownCompany.of(town, company)
+		if Battle.may_fight(company, wall):
+			return wall
 	return null
 
 
@@ -185,11 +211,10 @@ func _home_tile(company: Company) -> Vector2i:
 ##
 ## Returns whether a battle was fought, so an attack is spent on a fight and not
 ## on an empty field.
-func _engage(company: Company, context: ColonyContext) -> bool:
-	var other := _in_contact_with(company)
-	if other == null:
+func _engage(company: Company, enemy: Company, context: ColonyContext) -> bool:
+	if enemy == null:
 		return false
-	return not Battle.resolve(company, other, map, context).is_empty()
+	return not Battle.resolve(company, enemy, map, context).is_empty()
 
 
 ## What a month without rations does.

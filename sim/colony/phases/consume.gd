@@ -266,7 +266,7 @@ func _starve(town: Town, unmet: float, context: ColonyContext) -> void:
 
 	var toll := maxi(1, int(round(float(town.population()) * unmet * FAMINE_DEATH_RATE)))
 	for _each in toll:
-		var who := _take_one_life(town)
+		var who := town.take_one_life()
 		if who.is_empty():
 			break  # There is nobody left to lose.
 		context.log.emit(EVENT_FAMINE, town.id, context.state.month, {
@@ -276,26 +276,6 @@ func _starve(town: Town, unmet: float, context: ColonyContext) -> void:
 			"months_hungry": town.months_hungry,
 			"severity": String(Shortage.grade_of(unmet)),
 		}, WorldPhase.COLONY_MONTH)
-
-
-## Take exactly one life, and say whose. Empty when there is nobody left.
-##
-## Workers first, then experts. **A colony loses its skilled men last** — they
-## are fed by the rest as long as there is anything to feed them with, and losing
-## one is a blow the town feels for years. Experts go in sorted order, so which
-## one is lost is the colony's business rather than the dictionary's.
-func _take_one_life(town: Town) -> String:
-	if town.workers > 0:
-		town.workers -= 1
-		return "worker"
-
-	var kinds: PackedStringArray = PackedStringArray(town.experts.keys())
-	kinds.sort()
-	for kind in kinds:
-		if town.expert_count(StringName(kind)) > 0:
-			town.add_experts(StringName(kind), -1)
-			return String(kind)
-	return ""
 
 
 ## Livestock kinds, cheapest first, then by name.
