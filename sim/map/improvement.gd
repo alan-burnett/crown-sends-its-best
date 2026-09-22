@@ -41,6 +41,18 @@ var livestock_capacity: int = 0
 var natural: bool = false
 
 ## Resource id -> how much raising it costs the town (#49, #53).
+## 🔒 **What holding this improvement is worth in a fight** (#215,
+## `tiles-and-improvements.md` §6), as `{attacking, defending}`.
+##
+## **The fort is the exception in every direction.** It is the only improvement
+## that affects no yield whatsoever — everything else exists to change what a
+## tile produces, and this one exists to change what happens on it. So the two
+## figures live here, beside the cost of raising it, rather than in a battle
+## table that would have to name an improvement by id.
+##
+## Empty on everything else, which reads as no advantage: a farm is not cover.
+var defends: Dictionary = {}
+
 var cost: Dictionary = {}
 
 ## **Gold a month to keep it worked** (#151), and it may be zero.
@@ -71,6 +83,7 @@ static func load_from(records: Array) -> void:
 		improvement.allowed_on = PackedStringArray(record.get("allowed_on", []))
 		improvement.livestock_capacity = JsonTypes.to_int(record.get("livestock_capacity", 0), "livestock_capacity")
 		improvement.natural = bool(record.get("natural", false))
+		improvement.defends = record.get("defends", {}).duplicate()
 		improvement.cost = record.get("cost", {}).duplicate()
 		improvement.upkeep = maxf(0.0, float(record.get("upkeep", 0.0)))
 		_improvements[String(improvement.id)] = improvement
@@ -113,6 +126,21 @@ func can_build_on(terrain: StringName) -> bool:
 
 
 ## How well this terrain suits the improvement.
+## What this improvement is worth to a company standing on it.
+##
+## **One unless it says otherwise**, so every improvement but the fort is
+## exactly as good as bare ground to fight over — which is what makes the fort
+## the one thing worth taking for its own sake.
+func defence_for(defending: bool) -> float:
+	return maxf(1.0, float(defends.get("defending" if defending else "attacking", 1.0)))
+
+
+## Whether this improvement exists to change what happens on a tile rather than
+## what it yields.
+func is_a_fortification() -> bool:
+	return not defends.is_empty()
+
+
 func factor_on(terrain: StringName) -> float:
 	if terrain_factor.has(String(terrain)):
 		return float(terrain_factor[String(terrain)])

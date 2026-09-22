@@ -1,18 +1,12 @@
 [
   {
     "id": "force",
-    "note": "What each factor of battles.md section 5 is worth. Every figure is a tuning target section 12 names: want-per-head for guns, tools and horses and each one's multiplier, what leadership is worth, the three terrain tiers and the two fort tiers. None of them is measured, because nothing raises a company yet and there is nothing to measure. Terrain and fortification appear here and nowhere else - a defender's bonus applied again at resolution would be double-counted, and the letters would then describe a mismatch that did not happen.",
+    "note": "What each factor of battles.md section 5 is worth, for the factors that belong to the company. Every figure is a tuning target section 12 names. The three terrain tiers and the two fort tiers are deliberately not here (#215): a terrain's defence is authored beside its yields in data/terrain, and a fort's two figures beside the cost of raising it in data/improvements, because a battle table naming terrains and improvements by id would be a second place they are described. They are still read in force.gd and nowhere else, which is the lock test_force enforces.",
     "arms_worth": {
       "guns": 1.5,
       "tools": 0.5,
       "horses": 0.4
     },
-    "leadership": 1.25,
-    "terrain": {
-      "mountains": 1.8,
-      "forest": 1.4
-    },
-    "fort_attacking": 1.3,
-    "fort_defending": 2.5
+    "leadership": 1.25
   }
 ]
