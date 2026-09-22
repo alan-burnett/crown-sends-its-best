@@ -146,6 +146,9 @@ func _init(p_run: RunState) -> void:
 	colony_month.intents = run.intents
 	colony_month.grievances = run.grievances
 	colony_month.contacts = run.contacts
+	# For the residents a building brings and takes (#276). The month itself
+	# still sees only its context.
+	colony_month.run = run
 	colony_month.month.set_handler(ColonyMonth.WORK, WorkPhase.new())
 	colony_month.month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
 	colony_month.month.set_handler(ColonyMonth.RELIEF, ReliefPhase.new())
