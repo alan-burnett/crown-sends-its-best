@@ -384,6 +384,35 @@ static func reserved_resources(town: Town) -> PackedStringArray:
 	return sorted
 
 
+## How much wall this town has, in defence points (#218, `battles.md` §9,
+## `buildings.md` §4).
+##
+## 🔒 **The town itself fortifies**, and it does so as a building rather than as
+## a special case: `town_hall` carries the base figure, so the bare town is one
+## entry in this sum and not a branch above it. §9's *a town is a company with a
+## wall* is then true of a town that has built nothing at all.
+##
+## **Defence buildings add on top** — stockade, palisade, trenches, guard
+## towers — and they add rather than multiply, so the branch is worth building
+## out rather than worth reaching the end of.
+##
+## And it reads through `is_lit` like every other effect, which means **a town
+## too poor to pay for its palisade does not have one this month.** That is the
+## counterweight the defence branch has otherwise never had: walls are the one
+## thing with an upkeep that nobody notices until the month somebody arrives.
+##
+## Points, not a multiplier — what a point of wall is *worth* is a battle figure
+## and lives in `Force`.
+static func fortification_points_for(town: Town) -> float:
+	var points := 0.0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building == null or not is_lit(town, StringName(id)):
+			continue
+		points += maxf(0.0, float(building.effect("defence", 0.0)))
+	return points
+
+
 ## How many head this town's buildings can graze.
 ##
 ## **Livestock off pasture eat the town's grain** (#48), so this is the

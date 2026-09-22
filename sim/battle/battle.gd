@@ -126,9 +126,19 @@ static func _on_one_side(one: StringName, other: StringName) -> bool:
 static func are_in_contact(mine: Company, theirs: Company) -> bool:
 	if mine == null or theirs == null:
 		return false
-	if mine.at == Company.NOWHERE or theirs.at == Company.NOWHERE:
+	return tiles_in_contact(mine.at, theirs.at)
+
+
+## The same question asked of two tiles.
+##
+## Named separately so that a caller deciding **whether to build a combatant at
+## all** can ask it first — #218's towns are a view made on the spot, and a
+## colony of twenty would otherwise be twenty views built per step to find the
+## one that is adjacent.
+static func tiles_in_contact(mine: Vector2i, theirs: Vector2i) -> bool:
+	if mine == Company.NOWHERE or theirs == Company.NOWHERE:
 		return false
-	var apart := theirs.at - mine.at
+	var apart := theirs - mine
 	return absi(apart.x) <= 1 and absi(apart.y) <= 1
 
 

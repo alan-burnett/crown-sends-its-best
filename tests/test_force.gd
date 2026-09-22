@@ -318,7 +318,10 @@ func test_terrain_and_fortification_appear_in_force_and_nowhere_else() -> void:
 		if path.ends_with("force.gd"):
 			continue
 		var code := _code_of(path)
-		for token in ["Force.terrain_worth", "Force.fort_worth",
+		# `Force.wall_worth` joined the list with the town (#218): a second reader
+		# of it is the same double-count this has always guarded against, arriving
+		# by the one route §9 opened.
+		for token in ["Force.terrain_worth", "Force.fort_worth", "Force.wall_worth",
 				"Terrain.defence_of", ".defence_for("]:
 			if code.contains(token):
 				readers.append("%s calls %s" % [path.get_file(), token])

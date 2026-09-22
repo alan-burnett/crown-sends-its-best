@@ -2,9 +2,11 @@
   {
 	"id": "town_hall",
 	"name": "the town hall",
+	"note": "defence is the town's own wall (battles.md section 9): a town is a company with a wall, and it has one before it builds anything. It lives here rather than in a battle table because the town hall is the building every town has from the moment it is founded, which makes it the anchor for town-wide effects, and because a defence figure authored anywhere but beside the thing that defends is a second place that thing is described. The figure is tuning. Its upkeep is zero, so unlike the defence branch this wall can never go dark.",
 	"cost": {},
 	"upkeep": 0,
 	"effects": {
+	  "defence": 2,
 	  "conversions": {
 		"beer<-food": {
 		  "ratio": 4.0

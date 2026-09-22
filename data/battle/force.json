@@ -1,12 +1,13 @@
 [
   {
     "id": "force",
-    "note": "What each factor of battles.md section 5 is worth, for the factors that belong to the company. Every figure is a tuning target section 12 names. The three terrain tiers and the two fort tiers are deliberately not here (#215): a terrain's defence is authored beside its yields in data/terrain, and a fort's two figures beside the cost of raising it in data/improvements, because a battle table naming terrains and improvements by id would be a second place they are described. They are still read in force.gd and nowhere else, which is the lock test_force enforces.",
+    "note": "What each factor of battles.md section 5 is worth, for the factors that belong to the company. Every figure is a tuning target section 12 names. The three terrain tiers and the two fort tiers are deliberately not here (#215): a terrain's defence is authored beside its yields in data/terrain, and a fort's two figures beside the cost of raising it in data/improvements, because a battle table naming terrains and improvements by id would be a second place they are described. They are still read in force.gd and nowhere else, which is the lock test_force enforces. defence_worth is what one point of a town's wall is worth to it, defending (section 9, issue 218). The points themselves are authored beside the buildings that raise them, for the same reason; what a point is worth is a battle figure and so it is here. A bare town is 2 points and a fully walled one is 13, so at 0.2 they read 1.4x and 3.6x defending, against a fort's 2.5x. Tuning.",
     "arms_worth": {
       "guns": 1.5,
       "tools": 0.5,
       "horses": 0.4
     },
-    "leadership": 1.25
+    "leadership": 1.25,
+    "defence_worth": 0.2
   }
 ]

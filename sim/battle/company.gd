@@ -329,6 +329,21 @@ func is_empty() -> bool:
 	return size <= 0
 
 
+## Defence points this body of men carries of its own, over and above whatever
+## the ground gives it (#218, `battles.md` §9).
+##
+## **None, for a company.** A company is worth the fort it is standing in and
+## nothing more; §9's town is the one combatant that fortifies by some other
+## means, and it says so by answering here.
+##
+## 🔒 **Points, never a multiplier.** What a point of defence is *worth* is a
+## battle figure and is converted in `Force` and nowhere else (#215) — which is
+## the double-count guard, and the reason this returns a count instead of the
+## finished number.
+func own_defence_points() -> float:
+	return 0.0
+
+
 ## 🔒 **Nobody deliberates for it** (`battles.md` §4). A headless company holds
 ## the posture it was raised with and does nothing else — it never chooses, never
 ## reconsiders and can never be written to.
