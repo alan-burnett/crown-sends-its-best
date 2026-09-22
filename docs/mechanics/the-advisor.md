@@ -64,7 +64,24 @@ full speed.
 
 ## 4. What he speaks about
 
-Two kinds, and they behave differently.
+**Three kinds**, and they behave differently.
+
+### Arrival — about the surface, not the options on it
+
+The first is not about a choice at all. **The first time the player reaches the
+desk**, before a single letter is opened, he introduces himself and explains the
+desk: the stack, the post, what sending does, where the map and the ledger are.
+
+> *"I'm your advisor. Congratulations on the appointment. Here is your desk, and
+> here is how it works."*
+
+**This is the one piece of him that is a greeting as well as an explanation**,
+and it is the only advice that fires with nothing in front of the player to
+explain. Everything else answers a control; this one answers a room.
+
+It is also **unconditional**: it has never been said, so it fires at level 1 and
+level 2 alike. The cooldown never suppresses a first arrival, because there is
+only ever one.
 
 ### Explanations — static, about a control
 
@@ -150,10 +167,14 @@ are presented so a new player who understands basic strategy can read them — a
 an option that needed a tutorial standing beside it would be an option worded
 wrong (§3). The same test as everywhere else, applied to a screen he never sees.
 
-**So the opening letter is his first appearance.** #274 — the governor asking
-what the colony is for and how close to settle to the tribes — is a desk
-decision, the first of the run, and the one a new player understands least. He is
-there for it.
+**His first appearance is the desk itself**, not the first letter. Run setup
+ends, the desk assembles with the governor's opening letter sitting unopened in
+the stack, and **he speaks before it is opened** (§4, *Arrival*) — introducing
+himself and the room.
+
+The opening letter (#274) is then his second. It is the first decision of the
+run and the one a new player understands least, so the order matters: he explains
+the desk, and only then what is being asked on it.
 
 ### The checkbox
 
@@ -218,6 +239,11 @@ Prose, so **the folder carries the language** exactly as letters do
 
 ## 10. Open items
 
+- **Do the map and the ledger get an arrival too?** The desk plainly does (§4).
+  Those two carry no decisions, so he has no options to explain there — but a
+  player opening the ledger for the first time is looking at the one screen in
+  the game made of hard numbers. An arrival line is cheap and it is the same kind
+  of thing as the desk's. **Author's call**, and it does not block #347.
 - **What the unlock condition actually is.** *Survive to year five* is the
   Author's example rather than his ruling, and it wants setting alongside the
   other §14.3 thresholds. It is the cheapest of them to change.
