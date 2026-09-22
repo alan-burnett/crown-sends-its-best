@@ -300,6 +300,19 @@ func test_every_declared_kind_is_one_an_actor_actually_chooses() -> void:
 		# ⚠️ `deliberation.md` §1 still lists six decision points and this is a
 		# seventh. The doc is the PO's; the table wants a row.
 		DecisionKind.COMMANDER_ORDERS,
+		# **Considered, and it belongs** (#222). Where a commander takes his
+		# company is a different decision from what he does this step, on a
+		# different clock: the step is re-asked every move on a board the last
+		# move changed, and the objective survives the month, becomes an Intent
+		# and is the only part of his thinking anybody else can see.
+		#
+		# 🔒 It is also the **only** decision in the game that reads other actors'
+		# plans (`commanders.md` §4). Everything else deliberates about its own
+		# situation alone, and a second one of these would want asking about
+		# rather than adding.
+		#
+		# ⚠️ Eight now, against the doc's six. Both missing rows are the PO's.
+		DecisionKind.COMMANDER_OBJECTIVE,
 	]
 	assert_eq(DecisionKind.ALL.size(), expected.size(),
 		"a decision kind was added or removed without this test being considered")

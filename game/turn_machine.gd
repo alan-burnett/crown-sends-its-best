@@ -235,14 +235,16 @@ func _init(p_run: RunState) -> void:
 	# the map a month before it reaches anybody.
 	var muster := MusterDriver.new(run)
 
-	# Phases 2 and 7. They march where expeditions march, and a company nobody
-	# fed goes without after the Colony Month has had its chance (#211).
+	# Phases 2, 7 and 8. They march where expeditions march, a company nobody fed
+	# goes without after the Colony Month has had its chance (#211), and their
+	# commanders settle where they are going in the Intent phase (#222).
 	var companies := CompanyDriver.new()
 	companies.companies = run.companies
 	companies.colony = run.colony
 	companies.map = run.map
 	companies.contacts = run.contacts
 	companies.commanders = run.commanders
+	companies.book = run.intents
 
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and
