@@ -338,6 +338,71 @@ func test_adding_an_officer_later_needs_only_a_data_file() -> void:
 	assert_true(Compliance.OUTCOMES.has(StringName(result["outcome"])))
 
 
+# --- 🔒 Every order kind is priced, and none by omission (#302) ------------
+
+func test_every_registered_order_kind_has_a_price() -> void:
+	# 🔒 **The fall-through was the hazard.** `cost_of` used to answer two
+	# hundred for anything nobody had listed, which is a figure asserting that a
+	# thing costs the recipient rather a lot on the sole grounds that nobody had
+	# said what it cost.
+	#
+	# It broke `urge_intent` — governors answering *I will not* to instructions
+	# they already agreed with — and the fix was a case for that one kind. Then it
+	# broke `set_tax_rate` the same way, and **four more kinds were carrying it**
+	# unnoticed: `set_policy`, `prefer_site`, `dissuade_founding` and the
+	# answering ones.
+	#
+	# This is the check that stops a third time. It asks the same match `cost_of`
+	# asks, so the two cannot drift apart.
+	var unpriced: PackedStringArray = PackedStringArray()
+	for effect_id in ContentRegistry.effect_ids():
+		var kind := ContentRegistry.order_kind_of(String(effect_id))
+		if String(kind).is_empty():
+			continue
+		if not Compliance.is_priced(kind):
+			unpriced.append(String(kind))
+	assert_empty(unpriced,
+		"these order kinds have no case in Compliance._priced, so they are "
+			+ "silently free: %s" % ", ".join(unpriced))
+
+	# 🔒 **And the check must be able to say no.** A `is_priced` that answered
+	# yes to everything would pass the loop above for ever, which is how a check
+	# rots into a tautology.
+	assert_false(Compliance.is_priced(&"an_order_kind_nobody_has_written"),
+		"is_priced approves a kind that has no case, so the check above is vacuous")
+
+
+func test_a_rate_costs_the_colony_and_not_the_man_who_sets_it() -> void:
+	# SPEC §8.1: the Steward *follows your instruction about adjusting tax rates*
+	# and *prefers high taxes*. Priced at the old fall-through, against a man whose
+	# heaviest weight is `cost_of_request`, the Steward of the Revenue refused an
+	# order to raise the revenue on turn one.
+	for kind in [M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY]:
+		var order := Order.new(kind, &"steward", {
+			"resource": "tea", "rate": 0.15, "policy": "x", "value": "y",
+		}, 0)
+		assert_eq(Compliance.cost_of(order), 0.0,
+			"being told to set %s was priced against him personally" % kind)
+
+
+func test_the_steward_does_not_refuse_an_order_to_raise_the_revenue() -> void:
+	var steward := _contact(48.0, {"cost_of_request": 1.4, "loyalty": 1.0})
+	var order := Order.new(M1Registrations.ORDER_SET_TAX_RATE, &"steward", {
+		"resource": "tea", "rate": 0.15,
+	}, state.month)
+	order.tone = Tone.DUTIFUL
+	assert_false(String(_resolve(order, steward)["outcome"]) == String(Compliance.REFUSE),
+		"the Steward of the Revenue refused an order to raise the revenue")
+
+
+func test_an_urging_still_costs_a_governor_nothing() -> void:
+	# The first time this was fixed, and it must stay fixed: the PC sends no gold
+	# with a pronouncement, so anything it costs makes `payment_offered` decide
+	# every priority letter in the game.
+	assert_eq(Compliance.cost_of(
+		Order.new(M1Registrations.ORDER_URGE_INTENT, &"him", {}, 0)), 0.0)
+
+
 # --- 🔒 A harsh order is obeyed, and it costs (#71) -------------------------
 
 func _shipment(harsh: bool) -> Order:
