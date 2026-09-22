@@ -73,6 +73,20 @@ const FACTIONS: Array[StringName] = [COLONIAL, CROWN, REBEL, RIVAL, NATIVE]
 ## this is never anybody's burden and never goes unsupported.
 const SUPPORTED_BY_CROWN: StringName = &"crown"
 
+## 🔒 **Fed by its own side, which is not on this map** (#225).
+##
+## A rival duke's army and a tribe's war party are victualled by the state or the
+## people that sent them, and neither keeps books the colony can read. It is the
+## same *behaviour* as a Crown company and deliberately not the same *field*:
+## `is_the_crowns_burden` answers a question about the Marshal and must keep
+## answering only that, or `the-marshal.md` §3's lock would quietly come to mean
+## "anybody the colony does not feed".
+##
+## A company left on a town's id that the colony has no town for would go
+## unsupported and bleed instead — which reads as a besieging army starving
+## outside a town it is winning against.
+const SUPPORTED_ABROAD: StringName = &"abroad"
+
 const EVENT_RAISED: StringName = &"company_raised"
 const EVENT_MOVED: StringName = &"company_moved"
 const EVENT_UNSUPPORTED: StringName = &"company_unsupported"
@@ -188,6 +202,18 @@ var arms: Dictionary = {}
 
 ## The town that victuals it, or `SUPPORTED_BY_CROWN`.
 var support: StringName = &""
+
+## 🔒 **Who put these men under arms**, when that is not one of the colony's
+## towns (#225).
+##
+## A village that sent a war party, or a duke who landed a company. It is not
+## `support` — that says who feeds them and both of these feed their own — and it
+## is emphatically not `urged`, which is the PC's letter reaching a commander and
+## has no business carrying a faction's name.
+##
+## What reads it is `Muster`, to know how many a village already has out, so a
+## second party is not raised from people who are already in the field.
+var raised_by: StringName = &""
 
 ## The man who deliberates for it, or none (#220, `commanders.md` §1).
 ##
@@ -412,8 +438,12 @@ func was_supplied(month: int) -> void:
 
 
 ## Whether anybody fed it this month.
+func feeds_itself() -> bool:
+	return support == SUPPORTED_BY_CROWN or support == SUPPORTED_ABROAD
+
+
 func is_supplied(month: int) -> bool:
-	return is_the_crowns_burden() or supplied_month >= month
+	return feeds_itself() or supplied_month >= month
 
 
 ## How much of its strength it can actually bring, before anything about a battle.
@@ -618,6 +648,7 @@ func to_dict() -> Dictionary:
 		"size": size,
 		"arms": arms.duplicate(),
 		"support": String(support),
+		"raised_by": String(raised_by),
 		"commander": String(commander),
 		"commander_level": commander_level,
 		"order": String(order),
@@ -640,6 +671,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.size = int(data.get("size", 0))
 	company.arms = data.get("arms", {}).duplicate()
 	company.support = StringName(data.get("support", ""))
+	company.raised_by = StringName(data.get("raised_by", ""))
 	company.commander = StringName(data.get("commander", ""))
 	company.commander_level = int(data.get("commander_level", 0))
 	company.order = StandingOrder.of(StringName(data.get("order", "")))

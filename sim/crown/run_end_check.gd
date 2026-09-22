@@ -63,10 +63,17 @@ const INDEPENDENCE: StringName = &"independence"
 static func is_overrun(colony: Colony, parties: Array) -> bool:
 	if colony == null:
 		return false
-	# A run that has not begun is not a run that has ended. A colony with no
-	# towns at all before the first is founded would otherwise read as overrun on
-	# month one of every game.
-	if colony.is_empty() and parties.is_empty():
+	# 🔒 **A run that has not begun is not a run that has ended**, and the two look
+	# identical from here: no towns either way.
+	#
+	# It used to be told apart by *is anybody walking*, which worked only while
+	# nothing could take a town — and #218 and #225 made that false. A colony that
+	# lost its last town with no expedition in the field would have read as month
+	# one of a new game and the ending would never have fired.
+	#
+	# `has_held_a_town` is the distinction, set the first time a town joins the
+	# colony and never cleared.
+	if not colony.has_held_a_town and parties.is_empty():
 		return false
 	return people_in(colony, parties) <= 0
 
