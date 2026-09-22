@@ -60,6 +60,14 @@ const PARAM_TYPES: Array[StringName] = [
 	# letter file where nothing would check it again.
 	&"remedy",
 	&"regard",
+	# **Which of a fail condition's parts are true, phrased** (#268,
+	# `endings.md` §3). A closed vocabulary for the same reason `remedy` is one:
+	# the Chancellor's letter has to name *which are and are not*, and a generic
+	# string would have let that be written into a letter file where nothing
+	# would check it again the day a condition changed. The prose lives in
+	# `data/clauses_en/independence.json` and the validator asks whether every
+	# condition the sim knows about has a phrase there.
+	&"conditions",
 ]
 
 ## Param types that are whole numbers.

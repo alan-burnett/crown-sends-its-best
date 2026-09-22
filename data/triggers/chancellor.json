@@ -256,5 +256,44 @@
         "the_court_is_cooling": {}
       }
     ]
+  },
+  {
+    "id": "trigger.chancellor.last_chance",
+    "letter": "chancellor.last_chance",
+    "urgency": 1.0,
+    "cooldown": 1,
+    "note": "Issue 268. Fires the month a condition of Independence flips, never merely while one is true - he turns up rarely and at the worst possible moment, and a letter every month would be the nagging the standing ladder already does. Cooldown 1 because four conditions can flip in four consecutive months and he would not miss one of them for the world.",
+    "params": {
+      "gone": {
+        "from": "independence_conditions",
+        "which": "true"
+      },
+      "standing": {
+        "from": "independence_conditions",
+        "which": "false"
+      }
+    },
+    "conditions": [
+      {
+        "an_independence_condition_just_flipped": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.chancellor.colony_dwindling",
+    "letter": "chancellor.colony_dwindling",
+    "urgency": 1.0,
+    "cooldown": 1,
+    "note": "Issue 268. Overrun has no conjunction to watch approach, only a number falling, so the formal warning section 13.1 requires hangs off the number - and again at each lower rung, never twice for the same one.",
+    "params": {
+      "people": {
+        "from": "colony_people"
+      }
+    },
+    "conditions": [
+      {
+        "the_colony_has_fallen_further": {}
+      }
+    ]
   }
 ]

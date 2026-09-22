@@ -109,6 +109,9 @@ static func load_resources(content: ContentDatabase) -> void:
 	# language-suffixed folder with everything else the player reads.
 	if content.has_record(HarshClause.COLLECTION, HarshClause.RECORD):
 		HarshClause.load_from(content.record(HarshClause.COLLECTION, HarshClause.RECORD))
+	if content.has_record(IndependenceClause.COLLECTION, IndependenceClause.RECORD):
+		IndependenceClause.load_from(
+			content.record(IndependenceClause.COLLECTION, IndependenceClause.RECORD))
 	# Where a generated name comes from (#304). No language suffix: a bag carries
 	# no prose and is not translated.
 	NameBags.load_from(content)

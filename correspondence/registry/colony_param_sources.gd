@@ -12,6 +12,15 @@ extends RefCounted
 ## Godot 4.7 on shutdown (CLAUDE.md).
 
 static func register_all() -> void:
+	# --- The last chance (#268, `endings.md` §2, §3) ------------------------
+	ContentRegistry.register_param_source(
+		"independence_conditions", {"which": "string"},
+		ColonyParamSources.independence_conditions,
+	)
+	ContentRegistry.register_param_source(
+		"colony_people", {}, ColonyParamSources.colony_people
+	)
+
 	ContentRegistry.register_param_source(
 		"warning_turns", {}, ColonyParamSources.warning_turns
 	)
@@ -675,3 +684,36 @@ static func divergence(args: Dictionary, context: LetterContext) -> Variant:
 		if town != null:
 			return town.display_name
 	return value
+
+
+# --- The last chance (#268, `docs/mechanics/endings.md` §2, §3) -------------
+
+
+## How the Chancellor names Independence's conditions — `which` being `"true"`
+## for the ones that have flipped and `"false"` for what still stands.
+##
+## 🔒 **Read off the same look `RunEndCheck` was given**, never recomputed. A
+## letter that asked the world again could name a condition the check did not
+## believe in, which is the one thing a formal warning must never do.
+##
+## 🔒 **And the prose is in `data/`** (`IndependenceClause`). The ids stop here.
+static func independence_conditions(
+	args: Dictionary, context: LetterContext
+) -> Variant:
+	if context == null or context.log == null:
+		return ""
+	var flags := LastChance.latest(context.log, context.month)
+	if flags.is_empty():
+		return ""
+	return IndependenceClause.phrase_for(
+		flags, String(args.get("which", "true")) == "true")
+
+
+## Everyone the colony still has, in its towns and on the road.
+##
+## Exact and truthful, so a `{param:}` rather than a `{perception:}` — the
+## Chancellor is unpleasant about the figure and he is not wrong about it.
+static func colony_people(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null or context.log == null:
+		return 0
+	return int(LastChance.latest(context.log, context.month).get("people", 0))

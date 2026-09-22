@@ -36,6 +36,17 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 	if run.ending != null and run.ending.is_over():
 		return
 
+	# 🔒 **He looks before it is decided, every month** (#268, SPEC §13.1:
+	# *defeat is never a surprise*).
+	#
+	# In this file rather than in a driver of its own, so the ordering is
+	# structural: there is no arrangement of the driver list that could let an
+	# ending fire in a month the Chancellor was not shown the same facts. And it
+	# is a *look*, not a stage — nothing is recorded, nothing counts down, and the
+	# log is the whole of the memory.
+	LastChance.look(
+		run.colony, run.parties, run.standing, run.contact(&"marshal"), state, log)
+
 	var reason := RunEndCheck.reason_for(
 		run.colony, run.parties, run.standing, run.contact(&"marshal"), state)
 	if String(reason).is_empty():

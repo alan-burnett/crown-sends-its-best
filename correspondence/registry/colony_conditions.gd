@@ -19,6 +19,16 @@ extends RefCounted
 ## logic in what is supposed to be a declarative layer.
 
 static func register_all() -> void:
+	# --- The last chance (#268, `endings.md` §2, §3) ------------------------
+	ContentRegistry.register_condition(
+		"an_independence_condition_just_flipped", {},
+		ColonyConditions.an_independence_condition_just_flipped,
+	)
+	ContentRegistry.register_condition(
+		"the_colony_has_fallen_further", {},
+		ColonyConditions.the_colony_has_fallen_further,
+	)
+
 	ContentRegistry.register_condition(
 		"town_short_of", {"resource": "string"}, ColonyConditions.town_short_of
 	)
@@ -885,3 +895,38 @@ static func diverged(args: Dictionary, context: LetterContext) -> Dictionary:
 				"did": String(town.intent),
 			}
 	return latest
+
+
+# --- The last chance (#268, `docs/mechanics/endings.md` §2, §3) -------------
+#
+# 🔒 **Both read the log and nothing else.** `LastChance` writes down the four
+# conditions and the population every month, moved or not, and these ask it what
+# changed. There is no stage object to consult, because there is no stage.
+
+
+## 🔒 **One of Independence's four became true this month** (§3: *he writes as
+## each condition flips*).
+##
+## Newly true, never merely true — a letter that fired every month a condition
+## held would be nagging, from the one contact whose comic value is that he turns
+## up rarely and at the worst possible moment.
+static func an_independence_condition_just_flipped(
+	_args: Dictionary, context: LetterContext
+) -> bool:
+	if context == null or context.log == null:
+		return false
+	return not LastChance.newly_true(context.log, context.month).is_empty()
+
+
+## 🔒 **The colony fell to a rung of dwindling it has not been on before** (§2).
+##
+## Overrun has no conjunction to watch approach, only a number falling — so the
+## formal warning §13.1 requires hangs off the number. It fires again as it
+## worsens, and never twice for the same rung, so a town that loses a man and
+## takes in another does not set him writing about the same figure.
+static func the_colony_has_fallen_further(
+	_args: Dictionary, context: LetterContext
+) -> bool:
+	if context == null or context.log == null:
+		return false
+	return LastChance.newly_dire(context.log, context.month)
