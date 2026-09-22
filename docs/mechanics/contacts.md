@@ -347,10 +347,6 @@ run; a stream of new names arriving mid-run to replace the ones he had just
 learned is churn without payoff. **You get who you get**, and losing someone is a
 loss rather than an inconvenience.
 
-**This contradicts SPEC §8.2**, which currently says colony contacts can change
-"through death, replacement, promotion, or defection." The spec needs amending;
-until it is, the spec wins.
-
 ## 9. Loyalty can always be recovered
 
 **The base rule is that there is no permanent break.** Loyalty can always be

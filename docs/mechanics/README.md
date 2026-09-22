@@ -51,18 +51,14 @@ being rewritten every iteration.
 
 ## Still to write
 
-**Tracked as GitHub issues labelled `po`**, each assigned to the milestone that
-first needs it. That list is the live one; this table is the map.
+**Nothing.** The seven mechanics once tracked here — production and conversion,
+prestige, rival pressure, battles, commanders, patrons and institutional contacts
+— are all written and their issues (#92, #97, #103, #104, #106, #107, #108) are
+closed.
 
-| Mechanic | Issue | First needed |
-| :--- | :--- | :--- |
-| Production and conversion | #92 | M2 |
-| Prestige, and gold's share of it | #97 | M3+, blocked on the Author |
-| Rival pressure | #103 | M5 |
-| Battles and combat resolution | #104 | M6 |
-| Commanders | #106 | M6 |
-| Patrons | #107 | M7 |
-| Institutional contacts | #108 | M7 |
+New gaps are tracked as GitHub issues labelled `po`, assigned to the milestone
+that first needs them. **That list is the live one**; a table here goes stale the
+moment a doc lands, which this one did.
 
 ## Patterns
 

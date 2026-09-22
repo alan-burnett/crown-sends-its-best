@@ -232,8 +232,9 @@ that will not come again.
 
 ## 7. What is deliberately not a cutscene
 
-The catalog is bounded by §3. One a turn means anything that happens most months
-can never hold the slot, so it should not ask for it:
+§3 removed the budget, so this section is now the only thing bounding the
+catalog. **A cutscene has to earn a painting**, and anything that happens most
+months cannot:
 
 - **The monthly machinery.** A demand arriving, a duty paid, standing ticking
   down, a harvest, a birth, the fourth building. These belong to the map, the

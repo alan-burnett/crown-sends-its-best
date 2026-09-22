@@ -230,20 +230,19 @@ is comfortable on the day it is founded; a shed one is wretched from the start.
 
 **A new town extends the colony's border and vision** (§11.4).
 
-## 9. SPEC §11.4 needs an edit
+## 9. A new town begins as it was sent
 
-This line is no longer true:
-
-> **A new town begins fragile:** no buildings, a thin stockpile, low population,
-> low quality of life.
-
-Proposed replacement:
+SPEC §11.4 once said a new town *begins fragile: no buildings, a thin stockpile,
+low population, low quality of life.* **It no longer does**, and the line it now
+carries is this document's:
 
 > **A new town begins as it was sent.** An expedition mounted by a prosperous
 > town, or equipped by the Crown, may arrive with stores, livestock, an expert,
-> even a building already standing. One shed by a crowded town that could spare
-> nothing arrives with almost nothing. What it starts with is what was given to
-> it.
+> even a building already standing. [...] What it starts with is what was given
+> to it.
+
+Kept as a section because everything downstream depends on it: a daughter town is
+**not** a fixed weak starting state, so nothing may assume one.
 
 ## 10. Tuning targets
 

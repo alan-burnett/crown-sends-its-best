@@ -66,10 +66,15 @@ A town's resources and gold go out in a fixed order of precedence:
 3. **Wants** — rum, tea, experts. Discretionary comfort, bought with what is
    spare.
 
-**Terminology note.** SPEC §11.3 currently defines *wants* as "what it needs to
-reach its objectives", which is tier 2 here, and leaves tier 3 unnamed. This doc
-uses *wants* for tier 3 in line with the Author's model. **If the spec is not
-updated to match, the spec wins and this doc is wrong.**
+**Terminology note.** The spec has moved and this needs settling. SPEC §11.3 no
+longer defines *wants* at all; it now names the three tiers **needs, objectives
+and luxuries** — the same three as above, with *luxuries* where this doc says
+*wants*.
+
+So the doc is no longer in conflict, it is merely using a different word from the
+spec for tier 3, and **CLAUDE.md makes the spec's vocabulary an invariant**.
+Either this doc and the shipped `wants` field move to *luxuries*, or the Author
+keeps *wants* deliberately. It is one word and it is his.
 
 ## 4. Intent
 
@@ -83,6 +88,8 @@ Starting set, to grow:
 - Settle a new town
 - Secure the town's survival (the crisis intent)
 - **Prepare the town for rebellion** — reachable only at very low loyalty
+- **Drive them off** — reachable only where a tribe is actually on the town's
+  ground, which is a filter rather than a weight (`deliberation.md` §5)
 
 That last one is the only intent directed **against** the PC, and it is what
 `contacts.md` §4 means when it says an order at the bottom of the loyalty scale
@@ -102,7 +109,7 @@ available; considerations score them; the governor's personality is the weight
 vector. `choose()` emits its trace, which is what lets his letter state his
 reasoning truthfully.
 
-**Eight considerations**, and a governor carries a weight for every one:
+**Nine considerations**, and a governor carries a weight for every one:
 
 | | Reads |
 | :--- | :--- |
@@ -113,13 +120,16 @@ reasoning truthfully.
 | `room_to_grow` | unclaimed land worth taking |
 | `crowding` | people against workable ground (§6 of `founding-towns.md`) |
 | `mandate` | what the Crown appointed him to do |
+| `native_land` | tribes sitting on ground the town would work |
 | `crown_urging` | **what the PC last told him the town was for** |
 
-**Two filters, applied before scoring** — locked rules, never weights
+**Three filters, applied before scoring** — locked rules, never weights
 (`deliberation.md` §5):
 
 - **A town cannot intend to settle nowhere.** No governor, however expansionist,
   sends an expedition to country the colony has never seen.
+- **Nobody drives off a tribe that is not there.** A man whose town has never
+  seen a native cannot want it, however warlike he is.
 - **Sedition is unreachable above a loyalty floor.** A weight can lose a close
   vote and then win one; this must be impossible for a man who does not loathe
   the PC, whatever else his temperament says. It is also what makes recovery
@@ -223,6 +233,7 @@ an intent:
 | see to your defences | strengthen defences |
 | plant a new settlement | settle a new town |
 | your people's survival must come first | secure survival |
+| be rid of them | drive them off |
 
 ### Why the lock is right
 
