@@ -131,6 +131,55 @@ static func forgives_a_missed_payment(band: StringName) -> bool:
 
 
 ## Every duke in the run, in id order.
+## How many dukes have actually turned up (#300, `rival-pressure.md` §6).
+##
+## 🔒 **A duke arrives as the Squeeze's fourth dimension, and there is no second
+## schedule.** He spawns when the annual draw lands on dimension 4 and the source
+## taken from the catalogue is a rival — *that is the whole of it* — so this is
+## derived from `askers` rather than kept anywhere, and two properties the doc
+## names fall out instead of needing code:
+##
+## **They arrive staggered**, one source per draw, so the colony faces one duke,
+## then two, then three across a run. **And they cannot bunch**, because §7's
+## bucket guarantees dimension 4 at most twice in four years.
+##
+## Nought before the third hand is out. *Prospering does not attract rivals* —
+## they want the PC paying and weak, and in month one he is neither.
+## Nought before the third hand is out. *Prospering does not attract rivals* —
+## they want the PC paying and weak, and in month one he is neither.
+##
+## **That threshold is the arithmetic, not a second gate.**
+## `DemandSchedule.rivals_are_asking` says the same thing for demands, and
+## guarding with it as well is one rule written twice: below `ASKERS_FOR_RIVALS`
+## the subtraction is already negative and the clamp already returns nought.
+static func how_many_arrived(growth: DemandGrowth) -> int:
+	if growth == null:
+		return 0
+	return clampi(
+		DemandSchedule.askers(growth) - DemandSchedule.ASKERS_FOR_RIVALS + 1,
+		0, HOW_MANY)
+
+
+## The dukes who have arrived, in the order they arrive.
+##
+## 🔒 **Present as a contact and active in the world are not the same thing.**
+## SPEC §8.4 makes rivals fixed contacts, so all three are on the roster from the
+## start and `all_in` still finds them — what this adds is that a duke who has not
+## yet been produced by the Squeeze does not park men on the colony's fields.
+##
+## Ordered by id, which is the same tie-break every other ordered thing in the
+## game uses, so the same run always meets the same duke first.
+static func arrived_in(run: RunState, growth: DemandGrowth) -> Array:
+	var arrived := how_many_arrived(growth)
+	if arrived <= 0:
+		return []
+	var dukes := all_in(run)
+	dukes.sort_custom(func(a: Contact, b: Contact) -> bool:
+		return String(a.id) < String(b.id))
+	return dukes.slice(0, arrived)
+
+
+## Every duke on the roster, arrived or not.
 static func all_in(run: RunState) -> Array:
 	var out: Array = []
 	if run == null:

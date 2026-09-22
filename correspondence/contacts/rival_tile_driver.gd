@@ -44,7 +44,13 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.colony = run.colony
 
 	var territory: Territory = run.territory_now()
-	for duke in RivalDuke.all_in(run):
+	# 🔒 **Only the dukes the Squeeze has produced** (#300, §6). All three are
+	# on the roster from month one because SPEC §8.4 makes rivals fixed contacts,
+	# and one of them ships below the low band — so before this, a foreign duke
+	# parked men on the colony's fields in the first month of every run, and the
+	# governor wrote a desperate letter about it before the colony had done
+	# anything at all.
+	for duke in RivalDuke.arrived_in(run, run.demands):
 		var band := RivalDuke.band_for(duke, run.rivals)
 		if not RivalDuke.denies_tiles(band):
 			# 🔒 **Raising his loyalty past the low band ends it**, and nothing
