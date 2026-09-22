@@ -325,15 +325,43 @@ class Crowding extends Consideration:
 static func crowding_of(context: DeliberationContext) -> float:
 	var town: Town = context.get_value("town")
 	var territory: Territory = context.get_value("territory")
-	if town == null or territory == null:
+	var map: WorldMap = context.get_value("map")
+	if town == null or territory == null or map == null:
 		return 0.0
 
+	# 🔒 **Land, not influence** (#321, `founding-towns.md` §2). The class above
+	# has always said *against workable ground*; this counted every tile the town
+	# held, **sea and ocean included**, and sea is not fields.
+	#
+	# It made the measure unreachable rather than merely generous. Influence grows
+	# as `1 + population / 12` rings capped at four, so a town of thirty-six
+	# already commands eighty-one tiles and every further person only lowers the
+	# ratio — crowding stayed at exactly nought until about a hundred and sixty
+	# people, which no town in a smoke run ever reached. It read `0.0000` across
+	# 576 scorings.
+	#
+	# Counting land also makes the measure answer to the **map**: influence is the
+	# same seventy-two tiles for every grown town, while the land inside it ran
+	# from twenty-eight to forty-one across three seeds. A town on a spit is
+	# crowded sooner than one on a plain, which is the whole idea.
 	var ground := 0
 	for at in territory.influence:
-		if StringName(territory.influence[at]) == town.id:
+		if StringName(territory.influence[at]) != town.id:
+			continue
+		var terrain := Terrain.find(map.terrain_at(at.x, at.y))
+		if terrain != null and terrain.land:
 			ground += 1
 	if ground <= 0:
-		# Nowhere at all to work is as crowded as a town can be.
+		# Nowhere at all to work is as crowded as a town can be. A town whose
+		# whole reach is water is exactly that, and one was: five tiles of
+		# influence and not one of them land.
+		#
+		# **And it is the only thing standing between here and a NaN.** Dividing
+		# by nought gives `inf`, which clamps to the same 1.0 and looks harmless
+		# — but a town that has lost its last man as well as its last field
+		# divides nought by nought, and `clampf(NaN)` is not 1.0. `balance.gd`
+		# treats a NaN as a failed run, correctly, so this is the difference
+		# between a crowded town and a batch reporting a broken seed.
 		return 1.0
 
 	var mouths_per_tile := float(town.population()) / float(ground)
