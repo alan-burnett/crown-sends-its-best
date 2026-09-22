@@ -1,0 +1,32 @@
+[
+  {
+    "id": "towns",
+    "note": "The only generated places. A town is named when it is founded, and the first town is named the same way as the fifth - run start is a founding like any other. Nothing else on the map has a name: tribes do not, patrons have no home, and the independent nation is not dignified with one.",
+    "names": [
+      "Ashmere",
+      "Blackmoor",
+      "Cairnwell",
+      "Dunhollow",
+      "Eastmarch",
+      "Fenwick",
+      "Graystone",
+      "Harrowgate",
+      "Inglewood",
+      "Kettleburn",
+      "Larkhaven",
+      "Morrisville",
+      "Northbay",
+      "Oldcastle",
+      "Pinecross",
+      "Quarrymouth",
+      "Redferry",
+      "Stonebridge",
+      "Thornfield",
+      "Umberton",
+      "Vinesend",
+      "Westbrook",
+      "Yarrowdale",
+      "Zephyr Point"
+    ]
+  }
+]

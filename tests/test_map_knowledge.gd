@@ -196,4 +196,8 @@ func test_a_new_run_can_see_the_town_it_just_founded() -> void:
 	var run := RunState.new_run(SEED)
 	assert_true(run.knowledge.seen.size() > 0, "a colony was founded and saw nothing")
 	assert_not_empty(run.knowledge.towns, "it does not know where its own town is")
-	assert_eq(run.knowledge.town_at(run.colony.in_order()[0].at), RunState.FIRST_TOWN_NAME)
+	# **Whatever it is called.** The first town is named from the towns' bag now
+	# (#304), so this asks whether the map knows *the town that is there* rather
+	# than whether it is still called Ashmere.
+	var town := run.colony.in_order()[0]
+	assert_eq(run.knowledge.town_at(town.at), town.display_name)

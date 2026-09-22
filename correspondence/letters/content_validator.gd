@@ -718,6 +718,51 @@ func _collect_option_ids(node: Variant, into: Dictionary) -> void:
 				_collect_option_ids(entry, into)
 
 
+## 🔒 **Every generating role has a bag, and no bag is too small** (#304,
+## `names.md` §6).
+##
+## A missing bag fails **silently and completely**: `NameBags.person` answers
+## empty for a bag nobody wrote, so the contact keeps whatever name he had —
+## which for a generated man is none at all, and his letters arrive from nobody.
+##
+## The threshold is a placeholder. §7 asks for it to be set from a measured long
+## run rather than guessed, and this is the guess until somebody measures.
+const FEWEST_NAMES: int = 12
+
+func check_name_bags(content: ContentDatabase) -> void:
+	_file = "data/%s" % NameBags.COLLECTION
+
+	for bag in NameBags.ALL:
+		if not content.has_record(NameBags.COLLECTION, bag):
+			_problem(bag, (
+				"is a bag the generator draws from and there is no such file, so "
+				+ "everything drawn from it is nameless"
+			))
+			continue
+		var record := content.record(NameBags.COLLECTION, bag)
+		var keys := PackedStringArray(["given", "family"])
+		if bag == NameBags.TOWNS:
+			keys = PackedStringArray(["names"])
+		for key in keys:
+			var entries: Variant = record.get(key, [])
+			if typeof(entries) != TYPE_ARRAY:
+				_problem("%s.%s" % [bag, key], "expected a list of names")
+				continue
+			if entries.is_empty():
+				_problem("%s.%s" % [bag, key], "is empty, so nothing drawn from it has a name")
+			elif entries.size() < FEWEST_NAMES:
+				_problem("%s.%s" % [bag, key], (
+					"holds %d names, which is too few for a long run without "
+					+ "repeating — at least %d"
+				) % [entries.size(), FEWEST_NAMES])
+
+	# And every role that generates draws from one of them.
+	for role in NameBags.BY_ROLE:
+		var bag := String(NameBags.BY_ROLE[role])
+		if not NameBags.ALL.has(bag):
+			_problem(String(role), "draws from '%s', which is not a bag" % bag)
+
+
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
 func check_trigger_targets(content: ContentDatabase) -> void:

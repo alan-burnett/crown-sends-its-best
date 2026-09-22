@@ -93,7 +93,8 @@ func _step(party: ExpeditionParty, context: ColonyContext) -> bool:
 		return false
 
 	# **It is there.** The town is founded with exactly what it carried (#179).
-	var town := party.found(_name_for(party), _display_name_for(party), context)
+	var town := party.found(
+		_name_for(party), _display_name_for(party, context), context)
 	if town == null:
 		return true
 	colony.add(town)
@@ -113,8 +114,33 @@ func _name_for(party: ExpeditionParty) -> StringName:
 	return StringName("town_%s" % String(party.id).replace("expedition_", ""))
 
 
-func _display_name_for(party: ExpeditionParty) -> String:
-	return String(_name_for(party)).replace("town_", "").capitalize()
+## 🔒 **Drawn from the towns' bag, on the town's own stream** (#304,
+## `names.md` §4, §5), so the same seed gives the same town whatever else
+## happens — a town founded in month nine instead of month eight gets the same
+## name.
+##
+## It replaces a name derived from the party's id, which read *Town Ashmere 66*
+## on the desk. The comment above used to say a drawn name *would need a stream
+## of its own*; it has one.
+##
+## Falls back to the derived name if the bag is missing, because a town with no
+## name at all is worse than an ugly one.
+func _display_name_for(party: ExpeditionParty, context: ColonyContext) -> String:
+	var plain := String(_name_for(party)).replace("town_", "").capitalize()
+	if context == null or context.streams == null:
+		return plain
+	var drawn := NameBags.place(
+		context.streams.place_stream(String(_name_for(party))), _taken())
+	return plain if drawn.is_empty() else drawn
+
+
+## The names the colony is already using, so no two live towns share one.
+func _taken() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray()
+	if colony != null:
+		for town in colony.in_order():
+			out.append(town.display_name)
+	return out
 
 
 func _town(id: StringName) -> Town:

@@ -41,6 +41,7 @@ func _init() -> void:
 	validator.check_severity(content)
 	validator.check_epitaphs(content)
 	validator.check_balance_policies(content)
+	validator.check_name_bags(content)
 	print(validator.report())
 
 	var ok := validator.ok()
