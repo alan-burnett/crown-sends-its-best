@@ -60,16 +60,13 @@ const LEAN_SPREAD: float = 0.3
 const START_LOYALTY_MIN: float = 45.0
 const START_LOYALTY_MAX: float = 70.0
 
-## Invented names, in the spec's register. **🔒 All factions are fictionalised**
-## (SPEC §3.1), so nothing here names a real person or place.
-const FORENAMES: PackedStringArray = [
-	"Ambrose", "Cuthbert", "Hester", "Jerrold", "Maud", "Nathaniel",
-	"Oriel", "Perrin", "Rosamund", "Selwyn", "Thomasin", "Wilfrid",
-]
-const SURNAMES: PackedStringArray = [
-	"Ashcombe", "Breward", "Calloway", "Dunmore", "Fenwick", "Garrow",
-	"Halloway", "Larkin", "Merrick", "Pell", "Quarles", "Rushworth", "Standish", "Thorne",
-]
+## 🔒 **Names live in `data/names/`** (#304, `names.md` §6), not here. They
+## were two lists in this file, which meant a clergyman would have needed a third
+## and a patron a fourth — and the register that actually matters is *aristocrat
+## or colonist*, not what a man does for a living.
+##
+## **🔒 All factions are fictionalised** (SPEC §3.1), so nothing in a bag names a
+## real person or place.
 
 
 ## How much of the launcher's regard a daughter town's governor starts with.
@@ -139,10 +136,12 @@ static func _draw(id: StringName, streams: RngStreams, title: String) -> Contact
 
 	var contact := Contact.new(id, {})
 	contact.role = ROLE
-	contact.display_name = "%s %s" % [
-		FORENAMES[rng.randi_range(0, FORENAMES.size() - 1)],
-		SURNAMES[rng.randi_range(0, SURNAMES.size() - 1)],
-	]
+	# 🔒 **From the colonists' bag** (#304, `names.md` §3), which holds the
+	# names this file used to carry — same twelve forenames and fourteen surnames,
+	# topped up, so no governor's name changes register. A governor and a
+	# clergyman draw from one bag because they are both colonists.
+	contact.display_name = NameBags.person(NameBags.COLONISTS, rng)
+	contact.qualifier = Letterhead.qualifier_for(ROLE)
 	contact.title = title
 	contact.portrait_asset = "portrait.governor"
 

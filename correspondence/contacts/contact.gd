@@ -96,6 +96,33 @@ func prominence() -> float:
 var prominence_override: float = -1.0
 
 var display_name: String = ""
+
+## 🔒 **What follows his name on a letter** (#304, `names.md` §2), as a
+## template with at most a `{town}` in it.
+##
+## **Mutable state on the contact, not a lookup on the role.** A commander is one
+## role with three allegiances (`commanders.md` §1) and each names a different
+## master — and a town commander whose town revolts becomes *of the independent
+## nation*, the same object serving somebody else. A qualifier derived from his
+## role would have to be recomputed by something that knew what a rebellion was;
+## one he carries is rewritten by the thing that turned him.
+##
+## Defaulted from the role when he is created, so adding a role with a new
+## qualifier needs no code here.
+var qualifier: String = ""
+
+## 🔒 **The one word that goes first** (#304, `names.md` §2), when the role
+## alone cannot say it.
+##
+## Four offices share `crown_officer`, and §2 wants *Steward Corvyn Thrale* — so
+## the word is a field, defaulted from the role, exactly as the qualifier is.
+## Empty means take the role's.
+var role_word: String = ""
+
+## Flavour, like *Steward of the Revenue*.
+##
+## 🔒 **No letter reads this and the letterhead must not** (§2). The first word
+## of a letterhead comes from the role, because it is there to be scanned.
 var title: String = ""
 var role: StringName = &""
 
@@ -202,6 +229,10 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.display_name = String(record.get("name", ""))
 	contact.title = String(record.get("title", ""))
 	contact.role = StringName(record.get("role", ""))
+	# **After the role**, which is what it defaults from. Read first it silently
+	# took the empty role's qualifier, and the Diplomat's letterhead lost its town.
+	contact.qualifier = String(record.get("qualifier", Letterhead.qualifier_for(contact.role)))
+	contact.role_word = String(record.get("role_word", ""))
 	contact.prominence_override = float(record.get("prominence", -1.0))
 	contact.portrait_asset = String(record.get("portrait", ""))
 	contact.town = String(record.get("town", ""))
@@ -247,6 +278,16 @@ static func generate(
 
 	var contact := Contact.new(id, weights)
 	contact.role = role
+	contact.qualifier = Letterhead.qualifier_for(role)
+	# 🔒 **His name comes from his own stream** (#304, `names.md` §5), and
+	# **before the weights above are drawn** would be wrong — it is drawn here so
+	# that adding a name does not shift a personality that was rolled first, and
+	# the same seed keeps giving the same men.
+	var bag := NameBags.bag_for(role)
+	if not bag.is_empty():
+		var drawn := NameBags.person(bag, rng)
+		if not drawn.is_empty():
+			contact.display_name = drawn
 	# 🔒 **After the ordinary draw.** Harshness is among the considerations rolled
 	# above, and a mettle written first would be rolled over — the trait would
 	# then decide nothing and every man would take being leaned on the same way.
@@ -264,6 +305,8 @@ func to_dict() -> Dictionary:
 		"id": String(id),
 		"weights": weights.duplicate(),
 		"name": display_name,
+		"qualifier": qualifier,
+		"role_word": role_word,
 		"title": title,
 		"role": String(role),
 		"prominence": prominence_override,

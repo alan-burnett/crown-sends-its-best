@@ -1,0 +1,50 @@
+[
+  {
+    "id": "colonists",
+    "note": "Governors, colony commanders and the institutional contacts. A colony is not so large that its journalist and its clergyman came from different peoples, so they share a bag - the register that matters is aristocrat or colonist, not what a man does for a living. The first fourteen surnames and twelve forenames are the ones governor.gd carried before names moved into data, so no governor's name changes register.",
+    "given": [
+      "Ambrose",
+      "Cuthbert",
+      "Hester",
+      "Jerrold",
+      "Maud",
+      "Nathaniel",
+      "Oriel",
+      "Perrin",
+      "Rosamund",
+      "Selwyn",
+      "Thomasin",
+      "Wilfrid",
+      "Abel",
+      "Clement",
+      "Ezra",
+      "Hollis",
+      "Josiah",
+      "Silas",
+      "Tobias",
+      "Zachary"
+    ],
+    "family": [
+      "Ashcombe",
+      "Breward",
+      "Calloway",
+      "Dunmore",
+      "Fenwick",
+      "Garrow",
+      "Halloway",
+      "Larkin",
+      "Merrick",
+      "Pell",
+      "Quarles",
+      "Rushworth",
+      "Standish",
+      "Thorne",
+      "Harker",
+      "Kettle",
+      "Mercer",
+      "Stroud",
+      "Underhill",
+      "Whitlock"
+    ]
+  }
+]

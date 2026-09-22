@@ -321,7 +321,16 @@ func found_first_town() -> Town:
 	if map == null or not map.in_bounds(starting_site.x, starting_site.y):
 		return null
 
-	var town := Town.new(FIRST_TOWN_ID, FIRST_TOWN_NAME, starting_site)
+	# 🔒 **The first town is named the same way as the fifth** (#304,
+	# `names.md` §4): run start is a founding like any other. `FIRST_TOWN_NAME`
+	# stays as the fallback for a run assembled without content loaded, which is
+	# most test fixtures.
+	var called := FIRST_TOWN_NAME
+	var drawn := NameBags.place(streams.place_stream(String(FIRST_TOWN_ID)))
+	if not drawn.is_empty():
+		called = drawn
+
+	var town := Town.new(FIRST_TOWN_ID, called, starting_site)
 	town.workers = STARTING_WORKERS
 	town.store(&"food", STARTING_FOOD)
 	town.store(&"wood", STARTING_WOOD)

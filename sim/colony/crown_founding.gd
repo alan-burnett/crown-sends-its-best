@@ -141,11 +141,21 @@ func arrive(colony: Colony, map: WorldMap, context: ColonyContext) -> Town:
 	if at == Vector2i(-1, -1):
 		return null
 
-	var town := Town.new(
-		StringName("town_%s" % String(id).replace("founding_", "")),
-		String(id).replace("founding_", "").capitalize().replace("_", " "),
-		at,
-	)
+	var town_id := StringName("town_%s" % String(id).replace("founding_", ""))
+	# 🔒 **From the towns' bag, on the town's own stream** (#304, `names.md`
+	# §4). The Crown's foundings are named the same way a governor's expedition's
+	# are, because §4 has one way of naming a place and this is a founding like
+	# any other. Falls back to the derived name if the bag is missing.
+	var called := String(id).replace("founding_", "").capitalize().replace("_", " ")
+	if context != null and context.streams != null:
+		var taken: PackedStringArray = PackedStringArray()
+		for held in colony.in_order():
+			taken.append(held.display_name)
+		var drawn := NameBags.place(context.streams.place_stream(String(town_id)), taken)
+		if not drawn.is_empty():
+			called = drawn
+
+	var town := Town.new(town_id, called, at)
 	town.workers = people
 	if not String(expert_in).is_empty():
 		town.add_experts(expert_in, 1)

@@ -47,6 +47,20 @@ func contact_stream(contact_id: String) -> RandomNumberGenerator:
 	return _get_or_derive(CONTACT_PREFIX + contact_id)
 
 
+## A place's own stream, derived on first use (#304, `names.md` §5).
+##
+## **A prefix of its own rather than borrowing the contact one.** A town is not a
+## contact, and two subjects that share a key space would eventually collide — a
+## town called `ashmere` and a contact called `ashmere` would draw the same
+## numbers, which is the kind of thing that is invisible until it is not.
+func place_stream(place_id: String) -> RandomNumberGenerator:
+	assert(not place_id.is_empty(), "place_stream() requires a place id")
+	return _get_or_derive(PLACE_PREFIX + place_id)
+
+
+const PLACE_PREFIX: String = "place:"
+
+
 ## Stream keys that currently exist, sorted, so callers never iterate an
 ## unordered collection where the result depends on order.
 func active_keys() -> PackedStringArray:

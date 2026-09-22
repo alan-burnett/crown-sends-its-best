@@ -28,7 +28,8 @@
     "wants": {
       "crown_war_intensity": 0.0
     },
-    "writes_readily": 1.35
+    "writes_readily": 1.35,
+    "role_word": "Marshal"
   },
   {
     "id": "chancellor",
@@ -55,7 +56,8 @@
       "mettle": 0.4,
       "pity": 0.3
     },
-    "writes_readily": 0.7
+    "writes_readily": 0.7,
+    "role_word": "Chancellor"
   },
   {
     "id": "steward",
@@ -84,6 +86,7 @@
       "mettle": 0.8,
       "pity": 0.2
     },
-    "writes_readily": 1.1
+    "writes_readily": 1.1,
+    "role_word": "Steward"
   }
 ]
