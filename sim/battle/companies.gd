@@ -35,6 +35,14 @@ var list: Array = []
 ## have its number handed to one raised in year four.
 var raised: int = 0
 
+## And how many commanders have ever been made for them (#220).
+##
+## **Here rather than on a book of its own**, because it is the same kind of fact
+## and because a commander only ever comes into being at a raising. Counts men
+## made, not men alive: a commander killed with his company must not have his
+## number handed to the next one.
+var commanders_raised: int = 0
+
 
 ## Bring a company into the world (Seam A).
 ##
@@ -48,6 +56,7 @@ func raise_company(
 	support: StringName,
 	at: Vector2i,
 	context: ColonyContext,
+	order: StringName = StandingOrder.DEFEND_THE_TOWN,
 ) -> Company:
 	raised += 1
 	var company := Company.new(StringName("company_%d" % raised), raised)
@@ -55,6 +64,7 @@ func raise_company(
 	company.size = maxi(0, size)
 	company.support = support
 	company.at = at
+	company.order = StandingOrder.of(order)
 	company.raised_month = context.state.month
 	# **Copied, not referenced.** A town that handed its stockpile dictionary
 	# over would find the company spending it.
@@ -69,6 +79,11 @@ func raise_company(
 		"allegiance": String(allegiance),
 		"size": company.size,
 		"support": String(support),
+		"order": String(company.order),
+		# 🔒 **Whether anybody will be deciding for it** (#220, `commanders.md`
+		# §2). Said at the raising, because that is the moment the choice was
+		# made and the moment it can still be argued with.
+		"needs_a_commander": StandingOrder.needs_a_commander(company.order),
 		"arms": company.arms.duplicate(),
 		"cavalry": company.is_cavalry(),
 		"at": [at.x, at.y],
@@ -126,6 +141,27 @@ func supported_by(town: StringName) -> Array:
 	return out
 
 
+## Whoever is commanding this company, or null.
+func commander_of(company: Company, contacts: Dictionary) -> Contact:
+	if company == null or company.is_headless():
+		return null
+	return contacts.get(String(company.commander), null)
+
+
+## Whether this man has a company in the field.
+##
+## 🔒 **The commander persists, not the company** (`commanders.md` §7). A veteran
+## between commands is an ordinary contact who happens to have nothing to lead —
+## which is what lets experience survive across companies without any of the
+## machinery reinforcing them would demand.
+func is_commanding(commander: StringName) -> bool:
+	for entry in list:
+		var company: Company = entry
+		if not company.is_empty() and company.commander == commander:
+			return true
+	return false
+
+
 ## Drop the ones with nobody left in them.
 ##
 ## Called after losses rather than inside them, so a company that was wiped out
@@ -143,12 +179,13 @@ func to_dict() -> Dictionary:
 	# **In resolution order**, so the save reads the way the month does.
 	for entry in in_resolution_order():
 		out.append((entry as Company).to_dict())
-	return {"raised": raised, "list": out}
+	return {"raised": raised, "commanders_raised": commanders_raised, "list": out}
 
 
 static func from_dict(data: Dictionary) -> Companies:
 	var book := Companies.new()
 	book.raised = int(data.get("raised", 0))
+	book.commanders_raised = int(data.get("commanders_raised", 0))
 	for entry in data.get("list", []):
 		book.list.append(Company.from_dict(entry))
 	return book

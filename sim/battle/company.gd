@@ -74,7 +74,17 @@ const EVENT_RAISED: StringName = &"company_raised"
 const EVENT_MOVED: StringName = &"company_moved"
 const EVENT_UNSUPPORTED: StringName = &"company_unsupported"
 const EVENT_DWINDLED: StringName = &"company_dwindled"
+## 🔒 **Destroyed and disbanded are different things** (`commanders.md` §7). A
+## company wiped out leaves its commander to a coin flip; one that stood down on
+## its timer simply sends him home. One event for each, so the ticket that brings
+## the coin flip has something unambiguous to listen for.
+const EVENT_COMMANDED: StringName = &"company_commanded"
+const EVENT_DESTROYED: StringName = &"company_destroyed"
 const EVENT_DISBANDED: StringName = &"company_disbanded"
+
+## How long a leaderless militia stands before it goes home (`battles.md` §4).
+## Tuning, and §9 of `commanders.md` says so.
+static var _militia_months: int = 6
 
 ## What each head wants, per armed resource. **Tuning**, and §12 says so.
 static var _want_per_head: Dictionary = {"guns": 1.0, "tools": 0.35, "horses": 1.0}
@@ -100,6 +110,7 @@ static func load_from(record: Dictionary) -> void:
 	_unsupported_effect = float(record.get("unsupported_effect", _unsupported_effect))
 	_tiles_per_month = int(record.get("tiles_per_month", _tiles_per_month))
 	_cavalry_tiles = int(record.get("cavalry_tiles", _cavalry_tiles))
+	_militia_months = int(record.get("militia_months", _militia_months))
 
 
 static func reset() -> void:
@@ -109,6 +120,7 @@ static func reset() -> void:
 	_unsupported_effect = 0.6
 	_tiles_per_month = 1
 	_cavalry_tiles = 2
+	_militia_months = 6
 
 
 ## The resources a company carries, in a fixed order.
@@ -129,6 +141,10 @@ static func attrition() -> float:
 	return _attrition
 
 
+static func militia_months() -> int:
+	return maxi(1, _militia_months)
+
+
 var id: StringName = &""
 
 ## 🔒 **The sequential number it was given at instantiation** (§7). Within a
@@ -147,12 +163,20 @@ var arms: Dictionary = {}
 ## The town that victuals it, or `SUPPORTED_BY_CROWN`.
 var support: StringName = &""
 
-## A commander, or none. §4's agency is M6 (#220); the field is here because §1
-## puts it on the object.
-var leader: StringName = &""
+## The man who deliberates for it, or none (#220, `commanders.md` §1).
+##
+## 🔒 **A commander is an ordinary contact**, so this is his id and nothing more
+## — his name, his personality, his leans and his relationship with the PC all
+## live where every other contact's do.
+var commander: StringName = &""
 
-## A standing order. Likewise named now and acted on by M6.
-var objective: StringName = &""
+## 🔒 **What it was raised to do, given once** (#220, `commanders.md` §3).
+##
+## **An order, never an objective.** A town has an objective it reconsiders every
+## Settle; a militia has a standing order and no reconsideration machinery
+## touches it. The two words carry weight elsewhere (SPEC §4) and must not merge,
+## which is why this field is not called what #211 first called it.
+var order: StringName = StandingOrder.DEFEND_THE_TOWN
 
 var at: Vector2i = Vector2i(-1, -1)
 
@@ -234,6 +258,51 @@ func is_the_crowns_burden() -> bool:
 
 func is_empty() -> bool:
 	return size <= 0
+
+
+## 🔒 **Nobody deliberates for it** (`battles.md` §4). A headless company holds
+## the posture it was raised with and does nothing else — it never chooses, never
+## reconsiders and can never be written to.
+func is_headless() -> bool:
+	return String(commander).is_empty()
+
+
+## Whether a leaderless militia has stood its time (`battles.md` §4).
+##
+## 🔒 **Only a headless one.** A commanded company is not on a clock: its
+## commander deliberates afresh every month and it goes where he decides, which
+## is the whole difference §4 draws between the two.
+##
+## **And that is what gives defence a running cost.** A militia eats for every
+## month it stands, so a town under sustained threat must keep re-raising and
+## keep re-feeding — the Squeeze arriving in a system it has not touched before.
+func has_stood_its_time(month: int) -> bool:
+	return is_headless() and month - raised_month >= Company.militia_months()
+
+
+## Send the survivors home (Seam A). Returns how many came back.
+##
+## 🔒 **Disbanded, not destroyed.** The men go back into the town they were
+## raised from and the company ends — and `commanders.md` §7 leans on the
+## difference: a commander whose company stood down needs no coin flip, he simply
+## goes home and waits.
+func stand_down(town: Town, context: ColonyContext) -> int:
+	var returning := size
+	if town != null:
+		# **Workers, because that is what they were.** A company is population
+		# under arms, and putting them back where they came from is the whole of
+		# it — `the-provost.md` §4's rule that workers go before experts is about
+		# losses and has nothing to say about men coming home.
+		town.workers += returning
+	size = 0
+	context.log.emit(EVENT_DISBANDED, id, context.state.month, {
+		"company": String(id),
+		"order": String(order),
+		"town": String(town.id) if town != null else "",
+		"returned": returning,
+		"months": context.state.month - raised_month,
+	}, WorldPhase.RECKONING)
+	return returning
 
 
 # --- Support ----------------------------------------------------------------
@@ -329,9 +398,10 @@ func lose(share: float, reason: StringName, context: ColonyContext) -> int:
 	}, WorldPhase.RECKONING)
 
 	if is_empty():
-		context.log.emit(EVENT_DISBANDED, id, context.state.month, {
+		context.log.emit(EVENT_DESTROYED, id, context.state.month, {
 			"company": String(id),
 			"reason": String(reason),
+			"commander": String(commander),
 		}, WorldPhase.RECKONING)
 	return lost
 
@@ -379,8 +449,8 @@ func to_dict() -> Dictionary:
 		"size": size,
 		"arms": arms.duplicate(),
 		"support": String(support),
-		"leader": String(leader),
-		"objective": String(objective),
+		"commander": String(commander),
+		"order": String(order),
 		"at": [at.x, at.y],
 		"destination": [destination.x, destination.y],
 		"raised_month": raised_month,
@@ -396,8 +466,8 @@ static func from_dict(data: Dictionary) -> Company:
 	company.size = int(data.get("size", 0))
 	company.arms = data.get("arms", {}).duplicate()
 	company.support = StringName(data.get("support", ""))
-	company.leader = StringName(data.get("leader", ""))
-	company.objective = StringName(data.get("objective", ""))
+	company.commander = StringName(data.get("commander", ""))
+	company.order = StandingOrder.of(StringName(data.get("order", "")))
 	company.at = _vector(data.get("at", []))
 	company.destination = _vector(data.get("destination", []))
 	company.raised_month = int(data.get("raised_month", 0))

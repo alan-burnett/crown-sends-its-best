@@ -80,4 +80,28 @@ func _victual(context: ColonyContext) -> void:
 		if company.is_empty() or company.is_supplied(context.state.month):
 			continue
 		company.go_without(context)
+
+	# 🔒 **And a leaderless militia goes home when it has stood its time**
+	# (`battles.md` §4), which is what gives defence a running cost: a town under
+	# sustained threat must keep re-raising and keep re-feeding.
+	#
+	# **After the victualling**, because a militia that stood a month it was not
+	# fed still stood it — and the men who go home this month went hungry for it.
+	for entry in companies.in_resolution_order():
+		var militia: Company = entry
+		if militia.is_empty() or not militia.has_stood_its_time(context.state.month):
+			continue
+		militia.stand_down(_home_of(militia), context)
+
 	companies.bury_the_dead()
+
+
+## The town a militia goes back to.
+##
+## **The one that victualled it**, which for a colonial company is the one that
+## raised it. A company whose town is gone has nowhere to send its men, and they
+## are simply no longer under arms — said plainly rather than left as a crash.
+func _home_of(company: Company) -> Town:
+	if colony == null or company.is_the_crowns_burden():
+		return null
+	return colony.by_id(company.support)

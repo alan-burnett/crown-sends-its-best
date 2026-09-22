@@ -1,7 +1,7 @@
 [
   {
     "id": "companies",
-    "note": "What a company wants and what a month without rations costs it (battles.md sections 2, 3, 8). Every figure here is tuning and section 12 says so: want-per-head for guns, tools and horses and each one's multiplier, and attrition per month while unsupported, are all on the list. Tools are a weapon here, not a toolbox - trenches dug, battlements thrown up, muskets kept firing - so they multiply effectiveness exactly as guns do, and a head wants fewer of them because they are shared.",
+    "note": "What a company wants and what a month without rations costs it (battles.md sections 2, 3, 8). Every figure here is tuning and section 12 says so: want-per-head for guns, tools and horses and each one's multiplier, and attrition per month while unsupported, are all on the list. Tools are a weapon here, not a toolbox - trenches dug, battlements thrown up, muskets kept firing - so they multiply effectiveness exactly as guns do, and a head wants fewer of them because they are shared. militia_months is how long a leaderless militia stands before it goes home (battles.md section 4), which is what gives defence a running cost: a militia eats for every month it stands, so a town under sustained threat must keep re-raising and keep re-feeding.",
     "want_per_head": {
       "guns": 1.0,
       "tools": 0.35,
@@ -11,6 +11,7 @@
     "attrition": 0.06,
     "unsupported_effect": 0.6,
     "tiles_per_month": 1,
-    "cavalry_tiles": 2
+    "cavalry_tiles": 2,
+    "militia_months": 6
   }
 ]

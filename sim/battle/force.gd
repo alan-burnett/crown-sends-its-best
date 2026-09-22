@@ -122,7 +122,7 @@ static func arms_of(company: Company) -> float:
 
 ## What its commander is worth. One when it has none (§4).
 static func leadership_of(company: Company) -> float:
-	return _leadership if not String(company.leader).is_empty() else 1.0
+	return _leadership if not String(company.commander).is_empty() else 1.0
 
 
 ## What the ground it stands on is worth, to a defender.

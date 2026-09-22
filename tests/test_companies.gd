@@ -104,14 +104,14 @@ func _horsed(size: int) -> Dictionary:
 func test_a_company_carries_the_six_things_section_one_lists() -> void:
 	var run := _run()
 	var company := _raise(run, 30, _horsed(30))
-	company.leader = &"commander_one"
-	company.objective = &"hold_the_town"
+	company.commander = &"commander_one"
+	company.order = &"hold_the_town"
 
 	assert_eq(company.size, 30)
 	assert_true(company.held(&"guns") > 0.0, "it launched with no guns")
 	assert_eq(company.support, run.colony.in_order()[0].id)
-	assert_eq(company.leader, &"commander_one")
-	assert_eq(company.objective, &"hold_the_town")
+	assert_eq(company.commander, &"commander_one")
+	assert_eq(company.order, &"hold_the_town")
 	assert_eq(company.allegiance, Company.COLONIAL)
 
 
@@ -239,7 +239,7 @@ func test_a_company_can_be_lost_entirely_and_says_so() -> void:
 	var company := _raise(run, 4, _horsed(4))
 	company.lose(1.0, &"wiped_out", _context(run))
 	assert_true(company.is_empty())
-	assert_eq(run.log.of_type(Company.EVENT_DISBANDED).size(), 1,
+	assert_eq(run.log.of_type(Company.EVENT_DESTROYED).size(), 1,
 		"a company was destroyed and nothing said so")
 
 	run.companies.bury_the_dead()
@@ -548,8 +548,8 @@ func test_a_company_mid_march_survives_the_save() -> void:
 	var run := _run()
 	var company := _raise(run, 33, _horsed(33))
 	company.destination = company.at + Vector2i(5, 2)
-	company.leader = &"commander_one"
-	company.objective = &"relieve_the_town"
+	company.commander = &"commander_one"
+	company.order = &"relieve_the_town"
 	_march(run)
 	_reckon(run)
 
@@ -560,8 +560,8 @@ func test_a_company_mid_march_survives_the_save() -> void:
 	assert_eq(back.at, company.at, "it forgot where it was")
 	assert_eq(back.destination, company.destination, "it forgot where it was going")
 	assert_eq(back.ordinal, company.ordinal, "it lost its place in the order")
-	assert_eq(back.leader, company.leader)
-	assert_eq(back.objective, company.objective)
+	assert_eq(back.commander, company.commander)
+	assert_eq(back.order, company.order)
 	assert_eq(back.unsupported_months, company.unsupported_months)
 	assert_almost_eq(back.armed_share(&"horses"), company.armed_share(&"horses"), 0.001,
 		"it came back a different sort of company")

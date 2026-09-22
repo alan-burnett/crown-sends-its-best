@@ -98,7 +98,7 @@ func _fortify(run: RunState, company: Company) -> void:
 func test_force_is_the_product_of_the_six_factors() -> void:
 	var run := _run()
 	var company := _raise(run, 20, _arms(20))
-	company.leader = &"commander_one"
+	company.commander = &"commander_one"
 
 	var parts := Force.breakdown(company, run.map)
 	var product := float(parts["size"]) * float(parts["arms"]) \
@@ -185,7 +185,7 @@ func test_a_commander_is_worth_something_and_none_is_not_a_penalty() -> void:
 	assert_almost_eq(Force.leadership_of(leaderless), 1.0, 0.001,
 		"a company with no commander was penalised for it")
 
-	led.leader = &"commander_one"
+	led.commander = &"commander_one"
 	assert_true(Force.of(led, run.map) > Force.of(leaderless, run.map),
 		"a commander was worth nothing")
 
