@@ -297,6 +297,7 @@ func _check_option(option: Variant, letter: Letter, path: String) -> void:
 	_check_line(option, letter, path)
 	_check_slots(String(option.get(LetterSchema.KEY_LABEL, "")), option, letter, "%s.label" % path)
 	_check_harshness(option, path)
+	_check_option_conditions(option, path)
 
 	var effect: Variant = option.get(LetterSchema.KEY_EFFECT)
 	if effect == null:
@@ -323,6 +324,37 @@ func _check_option(option: Variant, letter: Letter, path: String) -> void:
 ##
 ## It is also meaningless without an order to attach to, so an option that is
 ## harsh and has no effect is a mistake rather than a harmless decoration.
+## 🔒 **When an option may be taken at all** (#275, `patrons.md` §5).
+##
+## Checked exactly as a trigger's conditions are, against the same registry,
+## because they **are** a trigger's conditions: one place a condition is defined
+## and one validator asking whether it exists.
+##
+## An unknown id on an option would otherwise fail closed and silently —
+## `test_condition` answers false for a condition nobody registered, so the
+## option would simply never appear and the letter would read as though the
+## author had never written it.
+func _check_option_conditions(option: Dictionary, path: String) -> void:
+	var conditions: Variant = option.get(LetterSchema.KEY_CONDITIONS, [])
+	if typeof(conditions) != TYPE_ARRAY:
+		_problem("%s.conditions" % path, "expected an array of condition objects")
+		return
+
+	for index in conditions.size():
+		var entry: Variant = conditions[index]
+		var at := "%s.conditions[%d]" % [path, index]
+		if typeof(entry) != TYPE_DICTIONARY:
+			_problem(at, "expected an object mapping a condition id to its params")
+			continue
+		for condition_id in entry:
+			var args: Variant = entry[condition_id]
+			if typeof(args) != TYPE_DICTIONARY:
+				_problem("%s.%s" % [at, condition_id], "expected an object of params")
+				continue
+			for problem in ContentRegistry.check_condition_call(String(condition_id), args):
+				_problem("%s.%s" % [at, condition_id], problem)
+
+
 func _check_harshness(option: Dictionary, path: String) -> void:
 	if not option.has(LetterSchema.KEY_HARSH):
 		return
