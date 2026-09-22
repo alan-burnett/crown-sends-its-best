@@ -232,8 +232,17 @@ through the ledger and the letters without a number ever appearing.
 One thing to watch: because net gold accumulates with time, **a long run will
 almost always out-score a short one**, so thresholds set against long runs would
 put unlocks out of reach of the players who need them most. Either the thresholds
-are generous, or some unlocks gate on something other than the total. Not settled
-here.
+are generous, or some unlocks gate on something other than the total.
+
+**The second is now confirmed.** The Advisor's checkbox default hangs off a
+condition like *survive to year five* (`the-advisor.md` §7) — a fact about what
+the player did, not a score. So **the machinery has to take conditions as well as
+thresholds**, which is worth knowing before the thresholds are set rather than
+after.
+
+That one also sits **outside §14.3**: it grants no potential and needs no
+balancing drawback. Not everything hung on this machinery is a meta-progression
+unlock.
 
 ## 11. The reckoning, in M7
 
