@@ -47,9 +47,13 @@ extends Control
 ## three lines of text is a real amount of the page.
 const CAPTION_SHARE: float = 0.28
 
-## The bed, and the sound a panel change makes (SPEC §15). Asset ids, never
-## paths, and a cutscene that names neither is silent rather than broken.
-const BED: String = "music.cutscene"
+## The sound a panel change makes (SPEC §15). An asset id, never a path.
+##
+## 🔒 **The bed is not here** (#294, `beats.md` §2). Music is a layer that
+## survives moving between screens, so a cutscene *asks* for its bed and never
+## owns a player for it — a screen that started and stopped its own music would
+## cut the bed every time the player left it, which is the thing §2 says must
+## not happen.
 const PANEL_SOUND: String = "sound.cutscene_panel"
 
 signal finished
@@ -62,12 +66,16 @@ var cutscene: Cutscene = null
 ## running under `--script` has no such identifier.
 var assets: AssetRegistry = null
 
+## The three layers (#294). Injected for the same reason, and **optional**: a
+## cutscene with nowhere to send its sounds is a silent cutscene, not a broken
+## one.
+var sound: SoundEngine = null
+
 var _at: int = 0
 var _painting: TextureRect = null
 var _caption: Label = null
 var _advance: Button = null
 var _counter: Label = null
-var _music: AudioStreamPlayer = null
 var _sound: AudioStreamPlayer = null
 
 
@@ -85,7 +93,8 @@ func begin(p_cutscene: Cutscene, p_assets: AssetRegistry = null) -> void:
 		finished.emit()
 		return
 	_show_panel()
-	_start_the_bed()
+	if sound != null:
+		sound.bed(SoundEngine.BED_CUTSCENE)
 
 
 func _build() -> void:
@@ -132,8 +141,6 @@ func _build() -> void:
 	_advance.pressed.connect(advance)
 	column.add_child(_advance)
 
-	_music = AudioStreamPlayer.new()
-	add_child(_music)
 	_sound = AudioStreamPlayer.new()
 	add_child(_sound)
 
@@ -163,7 +170,9 @@ func advance() -> void:
 		finished.emit()
 		return
 	if cutscene.is_last(_at):
-		_stop_the_bed()
+		# 🔒 **The bed is not stopped here.** The next screen asks for its own
+		# and it cross-fades; stopping it would cut the music every time a
+		# cutscene ended (§2).
 		finished.emit()
 		return
 	_at += 1
@@ -216,19 +225,6 @@ func _texture(id: String) -> Texture2D:
 	if assets == null or id.is_empty():
 		return null
 	return assets.texture(id)
-
-
-func _start_the_bed() -> void:
-	var stream := _stream(BED)
-	if stream == null:
-		return
-	_music.stream = stream
-	_music.play()
-
-
-func _stop_the_bed() -> void:
-	if _music != null:
-		_music.stop()
 
 
 func _play(id: String) -> void:

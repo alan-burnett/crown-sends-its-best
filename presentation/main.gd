@@ -99,7 +99,9 @@ func _open_the_run() -> void:
 	screen.finished.connect(func() -> void:
 		screen.queue_free()
 		_ask_for_the_commission())
-	screen.begin(opening, get_node_or_null(^"/root/Assets") as AssetRegistry)
+	screen.assets = get_node_or_null(^"/root/Assets") as AssetRegistry
+	screen.sound = get_node_or_null(SoundEngine.AUTOLOAD_PATH) as SoundEngine
+	screen.begin(opening, screen.assets)
 
 
 ## A cutscene from the content database, or null.
