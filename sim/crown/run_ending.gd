@@ -51,6 +51,14 @@ var score: float = 0.0
 var net_gold: float = 0.0
 var optics_debt: float = 0.0
 
+## 🔒 **Which fail condition it was** (#267, `endings.md` §1). Both ways of
+## losing are `FAILED` and cost the same final optics debt — the court is equally
+## embarrassed either way — so this is what the summary and the epitaph read to
+## tell *the colony was overrun* from *the colony threw us out*.
+##
+## Empty for a run that ended any other way.
+var how: StringName = &""
+
 
 func is_over() -> bool:
 	return not String(reason).is_empty()
@@ -95,6 +103,7 @@ func to_dict() -> Dictionary:
 		"score": score,
 		"net_gold": net_gold,
 		"optics_debt": optics_debt,
+		"how": String(how),
 	}
 
 
@@ -105,4 +114,5 @@ static func from_dict(data: Dictionary) -> RunEnding:
 	out.score = float(data.get("score", 0.0))
 	out.net_gold = float(data.get("net_gold", 0.0))
 	out.optics_debt = float(data.get("optics_debt", 0.0))
+	out.how = StringName(data.get("how", ""))
 	return out
