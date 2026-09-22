@@ -42,6 +42,19 @@ no two live things share a name, applied to the one thing that is not generated 
 a patron who happened to share the PC's name would read as a mistake even though
 nothing was wrong.
 
+**Both are free text, and bounded.** The player is naming his own character, so
+he types it; the bounds exist because it lands in period-style prose and in a
+salutation line.
+
+| | Min | Max |
+| :--- | --: | --: |
+| **Title** | 1 | **20** |
+| **Name** | 1 | **48** |
+
+**A minimum of one is what removes the empty case**, so nothing downstream needs
+a fallback for a nameless PC — there is no such PC. Measure it **after trimming**
+, or a single space satisfies the minimum and puts the empty case back.
+
 **The old default was *Governor*, and it was a trap.** §2 makes the first word of
 a letterhead the role, so a PC styled *Governor* read exactly like one of his own
 colonial governors. *Lord* is not a preference; it removes a collision.
