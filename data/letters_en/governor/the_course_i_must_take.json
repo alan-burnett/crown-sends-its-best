@@ -1,6 +1,6 @@
 {
   "id": "governor.the_course_i_must_take",
-  "sender": "governor_ashmere",
+  "sender": "governor",
   "type": "report",
   "skippable": false,
   "params": {

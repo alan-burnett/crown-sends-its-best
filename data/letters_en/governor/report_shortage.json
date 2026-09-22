@@ -1,6 +1,6 @@
 {
   "id": "governor.report_shortage",
-  "sender": "governor_ashmere",
+  "sender": "governor",
   "type": "request",
   "skippable": true,
   "speaks_to": 52,

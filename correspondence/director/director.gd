@@ -71,7 +71,7 @@ func compose_inbox(run: RunState, outcomes: Array = []) -> Array[InboundLetter]:
 	var letters := _cull(fired, acknowledging, run)
 
 	for letter in letters:
-		run.letters_sent[letter.letter_id] = run.world.month
+		run.letters_sent[sent_key(letter.letter_id, letter.sender)] = run.world.month
 		run.log.emit(EVENT_DISPATCHED, letter.sender, run.world.month, {
 			"letter": letter.letter_id,
 			"tone": String(letter.tone),
@@ -98,23 +98,59 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 		if not content.has_record("letters", letter_id):
 			continue
 
-		if _too_soon(trigger, letter_id, run):
-			continue
-
 		var letter := Letter.from_record(content.record("letters", letter_id))
-		var contact := run.contact(StringName(letter.sender))
-		if contact == null:
-			continue
+		for entry in senders_of(letter, run):
+			var contact: Contact = entry
+			# 🔒 **Cooldown is per man, not per letter** (#361). Two governors
+			# both have a shortage to report; one reporting his must not silence
+			# the other's for nine months.
+			if _too_soon(trigger, letter_id, contact, run):
+				continue
 
-		var context := _context(run, contact)
-		# 🔒 **Conditions still gate** (#254). They say whether a letter is
-		# *true*; pressure says whether he *bothers*. A letter that is not true is
-		# never a candidate whatever he feels about the world.
-		if not _conditions_hold(trigger, context):
-			continue
+			var context := _context(run, contact)
+			# 🔒 **Conditions still gate** (#254). They say whether a letter is
+			# *true*; pressure says whether he *bothers*. A letter that is not
+			# true is never a candidate whatever he feels about the world.
+			if not _conditions_hold(trigger, context):
+				continue
 
-		fired.append(_inbound(trigger, letter, contact, context, run))
+			fired.append(_inbound(trigger, letter, contact, context, run))
 	return _only_what_they_want_to_say(_still_consulting(fired, run), run)
+
+
+## Everybody who could send this letter, sorted (#361).
+##
+## 🔒 **A named man, or a role.** `sender` is read as a contact id first, so
+## every letter addressed to one particular office — the Chancellor, the Steward,
+## the Marshal — behaves exactly as it always has. A `sender` that names nobody
+## is read as a **role**, and expands to one candidate per contact holding it,
+## each with his own context.
+##
+## That is what the folder layout always implied and what the director never
+## did: before this, `sender: "governor"` matched no contact and was skipped in
+## silence every month for ever — six letters that could never fire, two of them
+## SPEC §12.3's entire rebellion arc — while sixteen more were bound to the
+## capital's fixed id and no second town's governor wrote anything at all.
+##
+## 🔒 **And it needs no new volume control.** `Threshold` already raises a man's
+## bar for each further contact of a redundant role, and already lists governors,
+## institutional contacts, commanders and patrons as roles a colony accumulates.
+## That rule has simply never had a second governor to apply to.
+func senders_of(letter: Letter, run: RunState) -> Array:
+	var named := run.contact(StringName(letter.sender))
+	if named != null:
+		return [named]
+	if not Contact.is_role(StringName(letter.sender)):
+		return []
+
+	var out: Array = []
+	var ids: Array = run.contacts.keys()
+	ids.sort()
+	for id in ids:
+		var contact: Contact = run.contacts[id]
+		if contact != null and not contact.is_dead 				and contact.role == StringName(letter.sender):
+			out.append(contact)
+	return out
 
 
 ## Take out the questions and offers of the men who have stopped asking.
@@ -291,11 +327,23 @@ func _only_what_they_want_to_say(
 
 
 ## Whether this letter arrived too recently to arrive again.
-func _too_soon(trigger: Dictionary, letter_id: String, run: RunState) -> bool:
-	if not run.letters_sent.has(letter_id):
+func _too_soon(
+	trigger: Dictionary, letter_id: String, contact: Contact, run: RunState
+) -> bool:
+	var key := sent_key(letter_id, contact.id)
+	if not run.letters_sent.has(key):
 		return false
 	var cooldown := int(trigger.get("cooldown", DEFAULT_COOLDOWN))
-	return run.world.month - int(run.letters_sent[letter_id]) < cooldown
+	return run.world.month - int(run.letters_sent[key]) < cooldown
+
+
+## 🔒 **What a cooldown remembers: this letter, from this man** (#361).
+##
+## Keyed by the pair because a role now expands to several men. One governor
+## reporting a shortage must not silence every other governor's shortage for the
+## length of the cooldown — which is the same letter about a different town.
+static func sent_key(letter_id: String, sender: StringName) -> String:
+	return "%s@%s" % [letter_id, sender]
 
 
 func _conditions_hold(trigger: Dictionary, context: LetterContext) -> bool:
@@ -326,8 +374,12 @@ func _context(run: RunState, contact: Contact) -> LetterContext:
 
 ## Build the letter that will land on the desk, values and tone included.
 func _inbound(trigger: Dictionary, letter: Letter, contact: Contact, context: LetterContext, run: RunState) -> InboundLetter:
-	var inbound := InboundLetter.new(letter.id, StringName(letter.sender), &"")
-	inbound.id = StringName("inbound_%d_%s" % [run.turn, letter.id])
+	# 🔒 **The man, never the authored string** (#361). Everything downstream
+	# keys by sender — the cooldown, the one-letter-a-month rule, redundancy
+	# ranks, whether he is still consulting — and with a role in that field two
+	# governors would be one correspondent who wrote twice.
+	var inbound := InboundLetter.new(letter.id, contact.id, &"")
+	inbound.id = StringName("inbound_%d_%s_%s" % [run.turn, contact.id, letter.id])
 	inbound.month = run.world.month
 	inbound.measures = context.measures.duplicate()
 	inbound.params = _supply_params(trigger, letter, context)

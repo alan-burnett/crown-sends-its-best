@@ -1,6 +1,6 @@
 {
   "id": "governor.i_have_settled_on_a_course",
-  "sender": "governor_ashmere",
+  "sender": "governor",
   "type": "question",
   "skippable": false,
   "params": {
