@@ -15,7 +15,7 @@
 
 **Every faction values a resource differently, and trade happens on the gap.**
 
-A single price table was wrong. No ship comes from the Crown carrying lumber,
+A single price table was wrong. No ship comes from the Crown carrying wood,
 because a developed country and a forested colony value timber about the same and
 there is no gap to pay for the voyage. No food goes back the other way, because
 the home country grows it on a scale the colony cannot touch.
@@ -111,7 +111,7 @@ That is the case worth building for, and it is why this is a function.
 | :--- | --: | --: | :--- |
 | Furs | low — it has plenty | high — scarce and fashionable at home | colony **sells** |
 | Tools | high — it needs them and can make few | low — it manufactures them | colony **buys** |
-| Lumber | low | low | **no trade** |
+| Wood | low | low | **no trade** |
 | Food | moderate | low — grown at home at scale | **no trade** |
 
 The colony exports raw goods and imports manufactures because the valuations say
@@ -237,7 +237,7 @@ Without **need**, a town pursues whatever is dearest and ignores its own orders.
 **`base` must be its own authored table, not a multiple of the Crown's price.**
 Derive it and the gap between town and Crown becomes a function of shortfall
 alone — every surplus sells and every shortage buys, whatever the resource, and
-lumber behaves exactly like furs. §1's table, where lumber trades in neither
+wood behaves exactly like furs. §1's table, where wood trades in neither
 direction because both sides value it alike, cannot fall out of a derived figure.
 It needs two independent numbers.
 
@@ -288,12 +288,12 @@ it cannot bear is a trade protest (`trade-protests.md`), not a clever sale.
 
 ### And it stops a town drowning in what nobody wants
 
-A forest town's lumber valuation collapses once it is above desired stock with no
+A forest town's wood valuation collapses once it is above desired stock with no
 buyer, so forest tiles score near nothing and the workers go elsewhere. **The
-town simply stops producing lumber.** No storage caps, no spoilage, no targeted
+town simply stops producing wood.** No storage caps, no spoilage, no targeted
 discount — the problem does not arise.
 
-The same town a year later, raising a church, values lumber highly again: it
+The same town a year later, raising a church, values wood highly again: it
 works forest, and buys from the Crown if it must.
 
 ### Timing: valuation is computed before Work
