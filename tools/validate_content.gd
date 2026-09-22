@@ -40,6 +40,7 @@ func _init() -> void:
 	validator.check_no_authored_durations(content)
 	validator.check_severity(content)
 	validator.check_epitaphs(content)
+	validator.check_balance_policies(content)
 	print(validator.report())
 
 	var ok := validator.ok()

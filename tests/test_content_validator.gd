@@ -68,6 +68,70 @@ func test_the_real_data_tree_validates() -> void:
 	content.free()
 
 
+# --- 🔒 The tuner's personalities must be real players (#313) ------------
+
+## A content tree whose only balance personality prefers these option ids.
+func _with_policy(prefer: Array) -> ContentValidator:
+	var content := ContentDatabase.new()
+	content.load_all("en")
+	content.collection("balance").clear()
+	content.collection("balance")["made_up"] = {
+		"id": "made_up",
+		"_source_file": "res://data/balance/policies.json",
+		"prefer": prefer,
+	}
+	var validator := ContentValidator.new()
+	validator.check_balance_policies(content)
+	content.free()
+	return validator
+
+
+func test_the_shipped_personalities_all_prefer_options_that_exist() -> void:
+	var content := ContentDatabase.new()
+	content.load_all("en")
+	var validator := ContentValidator.new()
+	validator.check_balance_policies(content)
+	assert_true(validator.ok(), _problems_text(validator))
+	assert_false(content.ids("balance").is_empty(),
+		"there are no tuner personalities, so this checked nothing")
+	content.free()
+
+
+func test_catches_a_personality_preferring_an_option_no_letter_offers() -> void:
+	# 🔒 `balance.gd` falls through to the letter's first option when a
+	# preference matches nothing, so a dead preference is **silent** — and a dead
+	# preference means the harness has been reporting on a player who was never
+	# simulated. This had been true of seven of the eight.
+	var validator := _with_policy(["refuse", "partial"])
+	assert_false(validator.ok(), "a preference for an option nobody offers passed")
+
+	var said := _problems_text(validator)
+	assert_true(said.contains("made_up"), "the failure does not name the personality: %s" % said)
+	assert_true(said.contains("partial"), "the failure does not name the id: %s" % said)
+	assert_false(said.contains("refuse"),
+		"the failure blamed an id that letters do offer: %s" % said)
+
+
+func test_a_personality_that_prefers_nothing_is_fine() -> void:
+	# The absentee answers nothing at all, and is the reference for what silence
+	# alone does (SPEC §9.3).
+	assert_true(_with_policy([]).ok())
+
+
+func test_a_check_that_finds_no_personalities_says_so() -> void:
+	# 🔒 **A check that finds nothing has found nothing wrong** is the exact
+	# shape of the bug this replaces: the first version of it read the collection
+	# `policies`, which is the file and not the folder, and so passed in silence.
+	var content := ContentDatabase.new()
+	content.load_all("en")
+	content.collection("balance").clear()
+	var validator := ContentValidator.new()
+	validator.check_balance_policies(content)
+	assert_false(validator.ok(),
+		"a content tree with no tuner personalities at all was reported clean")
+	content.free()
+
+
 # --- What it catches -------------------------------------------------------
 
 func test_catches_an_undeclared_param() -> void:
