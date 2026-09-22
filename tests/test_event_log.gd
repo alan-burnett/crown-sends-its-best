@@ -101,3 +101,30 @@ func test_world_phases_are_the_nine_in_order() -> void:
 	assert_true(WorldPhase.index_of(WorldPhase.RUN_END_CHECK) < WorldPhase.index_of(WorldPhase.DISPATCH))
 	assert_true(WorldPhase.index_of(WorldPhase.RECKONING) < WorldPhase.index_of(WorldPhase.INTENT))
 	assert_false(WorldPhase.is_phase(&"not_a_phase"))
+
+
+func test_type_lookup_keeps_emission_order() -> void:
+	# `of_type` answers from an index rather than a scan, and a bucket that was
+	# not in emission order would put the map and the letters in a different
+	# order from the one the sim ran in.
+	var events := _log().of_type(&"revenue_settled")
+	assert_eq(events[0].seq, 0)
+	assert_eq(events[1].seq, 2)
+
+
+func test_type_lookup_survives_a_reload() -> void:
+	# The index is derived and never saved. A load that restored the events and
+	# not the index would answer "that never happened" to every question the
+	# monthly settlers ask, quietly, on a loaded run only.
+	var restored := EventLog.from_dict(_log().to_dict())
+	assert_eq(restored.of_type(&"revenue_settled").size(), 2)
+	restored.emit(&"revenue_settled", &"colony", 3, {"amount": 140})
+	assert_eq(restored.of_type(&"revenue_settled").size(), 3)
+
+
+func test_since_takes_the_whole_log_and_stops_at_its_end() -> void:
+	var log := _log()
+	assert_eq(log.since(0).size(), 3)
+	assert_eq(log.since(2).size(), 1)
+	assert_eq(log.since(3).size(), 0)
+	assert_eq(EventLog.new().since(0).size(), 0)
