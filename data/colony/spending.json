@@ -2,10 +2,12 @@
   "id": "spending",
   "tiers": {
     "need": 8.0,
+    "company": 5.0,
     "objective": 2.5,
     "want": 1.0
   },
   "purse_reserve_months": 2.0,
   "pleasure_gold_per_head": 12.0,
-  "rounds": 20
+  "rounds": 20,
+  "note": "Tiers favour, they do not gate (town-economy.md section 4): a heavy multiplier on what a thing is worth, not a gate in front of it. The company tier sits between the townspeople's needs and the objective, because battles.md section 3 puts it there - a governor cannot starve his citizens to feed his soldiers, and he cannot raise a chapel while his men go hungry. Every figure is tuning."
 }

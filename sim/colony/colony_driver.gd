@@ -20,6 +20,9 @@ var intents: IntentBook = null
 ## launched in the Colony Month is on the map without anything copying it across.
 var parties: Array = []
 
+## The companies the colony's towns victual (#211).
+var companies: Companies = null
+
 ## What each town holds against the Crown, and who lives where (#71).
 var grievances: Grievances = null
 var contacts: Dictionary = {}
@@ -63,6 +66,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.run_seed = run_seed
 	context.intents = intents
 	context.parties = parties
+	context.companies = companies
 	context.grievances = grievances
 	context.contacts = contacts
 	context.native_trade = native_trade

@@ -31,10 +31,25 @@ extends RefCounted
 ## code change.
 
 const NEED: StringName = &"need"
+
+## 🔒 **Companies eat before the objective** (#211, `town-economy.md` §4,
+## `battles.md` §3). A town that has raised a company counts its men as mouths
+## and victuals them, and they sit in a fixed place in the order: the
+## townspeople's own needs, then every company the town supports, then the
+## objective, then wants.
+##
+## So a governor cannot starve his citizens to feed his soldiers, and he cannot
+## raise a chapel while his men go hungry. **And a town cannot disband its way
+## out of famine** — if it cannot cover a company it simply sends nothing and
+## that company goes unsupported, which costs the company and not the purse.
+const COMPANY: StringName = &"company"
+
 const OBJECTIVE: StringName = &"objective"
 const WANT: StringName = &"want"
 
-static var _tiers: Dictionary = {"need": 8.0, "objective": 2.5, "want": 1.0}
+static var _tiers: Dictionary = {
+	"need": 8.0, "company": 5.0, "objective": 2.5, "want": 1.0,
+}
 static var _purse_reserve_months: float = 2.0
 static var _pleasure_gold_per_head: float = 7.0
 static var _rounds: int = 20
@@ -48,7 +63,7 @@ static func load_from(record: Dictionary) -> void:
 
 
 static func reset() -> void:
-	_tiers = {"need": 8.0, "objective": 2.5, "want": 1.0}
+	_tiers = {"need": 8.0, "company": 5.0, "objective": 2.5, "want": 1.0}
 	_purse_reserve_months = 2.0
 	_pleasure_gold_per_head = 7.0
 	_rounds = 20

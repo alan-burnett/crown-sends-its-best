@@ -52,6 +52,11 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 
 	var unmet_food := _eat(town, mouths, context, record)
 	_wear(town, mouths, record)
+	# 🔒 **After the townspeople and before anything else** (#211, `battles.md`
+	# §3). A governor cannot starve his citizens to feed his soldiers, and the
+	# order is enforced by the order these run in rather than by a rule anybody
+	# has to remember.
+	record["companies_fed"] = _victual(town, context)
 	_enjoy(town, mouths, record)
 
 	context.wellbeing[String(town.id)] = record
@@ -99,6 +104,48 @@ func _eat(town: Town, mouths: float, context: ColonyContext, record: Dictionary)
 		town.months_hungry = 0
 
 	return unmet
+
+
+## The companies this town supports, fed out of what the people left.
+##
+## 🔒 **All of it or none of it, per company** (§3). A town that cannot cover a
+## company *sends nothing* and that company goes unsupported — half rations would
+## be a third state the doc does not have, and it would let a town quietly meter
+## its militia down instead of facing the choice.
+##
+## 🔒 **And it cannot disband its way out of famine.** There is deliberately no
+## path here by which a hungry town sheds a company: the failure costs the
+## company, never the purse, and the men are still on the map next month.
+##
+## Returns the share of its companies the town actually managed to victual, for
+## the record a governor's letter reads.
+func _victual(town: Town, context: ColonyContext) -> float:
+	if context.companies == null:
+		return 1.0
+	var supported := context.companies.supported_by(town.id)
+	if supported.is_empty():
+		return 1.0
+
+	var fed := 0
+	for entry in supported:
+		var company: Company = entry
+		var rations := company.victuals()
+		# **Asked before anything is taken.** Taking what there was and then
+		# finding the cloth short would leave the town poorer and the company
+		# unsupported anyway, which is the worst of both.
+		var can_cover := true
+		for resource in rations:
+			if town.held(StringName(resource)) < float(rations[resource]):
+				can_cover = false
+				break
+		if not can_cover:
+			continue
+		for resource in rations:
+			town.take(StringName(resource), float(rations[resource]))
+		company.was_supplied(context.state.month)
+		fed += 1
+
+	return float(fed) / float(supported.size())
 
 
 ## Clothing. Nobody dies of it; they are simply cold, and say so.

@@ -115,6 +115,9 @@ static func load_resources(content: ContentDatabase) -> void:
 	# Who a patron can be (#282). No language suffix either: the catalogue is a
 	# list of ids and a vice is a list of knobs, and neither carries a word the
 	# player reads.
+	# What a company wants and what a month without rations costs it (#211).
+	if content.has_record(Company.COLLECTION, Company.RECORD):
+		Company.load_from(content.record(Company.COLLECTION, Company.RECORD))
 	if content.has_record(Patron.COLLECTION, Patron.CATALOGUE_RECORD):
 		Patron.load_from(content.record(Patron.COLLECTION, Patron.CATALOGUE_RECORD))
 	if content.has_record(PatronVices.COLLECTION, PatronVices.RECORD):

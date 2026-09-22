@@ -34,6 +34,16 @@ var town_id: StringName = &""
 ## **Tier 1.** What the town will die without: food and clothing, by population.
 var needs: Dictionary = {}
 
+## 🔒 **Between the two** (#211, `town-economy.md` §4, `battles.md` §3). What the
+## companies this town supports eat this month.
+##
+## **Its own tier, and deliberately not part of `needs`.** Needs drive
+## `shortfall`, which is what the letters call a shortage and what a famine
+## counts — and a town whose militia went hungry has not had a famine. Folding
+## the two together would have a governor writing home about starving townsfolk
+## who were eating perfectly well.
+var companies: Dictionary = {}
+
 ## **Tier 2.** What the objective requires — the rest of the cost of what the
 ## town is building, over what has already gone into it.
 var objective: Dictionary = {}
@@ -69,6 +79,11 @@ func _init(p_town_id: StringName = &"") -> void:
 
 func need_of(resource: StringName) -> float:
 	return float(needs.get(String(resource), 0.0))
+
+
+## What the companies this town victuals want of a resource this month.
+func company_of(resource: StringName) -> float:
+	return float(companies.get(String(resource), 0.0))
 
 
 ## What the objective still requires of a resource.
@@ -125,6 +140,7 @@ func to_dict() -> Dictionary:
 	return {
 		"town": String(town_id),
 		"needs": needs.duplicate(),
+		"companies": companies.duplicate(),
 		"objective": objective.duplicate(),
 		"wants": wants.duplicate(),
 		"comfort_budget": comfort_budget,

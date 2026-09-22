@@ -1,0 +1,413 @@
+class_name Company
+extends RefCounted
+
+## One visible body of armed men on one tile (#211,
+## `docs/mechanics/battles.md` §1, §2, §3, §7, §8).
+##
+## ## 🔒 One structure, whoever is holding the musket
+##
+## SPEC §12.6 names two *kinds* — Colonial Forces and Crown Troops — and those
+## are mass nouns. **A company is the countable thing on the map**, and a Crown
+## force putting down a rebellion is many companies. Rebel, rival and native
+## bodies are companies too, because one structure and one resolver is what stops
+## five kinds of fighting men becoming five kinds of bug.
+##
+## `allegiance` is what §12.3's locks read — *colonists do not fight colonists*,
+## *rebel towns fight the Crown's forces but never loyal towns*. Those are
+## **filters on this field and nothing else**, and the field is here before
+## anything fights so that M6 adds a resolver and not a model.
+##
+## ## 🔒 Victualled continuously, equipped once
+##
+## Two things wear the word *supply* and they behave nothing alike.
+##
+## | | What | From | When |
+## | :--- | :--- | :--- | :--- |
+## | **Support** | food, clothing | its town, or the Crown | every month |
+## | **Arms** | guns, tools, horses | whatever it launched with | fixed at creation |
+##
+## **A company never resupplies its arms and never gains men. It only dwindles.**
+## There is deliberately no method here that adds to either, and the one
+## exception §2 allows is not a mechanic but a letter: a commander may write
+## asking for gold to buy horses, and the company that gold raises is a new one.
+##
+## That is what makes arms a **launch decision**. Raising a company is an
+## allocation, not a button.
+##
+## ## 🔒 Losses preserve ratios
+##
+## `CLAUDE.md`: *a company under arms loses a share of its people and the same
+## share of its stores.* Which is why **a fully horsed company stays cavalry
+## however badly it is mauled** (§8) — there is no unit type and no flag, only a
+## threshold on a ratio that attrition cannot move.
+##
+## A dev who made losses take men without taking arms would make a mauled company
+## *better* equipped than it started, and cavalry would become the reward for
+## being beaten.
+
+const COLLECTION: String = "battle"
+const RECORD: String = "companies"
+
+# --- Allegiance -------------------------------------------------------------
+
+## 🔒 **The field §12.3's locks read**, and the order §7 resolves in.
+const COLONIAL: StringName = &"colonial"
+const CROWN: StringName = &"crown"
+const REBEL: StringName = &"rebel"
+const RIVAL: StringName = &"rival"
+const NATIVE: StringName = &"native"
+
+## 🔒 **Factions in a set sequence** (§7). Order changes outcomes — several
+## companies may attack one in a month and the defender weakens as they come —
+## so it is fixed here and never incidental, and it needs no seeded roll because
+## creation order is already deterministic from the seed.
+const FACTIONS: Array[StringName] = [COLONIAL, CROWN, REBEL, RIVAL, NATIVE]
+
+# --- Support ----------------------------------------------------------------
+
+## 🔒 **The Crown victuals its own** (`the-marshal.md` §3, locked). There is no
+## state in which Crown troops depend on the colony, so a company supported by
+## this is never anybody's burden and never goes unsupported.
+const SUPPORTED_BY_CROWN: StringName = &"crown"
+
+const EVENT_RAISED: StringName = &"company_raised"
+const EVENT_MOVED: StringName = &"company_moved"
+const EVENT_UNSUPPORTED: StringName = &"company_unsupported"
+const EVENT_DWINDLED: StringName = &"company_dwindled"
+const EVENT_DISBANDED: StringName = &"company_disbanded"
+
+## What each head wants, per armed resource. **Tuning**, and §12 says so.
+static var _want_per_head: Dictionary = {"guns": 1.0, "tools": 0.35, "horses": 1.0}
+
+## Where a company stops being foot and becomes cavalry. A share of one, because
+## §8 says *supplied to the full on horses*.
+static var _cavalry_at: float = 1.0
+
+## What an unsupported month costs: a share of the men, and a multiplier on what
+## the rest are worth. Tuning (§12: *attrition per month while unsupported*).
+static var _attrition: float = 0.06
+static var _unsupported_effect: float = 0.6
+
+## Tiles crossed in a month, and what cavalry gets instead (§8).
+static var _tiles_per_month: int = 1
+static var _cavalry_tiles: int = 2
+
+
+static func load_from(record: Dictionary) -> void:
+	_want_per_head = record.get("want_per_head", _want_per_head).duplicate()
+	_cavalry_at = float(record.get("cavalry_at", _cavalry_at))
+	_attrition = float(record.get("attrition", _attrition))
+	_unsupported_effect = float(record.get("unsupported_effect", _unsupported_effect))
+	_tiles_per_month = int(record.get("tiles_per_month", _tiles_per_month))
+	_cavalry_tiles = int(record.get("cavalry_tiles", _cavalry_tiles))
+
+
+static func reset() -> void:
+	_want_per_head = {"guns": 1.0, "tools": 0.35, "horses": 1.0}
+	_cavalry_at = 1.0
+	_attrition = 0.06
+	_unsupported_effect = 0.6
+	_tiles_per_month = 1
+	_cavalry_tiles = 2
+
+
+## The resources a company carries, in a fixed order.
+##
+## **Sorted**, because a share taken off every line has to be taken in the same
+## order every time or two runs of one seed would round differently.
+static func armed_resources() -> PackedStringArray:
+	var out := PackedStringArray(_want_per_head.keys())
+	out.sort()
+	return out
+
+
+static func want_per_head(resource: StringName) -> float:
+	return maxf(0.0, float(_want_per_head.get(String(resource), 0.0)))
+
+
+static func attrition() -> float:
+	return _attrition
+
+
+var id: StringName = &""
+
+## 🔒 **The sequential number it was given at instantiation** (§7). Within a
+## faction, earliest-created goes first — the same rule that orders towns, and
+## the reason resolution needs no tie-break.
+var ordinal: int = 0
+
+var allegiance: StringName = COLONIAL
+
+## The population under arms. **Only ever falls.**
+var size: int = 0
+
+## What it launched with, per resource. **Only ever falls.**
+var arms: Dictionary = {}
+
+## The town that victuals it, or `SUPPORTED_BY_CROWN`.
+var support: StringName = &""
+
+## A commander, or none. §4's agency is M6 (#220); the field is here because §1
+## puts it on the object.
+var leader: StringName = &""
+
+## A standing order. Likewise named now and acted on by M6.
+var objective: StringName = &""
+
+var at: Vector2i = Vector2i(-1, -1)
+
+## Where it is marching. **Assigned by a standing order**, and one tile a month
+## in a straight line, exactly as an expedition crosses country.
+var destination: Vector2i = Vector2i(-1, -1)
+
+var raised_month: int = 0
+
+## The last month somebody actually fed it.
+##
+## 🔒 **A month, not a flag.** The town victuals in phase 4 and the consequence
+## falls in phase 7, so the question asked in phase 7 is *did anybody feed it
+## this month* — and a flag would have to be cleared by something, which is a
+## thing to forget.
+var supplied_month: int = -1
+
+## How many months running it has gone without. Zero the moment supply resumes,
+## because §3 says it recovers the moment supply resumes and that is the whole
+## of the rule.
+var unsupported_months: int = 0
+
+
+func _init(p_id: StringName = &"", p_ordinal: int = 0) -> void:
+	id = p_id
+	ordinal = p_ordinal
+
+
+# --- Arms -------------------------------------------------------------------
+
+func held(resource: StringName) -> float:
+	return float(arms.get(String(resource), 0.0))
+
+
+## What the company holds against what it wants, capped at one.
+##
+##     armed_share(r) = min(held(r) / (size x want_per_head(r)), 1.0)
+##
+## 🔒 **Surplus does nothing** (§2). The same shape `quality-of-life.md` uses for
+## pleasure — scaled by the fraction of the population served — and deliberately
+## so: one mental model covers both and neither needs new machinery.
+##
+## A resource nobody wants reads as fully supplied, because a company that needs
+## no horses is not short of horses.
+func armed_share(resource: StringName) -> float:
+	var want := want_per_head(resource) * float(size)
+	if want <= 0.0:
+		return 1.0
+	return clampf(held(resource) / want, 0.0, 1.0)
+
+
+## 🔒 **A threshold on the arms ratio, and no flag** (§8).
+##
+## Which is what makes it hold through attrition: losses take the same share of
+## the horses as of the men, so the ratio is unchanged and the company is still
+## cavalry. A company of four that started as forty is still mounted.
+func is_cavalry() -> bool:
+	return size > 0 and armed_share(&"horses") >= _cavalry_at
+
+
+## Tiles it crosses in a month. Cavalry gets two (§8).
+func tiles_this_month() -> int:
+	return _cavalry_tiles if is_cavalry() else _tiles_per_month
+
+
+## Attacks it makes in a month.
+##
+## **Named here and used by M6.** A normal company moves *and* attacks in the
+## same month — not one or the other, or nothing could ever be chased down — and
+## cavalry does both twice, which is a tempo advantage as much as a combat one.
+func attacks_this_month() -> int:
+	return _cavalry_tiles if is_cavalry() else _tiles_per_month
+
+
+## Whether the Crown feeds it, in which case the colony never does (§3).
+func is_the_crowns_burden() -> bool:
+	return support == SUPPORTED_BY_CROWN
+
+
+func is_empty() -> bool:
+	return size <= 0
+
+
+# --- Support ----------------------------------------------------------------
+
+## What this company eats in a month, per resource.
+##
+## **The townspeople's own per-head figures**, because soldiers are the same
+## people with muskets. A separate table would be a second answer to how much a
+## man eats, and the two would drift.
+func victuals() -> Dictionary:
+	var out: Dictionary = {}
+	for resource in ColonyNeeds.needed_resources():
+		var amount := float(size) * ColonyNeeds.per_head(StringName(resource))
+		if amount > 0.0:
+			out[String(resource)] = amount
+	return out
+
+
+## Somebody fed it this month.
+func was_supplied(month: int) -> void:
+	supplied_month = month
+	unsupported_months = 0
+
+
+## Whether anybody fed it this month.
+func is_supplied(month: int) -> bool:
+	return is_the_crowns_burden() or supplied_month >= month
+
+
+## How much of its strength it can actually bring, before anything about a battle.
+##
+## **Falls at once when it goes without** (§3), rather than after some number of
+## months. A company that missed its rations this month is worse today, which is
+## what makes a town's failure to cover it immediately legible.
+func effectiveness() -> float:
+	return 1.0 if unsupported_months <= 0 else _unsupported_effect
+
+
+## A month without rations (Seam A). Returns how many men it cost.
+##
+## 🔒 **It bleeds, and it cannot disband its way out** (§3). The town that could
+## not cover it sent nothing; the company wears it. And **it recovers the moment
+## supply resumes** — `unsupported_months` going to nought is the whole of the
+## recovery rule, because effectiveness reads that and nothing else.
+func go_without(context: ColonyContext) -> int:
+	unsupported_months += 1
+	context.log.emit(EVENT_UNSUPPORTED, id, context.state.month, {
+		"company": String(id),
+		"support": String(support),
+		"months": unsupported_months,
+		"size": size,
+	}, WorldPhase.RECKONING)
+	return lose(Company.attrition(), &"unsupported", context)
+
+
+# --- Losses -----------------------------------------------------------------
+
+## Lose a share of the men, and the same share of everything they carried.
+##
+## 🔒 **The share, not a count** (`CLAUDE.md`). A body of people in the open is
+## not a town, so the one-population-at-a-time rule does not reach here — and the
+## proportional loss of the arms with the men is the other half of it, which is
+## what keeps a mauled company the same sort of company it was.
+##
+## **At least one man** when a share is asked for at all, so a company of eight
+## losing six per cent is not immortal by rounding.
+##
+## Returns how many men were lost. Emits, per Seam A, because the map, the
+## letters and the ledger all read the log rather than the state.
+func lose(share: float, reason: StringName, context: ColonyContext) -> int:
+	if size <= 0 or share <= 0.0:
+		return 0
+	var lost := maxi(1, int(round(float(size) * clampf(share, 0.0, 1.0))))
+	lost = mini(lost, size)
+	var taken := float(lost) / float(size)
+
+	size -= lost
+	# **In a fixed order**, so two runs of one seed round the same way.
+	for resource in Company.armed_resources():
+		var had := held(resource)
+		if had <= 0.0:
+			continue
+		arms[String(resource)] = maxf(0.0, had - had * taken)
+
+	context.log.emit(EVENT_DWINDLED, id, context.state.month, {
+		"company": String(id),
+		"reason": String(reason),
+		"lost": lost,
+		"size": size,
+		# **What it still holds**, so a reader can see the ratios were preserved
+		# without having to recompute them from two events.
+		"horsed": armed_share(&"horses"),
+	}, WorldPhase.RECKONING)
+
+	if is_empty():
+		context.log.emit(EVENT_DISBANDED, id, context.state.month, {
+			"company": String(id),
+			"reason": String(reason),
+		}, WorldPhase.RECKONING)
+	return lost
+
+
+# --- Movement ---------------------------------------------------------------
+
+## One month's march toward a tile. Returns whether it arrived.
+##
+## **The plainest possible line**, exactly as an expedition crosses country: a
+## company that took a clever route would be one the player could not follow on
+## a map that shows only what the colony knows (SPEC §11.2).
+func advance(toward: Vector2i, context: ColonyContext) -> bool:
+	if toward == Vector2i(-1, -1) or at == Vector2i(-1, -1):
+		return false
+	if at == toward:
+		return true
+
+	var from := at
+	for _tile in tiles_this_month():
+		if at == toward:
+			break
+		at += Vector2i(signi(toward.x - at.x), signi(toward.y - at.y))
+
+	if at == from:
+		return at == toward
+
+	context.log.emit(EVENT_MOVED, id, context.state.month, {
+		"company": String(id),
+		"allegiance": String(allegiance),
+		"at": [at.x, at.y],
+		"toward": [toward.x, toward.y],
+		"cavalry": is_cavalry(),
+		"size": size,
+	}, WorldPhase.MOVEMENT)
+	return at == toward
+
+
+# --- Serialisation ----------------------------------------------------------
+
+func to_dict() -> Dictionary:
+	return {
+		"id": String(id),
+		"ordinal": ordinal,
+		"allegiance": String(allegiance),
+		"size": size,
+		"arms": arms.duplicate(),
+		"support": String(support),
+		"leader": String(leader),
+		"objective": String(objective),
+		"at": [at.x, at.y],
+		"destination": [destination.x, destination.y],
+		"raised_month": raised_month,
+		"supplied_month": supplied_month,
+		"unsupported_months": unsupported_months,
+	}
+
+
+static func from_dict(data: Dictionary) -> Company:
+	var company := Company.new(
+		StringName(data.get("id", "")), int(data.get("ordinal", 0)))
+	company.allegiance = StringName(data.get("allegiance", COLONIAL))
+	company.size = int(data.get("size", 0))
+	company.arms = data.get("arms", {}).duplicate()
+	company.support = StringName(data.get("support", ""))
+	company.leader = StringName(data.get("leader", ""))
+	company.objective = StringName(data.get("objective", ""))
+	company.at = _vector(data.get("at", []))
+	company.destination = _vector(data.get("destination", []))
+	company.raised_month = int(data.get("raised_month", 0))
+	company.supplied_month = int(data.get("supplied_month", -1))
+	company.unsupported_months = int(data.get("unsupported_months", 0))
+	return company
+
+
+static func _vector(entry: Variant) -> Vector2i:
+	var list: Array = entry if typeof(entry) == TYPE_ARRAY else []
+	if list.size() < 2:
+		return Vector2i(-1, -1)
+	return Vector2i(int(list[0]), int(list[1]))
