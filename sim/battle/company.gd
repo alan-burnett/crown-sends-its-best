@@ -197,6 +197,25 @@ var raised_month: int = 0
 ## thing to forget.
 var supplied_month: int = -1
 
+## 🔒 **What the PC last argued him toward**, and how (#221,
+## `commanders.md` §8, SPEC §8.5).
+##
+## > *Argue with a commander's intent, never his target.* §12.6 gives the PC
+## > goals and allocations; the tile is the commander's, exactly as it is the
+## > governor's.
+##
+## So this names one of the five things a commander may decide — press the
+## attack, hold, go on, come home, stand down — and never a place. It is the
+## same shape a governor's `urged_intent` takes, for the same reason: **a letter
+## is not a standing order.** He remembers it, it fades, and how fast depends on
+## how much he took it to mean.
+##
+## 🔒 **And it is weighed against his regard, not obeyed.** A man who despises
+## the PC has had the letter too.
+var urged: StringName = &""
+var urged_month: int = 0
+var urged_tone: StringName = &""
+
 ## 🔒 **Casualties owed but not yet taken** (#216, `battles.md` §6).
 ##
 ## A battle costs a company **men, fractionally**: a company dwindling at 0.2 a
@@ -480,6 +499,22 @@ func advance(toward: Vector2i, context: ColonyContext) -> bool:
 	return at == toward
 
 
+## The PC has written to him (#221, `commanders.md` §8).
+##
+## 🔒 **An Order is never a write** (`CLAUDE.md`, Seam B). This does not move the
+## company and does not decide anything — it records what was argued for, and the
+## commander weighs it next time he deliberates, against his regard for the man
+## who wrote it.
+##
+## **The latest letter is the one he is thinking about.** A second letter
+## replaces the first rather than stacking with it, because a man does not hold
+## two opinions about what the Crown wants.
+func urge(toward: StringName, tone: StringName, month: int) -> void:
+	urged = toward
+	urged_tone = tone
+	urged_month = month
+
+
 ## Say where a month's marching took it (Seam A).
 ##
 ## **Emitted once for the whole month**, however many tiles that was, because the
@@ -534,6 +569,9 @@ func to_dict() -> Dictionary:
 		"supplied_month": supplied_month,
 		"unsupported_months": unsupported_months,
 		"casualties_owed": casualties_owed,
+		"urged": String(urged),
+		"urged_month": urged_month,
+		"urged_tone": String(urged_tone),
 	}
 
 
@@ -552,6 +590,9 @@ static func from_dict(data: Dictionary) -> Company:
 	company.supplied_month = int(data.get("supplied_month", -1))
 	company.unsupported_months = int(data.get("unsupported_months", 0))
 	company.casualties_owed = float(data.get("casualties_owed", 0.0))
+	company.urged = StringName(data.get("urged", ""))
+	company.urged_month = int(data.get("urged_month", 0))
+	company.urged_tone = StringName(data.get("urged_tone", ""))
 	return company
 
 

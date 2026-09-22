@@ -47,8 +47,60 @@ const ALL: PackedStringArray = [
 	"keeping_my_army_alive",
 	"the_prize_in_front_of_me",
 	"the_orders_i_was_given",
+	"the_crowns_urging",
 	"standing_about",
 ]
+
+## 🔒 **What his regard for the PC does to an order** (SPEC §8.5).
+##
+## **An order is a request, and a request from a man you despise is barely an
+## argument at all.** Both order terms below are scaled by this, so:
+##
+## - a commander who thinks well of the PC weighs the order at full strength,
+##   and for most boards that is what decides it
+## - a commander who does not is **barely moved even by a desperate letter** —
+##   the tone raises how hard the letter pulls, and his regard crushes the
+##   product
+##
+## That is the difference between this and the governor's urging, which relies
+## on compliance to gate whether the letter lands at all. A commander in the
+## field is not answering a letter when he decides; he is deciding, with a letter
+## in his pocket. So the regard has to reach the weighing itself, or a man who
+## loathed the PC would follow his last instruction exactly as faithfully as a
+## man who admired him.
+##
+## 🔒 **It never reaches nought.** A company under orders is still under orders,
+## and a commander who ignored them completely would have stopped being the
+## Crown's — which is a rebellion and belongs to a different mechanism.
+const LEAST_REGARD: float = 0.1
+
+## The size of enemy a commander would call a famous victory. Tuning.
+##
+## **An absolute, deliberately.** Beating a hundred men is the same feat whether
+## you brought fifty or five hundred, which is what makes this a different
+## question from the odds rather than the same one inverted.
+const GLORY_AT: float = 80.0
+
+## How long the PC's last word to a commander keeps half its pull.
+##
+## **Shorter than a governor's year** (`intent_considerations.md`'s twelve
+## months), because a campaign is a season and a town is a lifetime: a letter
+## about a march that is over is a letter about nothing. Tuning.
+const URGING_HALF_LIFE: float = 6.0
+
+
+## How much this man's orders count with him, nought to one.
+##
+## Linear in loyalty, because there is no band here worth naming — the point is a
+## gradient, so that the PC can feel a commander slipping rather than discover it
+## at a threshold.
+static func regard_of(actor: DeliberationActor) -> float:
+	var contact := actor as Contact
+	if contact == null:
+		return 1.0
+	return lerpf(
+		LEAST_REGARD, 1.0,
+		clampf(contact.loyalty() / Relationship.MAX_LOYALTY, 0.0, 1.0))
 
 
 static func register_all() -> void:
@@ -58,6 +110,8 @@ static func register_all() -> void:
 		PrizeConsideration.new(&"the_prize_in_front_of_me"), KINDS)
 	Deliberation.register_consideration(
 		OrdersConsideration.new(&"the_orders_i_was_given"), KINDS)
+	Deliberation.register_consideration(
+		UrgingConsideration.new(&"the_crowns_urging"), KINDS)
 	Deliberation.register_consideration(
 		IdlenessConsideration.new(&"standing_about"), KINDS)
 
@@ -197,14 +251,16 @@ class PrizeConsideration:
 	func score(
 		_actor: DeliberationActor, candidate: Candidate, _context: DeliberationContext
 	) -> float:
-		var mine := CommanderConsiderations._company_of(candidate)
 		var theirs := CommanderConsiderations._enemy_of(candidate)
-		if mine == null or theirs == null:
+		if theirs == null:
 			return 0.0
-		var both := float(mine.size + theirs.size)
-		if both <= 0.0:
-			return 0.0
-		return clampf((float(theirs.size) / both - 0.5) * 2.0, -1.0, 1.0)
+		# 🔒 **Their size, not their share of the pair.** A share is one minus the
+		# odds, so it cancelled the risk exactly whenever force tracked size —
+		# which is every fight in a bare field between two unarmed companies. The
+		# two considerations then summed to nothing and only the weights decided,
+		# which is the correlation this pair exists to avoid.
+		return clampf(
+			float(theirs.size) / CommanderConsiderations.GLORY_AT, 0.0, 1.0)
 
 
 ## 🔒 **What he was told to do** (§5, SPEC §8.5) — and this is the only place the
@@ -220,21 +276,73 @@ class OrdersConsideration:
 	extends Consideration
 
 	func score(
-		_actor: DeliberationActor, candidate: Candidate, _context: DeliberationContext
+		actor: DeliberationActor, candidate: Candidate, _context: DeliberationContext
 	) -> float:
 		var company := CommanderConsiderations._company_of(candidate)
 		var sent := company != null and StandingOrder.leaves_the_town(company.order)
+		var asked := 0.0
 		match candidate.id:
 			CommanderConsiderations.ATTACK:
-				return 0.8 if sent else 0.2
+				asked = 0.8 if sent else 0.2
 			CommanderConsiderations.MARCH:
-				return 1.0 if sent else -0.2
+				asked = 1.0 if sent else -0.2
 			CommanderConsiderations.HOLD:
-				return -0.2 if sent else 1.0
+				asked = -0.2 if sent else 1.0
 			CommanderConsiderations.WITHDRAW:
-				return -0.6 if sent else 0.2
+				asked = -0.6 if sent else 0.2
 			_:
-				return -1.0
+				asked = -1.0
+		# 🔒 **Scaled by what he thinks of the man who gave it** (SPEC §8.5). An
+		# order is a request, and a request from somebody you despise is barely an
+		# argument — so the same order counts for everything with a loyal officer
+		# and for almost nothing with a bitter one.
+		return asked * CommanderConsiderations.regard_of(actor)
+
+
+## 🔒 **What the PC last argued him toward** (`commanders.md` §8, SPEC §8.5).
+##
+## The commander's half of the lever the whole game turns on. The PC cannot name
+## a tile and cannot order an attack; he can write, and a commander who thinks
+## well of him takes it to heart.
+##
+## Three things decide how hard it pulls, and they multiply:
+##
+## | | |
+## | :--- | :--- |
+## | **how long ago** | a letter fades — `commanders.md` §8's *argue with his intent* is not a standing order |
+## | **how it was written** | desperate pulls harder and for longer than dutiful (`tone.md` §4) |
+## | **what he thinks of the PC** | and this is what makes the other two matter or not |
+##
+## 🔒 **Which is why a disloyal commander is barely moved by even a desperate
+## letter.** Tone raises the product and regard crushes it, and there is no tone
+## strong enough to make a man who loathes the PC do as he is told — which is the
+## whole of an order being a request rather than a command.
+##
+## **Only the option he was urged toward** scores here. A letter arguing for one
+## thing says nothing about the other four, and scoring them negatively would
+## make the PC's letter an argument against everything he did not mention.
+class UrgingConsideration:
+	extends Consideration
+
+	func applies_to(candidate: Candidate) -> bool:
+		var company := CommanderConsiderations._company_of(candidate)
+		return company != null and not String(company.urged).is_empty() 			and candidate.id == company.urged
+
+	func score(
+		actor: DeliberationActor, candidate: Candidate, context: DeliberationContext
+	) -> float:
+		var company := CommanderConsiderations._company_of(candidate)
+		if company == null:
+			return 0.0
+		# **One factor on the half-life, as the governor's urging does it**
+		# (#262, `tone.md` §4): a consideration is clamped to one, so a fresh
+		# letter is already at the ceiling and what a stronger tone buys is that
+		# it is still pulling months later.
+		var intensity := IntentConsiderations.intensity_of(company.urged_tone)
+		var age := float(context.month - company.urged_month)
+		return IntentConsiderations.decayed(
+			age, CommanderConsiderations.URGING_HALF_LIFE * intensity
+		) * CommanderConsiderations.regard_of(actor)
 
 
 ## A company doing nothing, in a war that is costing its town every month.
