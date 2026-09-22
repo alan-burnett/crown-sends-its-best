@@ -42,6 +42,57 @@ What does **not** change is that the PC has no purview over any of it. SPEC §10
 locks that his gold is not a wallet, and §8.1 gives him no lever on terms of
 trade. Prices move because the world moves, never because he asked.
 
+### What actually moves the Crown's dictionary
+
+**The seam is already cut and already in use.** `Valuation.crown()` is
+`price_of(resource) x PolicyEffects.price_multiplier(state, resource)` — a patron
+persuading his Barony to buy your horses arrives that way (`policy.md` §8).
+Multipliers compose, so the Crown's own circumstances are another one.
+
+**Two drivers, and one of them already exists.**
+
+| | Where it comes from | Shape |
+| :--- | :--- | :--- |
+| **The war** | `crown_war_intensity`, which already climbs on campaign and cools between | a standing lift while the Crown is fighting |
+| **A shortage at home** | a Crown-month event naming a resource | a sharp lift that decays back |
+
+**The war needs no new state at all.** `CrownAffairs` already runs campaigns,
+already moves the intensity, and already emits when one begins and ends. SPEC
+§12.4 says the Crown's wars reach the colony through troop availability, demands
+and treaties; **this is the fourth channel and it is the cheapest of the four.**
+
+### Appetite is a data field, not a list in code
+
+Each resource carries a **war appetite**, nought by default. The lift is
+`1 + appetite x (war / WAR_MAX)`.
+
+Iron, guns, tools, food and horses have one because armies eat and armies are
+armed. **Nothing in code names a resource** — the same rule the conversion
+recipes already follow, so a new resource that a war should want is a data edit.
+
+### 🔒 The Crown's circumstances move necessities, never pleasures
+
+**No luxury carries a war appetite, and no luxury can be the subject of a
+shortage.**
+
+This is what keeps the tea rule safe, and it keeps it safe **by construction
+rather than by clamp**. Tea is the cheapest pleasure a town can never make for
+itself; if a Crown shortage ever priced it above a luxury the colony can brew,
+the town would brew instead of buying and the trade-protest design in SPEC §10.2
+would quietly stop working — with nothing failing loudly.
+
+Barring luxuries from both drivers removes that failure mode outright, and it is
+truer besides: a Crown at war prices iron, not tea.
+
+### Which makes a shortage the interesting half
+
+The war is a slow standing lift on things the colony already sells. **A shortage
+is a reversal**, and reversals are the news: the mercantile table below has food
+at *Crown values low — grown at home at scale — no trade*, and a failed harvest
+turns that row over for a season.
+
+That is the case worth building for, and it is why this is a function.
+
 ### The mercantile pattern falls out of the numbers
 
 | | Town values | Crown values | Result |
