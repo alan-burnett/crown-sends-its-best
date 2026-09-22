@@ -111,6 +111,15 @@ static func has_effect(id: String) -> bool:
 	return _effects.has(id)
 
 
+## The Order kind this effect produces, or empty.
+##
+## **Asked rather than assumed** (#263). Most effect ids happen to match their
+## order kind; a builder's need not, and a caller that matched them by name would
+## be right until the first one that did not.
+static func order_kind_of(id: String) -> StringName:
+	return StringName(_effects.get(id, {}).get("order_kind", &""))
+
+
 static func has_condition(id: String) -> bool:
 	return _conditions.has(id)
 

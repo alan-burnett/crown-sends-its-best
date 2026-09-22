@@ -105,6 +105,10 @@ static func load_resources(content: ContentDatabase) -> void:
 	# leaves every request alone.
 	if content.has_record(Consultation.COLLECTION, Consultation.RECORD):
 		Consultation.load_from(content.record(Consultation.COLLECTION, Consultation.RECORD))
+	# The one sentence a harsh letter adds (#263). Prose, so it lives in the
+	# language-suffixed folder with everything else the player reads.
+	if content.has_record(HarshClause.COLLECTION, HarshClause.RECORD):
+		HarshClause.load_from(content.record(HarshClause.COLLECTION, HarshClause.RECORD))
 
 
 static func register_all() -> void:

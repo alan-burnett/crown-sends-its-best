@@ -70,6 +70,40 @@ func choose_tone(tone: StringName) -> bool:
 	return false
 
 
+# --- Harsh, the second axis -------------------------------------------------
+
+## 🔒 **Asked after the tone, and never when answering** (#263, `tone.md` §9).
+##
+## The two are orthogonal, so this is a step of its own rather than a sixth tone
+## — five tones times harsh-or-not is **ten registers.** It is not offered on an
+## answering letter because there is nothing to lean on: *you* are the one
+## deciding, and *do it or else* has no object.
+func has_harsh_step() -> bool:
+	return LetterKind.may_be_harsh(letter)
+
+
+func harsh_prompt() -> String:
+	return HarshClause.prompt() if has_harsh_step() else ""
+
+
+func harsh_options() -> Array[Dictionary]:
+	return HarshClause.options() if has_harsh_step() else [] as Array[Dictionary]
+
+
+func choose_harsh(harsh: bool) -> bool:
+	if not has_harsh_step():
+		push_error("'%s' cannot be written harshly." % letter.id)
+		return false
+	outgoing.harsh = harsh
+	outgoing.choose(HARSH_STEP, "lean" if harsh else "leave_it")
+	return true
+
+
+## The step id the answer is recorded under, so *not yet asked* and *asked and
+## declined* are different states — a letter is not finished until he has said.
+const HARSH_STEP: String = "_harsh"
+
+
 # --- Steps -----------------------------------------------------------------
 
 func steps() -> Array:
@@ -85,6 +119,11 @@ func next_step_index() -> int:
 		if not outgoing.has_chosen(String(all_steps[index].get("id", ""))):
 			return index
 	return -1
+
+
+## Whether the wizard still owes the player the harsh question.
+func harsh_is_pending() -> bool:
+	return has_harsh_step() and not outgoing.has_chosen(HARSH_STEP)
 
 
 func step_prompt(index: int) -> String:
@@ -127,7 +166,7 @@ func choose(step_id: String, option_id: String) -> bool:
 
 
 func is_complete() -> bool:
-	return outgoing.is_complete(letter)
+	return outgoing.is_complete(letter) and not harsh_is_pending()
 
 
 # --- The letter the player writes ------------------------------------------
@@ -159,6 +198,15 @@ func assemble(context: LetterContext) -> String:
 		var text := renderer.render_line(option, letter, context)
 		if not text.is_empty():
 			parts.append(text)
+
+	# 🔒 **One sentence, and nothing else about the letter changes** (#263,
+	# §9). Before the closing, because it is the last thing he says rather than
+	# how he signs off — and keyed by the tone, which is what makes harsh a second
+	# axis instead of a sixth entry in the first.
+	if outgoing.harsh:
+		var clause := HarshClause.sentence(outgoing.tone)
+		if not clause.is_empty():
+			parts.append(renderer.resolve_slots(clause, {}, letter, context))
 
 	var closing := renderer.render_lines(letter.closing(), letter, context)
 	if not closing.is_empty():

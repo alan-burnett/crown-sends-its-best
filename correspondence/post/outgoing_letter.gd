@@ -26,6 +26,13 @@ var in_reply_to: StringName = &""
 ## outgoing letter has a tone** (SPEC §9.2).
 var tone: StringName = &""
 
+## 🔒 **Whether the PC leaned on him** (#263, `tone.md` §9). The player's
+## answer to a yes-or-no put after the tone, not a flag the content carries: it
+## is the second axis, and five tones times harsh-or-not is ten registers.
+##
+## Never set on an answering letter, where there is nothing to lean on.
+var harsh: bool = false
+
 ## Step id -> chosen option id.
 var choices: Dictionary = {}
 
@@ -68,6 +75,7 @@ func to_dict() -> Dictionary:
 		"addressed_to": String(addressed_to),
 		"in_reply_to": String(in_reply_to),
 		"tone": String(tone),
+		"harsh": harsh,
 		"choices": choices.duplicate(),
 		"params": params.duplicate(true),
 	}
@@ -81,6 +89,7 @@ static func from_dict(data: Dictionary) -> OutgoingLetter:
 	letter.id = StringName(data.get("id", ""))
 	letter.in_reply_to = StringName(data.get("in_reply_to", ""))
 	letter.tone = StringName(data.get("tone", ""))
+	letter.harsh = bool(data.get("harsh", false))
 	letter.choices = data.get("choices", {}).duplicate()
 	letter.params = data.get("params", {}).duplicate(true)
 	return letter

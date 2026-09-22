@@ -286,6 +286,32 @@ own throughput with it and the two columns cannot drift apart.
 **There is no second tier.** One building per conversion, and that is the whole
 improvement available.
 
+### 🔒 What a conversion building is worth to a governor
+
+A governor scores a building on axes (`governor-objectives.md`). A conversion
+building's worth is **the margin it adds**, and it adds it twice: a better ratio
+means less input per unit, and doubled throughput means more units a worker-month.
+
+**The axis follows the output, and the output already knows what it is.** Nothing
+here names a resource:
+
+| The output | Axis | Because |
+| :--- | :--- | :--- |
+| anything | **trade** | it is sellable, weighted by price exactly as a yield bonus is |
+| appears in a building's cost | **capacity** | the chain feeds construction — iron and tools, and this is §5's argument |
+| `luxury` in `processed.json` | **comfort** | the town drinks it rather than shipping it |
+
+A building can score on more than one. Rum is a luxury and a cash crop, and a
+distillery should be wanted for both reasons by governors who want different
+things.
+
+**The capacity row is the one that matters**, and it is the one that was missing.
+§5 claims the mineworks → foundry → toolworks chain *pays for itself in
+construction*. A governor can only act on that if a toolworks reads as capacity
+to him, and it reads as capacity because tools appear in the cost of half the
+tree — which is derived, not asserted.
+
+
 **The worst conversions improve most.** Ore to iron and sugar to rum quadruple
 their output; the 3:1 chains merely triple theirs. That falls out of the rule
 rather than being designed, and it is the right shape — the expensive chains are

@@ -85,6 +85,19 @@ const PARTIAL_BY_TONE: Dictionary = {
 ## How much of an `adjust_loyalty` amount counts as one deed's worth. Tuning.
 const LOYALTY_STEP: float = 5.0
 
+## What leaning on a man adds to a half measure, on an asking letter (#263).
+##
+## Tuning, and a multiplier rather than a figure of its own so the two axes stay
+## two: the tone decides how generous he is and the threat decides how much the
+## threat is worth.
+const HARSH_PARTIAL: float = 1.3
+
+## And the most a partial can ever be, however hard the PC leans.
+##
+## **A man who did the lot has complied**, and partial would otherwise be a word
+## for two different answers.
+const HARSHEST_PARTIAL: float = 0.9
+
 ## What being leaned on costs a governor, in deeds.
 ##
 ## **Less than a refusal and more than nothing.** The PC did not decline to help
@@ -446,7 +459,18 @@ static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName
 ## 🔒 **Asking letters only** (`tone.md` §3). Directing has no amount in it — a
 ## governor half-persuaded toward profit is not chasing half a profit — and
 ## answering never reaches a partial at all.
+##
+## 🔒 **And leaning on him makes the half measure larger** (#263, §9). Harsh is
+## the second axis, so it multiplies the tone's share rather than replacing it:
+## a hateful threat still buys less of the levy than a fond one, and a threat of
+## either kind buys more than the same letter without it.
+##
+## Never the whole of it, however hard the PC leans. A man who did the lot has
+## complied, and partial would then be a word for two different answers.
 static func partial_share(order: Order) -> float:
 	if not LetterKind.has_a_magnitude(StringName(order.kind)):
 		return PARTIAL_SHARE
-	return float(PARTIAL_BY_TONE.get(order.tone, PARTIAL_SHARE))
+	var share := float(PARTIAL_BY_TONE.get(order.tone, PARTIAL_SHARE))
+	if order.harsh:
+		share *= HARSH_PARTIAL
+	return clampf(share, 0.0, HARSHEST_PARTIAL)

@@ -348,11 +348,22 @@ func _shipment(harsh: bool) -> Order:
 	return order
 
 
-## How often a whole spread of governors comply, asked the same way.
+## How often a whole spread of governors do the thing, asked the same way.
 ##
 ## **Across many men, not one.** Harshness is a weight in the kernel rather than
 ## a rule, so a single governor can refuse a harsh order and that is the design
 ## working — the claim is about the odds, so the test has to be too.
+##
+## 🔒 **Complying and part-complying both count as doing it** (#263, `tone.md`
+## §9). §9 has harshness pushing toward comply **and partial**: a man leaned on
+## does at least some of it rather than none, and half a levy raised under a
+## threat is the commonest thing a threat actually gets you.
+##
+## This counted only full compliance, and so read the change as a loss — on this
+## fixture an unpaid shipment of twenty iron is never given whole by anybody, and
+## what leaning on him actually moved was fifteen refusals down to seven. It is
+## also the definition `GrievanceDriver._was_borne` already uses for whether the
+## town carried the order, which is the same question asked from the other side.
 func _compliance_rate(harsh: bool) -> float:
 	var complied := 0.0
 	var asked := 0.0
@@ -361,7 +372,8 @@ func _compliance_rate(harsh: bool) -> float:
 			var contact := _contact(loyalty, {"harshness": weight})
 			var outcome := String(_resolve(_shipment(harsh), contact)["outcome"])
 			asked += 1.0
-			if outcome == String(Compliance.COMPLY):
+			if outcome == String(Compliance.COMPLY) \
+					or outcome == String(Compliance.PARTIAL):
 				complied += 1.0
 	return complied / asked
 

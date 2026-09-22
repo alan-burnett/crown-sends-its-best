@@ -1,0 +1,15 @@
+{
+  "id": "harsh",
+  "note": "The one sentence a harsh letter adds, and nothing else about the letter changes. Keyed by tone, so the same flag reads as velvet from a pleased PC and as a threat from an annoyed one - harsh is the second axis and not a sixth tone, which is what makes five tones times harsh-or-not into ten registers. Prose, so the folder carries the language and a second language is a copied folder where only these strings change. The pleased and annoyed lines are the Author's, from the ticket.",
+  "prompt": "And whether to lean on him",
+  "yes": "and let him know the Crown is in earnest",
+  "no": "and leave it there",
+  "by_tone": {
+    "pleased": "Please see to this matter most promptly, lest we allow room for unpleasantness.",
+    "dutiful": "I shall expect it done, and I shall expect to be told when it is.",
+    "annoyed": "Failure to meet this requirement will be met with most dire consequences.",
+    "desperate": "I have no other course left me, and you would not care for the one I should be driven to.",
+    "hateful": "You will do it, or you will answer for not having done it. I am indifferent as to which."
+  },
+  "default": "I shall expect it done, and I shall expect to be told when it is."
+}

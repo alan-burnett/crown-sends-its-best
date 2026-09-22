@@ -526,7 +526,15 @@ func _build_orders() -> Array[Order]:
 				# 🔒 **Harsh orders come from the PC only** (#71). This loop runs
 				# over his outgoing post and nothing else, so an NPC's Intent can
 				# never arrive carrying it however the content is authored.
-				order.harsh = bool(option.get(LetterSchema.KEY_HARSH, false))
+				#
+				# 🔒 **And it is the player's answer, not the content's** (#263,
+				# `tone.md` §9). Harsh is a second axis the wizard asks about after
+				# the tone — five tones times harsh-or-not is ten registers — so an
+				# option cannot be born leaning on a man. The authored flag remains
+				# as a floor: a letter whose wording is a threat is harsh whatever
+				# the player then says, because the words are already on the page.
+				order.harsh = outgoing.harsh \
+					or bool(option.get(LetterSchema.KEY_HARSH, false))
 				orders.append(order)
 				run.log.emit(EVENT_ORDER_ISSUED, order.addressed_to, run.world.month,
 					order.to_dict(), WorldPhase.DISPATCH)
