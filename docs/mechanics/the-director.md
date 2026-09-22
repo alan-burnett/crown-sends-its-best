@@ -149,6 +149,29 @@ the only volume control that scales with the colony.** A PC who goes wide does
 not get a desk that grows linearly with his towns — he gets a desk where each
 additional voice has a higher bar to clear.
 
+### 🔒 A letter's `sender` is a role, not a contact id
+
+This section has always assumed it — *the third church's clergyman* only means
+something if one letter file serves every clergyman — but it was never said, and
+the code reads `sender` as an exact contact id (#361). Six governor letters
+therefore never fire and sixteen are bound to the first town.
+
+**A role expands to every contact who holds it.** Each is a separate candidate,
+scored in his own context, and each carries:
+
+- **his own threshold**, raised by how many share his role — the rule above;
+- **his own cooldowns and dampers**, because §3's *one letter a month* is a fact
+  about a man, not about a file;
+- **his own tone**, because it comes from his loyalty.
+
+**That is also the answer on volume.** A wide colony has more voices and each one
+has a higher bar, which is this section's whole point — so role expansion does
+not put SPEC §9.6's averages at risk, it is the mechanism that protects them.
+
+**It is the only shape that works for generated contacts**, whose ids are made at
+run time: commanders, patrons and the institutional contacts can never have
+letters authored against their ids.
+
 ## 6. The two dampers
 
 Writing a letter sets both, and both decay.
