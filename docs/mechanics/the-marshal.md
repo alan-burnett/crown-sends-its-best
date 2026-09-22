@@ -163,6 +163,48 @@ across a run exactly as the colony's need for them grows.
 By the late game he is a man being asked for soldiers he genuinely does not
 have, by a PC whose colony has been eating them.
 
+### 🔒 The war is nobody's to influence, least of all his
+
+`crown_war_intensity` is written in exactly one place — `CrownAffairs` — and
+**nothing reads the colony to do it.** Campaigns begin on a roll, climb while
+they run, cool between, and that is the whole of it. No letter, no shipment, no
+contact and no colony state reaches it.
+
+**That is right and it should stay locked.** The PC is a minor royal with a token
+colony; the Crown's wars are not his to move. It is the same principle
+`town-economy.md` §1 states about prices — *the world moves, never because he
+asked* — and the same one SPEC §10.2 states about his gold.
+
+**What he can move is the man.** Supplying the Marshal buys regard, and regard
+decides troops, tone and eventually the Independence gate (§7). **You influence
+the officer who runs the wars, never the wars**, and that distinction is most of
+what makes him feel like a person with a job rather than a dial.
+
+### The drift is a ramp, not a curve — worth measuring
+
+§8 says his war worsens *on the same curve* as the Crown's decline. The shipped
+constants do not describe a curve.
+
+From `CrownAffairs`: campaigns last 2–5 months at **+9** a month, arrive on a
+**28 per cent** monthly roll, and cool at **−4.5** between, clamped to 0–100 and
+starting at 0.
+
+| | |
+| :--- | --: |
+| average campaign | 3.5 months, **+31.5** |
+| average wait between | 3.6 months, **−16.1** |
+| **net drift** | **+2.2 a month** |
+| **reaches the 100 ceiling** | **month ~46 — year four** |
+
+**So it climbs for four years and is then a constant**, for the rest of a run
+SPEC §6.2 expects to last four to eight years. His wars stop getting worse
+exactly when `crown-demands.md` has the Crown entering its decline, and anything
+hanging off the number — such as the price lift in #141 — stops varying with it.
+
+**This is arithmetic on the constants, not a measured run.** It belongs to
+whoever owns balance to confirm, and the fix is a tuning question: a lower
+ceiling, a gentler climb, or cooling that scales with how high it already is.
+
 ## 9. His other work
 
 **He demands resources** — iron, guns, food, horses — for those wars
