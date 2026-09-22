@@ -9,6 +9,7 @@
 
 | | Named how |
 | :--- | :--- |
+| **The PC** | **the player's**, auto-filled from the aristocrats' bag |
 | **The five Crown officers** | **fixed in data** — SPEC §8.1 makes them the same every run |
 | **Rivals** | **fixed in data** — three named dukes, hand-written |
 | Governors, patrons, commanders, clergy, quartermasters, journalists, scholars | **generated** |
@@ -26,6 +27,24 @@ already say.
 **Tribes have no names by the Author's ruling.** They are known by what they are
 and where they are, not by what they call themselves — which is the colonial view
 the game is written from, and cheaper besides.
+
+### 🔒 The PC is named by the player, and the game guesses first
+
+SPEC §5: *the player chooses a name and a title for the PC which are referenced
+in letters to the PC in that run. This is flavor only and has no effect.*
+
+**Both fields arrive filled in.** The title defaults to **Lord**; the name is
+drawn from the **aristocrats' bag**, which is the right bag because he is a minor
+royal and it is the same pool his patrons come from.
+
+**A guessed name he keeps is struck from the bag for that run.** §5's rule that
+no two live things share a name, applied to the one thing that is not generated —
+a patron who happened to share the PC's name would read as a mistake even though
+nothing was wrong.
+
+**The old default was *Governor*, and it was a trap.** §2 makes the first word of
+a letterhead the role, so a PC styled *Governor* read exactly like one of his own
+colonial governors. *Lord* is not a preference; it removes a collision.
 
 **A patron has no home**, by the same ruling. An earlier draft invented one so he
 would have somewhere to be *of*; §2's qualifier does that job without inventing a
@@ -114,6 +133,26 @@ It also says the right thing. A rebel commander is not a local difficulty in
 Ashmere — **he serves a nation now**, which is exactly what SPEC §13.1 means
 when it says the colony becomes one.
 
+### 🔒 How the PC is addressed is the tone's business
+
+The letterhead above is how a **sender** is shown. How the PC is **addressed** is
+a different thing and it belongs to `tone.md`, because it moves with the writer's
+tone:
+
+> *pleased* — **To the most noble Lord Frank Zappa**
+> *hateful* — **To the despicable Frank Zappa**
+
+**Note what the hateful form does: it drops the title.** So this is not an
+adjective swapped in front of a fixed name — **the whole salutation is
+tone-keyed**, and a contact refusing the PC his title is doing something the
+prose has to be able to say.
+
+That needs no new machinery. `{insert:}` is already a tone-keyed fragment local
+to its line (`CLAUDE.md`), incoming letters already carry the sender's tone, and
+`{param:pc_title}` and `{param:pc_name}` already ship — the Chancellor's squeeze
+letters use them. **A tone-keyed salutation line is the existing tools pointed at
+the top of the letter.**
+
 ### It follows that the Diplomat's name changes
 
 He lives in a town and asks to be rehomed when it turns dangerous (SPEC §8.1).
@@ -129,7 +168,7 @@ before he reads a word.
 
 | Bag | Drawn by |
 | :--- | :--- |
-| **`aristocrats`** | patrons, **Crown commanders** |
+| **`aristocrats`** | **the PC's suggested name**, patrons, Crown commanders |
 | **`colonists`** | governors, **colony commanders**, and the institutional contacts |
 | **`towns`** | towns |
 
