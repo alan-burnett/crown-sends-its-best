@@ -1,0 +1,52 @@
+{
+	"id": "chancellor.colony_dwindling",
+	"sender": "chancellor",
+	"type": "warning",
+	"skippable": false,
+	"params": {
+		"people": "integer"
+	},
+	"body": [
+		{
+			"text": "A small administrative matter, which I have been looking forward to raising."
+		},
+		{
+			"text": "The last return puts the colony at {param:people} souls. I had the clerk count it twice, in case I had misread it and spoiled my afternoon."
+		},
+		{
+			"text": "I am obliged to warn you formally that a colony with nobody in it is no longer a colony, and that the Crown does not retake ground it has no reason to want. Consider yourself warned. I have enjoyed it enormously."
+		},
+		{
+			"text": "Do write back. Your letters are the best thing in my week."
+		}
+	],
+	"reply": {
+		"tone": {
+			"text": "I have your note, and I return it {choice}.",
+			"options": [
+				{ "tone": "dutiful", "text": "with the count, which I keep myself" },
+				{ "tone": "desperate", "text": "and I will take any help the Crown can find" },
+				{ "tone": "annoyed", "text": "with the observation that clerks are cheap" },
+				{ "tone": "hateful", "text": "and I hope you enjoy the next one as much" }
+			]
+		},
+		"steps": [
+			{
+				"id": "answer",
+				"prompt": "What the Chancellor is to carry back",
+				"options": [
+					{
+						"id": "hold",
+						"label": "that the colony will hold",
+						"text": "Tell the court the colony will hold, and that I would welcome anything it cares to send."
+					},
+					{
+						"id": "silence",
+						"label": "nothing at all",
+						"text": "Tell the court nothing. You have had your afternoon."
+					}
+				]
+			}
+		]
+	}
+}

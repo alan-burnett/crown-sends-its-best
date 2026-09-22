@@ -383,6 +383,16 @@ static func _coerce(value: Variant, declared: StringName, context_label: String)
 ## five have no sequence, and nothing anywhere asks whether one tone is worse
 ## than another.
 static func tone_for(contact: Contact, urgency: float = 0.0) -> StringName:
+	# 🔒 **A contact may be authored to write in one tone always** (#268,
+	# `endings.md` §3), and exactly one is: the Chancellor is *delighted* to bring
+	# the PC news of his failures, so he writes `pleased` about ruin whatever his
+	# loyalty and however urgent it is.
+	#
+	# Read off the contact rather than branched on his id, because it is a fact
+	# about the man.
+	if not String(contact.writes_in).is_empty():
+		return contact.writes_in
+
 	var loyalty := contact.loyalty()
 
 	if urgency >= 0.7 and loyalty < 70.0:

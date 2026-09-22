@@ -1,0 +1,53 @@
+{
+	"id": "chancellor.last_chance",
+	"sender": "chancellor",
+	"type": "warning",
+	"skippable": false,
+	"params": {
+		"gone": "conditions",
+		"standing": "conditions"
+	},
+	"body": [
+		{
+			"text": "Forgive the paper. I had it brought up specially, and I did not want to use it on anything ordinary."
+		},
+		{
+			"text": "It is my pleasant duty to inform you formally that {param:gone}. I am told these things ought to be said plainly, so there it is, plainly."
+		},
+		{
+			"text": "What remains between you and the end of the matter is this: {param:standing}. Not a great deal, I grant you, but I thought you would rather hear it from a friend."
+		},
+		{
+			"text": "I shall of course write again the moment anything else gives way. You may rely on me absolutely."
+		}
+	],
+	"reply": {
+		"tone": {
+			"text": "I have read your letter, and I answer it {choice}.",
+			"options": [
+				{ "tone": "dutiful", "text": "as a man who has not finished yet" },
+				{ "tone": "desperate", "text": "with rather less composure than you enjoy" },
+				{ "tone": "annoyed", "text": "with the contempt your stationery deserves" },
+				{ "tone": "hateful", "text": "knowing precisely how much you have enjoyed writing it" }
+			]
+		},
+		"steps": [
+			{
+				"id": "answer",
+				"prompt": "What the Chancellor is to carry back",
+				"options": [
+					{
+						"id": "fight",
+						"label": "that the colony is not finished",
+						"text": "You may tell the court that the colony stands, and that I intend it to go on standing."
+					},
+					{
+						"id": "silence",
+						"label": "nothing at all",
+						"text": "You may tell the court nothing. It has heard quite enough from you."
+					}
+				]
+			}
+		]
+	}
+}

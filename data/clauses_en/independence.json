@@ -1,0 +1,17 @@
+{
+	"id": "independence",
+	"note": "How the Chancellor names each of SPEC section 13.1's four Independence conditions, in a letter (issue 268, endings.md section 3). Prose, so the folder carries the language and a second language is a copied folder where only these strings change. Two forms for each: what he says when it is true, and what he says when it still stands between the player and the end. The ids are LastChance.CONDITIONS and the content validator checks that every one of them is present here. He is delighted throughout; the warmth is his and the content is not.",
+	"joiner": ", and ",
+	"true": {
+		"confidence_lost": "the Crown has withdrawn its confidence in you entirely",
+		"every_town_rebels": "not one town in the colony still answers to us",
+		"no_more_coming": "the Marshal has declined, in writing, to send any more",
+		"no_troops": "there is not a single Crown soldier left on the ground"
+	},
+	"false": {
+		"confidence_lost": "the Crown has not yet quite given you up",
+		"every_town_rebels": "one or two towns are still nominally yours",
+		"no_more_coming": "the Marshal has not yet said no in so many words",
+		"no_troops": "there are still Crown soldiers there, for the moment"
+	}
+}

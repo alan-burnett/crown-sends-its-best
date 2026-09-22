@@ -64,7 +64,19 @@ func validate(content: ContentDatabase) -> bool:
 	for id in content.ids("triggers"):
 		validate_trigger(content.collection("triggers")[id])
 	validate_resources(content)
+	validate_clauses()
 	return ok()
+
+
+## 🔒 **Every condition the sim knows about has a phrase** (#268).
+##
+## A `conditions` param renders what `IndependenceClause` holds, so a condition
+## added to `LastChance` without prose beside it would put an id in front of the
+## player in the most formal letter of the run. Build-time, because that is the
+## only place it can be caught before it is read.
+func validate_clauses() -> void:
+	for gap in IndependenceClause.missing():
+		_problem("clauses.independence", "no prose for '%s'" % gap)
 
 
 # --- Resources -------------------------------------------------------------

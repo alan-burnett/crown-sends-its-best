@@ -187,6 +187,24 @@ var traits: Dictionary = {}
 ## importunate and below it he keeps his own counsel.
 var writes_readily: float = 1.0
 
+## 🔒 **The one tone this contact ever writes in**, or empty for everybody who
+## writes as §9.1 says (#268, `endings.md` §3).
+##
+## Authored in `data/contacts/`, because it is a fact about a person and not a
+## branch about an id. Exactly one contact has it: **the Chancellor writes
+## `pleased` about ruin.** His loyalty begins very low and he cherishes giving
+## the PC news of his failures, so gilded leaves and the warmest possible
+## phrasing over the worst possible content is not a bug in his tone — it is the
+## joke the character exists to make.
+##
+## 🔒 **It is a fixed tone and not an inversion.** The five tones are **not
+## ordered** (`CLAUDE.md`), so *the opposite of annoyed* is not a thing that
+## exists; what §3 asks for is the warmest, and warmest is a value rather than a
+## direction.
+##
+## A dev who "fixes" this to match the news has removed the joke.
+var writes_in: StringName = &""
+
 ## The month he joined the correspondence.
 ##
 ## 🔒 **Redundancy ranks by arrival** (#255). The man who was already writing
@@ -266,6 +284,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.traits = Temperament.from_record(record.get("traits", {}))
 	Temperament.write_into(contact.traits, contact)
 	contact.writes_readily = float(record.get("writes_readily", 1.0))
+	contact.writes_in = StringName(record.get("writes_in", ""))
 	contact.specialty = String(record.get("specialty", ""))
 	contact.need = String(record.get("need", ""))
 	contact.vice = StringName(record.get("vice", ""))
