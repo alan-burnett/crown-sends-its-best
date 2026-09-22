@@ -44,6 +44,7 @@ const EVENT_ORDER_ISSUED: StringName = &"order_issued"
 var run: RunState = null
 var month_runner: WorldMonth = null
 var prestige: PrestigeDriver = null
+var run_end: RunEndDriver = null
 var expeditions: ExpeditionDriver = null
 var crown_foundings: CrownFoundingDriver = null
 
@@ -236,6 +237,12 @@ func _init(p_run: RunState) -> void:
 	crown_affairs.colony = run.colony
 	crown_affairs.contacts = run.contacts
 
+	# **Phase 6, between the two.** Standing has just settled the band condition 2
+	# reads; prestige has not yet settled the score the ending is recorded with,
+	# and `RunEnding.end` charges the final optics debt — so a run lost this month
+	# must be lost before prestige, or the score would be the one without it.
+	run_end = RunEndDriver.new(run)
+
 	prestige = PrestigeDriver.new(run.prestige)
 
 	# Phase 4, beside the Colony Month. The villages work their land and feed
@@ -266,7 +273,7 @@ func _init(p_run: RunState) -> void:
 		immigration, native_help, crown_foundings, expeditions, crown_affairs, territory,
 		rival_tiles,
 		colony_month, villages, promise_driver, standings, native_trade,
-		policies, crown_standing, prestige, drift, rivals, orders, silence, governors,
+		policies, crown_standing, run_end, prestige, drift, rivals, orders, silence, governors,
 		grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
