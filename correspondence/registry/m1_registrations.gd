@@ -112,6 +112,13 @@ static func load_resources(content: ContentDatabase) -> void:
 	# Where a generated name comes from (#304). No language suffix: a bag carries
 	# no prose and is not translated.
 	NameBags.load_from(content)
+	# Who a patron can be (#282). No language suffix either: the catalogue is a
+	# list of ids and a vice is a list of knobs, and neither carries a word the
+	# player reads.
+	if content.has_record(Patron.COLLECTION, Patron.CATALOGUE_RECORD):
+		Patron.load_from(content.record(Patron.COLLECTION, Patron.CATALOGUE_RECORD))
+	if content.has_record(PatronVices.COLLECTION, PatronVices.RECORD):
+		PatronVices.load_from(content.record(PatronVices.COLLECTION, PatronVices.RECORD))
 
 
 static func register_all() -> void:
@@ -391,6 +398,16 @@ static func register_measures() -> void:
 	# is measured against what a colony might reach rather than against a total.
 	MeasureRegistry.register_linear(ColonyMeasures.COLONY_REACH, 0.0, 1.0)
 	MeasureRegistry.register_linear(ColonyMeasures.COLONY_IS_NO_THREAT, 0.0, 1.0)
+	# 🔒 **What a man at court reads, and nobody else** (#282). A share of the
+	# money that moved rather than a pile of gold, so the ends are the arithmetic
+	# and not a tuning value: every penny lost, and every penny returned several
+	# times over.
+	MeasureRegistry.register_linear(
+		ColonyMeasures.COLONY_NET_POSITION,
+		ColonyMeasures.DEEP_IN_THE_RED,
+		ColonyMeasures.HANDSOMELY_IN_PROFIT,
+	)
+	MeasureRegistry.register_linear(ColonyMeasures.COLONY_IS_QUIET, 0.0, 1.0)
 	# Likewise a ratio: a town's month against the colony's average town, so a
 	# governor calling his month brisk means brisk for the place he governs.
 	MeasureRegistry.register_linear(

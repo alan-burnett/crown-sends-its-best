@@ -201,10 +201,37 @@ func test_no_measure_is_normalised_against_a_raw_quantity() -> void:
 		# bushels went through its storehouses.
 		ColonyMeasures.COLONY_REACH,
 		ColonyMeasures.COLONY_IS_NO_THREAT,
+		# **A share of the money that moved, not a pile of gold** (#282). The
+		# absolute net position is exactly what this test exists to forbid — a
+		# ladder hung on it says one word for the whole of a large colony's run —
+		# so a patron reads the margin, which a hamlet and a province doing
+		# equally well by the Crown both read the same.
+		ColonyMeasures.COLONY_NET_POSITION,
+		# **The worst town's sentiment, inverted**, which is a share by
+		# construction and does not grow with the colony.
+		ColonyMeasures.COLONY_IS_QUIET,
 	]
 	for id in MeasureRegistry.ids():
 		assert_true(bounded.has(String(id)),
 			"'%s' is registered and nothing says what it is normalised against" % id)
+
+
+func test_the_crowns_books_read_as_a_share_and_not_as_gold() -> void:
+	# 🔒 #282's measure, asked the way §4a asks it: two colonies an order of
+	# magnitude apart, each returning the Crown the same share of what it put in,
+	# must read the same — or a patron judging the books would say *ruinous*
+	# about the larger one for the whole run.
+	var hamlet := CrownAccounts.new()
+	hamlet._add(1, 110.0, 90.0)
+	var province := CrownAccounts.new()
+	province._add(1, 11_000.0, 9_000.0)
+	assert_almost_eq(hamlet.margin(), province.margin(), 0.001,
+		"the same books ten times the size read as %f against %f"
+			% [province.margin(), hamlet.margin()])
+
+	var empty := CrownAccounts.new()
+	assert_almost_eq(empty.margin(), 0.0, 0.001,
+		"a colony that has neither cost nor paid was judged")
 
 
 func test_the_gold_measures_are_registered_as_ratios() -> void:

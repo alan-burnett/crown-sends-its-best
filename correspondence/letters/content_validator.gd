@@ -807,6 +807,88 @@ func check_run_modifiers(content: ContentDatabase) -> void:
 						) % [modifier_id, ", ".join(RunModifiers.ids())])
 
 
+## 🔒 **Every patron is somebody, and every vice does something** (#282,
+## `patrons.md` §2, §3, §6).
+##
+## Three ways a patron file can be wrong, and each of them ships a man the player
+## meets who is quietly nothing:
+##
+## | | Because |
+## | :--- | :--- |
+## | a catalogue with fewer than two entries | §3's mismatch is impossible with one |
+## | no vices at all | every patron would roll nothing |
+## | a knob nothing turns and nothing reads | the vice would be a name and no more |
+##
+## The last is the one that matters, and it is the same check the perks carry for
+## the same reason. **A vice naming `will_not_touch_gold` instead of
+## `will_not_touch` would apply nothing**, the Author would have written it, the
+## player would have met him, and nobody would ever find out.
+func check_patrons(content: ContentDatabase) -> void:
+	_file = "data/%s" % Patron.COLLECTION
+
+	if not content.has_record(Patron.COLLECTION, Patron.CATALOGUE_RECORD):
+		_problem(Patron.CATALOGUE_RECORD,
+			"does not exist, so a patron has nothing to specialise in")
+	else:
+		var entries: Array = content.record(
+			Patron.COLLECTION, Patron.CATALOGUE_RECORD).get("entries", [])
+		if entries.size() < 2:
+			_problem(Patron.CATALOGUE_RECORD, (
+				"holds %d entries, and §3 wants a specialty and a need that are "
+				+ "never the same — which needs two"
+			) % entries.size())
+		var seen: Dictionary = {}
+		for entry in entries:
+			var id := String((entry as Dictionary).get("id", ""))
+			if id.is_empty():
+				_problem(Patron.CATALOGUE_RECORD, "holds an entry with no id")
+			elif seen.has(id):
+				_problem("%s.%s" % [Patron.CATALOGUE_RECORD, id], "is declared twice")
+			seen[id] = true
+
+	if not content.has_record(PatronVices.COLLECTION, PatronVices.RECORD):
+		_problem(PatronVices.RECORD,
+			"does not exist, so every patron would arrive with no vice at all")
+		return
+
+	var vices: Array = content.record(
+		PatronVices.COLLECTION, PatronVices.RECORD).get("entries", [])
+	if vices.is_empty():
+		_problem(PatronVices.RECORD, "holds no vices, so nothing makes a patron difficult")
+	var known: Dictionary = {}
+	for entry in vices:
+		var id := String((entry as Dictionary).get("id", ""))
+		if id.is_empty():
+			_problem(PatronVices.RECORD, "holds a vice with no id")
+			continue
+		if known.has(id):
+			_problem("%s.%s" % [PatronVices.RECORD, id], "is declared twice")
+		known[id] = true
+
+		var knobs: Variant = (entry as Dictionary).get("knobs", [])
+		if typeof(knobs) != TYPE_ARRAY:
+			_problem("%s.%s.knobs" % [PatronVices.RECORD, id], "expected a list")
+			continue
+		if knobs.is_empty():
+			_problem("%s.%s" % [PatronVices.RECORD, id],
+				"names no knobs, so it is a word and not a vice")
+		for knob in knobs:
+			if typeof(knob) != TYPE_DICTIONARY:
+				_problem("%s.%s.knobs" % [PatronVices.RECORD, id],
+					"expected an object mapping a knob id to its params")
+				continue
+			for knob_id in knob:
+				if not PatronVices.is_knob(String(knob_id)):
+					_problem("%s.%s" % [PatronVices.RECORD, id], (
+						"names the knob '%s', which nothing turns and nothing "
+						+ "reads — turned: %s; read: %s"
+					) % [
+						knob_id,
+						", ".join(PackedStringArray(PatronVices.APPLIES.keys())),
+						", ".join(PackedStringArray(PatronVices.READ_BY.keys())),
+					])
+
+
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
 func check_trigger_targets(content: ContentDatabase) -> void:

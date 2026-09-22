@@ -1,6 +1,6 @@
 {
   "id": "demands",
-  "note": "The bar, and what each growth event does to it. Magnitudes are placeholders pending the harness calibration in crown-demands.md section 8 - equal expected pressure across the reference players, which is measured rather than judged. gold_target is a revenue target over term_months, not a bill; it is meant to sit above what a young colony returns.",
+  "note": "The bar, and what each growth event does to it. Magnitudes are placeholders pending the harness calibration in crown-demands.md section 8 - equal expected pressure across the reference players, which is measured rather than judged. gold_target is a revenue target over term_months, not a bill; it is meant to sit above what a young colony returns. The reach ceiling is seven because crown-demands.md section 6 wrote it as 'there are only so many people in the world with a hand out before M7 brings patrons' - M7 has brought them, so the last three hands are the three patrons, and the third rival duke becomes reachable on the way.",
   "steady": {
     "months_between": 4.0,
     "gold_target": 300.0,
@@ -23,7 +23,7 @@
     },
     "reach": {
       "askers": 1,
-      "ceiling": 4
+      "ceiling": 7
     }
   }
 }

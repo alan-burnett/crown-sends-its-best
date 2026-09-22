@@ -195,6 +195,25 @@ var writes_readily: float = 1.0
 ## since month one.
 var known_since: int = 0
 
+## 🔒 **What he can supply, and what he wants** (#282, `patrons.md` §2, §3).
+##
+## Empty on everybody else, and that is the honest shape: SPEC §8.3 makes a
+## patron a contact with three things rolled at arrival, and two of them are
+## facts about the man in the same way his name is. `Patron` does the rolling and
+## `PatronVices` reads the third; nothing here knows what a specialty is for.
+##
+## 🔒 **Never equal**, guaranteed by the draw rather than by a check — the need
+## is taken from the catalogue with the specialty removed.
+var specialty: String = ""
+var need: String = ""
+
+## 🔒 **What makes him difficult** (#282, `patrons.md` §6).
+##
+## **Vice, not personality.** `contacts.md` §1 reserves *personality* for the
+## weight vector above, which a patron has like everybody else. This is a named
+## bundle of mechanical behaviour on top of it, and the two words must not merge.
+var vice: StringName = &""
+
 var relationship: Relationship = null
 
 
@@ -247,6 +266,9 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.traits = Temperament.from_record(record.get("traits", {}))
 	Temperament.write_into(contact.traits, contact)
 	contact.writes_readily = float(record.get("writes_readily", 1.0))
+	contact.specialty = String(record.get("specialty", ""))
+	contact.need = String(record.get("need", ""))
+	contact.vice = StringName(record.get("vice", ""))
 	contact.known_since = int(record.get("known_since", 0))
 	contact.relationship = Relationship.new(
 		contact.id,
@@ -319,6 +341,9 @@ func to_dict() -> Dictionary:
 		"wants": wants.duplicate(),
 		"traits": traits.duplicate(),
 		"writes_readily": writes_readily,
+		"specialty": specialty,
+		"need": need,
+		"vice": String(vice),
 		"known_since": known_since,
 		"relationship": relationship.to_dict(),
 	}

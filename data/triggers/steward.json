@@ -236,5 +236,24 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.steward.patron_speaks_ill",
+    "letter": "steward.patron_speaks_ill",
+    "urgency": 0.55,
+    "cooldown": 4,
+    "params": {
+      "patron": {
+        "from": "patron_who_spoke",
+        "fallback": "A gentleman of your acquaintance"
+      }
+    },
+    "conditions": [
+      {
+        "a_patron_has_spoken_ill": {
+          "within": 2
+        }
+      }
+    ]
   }
 ]

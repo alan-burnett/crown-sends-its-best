@@ -409,6 +409,13 @@ func _row(
 		"demand_target": DemandSchedule.gold_target(run.demands),
 		"demand_refusal": DemandSchedule.refusal_cost(run.demands),
 		"demand_askers": DemandSchedule.askers(run.demands),
+		# **Who the fourth dimension has actually produced** (#282, #300). The
+		# dukes and the patrons are the same draw against two thresholds, and
+		# `patrons.md` §1 asks whether a fed patron is a net drain — which cannot
+		# be answered without knowing how many years the run had one.
+		"dukes": RivalDuke.how_many_arrived(run.demands),
+		"patrons": Patron.all_in(run).size(),
+		"patron_credit": Prestige.patron_credit_in(run.log),
 		# **The harness may read the figure; the game may not.** SPEC §12.3 keeps
 		# it off the player's screens and `tools/lint.gd` keeps it out of
 		# `presentation/` — but tuning it against evidence is the whole reason
@@ -509,7 +516,8 @@ const COLUMNS: PackedStringArray = [
 	"tax_burden", "net_position", "standing", "standing_band", "letters",
 	"promises_outstanding", "tile_moves", "rebelling", "declared", "returned",
 	"demand_axis", "demand_interval", "demand_target", "demand_refusal",
-	"demand_askers", "sentiment", "worst_sentiment",
+	"demand_askers", "dukes", "patrons", "patron_credit",
+	"sentiment", "worst_sentiment",
 	"prestige", "prestige_net_gold", "prestige_optics",
 	"protests", "promises_broken",
 ]

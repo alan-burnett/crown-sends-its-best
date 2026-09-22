@@ -54,6 +54,14 @@ extends RefCounted
 
 const EVENT_MEASURED: StringName = &"prestige_measured"
 
+## What a deed done for a patron banked, the month it was done (§5).
+##
+## 🔒 **Declared here, emitted from the correspondence layer.** `sim/` sits at
+## the bottom of the stack and depends on nothing above it, so the term prestige
+## reads is an event type prestige owns; `PatronCredit` decides when one is worth
+## emitting and what it is worth.
+const EVENT_PATRON_CREDIT: StringName = &"patron_credit_banked"
+
 ## The figure as of the month it was last settled.
 ##
 ## **Stored, not recomputed on demand** (§6), as quality of life is, so that two
@@ -125,15 +133,25 @@ static func band_names() -> PackedStringArray:
 
 ## What the PC's patrons are worth to his name.
 ##
-## **Named, and reads zero.** Patrons are M7 (SPEC §8.3). §5 has the shape ready
-## for them: a favour banks the month it is granted and survives his departure, a
-## present patron's regard is a live term, and on leaving his final loyalty banks
-## permanently — which is what makes a patron about to go worth pleasing now.
+## **The first of §5's three halves** (#282): a favour banks the month it is
+## granted and survives his departure, because he remembers it and says so at
+## court. `PatronCredit` emits the event; this only sums it, so prestige stays a
+## pure reading of what happened rather than a second ledger.
 ##
-## Reading it here means M7 fills this in rather than threading a third term
-## through everything that touches prestige.
-static func patron_credit_in(_log: EventLog) -> float:
-	return 0.0
+## The other two — his regard as a live term while he is present, and his final
+## loyalty banking when he goes — belong with the departure window
+## (`patrons.md` §8) and are #283.
+##
+## 🔒 **Summed from the log, not held.** A patron who has left still counts, and
+## he counts without anybody keeping a record of a man who is no longer in the
+## correspondence.
+static func patron_credit_in(log: EventLog) -> float:
+	if log == null:
+		return 0.0
+	var total := 0.0
+	for event in log.of_type(EVENT_PATRON_CREDIT):
+		total += float(event.payload.get("amount", 0.0))
+	return total
 
 
 ## Settle this month's figure (Seam A).

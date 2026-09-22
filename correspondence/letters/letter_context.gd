@@ -154,5 +154,9 @@ func sender_field(field: StringName) -> String:
 			return sender.town
 		&"months_silent":
 			return str(sender.relationship.months_silent(month))
+		&"specialty":
+			return sender.specialty
+		&"need":
+			return sender.need
 	push_error("'%s' is not on the sender whitelist." % field)
 	return ""

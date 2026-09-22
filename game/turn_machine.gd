@@ -225,6 +225,11 @@ func _init(p_run: RunState) -> void:
 	# from the number afterwards — that he has been to the bottom (#209).
 	var rivals := RivalDriver.new(run)
 
+	# Phases 1 and 7. He turns up as the Squeeze's fourth dimension and there is
+	# no second clock (#282); the gossip runs after the drift, so what the court
+	# hears is everything that has happened to him since it last heard.
+	var patron_driver := PatronDriver.new(run)
+
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and
 	# prestige reads the accounts standing has just judged.
@@ -276,7 +281,8 @@ func _init(p_run: RunState) -> void:
 		immigration, native_help, crown_foundings, expeditions, crown_affairs, territory,
 		rival_tiles,
 		colony_month, villages, promise_driver, standings, native_trade,
-		policies, crown_standing, run_end, prestige, drift, rivals, orders, silence, governors,
+		policies, crown_standing, run_end, prestige, drift, rivals, patron_driver,
+		orders, silence, governors,
 		grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for
