@@ -48,6 +48,9 @@ extends RefCounted
 const COLLECTION: String = "battle"
 const RECORD: String = "companies"
 
+## No tile. A company being assembled, or one the map has no place for.
+const NOWHERE: Vector2i = Vector2i(-1, -1)
+
 # --- Allegiance -------------------------------------------------------------
 
 ## 🔒 **The field §12.3's locks read**, and the order §7 resolves in.
@@ -178,11 +181,11 @@ var commander: StringName = &""
 ## which is why this field is not called what #211 first called it.
 var order: StringName = StandingOrder.DEFEND_THE_TOWN
 
-var at: Vector2i = Vector2i(-1, -1)
+var at: Vector2i = NOWHERE
 
 ## Where it is marching. **Assigned by a standing order**, and one tile a month
 ## in a straight line, exactly as an expedition crosses country.
-var destination: Vector2i = Vector2i(-1, -1)
+var destination: Vector2i = NOWHERE
 
 var raised_month: int = 0
 
@@ -193,6 +196,16 @@ var raised_month: int = 0
 ## this month* — and a flag would have to be cleared by something, which is a
 ## thing to forget.
 var supplied_month: int = -1
+
+## 🔒 **Casualties owed but not yet taken** (#216, `battles.md` §6).
+##
+## A battle costs a company **men, fractionally**: a company dwindling at 0.2 a
+## month is visibly dying for five months before it loses one, and that is
+## exactly the letter its commander should be writing. Rounding each month away
+## would make a small exchange free and a siege impossible.
+##
+## Always below one — whole men come off `size` as they are earned.
+var casualties_owed: float = 0.0
 
 ## How many months running it has gone without. Zero the moment supply resumes,
 ## because §3 says it recovers the moment supply resumes and that is the whole
@@ -375,11 +388,41 @@ func go_without(context: ColonyContext) -> int:
 func lose(share: float, reason: StringName, context: ColonyContext) -> int:
 	if size <= 0 or share <= 0.0:
 		return 0
-	var lost := maxi(1, int(round(float(size) * clampf(share, 0.0, 1.0))))
-	lost = mini(lost, size)
+	return _remove(
+		maxi(1, int(round(float(size) * clampf(share, 0.0, 1.0)))), reason, context)
+
+
+## Take a fractional number of men, keeping what is left over for next month
+## (#216, `battles.md` §6).
+##
+## 🔒 **The fractional half is the point.** Whole men come off as the tally
+## passes one; the remainder stays on the company so a long siege adds up. A
+## version that rounded each month would make a 0.2-a-month grind free forever,
+## which is the failure the *visibly dying for five months* sentence describes.
+##
+## Returns how many men were actually taken this month, which is usually none.
+func take_casualties(men: float, reason: StringName, context: ColonyContext) -> int:
+	if size <= 0 or men <= 0.0:
+		return 0
+	casualties_owed += men
+	var whole := int(floorf(casualties_owed))
+	if whole <= 0:
+		return 0
+	casualties_owed -= float(whole)
+	return _remove(whole, reason, context)
+
+
+## Take this many men, and the same share of everything they carried.
+func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
+	var lost := mini(maxi(0, count), size)
+	if lost <= 0:
+		return 0
 	var taken := float(lost) / float(size)
 
 	size -= lost
+	if size <= 0:
+		# Nobody left to owe anything for.
+		casualties_owed = 0.0
 	# **In a fixed order**, so two runs of one seed round the same way.
 	for resource in Company.armed_resources():
 		var had := held(resource)
@@ -414,7 +457,7 @@ func lose(share: float, reason: StringName, context: ColonyContext) -> int:
 ## company that took a clever route would be one the player could not follow on
 ## a map that shows only what the colony knows (SPEC §11.2).
 func advance(toward: Vector2i, context: ColonyContext) -> bool:
-	if toward == Vector2i(-1, -1) or at == Vector2i(-1, -1):
+	if toward == NOWHERE or at == NOWHERE:
 		return false
 	if at == toward:
 		return true
@@ -456,6 +499,7 @@ func to_dict() -> Dictionary:
 		"raised_month": raised_month,
 		"supplied_month": supplied_month,
 		"unsupported_months": unsupported_months,
+		"casualties_owed": casualties_owed,
 	}
 
 
@@ -473,11 +517,12 @@ static func from_dict(data: Dictionary) -> Company:
 	company.raised_month = int(data.get("raised_month", 0))
 	company.supplied_month = int(data.get("supplied_month", -1))
 	company.unsupported_months = int(data.get("unsupported_months", 0))
+	company.casualties_owed = float(data.get("casualties_owed", 0.0))
 	return company
 
 
 static func _vector(entry: Variant) -> Vector2i:
 	var list: Array = entry if typeof(entry) == TYPE_ARRAY else []
 	if list.size() < 2:
-		return Vector2i(-1, -1)
+		return NOWHERE
 	return Vector2i(int(list[0]), int(list[1]))

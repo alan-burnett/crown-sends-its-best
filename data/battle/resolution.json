@@ -1,0 +1,7 @@
+[
+  {
+    "id": "resolution",
+    "note": "How hard a battle hits (battles.md section 6). LETHALITY is the number of men a battle at parity costs each side in a month, and section 12 names it first among the tuning targets - along with whether the curve should be steeper than linear in the ratio. It is deliberately small: a siege takes months because a hard target is worn down by this curve and not by any machinery of its own, and casualties are fractional so a company dwindling at 0.2 a month is visibly dying for five months before it loses a man. Unmeasured.",
+    "lethality": 0.1
+  }
+]

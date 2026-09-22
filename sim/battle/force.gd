@@ -134,7 +134,7 @@ static func leadership_of(company: Company) -> float:
 static func terrain_of(
 	company: Company, map: WorldMap, defending: bool, attacker: Company = null
 ) -> float:
-	if not defending or map == null or company.at == Vector2i(-1, -1):
+	if not defending or map == null or company.at == Company.NOWHERE:
 		return 1.0
 	if attacker != null and attacker.is_cavalry():
 		return 1.0
@@ -143,7 +143,7 @@ static func terrain_of(
 
 ## What a fort on its tile is worth, attacking or defending.
 static func fortification_of(company: Company, map: WorldMap, defending: bool) -> float:
-	if map == null or company.at == Vector2i(-1, -1):
+	if map == null or company.at == Company.NOWHERE:
 		return 1.0
 	return fort_worth(map.improvement_at(company.at.x, company.at.y), defending)
 
