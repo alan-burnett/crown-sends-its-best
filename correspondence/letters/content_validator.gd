@@ -574,6 +574,76 @@ func _collect_effects(node: Variant, into: Dictionary) -> void:
 				_collect_effects(entry, into)
 
 
+## 🔒 Every tuner personality must prefer options that exist (#313,
+## `reply-vocabulary.md` §5).
+##
+## `data/balance/policies.json` describes each test player as a list of option ids
+## to prefer, and `balance.gd` falls through to the letter's first option when a
+## preference matches nothing. **Nothing fails, so a dead preference is silent** —
+## and a dead preference means the harness has been reporting on a player who was
+## never simulated.
+##
+## It had been true of **seven of the eight**: `yes`, `no` and `partial` were in
+## the file and in no letter, so the spendthrift never said yes and the four
+## steady-hand runs — which carry `tea_free`, `tea_duty` and `poor_ground`, the
+## comparisons the tuning rests on — never paid part.
+##
+## The other checks in this file are tidiness. **This one is a number being
+## wrong.**
+func check_balance_policies(content: ContentDatabase) -> void:
+	const POLICIES: String = "balance"
+
+	var offered: Dictionary = {}
+	for id in content.ids("letters"):
+		_collect_option_ids(content.collection("letters")[id], offered)
+	if offered.is_empty():
+		return
+
+	# 🔒 **A check that finds nothing has found nothing wrong** is the shape of
+	# the bug this replaces. If the personalities are not there at all, say so.
+	if content.ids(POLICIES).is_empty():
+		_file = "data/%s" % POLICIES
+		_problem(POLICIES, (
+			"holds no tuner personalities, so nothing checks what the balance "
+			+ "harness has been simulating"
+		))
+		return
+
+	# The collection is the **folder**, `data/balance/`, and not the file inside
+	# it. Reading `policies` here found nothing and reported nothing, which is
+	# precisely the failure this check exists to end.
+	for id in content.ids(POLICIES):
+		var policy: Dictionary = content.collection(POLICIES)[id]
+		_file = String(policy.get(JsonLoader.SOURCE_KEY, ""))
+		for wanted in policy.get("prefer", []):
+			if offered.has(String(wanted)):
+				continue
+			_problem("policies.%s" % id, (
+				"prefers option '%s', which no letter offers — so the "
+				+ "preference falls through and the harness reports on a "
+				+ "player who was never simulated"
+			) % wanted)
+
+
+## Every reply option id a letter offers.
+##
+## Walks the record rather than matching text, for the same reason
+## `_collect_effects` does: a param or a resource sharing a name with an option
+## must not be mistaken for one.
+func _collect_option_ids(node: Variant, into: Dictionary) -> void:
+	match typeof(node):
+		TYPE_DICTIONARY:
+			for key in node:
+				if String(key) == "options" and typeof(node[key]) == TYPE_ARRAY:
+					for option in node[key]:
+						if typeof(option) == TYPE_DICTIONARY and option.has("id"):
+							into[String(option["id"])] = true
+				_collect_option_ids(node[key], into)
+		TYPE_ARRAY:
+			for entry in node:
+				_collect_option_ids(entry, into)
+
+
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
 func check_trigger_targets(content: ContentDatabase) -> void:
