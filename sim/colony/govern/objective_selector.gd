@@ -196,6 +196,15 @@ const EXPERTS_A_TOWN_MIGHT_HOLD: float = 3.0
 const AMUSEMENT_WORTH: float = 3.0
 
 
+## What one more unit a worker-month of a conversion is worth.
+##
+## A yield bonus is a share of everything the town will ever produce and is
+## weighted by `LASTING` for it. A conversion margin is already in units a month,
+## so it needs a scale of its own rather than that one — and it is lasting in the
+## same way, which is why this is not small. Tuning (#311).
+const CONVERSION_WORTH: float = 0.35
+
+
 ## How long a governor reckons an expedition takes to gather.
 ##
 ## Not derived from its cargo, because the cargo is derived from what the town
@@ -242,6 +251,34 @@ static func improvement_axes_at(
 	at: Vector2i, improvement: Improvement, context: ColonyContext
 ) -> Dictionary:
 	return _improvement_axes(at, improvement, context)
+
+
+## 🔒 **Every effect key this function knows how to value** (#311).
+##
+## **An effect `_building_axes` is not told about is an effect no governor can
+## pursue, and nothing fails when it happens.** It has happened three times:
+##
+## - **amusement** — the colony built fourteen of the eighteen buildings in the
+##   tree and never the two that exist to make people happy (#153).
+## - **reserve_months** — read as a float after it became a dictionary, so a
+##   governor stopped being able to want a granary for the reason a granary
+##   exists (#148).
+## - **conversions** — a governor could want a foundry as a shed that holds two
+##   months of ore, and not as a foundry (#311).
+##
+## Each was found by a five-year harness run. `test_objective_selector` now fails
+## if the building data uses a key that is not here, so **the fourth is a failing
+## test instead.**
+##
+## A key listed here and then ignored below would still slip through, which is
+## why it sits against the function rather than somewhere tidier: the list and the
+## body are meant to be read together.
+const EFFECTS_READ: PackedStringArray = [
+	"amusement", "build_speed", "conversions", "counts_distant_experts",
+	"defence", "draws_experts", "education", "education_per_expert",
+	"growth", "immigration", "pasture", "quality_of_life", "reserve_months",
+	"yield_bonus",
+]
 
 
 static func _building_axes(id: StringName) -> Dictionary:
@@ -314,7 +351,98 @@ static func _building_axes(id: StringName) -> Dictionary:
 		+ float(building.effect("growth", 0.0)) * 0.25
 		+ float(building.effect("build_speed", 0.0)) * 0.5
 	)
+
+	# 🔒 **A conversion building has a worth, and it is the margin it adds**
+	# (#311, `buildings.md` §6).
+	#
+	# This function was told about thirteen effects and not this one, so a foundry
+	# reached a governor only through its `reserve_months` — he could want it as a
+	# shed that holds two months of ore, and not as a foundry. Over three seeds
+	# and five years a town raised thirteen buildings and **not one** of the nine
+	# that convert anything, while finishing four *works*-band buildings at the
+	# same price and ending ninety tools in hand.
+	#
+	# **The third time this has happened**, after amusement and per-resource
+	# reserves. `test_objective_selector` now fails if the data uses an effect key
+	# this function has never heard of, so the fourth is a failing test rather
+	# than a five-year harness run.
+	_add_conversion_axes(building, axes)
 	return axes
+
+
+## What a conversion building is worth, on the axes §6 names.
+##
+## **It adds its margin twice**: a better ratio means less input per unit, and
+## doubled throughput means more units a worker-month. Both are already derived
+## by `Building.conversion_terms`, so this asks rather than recomputing — the
+## throughput and the ratio cannot drift apart here either.
+##
+## 🔒 **The axis follows the output, and the output already knows what it is.**
+## Nothing below names a resource:
+##
+## | The output | Axis | Because |
+## | :--- | :--- | :--- |
+## | anything | **trade** | it is sellable, weighted by price as a yield bonus is |
+## | appears in a building's cost | **capacity** | the chain feeds construction |
+## | a luxury | **comfort** | the town drinks it rather than shipping it |
+##
+## A building may score on more than one. Rum is a luxury and a cash crop, and a
+## distillery is wanted for both reasons by governors who want different things.
+static func _add_conversion_axes(building: Building, axes: Dictionary) -> void:
+	for recipe in building.effect("conversions", {}):
+		var terms := building.conversion_terms(StringName(recipe))
+		if terms.is_empty():
+			continue
+		var gain := _conversion_gain(StringName(recipe), terms)
+		if gain <= 0.0:
+			# 🔒 **The town hall's own terms are the base, not an improvement on
+			# it.** It performs every ungated conversion at the worst terms in the
+			# tree, which is what *base* means — so it must not read as nine
+			# conversion buildings in one.
+			#
+			# The arithmetic already gives it nought, so what this actually buys is
+			# that it is not scored **at all**: no axis appears, rather than one
+			# appearing and reading zero. A building that improves nothing has
+			# nothing to say about trade, and saying it quietly is a different
+			# claim from not saying it.
+			continue
+
+		var output := StringName(String(recipe).split("<-")[0])
+		axes["trade"] = float(axes.get("trade", 0.0)) \
+			+ gain * CONVERSION_WORTH * _trade_weight(output)
+		if _feeds_construction(output):
+			axes["capacity"] = float(axes.get("capacity", 0.0)) \
+				+ gain * CONVERSION_WORTH
+		if ResourceCatalogue.is_luxury(output):
+			axes["comfort"] = float(axes.get("comfort", 0.0)) \
+				+ gain * CONVERSION_WORTH
+
+
+## How much more of the output one worker turns out in a month, for the building.
+##
+## Base is two a month by `town-economy.md` §11, whatever the recipe; with the
+## building it is `throughput / ratio`. The difference is the margin.
+static func _conversion_gain(recipe: StringName, terms: Dictionary) -> float:
+	var ratio := maxf(0.0001, float(terms.get("ratio", 1.0)))
+	var base := maxf(0.0001, Building.base_ratio_for(recipe))
+	var with_it := float(terms.get("throughput", 0.0)) / ratio
+	var without := (2.0 * base) / base
+	return with_it - without
+
+
+## 🔒 **Whether this output feeds construction, derived and never asserted.**
+##
+## §5 claims the mineworks → foundry → toolworks chain *pays for itself in
+## construction*, and a governor can only act on that if a toolworks reads as
+## capacity to him. It reads as capacity because tools appear in the cost of half
+## the tree — which this asks the tree, so a building priced in a new resource
+## tomorrow makes that resource capacity without anybody editing this.
+static func _feeds_construction(output: StringName) -> bool:
+	for id in Building.ids():
+		var building := Building.find(StringName(id))
+		if building != null and building.cost.has(String(output)):
+			return true
+	return false
 
 
 ## What raising this improvement on this tile would actually change.
