@@ -80,12 +80,13 @@ func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	var rows: Array = []
 	var influence: Dictionary = {}
+	var decisions: Array = []
 	var failures: Array = []
 	var started := Time.get_ticks_msec()
 
 	for index in seeds:
 		var seed_value := SEED_BASE + index
-		var result := _play(seed_value, years, policy, content, influence)
+		var result := _play(seed_value, years, policy, content, influence, decisions)
 		# **Reported, not fatal.** The batch is worth more than the seed, and
 		# whatever years it did complete are still worth having.
 		rows.append_array(result["rows"])
@@ -96,14 +97,17 @@ func _init() -> void:
 
 	var years_path := "%s/%s-years.csv" % [out_dir, policy_id]
 	var traces_path := "%s/%s-considerations.csv" % [out_dir, policy_id]
+	var choices_path := "%s/%s-decisions.csv" % [out_dir, policy_id]
 	_write(years_path, _years_csv(rows))
 	_write(traces_path, _considerations_csv(influence))
+	_write(choices_path, _decisions_csv(decisions))
 
 	print("%d seeds x %d years as '%s' in %.1fs" % [
 		seeds, years, policy_id, float(Time.get_ticks_msec() - started) / 1000.0,
 	])
 	print("  %s  (%d rows)" % [years_path, rows.size()])
 	print("  %s  (%d considerations)" % [traces_path, influence.size()])
+	print("  %s  (%d decisions)" % [choices_path, decisions.size()])
 	if not failures.is_empty():
 		print("  %d seed(s) failed:" % failures.size())
 		for line in failures:
@@ -145,6 +149,7 @@ func _play(
 	policy: Dictionary,
 	content: ContentDatabase,
 	influence: Dictionary,
+	decisions: Array = [],
 ) -> Dictionary:
 	var run := RunState.new_run(seed_value, _site(seed_value, policy))
 	# **A policy may start the run with duties already set.** Some questions are
@@ -174,8 +179,17 @@ func _play(
 	for turn in turns:
 		machine.begin_turn()
 		letters += run.inbox.size()
-		_answer(run, content, policy)
+		var this_turn: Array = []
+		_answer(run, content, policy, this_turn)
 		machine.send_post()
+
+		# **After the post has gone**, because compliance resolves in phase 7 of
+		# the month `send_post` runs — so by here the Orders this turn produced
+		# have been answered and the outcomes are in the log.
+		_join_outcomes(run, this_turn)
+		for entry in this_turn:
+			entry["seed"] = seed_value
+			decisions.append(entry)
 
 		seen_traces = _gather(run, influence, seen_traces)
 
@@ -213,7 +227,16 @@ func _what_went_wrong(run: RunState) -> String:
 
 
 ## Answer the post the way this policy would.
-func _answer(run: RunState, content: ContentDatabase, policy: Dictionary) -> void:
+##
+## `decisions` collects one entry per **choice**, which is what #318 is for: two
+## personalities producing the same colony is otherwise indistinguishable from
+## two personalities making the same choices.
+func _answer(
+	run: RunState,
+	content: ContentDatabase,
+	policy: Dictionary,
+	decisions: Array = [],
+) -> void:
 	var answers := String(policy.get("answers", "all"))
 	var prefer: Array = policy.get("prefer", [])
 
@@ -258,6 +281,29 @@ func _answer(run: RunState, content: ContentDatabase, policy: Dictionary) -> voi
 
 		inbound.status = InboundLetter.ANSWERED
 		run.post.add(outgoing)
+
+		# One row per **step answered**, not per letter, because a letter with
+		# two steps is two decisions and the second is where the interesting
+		# ones live.
+		for step in letter.steps():
+			var step_id := String(step.get("id", ""))
+			if not outgoing.has_chosen(step_id):
+				continue
+			decisions.append({
+				"turn": run.turn,
+				"sender": String(inbound.sender),
+				"letter_id": inbound.letter_id,
+				"kind": String(LetterKind.of_letter(letter)),
+				"tone": String(outgoing.tone),
+				"harsh": outgoing.harsh,
+				"step": step_id,
+				"option": outgoing.chosen_for(step_id),
+				# **Joined to the outcome, not reported beside it** (#318). The
+				# Order this choice produced is named after the letter and the
+				# step, which is what lets the two be matched at all.
+				"order_id": "%s.%s" % [outgoing.id, step_id],
+				"outcome": "",
+			})
 
 
 ## The first offered option this policy prefers, or the first on the letter.
@@ -594,6 +640,50 @@ func _policies(content: ContentDatabase) -> Dictionary:
 	for id in content.ids("balance"):
 		out[String(id)] = content.record("balance", String(id))
 	return out
+
+
+## Match each choice to what the contact did about it.
+##
+## 🔒 **Joined, not reported separately** (#318). The years CSV can say six
+## letters were refused and the log can say six letters were sent; only the join
+## says *which* letter was refused, and that is the whole artefact.
+##
+## Matched on the Order id, which `TurnMachine._build_orders` composes from the
+## outgoing letter and the step — so a choice that produced no Order keeps an
+## empty outcome rather than borrowing somebody else's.
+func _join_outcomes(run: RunState, decisions: Array) -> void:
+	if decisions.is_empty():
+		return
+	var by_order: Dictionary = {}
+	for outcome in Compliance.OUTCOMES:
+		for event in run.log.of_type(Compliance.OUTCOME_EVENTS[outcome]):
+			var order: Dictionary = event.payload.get("order", {})
+			var id := String(order.get("id", ""))
+			if not id.is_empty():
+				by_order[id] = String(outcome)
+
+	for entry in decisions:
+		entry["outcome"] = String(by_order.get(String(entry["order_id"]), ""))
+
+
+const DECISION_COLUMNS: PackedStringArray = [
+	"seed", "turn", "sender", "letter_id", "kind", "tone", "harsh",
+	"step", "option", "outcome",
+]
+
+
+## One row per answered step, so *what did he choose* is a column and not an
+## inference.
+func _decisions_csv(decisions: Array) -> String:
+	var lines: PackedStringArray = PackedStringArray([",".join(DECISION_COLUMNS)])
+	for entry in decisions:
+		var cells: PackedStringArray = PackedStringArray()
+		for column in DECISION_COLUMNS:
+			cells.append(_cell(entry.get(column, "")))
+		lines.append(",".join(cells))
+	return "
+".join(lines) + "
+"
 
 
 func _write(path: String, text: String) -> void:
