@@ -124,11 +124,17 @@ static func take_command(
 static func _generate(company: Company, town: Town, run: RunState) -> Contact:
 	var run_of_commanders := run.companies.commanders_raised + 1
 	run.companies.commanders_raised = run_of_commanders
+	# 🔒 **He is rolled a weight for what a commander weighs** (#221). A man with
+	# no weight on `keeping_my_army_alive` would weigh it exactly as every other
+	# commander does, and two men reading the same board would always agree — so
+	# the cautious man and the glory-seeker would be the same man.
+	var considers := IntentConsiderations.ALL.duplicate()
+	considers.append_array(CommanderConsiderations.ALL)
 	var man := Contact.generate(
 		StringName("commander_%d" % run_of_commanders),
 		ROLE,
 		run.streams,
-		IntentConsiderations.ALL,
+		considers,
 	)
 	# 🔒 **A company is given to the same sort of man either way** (`names.md`
 	# §3). The Marshal's officer comes from the pool a patron comes from; a

@@ -104,6 +104,9 @@ func _march(run: RunState) -> void:
 	driver.companies = run.companies
 	driver.colony = run.colony
 	driver.map = run.map
+	# **The roster, because the decision is a man's** (#221). A driver with no
+	# contacts finds no commander and every company holds.
+	driver.contacts = run.contacts
 	driver.on_phase(WorldPhase.MOVEMENT, run.world, run.log, run.streams)
 
 

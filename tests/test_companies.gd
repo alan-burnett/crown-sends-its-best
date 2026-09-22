@@ -496,15 +496,20 @@ func _march(run: RunState) -> void:
 	driver.on_phase(WorldPhase.MOVEMENT, run.world, run.log, run.streams)
 
 
+## The march itself, asked of the company rather than of the driver.
+##
+## **Whether it marches at all is a decision** (#221) and belongs to
+## `test_cavalry` with the rest of the month; what is asked here is how far a
+## company gets once somebody has decided it is going.
 func test_a_company_marches_toward_its_destination_over_months() -> void:
 	var run := _run()
 	var company := _raise(run, 20, {})
 	var start := company.at
-	company.destination = start + Vector2i(4, 0)
+	var context := _context(run)
 
-	_march(run)
+	company.advance(start + Vector2i(4, 0), context)
 	assert_eq(company.at, start + Vector2i(1, 0), "it did not march")
-	_march(run)
+	company.advance(start + Vector2i(4, 0), context)
 	assert_eq(company.at, start + Vector2i(2, 0))
 	assert_eq(run.log.of_type(Company.EVENT_MOVED).size(), 2,
 		"it moved and the map was not told")
@@ -514,9 +519,8 @@ func test_cavalry_covers_twice_the_ground() -> void:
 	var run := _run()
 	var mounted := _raise(run, 20, _horsed(20))
 	var start := mounted.at
-	mounted.destination = start + Vector2i(6, 0)
 
-	_march(run)
+	mounted.advance(start + Vector2i(6, 0), _context(run))
 	assert_eq(mounted.at, start + Vector2i(2, 0),
 		"cavalry marched at a walk: %s" % [mounted.at])
 
@@ -533,10 +537,11 @@ func test_a_company_with_nowhere_to_go_stands_still() -> void:
 func test_it_stops_when_it_arrives() -> void:
 	var run := _run()
 	var company := _raise(run, 20, {})
-	company.destination = company.at + Vector2i(1, 0)
-	_march(run)
+	var context := _context(run)
+	var toward := company.at + Vector2i(1, 0)
+	company.advance(toward, context)
 	var arrived := company.at
-	_march(run)
+	company.advance(toward, context)
 	assert_eq(company.at, arrived, "it marched past its destination")
 
 

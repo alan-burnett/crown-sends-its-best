@@ -290,6 +290,16 @@ func test_every_declared_kind_is_one_an_actor_actually_chooses() -> void:
 		DecisionKind.UNANSWERED,
 		DecisionKind.DIRECTOR_URGENCY,
 		DecisionKind.FACTION_POSTURE,
+		# **Considered, and it belongs** (#221). A commander weighing attack,
+		# hold, march, withdraw and disband is plainly a moment where somebody
+		# could have chosen otherwise — and `commanders.md` §5 is explicit that
+		# it must be one, because *refusing to attack is attack scoring below
+		# retreat* and a branch here would be the "will he obey" check the
+		# section forbids.
+		#
+		# ⚠️ `deliberation.md` §1 still lists six decision points and this is a
+		# seventh. The doc is the PO's; the table wants a row.
+		DecisionKind.COMMANDER_ORDERS,
 	]
 	assert_eq(DecisionKind.ALL.size(), expected.size(),
 		"a decision kind was added or removed without this test being considered")

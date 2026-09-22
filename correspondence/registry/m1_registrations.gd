@@ -147,6 +147,10 @@ static func register_considerations() -> void:
 	ComplianceConsiderations.register_all()
 	UnansweredConsiderations.register_all()
 	IntentConsiderations.register_all()
+	# **A milestone that adds a system ships that system's considerations with
+	# it** (#221). A commander scores every option open to him, and refusal is
+	# attack scoring below retreat rather than a branch.
+	CommanderConsiderations.register_all()
 	# 🔒 **`faction_posture` finally has something registered against it** (#206).
 	# It has been a decision kind with no considerations since the kernel was
 	# built, which is a decision nobody could make.

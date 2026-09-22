@@ -50,12 +50,26 @@ const DIRECTOR_URGENCY: StringName = &"director_urgency"
 ## (SPEC §12.5, §8.4).
 const FACTION_POSTURE: StringName = &"faction_posture"
 
+## 🔒 **A commander decides what his company does this month** (#221,
+## `commanders.md` §5, SPEC §8.5, §12.6).
+##
+## The seventh point, and it is here rather than as a branch for the reason §5
+## gives: **there is no "will he obey" check anywhere.** He scores attack, hold,
+## march, withdraw and disband and takes the best, so *refusing to attack* is
+## attack scoring below retreat and needs no code of its own.
+##
+## Which makes §12.6's *Crown troops may refuse orders against Crown interests*
+## and §8.5's *orders are requests* the same mechanism rather than two: the PC's
+## letter moves the weights, it does not move the company.
+const COMMANDER_ORDERS: StringName = &"commander_orders"
+
 const ALL: Array[StringName] = [
 	GOVERNOR_INTENT,
 	ORDER_COMPLIANCE,
 	UNANSWERED,
 	DIRECTOR_URGENCY,
 	FACTION_POSTURE,
+	COMMANDER_ORDERS,
 ]
 
 
