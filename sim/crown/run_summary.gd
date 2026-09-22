@@ -31,6 +31,15 @@ static func of(run: RunState) -> Dictionary:
 		"months": run.world.month,
 		"years": int(run.world.month / 12),
 		"reason": String(run.ending.reason) if run.ending != null else "",
+		# 🔒 **Which ending, and why** (#269). `reason` says *failed*, and failed
+		# is two entirely different stories: the colony was overrun, or the colony
+		# threw us out. The summary that could not tell them apart would be the
+		# one screen in the game that did not say what had happened.
+		#
+		# Empty for a retirement and for fifty years served, because those are
+		# wholly described by `reason` — there is no second question about a man
+		# who chose to go home.
+		"how": String(run.ending.how) if run.ending != null else "",
 		# What the Crown got. Received and paid rather than the net alone,
 		# because "you netted them nine hundred" and "you moved forty thousand
 		# through their hands and kept nine hundred of it" are different facts
