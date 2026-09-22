@@ -7,7 +7,8 @@
 > **Serves:** SPEC §10.2, §10.3, §9.5 (promises), §5 (the "it's my first day"
 > perk), and the Squeeze pillar in §2.
 >
-> **Does not settle:** SPEC §17's open question on gold's share of prestige.
+> **Does not settle:** how prestige is scored. `prestige.md` §3 owns that, and
+> settled gold's share of it in v2.2.
 
 ---
 
@@ -261,6 +262,10 @@ balance harness and revised from playtest.
   be discounted because the Crown knows what they cost politically.
 - Whether standing should decay passively at all. Current model says no: only
   profit moves it, because passive recovery would undercut the Squeeze.
-- **Gold's share of prestige (SPEC §17) is deliberately not approached here.**
-  Anything written now would be invalidated by iteration on this model. It waits
-  until crown standing has been through playtest and stabilized.
+- **Gold's share of prestige is settled** — `prestige.md` §3, `net_gold =
+  net_position`, linear and without a ceiling, and `prestige.gd` implements it.
+  This doc deferred it on the grounds that anything written before crown standing
+  stabilised would be invalidated by iteration. **That was the right caution and
+  it has expired**: the question was answered two spec versions ago, and SPEC §17
+  is now empty, so a reader following the old citation found nothing and could
+  not tell whether it had been answered or dropped.
