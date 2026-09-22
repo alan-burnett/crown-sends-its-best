@@ -37,6 +37,13 @@ var natives: Tribes = null
 ## contain it.
 var denied: DeniedTiles = null
 
+## The run, for the contacts a building brings and takes (#276).
+##
+## **Only for the roster.** The colony month itself is handed a `ColonyContext`
+## and must stay that way: a phase that could reach the whole run would be a
+## phase that could reach anything.
+var run: RunState = null
+
 
 func _init(p_colony: Colony = null, p_map: WorldMap = null, p_run_seed: int = 0) -> void:
 	colony = p_colony
@@ -65,3 +72,16 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		context.territory = territory_driver.territory
 
 	month.run(colony, context)
+
+	# 🔒 **A building brings a man, and losing it takes him** (#276,
+	# `institutional-contacts.md` §1, §2).
+	#
+	# After the month, because Build completes inside it and a church finished
+	# this month should bring its clergyman this month rather than next.
+	#
+	# **Asked rather than reacted to**, so a run loaded from a save is correct
+	# without replaying its history — and so an extension building widens the man
+	# already there instead of granting a second one.
+	if run != null:
+		ContactRoster.house_the_residents(run)
+		ContactRoster.unhouse_the_lost(run)

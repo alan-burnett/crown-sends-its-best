@@ -34,6 +34,18 @@ var effects: Dictionary = {}
 ## feature.
 var grants_contact: String = ""
 
+## 🔒 **A building that widens a man the town already has** (#276,
+## `institutional-contacts.md` §1).
+##
+## The cathedral, the armoury and the college. **An extension never creates a
+## second contact** — it widens the first, which is what `buildings.md` means by
+## the cathedral's *more with the contact*.
+##
+## Named rather than derived from `requires`, because a prerequisite and a
+## widening are different claims: the gunsmith requires the foundry and widens
+## nobody.
+var extends_contact: String = ""
+
 
 static func load_from(records: Array) -> void:
 	_buildings = {}
@@ -49,6 +61,7 @@ static func load_from(records: Array) -> void:
 		building.upkeep = maxf(0.0, float(record.get("upkeep", 0.0)))
 		building.effects = record.get("effects", {}).duplicate()
 		building.grants_contact = String(record.get("grants_contact", ""))
+		building.extends_contact = String(record.get("extends_contact", ""))
 		_buildings[String(building.id)] = building
 
 
@@ -407,4 +420,5 @@ func to_dict() -> Dictionary:
 		"cost": cost.duplicate(),
 		"effects": effects.duplicate(),
 		"grants_contact": grants_contact,
+		"extends_contact": extends_contact,
 	}
