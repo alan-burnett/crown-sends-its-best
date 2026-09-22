@@ -399,6 +399,49 @@ and those are built once the Squeeze is solid — not before, and never as an
 escape hatch inside it. A draw that eased off by itself would be exactly the
 pressure-with-its-relief-built-in that this section exists to forbid.
 
+### Stated interaction: the Crown's prices (`town-economy.md` §1)
+
+The first of §10's interactions, written down as §10 requires.
+
+**Prices are not a fifth dimension.** The four above are all about what the Crown
+**takes**. Prices are about what it **pays and charges**, and they move in both
+directions, which is the property no dimension here has.
+
+But they are not neutral either, and they split cleanly:
+
+| | Moves | For the colony |
+| :--- | :--- | :--- |
+| **A war at home** | lifts what an army consumes — iron, tools, guns, food | mostly **pressure**. §1's mercantile table has the colony *buying* tools; a war makes developing dearer |
+| **A shortage at home** | lifts one thing the Crown suddenly cannot grow | **opportunity**. The reversal: colonial grain becomes worth shipping |
+
+**So the war is the Squeeze arriving by a second road.** It takes nothing extra
+and demands nothing extra; it simply makes the colony's own development cost
+more, at exactly the times the Crown is also asking for more. That is not a
+dimension of the draw and it should not be added to §6 — but a player will feel
+it as the same thing, and that is correct.
+
+**And the shortage is relief of the kind §10 asks for**: it does not soften a
+single demand, it gives the colony a way to *meet* them. A demand is no smaller
+because grain is dear; it is merely payable. **That distinction is what keeps it
+honest** — relief that eased the draw would be the escape-hatch-inside-the-
+pressure §10 forbids.
+
+### 🔒 Neither ever touches a demand's size
+
+A demand is a figure in gold or resources set by §2 and §6. **Nothing about
+Crown prices may reach it.** If a shortage doubled the Crown's price for grain
+and a demand asked for grain, the demand must be the same demand.
+
+Otherwise the draw would ease off on its own the moment prices moved, which is
+exactly what §10's lock forbids, and it would do it invisibly.
+
+### One thing the harness should watch
+
+`buildings.md` §11 records that towns could once not accumulate iron at all. A
+war appetite on iron and tools **raises the price of the two resources that gate
+half the building tree**, and a long campaign early in a run could recreate that
+wall by a different route. Worth measuring rather than assuming.
+
 ## 11. Open items
 
 - The size of the year-one gap between demand and output. This single number sets

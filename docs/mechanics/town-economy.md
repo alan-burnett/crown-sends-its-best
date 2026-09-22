@@ -84,6 +84,18 @@ would quietly stop working — with nothing failing loudly.
 Barring luxuries from both drivers removes that failure mode outright, and it is
 truer besides: a Crown at war prices iron, not tea.
 
+### How this sits with the Squeeze
+
+**It is not a fifth dimension of it.** `crown-demands.md` §6's four are all about
+what the Crown *takes*; this is what it *pays and charges*, and it moves both
+ways.
+
+But the two halves land differently, and `crown-demands.md` §10 carries the
+stated interaction: **the war is the Squeeze arriving by a second road** — it
+makes the colony's development dearer while the Crown is also asking for more —
+and **the shortage is relief of the kind §10 asks for**, because it does not
+shrink a demand, it makes one payable.
+
 ### Which makes a shortage the interesting half
 
 The war is a slow standing lift on things the colony already sells. **A shortage
