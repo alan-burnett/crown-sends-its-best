@@ -93,6 +93,31 @@ static func has_a_magnitude(order_kind: StringName) -> bool:
 	return of(order_kind) == ASKING
 
 
+## Which of the three kinds this whole letter is (#317, `tone.md` §3).
+##
+## A letter is classified by **what its options would order**, and the strongest
+## claim wins: a reply that mixes an answer with an instruction is an
+## instruction, and one that asks for something is an ask. Nothing in a letter
+## file says which kind it is, and nothing should — it is decided by the effects,
+## which is the same place `may_be_harsh` reads and for the same reason.
+##
+## **Answering is the floor**, so a letter that orders nothing at all is one in
+## which the PC is the only person doing anything.
+static func of_letter(letter: Letter) -> StringName:
+	if letter == null:
+		return ANSWERING
+	var kind := ANSWERING
+	for step in letter.steps():
+		for option in step.get(LetterSchema.KEY_OPTIONS, []):
+			for effect_id in option.get(LetterSchema.KEY_EFFECT, {}):
+				match of(ContentRegistry.order_kind_of(String(effect_id))):
+					ASKING:
+						return ASKING
+					DIRECTING:
+						kind = DIRECTING
+	return kind
+
+
 ## Whether a letter may be written harshly (#263, `tone.md` §9).
 ##
 ## 🔒 **Not when answering.** There is nothing to lean on — *you* are the one

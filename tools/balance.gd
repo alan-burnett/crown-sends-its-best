@@ -216,7 +216,6 @@ func _what_went_wrong(run: RunState) -> String:
 func _answer(run: RunState, content: ContentDatabase, policy: Dictionary) -> void:
 	var answers := String(policy.get("answers", "all"))
 	var prefer: Array = policy.get("prefer", [])
-	var tone := StringName(policy.get("tone", "dutiful"))
 
 	for inbound in run.inbox.duplicate():
 		var letter := Letter.from_record(content.record("letters", inbound.letter_id))
@@ -232,15 +231,30 @@ func _answer(run: RunState, content: ContentDatabase, policy: Dictionary) -> voi
 		outgoing.params = inbound.params.duplicate(true)
 		var wizard := ReplyWizard.new(letter, outgoing)
 
+		# 🔒 **A register per letter kind, not one tone per run** (#317,
+		# `tone.md` §3). Answering has no compliance step, so a personality that
+		# writes `desperate` on everything is not the pleader — it is a **worse**
+		# pleader than one that pleads only where pleading buys something, and the
+		# harness could build only the naive version.
+		var register := _register_for(policy, letter)
+
 		if wizard.has_tone_step():
 			var options := wizard.tone_options()
 			if not options.is_empty():
-				wizard.choose_tone(_preferred_tone(options, tone))
+				wizard.choose_tone(_preferred_tone(
+					options, StringName(register.get("tone", "dutiful"))))
 
 		for step in letter.steps():
 			var choices: Array = step.get(LetterSchema.KEY_OPTIONS, [])
 			if not choices.is_empty():
 				wizard.choose(String(step.get("id", "")), _preferred(choices, prefer))
+
+		# **Asked for, and ignored where §9 does not offer it.** The wizard refuses
+		# harshness on an answering letter, which is the point: a personality that
+		# means *always leans on people* leans on nobody across most of the desk,
+		# and that is a fact about the desk rather than about the personality.
+		if wizard.harsh_is_pending():
+			wizard.choose_harsh(bool(register.get("harsh", false)))
 
 		inbound.status = InboundLetter.ANSWERED
 		run.post.add(outgoing)
@@ -257,6 +271,22 @@ func _preferred(choices: Array, prefer: Array) -> String:
 			if String(option.get("id", "")) == String(wanted):
 				return String(option["id"])
 	return String(choices[0].get("id", ""))
+
+
+## How this personality writes a letter of this kind.
+##
+## `registers` keys on `answering`, `directing` and `asking`, each `{tone, harsh}`.
+## A personality that names none of them falls back to its single `tone`, so
+## every policy written before this still plays exactly as it did — which matters,
+## because the batches those policies produced are the baseline the new ones are
+## read against.
+func _register_for(policy: Dictionary, letter: Letter) -> Dictionary:
+	var registers: Dictionary = policy.get("registers", {})
+	var plain: Dictionary = {"tone": String(policy.get("tone", "dutiful")), "harsh": false}
+	if registers.is_empty():
+		return plain
+	var kind := String(LetterKind.of_letter(letter))
+	return registers.get(kind, plain)
 
 
 func _preferred_tone(options: Array, wanted: StringName) -> StringName:
