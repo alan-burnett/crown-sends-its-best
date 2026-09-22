@@ -44,6 +44,9 @@ var map: WorldMap = null
 ## The roster, so a company can find the man who decides for it (#221).
 var contacts: Dictionary = {}
 
+## What each commander has learned (#223), so a battle can add to it.
+var commanders: CommanderBook = null
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if companies == null:
@@ -51,6 +54,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	var context := ColonyContext.new(state, log, streams, map)
 	context.colony = colony
 	context.companies = companies
+	context.commanders = commanders
 
 	match phase:
 		WorldPhase.MOVEMENT:

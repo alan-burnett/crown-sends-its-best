@@ -58,6 +58,10 @@ const RECORD: String = "force"
 ## allocation rather than a rounding.
 static var _arms_worth: Dictionary = {"guns": 1.5, "tools": 0.5, "horses": 0.4}
 
+## What knowing the ground is worth to the man holding it. Tuning
+## (`commanders.md` §9: *what each bonus is worth*).
+const KNOWS_THE_COUNTRY: float = 1.25
+
 ## What a commander is worth. Tuning (§12: *what leadership is worth*), and §4
 ## is clear that leadership is **agency before it is a bonus** — so the bonus is
 ## deliberately modest, and a leaderless company is not a broken one.
@@ -121,7 +125,13 @@ static func arms_of(company: Company) -> float:
 
 ## What its commander is worth. One when it has none (§4).
 static func leadership_of(company: Company) -> float:
-	return _leadership if not String(company.commander).is_empty() else 1.0
+	if String(company.commander).is_empty():
+		return 1.0
+	# **Bearing** (`commanders.md` §6): what he has learned, on top of the flat
+	# worth of having anybody at all. It stacks, so a long-lived commander is
+	# genuinely formidable — which is intended, because he is the one competent
+	# person in the PC's employ and the PC cannot direct him.
+	return _leadership * CommanderExperience.knob_at(company.commander_level, "bearing")
 
 
 ## What the ground it stands on is worth, to a defender.
@@ -138,14 +148,33 @@ static func terrain_of(
 		return 1.0
 	if attacker != null and attacker.is_cavalry():
 		return 1.0
-	return terrain_worth(map.terrain_at(company.at.x, company.at.y))
+	var ground := map.terrain_at(company.at.x, company.at.y)
+	# **Country** (`commanders.md` §6): a man who knows this ground holds it
+	# better than a stranger would. His specialism and no other — a commander who
+	# knew every kind of country would have no specialism at all.
+	var knows := CommanderExperience.country_at(company.commander_level) == ground
+	return terrain_worth(ground) * (KNOWS_THE_COUNTRY if knows else 1.0)
 
 
 ## What a fort on its tile is worth, attacking or defending.
-static func fortification_of(company: Company, map: WorldMap, defending: bool) -> float:
+static func fortification_of(
+	company: Company, map: WorldMap, defending: bool, attacker: Company = null
+) -> float:
 	if map == null or company.at == Company.NOWHERE:
 		return 1.0
-	return fort_worth(map.improvement_at(company.at.x, company.at.y), defending)
+	var worth := fort_worth(map.improvement_at(company.at.x, company.at.y), defending)
+	if worth <= 1.0 or attacker == null:
+		return worth
+	# **Siegecraft** (`commanders.md` §6): *part of a fort's defensive bonus
+	# ignored.* Part, not all — a wall is still a wall, and §5's rebel in a fort
+	# on a mountain is meant to be close to unassailable.
+	#
+	# 🔒 **It is the attacker's bonus applied to the defender's wall**, which is
+	# the only place it can be: what a besieger knows is not a property of the
+	# ground he is standing on.
+	var ignored := 1.0 - CommanderExperience.knob_at(
+		attacker.commander_level, "siegecraft", 1.0)
+	return maxf(1.0, worth - (worth - 1.0) * clampf(ignored, 0.0, 1.0))
 
 
 ## The whole of it, as one number.
@@ -168,7 +197,7 @@ static func of(
 		* leadership_of(company) \
 		* company.effectiveness() \
 		* terrain_of(company, map, defending, attacker) \
-		* fortification_of(company, map, defending)
+		* fortification_of(company, map, defending, attacker)
 
 
 ## The six factors and the total, for an event payload.
@@ -191,6 +220,6 @@ static func breakdown(
 		"leadership": leadership_of(company),
 		"supply": company.effectiveness(),
 		"terrain": terrain_of(company, map, defending, attacker),
-		"fortification": fortification_of(company, map, defending),
+		"fortification": fortification_of(company, map, defending, attacker),
 		"force": of(company, map, defending, attacker),
 	}

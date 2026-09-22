@@ -237,6 +237,7 @@ func _init(p_run: RunState) -> void:
 	companies.colony = run.colony
 	companies.map = run.map
 	companies.contacts = run.contacts
+	companies.commanders = run.commanders
 
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and

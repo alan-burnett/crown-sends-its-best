@@ -136,6 +136,13 @@ var patrons: PatronBook = null
 ## faction's list.
 var companies: Companies = null
 
+## What each commander has done, across every company he has led (#223).
+##
+## 🔒 **Kept beside the companies rather than on them**, because the commander is
+## the thing that persists: a company only ever dwindles, and a veteran takes the
+## next command raised in his town at the level he left at.
+var commanders: CommanderBook = null
+
 ## Ground a rival has parked men on (#188). Held on the run rather than on a
 ## town, because it is a fact about the map and a duke rather than about a
 ## settlement — and because a town that is lost takes its tiles with it.
@@ -308,6 +315,7 @@ static func new_run(
 	run.rivals = RivalBook.new()
 	run.patrons = PatronBook.new()
 	run.companies = Companies.new()
+	run.commanders = CommanderBook.new()
 	run.denied = DeniedTiles.new()
 	run.prestige = Prestige.new()
 	run.ending = RunEnding.new()
@@ -468,6 +476,7 @@ func to_dict() -> Dictionary:
 		"rivals": rivals.to_dict() if rivals != null else {},
 		"patrons": patrons.to_dict() if patrons != null else {},
 		"companies": companies.to_dict() if companies != null else {},
+		"commanders": commanders.to_dict() if commanders != null else {},
 		"denied": denied.to_dict() if denied != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
@@ -512,6 +521,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.rivals = RivalBook.from_dict(data.get("rivals", {}))
 	run.patrons = PatronBook.from_dict(data.get("patrons", {}))
 	run.companies = Companies.from_dict(data.get("companies", {}))
+	run.commanders = CommanderBook.from_dict(data.get("commanders", {}))
 	run.denied = DeniedTiles.from_dict(data.get("denied", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))

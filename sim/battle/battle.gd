@@ -173,6 +173,14 @@ static func resolve(
 	var they_lost := defender.take_casualties(they_lose, EVENT_FOUGHT, context)
 	var i_lost := attacker.take_casualties(i_lose, EVENT_FOUGHT, context)
 
+	# 🔒 **Casualties inflicted, and nothing else** (#223, `commanders.md` §6).
+	# Not battles won — §6 of this doc has no rout and no surrender, so *winning*
+	# is not a quantity that exists. **Both sides learn**, because both inflicted
+	# something: a defender who ground down an assault has learned from it as
+	# surely as the man who ordered it.
+	_learn(attacker, they_lose, context)
+	_learn(defender, i_lose, context)
+
 	context.log.emit(EVENT_FOUGHT, attacker.id, context.state.month, {
 		"attacker": String(attacker.id),
 		"defender": String(defender.id),
@@ -197,6 +205,22 @@ static func resolve(
 		"defender_destroyed": defender.is_empty(),
 		"attacker_destroyed": attacker.is_empty(),
 	}
+
+
+## Put what a company inflicted on its commander's account (#223).
+##
+## **Headless companies earn nobody anything**, which is correct: there is no man
+## to have learned from it.
+##
+## The level is refreshed here because this is the one place the tally can
+## change, so a company's `commander_level` cannot lag the book that decides it.
+static func _learn(company: Company, inflicted: float, context: ColonyContext) -> void:
+	if company == null or company.is_headless() or inflicted <= 0.0:
+		return
+	if context.commanders == null:
+		return
+	context.commanders.record(company.commander, inflicted)
+	company.commander_level = context.commanders.level_of(company.commander)
 
 
 ## Fight every battle a month has, in §7's order.

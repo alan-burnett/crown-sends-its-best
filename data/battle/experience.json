@@ -1,0 +1,74 @@
+[
+  {
+    "id": "experience",
+    "note": "What a commander learns in the field and what it buys (commanders.md section 6). Casualties inflicted and nothing else, because battles.md section 6 has no rout and no surrender so winning is not a quantity that exists. Every figure here is a tuning target section 9 names - casualties per level, how many levels there are, and what each bonus is worth - and none of them is measured. A bonus names a knob in CommanderExperience.READ_BY; a knob nothing reads is refused by the validator. rank is an id and never a sentence: the words live in data/ranks_en so a second language is a copied folder, and a letter keys its line off the id rather than rendering a number the PC is not meant to see.",
+    "levels": [
+      {
+        "casualties": 0,
+        "rank": "rank.untried"
+      },
+      {
+        "casualties": 12,
+        "rank": "rank.blooded"
+      },
+      {
+        "casualties": 40,
+        "rank": "rank.steady"
+      },
+      {
+        "casualties": 90,
+        "rank": "rank.known"
+      },
+      {
+        "casualties": 180,
+        "rank": "rank.feared"
+      },
+      {
+        "casualties": 320,
+        "rank": "rank.legend"
+      }
+    ],
+    "bonuses": [
+      {
+        "id": "bearing",
+        "at": 2,
+        "turns": {
+          "bearing": 1.15
+        }
+      },
+      {
+        "id": "marches",
+        "at": 3,
+        "adds": {
+          "marches": 1
+        }
+      },
+      {
+        "id": "hardiness",
+        "at": 3,
+        "turns": {
+          "hardiness": 0.6
+        }
+      },
+      {
+        "id": "country",
+        "at": 4,
+        "country": "forest"
+      },
+      {
+        "id": "husbandry",
+        "at": 5,
+        "turns": {
+          "husbandry": 0.8
+        }
+      },
+      {
+        "id": "siegecraft",
+        "at": 6,
+        "turns": {
+          "siegecraft": 0.5
+        }
+      }
+    ]
+  }
+]
