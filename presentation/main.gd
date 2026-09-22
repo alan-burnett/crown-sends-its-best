@@ -71,10 +71,42 @@ func _start() -> void:
 			_show_failure(resumed["message"])
 			return
 		_:
-			_ask_for_the_commission()
+			_open_the_run()
 			return
 
 	_open_desk()
+
+
+## 🔒 **A run opens with a cutscene** (SPEC §6.1, `cutscenes.md` §1).
+##
+## Shown before the commission, because it is the thing that says where the
+## player is: the commission is already the PC sitting at a desk answering for a
+## colony, and a run that opened on a form would never have established there was
+## anywhere to sail to.
+##
+## **Skipped silently when there is none.** The opening's panels are a content
+## file (#299) and the triggers that fire every other cutscene are #298 — so this
+## looks for `cutscenes/opening` and gets out of the way if the Author has not
+## written it yet. When the file lands the opening appears, with no change here.
+func _open_the_run() -> void:
+	var opening := _cutscene(Cutscene.OPENING)
+	if opening == null or opening.is_empty():
+		_ask_for_the_commission()
+		return
+
+	var screen := CutsceneScreen.new()
+	add_child(screen)
+	screen.finished.connect(func() -> void:
+		screen.queue_free()
+		_ask_for_the_commission())
+	screen.begin(opening, get_node_or_null(^"/root/Assets") as AssetRegistry)
+
+
+## A cutscene from the content database, or null.
+func _cutscene(id: StringName) -> Cutscene:
+	if content == null or not content.has_record(Cutscene.COLLECTION, String(id)):
+		return null
+	return Cutscene.from_data(content.record(Cutscene.COLLECTION, String(id)))
 
 
 ## The commission, before there is a run to open a desk on.
