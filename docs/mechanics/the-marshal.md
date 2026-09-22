@@ -186,18 +186,23 @@ what makes him feel like a person with a job rather than a dial.
 constants do not describe a curve.
 
 From `CrownAffairs`: campaigns last 2–5 months at **+9** a month, arrive on a
-**28 per cent** monthly roll, and cool at **−4.5** between, clamped to 0–100 and
-starting at 0.
+**28 per cent** monthly roll, and cool at **−4.5** between, clamped to 0–100.
+`WorldValues.initial_state()` starts it at **35**.
 
 | | |
 | :--- | --: |
 | average campaign | 3.5 months, **+31.5** |
 | average wait between | 3.6 months, **−16.1** |
 | **net drift** | **+2.2 a month** |
-| **reaches the 100 ceiling** | **month ~46 — year four** |
+| **reaches the 100 ceiling** | **month ~30 — year two and a half** |
 
-**So it climbs for four years and is then a constant**, for the rest of a run
-SPEC §6.2 expects to last four to eight years. His wars stop getting worse
+**So it climbs for two and a half years and is then a constant**, for the rest of
+a run SPEC §6.2 expects to last four to eight years.
+
+**And it opens above two of his own thresholds.** `marshal.request_supplies`
+needs war above **30**, so it is available from the first turn of every run;
+`marshal.demand_gold` needs **62**, reached around month twelve. He starts the
+run already asking and escalates within a year. His wars stop getting worse
 exactly when `crown-demands.md` has the Crown entering its decline, and anything
 hanging off the number — such as the price lift in #141 — stops varying with it.
 
