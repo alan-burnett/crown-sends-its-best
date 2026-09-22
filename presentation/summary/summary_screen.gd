@@ -133,7 +133,20 @@ func _opening(facts: Dictionary) -> String:
 		String(RunEnding.TERM_EXPIRED):
 			return "Fifty years, and the term is served."
 		String(RunEnding.FAILED):
-			return "The colony is lost, in its %s year." % [_ordinal(years + 1)]
+			# 🔒 **Which loss, and not merely that there was one** (#269). *The
+			# colony was overrun* and *the colony threw us out* are two entirely
+			# different stories about the same man, and a screen that ended both
+			# with the same sentence would be the one place in the game that did
+			# not say what had happened.
+			match String(facts.get("how", "")):
+				String(RunEndCheck.OVERRUN):
+					return "The colony was overrun, in its %s year." % [
+						_ordinal(years + 1)]
+				String(RunEndCheck.INDEPENDENCE):
+					return "The colony declared for itself, in its %s year." % [
+						_ordinal(years + 1)]
+				_:
+					return "The colony is lost, in its %s year." % [_ordinal(years + 1)]
 		_:
 			return "You asked to be relieved, in the %s year." % [_ordinal(years + 1)]
 
