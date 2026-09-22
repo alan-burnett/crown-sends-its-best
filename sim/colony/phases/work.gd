@@ -96,6 +96,21 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var desired := DesiredStock.for_town(town, before)
 	var tiles := context.tiles_of(town)
 
+	# 🔒 **Every tile's yield, worked out once for this town this month** (#351).
+	#
+	# Experts do not move inside a phase, buildings do not go up inside a phase
+	# and the map does not change inside one either — so what a hand would get
+	# off a tile is the same number for the first hand and the twelfth, and
+	# `_allocate` was computing it afresh for every tile for every hand.
+	#
+	# **Per town and per month, and it must stay that way.** A table that
+	# outlived either would be reading one town's experts through another town's
+	# buildings, which is why it is a local here rather than anything stored.
+	#
+	# Exactly equivalent: the same three factors in the same order, so the
+	# product is the identical double rather than a close one.
+	var yields := _yields_for(town, context, tiles)
+
 	# Tiles and recipes in one list, to be ranked together. `_allocate` scores
 	# them; the score here is a placeholder it overwrites.
 	var work: Array = []
@@ -109,7 +124,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# work, adding what it would yield to a running projection of the stores, and
 	# asking again — so the second fur trapper is judged on a town that already
 	# has the first trapper's furs.
-	_allocate(town, before, context, work, desired)
+	_allocate(town, before, context, work, desired, yields)
 
 	# **The survival check, after scoring and before anybody goes out.** It may
 	# reorder the list; it never rescores it.
@@ -138,7 +153,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 			tiles_worked += 1
 			var at: Vector2i = entry["at"]
 			worked.append("%d,%d" % [at.x, at.y])
-			_harvest(town, context, at, produced)
+			_harvest(at, yields, produced)
 		else:
 			# **Assigned, not run.** Whether there is anything for him to work on
 			# is Convert's question, asked of the stores as they stand then.
@@ -378,6 +393,48 @@ func _yield_of(context: ColonyContext, town: Town, at: Vector2i, resource: Strin
 		* (1.0 + Building.yield_bonus_for(town, resource))
 
 
+## What every tile of this town would yield a hand, this month (#351).
+##
+## Keyed by tile, holding only the resources that come off it at all — which is a
+## handful of the nineteen, so the scoring loop that used to walk the whole
+## catalogue per tile per hand now walks what is actually there.
+##
+## The per-resource multiplier is worked out once as well: `expert_multiplier`
+## walks the town's experts and `Building.yield_bonus_for` walks its buildings,
+## and neither answer can change between two hands of one phase.
+##
+## 🔒 **Exactly equivalent, not an approximation.** The same three factors in the
+## same order, so the product is the identical double rather than a close one.
+func _yields_for(town: Town, context: ColonyContext, tiles: Array) -> Dictionary:
+	var multiplier: Dictionary = {}
+	for resource in ResourceCatalogue.ids():
+		var id := StringName(resource)
+		multiplier[resource] = expert_multiplier(town, id) \
+			* (1.0 + Building.yield_bonus_for(town, id))
+
+	var out: Dictionary = {}
+	if context.map == null:
+		return out
+	for at in tiles:
+		var here: Dictionary = {}
+		for resource in ResourceCatalogue.ids():
+			var amount := context.map.yield_at(at.x, at.y, StringName(resource))
+			if amount > 0.0:
+				here[resource] = amount * float(multiplier[resource])
+		out[_tile_key(at)] = here
+	return out
+
+
+## How a tile is looked up in the yield table.
+static func _tile_key(at: Vector2i) -> String:
+	return "%d,%d" % [at.x, at.y]
+
+
+## What one tile yields this town, or nothing for ground it does not hold.
+static func _yields_at(yields: Dictionary, at: Vector2i) -> Dictionary:
+	return yields.get(_tile_key(at), {})
+
+
 # --- Building the month's assignment ----------------------------------------
 
 ## Put the best work first, each hand judged on what the hands before it did.
@@ -410,20 +467,29 @@ func _allocate(
 	context: ColonyContext,
 	work: Array,
 	desired: DesiredStock,
+	yields: Dictionary,
 ) -> void:
 	# What the town would be holding, updated as each hand is committed.
 	var projected: Dictionary = {}
 	for resource in ResourceCatalogue.ids():
 		projected[resource] = before.held(town.id, StringName(resource))
 
+	# 🔒 **Valued once, and then only where it moved** (#351).
+	#
+	# `Valuation.town` over an unchanged `held` returns the identical double, so
+	# a worth carried between rounds is the same number rather than a close one —
+	# there is no drift to accumulate. What a committed hand touches is at most a
+	# recipe's input and output, or the handful of resources one tile yields, and
+	# everything else is worth exactly what it was worth a moment ago.
+	var worth := _worth_of(projected, desired)
+
 	var chosen: Array = []
 	var rounds := mini(town.workable_tiles(), work.size())
 	for _hand in rounds:
-		var worth := _worth_of(projected, desired)
 		var best := -1
 		var best_score := 0.0
 		for i in work.size():
-			var score := _score(town, before, context, work[i], worth)
+			var score := _score(town, before, context, work[i], worth, yields)
 			if best < 0 or score > best_score + 0.000001 					or (absf(score - best_score) <= 0.000001 and _before(work[i], work[best])):
 				best = i
 				best_score = score
@@ -434,13 +500,14 @@ func _allocate(
 		taken["score"] = best_score
 		chosen.append(taken)
 		work.remove_at(best)
-		_project(town, before, context, taken, projected)
+		_revalue(
+			_project(town, before, context, taken, projected, yields),
+			projected, desired, worth)
 
 	# The rest, in the order they last scored, so the survival check has a ranked
 	# tail to draw a replacement hand from.
-	var worth := _worth_of(projected, desired)
 	for entry in work:
-		entry["score"] = _score(town, before, context, entry, worth)
+		entry["score"] = _score(town, before, context, entry, worth, yields)
 	work.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if not is_equal_approx(float(a["score"]), float(b["score"])):
 			return float(a["score"]) > float(b["score"])
@@ -467,41 +534,62 @@ func _score(
 	context: ColonyContext,
 	entry: Dictionary,
 	worth: Dictionary,
+	yields: Dictionary,
 ) -> float:
 	if String(entry["kind"]) == "convert":
 		return _score_recipe(entry["recipe"], town, worth)
-	var at: Vector2i = entry["at"]
-	return _score_tile(town, context, at, worth)
+	return _score_tile(_yields_at(yields, entry["at"]), worth)
+
+
+## Bring the worth of the resources a hand moved back up to date (#351).
+##
+## 🔒 **Only those, because only those can have changed.** `Valuation.town` reads
+## `desired` and one resource's `held`, so a resource the committed hand did not
+## touch values to the same double it did a round ago. Revaluing the other
+## eighteen was the second half of §7's cost and none of the answer.
+func _revalue(
+	touched: PackedStringArray,
+	projected: Dictionary,
+	desired: DesiredStock,
+	worth: Dictionary,
+) -> void:
+	for resource in touched:
+		worth[resource] = Valuation.town(
+			StringName(resource), desired, float(projected.get(resource, 0.0)))
 
 
 ## Add what a piece of work would yield to the running projection.
+##
+## Returns **which resources it moved**, so the valuation can be brought up to
+## date where it matters and left alone everywhere else.
 func _project(
 	town: Town,
 	before: ColonySnapshot,
 	context: ColonyContext,
 	entry: Dictionary,
 	projected: Dictionary,
-) -> void:
+	yields: Dictionary,
+) -> PackedStringArray:
 	if String(entry["kind"]) == "convert":
 		var recipe: Conversion = entry["recipe"]
 		# **Only what it could actually run.** A loom with no furs changes
 		# nothing, so it must not look as though it did.
 		var share := _feasible(town, before, recipe)
 		if share <= 0.0:
-			return
+			return PackedStringArray()
 		var out := String(recipe.output)
 		projected[out] = float(projected.get(out, 0.0)) + recipe.made_by(town) * share
 		var into := String(recipe.input)
 		projected[into] = maxf(0.0,
 			float(projected.get(into, 0.0)) - recipe.consumes_for(town) * share)
-		return
+		return PackedStringArray([out, into])
 
-	var at: Vector2i = entry["at"]
-	for resource in ResourceCatalogue.ids():
-		var amount := context.map.yield_at(at.x, at.y, StringName(resource))
-		if amount <= 0.0:
-			continue
-		projected[resource] = float(projected.get(resource, 0.0)) 			+ amount * expert_multiplier(town, StringName(resource)) 			* (1.0 + Building.yield_bonus_for(town, StringName(resource)))
+	var moved := PackedStringArray()
+	var here := _yields_at(yields, entry["at"])
+	for resource in here:
+		projected[resource] = float(projected.get(resource, 0.0)) + float(here[resource])
+		moved.append(String(resource))
+	return moved
 
 
 # --- Scoring ----------------------------------------------------------------
@@ -514,12 +602,10 @@ func _project(
 ## made a food expert *lower* the town's grain: the projection filled the want
 ## faster than the scoring knew, so the town gave up a field it was scoring as
 ## though nobody skilled worked it.
-func _score_tile(town: Town, context: ColonyContext, at: Vector2i, weights: Dictionary) -> float:
+func _score_tile(here: Dictionary, weights: Dictionary) -> float:
 	var score := 0.0
-	for resource in ResourceCatalogue.ids():
-		var amount := _yield_of(context, town, at, StringName(resource))
-		if amount > 0.0:
-			score += amount * float(weights.get(resource, 1.0))
+	for resource in here:
+		score += float(here[resource]) * float(weights.get(resource, 1.0))
 	return score
 
 
@@ -534,14 +620,10 @@ func _score_recipe(recipe: Conversion, town: Town, weights: Dictionary) -> float
 
 # --- Doing the work ---------------------------------------------------------
 
-func _harvest(town: Town, context: ColonyContext, at: Vector2i, into: Dictionary) -> void:
-	for resource in ResourceCatalogue.ids():
-		var amount := context.map.yield_at(at.x, at.y, StringName(resource))
-		if amount <= 0.0:
-			continue
-		amount *= expert_multiplier(town, StringName(resource))
-		amount *= 1.0 + Building.yield_bonus_for(town, StringName(resource))
-		into[resource] = float(into.get(resource, 0.0)) + amount
+func _harvest(at: Vector2i, yields: Dictionary, into: Dictionary) -> void:
+	var here := _yields_at(yields, at)
+	for resource in here:
+		into[resource] = float(into.get(resource, 0.0)) + float(here[resource])
 
 
 ## What this town's experts are worth on a resource.
