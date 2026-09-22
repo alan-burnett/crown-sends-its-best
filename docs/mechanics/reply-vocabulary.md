@@ -104,6 +104,36 @@ not have.
 It also makes a personality *legible*: *the tyrant* differs from *the miser* in
 exactly one column, and that is a hypothesis a balance run can test.
 
+### A personality must also say what it writes unprompted
+
+`tone.md` §3 has three letter kinds — **directing, answering, asking** — and the
+harness has never produced an `asking` one (#334), because `balance.gd` only ever
+walks the inbox. The two asking order kinds, `request_troops` and
+`ship_resource`, come from letters the PC **composes**.
+
+**So a personality carries a `composes` list as well as its leans**: which of
+`Composer.purposes(run)` it takes up, and how readily.
+
+| | Composes |
+| :--- | :--- |
+| the spendthrift | freely — he is the man who promises what is wanted |
+| the steady hand | when the colony's condition calls for it |
+| the miser | rarely, and asks for nothing he would have to pay for |
+| the tyrant | readily, and harshly |
+
+**The frequencies are tuning and belong in `policies.json`**, not here. What
+belongs here is that composing is **a lean like any other**, scored the same way
+— not a separate hardcoded script of actions, which would make the harness's
+player a different animal from the one the families describe.
+
+### Why this is the register with the most to lose
+
+Asking has a knob the other two kinds do not: **partial magnitude**. Leaning on a
+man enlarges the half measure, and the tone decides how generous he is underneath
+the threat. **Both are asking-only, and neither has ever run** — so a miser who
+composes nothing is a correct and informative result, and a harness that can
+never compose is not a result at all.
+
 ---
 
 ## 4. The one-offs are allowed, and counted
