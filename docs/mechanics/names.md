@@ -124,8 +124,14 @@ fiction has already done the job the role word was hired for.
 
 It does not extend to the Crown officers, who are equally fixed and equally
 learned. *Master Corvyn Thrale* does not say **Steward**, so he keeps his word.
-**The test is whether the name itself announces the man**, and only the rivals'
+**The test is whether the name itself announces the man**, and only the dukes'
 do.
+
+**And the word is *duke*, never *rival*** (`CLAUDE.md`), in anything the player
+reads. Nothing shown to him has ever said otherwise — the three titles are
+*Governor of the Windward Coast*, *Lieutenant-General of the Leeward Isles* and
+*Warden of the Northern Reach* — and this is written down so the letters,
+cutscenes and advisor lines still to be authored keep it that way.
 
 It has to be on the contact rather than the role because **a commander is one
 role with three allegiances** (`commanders.md` §1: *colonial, Crown and rebel

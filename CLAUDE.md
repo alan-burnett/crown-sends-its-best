@@ -49,6 +49,11 @@ Watch these in particular:
 - **Ledger** is the gold screen (§10.4) and nothing else.
 - **Relationship** is the per-contact record of how the PC's rule has landed on
   someone. **Loyalty** (§8.5) is the headline scalar inside it.
+- **duke** in anything the player reads, never *rival*. SPEC §8.4 calls them
+  Rivals and the code, the docs and the data may keep doing so — `rival_duke`,
+  `ROLE_RIVAL`, `rival-pressure.md`. **The player hears *duke*.** Author's
+  ruling, and it costs nothing to honour: *rival* is a category and *duke* is a
+  man.
 - **Post**, **Turn**, **Run**, **Colony**, **Crown** — all as §4 defines them.
 
 ## Architecture
