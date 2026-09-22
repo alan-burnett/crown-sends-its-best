@@ -145,6 +145,8 @@ func options_for(index: int, context: LetterContext) -> Array[Dictionary]:
 	if index < 0 or index >= all_steps.size():
 		return out
 	for option in all_steps[index].get(LetterSchema.KEY_OPTIONS, []):
+		if not may_take(option, context):
+			continue
 		out.append({
 			"id": String(option.get("id", "")),
 			"label": renderer.resolve_slots(String(option.get(LetterSchema.KEY_LABEL, "")), option, letter, context),
@@ -153,14 +155,47 @@ func options_for(index: int, context: LetterContext) -> Array[Dictionary]:
 	return out
 
 
-func choose(step_id: String, option_id: String) -> bool:
+## 🔒 **Whether this option may be taken at all** (#275, `patrons.md` §5).
+##
+## An option with no conditions is always offered, which is what every option
+## authored before this was.
+##
+## **Offering a choice the player cannot take is worse than not offering it.**
+## `patrons.md` §5's third door — *go and collect it from Lord Magilicutty's
+## house* — cannot be an always-present answer to a tribute demand, because
+## without that patron there is nobody to send the duke to.
+static func may_take(option: Dictionary, context: LetterContext) -> bool:
+	for entry in option.get(LetterSchema.KEY_CONDITIONS, []):
+		for condition_id in entry:
+			if not ContentRegistry.test_condition(
+					String(condition_id), entry[condition_id], context):
+				return false
+	return true
+
+
+## Take an option.
+##
+## 🔒 **A gated option cannot be chosen either** (#275). Filtering it out of
+## `options_for` alone would leave it reachable by anything that names an id — a
+## saved outgoing letter, a test, a second screen — and the whole point is that
+## the player cannot take it.
+##
+## `context` is optional so that callers with nothing to judge by keep working;
+## an option with conditions and nobody to ask is refused rather than allowed,
+## because an unanswerable question about whether a door is open is not a yes.
+func choose(step_id: String, option_id: String, context: LetterContext = null) -> bool:
 	for step in steps():
 		if String(step.get("id", "")) != step_id:
 			continue
 		for option in step.get(LetterSchema.KEY_OPTIONS, []):
-			if String(option.get("id", "")) == option_id:
-				outgoing.choose(step_id, option_id)
-				return true
+			if String(option.get("id", "")) != option_id:
+				continue
+			if not option.get(LetterSchema.KEY_CONDITIONS, []).is_empty() \
+					and (context == null or not may_take(option, context)):
+				push_error("'%s' cannot be taken on '%s' just now." % [option_id, letter.id])
+				return false
+			outgoing.choose(step_id, option_id)
+			return true
 	push_error("'%s' offers no option '%s' at step '%s'." % [letter.id, option_id, step_id])
 	return false
 

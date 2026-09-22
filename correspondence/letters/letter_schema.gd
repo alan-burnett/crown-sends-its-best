@@ -113,6 +113,20 @@ const KEY_EFFECT: String = "effect"
 
 ## An option the PC writes as a command rather than a request (#71).
 const KEY_HARSH: String = "harsh"
+
+## 🔒 **When a reply option may be taken at all** (#275, `patrons.md` §5).
+##
+## Ids into the code-side registry with typed params, **exactly as a trigger's
+## conditions are** — never logic in a data file, and the same registry, so there
+## is one place a condition is defined and one validator checking it.
+##
+## Absent means always offered, which is what every option authored before this
+## was, so no existing letter changes.
+##
+## **Offering a choice the player cannot take is worse than not offering it.**
+## SPEC §9.2 locks that every choice's mechanical effect can be understood from
+## its wording, and an option that silently does nothing fails that.
+const KEY_CONDITIONS: String = "conditions"
 const KEY_INSERT: String = "insert"
 const KEY_MEASURE: String = "measure"
 const KEY_PURPOSE: String = "purpose"
