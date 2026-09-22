@@ -5,108 +5,108 @@
   "skippable": true,
   "speaks_to": 70,
   "params": {
-    "governor": "contact",
-    "last_amount": "integer",
-    "last_resource": "resource",
-    "months_ago": "integer",
-    "lacking": "resource"
+	"governor": "contact",
+	"last_amount": "integer",
+	"last_resource": "resource",
+	"months_ago": "integer",
+	"lacking": "resource"
   },
   "perception": {
-    "stores": {
-      "measure": "stockpile_health",
-      "ladder": [
-        "bare",
-        "thin",
-        "sufficient",
+	"stores": {
+	  "measure": "stockpile_health",
+	  "ladder": [
+		"bare",
+		"thin",
+		"sufficient",
         "comfortable"
-      ]
-    }
+	  ]
+	}
   },
   "body": [
-    {
-      "text": "Your Grace was good enough to send {param:last_amount} of {param:last_resource}, {param:months_ago} months ago now, when we had none."
-    },
-    {
-      "text": "I would not ask again so soon were the need not greater. Our stores are {perception:stores}, and it is {param:lacking} we want this time."
-    },
-    {
-      "text": "I remember the last time and I have not forgotten who sent it. I would rather say that plainly than have you think I only write when I want something.",
-      "only_tones": [
-        "pleased",
+	{
+	  "text": "Your Grace was good enough to send {param:last_amount} of {param:last_resource}, {param:months_ago} months ago now, when we had none."
+	},
+	{
+	  "text": "I would not ask again so soon were the need not greater. Our stores are {perception:stores}, and it is {param:lacking} we want this time."
+	},
+	{
+	  "text": "I remember the last time and I have not forgotten who sent it. I would rather say that plainly than have you think I only write when I want something.",
+	  "only_tones": [
+		"pleased",
         "dutiful"
-      ]
-    },
-    {
-      "text": "You will forgive me for mentioning it. A man in my position learns to say what he is owed before he asks for more.",
-      "only_tones": [
-        "annoyed",
+	  ]
+	},
+	{
+	  "text": "You will forgive me for mentioning it. A man in my position learns to say what he is owed before he asks for more.",
+	  "only_tones": [
+		"annoyed",
         "hateful"
-      ]
-    }
+	  ]
+	}
   ],
   "reply": {
-    "tone": {
-      "text": "I have your letter {choice}.",
-      "options": [
-        {
-          "tone": "pleased",
-          "text": "and am glad you thought to write"
-        },
-        {
-          "tone": "dutiful",
-          "text": "and have looked into the matter"
-        },
-        {
-          "tone": "annoyed",
-          "text": "and note you have kept a careful account"
-        },
-        {
-          "tone": "desperate",
-          "text": "and wish I had better to send than words"
-        }
-      ]
-    },
-    "steps": [
-      {
-        "id": "answer",
-        "prompt": "What the town is told",
-        "options": [
-          {
-            "id": "urge",
-            "label": "tell him to put the town's own stores first",
-            "text": "Turn the town to filling its own stores before anything else{insert:edge}. I would rather you needed nothing from me at all.",
-            "insert": {
-              "edge": {
-                "annoyed": ", and let us both be spared this correspondence"
-              }
-            },
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "secure_survival"
-              }
-            }
-          },
-          {
-            "id": "refuse",
-            "label": "tell him there is nothing to send",
-            "text": "There is nothing to send. I will not pretend otherwise and I will not promise what I cannot deliver, which I hope counts for something.",
-            "effect": {
-              "refuse": {
-                "to": "{governor}"
-              }
-            }
-          }
-        ]
-      }
-    ],
-    "closing": [
-      {
-        "text": "Yours,",
-        "tone": {
-          "hateful": "Kindly keep your accounts to yourself in future."
-        }
-      }
-    ]
+	"tone": {
+	  "text": "I have your letter {choice}.",
+	  "options": [
+		{
+		  "tone": "pleased",
+		  "text": "and am glad you thought to write"
+		},
+		{
+		  "tone": "dutiful",
+		  "text": "and have looked into the matter"
+		},
+		{
+		  "tone": "annoyed",
+		  "text": "and note you have kept a careful account"
+		},
+		{
+		  "tone": "desperate",
+		  "text": "and wish I had better to send than words"
+		}
+	  ]
+	},
+	"steps": [
+	  {
+		"id": "answer",
+		"prompt": "What the town is told",
+		"options": [
+		  {
+			"id": "urge",
+			"label": "tell him to put the town's own stores first",
+			"text": "Turn the town to filling its own stores before anything else{insert:edge}. I would rather you needed nothing from me at all.",
+			"insert": {
+			  "edge": {
+				"annoyed": ", and let us both be spared this correspondence"
+			  }
+			},
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "secure_survival"
+			  }
+			}
+		  },
+		  {
+			"id": "refuse",
+			"label": "tell him there is nothing to send",
+			"text": "There is nothing to send. I will not pretend otherwise and I will not promise what I cannot deliver, which I hope counts for something.",
+			"effect": {
+			  "refuse": {
+				"to": "{governor}"
+			  }
+			}
+		  }
+		]
+	  }
+	],
+	"closing": [
+	  {
+		"text": "Yours,",
+		"tone": {
+		  "hateful": "Kindly keep your accounts to yourself in future."
+		}
+	  }
+	]
   }
 }

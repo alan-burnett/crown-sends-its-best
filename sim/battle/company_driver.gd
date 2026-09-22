@@ -55,6 +55,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.colony = colony
 	context.companies = companies
 	context.commanders = commanders
+	context.contacts = contacts
 
 	match phase:
 		WorldPhase.MOVEMENT:

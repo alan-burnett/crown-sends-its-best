@@ -502,6 +502,11 @@ func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
 			"reason": String(reason),
 			"commander": String(commander),
 		}, WorldPhase.RECKONING)
+		# 🔒 **The last man killed, and not merely an empty company** (#224,
+		# `commanders.md` §7). `stand_down` empties a company too, and a man who
+		# marched his militia home has not been shot — so the coin flip hangs off
+		# this line rather than off `is_empty`.
+		CommanderFate.settle(self, context)
 	return lost
 
 
