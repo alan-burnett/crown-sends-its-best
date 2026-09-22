@@ -38,6 +38,10 @@ var parties: Array = []
 ## them above the objective, which is a decision the Colony Month makes.
 var companies: Companies = null
 
+## What each commander has learned (#223). Here because a battle is where it is
+## earned, and a battle happens in a context.
+var commanders: CommanderBook = null
+
 ## What each town holds against the Crown (#71). Null in fixtures that do not
 ## care, which is why every reader checks.
 var grievances: Grievances = null

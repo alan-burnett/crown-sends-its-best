@@ -144,6 +144,29 @@ static func attrition() -> float:
 	return _attrition
 
 
+## What a head of *this* company wants, after its commander.
+##
+## 🔒 **Husbandry reduces what is wanted; it never adds** (`commanders.md` §6).
+## A company only ever dwindles and is never re-equipped, so arming more men with
+## the same cargo has to be a change to the appetite rather than a delivery — a
+## commander who could conjure muskets would be the resupply mechanic
+## `battles.md` §2 forbids.
+func wants_per_head(resource: StringName) -> float:
+	return Company.want_per_head(resource) \
+		* CommanderExperience.knob_at(commander_level, "husbandry")
+
+
+## What a month without rations costs *this* company, after its commander.
+##
+## **Hardiness** (`commanders.md` §6): a man who has kept an army in the field
+## through one winter loses fewer of it to the next. It reduces the share and
+## cannot raise it, because experience is what the bonus buys and not a tax on
+## the inexperienced.
+func attrition_for_me() -> float:
+	return Company.attrition() \
+		* minf(1.0, CommanderExperience.knob_at(commander_level, "hardiness"))
+
+
 static func militia_months() -> int:
 	return maxi(1, _militia_months)
 
@@ -172,6 +195,18 @@ var support: StringName = &""
 ## — his name, his personality, his leans and his relationship with the PC all
 ## live where every other contact's do.
 var commander: StringName = &""
+
+## 🔒 **What his commander has learned** (#223, `commanders.md` §6).
+##
+## **Derived, and refreshed at the one place experience changes.** The tally is
+## the truth and lives on `CommanderBook`; this is the level read off it, kept
+## here because every knob a level turns is asked of the company — how far it
+## marches, what a head wants, what it is worth in a fight — and threading the
+## book through all of them would put the roster inside `Force`.
+##
+## Nought for a headless militia, which is correct: there is nobody to have
+## learned anything.
+var commander_level: int = 0
 
 ## 🔒 **What it was raised to do, given once** (#220, `commanders.md` §3).
 ##
@@ -254,7 +289,7 @@ func held(resource: StringName) -> float:
 ## A resource nobody wants reads as fully supplied, because a company that needs
 ## no horses is not short of horses.
 func armed_share(resource: StringName) -> float:
-	var want := want_per_head(resource) * float(size)
+	var want := wants_per_head(resource) * float(size)
 	if want <= 0.0:
 		return 1.0
 	return clampf(held(resource) / want, 0.0, 1.0)
@@ -269,9 +304,11 @@ func is_cavalry() -> bool:
 	return size > 0 and armed_share(&"horses") >= _cavalry_at
 
 
-## Tiles it crosses in a month. Cavalry gets two (§8).
+## Tiles it crosses in a month. Cavalry gets two (§8), and **Marches** adds one
+## on top (`commanders.md` §6) — a man who knows how to move an army.
 func tiles_this_month() -> int:
-	return _cavalry_tiles if is_cavalry() else _tiles_per_month
+	return (_cavalry_tiles if is_cavalry() else _tiles_per_month) \
+		+ CommanderExperience.added_at(commander_level, "marches")
 
 
 ## Attacks it makes in a month.
@@ -387,7 +424,7 @@ func go_without(context: ColonyContext) -> int:
 		"months": unsupported_months,
 		"size": size,
 	}, WorldPhase.RECKONING)
-	return lose(Company.attrition(), &"unsupported", context)
+	return lose(attrition_for_me(), &"unsupported", context)
 
 
 # --- Losses -----------------------------------------------------------------
@@ -562,6 +599,7 @@ func to_dict() -> Dictionary:
 		"arms": arms.duplicate(),
 		"support": String(support),
 		"commander": String(commander),
+		"commander_level": commander_level,
 		"order": String(order),
 		"at": [at.x, at.y],
 		"destination": [destination.x, destination.y],
@@ -583,6 +621,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.arms = data.get("arms", {}).duplicate()
 	company.support = StringName(data.get("support", ""))
 	company.commander = StringName(data.get("commander", ""))
+	company.commander_level = int(data.get("commander_level", 0))
 	company.order = StandingOrder.of(StringName(data.get("order", "")))
 	company.at = _vector(data.get("at", []))
 	company.destination = _vector(data.get("destination", []))

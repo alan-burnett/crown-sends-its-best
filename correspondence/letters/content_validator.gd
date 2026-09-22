@@ -889,6 +889,69 @@ func check_patrons(content: ContentDatabase) -> void:
 					])
 
 
+## 🔒 **Every bonus a commander earns turns something** (#223,
+## `commanders.md` §6).
+##
+## The same check the perks and the patrons' vices carry, and the same failure it
+## prevents: a bonus the Author wrote, a commander reached, and that did nothing
+## at all — *Siegecraft* misspelt as `siege_craft` would apply nothing, the
+## commander would go on being told he had it, and nobody would ever find out.
+##
+## Also refuses a level table that cannot rank anybody and thresholds that run
+## backwards, because a level nobody can reach is a level nobody can be told
+## about.
+func check_commander_experience(content: ContentDatabase) -> void:
+	_file = "data/%s" % CommanderExperience.COLLECTION
+
+	if not content.has_record(CommanderExperience.COLLECTION, CommanderExperience.RECORD):
+		_problem(CommanderExperience.RECORD,
+			"does not exist, so a commander can never learn anything")
+		return
+
+	var record := content.record(
+		CommanderExperience.COLLECTION, CommanderExperience.RECORD)
+
+	var levels: Variant = record.get("levels", [])
+	if typeof(levels) != TYPE_ARRAY or (levels as Array).is_empty():
+		_problem("%s.levels" % CommanderExperience.RECORD,
+			"holds no levels, so nobody can rise at all")
+	else:
+		var last := -1.0
+		for entry in levels as Array:
+			var at := float((entry as Dictionary).get("casualties", 0.0))
+			if at < last:
+				_problem("%s.levels" % CommanderExperience.RECORD, (
+					"runs backwards at %f, so a level arrives before the one below it"
+				) % at)
+			last = at
+
+	var bonuses: Variant = record.get("bonuses", [])
+	if typeof(bonuses) != TYPE_ARRAY:
+		_problem("%s.bonuses" % CommanderExperience.RECORD, "expected a list")
+		return
+	for entry in bonuses as Array:
+		var id := String((entry as Dictionary).get("id", ""))
+		if id.is_empty():
+			_problem("%s.bonuses" % CommanderExperience.RECORD,
+				"holds a bonus with no id")
+			continue
+		var turns: Dictionary = (entry as Dictionary).get("turns", {})
+		var adds: Dictionary = (entry as Dictionary).get("adds", {})
+		var named := PackedStringArray(turns.keys())
+		named.append_array(PackedStringArray(adds.keys()))
+		if (entry as Dictionary).has("country"):
+			named.append("country")
+		if named.is_empty():
+			_problem("%s.%s" % [CommanderExperience.RECORD, id],
+				"turns nothing, so it is a word and not a bonus")
+		for knob in named:
+			if not CommanderExperience.is_knob(String(knob)):
+				_problem("%s.%s" % [CommanderExperience.RECORD, id], (
+					"names the knob '%s', which nothing reads — known: %s"
+				) % [knob, ", ".join(PackedStringArray(
+					CommanderExperience.READ_BY.keys()))])
+
+
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
 func check_trigger_targets(content: ContentDatabase) -> void:

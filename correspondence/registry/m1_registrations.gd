@@ -124,6 +124,10 @@ static func load_resources(content: ContentDatabase) -> void:
 	# And how hard a battle hits (#216).
 	if content.has_record(Battle.COLLECTION, Battle.RECORD):
 		Battle.load_from(content.record(Battle.COLLECTION, Battle.RECORD))
+	# And what a commander learns in the field (#223).
+	if content.has_record(CommanderExperience.COLLECTION, CommanderExperience.RECORD):
+		CommanderExperience.load_from(
+			content.record(CommanderExperience.COLLECTION, CommanderExperience.RECORD))
 	if content.has_record(Patron.COLLECTION, Patron.CATALOGUE_RECORD):
 		Patron.load_from(content.record(Patron.COLLECTION, Patron.CATALOGUE_RECORD))
 	if content.has_record(PatronVices.COLLECTION, PatronVices.RECORD):

@@ -99,6 +99,12 @@ static func take_command(
 		run.add_contact(man)
 
 	company.commander = man.id
+	# 🔒 **At the level he left at** (§7, #223). The veteran's tally is his and
+	# survived the company that earned it, so the next command starts where the
+	# last one ended — which is what makes experience persist without any of the
+	# machinery reinforcing a company would demand.
+	if run.commanders != null:
+		company.commander_level = run.commanders.level_of(man.id)
 	# **His allegiance is the company's**, and it can change under him: a town
 	# commander whose town revolts becomes *of the independent nation*, the same
 	# object serving somebody else (`names.md` §2).
