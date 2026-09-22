@@ -82,9 +82,54 @@ const TONE_WEIGHT: Dictionary = {
 	Tone.HATEFUL: -0.9,
 }
 
+## What being written to that way does to his **desire to write again** (#264,
+## `tone.md` §4, `the-director.md` §4).
+##
+## 🔒 **Pleased increasing it is a cost, not a benefit.** More letters from him
+## is more of a capped desk spent on him: being kind to a man gives you a
+## chattier morning's post, and SPEC §9.6's budget is a ceiling.
+##
+## 🔒 **And hateful's major decrease is the other kind of cost.** A man written
+## to contemptuously stops consulting the PC — and a man who has stopped
+## consulting him does what *he* wants instead (#259, §10). **That is Seam C,
+## arrived at by insult.**
+##
+## Dutiful and desperate move it not at all. Dutiful because it is the plain
+## register and buys nothing; desperate because a man reading a plea is not
+## thereby made keener or warier of writing — what it costs the PC is his regard
+## and his prestige, which is quite enough.
+##
+## A table per tone, never a scale, like everything else keyed on tone.
+const EAGERNESS_WEIGHT: Dictionary = {
+	Tone.PLEASED: 0.06,
+	Tone.DUTIFUL: 0.0,
+	Tone.ANNOYED: -0.04,
+	Tone.DESPERATE: 0.0,
+	Tone.HATEFUL: -0.18,
+}
+
+## How far a run of letters can move it.
+##
+## **Never nought and never unbounded.** A man the PC has been kind to for four
+## years should be noticeably chattier, not writing three letters a month; and a
+## man he has abused should be very nearly silent without becoming unreachable,
+## because an unreachable contact is an ending rather than a silence. Tuning.
+const LEAST_EAGER: float = 0.45
+const MOST_EAGER: float = 1.6
+
+## Where a man starts, having been written to not at all.
+const EAGER_AT_FIRST: float = 1.0
+
 var contact_id: StringName = &""
 
 var loyalty: float = NEUTRAL_LOYALTY
+
+## How apt he is to write to the PC, after everything the PC has written to him.
+##
+## Read by the director as a divisor on his threshold: **eager men have lower
+## bars.** It is not how strongly he feels — pressure is the world's business —
+## it is whether he reaches for the pen.
+var eagerness: float = EAGER_AT_FIRST
 
 ## 🔒 **What his regard lets the PC hear** (#258, `the-director.md` §2).
 ##
@@ -249,10 +294,15 @@ func record_deed(deed: StringName, scale: float = 1.0) -> float:
 
 
 ## Record the tone of a letter the PC sent.
+##
+## Two things happen: his regard moves, and so does **how apt he is to write
+## back** (#264, `tone.md` §4).
 func record_tone(tone: StringName) -> float:
 	if not Tone.is_tone(tone):
 		push_error("Unknown tone '%s'." % tone)
 		return 0.0
+	eagerness = clampf(
+		eagerness + float(EAGERNESS_WEIGHT[tone]), LEAST_EAGER, MOST_EAGER)
 	return _move_loyalty(float(TONE_WEIGHT[tone]))
 
 
@@ -330,6 +380,7 @@ func to_dict() -> Dictionary:
 	return {
 		"contact_id": String(contact_id),
 		"loyalty": loyalty,
+		"eagerness": eagerness,
 		"promises_broken": promises_broken,
 		"last_promise_broken_month": last_promise_broken_month,
 		"outstanding_promises": outstanding_promises.duplicate(),
@@ -351,6 +402,7 @@ static func from_dict(data: Dictionary) -> Relationship:
 		StringName(data.get("contact_id", "")),
 		float(data.get("loyalty", NEUTRAL_LOYALTY)),
 	)
+	relationship.eagerness = float(data.get("eagerness", EAGER_AT_FIRST))
 	relationship.outstanding_promises = PackedStringArray(data.get("outstanding_promises", []))
 	relationship.deeds = data.get("deeds", {}).duplicate()
 	relationship.last_written_month = int(data.get("last_written_month", -1))
