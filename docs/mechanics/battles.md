@@ -32,6 +32,70 @@ whoever is holding the musket.**
 *rebel towns fight the Crown's forces but never loyal towns*, are filters on this
 field and nothing else.
 
+### 🔒 Raising one is an objective, like any other
+
+**Author's ruling (#342).** A governor under a military intent may take *raise a
+company* as his objective, **scored through the deliberation kernel against every
+building and improvement he could choose instead.**
+
+Not a second path that bypasses the objective system. A town weighs a company
+against a granary on the same axes, which is the only way a governor can decline
+to raise one because the harvest matters more — and that refusal is the thing
+that makes raising one mean something.
+
+It also keeps §11 true. The PC's instrument is *raising companies through a
+governor's intent*: he shifts the weights by letter and the governor decides, the
+same relationship he has with everything else a town does.
+
+**The expedition is the pattern.** `founding-towns.md` §7 already has a body of
+people leaving a town with a share of its stores, and `CLAUDE.md` already treats
+the two alike when they are attacked. Raising mirrors launching.
+
+### What it takes with it
+
+| | |
+| :--- | :--- |
+| **Men** | from **workers**, never experts |
+| **Arms** | guns, tools and horses at §2's supply ratio, drawn from the town's stores **at launch** |
+| **Support** | the town that raised it (§3) |
+
+**Workers, never experts**, because `CLAUDE.md` holds that workers go before
+experts and accumulated expertise is what a bad month cannot take. A town does
+not send its smith to carry a musket.
+
+**And it takes its men at once.** `CLAUDE.md`'s one-population-at-a-time rule
+governs **hardship** — famine, shortage, a bad winter. Enlistment is a decision
+rather than a misfortune, so it is not that rule's business, and a company raised
+one man a month would never assemble.
+
+**§2's lock still binds: a company never resupplies its arms.** What it carries
+out is what it has, so how well it is armed is settled in the month it is raised
+— which is exactly the point at which the PC's letter is a month old.
+
+### How large, and what the town keeps
+
+**The governor sizes it**, as he sizes an expedition's cargo, against what the
+town can spare and what it can arm.
+
+**A town must keep enough workers to work**, and that floor is the answer to
+*may a town of twelve put ten under arms*. It may not. The floor is a tuning
+target (§12) rather than a number here, because it trades directly against how
+threatened the town is — a colony about to be overrun should be able to empty
+itself further than a comfortable one.
+
+### Which standing order it gets
+
+**From the intent that raised it**, not from a separate choice:
+
+| Intent | Standing order | Commander? |
+| :--- | :--- | :--- |
+| `strengthen_defences` | defend the town | **no** — it never leaves (§4) |
+| `drive_them_off` | an order that leaves the town | **yes** |
+| `prepare_for_rebellion` | defend the town | no — until the town declares |
+
+That is §4's test applied rather than restated: leadership is needed the moment
+the company has to *go* somewhere.
+
 ## 2. Support and arms are different things
 
 Two things wear the word *supply* and they behave nothing alike.
@@ -308,6 +372,11 @@ Nothing, directly, and that is the point (§12.6, locked). His instruments are:
 Every one of those is a letter, and every one of them is a month or more early.
 
 ## 12. Tuning targets
+
+- **The worker floor a town keeps when raising a company** (§1), and whether it
+  softens as the town is threatened.
+- **How large a company a governor raises**, against the town's spare workers and
+  what it can arm.
 
 - `LETHALITY`, and whether the curve should be steeper than linear in the ratio.
 - Want-per-head for guns, tools and horses, and each one's multiplier.
