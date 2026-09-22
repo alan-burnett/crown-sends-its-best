@@ -66,6 +66,7 @@ const CAUTIOUS: Dictionary = {
 	"keeping_my_army_alive": 1.6,
 	"the_prize_in_front_of_me": 0.5,
 	"the_orders_i_was_given": 0.5,
+	"the_crowns_urging": 1.0,
 	"standing_about": 0.5,
 }
 
@@ -73,6 +74,7 @@ const GLORY_SEEKING: Dictionary = {
 	"keeping_my_army_alive": 0.5,
 	"the_prize_in_front_of_me": 1.6,
 	"the_orders_i_was_given": 1.6,
+	"the_crowns_urging": 1.0,
 	"standing_about": 1.6,
 }
 
@@ -357,6 +359,11 @@ func test_the_trace_names_what_he_weighed() -> void:
 	# the kernel recorded it.
 	var run := _run()
 	var board := _a_hopeless_assault(run)
+	# **Urged, so the letter is among what he weighed.** A consideration that
+	# does not apply is left out of the trace by design, and a commander nobody
+	# has written to has no urging to weigh.
+	(board["mine"] as Company).urge(
+		CommanderConsiderations.ATTACK, Tone.DUTIFUL, run.world.month)
 	var careful := _man(run, &"careful", CAUTIOUS)
 	var decision := _what_he_would_do(run, careful, board["mine"], board["theirs"])
 
@@ -394,6 +401,156 @@ func test_a_commander_is_rolled_a_weight_for_each_of_them() -> void:
 	for id in CommanderConsiderations.ALL:
 		assert_true(man.weights.has(String(id)),
 			"a commander has no opinion of his own about '%s'" % id)
+
+
+# --- 🔒 Loyalty is what makes an order an argument ------------------------
+
+## A commander whose regard for the PC is what this test is about.
+func _at(run: RunState, id: StringName, loyalty: float, weights: Dictionary) -> Contact:
+	var man := _man(run, id, weights)
+	man.relationship = Relationship.new(id, loyalty)
+	return man
+
+
+func test_a_loyal_commander_weighs_the_order_and_a_bitter_one_barely_does() -> void:
+	# 🔒 SPEC §8.5: **an order is a request**, and a request from a man you
+	# despise is barely an argument at all. The same board, the same weights, the
+	# same order — and only his regard is different.
+	var run := _run()
+	var board := _a_hopeless_assault(run)
+	var devoted := _at(run, &"devoted", 95.0, {})
+	var bitter := _at(run, &"bitter", 5.0, {})
+
+	var his := _what_he_would_do(run, devoted, board["mine"], board["theirs"])
+	var theirs := _what_he_would_do(run, bitter, board["mine"], board["theirs"])
+
+	assert_true(
+		_consideration_in(his, CommanderConsiderations.ATTACK, "the_orders_i_was_given")
+			> _consideration_in(theirs, CommanderConsiderations.ATTACK,
+				"the_orders_i_was_given") * 3.0,
+		"a bitter commander weighed his orders nearly as heavily as a devoted one")
+
+
+func test_a_disloyal_commander_is_barely_moved_by_a_desperate_letter() -> void:
+	# 🔒 The whole point. **Desperate pulls harder and for longer than any other
+	# tone** (`tone.md` §4) — and there is no tone strong enough to make a man who
+	# loathes the PC do as he is told.
+	var run := _run()
+	var board := _a_hopeless_assault(run)
+	var company: Company = board["mine"]
+	company.urge(CommanderConsiderations.ATTACK, Tone.DESPERATE, run.world.month)
+
+	var devoted := _at(run, &"devoted", 95.0, {})
+	var bitter := _at(run, &"bitter", 5.0, {})
+
+	var moved := _consideration_in(
+		_what_he_would_do(run, devoted, company, board["theirs"]),
+		CommanderConsiderations.ATTACK, "the_crowns_urging")
+	var unmoved := _consideration_in(
+		_what_he_would_do(run, bitter, company, board["theirs"]),
+		CommanderConsiderations.ATTACK, "the_crowns_urging")
+
+	assert_true(moved > 0.8, "a desperate letter barely reached a devoted man: %f" % moved)
+	assert_true(unmoved < 0.2,
+		"a desperate letter moved a man who loathes the PC: %f" % unmoved)
+
+
+func test_a_devoted_commander_does_what_he_is_asked_where_a_bitter_one_will_not() -> void:
+	# The outcome, not only the weight: **the same board, decided differently by
+	# two men who differ in nothing but their regard.**
+	var run := _run()
+	var home := run.colony.in_order()[0].at
+	var mine := _raise(run, Company.REBEL, 50, home)
+	mine.destination = home + Vector2i(4, 0)
+	# A fight he would not pick on his own: dearer than even, not hopeless.
+	var theirs := _raise(run, Company.CROWN, 90, home + Vector2i(1, 0))
+	mine.urge(CommanderConsiderations.ATTACK, Tone.DUTIFUL, run.world.month)
+
+	# **The same man twice, differing in nothing but his regard.** Both are
+	# cautious, so both would decline this on their own judgement — which is what
+	# leaves the letter as the only thing that could move either of them.
+	var devoted := _at(run, &"devoted", 95.0, CAUTIOUS)
+	var bitter := _at(run, &"bitter", 5.0, CAUTIOUS)
+
+	assert_eq(_what_he_would_do(run, devoted, mine, theirs).chosen_id(),
+		CommanderConsiderations.ATTACK,
+		"a devoted commander ignored the letter he was sent")
+	assert_ne(_what_he_would_do(run, bitter, mine, theirs).chosen_id(),
+		CommanderConsiderations.ATTACK,
+		"a bitter commander went in on the strength of a letter")
+
+
+func test_a_letter_fades_and_a_desperate_one_fades_slower() -> void:
+	# 🔒 **A letter is not a standing order** (`commanders.md` §8). He remembers
+	# it, it fades, and how fast depends on how much he took it to mean.
+	var run := _run()
+	var board := _a_hopeless_assault(run)
+	var company: Company = board["mine"]
+	var devoted := _at(run, &"devoted", 95.0, {})
+
+	company.urge(CommanderConsiderations.ATTACK, Tone.DUTIFUL, 0)
+	run.world.month = 0
+	var fresh := _pull(run, devoted, board)
+	run.world.month = int(CommanderConsiderations.URGING_HALF_LIFE) * 2
+	var stale := _pull(run, devoted, board)
+	assert_true(stale < fresh, "a year-old letter pulled as hard as a fresh one")
+
+	company.urge(CommanderConsiderations.ATTACK, Tone.DESPERATE, 0)
+	assert_true(_pull(run, devoted, board) > stale,
+		"a desperate letter faded as fast as a dutiful one")
+
+
+func test_a_commander_nobody_has_written_to_weighs_no_urging() -> void:
+	var run := _run()
+	var board := _a_hopeless_assault(run)
+	var devoted := _at(run, &"devoted", 95.0, {})
+	assert_almost_eq(_pull(run, devoted, board), 0.0, 0.0001,
+		"a commander felt urged toward something nobody asked for")
+
+
+func test_the_letter_says_nothing_about_what_it_did_not_mention() -> void:
+	# Scoring the other options negatively would make the PC's letter an argument
+	# against everything he did not write about.
+	var run := _run()
+	var board := _a_hopeless_assault(run)
+	var company: Company = board["mine"]
+	company.urge(CommanderConsiderations.ATTACK, Tone.DUTIFUL, run.world.month)
+	var devoted := _at(run, &"devoted", 95.0, {})
+	var decision := _what_he_would_do(run, devoted, company, board["theirs"])
+
+	assert_almost_eq(
+		_consideration_in(decision, CommanderConsiderations.WITHDRAW, "the_crowns_urging"),
+		0.0, 0.0001,
+		"the letter argued against an option it never named")
+
+
+func test_the_urging_survives_the_save() -> void:
+	var run := _run()
+	var board := _a_hopeless_assault(run)
+	var company: Company = board["mine"]
+	company.urge(CommanderConsiderations.ATTACK, Tone.DESPERATE, 7)
+
+	var back := Companies.from_dict(run.companies.to_dict()).find(company.id)
+	assert_eq(back.urged, company.urged)
+	assert_eq(back.urged_tone, company.urged_tone)
+	assert_eq(back.urged_month, company.urged_month)
+
+
+func _pull(run: RunState, man: Contact, board: Dictionary) -> float:
+	return _consideration_in(
+		_what_he_would_do(run, man, board["mine"], board["theirs"]),
+		CommanderConsiderations.ATTACK, "the_crowns_urging")
+
+
+## What one consideration scored, raw, for one option.
+func _consideration_in(decision: Decision, option: StringName, id: String) -> float:
+	for entry in decision.entries:
+		if String((entry as Dictionary).get("id", "")) != String(option):
+			continue
+		for one in (entry as Dictionary).get("considerations", []):
+			if String((one as Dictionary).get("id", "")) == id:
+				return float((one as Dictionary).get("raw", 0.0))
+	return 0.0
 
 
 func _total_for(decision: Decision, option: StringName) -> float:
