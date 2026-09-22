@@ -128,11 +128,27 @@ func test_a_colony_entirely_in_revolt_is_populous_and_is_not_overrun() -> void:
 func test_a_run_that_has_not_begun_has_not_ended() -> void:
 	# A colony with no towns at all, before the first is founded, would otherwise
 	# read as overrun on month one of every game.
-	var run := _run()
-	run.colony.towns.clear()
-	assert_true(run.parties.is_empty(), "the fixture left somebody walking")
-	assert_false(RunEndCheck.is_overrun(run.colony, run.parties),
+	#
+	# 🔒 **A colony that has never been founded**, and not a founded one emptied
+	# to look like it (#225). Those were the same thing here until something could
+	# finally take a town, and the fixture that conflated them was the reason
+	# nobody noticed that losing everything read as *the run has not begun*.
+	var unfounded := Colony.new()
+	assert_true(unfounded.is_empty())
+	assert_false(RunEndCheck.is_overrun(unfounded, []),
 		"a colony that has not been founded yet was reported lost")
+
+
+func test_and_a_run_that_lost_every_town_has_ended() -> void:
+	# 🔒 The other half, and the pair is the whole distinction. Same empty town
+	# list, opposite answer, because one of them held something once.
+	var run := _run()
+	assert_true(run.parties.is_empty(), "the fixture left somebody walking")
+	for town in run.colony.in_order().duplicate():
+		run.colony.towns.erase(town)
+	assert_true(run.colony.is_empty())
+	assert_true(RunEndCheck.is_overrun(run.colony, run.parties),
+		"a colony that lost every town it ever had was not overrun")
 
 
 # --- 🔒 Independence: four conditions, together -----------------------------

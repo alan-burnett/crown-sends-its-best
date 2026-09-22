@@ -16,8 +16,22 @@ const EVENT_LOST: StringName = &"town_lost"
 var towns: Array[Town] = []
 
 
+## 🔒 **Whether this colony has ever held a town** (#225).
+##
+## Not the same question as whether it holds one now, and the difference is a
+## fail condition. §13.1's Colony Overrun is *no towns remain*, which before this
+## was indistinguishable from the state a run starts in — so the day something
+## could finally take the last town, losing everything would have read as *the
+## run has not begun* and the ending would never have fired.
+##
+## Set once and never cleared, because a colony that was founded stays founded
+## however badly it ends.
+var has_held_a_town: bool = false
+
+
 func add(town: Town) -> Town:
 	towns.append(town)
+	has_held_a_town = true
 	return town
 
 
@@ -143,11 +157,15 @@ func to_dict() -> Dictionary:
 	var entries: Array = []
 	for town in in_order():
 		entries.append(town.to_dict())
-	return {"towns": entries}
+	return {"towns": entries, "has_held_a_town": has_held_a_town}
 
 
 static func from_dict(data: Dictionary) -> Colony:
 	var colony := Colony.new()
 	for entry in data.get("towns", []):
 		colony.towns.append(Town.from_dict(entry))
+	# **Defaulted from the towns present**, so a save written before the field
+	# existed loads as a colony that plainly has held one.
+	colony.has_held_a_town = bool(
+		data.get("has_held_a_town", not colony.towns.is_empty()))
 	return colony
