@@ -107,5 +107,24 @@ func net_position() -> float:
 	return total
 
 
+## **What share of the money that moved stayed with the Crown**, `-1` to `+1`.
+##
+## The same `net_position` above, put on a scale that does not grow with the
+## colony (#282, `perception.md` §4a). A hamlet returning a tenth more than it
+## costs and a province returning a tenth more than it costs are both doing
+## equally well by the Crown, and a man who judged them on the absolute would say
+## *ruinous* about the hamlet for the whole run.
+##
+## Nought when nothing has moved: a colony that has neither cost nor paid has not
+## yet failed at anything.
+func margin() -> float:
+	var moved := 0.0
+	for month in months:
+		moved += received_in(month) + paid_in(month)
+	if moved <= 0.0:
+		return 0.0
+	return clampf(net_position() / moved, -1.0, 1.0)
+
+
 func is_empty() -> bool:
 	return months.is_empty()

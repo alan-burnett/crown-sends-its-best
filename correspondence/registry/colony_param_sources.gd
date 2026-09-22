@@ -16,6 +16,9 @@ static func register_all() -> void:
 		"warning_turns", {}, ColonyParamSources.warning_turns
 	)
 	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
+	ContentRegistry.register_param_source(
+		"patron_who_spoke", {"fallback": "string"}, ColonyParamSources.patron_who_spoke
+	)
 	ContentRegistry.register_param_source("town_name", {}, ColonyParamSources.town_name)
 	ContentRegistry.register_param_source(
 		"idle_building", {"field": "building"}, ColonyParamSources.idle_building
@@ -152,6 +155,28 @@ static func crown_demand(args: Dictionary, context: LetterContext) -> Variant:
 ## governor and a second town; without it, every letter file would name Ashmere
 ## and the set would have to be copied per town, which is a content-scaling
 ## problem the folder-per-language rule was designed to avoid (SPEC §9.7).
+## The patron the court has just heard from, by name (#282).
+##
+## **The first of them, in the order the gossip was carried**, which is id order
+## — so a month in which two men talked names the same one every time the same
+## seed is played.
+##
+## 🔒 **The name is looked up, not carried in the payload.** SPEC §10.3's rule
+## about what an event may say holds here: the log records that a man spoke, and
+## the roster is where his name lives.
+static func patron_who_spoke(args: Dictionary, context: LetterContext) -> Variant:
+	var fallback := String(args.get("fallback", ""))
+	if context.log == null:
+		return fallback
+	var events := context.log.of_type(PatronGossip.EVENT_SPREAD)
+	for index in range(events.size() - 1, -1, -1):
+		for id in events[index].payload.get("patrons", []):
+			var patron: Contact = context.contacts.get(String(id), null)
+			if patron != null and not patron.display_name.is_empty():
+				return patron.display_name
+	return fallback
+
+
 static func sender_id(_args: Dictionary, context: LetterContext) -> Variant:
 	return String(context.sender.id) if context.sender != null else ""
 

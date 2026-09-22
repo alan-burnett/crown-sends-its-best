@@ -81,7 +81,14 @@ const SLOT_KINDS: Array[StringName] = [SLOT_PARAM, SLOT_PERCEPTION, SLOT_SENDER,
 
 ## **A fixed whitelist, not open field access**, so the validator can check it
 ## and renaming a field in code does not silently break hundreds of letter files.
-const SENDER_FIELDS: Array[StringName] = [&"name", &"title", &"town", &"months_silent"]
+## 🔒 **A fixed whitelist, not open field access** (#9). Renaming a field in code
+## cannot silently break hundreds of letter files, and the validator can say so.
+##
+## `specialty` and `need` are a patron's, and empty on everybody else (#282) —
+## which is the ordinary shape here: `town` is empty on the Crown's officers.
+const SENDER_FIELDS: Array[StringName] = [
+	&"name", &"title", &"town", &"months_silent", &"specialty", &"need",
+]
 
 ## Where a tone option's wording drops into the line that offers it:
 ## `"Your letter finds me {choice}."` It has no `kind:name` shape, so it is not a

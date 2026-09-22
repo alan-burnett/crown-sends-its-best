@@ -98,6 +98,10 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"the_court_is_cooling", {}, ColonyConditions.the_court_is_cooling
 	)
+	ContentRegistry.register_condition(
+		"a_patron_has_spoken_ill", {"within": "integer"},
+		ColonyConditions.a_patron_has_spoken_ill,
+	)
 	# The Diplomat (#81). His regard governs **what he tells**, so every one of
 	# these is a gate on his own reporting rather than on the colony.
 	ContentRegistry.register_condition(
@@ -529,6 +533,23 @@ static func will_not_carry_it_further(_args: Dictionary, context: LetterContext)
 		return false
 	for policy in context.policies.held_by(context.sender.id):
 		if policy.is_warning():
+			return true
+	return false
+
+
+## Whether a well-connected patron's displeasure has just reached the court
+## (#282, `patrons.md` §6).
+##
+## 🔒 **Reads the event, never the officers' loyalty.** The movement and the
+## letter are then one act — there is no month in which the court has cooled and
+## nobody says why, and no month in which somebody repeats gossip that did not
+## travel.
+static func a_patron_has_spoken_ill(args: Dictionary, context: LetterContext) -> bool:
+	if context.log == null:
+		return false
+	var within := maxi(1, int(args.get("within", 2)))
+	for event in context.log.of_type(PatronGossip.EVENT_SPREAD):
+		if context.month - event.month < within:
 			return true
 	return false
 

@@ -1,0 +1,25 @@
+[
+  {
+    "id": "steward.patron_speaks_ill",
+    "sender": "steward",
+    "type": "report",
+    "skippable": false,
+    "params": {
+      "patron": "contact"
+    },
+    "body": [
+      {
+        "text": "A small matter, and not properly the business of this office, but I would rather you heard it from me than did not hear it at all."
+      },
+      {
+        "text": "{param:patron} gives us to understand that Your Grace has been difficult. He did not say it to me. He said it at a table of eleven, twice, and by Thursday it had reached the Marshal's clerk, who repeated it to me with the air of a man doing me a kindness."
+      },
+      {
+        "text": "I do not know what passed between you and I have not asked. I observe only that he is very widely acquainted, and that a name is a slow thing to build and a quick thing to spend."
+      },
+      {
+        "text": "Whatever the merits, the room has taken his side. It usually does. The man who is present is always the more persuasive."
+      }
+    ]
+  }
+]

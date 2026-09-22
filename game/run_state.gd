@@ -122,6 +122,11 @@ var native_trade: TradeBook = null
 ## derivable from the number afterwards.
 var rivals: RivalBook = null
 
+## What has to be remembered about the patrons between months (#282). Who they
+## are lives on the contacts; this is the count of arrivals and where each man's
+## regard stood when the court last heard from him.
+var patrons: PatronBook = null
+
 ## Ground a rival has parked men on (#188). Held on the run rather than on a
 ## town, because it is a fact about the map and a duke rather than about a
 ## settlement — and because a town that is lost takes its tiles with it.
@@ -292,6 +297,7 @@ static func new_run(
 	run.tribes.settle(run.map, run.starting_site, run.streams, proximity)
 	run.native_trade = TradeBook.new()
 	run.rivals = RivalBook.new()
+	run.patrons = PatronBook.new()
 	run.denied = DeniedTiles.new()
 	run.prestige = Prestige.new()
 	run.ending = RunEnding.new()
@@ -450,6 +456,7 @@ func to_dict() -> Dictionary:
 		"tribes": tribes.to_dict() if tribes != null else {},
 		"native_trade": native_trade.to_dict() if native_trade != null else {},
 		"rivals": rivals.to_dict() if rivals != null else {},
+		"patrons": patrons.to_dict() if patrons != null else {},
 		"denied": denied.to_dict() if denied != null else {},
 		"refusal": refusal.to_dict() if refusal != null else {},
 		"demands": demands.to_dict() if demands != null else {},
@@ -492,6 +499,7 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.tribes = Tribes.from_dict(data.get("tribes", {}))
 	run.native_trade = TradeBook.from_dict(data.get("native_trade", {}))
 	run.rivals = RivalBook.from_dict(data.get("rivals", {}))
+	run.patrons = PatronBook.from_dict(data.get("patrons", {}))
 	run.denied = DeniedTiles.from_dict(data.get("denied", {}))
 	run.refusal = CrownRefusal.from_dict(data.get("refusal", {}))
 	run.demands = DemandGrowth.from_dict(data.get("demands", {}))

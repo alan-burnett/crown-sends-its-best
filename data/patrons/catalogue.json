@@ -1,0 +1,32 @@
+[
+  {
+    "id": "catalogue",
+    "note": "What a patron can supply and what he wants, drawn from one list so that specialty and need are the same kind of thing (patrons.md section 3). Everything except rivals is a shipment: it arrives, or the PC sends it, and a patron with his own means is wealthy enough to move goods across an ocean - that is all the machinery it takes. No prose here: the folder carries no language suffix, so the words a letter uses for a specialty belong in data/letters_en with the letter that says them.",
+    "entries": [
+      {
+        "id": "resources",
+        "kind": "shipment"
+      },
+      {
+        "id": "troops",
+        "kind": "shipment"
+      },
+      {
+        "id": "gold",
+        "kind": "shipment"
+      },
+      {
+        "id": "experts",
+        "kind": "shipment"
+      },
+      {
+        "id": "livestock",
+        "kind": "shipment"
+      },
+      {
+        "id": "rivals",
+        "kind": "rivals"
+      }
+    ]
+  }
+]

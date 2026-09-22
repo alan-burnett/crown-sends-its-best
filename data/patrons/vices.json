@@ -1,0 +1,129 @@
+[
+  {
+    "id": "vices",
+    "note": "A named bundle of mechanical behaviour on top of the personality every contact has (patrons.md section 6). contacts.md section 1 reserves 'personality' for the weight vector, and the two words must not merge. Every knob here is an id into a code-side table: one that is turned when he arrives, or one that is read where it is needed. A knob nothing turns and nothing reads is refused by the validator.",
+    "entries": [
+      {
+        "id": "thin_skinned",
+        "note": "A refusal cuts deeper than it would. A per-contact weight on REFUSED, which is the same deed everyone else feels.",
+        "knobs": [
+          {
+            "deed_weight": {
+              "deed": "refused",
+              "scale": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "id": "importunate",
+        "note": "He will not take no. He writes again and again, and tone.md's eagerness carries him into desperation on its own.",
+        "knobs": [
+          {
+            "writes_readily": {
+              "scale": 1.6
+            }
+          }
+        ]
+      },
+      {
+        "id": "credulous",
+        "note": "He reads the colony as richer than it is, so his asks grow without a rule that says they should. The greed is derived from the perception.",
+        "knobs": [
+          {
+            "lean": {
+              "measure": "colony_revenue",
+              "amount": 0.35
+            }
+          },
+          {
+            "lean": {
+              "measure": "colony_reach",
+              "amount": 0.3
+            }
+          }
+        ]
+      },
+      {
+        "id": "loudmouth",
+        "note": "He talks. Granting banks more prestige and refusing costs more of it, both through the one term.",
+        "knobs": [
+          {
+            "prestige_voice": {
+              "scale": 2.0
+            }
+          }
+        ]
+      },
+      {
+        "id": "pragmatic",
+        "note": "His regard follows the colony's net contribution to the Crown, and deliberately not prestige - which would close a loop, since his regard is itself part of prestige.",
+        "knobs": [
+          {
+            "cares_about": {
+              "measure": "colony_net_position"
+            }
+          }
+        ]
+      },
+      {
+        "id": "respectable",
+        "note": "He watches how the colony is governed and cannot be seen doing business with a man who is losing his. His standing arrangements end when a town declares.",
+        "knobs": [
+          {
+            "cares_about": {
+              "measure": "colony_is_quiet"
+            }
+          },
+          {
+            "cancels_on_rebellion": {}
+          }
+        ]
+      },
+      {
+        "id": "doctrinaire",
+        "note": "He will not touch certain goods. A filter on the catalogue, so it needs no behaviour of its own.",
+        "knobs": [
+          {
+            "will_not_touch": {
+              "resource": "rum"
+            }
+          }
+        ]
+      },
+      {
+        "id": "dilatory",
+        "note": "His side of a bargain arrives late. The promise machinery, aimed at him.",
+        "knobs": [
+          {
+            "delivers_late": {
+              "months": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "impatient",
+        "note": "His offers expire within the turn: silence is a refusal, not a delay.",
+        "knobs": [
+          {
+            "offer_expires_in": {
+              "months": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": "well_connected",
+        "note": "He knows people. The one new mechanic here - his displeasure travels to the Crown's officers, and per contacts.md section 6 they write to say so. One-directional and shallow: the officers reach nobody.",
+        "knobs": [
+          {
+            "displeasure_spreads": {
+              "share": 0.25
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

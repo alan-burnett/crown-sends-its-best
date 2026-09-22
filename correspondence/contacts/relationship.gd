@@ -131,6 +131,18 @@ var loyalty: float = NEUTRAL_LOYALTY
 ## it is whether he reaches for the pen.
 var eagerness: float = EAGER_AT_FIRST
 
+## Per-deed multipliers on `DEED_WEIGHT`, for the men who are not like the rest.
+##
+## 🔒 **A scale on the weight, never a second weight.** A thin-skinned patron
+## (`patrons.md` §6) feels a refusal twice as hard, and he feels it through the
+## line everybody else feels it through — so a change to what a refusal costs
+## reaches him without anybody remembering that he exists.
+##
+## Empty for nearly everyone, which is what makes it safe to put here: a
+## relationship that says nothing behaves exactly as it did before there was a
+## field.
+var deed_scale: Dictionary = {}
+
 ## 🔒 **What his regard lets the PC hear** (#258, `the-director.md` §2).
 ##
 ## **Consulted, informed, bypassed** — one event, three entirely different
@@ -290,7 +302,7 @@ func record_deed(deed: StringName, scale: float = 1.0) -> float:
 		push_error("Unknown deed '%s'." % deed)
 		return 0.0
 	deeds[String(deed)] = int(deeds.get(String(deed), 0)) + 1
-	return _move_loyalty(float(DEED_WEIGHT[deed]) * scale)
+	return _move_loyalty(float(DEED_WEIGHT[deed]) * scale * scale_for(deed))
 
 
 ## Record the tone of a letter the PC sent.
@@ -320,6 +332,23 @@ func _move_loyalty(delta: float) -> float:
 	var before := loyalty
 	loyalty = clampf(loyalty + delta, MIN_LOYALTY, MAX_LOYALTY)
 	return loyalty - before
+
+
+## How much harder this man takes a deed than the next man.
+##
+## **One, unless something said otherwise**, so the ordinary contact is
+## untouched and the scale cannot quietly invert a weight: a negative multiplier
+## would turn a refusal into a favour.
+func scale_for(deed: StringName) -> float:
+	return maxf(0.0, float(deed_scale.get(String(deed), 1.0)))
+
+
+## Say that this man feels a deed differently (#282, `patrons.md` §6).
+func scale_deed(deed: StringName, scale: float) -> void:
+	if not DEEDS.has(deed):
+		push_error("Unknown deed '%s'." % deed)
+		return
+	deed_scale[String(deed)] = maxf(0.0, scale)
 
 
 func deed_count(deed: StringName) -> int:
@@ -385,6 +414,7 @@ func to_dict() -> Dictionary:
 		"last_promise_broken_month": last_promise_broken_month,
 		"outstanding_promises": outstanding_promises.duplicate(),
 		"deeds": deeds.duplicate(),
+		"deed_scale": deed_scale.duplicate(),
 		"last_written_month": last_written_month,
 		"history": _history_to_dicts(),
 	}
@@ -405,6 +435,7 @@ static func from_dict(data: Dictionary) -> Relationship:
 	relationship.eagerness = float(data.get("eagerness", EAGER_AT_FIRST))
 	relationship.outstanding_promises = PackedStringArray(data.get("outstanding_promises", []))
 	relationship.deeds = data.get("deeds", {}).duplicate()
+	relationship.deed_scale = data.get("deed_scale", {}).duplicate()
 	relationship.last_written_month = int(data.get("last_written_month", -1))
 	relationship.promises_broken = int(data.get("promises_broken", 0))
 	relationship.last_promise_broken_month = int(data.get("last_promise_broken_month", -1))

@@ -72,6 +72,45 @@ const COLONY_IS_NO_THREAT: String = "colony_is_no_threat"
 ## think of him, which he can only guess at.
 const NATIVE_PRESSURE: String = "native_pressure"
 
+## What share of the money that moved stayed with the Crown, `-1` to `+1` (#282).
+##
+## 🔒 **A patron's measure, and only a patron's.** `COLONY_REACH` above carries
+## the lock that a rival never sees `net_position`, and this is the other half of
+## it: the ledger is the Crown's, so the men who read it are the Crown's — the
+## patron whose interest in the colony is an interest in its books.
+##
+## 🔒 **A margin rather than a pile of gold** (`perception.md` §4a). The absolute
+## figure is pinned to a quantity, so a ladder hung on it would say one word for
+## the whole of a large colony's run; a share reads the same for a hamlet and a
+## province that are each doing equally well by the Crown. `{param:}` still
+## carries the true figure, and always did.
+##
+## 🔒 **And it is why a pragmatic man cannot be bought** (`patrons.md` §6).
+## Paying him lowers the very figure he respects, so the only way to please him
+## is to run the place well. Prestige would have closed a loop here — pleasing a
+## patron banks prestige and his regard is itself part of prestige — which is why
+## the doc names this and not that.
+const COLONY_NET_POSITION: String = "colony_net_position"
+
+## Whether the colony is governed quietly, nought to one (#282).
+##
+## **The worst town, not the average.** A respectable man watches the place that
+## is about to go, and an average would let nine contented towns hide the tenth
+## — which is the one that ends his business.
+##
+## ⚠️ **`patrons.md` §12 leaves this open** — *whether Respectable reads
+## colony-wide sentiment or his worst town* — and says only that the worst town
+## is sharper. The worst town is what shipped, because the alternative made the
+## vice do nothing in a colony of six; it is one line here and the PO's to
+## overturn.
+const COLONY_IS_QUIET: String = "colony_is_quiet"
+
+## The ends of the margin: everything the Crown put in lost, and everything it
+## put in returned several times over. **Fixed by the arithmetic, not tuning** —
+## a share cannot leave `[-1, +1]`.
+const DEEP_IN_THE_RED: float = -1.0
+const HANDSOMELY_IN_PROFIT: float = 1.0
+
 ## Months of stock that counts as a healthy store. Matches the food ladder in
 ## `docs/mechanics/perception.md` §4 so the two read alike.
 const HEALTHY_MONTHS: float = 3.0
@@ -99,6 +138,14 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	# threat, which is the whole of the inversion.
 	measures[COLONY_REACH] = reach_of(run)
 	measures[COLONY_IS_NO_THREAT] = 1.0 - reach_of(run)
+
+	# **What a man at court can see, which is the ledger** (#282). On the patrons
+	# alone: `COLONY_REACH` above is the lock that a rival never reads the Crown's
+	# books, and putting these on every contact would be the same leak by another
+	# door.
+	if contact.role == Contact.ROLE_PATRON:
+		measures[COLONY_NET_POSITION] = net_position_of(run)
+		measures[COLONY_IS_QUIET] = quiet_of(run)
 
 	# **The Diplomat before the governors**, because he governs nothing and would
 	# otherwise fall out here with the Crown's officers — and he is the one man
@@ -229,6 +276,35 @@ static func reach_of(run: RunState) -> float:
 		+ clampf(people / PEOPLE_AT_FULL_REACH, 0.0, 1.0)
 		+ clampf(ground / GROUND_AT_FULL_REACH, 0.0, 1.0)
 	) / 3.0, 0.0, 1.0)
+
+
+## What the colony has returned the Crown against what it has cost, as a raw
+## figure the registry then puts on a ladder (#282).
+##
+## 🔒 **The same accounts prestige reads.** Not a fresh sum over the log: two
+## answers to *what has the colony been worth* would eventually disagree, and one
+## of them would be in a letter.
+static func net_position_of(run: RunState) -> float:
+	if run == null or run.log == null:
+		return 0.0
+	return CrownAccounts.of(run.log).margin()
+
+
+## How quietly the colony is governed, nought to one (#282).
+##
+## **The worst town, because that is the one that ends his business.** A town
+## that has actually declared reads nought however contented the rest are, which
+## is the collapse `patrons.md` §6 asks for and needs no second rule: a rebel
+## town's sentiment is at the top of the scale by the time it goes.
+static func quiet_of(run: RunState) -> float:
+	if run == null or run.colony == null or run.colony.is_empty():
+		return 1.0
+	var worst := RebelSentiment.MINIMUM
+	for town in run.colony.in_order():
+		if town.rebelling:
+			return 0.0
+		worst = maxf(worst, town.rebel_sentiment)
+	return clampf(1.0 - worst / RebelSentiment.MAXIMUM, 0.0, 1.0)
 
 
 ## What a colony that has got as far as it is going to looks like. Tuning.
