@@ -64,9 +64,16 @@ static func register_all() -> void:
 class HarshnessConsideration:
 	extends Consideration
 
+	## 🔒 **Toward comply and partial** (#263, `tone.md` §9), and away from
+	## everything else.
+	##
+	## Partial used to sit at `-0.2` on the reasoning that it is a sideways
+	## answer like the rest. §9 is explicit that it is not: a man leaned on does
+	## **at least some of it** rather than none, and half a levy raised under a
+	## threat is the commonest thing a threat actually gets you.
 	const PULL: Dictionary = {
 		Compliance.COMPLY: 1.0,
-		Compliance.PARTIAL: -0.2,
+		Compliance.PARTIAL: 0.4,
 		Compliance.DELAY: -0.8,
 		Compliance.REINTERPRET: -1.0,
 		Compliance.REFUSE: -0.3,

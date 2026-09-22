@@ -91,3 +91,27 @@ static func deliberates(order_kind: StringName) -> bool:
 ## and only where there is an amount to move.
 static func has_a_magnitude(order_kind: StringName) -> bool:
 	return of(order_kind) == ASKING
+
+
+## Whether a letter may be written harshly (#263, `tone.md` §9).
+##
+## 🔒 **Not when answering.** There is nothing to lean on — *you* are the one
+## deciding, and *do it or else* has no object. On every other letter it is a
+## second axis beside the tone: five tones times harsh-or-not is **ten
+## registers.**
+##
+## Offered when **any** option in the letter would order something. A reply that
+## mixes an answer with an instruction is still an instruction, and the clause
+## has something to attach to.
+static func may_be_harsh(letter: Letter) -> bool:
+	if letter == null:
+		return false
+	for step in letter.steps():
+		for option in step.get(LetterSchema.KEY_OPTIONS, []):
+			for effect_id in option.get(LetterSchema.KEY_EFFECT, {}):
+				var kind := ContentRegistry.order_kind_of(String(effect_id))
+				if String(kind).is_empty():
+					continue
+				if of(kind) != ANSWERING:
+					return true
+	return false

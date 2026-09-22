@@ -210,7 +210,7 @@ bags must guarantee.
 
 ```
 data/names/<bag>.json     given[] and family[] for people; names[] for towns
-                          aristocrats · colonists · towns
+						  aristocrats · colonists · towns
 ```
 
 **No language suffix.** A bag carries no prose and is not translated, unlike

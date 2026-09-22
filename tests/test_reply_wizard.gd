@@ -296,6 +296,10 @@ func test_composing_uses_the_same_wizard_as_replying() -> void:
 	assert_true(wizard.has_tone_step())
 	wizard.choose_tone(Tone.DUTIFUL)
 	wizard.choose("payment", "full")
+	# Asking for troops is an asking letter, so the wizard also puts the harsh
+	# question (#263, `tone.md` §9) — and *not yet asked* is not *declined*.
+	assert_false(wizard.is_complete(), "the letter finished without putting the question")
+	wizard.choose_harsh(false)
 	assert_true(wizard.is_complete())
 
 
