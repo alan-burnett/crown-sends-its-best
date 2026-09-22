@@ -1,0 +1,18 @@
+[
+  {
+    "id": "perks",
+    "note": "A perk is a fact about the PC, so it is pure benefit and there is one per run (perks-and-quirks.md section 1). SPEC section 6.1 unlocks exactly one at game start; section 14.3's meta-progression adds the rest. Adding an entry here adds it to the offered list, and the code knows only how to apply the modifier ids it finds - a perk names a knob and never adds a number.",
+    "entries": [
+      {
+        "id": "its_my_first_day",
+        "name": "It's my first day",
+        "blurb": "The court is inclined to make allowances, this once.",
+        "modifiers": [
+          {
+            "crown_grace": {}
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,641 +1,641 @@
 [
   {
-    "id": "town_hall",
-    "name": "the town hall",
-    "cost": {},
-    "upkeep": 0,
-    "effects": {
-      "conversions": {
-        "beer<-food": {
-          "ratio": 4.0
-        },
-        "cigars<-tobacco": {
-          "ratio": 3.0
-        },
-        "clothing<-cotton": {
-          "ratio": 5.0
-        },
-        "clothing<-furs": {
-          "ratio": 3.0
-        },
-        "iron<-ore": {
-          "ratio": 10.0
-        },
-        "rum<-sugar": {
-          "ratio": 10.0
-        },
-        "tools<-iron": {
-          "ratio": 3.0
-        }
-      }
-    },
-    "requires": []
+	"id": "town_hall",
+	"name": "the town hall",
+	"cost": {},
+	"upkeep": 0,
+	"effects": {
+	  "conversions": {
+		"beer<-food": {
+		  "ratio": 4.0
+		},
+		"cigars<-tobacco": {
+		  "ratio": 3.0
+		},
+		"clothing<-cotton": {
+		  "ratio": 5.0
+		},
+		"clothing<-furs": {
+		  "ratio": 3.0
+		},
+		"iron<-ore": {
+		  "ratio": 10.0
+		},
+		"rum<-sugar": {
+		  "ratio": 10.0
+		},
+		"tools<-iron": {
+		  "ratio": 3.0
+		}
+	  }
+	},
+	"requires": []
   },
   {
-    "id": "dock",
-    "name": "a dock",
-    "cost": {
-      "wood": 30
-    },
-    "upkeep": 2,
-    "effects": {},
-    "requires": []
+	"id": "dock",
+	"name": "a dock",
+	"cost": {
+	  "wood": 30
+	},
+	"upkeep": 2,
+	"effects": {},
+	"requires": []
   },
   {
-    "id": "irrigation_station",
-    "name": "an irrigation station",
-    "cost": {
-      "wood": 20,
-      "stone": 20,
-      "tools": 4
-    },
-    "upkeep": 5,
-    "effects": {},
-    "requires": []
+	"id": "irrigation_station",
+	"name": "an irrigation station",
+	"cost": {
+	  "wood": 20,
+	  "stone": 20,
+	  "tools": 4
+	},
+	"upkeep": 5,
+	"effects": {},
+	"requires": []
   },
   {
-    "id": "windmill",
-    "name": "a windmill",
-    "requires": [
+	"id": "windmill",
+	"name": "a windmill",
+	"requires": [
       "irrigation_station"
-    ],
-    "cost": {
-      "stone": 20,
-      "wood": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {}
+	],
+	"cost": {
+	  "stone": 20,
+	  "wood": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {}
   },
   {
-    "id": "river_mill",
-    "name": "a river mill",
-    "requires": [
+	"id": "river_mill",
+	"name": "a river mill",
+	"requires": [
       "irrigation_station"
-    ],
-    "cost": {
-      "wood": 20,
-      "stone": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {}
+	],
+	"cost": {
+	  "wood": 20,
+	  "stone": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {}
   },
   {
-    "id": "wharf",
-    "name": "a wharf",
-    "requires": [
+	"id": "wharf",
+	"name": "a wharf",
+	"requires": [
       "dock"
-    ],
-    "cost": {
-      "wood": 50,
-      "stone": 20,
-      "tools": 4
-    },
-    "upkeep": 0,
-    "effects": {}
+	],
+	"cost": {
+	  "wood": 50,
+	  "stone": 20,
+	  "tools": 4
+	},
+	"upkeep": 0,
+	"effects": {}
   },
   {
-    "id": "gunsmith",
-    "name": "a gunsmith",
-    "requires": [
+	"id": "gunsmith",
+	"name": "a gunsmith",
+	"requires": [
       "foundry"
-    ],
-    "cost": {
-      "iron": 20,
-      "stone": 20,
-      "wood": 20,
-      "tools": 25
-    },
-    "upkeep": 10,
-    "effects": {
-      "conversions": {
-        "guns<-iron": {
-          "ratio": 3.0
-        }
-      },
-      "reserve_months": {
-        "iron": 2
-      }
-    },
-    "grants_contact": "quartermaster"
+	],
+	"cost": {
+	  "iron": 20,
+	  "stone": 20,
+	  "wood": 20,
+	  "tools": 25
+	},
+	"upkeep": 10,
+	"effects": {
+	  "conversions": {
+		"guns<-iron": {
+		  "ratio": 3.0
+		}
+	  },
+	  "reserve_months": {
+		"iron": 2
+	  }
+	},
+	"grants_contact": "quartermaster"
   },
   {
-    "id": "stockade",
-    "name": "a stockade",
-    "cost": {
-      "wood": 40
-    },
-    "upkeep": 0,
-    "effects": {
-      "defence": 2
-    },
-    "requires": []
+	"id": "stockade",
+	"name": "a stockade",
+	"cost": {
+	  "wood": 40
+	},
+	"upkeep": 0,
+	"effects": {
+	  "defence": 2
+	},
+	"requires": []
   },
   {
-    "id": "palisade",
-    "name": "a palisade",
-    "requires": [
+	"id": "palisade",
+	"name": "a palisade",
+	"requires": [
       "stockade"
-    ],
-    "cost": {
-      "stone": 30,
-      "wood": 40,
-      "iron": 10,
-      "tools": 4
-    },
-    "upkeep": 2,
-    "effects": {
-      "defence": 4
-    }
+	],
+	"cost": {
+	  "stone": 30,
+	  "wood": 40,
+	  "iron": 10,
+	  "tools": 4
+	},
+	"upkeep": 2,
+	"effects": {
+	  "defence": 4
+	}
   },
   {
-    "id": "guard_towers",
-    "name": "guard towers",
-    "requires": [
+	"id": "guard_towers",
+	"name": "guard towers",
+	"requires": [
       "stockade"
-    ],
-    "cost": {
-      "stone": 20,
-      "wood": 20,
-      "tools": 2
-    },
-    "upkeep": 5,
-    "effects": {
-      "defence": 3
-    }
+	],
+	"cost": {
+	  "stone": 20,
+	  "wood": 20,
+	  "tools": 2
+	},
+	"upkeep": 5,
+	"effects": {
+	  "defence": 3
+	}
   },
   {
-    "id": "trenches",
-    "name": "trenches",
-    "requires": [
+	"id": "trenches",
+	"name": "trenches",
+	"requires": [
       "stockade"
-    ],
-    "cost": {
-      "stone": 15,
-      "wood": 15
-    },
-    "upkeep": 0,
-    "effects": {
-      "defence": 2
-    }
+	],
+	"cost": {
+	  "stone": 15,
+	  "wood": 15
+	},
+	"upkeep": 0,
+	"effects": {
+	  "defence": 2
+	}
   },
   {
-    "id": "scouts",
-    "name": "a scouts' post",
-    "cost": {
-      "wood": 20,
-      "tools": 2
-    },
-    "upkeep": 2,
-    "effects": {},
-    "requires": []
+	"id": "scouts",
+	"name": "a scouts' post",
+	"cost": {
+	  "wood": 20,
+	  "tools": 2
+	},
+	"upkeep": 2,
+	"effects": {},
+	"requires": []
   },
   {
-    "id": "worker_cabins",
-    "name": "worker cabins",
-    "requires": [
+	"id": "worker_cabins",
+	"name": "worker cabins",
+	"requires": [
       "scouts"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "tools": 2
-    },
-    "upkeep": 5,
-    "effects": {}
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "tools": 2
+	},
+	"upkeep": 5,
+	"effects": {}
   },
   {
-    "id": "fairgrounds",
-    "name": "a fairgrounds",
-    "requires": [
-      "town_pasture",
+	"id": "fairgrounds",
+	"name": "a fairgrounds",
+	"requires": [
+	  "town_pasture",
       "stockade"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 30
-    },
-    "upkeep": 5,
-    "effects": {
-      "amusement": 0.4,
-      "immigration": 1.5
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 30
+	},
+	"upkeep": 5,
+	"effects": {
+	  "amusement": 0.4,
+	  "immigration": 1.5
+	}
   },
   {
-    "id": "church",
-    "name": "a church",
-    "cost": {
-      "wood": 30,
-      "stone": 10
-    },
-    "upkeep": 2,
-    "effects": {
-      "amusement": 0.3
-    },
-    "grants_contact": "clergyman",
-    "requires": []
+	"id": "church",
+	"name": "a church",
+	"cost": {
+	  "wood": 30,
+	  "stone": 10
+	},
+	"upkeep": 2,
+	"effects": {
+	  "amusement": 0.3
+	},
+	"grants_contact": "clergyman",
+	"requires": []
   },
   {
-    "id": "cathedral",
-    "name": "a cathedral",
-    "requires": [
+	"id": "cathedral",
+	"name": "a cathedral",
+	"requires": [
       "church"
-    ],
-    "cost": {
-      "stone": 120,
-      "tools": 15
-    },
-    "upkeep": 10,
-    "effects": {
-      "amusement": 0.3
-    },
-    "extends_contact": "clergyman"
+	],
+	"cost": {
+	  "stone": 120,
+	  "tools": 15
+	},
+	"upkeep": 10,
+	"effects": {
+	  "amusement": 0.3
+	},
+	"extends_contact": "clergyman"
   },
   {
-    "id": "theatre",
-    "name": "a theatre",
-    "cost": {
-      "stone": 20,
-      "wood": 30,
-      "tools": 4
-    },
-    "upkeep": 5,
-    "effects": {
-      "amusement": 0.5,
-      "education": 1.0,
-      "draws_experts": 1.0
-    },
-    "requires": []
+	"id": "theatre",
+	"name": "a theatre",
+	"cost": {
+	  "stone": 20,
+	  "wood": 30,
+	  "tools": 4
+	},
+	"upkeep": 5,
+	"effects": {
+	  "amusement": 0.5,
+	  "education": 1.0,
+	  "draws_experts": 1.0
+	},
+	"requires": []
   },
   {
-    "id": "tea_house",
-    "name": "a tea house",
-    "cost": {
-      "wood": 20,
-      "stone": 10
-    },
-    "upkeep": 0,
-    "effects": {
-      "reserve_months": {
-        "tea": 2
-      }
-    },
-    "requires": []
+	"id": "tea_house",
+	"name": "a tea house",
+	"cost": {
+	  "wood": 20,
+	  "stone": 10
+	},
+	"upkeep": 0,
+	"effects": {
+	  "reserve_months": {
+		"tea": 2
+	  }
+	},
+	"requires": []
   },
   {
-    "id": "ale_house",
-    "name": "an ale house",
-    "cost": {
-      "wood": 20,
-      "stone": 10
-    },
-    "upkeep": 0,
-    "effects": {
-      "reserve_months": {
-        "beer": 2
-      }
-    },
-    "requires": []
+	"id": "ale_house",
+	"name": "an ale house",
+	"cost": {
+	  "wood": 20,
+	  "stone": 10
+	},
+	"upkeep": 0,
+	"effects": {
+	  "reserve_months": {
+		"beer": 2
+	  }
+	},
+	"requires": []
   },
   {
-    "id": "printing_press",
-    "name": "a printing press",
-    "requires": [
-      "college",
+	"id": "printing_press",
+	"name": "a printing press",
+	"requires": [
+	  "college",
       "stockade"
-    ],
-    "cost": {
-      "stone": 10,
-      "wood": 10,
-      "iron": 10,
-      "tools": 25
-    },
-    "upkeep": 10,
-    "effects": {
-      "amusement": 0.3,
-      "education": 3.0,
-      "draws_experts": 1.0
-    },
-    "grants_contact": "journalist"
+	],
+	"cost": {
+	  "stone": 10,
+	  "wood": 10,
+	  "iron": 10,
+	  "tools": 25
+	},
+	"upkeep": 10,
+	"effects": {
+	  "amusement": 0.3,
+	  "education": 3.0,
+	  "draws_experts": 1.0
+	},
+	"grants_contact": "journalist"
   },
   {
-    "id": "town_pasture",
-    "name": "a town pasture",
-    "cost": {
-      "wood": 20
-    },
-    "upkeep": 0,
-    "effects": {
-      "pasture": 24
-    },
-    "requires": []
+	"id": "town_pasture",
+	"name": "a town pasture",
+	"cost": {
+	  "wood": 20
+	},
+	"upkeep": 0,
+	"effects": {
+	  "pasture": 24
+	},
+	"requires": []
   },
   {
-    "id": "granary",
-    "name": "a granary",
-    "cost": {
-      "wood": 30
-    },
-    "upkeep": 2,
-    "effects": {
-      "reserve_months": {
-        "food": 2
-      },
-      "growth": 0.5
-    },
-    "requires": []
+	"id": "granary",
+	"name": "a granary",
+	"cost": {
+	  "wood": 30
+	},
+	"upkeep": 2,
+	"effects": {
+	  "reserve_months": {
+		"food": 2
+	  },
+	  "growth": 0.5
+	},
+	"requires": []
   },
   {
-    "id": "crane",
-    "name": "a crane",
-    "cost": {
-      "wood": 30,
-      "iron": 20,
-      "tools": 4
-    },
-    "upkeep": 2,
-    "effects": {
-      "build_speed": 0.5
-    },
-    "requires": []
+	"id": "crane",
+	"name": "a crane",
+	"cost": {
+	  "wood": 30,
+	  "iron": 20,
+	  "tools": 4
+	},
+	"upkeep": 2,
+	"effects": {
+	  "build_speed": 0.5
+	},
+	"requires": []
   },
   {
-    "id": "stonecutters",
-    "name": "a stonecutters'",
-    "cost": {
-      "wood": 20,
-      "iron": 20,
-      "tools": 15
-    },
-    "upkeep": 5,
-    "effects": {
-      "yield_bonus": {
-        "stone": 0.6
-      }
-    },
-    "requires": []
+	"id": "stonecutters",
+	"name": "a stonecutters'",
+	"cost": {
+	  "wood": 20,
+	  "iron": 20,
+	  "tools": 15
+	},
+	"upkeep": 5,
+	"effects": {
+	  "yield_bonus": {
+		"stone": 0.6
+	  }
+	},
+	"requires": []
   },
   {
-    "id": "sawmill",
-    "name": "a sawmill",
-    "cost": {
-      "stone": 20,
-      "iron": 20,
-      "tools": 15
-    },
-    "upkeep": 5,
-    "effects": {
-      "yield_bonus": {
-        "wood": 0.6
-      }
-    },
-    "requires": []
+	"id": "sawmill",
+	"name": "a sawmill",
+	"cost": {
+	  "stone": 20,
+	  "iron": 20,
+	  "tools": 15
+	},
+	"upkeep": 5,
+	"effects": {
+	  "yield_bonus": {
+		"wood": 0.6
+	  }
+	},
+	"requires": []
   },
   {
-    "id": "mineworks",
-    "name": "the mineworks",
-    "cost": {
-      "wood": 20,
-      "stone": 20,
-      "tools": 15
-    },
-    "upkeep": 5,
-    "effects": {
-      "yield_bonus": {
-        "ore": 0.6
-      }
-    },
-    "requires": []
+	"id": "mineworks",
+	"name": "the mineworks",
+	"cost": {
+	  "wood": 20,
+	  "stone": 20,
+	  "tools": 15
+	},
+	"upkeep": 5,
+	"effects": {
+	  "yield_bonus": {
+		"ore": 0.6
+	  }
+	},
+	"requires": []
   },
   {
-    "id": "library",
-    "name": "a library",
-    "requires": [
+	"id": "library",
+	"name": "a library",
+	"requires": [
       "theatre"
-    ],
-    "cost": {
-      "wood": 30,
-      "stone": 10
-    },
-    "upkeep": 5,
-    "effects": {
-      "amusement": 0.2,
-      "education_per_expert": 1.0,
-      "draws_experts": 1.0
-    },
-    "grants_contact": "scholar"
+	],
+	"cost": {
+	  "wood": 30,
+	  "stone": 10
+	},
+	"upkeep": 5,
+	"effects": {
+	  "amusement": 0.2,
+	  "education_per_expert": 1.0,
+	  "draws_experts": 1.0
+	},
+	"grants_contact": "scholar"
   },
   {
-    "id": "college",
-    "name": "a college",
-    "requires": [
+	"id": "college",
+	"name": "a college",
+	"requires": [
       "library"
-    ],
-    "cost": {
-      "wood": 50,
-      "stone": 30,
-      "iron": 20,
-      "tools": 15
-    },
-    "upkeep": 10,
-    "effects": {
-      "education_per_expert": 1.5,
-      "counts_distant_experts": 1.0
-    },
-    "extends_contact": "scholar"
+	],
+	"cost": {
+	  "wood": 50,
+	  "stone": 30,
+	  "iron": 20,
+	  "tools": 15
+	},
+	"upkeep": 10,
+	"effects": {
+	  "education_per_expert": 1.5,
+	  "counts_distant_experts": 1.0
+	},
+	"extends_contact": "scholar"
   },
   {
-    "id": "foundry",
-    "name": "a foundry",
-    "requires": [
+	"id": "foundry",
+	"name": "a foundry",
+	"requires": [
       "crane"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "iron<-ore": {
-          "ratio": 5.0
-        }
-      },
-      "reserve_months": {
-        "ore": 2
-      }
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"iron<-ore": {
+		  "ratio": 5.0
+		}
+	  },
+	  "reserve_months": {
+		"ore": 2
+	  }
+	}
   },
   {
-    "id": "toolworks",
-    "name": "a toolworks",
-    "requires": [
+	"id": "toolworks",
+	"name": "a toolworks",
+	"requires": [
       "crane"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "tools<-iron": {
-          "ratio": 2.0
-        }
-      },
-      "reserve_months": {
-        "iron": 2
-      }
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"tools<-iron": {
+		  "ratio": 2.0
+		}
+	  },
+	  "reserve_months": {
+		"iron": 2
+	  }
+	}
   },
   {
-    "id": "furriers",
-    "name": "a furrier's",
-    "requires": [
+	"id": "furriers",
+	"name": "a furrier's",
+	"requires": [
       "crane"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "clothing<-furs": {
-          "ratio": 2.0
-        }
-      },
-      "reserve_months": {
-        "furs": 2
-      }
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"clothing<-furs": {
+		  "ratio": 2.0
+		}
+	  },
+	  "reserve_months": {
+		"furs": 2
+	  }
+	}
   },
   {
-    "id": "weaving_shed",
-    "name": "a weaving shed",
-    "requires": [
+	"id": "weaving_shed",
+	"name": "a weaving shed",
+	"requires": [
       "crane"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "clothing<-cotton": {
-          "ratio": 3.0
-        }
-      },
-      "reserve_months": {
-        "cotton": 2
-      }
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"clothing<-cotton": {
+		  "ratio": 3.0
+		}
+	  },
+	  "reserve_months": {
+		"cotton": 2
+	  }
+	}
   },
   {
-    "id": "rolling_house",
-    "name": "a rolling house",
-    "requires": [
+	"id": "rolling_house",
+	"name": "a rolling house",
+	"requires": [
       "crane"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "cigars<-tobacco": {
-          "ratio": 2.0
-        }
-      },
-      "reserve_months": {
-        "tobacco": 2
-      }
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"cigars<-tobacco": {
+		  "ratio": 2.0
+		}
+	  },
+	  "reserve_months": {
+		"tobacco": 2
+	  }
+	}
   },
   {
-    "id": "distillery",
-    "name": "a distillery",
-    "requires": [
+	"id": "distillery",
+	"name": "a distillery",
+	"requires": [
       "crane"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "rum<-sugar": {
-          "ratio": 5.0
-        }
-      },
-      "reserve_months": {
-        "sugar": 2
-      }
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"rum<-sugar": {
+		  "ratio": 5.0
+		}
+	  },
+	  "reserve_months": {
+		"sugar": 2
+	  }
+	}
   },
   {
-    "id": "brewhouse",
-    "name": "a brewhouse",
-    "requires": [
+	"id": "brewhouse",
+	"name": "a brewhouse",
+	"requires": [
       "crane"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "beer<-food": {
-          "ratio": 2.0
-        }
-      },
-      "reserve_months": {
-        "food": 2
-      }
-    }
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"beer<-food": {
+		  "ratio": 2.0
+		}
+	  },
+	  "reserve_months": {
+		"food": 2
+	  }
+	}
   },
   {
-    "id": "armoury",
-    "name": "an armoury",
-    "requires": [
+	"id": "armoury",
+	"name": "an armoury",
+	"requires": [
       "gunsmith"
-    ],
-    "cost": {
-      "wood": 40,
-      "stone": 10,
-      "iron": 10,
-      "tools": 8
-    },
-    "upkeep": 5,
-    "effects": {
-      "conversions": {
-        "guns<-iron": {
-          "ratio": 2.0
-        }
-      },
-      "reserve_months": {
-        "iron": 2
-      }
-    },
-    "extends_contact": "quartermaster"
+	],
+	"cost": {
+	  "wood": 40,
+	  "stone": 10,
+	  "iron": 10,
+	  "tools": 8
+	},
+	"upkeep": 5,
+	"effects": {
+	  "conversions": {
+		"guns<-iron": {
+		  "ratio": 2.0
+		}
+	  },
+	  "reserve_months": {
+		"iron": 2
+	  }
+	},
+	"extends_contact": "quartermaster"
   }
 ]

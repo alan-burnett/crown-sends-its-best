@@ -1,0 +1,7 @@
+[
+  {
+    "id": "quirks",
+    "note": "A quirk is a fact about the world the PC was given, so it cuts both ways and a run may carry any number (section 1). SPEC section 6.1 unlocks none at game start. The file exists so that adding one is adding an entry rather than adding a file, which is the whole point of the framework.",
+    "entries": []
+  }
+]

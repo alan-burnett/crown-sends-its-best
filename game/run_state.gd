@@ -216,7 +216,12 @@ static func from_setup(setup: RunSetup) -> RunState:
 
 	# **The perk, applied where the mechanic already was.** `CrownRefusal` has
 	# carried a grace since #68 with nothing able to switch it on.
-	run.refusal.has_grace = setup.has_perk(RunSetup.PERK_FIRST_DAY)
+	# 🔒 **A perk names a knob** (#286, `perks-and-quirks.md` §2), and the
+	# knobs are turned by `RunModifiers` from what the data says — not by a line
+	# here per perk. This was that line, and it was the whole of the system.
+	#
+	# `use_content` does the turning, because a run assembled without content
+	# loaded (most fixtures) has no perks to read and must still be a valid run.
 
 	# **The Crown's stated goal is the founding governor's starting intent**
 	# (SPEC §6.1). Written to the world before the town is founded would be
