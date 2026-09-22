@@ -50,6 +50,16 @@ extends RefCounted
 ## figure is a placeholder set in the ticket that introduced it, which is exactly
 ## the situation the emit-not-price rule exists to make survivable.
 
+## 🔒 **A desperate letter** (#264, `tone.md` §4, §6).
+##
+## > **The Crown does not care whether the PC flatters or abuses his subjects.
+## > It minds very much that he looked weak in front of them.**
+##
+## The sharpest expression in the game of §14.1's lock that prestige measures
+## **only how the Crown benefits**: cruelty is free and desperation is not.
+## **Hateful carries no prestige cost at all**, and should not.
+const EVENT_DESPERATE_LETTER: StringName = &"desperate_letter"
+
 ## Events nothing emits yet, named here so the milestone that adds them is a
 ## mechanic and not a negotiation about what the court thinks of it.
 const EVENT_TRIBUTE_PAID: StringName = &"tribute_paid"
@@ -67,6 +77,16 @@ const EVENT_RUN_FAILED: StringName = &"run_failed"
 static func prices() -> Dictionary:
 	return {
 		# Available now.
+		#
+		# 🔒 **The figure that decides whether desperate is a tool or the
+		# answer to everything** (#264). Small enough to be worth paying once;
+		# large enough that a run of them tells at retirement. The ticket says
+		# plainly that it wants the harness rather than an argument, so this is a
+		# starting point with its reasoning attached rather than a judgement: a
+		# fifth of a trade protest, so one plea is a small thing beside a resource
+		# the colony stopped selling — and about thirty of them come to a
+		# rebellion, which is the shape the sentence *a run of them tells* has.
+		String(EVENT_DESPERATE_LETTER): 45.0,
 		String(TradeProtest.EVENT_DECLARED): 220.0,
 		String(Rebellion.EVENT_DECLARED): 1_400.0,
 		# Hooks. M5 brings rivals and lost towns, M6 brings companies, and #78

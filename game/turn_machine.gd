@@ -462,6 +462,28 @@ func send_post() -> bool:
 	# The post goes aboard. It is read next month, in phase 7.
 	for order in issued_orders:
 		orders.carry(order)
+
+	# 🔒 **Every desperate letter leaves a mark** (#264, `tone.md` §4,
+	# `prestige.md` §4). *The Crown does not care whether the PC flatters or
+	# abuses his subjects; it minds very much that he looked weak in front of
+	# them.*
+	#
+	# **Emitted here and priced nowhere near here.** The mechanic says what
+	# happened and `OpticsRegister` alone decides what the court makes of it, so
+	# no other tone needs a line and hateful needs an absence rather than a zero.
+	#
+	# Once per letter, over the post as the player wrote it rather than over the
+	# Orders it produced: a plea that asked for nothing was still a plea, and a
+	# letter carrying three effects is one letter.
+	for outgoing in run.post.all():
+		if outgoing.tone != Tone.DESPERATE:
+			continue
+		run.log.emit(OpticsRegister.EVENT_DESPERATE_LETTER, outgoing.addressed_to,
+			run.world.month, {
+				"letter": outgoing.letter_id,
+				"to": String(outgoing.addressed_to),
+			}, WorldPhase.DISPATCH)
+
 	run.post.seal()
 
 	run.log.emit(EVENT_POST_SENT, &"pc", run.world.month, {

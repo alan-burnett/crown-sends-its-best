@@ -103,7 +103,16 @@ static func for_contact(contact: Contact, rank: int) -> float:
 	# who feels more strongly — pressure is the world's business — he is one who
 	# reaches for the pen sooner.
 	var temperament := 1.0 - _personality_spread * (contact.writes_readily - 1.0)
-	return maxf(1.0, base_for(contact.role) * redundancy_at(rank) * temperament)
+	# 🔒 **And how the PC has written to him** (#264, `tone.md` §4). A man
+	# treated kindly reaches for the pen sooner and a man treated with contempt
+	# stops reaching for it at all — so a kind PC pays in desk and a cruel one
+	# pays by not being consulted.
+	#
+	# A divisor, because eagerness is the mirror of a threshold: more of one is
+	# less of the other, and the same figure then reads the same way whichever end
+	# a tuning pass looks at it from.
+	var eager := 1.0 if contact.relationship == null else maxf(0.0001, contact.relationship.eagerness)
+	return maxf(1.0, base_for(contact.role) * redundancy_at(rank) * temperament / eager)
 
 
 ## How many contacts of each role were already here when each one arrived.
