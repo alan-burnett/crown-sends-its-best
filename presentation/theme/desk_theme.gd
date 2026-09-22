@@ -91,10 +91,24 @@ static func panel(colour: Color, radius: int = 4) -> StyleBoxFlat:
 	return style
 
 
+## What a designed size actually draws at (#353, SPEC §15).
+##
+## 🔒 **One place, so every screen moves together.** Text is the main medium and
+## must be comfortable to read at length on a phone (`CLAUDE.md`), so the text
+## size in options is not a setting one screen honours — every label and every
+## button in the game is built through the two helpers below, and both ask here.
+##
+## Rounded, and never below a size a phone can render: a scale that produced a
+## fractional or a two-pixel font would be a setting that broke the game rather
+## than one that made it easier to read.
+static func scaled(size: int) -> int:
+	return maxi(8, int(round(float(size) * Settings.text_scale())))
+
+
 static func label(text: String, size: int = SIZE_LABEL, colour: Color = INK) -> Label:
 	var node := Label.new()
 	node.text = text
-	node.add_theme_font_size_override("font_size", size)
+	node.add_theme_font_size_override("font_size", scaled(size))
 	node.add_theme_color_override("font_color", colour)
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	return node
@@ -108,10 +122,12 @@ static func label(text: String, size: int = SIZE_LABEL, colour: Color = INK) -> 
 static func button(text: String) -> Button:
 	var node := Button.new()
 	node.text = text
-	node.custom_minimum_size = Vector2(0, TAP_HEIGHT)
+	# **The target grows with the text**, because a player who needs larger words
+	# usually needs a larger thing to press as well.
+	node.custom_minimum_size = Vector2(0, scaled(TAP_HEIGHT))
 	node.focus_mode = Control.FOCUS_ALL
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	node.add_theme_font_size_override("font_size", SIZE_LABEL)
+	node.add_theme_font_size_override("font_size", scaled(SIZE_LABEL))
 	return node
 
 

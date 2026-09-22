@@ -443,7 +443,23 @@ func retire() -> bool:
 	run.phase = RESOLUTION
 	if saves_on_send:
 		SaveGame.delete_save(save_path)
+	_close_the_book()
 	return true
+
+
+## Write a finished run into the hall of records (#354, SPEC §14.3).
+##
+## 🔒 **Not part of the save**, and deliberately after it: `SaveGame` holds the
+## run in progress and New Game destroys it, while this is what is left of the
+## ones before. Called from both doors a run can leave by, and idempotent, so
+## neither door has to know the other exists.
+##
+## **Silently nothing without content**, because a harness and most fixtures run
+## without it and a run they end is not a run anybody is remembering.
+func _close_the_book() -> void:
+	if not is_over() or not saves_on_send:
+		return
+	Records.remember(run, content)
 
 
 ## Whether the post may be sent.
@@ -536,6 +552,13 @@ func send_post() -> bool:
 	# holding a sealed post and a month that had not happened yet.
 	if saves_on_send:
 		SaveGame.save(run, save_path)
+
+	# 🔒 **And a run that ended in that resolution goes into the hall** (#354).
+	# The end-of-run check runs inside the month, so this is where a colony
+	# overrun or gone independent is first known about — the other door is
+	# `retire`, and `Records.remember` is idempotent so neither has to know about
+	# the other.
+	_close_the_book()
 
 	return true
 

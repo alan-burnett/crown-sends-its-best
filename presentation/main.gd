@@ -1,17 +1,19 @@
 extends Control
 
-## Boot. Starts or resumes the run, then hands over to the desk.
+## Boot. Opens the main menu, and hands over to whatever it chooses.
 ##
 ## **Ironman**: there is one save per run and no loading of earlier states
-## (SPEC §16.2), so there is no menu of saves here and no "load" — either a run
-## is in progress and it resumes, or a new one begins.
+## (SPEC §16.2), so the menu has no slots and no "load" — either a run is in
+## progress and Continue resumes it, or New Game destroys it and begins another.
 ##
-## **A new run opens the commission first** (#79, SPEC §6.1): the PC's name, what
-## the Crown says the colony is for, how the grant is taken, and which of three
+## 🔒 **Nothing starts or resumes on its own** (#353, SPEC §15). The first thing
+## the player sees is a choice, because a boot that auto-continued would make the
+## one destructive option on the screen the only one he had to go looking for.
+##
+## **A new run opens the commission** (#79, SPEC §6.1): the PC's name, what the
+## Crown says the colony is for, how the grant is taken, and which of three
 ## charts to sail for. A run already in progress skips it, because Ironman means
 ## those decisions were made once and are not revisited.
-##
-## The main menu is M7.
 
 ## What the commission opens on before the player asks for another chart.
 const OPENING_SEED: int = 20_260_918
@@ -59,22 +61,56 @@ func _ready() -> void:
 	_start()
 
 
+## The title screen, which is where a launch stops until the player chooses.
 func _start() -> void:
-	var resumed := SaveGame.load_run()
-	match int(resumed["result"]):
-		SaveGame.Result.OK:
-			run = resumed["run"]
-			print("Resumed a run in progress: turn %d." % run.turn)
-		SaveGame.Result.WRONG_VERSION:
-			# Refused rather than migrated, and said so rather than silently
-			# starting over on top of somebody's run.
-			_show_failure(resumed["message"])
-			return
-		_:
-			_open_the_run()
-			return
+	var menu := MainMenuScreen.new()
+	add_child(menu)
+	menu.continued.connect(_on_continue.bind(menu))
+	menu.new_game.connect(_on_new_game.bind(menu))
+	menu.options_opened.connect(_on_options.bind(menu))
+	menu.records_opened.connect(_on_records.bind(menu))
+	menu.begin()
 
+
+func _on_continue(menu: MainMenuScreen) -> void:
+	var resumed := SaveGame.load_run()
+	if int(resumed["result"]) != SaveGame.Result.OK:
+		# The menu read the save a moment ago and it was fine; if it is not fine
+		# now, say so there rather than opening a desk on nothing.
+		menu.refresh()
+		return
+	menu.queue_free()
+	run = resumed["run"]
+	print("Resumed a run in progress: turn %d." % run.turn)
 	_open_desk()
+
+
+## 🔒 **New Game destroys the run in progress** (SPEC §16.2). The menu has
+## already confirmed it, naming the colony and the year; this is where it
+## actually goes.
+func _on_new_game(menu: MainMenuScreen) -> void:
+	menu.queue_free()
+	SaveGame.delete_save()
+	_open_the_run()
+
+
+func _on_options(menu: MainMenuScreen) -> void:
+	var screen := OptionsScreen.new()
+	add_child(screen)
+	screen.closed.connect(func() -> void:
+		screen.queue_free()
+		# **Redrawn, because the text size may have moved under it.**
+		menu.refresh())
+	screen.begin(get_node_or_null(SoundEngine.AUTOLOAD_PATH) as SoundEngine)
+
+
+func _on_records(menu: MainMenuScreen) -> void:
+	var screen := RecordsScreen.new()
+	add_child(screen)
+	screen.closed.connect(func() -> void:
+		screen.queue_free()
+		menu.refresh())
+	screen.begin(content)
 
 
 ## 🔒 **A run opens with a cutscene** (SPEC §6.1, `cutscenes.md` §1).
