@@ -83,6 +83,15 @@ It is also **unconditional**: it has never been said, so it fires at level 1 and
 level 2 alike. The cooldown never suppresses a first arrival, because there is
 only ever one.
 
+**The map and the ledger get one each**, by the Author's ruling. Neither carries
+a decision, so he has nothing to explain on them in the ordinary sense — but a
+first visit to the ledger is a player looking at **the one screen in the game
+made of hard numbers**, and a first visit to the map is a player looking at a
+world he has only read about. A line apiece.
+
+That makes arrival the one kind of advice that reaches beyond the desk, which is
+worth noticing: §1 keeps him out of the sim, not off the other screens.
+
 ### Explanations — static, about a control
 
 *What tone is. What the purse ladder means. What a priority pronouncement does.*
@@ -239,11 +248,6 @@ Prose, so **the folder carries the language** exactly as letters do
 
 ## 10. Open items
 
-- **Do the map and the ledger get an arrival too?** The desk plainly does (§4).
-  Those two carry no decisions, so he has no options to explain there — but a
-  player opening the ledger for the first time is looking at the one screen in
-  the game made of hard numbers. An arrival line is cheap and it is the same kind
-  of thing as the desk's. **Author's call**, and it does not block #347.
 - **What the unlock condition actually is.** *Survive to year five* is the
   Author's example rather than his ruling, and it wants setting alongside the
   other §14.3 thresholds. It is the cheapest of them to change.
