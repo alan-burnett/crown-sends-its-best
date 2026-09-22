@@ -192,9 +192,14 @@ has designed and it should not arrive by accident.
 ## 7. Arrival
 
 **Patrons spawn from the Squeeze**, not from a schedule of their own.
-`crown-demands.md` §6, dimension 4 — *more hands out* — already names them
-alongside rival dukes and Crown officers who were not asking before. Same annual
-draw, same bucket, same guarantee that they cannot bunch.
+`crown-demands.md` §6, dimension 4 — *more hands out* — names them alongside
+dukes and Crown contacts who were not asking before. Same draw, same bucket,
+same guarantee that they cannot bunch.
+
+**And no order.** A patron is not behind the dukes and does not wait on a count
+of hands: any draw of dimension 4 can produce any of the three, so the first
+source a run meets may be a patron. §6 has the reasoning, and the measurement
+that forced it.
 
 Nothing here adds a clock.
 

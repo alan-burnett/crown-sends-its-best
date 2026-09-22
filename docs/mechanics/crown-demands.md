@@ -246,20 +246,36 @@ of saying no. A player who pays everything never feels it; a player who refuses
 feels nothing else. It arrives in the **`desperate`** tone, which is already in
 the enum and is exactly what it is for.
 
-**Dimension 4 is not only patrons.** Patrons are M7, and an inert dimension would
-waste a quarter of the bucket for four milestones. Read it as *more sources of
-demand*, drawn from §4's catalogue:
+**Dimension 4 is not only patrons.** Read it as *more sources of demand*, and
+when it is drawn, **which source appears is drawn too**:
 
-- Crown officers who were not asking before — the Provost wanting funds for
-  education, the Marshal wanting supplies as well as gold.
-- **Rival dukes demanding tribute** (§8.4). As a run goes on, more parties have a
-  hand out, and not all of them are the PC's own.
-- Patrons, once M7 exists.
+- **A Crown contact who was not asking before** — the Provost wanting funds for
+  education, the Marshal wanting supplies as well as gold. A familiar man turns
+  needy, which is the quietest of the three and the most personal.
+- **A duke demanding tribute** (§8.4).
+- **A patron.**
 
-The rivals are the sharpest version, because their demands cost **prestige**
-rather than standing. Dimension 4 therefore does not merely add more of the same
-pressure — it adds pressure of a kind the player's existing defences do not
-answer.
+### 🔒 There is no order, and no ladder
+
+**Any draw can produce any of the three.** The first one in a run may be a
+patron; it may equally be a duke, or the Steward discovering a need.
+
+This is worth stating plainly because the list above reads like a sequence and
+was once built as one: thresholds in code gated goods behind two sources, dukes
+behind three and patrons behind five, so a patron required dimension 4 to be
+drawn four separate times. **At the old rate that was year nine at the earliest**
+— outside the four-to-eight-year run SPEC §6.2 designs for — and a measured
+fifteen-year batch found one patron, in year fourteen, in one seed of four.
+
+Nothing in this document ever asked for that ladder. **The numbering is a label,
+not a running order**, and the same is true of the four dimensions themselves.
+
+### What the draw still guarantees
+
+A duke's demands cost **prestige** rather than standing, so dimension 4 does not
+merely add more of the same pressure — it adds pressure of a kind the player's
+existing defences do not answer. That remains true whichever source is drawn
+first; it is simply no longer something the run has to wait for.
 
 ### Frequency has a ceiling the others do not
 
@@ -291,24 +307,35 @@ after four draws:  refill the bucket to eight
 ```
 
 Drawing without replacement and refilling at the halfway mark gives a hard
-guarantee: **in any four consecutive years, no dimension can be drawn more than
+guarantee: **in any four consecutive draws, no dimension can be drawn more than
 twice**, because the bucket never holds more than two of anything. Five in a row
 is impossible rather than merely unlikely.
+
+At two draws a year that is **a two-year window**, not a four-year one.
 
 Runs still differ. The order is different, the emphasis is different, and two
 players on two seeds get recognisably different late games. They just cannot get
 a *broken* one.
 
-### One draw a year, not two
+### 🔒 Two draws a year, from year two
 
-Growth starts in year four and SPEC §6.2 targets a competent run of four to eight
-years, so one draw a year gives a typical endgame **three to five growth events**
-— enough for each to be felt and named. Two a year doubles the ramp and reaches
-the same place twice as fast, which leaves less room for the player to respond
-between changes.
+An earlier draft started growth in **year four** at **one draw a year**, and said
+that if the ramp proved too gentle, raising it to two was the first lever to try.
+It was too gentle. Author's ruling:
 
-**If the ramp proves too gentle, raising this to two is the first lever to try**,
-before touching the per-dimension magnitudes.
+| | |
+| :--- | :--- |
+| **Growth begins** | year **2** |
+| **Draws a year** | **2**, on two months chosen at random within the year |
+| **Bucket refills** | after **4** draws — so every two years |
+
+**The months are drawn, not fixed.** Two random months a year, rather than a
+half-yearly clock, so a player cannot learn when the next turn of the screw
+lands and bank against it.
+
+That gives a competent run of four to eight years **six to fourteen growth
+events** instead of three to five. Each is still named and felt; there are simply
+enough of them for the late game to arrive while the run is still going.
 
 ### Determinism
 
