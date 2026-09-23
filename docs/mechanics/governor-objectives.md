@@ -157,6 +157,34 @@ argues for one thing.
 So the PC's instrument is **weaker than the Crown's own appointment and wears
 off**, which is why repetition is a real part of ruling by letter.
 
+### 🔒 An urging has an author, and several may stand at once
+
+**The PC is not the only man who can urge a governor.** Author's ruling. The
+Provost may press a town toward education, the Marshal toward guns, a slighted
+patron toward trading with the tribes — each is a pull on the governor's intent,
+**never on his objective**, which is what keeps SPEC §8.5's lock intact.
+
+It is the same lever the PC pulls, from a different hand — Seam C's *same code
+path, different origins* — and it needs the plumbing to hold more than one:
+
+- **Keyed by author.** Each urging records who sent it. Nine times in ten it is
+  the PC, and his is not special in the plumbing, only in the prose.
+- **Several at once, each decaying on its own.** A PC urging from the spring and
+  a Provost urging from the summer are both live, both fading at their own rate.
+  **One slot would let the Provost silently erase the PC's last letter**, and a
+  governor would forget what his ruler told him because a clerk wrote after.
+- **Each carries its own strength.** The PC's comes from his tone, as above.
+  Another author's comes from whatever he did to press it — a bribe, an order, a
+  threat — and is authored with the act.
+
+**A company's standing order has the same shape**, for the same reason
+(`commanders.md`), and the plumbing serves both.
+
+**How much a non-PC urging counts against the PC's is not settled here.** A
+governor who defers to the Crown need not defer to the Marshal. That is a
+weighting question for whichever act first uses the plumbing, not for the
+plumbing itself.
+
 ### The Mandate is the starting intent
 
 SPEC §6.1 gives the Crown's Mandate an effect on objectives "especially in the
