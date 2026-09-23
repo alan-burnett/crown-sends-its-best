@@ -90,6 +90,9 @@ Starting set, to grow:
 - **Prepare the town for rebellion** — reachable only at very low loyalty
 - **Drive them off** — reachable only where a tribe is actually on the town's
   ground, which is a filter rather than a weight (`deliberation.md` §5)
+- **Educate the people** — a town that wants its people to amount to something.
+  Weights the education axis above all others (below). **The PC may urge it**, as
+  he may any other, and so may the Provost (§4, *An urging has an author*).
 
 That last one is the only intent directed **against** the PC, and it is what
 `contacts.md` §4 means when it says an order at the bottom of the loyalty scale
@@ -218,8 +221,48 @@ construction:
 ### How it is chosen
 
 **Deterministically.** Every candidate — a building, an improvement on a named
-tile, a standing posture — is measured on **the same six axes**, and the intent
+tile, a standing posture — is measured on **the same seven axes**, and the intent
 says what each axis is worth. Take the best.
+
+### 🔒 The seven axes
+
+**Each names something a governor is actually trying to do.** That is the test an
+axis has to pass, and it is the one the old *capacity* axis failed.
+
+| Axis | What it measures | What feeds it |
+| :--- | :--- | :--- |
+| **food** | keeping people fed, now and through a lean month | food yields, food held in reserve, livestock, births |
+| **trade** | what the town can sell | yields and outputs weighted by price |
+| **defence** | keeping the town safe | walls, towers, companies |
+| **comfort** | how pleasant life is | quality of life, amusement, luxuries |
+| **expansion** | a second town | immigration drawn, experts drawn |
+| **education** | people who amount to something | experts turned into education |
+| **construction** | the means to build more | anything that appears in a building's cost: stone, wood, ore, iron, tools |
+
+**Construction is derived, not listed.** A yield or an output scores on it when
+its resource appears in some building's cost — so stonecutters, a sawmill and a
+toolworks all read as construction without any code naming a resource. A thing
+may score on several axes: wood is sellable *and* builds the tree.
+
+### Why there is no capacity axis
+
+There was one, and it was defined nowhere — a sum of six unrelated things:
+learning, build speed, reserves, pasture, births, and whether a building's output
+fed construction. **No governor is trying to do "capacity."** Dissolved by the
+Author's ruling and rehomed:
+
+| Was in capacity | Now |
+| :--- | :--- |
+| learning | **education** |
+| build speed | gone with the crane (#327) |
+| food held in reserve, pasture, births | **food** |
+| a reserve of anything else | dropped — the conversion's own output scoring (`buildings.md` §6) already values it, and counting both was a double count |
+| feeds construction | **construction** |
+
+**Every intent's profile loses its capacity weight and gains two.** Construction
+starts at the intent's old capacity weight, so a toolworks is wanted exactly as
+much as #311 made it; education starts small everywhere except *educate the
+people*. Calibrating both is #377's.
 
 That structure is what keeps it extensible without branching: **adding an intent
 is adding a row**, and adding a kind of objective is teaching the scorer to

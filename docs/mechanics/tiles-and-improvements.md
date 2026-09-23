@@ -84,17 +84,19 @@ An improvement goes through **the same path as a building** — the town takes i
 as an objective, gathers, and invests resources into it month by month out of its
 build capacity (`buildings.md` §3).
 
-**🔒 The crane does not help.** A crane raises `build_speed` for *buildings*.
-Improvements answer to **worker cabins** instead, which build them faster and
-carry their upkeep.
+**🔒 Nothing that speeds buildings speeds improvements.** Improvements answer to
+**worker cabins**, which build them faster and carry their upkeep.
 
-That is a deliberate pair rather than an oversight:
+There used to be a **crane** on the other side of this pair, speeding buildings
+as worker cabins speed improvements. **It was removed** (#327): its only effect was
+build speed, so a governor never wanted it and nine conversion buildings sat
+behind it. Build speed for buildings is now **a policy's business**, not a
+building's (`buildings.md` §3).
 
-> **The crane is to buildings what worker cabins are to improvements.**
-
-A town that has invested in one is not thereby faster at the other, so *building
-up* and *spreading out* are separate investments with separate prerequisites —
-and a town cannot buy its way into being good at both with a single project.
+The pair survives in a different shape. Worker cabins are still the only thing
+that makes a town faster at *spreading out*, and nothing a town can build makes it
+faster at *building up* — so the two remain separate investments, and a town still
+cannot buy its way into being good at both with a single project.
 
 ## 5. Upkeep disables; it never destroys
 

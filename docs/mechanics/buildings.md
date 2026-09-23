@@ -11,13 +11,18 @@
 
 ## 1. The branches are the intent axes
 
-The tree has six branches — **food, trade, defence, expansion, comfort,
-capacity** — and those are exactly the axes a governor's intent weights in
-`governor-objectives.md`.
+The tree has seven branches — **food, trade, defence, expansion, comfort,
+education, construction** — and those are exactly the axes a governor's intent
+weights in `governor-objectives.md` §5.
+
+There was a sixth called *capacity*, and it held a granary, three mills and a
+college. **It was dissolved with the axis it mirrored** (Author's ruling): no
+governor is trying to do "capacity", so no branch should be named for it. Its
+buildings went to the branch whose axis they actually score on.
 
 So a branch is not a label. **It is the intent that will pursue it.** A governor
 set on defence walks the stockade line; one set on growing his population wants
-comfort and capacity. The tree and the deliberation kernel speak the same
+food and comfort; one set on educating his people wants the library. The tree and the deliberation kernel speak the same
 language by construction, and that should survive any later reshuffle.
 
 ## 2. The town hall
@@ -40,7 +45,8 @@ gold to raise. See §5 for what tools do to the shape of the tree.
 
 **Build time is not authored.** A town has a **build capacity** — resources per
 month it can put into construction, derived from its population and multiplied by
-`build_speed` effects. Duration is cost divided by capacity, so a large town
+any `build_speed` a policy grants — no building grants it since the crane went
+(#327). Duration is cost divided by capacity, so a large town
 raises a granary in weeks and a hamlet labours over it for a year.
 
 **🔒 Nothing in the tree speeds building.** Improvements answer to **worker
@@ -94,10 +100,16 @@ tuning.
 | **irrigation station** | 20 wood, 20 stone, 4 tools | medium | Grassland and plains yield more food, **doubled where there is a farm** | — |
 | **windmill** | 20 stone, 10 wood, 8 tools | medium | Bonus yield from farms | irrigation station |
 | **river mill** | 20 wood, 10 stone, 8 tools | medium | Bonus yield from farms | irrigation station |
+| **town pasture** | 20 wood | none | Supports livestock, as the pasture improvement does | — |
+| **granary** | 30 wood | low | Natural population growth is faster, livestock included. Raises food's desired stock | — |
 
 Windmill and river mill do the same thing at **mirrored costs**, so a wood-rich
 town reaches one first and a stone-rich town the other. A large town eventually
 wants both: food capacity has to keep climbing as a town grows.
+
+**The pasture and the granary moved here from the old capacity branch.** Both are
+food — livestock, and food held against a lean month — and the granary's faster
+births count as food too, because a well-fed town is a growing one.
 
 ### Trade
 
@@ -139,17 +151,28 @@ building for defence gets an economy as a side effect.
 | **ale house** | 20 wood, 10 stone | **none** | More quality of life from beer. Raises beer's desired stock | — |
 | **printing press** | 10 stone, 10 wood, 10 iron, 25 tools | **high** | Attracts experts. Amusement **in every town**. **Raises rebel sentiment.** Brings the **journalist** | college, stockade |
 
-### Capacity
+### Education
 
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
-| **town pasture** | 20 wood | none | Supports livestock, as the pasture improvement does | — |
-| **granary** | 30 wood | low | Natural population growth is faster, livestock included. Raises food's desired stock | — |
+| **library** | 30 wood, 10 stone | medium | Amusement. **Turns resident experts into education**, so experts here generate more experts. Brings the **scholar**, who moves experts between towns | theatre |
+| **college** | 50 wood, 30 stone, 20 iron, 15 tools | **high** | Extends the **scholar**. **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
+
+**The branch the Provost argues for** (#401), and the one *educate the people*
+walks.
+
+### Construction
+
+| Building | Cost | Upkeep | Effect | Needs |
+| :--- | :--- | :--- | :--- | :--- |
 | **stonecutters** | 20 wood, 20 iron, 15 tools | medium | More stone | — |
 | **sawmill** | 20 stone, 20 iron, 15 tools | medium | More wood | — |
 | **mineworks** | 20 wood, 20 stone, 15 tools | medium | More ore | — |
-| **library** | 30 wood, 10 stone | medium | Amusement. **Turns resident experts into education**, so experts here generate more experts. Brings the **scholar**, who moves experts between towns | theatre |
-| **college** | 50 wood, 30 stone, 20 iron, 15 tools | **high** | Extends the **scholar**. **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
+
+**What the tree is built from.** Every one of these yields a resource that appears
+in some building's cost, which is what puts it on the construction axis — derived,
+not listed. The conversion buildings that turn ore into iron and iron into tools
+score here too, by §6's rule, though they stay in §6.
 
 Stonecutters and sawmill each cost the resource the other produces, which makes
 them a natural pair rather than a choice.
@@ -164,7 +187,7 @@ iron, iron to tools — and that changes what the tree means.
 
 **The deep chain gets a domestic customer.** Before this, ore to iron to tools
 existed to sell to the Crown, to supply an expedition, or to tempt a tribe
-(§10.1). Now the colony's own growth eats them, so the capacity branch —
+(§10.1). Now the colony's own growth eats them, so the construction branch —
 mineworks, then the foundry, then the toolworks — pays for itself in
 construction rather than in gold.
 
@@ -306,17 +329,17 @@ here names a resource:
 | The output | Axis | Because |
 | :--- | :--- | :--- |
 | anything | **trade** | it is sellable, weighted by price exactly as a yield bonus is |
-| appears in a building's cost | **capacity** | the chain feeds construction — iron and tools, and this is §5's argument |
+| appears in a building's cost | **construction** | the chain feeds construction — iron and tools, and this is §5's argument |
 | `luxury` in `processed.json` | **comfort** | the town drinks it rather than shipping it |
 
 A building can score on more than one. Rum is a luxury and a cash crop, and a
 distillery should be wanted for both reasons by governors who want different
 things.
 
-**The capacity row is the one that matters**, and it is the one that was missing.
-§5 claims the mineworks → foundry → toolworks chain *pays for itself in
-construction*. A governor can only act on that if a toolworks reads as capacity
-to him, and it reads as capacity because tools appear in the cost of half the
+**The construction row is the one that matters**, and it is the one that was
+missing. §5 claims the mineworks → foundry → toolworks chain *pays for itself in
+construction*. A governor can only act on that if a toolworks reads as
+construction to him, and it does because tools appear in the cost of half the
 tree — which is derived, not asserted.
 
 
@@ -378,7 +401,7 @@ ale house sets its pleasure in direct competition with its supper.
 | stonecutters, sawmill, mineworks, town pasture, conversion buildings, gunsmith, granary *(reserve)*, tea house, ale house | dock, irrigation station, windmill, river mill, wharf, guard towers *(vision, influence)* | fairgrounds, theatre, printing press, library, college, scouts, worker cabins, granary *(growth)* | church, cathedral *(perceived safety)* | stockade, palisade, trenches, guard towers *(defence)* |
 
 **Roughly two thirds of the tree does nothing yet**, which is fine but means an
-M3 playtest exercises the capacity and trade branches only.
+M3 playtest exercises the construction and trade branches only.
 
 ## 10. Tuning targets
 
@@ -404,8 +427,8 @@ M3 playtest exercises the capacity and trade branches only.
   scores only for the two months of ore it shelters — a governor can want it as
   a shed and for nothing else.
 
-  §5's design argument depends on this chain being walked: *the capacity branch
-  pays for itself in construction*. It is not being walked. Ticketed separately;
+  §5's design argument depends on this chain being walked: *the construction
+  branch pays for itself in construction*. It is not being walked. Ticketed separately;
   **do not reprice anything in §5 to compensate.**
 - **The wharf looks underpriced.** A permanent **+10% on all Crown trade for no
   upkeep** partly offsets the duty forever, and at 50 wood and 20 stone it is an
