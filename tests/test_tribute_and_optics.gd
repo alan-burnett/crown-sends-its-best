@@ -91,8 +91,21 @@ func test_the_dukes_arrive_on_the_bucket_and_nothing_else() -> void:
 		for entry in trigger.get("conditions", []):
 			for name in entry:
 				gates.append(String(name))
-		assert_eq(gates, PackedStringArray(["a_rival_has_a_hand_out"]),
-			"%s decides for itself when a duke writes" % id)
+		assert_true(gates.has("a_rival_has_a_hand_out"),
+			"%s does not wait for the bucket at all" % id)
+
+		# ⚠️ **`he_is_free_to_demand` is allowed, and it is not a second clock**
+		# (#284). A clock is a timetable of the duke's own — he writes every so
+		# often on his own schedule, and the bucket stops being what decides.
+		# This is the opposite: it is **the player having acted**, once, through
+		# a patron, and it says nothing about when he would otherwise write.
+		# Afterwards the bucket is again the only thing deciding.
+		#
+		# Anything else here is a timetable, and the guard still refuses it.
+		for gate in gates:
+			assert_true(
+				gate == "a_rival_has_a_hand_out" or gate == "he_is_free_to_demand",
+				"%s decides for itself when a duke writes: %s" % [id, gate])
 
 
 func test_the_marshal_is_asking_before_any_duke_is() -> void:
@@ -310,3 +323,233 @@ func test_the_optic_says_who_took_it() -> void:
 	assert_eq(String(lost[0].payload["to"]), "tribe_test",
 		"a town was lost to nobody in particular")
 	assert_eq(String(lost[0].payload["town"]), String(town.id))
+
+
+# --- 🔒 The rival specialty: a third door that costs nothing (#284) ---------
+
+func _duke(run: RunState) -> Contact:
+	return RivalDuke.all_in(run)[0]
+
+
+func _company_of(run: RunState, duke: Contact) -> Company:
+	var context := _context(run)
+	var landed := run.companies.raise_company(
+		Company.RIVAL, 40, {"guns": 40.0}, Company.SUPPORTED_ABROAD,
+		Vector2i(3, 3), context)
+	landed.raised_by = duke.id
+	return landed
+
+
+func _arrivals(run: RunState) -> void:
+	SabotageDriver.new(run).on_phase(
+		WorldPhase.ARRIVALS, run.world, run.log, run.streams)
+
+
+# --- Sabotage ----------------------------------------------------------------
+
+func test_the_gift_applies_to_one_named_rival_and_no_other() -> void:
+	var run := _run()
+	var dukes := RivalDuke.all_in(run)
+	assert_true(dukes.size() >= 2, "a run with fewer than two dukes proves nothing")
+	var chosen: Contact = dukes[0]
+	var spared: Contact = dukes[1]
+
+	assert_true(SabotageDriver.arrange(chosen, run.world, run.log, 4),
+		"the patron could not arrange anything")
+	assert_true(SabotageDriver.is_sabotaged(run.world, chosen.id, 5),
+		"the duke the patron named is having a perfectly good year")
+	assert_false(SabotageDriver.is_sabotaged(run.world, spared.id, 5),
+		"a patron interfered with a duke nobody named")
+
+
+func test_it_lasts_a_year_and_then_stops() -> void:
+	var run := _run()
+	var duke := _duke(run)
+	SabotageDriver.arrange(duke, run.world, run.log, 4)
+
+	assert_true(SabotageDriver.is_sabotaged(run.world, duke.id, 4 + 11),
+		"his bad year was over inside the year")
+	assert_false(SabotageDriver.is_sabotaged(run.world, duke.id, 4 + SabotageDriver.MONTHS),
+		"his bad year never ended")
+
+
+func test_a_sabotaged_company_fights_worse() -> void:
+	# 🔒 §5: *they inflict less and they break sooner.* One figure does both,
+	# because `Force` is what a company inflicts and what it survives.
+	var run := _run()
+	var duke := _duke(run)
+	var company := _company_of(run, duke)
+
+	var whole := Force.of(company, run.map)
+	company.sabotaged = true
+	var ruined := Force.of(company, run.map)
+
+	assert_true(whole > 0.0, "the company was worth nothing to begin with")
+	assert_true(ruined < whole,
+		"a year of a patron's interference cost the duke's men nothing")
+
+
+func test_the_driver_marks_his_men_and_nobody_elses() -> void:
+	var run := _run()
+	var dukes := RivalDuke.all_in(run)
+	var mine := _company_of(run, dukes[0])
+	var theirs := _company_of(run, dukes[1])
+
+	run.world.month = 4
+	SabotageDriver.arrange(dukes[0], run.world, run.log, 4)
+	run.world.month = 5
+	_arrivals(run)
+
+	assert_true(mine.sabotaged, "the duke's own men were untouched")
+	assert_false(theirs.sabotaged, "another duke's men were caught up in it")
+
+
+func test_a_company_raised_during_the_bad_year_is_in_it_too() -> void:
+	# It is the duke's affairs that are in disarray, not one body of men.
+	var run := _run()
+	var duke := _duke(run)
+	run.world.month = 4
+	SabotageDriver.arrange(duke, run.world, run.log, 4)
+
+	var late := _company_of(run, duke)
+	run.world.month = 9
+	_arrivals(run)
+	assert_true(late.sabotaged,
+		"men raised in the ninth month of a ruined year were in fine order")
+
+
+func test_the_men_recover_when_the_year_is_out() -> void:
+	var run := _run()
+	var duke := _duke(run)
+	var company := _company_of(run, duke)
+	run.world.month = 4
+	SabotageDriver.arrange(duke, run.world, run.log, 4)
+	run.world.month = 5
+	_arrivals(run)
+	assert_true(company.sabotaged)
+
+	run.world.month = 4 + SabotageDriver.MONTHS
+	_arrivals(run)
+	assert_false(company.sabotaged, "his men never got over it")
+
+
+func test_it_survives_the_save() -> void:
+	var company := Company.new(&"c1", 1)
+	company.sabotaged = true
+	assert_true(Company.from_dict(company.to_dict()).sabotaged,
+		"a sabotaged year did not survive the save")
+
+
+# --- 🔒 It cannot undo the latch --------------------------------------------
+
+func test_a_duke_at_minimum_is_unaffected_by_any_of_it() -> void:
+	# 🔒 `rival-pressure.md` §3: a duke at minimum is there for the run. **A
+	# patron may help the PC survive that; nothing brings a duke back from open
+	# war**, and the refusal is at the grant so it can be a letter rather than a
+	# gift that quietly does nothing.
+	var run := _run()
+	var duke := _duke(run)
+	duke.relationship = Relationship.new(duke.id, Relationship.MIN_LOYALTY)
+	assert_eq(RivalDuke.band_of(duke.loyalty()), RivalDuke.MINIMUM,
+		"the fixture duke is not at minimum, so this proves nothing")
+
+	assert_false(SabotageDriver.arrange(duke, run.world, run.log, 4),
+		"a patron interfered with a duke already at open war")
+	assert_false(SabotageDriver.is_sabotaged(run.world, duke.id, 5),
+		"a refused arrangement was arranged anyway")
+
+
+# --- 🔒 The third door ------------------------------------------------------
+
+func test_the_reply_option_appears_only_while_the_gift_is_live() -> void:
+	var run := _run()
+	var duke := _duke(run)
+	var context := LetterContext.new()
+	context.sender = duke
+	context.state = run.world
+	run.world.month = 5
+
+	var door := {"conditions": [{"a_patron_can_deflect_him": {}}]}
+	assert_false(ReplyWizard.may_take(door, context),
+		"the third door was open with no patron behind it")
+
+	SabotageDriver.arrange(duke, run.world, run.log, 4)
+	assert_true(ReplyWizard.may_take(door, context),
+		"the patron arranged it and the door stayed shut")
+
+
+func test_the_door_is_on_that_dukes_demand_and_no_other() -> void:
+	var run := _run()
+	var dukes := RivalDuke.all_in(run)
+	run.world.month = 5
+	SabotageDriver.arrange(dukes[0], run.world, run.log, 4)
+
+	var door := {"conditions": [{"a_patron_can_deflect_him": {}}]}
+	var other := LetterContext.new()
+	other.sender = dukes[1]
+	other.state = run.world
+	assert_false(ReplyWizard.may_take(door, other),
+		"one patron's arrangement opened a door on a different duke's letter")
+
+
+func test_taking_it_costs_no_gold_no_loyalty_and_no_optic() -> void:
+	# 🔒 **The only answer to a tribute demand that costs nothing.** Pay costs
+	# gold and an undecaying optic; refuse costs his loyalty. This costs neither.
+	var run := _run()
+	var duke := _duke(run)
+	var before := duke.loyalty()
+	var debt := OpticsRegister.debt_in(run.log)
+
+	var intent := Intent.new()
+	intent.kind = DeflectionExecutor.KIND
+	intent.data = {"to": String(duke.id)}
+	DeflectionExecutor.new().execute(intent, run.world, run.log)
+
+	assert_eq(duke.loyalty(), before,
+		"sending the duke to collect elsewhere cost the PC his regard")
+	assert_eq(OpticsRegister.debt_in(run.log), debt,
+		"the court heard about a thing the patron covered up entirely")
+	assert_empty(run.log.of_type(OpticsRegister.EVENT_TRIBUTE_PAID),
+		"a deflected demand was recorded as tribute paid")
+
+
+func test_it_makes_a_gold_promise_of_nothing() -> void:
+	# The pay door promises gold; this door promises nothing at all.
+	var order := Order.new(
+		M1Registrations.ORDER_DEFLECT_TRIBUTE, &"rival_duke", {})
+	assert_eq(PromiseBook.from_order(order, 3), null,
+		"the third door committed the Crown to something")
+
+
+func test_he_skips_the_next_demand_and_the_one_after_is_normal() -> void:
+	var run := _run()
+	var duke := _duke(run)
+	var context := LetterContext.new()
+	context.sender = duke
+	context.state = run.world
+
+	run.world.month = 5
+	assert_true(ColonyConditions.he_is_free_to_demand({}, context),
+		"he was holding off before anybody deflected anything")
+
+	var intent := Intent.new()
+	intent.kind = DeflectionExecutor.KIND
+	intent.data = {"to": String(duke.id)}
+	DeflectionExecutor.new().execute(intent, run.world, run.log)
+
+	run.world.month = 6
+	assert_false(ColonyConditions.he_is_free_to_demand({}, context),
+		"he wrote again the month after being sent to collect")
+
+	run.world.month = 5 + DeflectionExecutor.DEMAND_CYCLE
+	assert_true(ColonyConditions.he_is_free_to_demand({}, context),
+		"the demand after the skipped one never came")
+
+
+func test_a_skipped_demand_is_not_a_deferred_attack() -> void:
+	# 🔒 Two keys. `TributeExecutor` writes `quiet_until` when the PC **pays**,
+	# which is about whether he comes; this is about whether he writes. One name
+	# for two things is how paying a man quietly came to mean he had stopped
+	# asking.
+	assert_ne(DeflectionExecutor.SKIPPED_PREFIX, TributeExecutor.DEFERRED_PREFIX,
+		"a skipped demand and a deferred attack share a world value")

@@ -406,7 +406,8 @@ static func _priced(order: Order) -> Variant:
 			# because a preference is an urging about a place.
 			return 0.0
 		M1Registrations.ORDER_ADJUST_LOYALTY, M1Registrations.ORDER_GRANT_FAVOR, \
-		M1Registrations.ORDER_FUND_FOUNDING, M1Registrations.ORDER_PAY_TRIBUTE:
+		M1Registrations.ORDER_FUND_FOUNDING, M1Registrations.ORDER_PAY_TRIBUTE, \
+		M1Registrations.ORDER_DEFLECT_TRIBUTE:
 			# Answering letters (#261). He never deliberates over these, so the
 			# price is moot — but it is written down, because an unpriced kind is
 			# how this went wrong twice and a moot figure is still a figure.

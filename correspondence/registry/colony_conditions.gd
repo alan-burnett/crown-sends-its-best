@@ -198,6 +198,14 @@ static func register_all() -> void:
 		"i_have_experts_to_spare", {},
 		ColonyConditions.i_have_experts_to_spare,
 	)
+	ContentRegistry.register_condition(
+		"a_patron_can_deflect_him", {},
+		ColonyConditions.a_patron_can_deflect_him,
+	)
+	ContentRegistry.register_condition(
+		"he_is_free_to_demand", {},
+		ColonyConditions.he_is_free_to_demand,
+	)
 
 
 ## Whether this sender is a governor-elect who has only just set out (#178).
@@ -952,3 +960,35 @@ static func i_have_experts_to_spare(_args: Dictionary, context: LetterContext) -
 	if context == null or context.town == null:
 		return false
 	return not ExpertTransfer.spare_kinds(context.town).is_empty()
+
+
+## Whether a patron has arranged for this duke to have a bad year (#284,
+## `patrons.md` §5).
+##
+## 🔒 **What gates the third door.** *Go and collect it from Lord Magilicutty's
+## house* cannot be an always-present answer to a tribute demand, because without
+## that patron there is nobody to send him to — and #275's whole point is that
+## offering a choice the player cannot take is worse than not offering it.
+static func a_patron_can_deflect_him(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null or context.state == null:
+		return false
+	return SabotageDriver.is_sabotaged(
+		context.state, context.sender.id, context.state.month)
+
+
+## Whether this duke is free to ask again (#284).
+##
+## 🔒 **The demand he skips.** Taking the third door is worth two demands — the
+## one deflected and the one skipped — and this is the second. He resumes
+## afterwards as though nothing had happened, because as far as he knows nothing
+## did.
+##
+## **Phrased positively because there is no negation in the registry**, and a
+## trigger reads a list of things that must be true. Naming it *free to demand*
+## rather than *not holding off* also keeps the trigger file readable, which is
+## the half a person checks.
+static func he_is_free_to_demand(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null or context.state == null:
+		return true
+	return not DeflectionExecutor.is_holding_off(
+		context.state, context.sender.id, context.state.month)

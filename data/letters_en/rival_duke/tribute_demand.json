@@ -68,6 +68,21 @@
                 "to": "rival_duke"
               }
             }
+          },
+          {
+            "id": "deflect",
+            "label": "send him to collect it elsewhere",
+            "text": "You will find what you are owed at the house of a gentleman of my acquaintance. He is expecting you.",
+            "conditions": [
+              {
+                "a_patron_can_deflect_him": {}
+              }
+            ],
+            "effect": {
+              "deflect_tribute": {
+                "to": "rival_duke"
+              }
+            }
           }
         ]
       }

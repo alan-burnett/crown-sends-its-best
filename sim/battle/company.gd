@@ -292,6 +292,19 @@ var casualties_owed: float = 0.0
 ## of the rule.
 var unsupported_months: int = 0
 
+## 🔒 **Whether somebody at court has arranged for this company to have a bad
+## year** (#284, `patrons.md` §5).
+##
+## A patron's rival specialty: he interferes with one duke, and that duke's
+## companies **inflict less and break sooner** for a year. **Held apart from
+## `unsupported_months`** deliberately — a sabotaged company is not an unsupplied
+## one, and a letter that said so would be telling the player something untrue
+## about why his enemy is losing.
+##
+## Written each month by `SabotageDriver` from a world value, so nothing here has
+## to know what a patron is and the year runs down on its own.
+var sabotaged: bool = false
+
 
 func _init(p_id: StringName = &"", p_ordinal: int = 0) -> void:
 	id = p_id
@@ -657,6 +670,7 @@ func to_dict() -> Dictionary:
 		"raised_month": raised_month,
 		"supplied_month": supplied_month,
 		"unsupported_months": unsupported_months,
+		"sabotaged": sabotaged,
 		"casualties_owed": casualties_owed,
 		"urged": String(urged),
 		"urged_month": urged_month,
@@ -680,6 +694,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.raised_month = int(data.get("raised_month", 0))
 	company.supplied_month = int(data.get("supplied_month", -1))
 	company.unsupported_months = int(data.get("unsupported_months", 0))
+	company.sabotaged = bool(data.get("sabotaged", false))
 	company.casualties_owed = float(data.get("casualties_owed", 0.0))
 	company.urged = StringName(data.get("urged", ""))
 	company.urged_month = int(data.get("urged_month", 0))

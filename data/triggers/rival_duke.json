@@ -15,6 +15,9 @@
     "conditions": [
       {
         "a_rival_has_a_hand_out": {}
+      },
+      {
+        "he_is_free_to_demand": {}
       }
     ]
   },
@@ -34,6 +37,9 @@
     "conditions": [
       {
         "a_rival_has_a_hand_out": {}
+      },
+      {
+        "he_is_free_to_demand": {}
       }
     ]
   },
@@ -53,6 +59,9 @@
     "conditions": [
       {
         "a_rival_has_a_hand_out": {}
+      },
+      {
+        "he_is_free_to_demand": {}
       }
     ]
   }

@@ -34,6 +34,11 @@ const ORDER_SET_POLICY: StringName = &"set_policy"
 ## having done this.
 const ORDER_PAY_TRIBUTE: StringName = &"pay_tribute"
 
+## **The third door** (#284, `patrons.md` §5). Sending the duke to collect from
+## the patron's house instead: it costs no gold, no loyalty and no optic, and it
+## is worth two demands — the one deflected and the one skipped.
+const ORDER_DEFLECT_TRIBUTE: StringName = &"deflect_tribute"
+
 ## **A preference about where a town goes** (#177, SPEC §11.4).
 ##
 ## 🔒 The PC approves, refuses, or states a preference. **He never chooses a
@@ -303,6 +308,12 @@ static func register_effects() -> void:
 		"pay_tribute",
 		{"to": "contact", "amount": "gold", "months": "integer"},
 		ORDER_PAY_TRIBUTE,
+	)
+	# 🔒 **No params but the man**, because there is nothing to decide: the
+	# patron arranges it, and a figure here would be a price on a door whose
+	# whole identity is costing nothing.
+	ContentRegistry.register_effect(
+		"deflect_tribute", {"to": "contact"}, ORDER_DEFLECT_TRIBUTE
 	)
 	ContentRegistry.register_effect(
 		"set_policy", {"policy": "string", "value": "string"}, ORDER_SET_POLICY

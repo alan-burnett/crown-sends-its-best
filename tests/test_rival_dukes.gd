@@ -315,7 +315,15 @@ func test_no_letter_from_a_duke_offers_the_pc_anything() -> void:
 			for option in step.get(LetterSchema.KEY_OPTIONS, []):
 				var effect: Dictionary = option.get("effect", {})
 				for name in effect:
-					assert_true(String(name) in ["pay_tribute", "refuse"],
+					# **`deflect_tribute` is on this list and is not an exchange**
+					# (#284). SPEC section 8.4 locks that a duke never offers the PC
+					# anything and never asks for help -- nothing passes *between*
+					# them but a demand and its answer. The third door is the PC
+					# sending him somewhere else entirely, arranged by a patron he
+					# never connects to the Crown: the duke gets nothing and gives
+					# nothing, and does not even know it happened.
+					assert_true(
+						String(name) in ["pay_tribute", "refuse", "deflect_tribute"],
 						"%s lets a duke and the PC do '%s' to one another"
 							% [letter.id, name])
 

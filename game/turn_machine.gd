@@ -120,6 +120,7 @@ func _init(p_run: RunState) -> void:
 	crown_foundings.foundings = run.foundings
 
 	var tribute := TributeExecutor.new()
+	var deflection := DeflectionExecutor.new()
 	var embargoes := EmbargoExecutor.new()
 	embargoes.colony = run.colony
 	urging.colony = run.colony
@@ -241,6 +242,11 @@ func _init(p_run: RunState) -> void:
 	# reach, and the only policy that buys another contact's regard.
 	var cultivation := CultivationDriver.new(run)
 
+	# Phase 1, before anybody moves. A patron's rival specialty (#284): it marks
+	# the duke whose year a patron has arranged to ruin, so the men he raises
+	# this month are already in disarray.
+	var sabotage := SabotageDriver.new(run)
+
 	# Phase 1. The neighbours put men under arms: a village past the point of no
 	# return, and a duke at Minimum (#225). Before the marching, so a muster is on
 	# the map a month before it reaches anybody.
@@ -312,7 +318,7 @@ func _init(p_run: RunState) -> void:
 		rival_tiles,
 		colony_month, villages, promise_driver, standings, native_trade,
 		policies, crown_standing, run_end, prestige, drift, rivals, patron_driver,
-		expert_travel, cultivation,
+		expert_travel, cultivation, sabotage,
 		companies,
 		orders, silence, governors,
 		grievances,
@@ -320,7 +326,8 @@ func _init(p_run: RunState) -> void:
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, shipments, embargoes, tribute, preferences, foundings, executor,
+		urging, shipments, embargoes, tribute, deflection, preferences, foundings,
+		executor,
 	]
 
 
@@ -377,9 +384,14 @@ static func order_effects() -> Dictionary:
 		# An embargo reaches a town rather than a world value, through
 		# `EmbargoExecutor`.
 		String(M1Registrations.ORDER_EMBARGO): {"target": ""},
-		# **Tribute touches the Crown's books not at all**, which is exactly what
-		# makes it dangerous: nothing in standing notices, and the court does.
+		# **Tribute moves no world value**, because what it moves is a gold
+		# promise and a date — `PromiseBook` takes the money out of the Crown's
+		# purse (SPEC §8.4, v3.0) and `TributeExecutor` writes the quiet.
 		String(M1Registrations.ORDER_PAY_TRIBUTE): {"target": ""},
+		# **And the third door moves nothing at all** (#284): no gold, no
+		# loyalty, no optic. `DeflectionExecutor` writes the date he is silent
+		# until, and that is the whole of it.
+		String(M1Registrations.ORDER_DEFLECT_TRIBUTE): {"target": ""},
 		# A preference moves no world value. What it moves is a governor already
 		# walking, which is `PreferenceExecutor`'s business (#177).
 		String(M1Registrations.ORDER_PREFER_SITE): {"target": ""},

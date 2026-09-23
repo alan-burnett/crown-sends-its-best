@@ -125,8 +125,24 @@ func test_the_player_can_actually_reach_it() -> void:
 		for effect in option.get("effect", {}):
 			kinds.append(String(effect))
 	kinds.sort()
-	assert_eq(",".join(kinds), "pay_tribute,refuse",
-		"the two answers are not paying and refusing, which are the only two there are")
+	# 🔒 **Two answers that cost, and one that does not** (#284, `patrons.md` §5).
+	#
+	# `rival-pressure.md` gave a demand exactly two answers and **both cost** —
+	# paying is gold out of `net_position` plus an optic that never decays,
+	# refusing is his loyalty and the road to war. The third door was added
+	# deliberately to be neither, and it is **gated**: without a patron
+	# interfering with this particular duke there is nobody to send him to, so
+	# the player sees the same two answers he always did.
+	assert_eq(",".join(kinds), "deflect_tribute,pay_tribute,refuse",
+		"the answers to a demand are not the two that cost and the one that does not")
+
+	# And the third one must stay behind its condition, or it stops being a
+	# patron's gift and becomes a free answer everybody has.
+	for option in options:
+		if not option.get("effect", {}).has("deflect_tribute"):
+			continue
+		assert_false(option.get(LetterSchema.KEY_CONDITIONS, []).is_empty(),
+			"the third door is offered to a PC who has no patron behind it")
 
 
 func test_he_is_a_rival_and_not_one_of_the_crown_s_officers() -> void:

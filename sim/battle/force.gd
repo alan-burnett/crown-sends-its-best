@@ -77,6 +77,14 @@ static var _leadership: float = 1.25
 ## 1.4x and 3.6x defending, against a fort's 2.5x.
 static var _defence_worth: float = 0.2
 
+## 🔒 **What a sabotaged year does to a duke's companies** (#284, `patrons.md`
+## §5): *they inflict less and they break sooner.*
+##
+## One figure does both, because `Force` is what a company inflicts **and** what
+## it survives — a company at two thirds its strength deals two thirds and takes
+## the casualties of a body two thirds the size. **Heavy**, per §5, and tuning.
+static var _sabotaged_worth: float = 0.65
+
 ## 🔒 **The three terrain tiers and the two fort tiers are not here** (#215).
 ##
 ## They are **authored where the thing is** — a terrain's defence sits beside its
@@ -93,12 +101,15 @@ static func load_from(record: Dictionary) -> void:
 	_arms_worth = record.get("arms_worth", _arms_worth).duplicate()
 	_leadership = float(record.get("leadership", _leadership))
 	_defence_worth = maxf(0.0, float(record.get("defence_worth", _defence_worth)))
+	_sabotaged_worth = clampf(
+		float(record.get("sabotaged_worth", _sabotaged_worth)), 0.0, 1.0)
 
 
 static func reset() -> void:
 	_arms_worth = {"guns": 1.5, "tools": 0.5, "horses": 0.4}
 	_leadership = 1.25
 	_defence_worth = 0.2
+	_sabotaged_worth = 0.65
 
 
 ## What the ground under a tile is worth to whoever is standing on it.
@@ -238,8 +249,23 @@ static func of(
 		* arms_of(company) \
 		* leadership_of(company) \
 		* company.effectiveness() \
+		* sabotage_of(company) \
 		* terrain_of(company, map, defending, attacker) \
 		* fortification_of(company, map, defending, attacker)
+
+
+## What somebody at court has arranged for this company (#284, `patrons.md` §5).
+##
+## **One when nobody has**, which is every company in every run until a patron's
+## rival specialty is granted — so the six factors read exactly as they always
+## did and `§5`'s table is unchanged for anybody who never takes the gift.
+##
+## 🔒 **A seventh factor rather than a change to one of the six.** Sabotage is not
+## bad supply and not bad leadership: a letter that folded it into either would
+## be telling the player something untrue about why his enemy is losing, which
+## SPEC §9.1 forbids. It appears in `breakdown` for the same reason.
+static func sabotage_of(company: Company) -> float:
+	return _sabotaged_worth if company != null and company.sabotaged else 1.0
 
 
 ## The six factors and the total, for an event payload.
@@ -261,6 +287,7 @@ static func breakdown(
 		"arms": arms_of(company),
 		"leadership": leadership_of(company),
 		"supply": company.effectiveness(),
+		"sabotage": sabotage_of(company),
 		"terrain": terrain_of(company, map, defending, attacker),
 		"fortification": fortification_of(company, map, defending, attacker),
 		"force": of(company, map, defending, attacker),
