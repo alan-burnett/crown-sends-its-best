@@ -19,12 +19,18 @@
 
 | Years | What happens |
 | :--- | :--- |
-| **1–3** | A **steady** demand, set above what a young colony can produce |
-| **4 onward** | The bar starts moving, along one randomly chosen axis per year |
+| **1** | A **steady** demand, set above what a young colony can produce |
+| **2 onward** | The bar starts moving, along a randomly chosen axis twice a year (§7) |
 
 This matters more than a single curve would, because the two eras ask different
-questions. Years one to three ask *can you build an economy that clears a fixed
-bar.* Year four onward asks *can you keep clearing it while it moves.*
+questions. Year one asks *can you build an economy that clears a fixed bar.* Year
+two onward asks *can you keep clearing it while it moves.*
+
+**The fixed-bar era is one year, not three.** It was three until the Author moved
+growth to year two (§7), and the shorter era is the point of that ruling: the
+Squeeze was too gentle for too long. It also lands closer to SPEC §6.2, which
+wants it *impossible to please everyone by the end of year two* — now the year
+the bar begins to move.
 
 ## 2. The early squeeze is a level, not a curve
 
@@ -47,12 +53,12 @@ is the pressure.
 year one. Warnings are not failure, and reaching Concern in the first year is the
 intended experience rather than a sign of bad play.
 
-## 3. Year four, and the Chancellor
+## 3. Year two, and the Chancellor
 
 **The player has to know the rules changed**, or a moving bar reads as the game
 cheating.
 
-At the opening of year four the **Chancellor** writes. Not a warning — an
+At the opening of year two the **Chancellor** writes. Not a warning — an
 announcement, delivered with satisfaction. The Crown's obligations are growing,
 the colony must do more with less, and here is the new direction for its
 governance.
@@ -62,7 +68,7 @@ He is the right voice for three reasons the spec already establishes:
 - **SPEC §8.1**: he speaks with the Crown's political voice, and he cherishes
   delivering the PC bad news.
 - **SPEC §3.1**: the game opens with the Crown *at the peak* of its power. A peak
-  is the moment before a decline, and year four is when the decline starts being
+  is the moment before a decline, and year two is when the decline starts being
   felt out in the colonies.
 - He has seen this a hundred times in a hundred colonies. He is not warning the
   PC, he is informing him of something that was always going to happen to a man
@@ -390,10 +396,10 @@ Tied to SPEC §6.2:
 
 - **Year 1:** demand exceeds output. A sensible player reaches **Concern** and
   not beyond.
-- **Years 2–3:** a player who has built well closes the gap and holds; one who
-  has not is at **Alarm**.
-- **Year 4:** the Chancellor's announcement, and the first draw.
-- **Years 4–8:** three to five growth events, each perceptible in the letters.
+- **Year 2:** the Chancellor's announcement, and the first draw.
+- **Years 2–3:** a player who has built well keeps pace as the bar starts to move;
+  one who has not is at **Alarm**.
+- **Years 2–8:** six to fourteen growth events, each perceptible in the letters.
 - A negligent run should be failing by year 4–5, which is the specific thing #90
   says cannot happen today.
 
@@ -485,8 +491,9 @@ wall by a different route. Worth measuring rather than assuming.
   number is a harness question.
 - How often a resource demand should arrive relative to a gold one. Too often and
   the desk becomes logistics (§9.6).
-- **Whether growth saturates.** At one draw a year from year four, a run reaching
-  SPEC §13.2's fifty-year cap sees some forty-odd growth events. The ramp is
+- **Whether growth saturates.** At two draws a year from year two, a run reaching
+  SPEC §13.2's fifty-year cap sees **nearly a hundred** growth events — twice what
+  the old rate gave, which makes this more pressing than it was. The ramp is
   *supposed* to become impossible — §13.2 calls fifty years extraordinary — but
   there is a difference between impossible and farcical, and a demand grown a
   hundredfold stops reading as a Crown and starts reading as a bug. Whether the
