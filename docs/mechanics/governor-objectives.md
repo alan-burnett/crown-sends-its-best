@@ -305,6 +305,7 @@ an intent:
 | plant a new settlement | settle a new town |
 | your people's survival must come first | secure survival |
 | be rid of them | drive them off |
+| see that the people are educated | educate the people |
 
 ### Why the lock is right
 

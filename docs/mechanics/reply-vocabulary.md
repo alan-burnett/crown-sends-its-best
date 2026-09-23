@@ -68,7 +68,7 @@ below are not invented — each is a cluster already in the data, given a name.
 | **assent** | refuse · accept | `accept` ×5, `refuse` ×6, `deny`, `decline`, `grant`, `turn` |
 | **magnitude** | none · a little · a lot · a great deal | the five ladders above |
 | **purse** | nothing · part · fair · full · double | `pay`, `full`, `half`, `all`, `double`, `fair`, `part` |
-| **priority** | the seven governor intents | `defence` ×9, `growth` ×8, `profit` ×7, `survival` ×6, `settle` ×5, `trade`, `be_rid_of_them` |
+| **priority** | the governor intents — eight since *educate the people* | `defence` ×9, `growth` ×8, `profit` ×7, `survival` ×6, `settle` ×5, `trade`, `be_rid_of_them` |
 | **preference** | good ground · coast · ore · away from tribes | `map.md` §4's four requests |
 | **manner** | ask · press · command | `ask` ×5, `press`, `command` |
 | **terms** | let it rest · on conditions · ask what would keep them | `clemency`, `conditions`, `future` |
@@ -201,6 +201,7 @@ his description says.
   from, or families need declared subsets. **The first is simpler and probably
   right**, but it weakens §5's third check.
 - **Is `priority` really a family, or is it the intent list wearing a hat?** It
-  has seven rungs because `GovernorIntent` has seven members, and it will change
-  when that does. Worth deciding whether it is authored here or derived there —
+  had seven rungs because `GovernorIntent` had seven members, and it has already
+  changed once — *educate the people* made it eight — and it will again whenever
+  that list does. **That is the argument settled by example.** Worth deciding whether it is authored here or derived there —
   **derived is better**, and it is the only family that could be.
