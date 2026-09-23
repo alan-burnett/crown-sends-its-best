@@ -44,20 +44,31 @@ const BLANK: String = "______"
 ## The insertion point renders as a **blank to be filled**, which is the whole
 ## mad-libs conceit — and stops the raw `{choice}` token reaching the player,
 ## which is what it did before anybody looked at the screen.
-func tone_prompt() -> String:
+##
+## 🔒 **And its slots are filled** (#363). *As to the governor of
+## {param:town}, I am ______* is a question the player reads, so it takes the
+## path a label takes.
+func tone_prompt(context: LetterContext) -> String:
 	if not has_tone_step():
 		return ""
-	var phrasing := String(letter.reply[LetterSchema.KEY_TONE].get(LetterSchema.KEY_TEXT, ""))
-	return phrasing.replace(LetterSchema.CHOICE_TOKEN, BLANK)
+	var block: Dictionary = letter.reply[LetterSchema.KEY_TONE]
+	return _rendered(String(block.get(LetterSchema.KEY_TEXT, "")), {}, context) 		.replace(LetterSchema.CHOICE_TOKEN, BLANK)
 
 
 ## `[{tone, text}]` in the order the letter offers them.
-func tone_options() -> Array[Dictionary]:
+##
+## `context` fills the slots in `text` (#363), and **the screen must pass one.**
+## Without it the text comes back as written, which is only for callers that want
+## the tones and never show the words.
+func tone_options(context: LetterContext = null) -> Array[Dictionary]:
 	var out: Array[Dictionary] = []
 	if not has_tone_step():
 		return out
 	for option in letter.reply[LetterSchema.KEY_TONE].get(LetterSchema.KEY_OPTIONS, []):
-		out.append({"tone": StringName(option.get(LetterSchema.KEY_TONE, "")), "text": String(option.get(LetterSchema.KEY_TEXT, ""))})
+		out.append({
+			"tone": StringName(option.get(LetterSchema.KEY_TONE, "")),
+			"text": String(option.get(LetterSchema.KEY_TEXT, "")) if context == null 				else _rendered(String(option.get(LetterSchema.KEY_TEXT, "")), option, context),
+		})
 	return out
 
 
@@ -126,11 +137,15 @@ func harsh_is_pending() -> bool:
 	return has_harsh_step() and not outgoing.has_chosen(HARSH_STEP)
 
 
-func step_prompt(index: int) -> String:
+## 🔒 **Rendered, like the options under it** (#363). This returned the prompt as
+## written while `options_for` beside it filled its slots, so *What is to come
+## first at {param:town}* reached the player on nearly every governor's letter.
+func step_prompt(index: int, context: LetterContext) -> String:
 	var all_steps := steps()
 	if index < 0 or index >= all_steps.size():
 		return ""
-	return String(all_steps[index].get(LetterSchema.KEY_PROMPT, ""))
+	var step: Dictionary = all_steps[index]
+	return _rendered(String(step.get(LetterSchema.KEY_PROMPT, "")), step, context)
 
 
 ## The options for a step, each with the **label the player reads**.
@@ -149,7 +164,7 @@ func options_for(index: int, context: LetterContext) -> Array[Dictionary]:
 			continue
 		out.append({
 			"id": String(option.get("id", "")),
-			"label": renderer.resolve_slots(String(option.get(LetterSchema.KEY_LABEL, "")), option, letter, context),
+			"label": _rendered(String(option.get(LetterSchema.KEY_LABEL, "")), option, context),
 			"effect": option.get(LetterSchema.KEY_EFFECT, {}),
 		})
 	return out
@@ -269,3 +284,11 @@ func _option(step: Dictionary, option_id: String) -> Dictionary:
 		if String(option.get("id", "")) == option_id:
 			return option
 	return {}
+
+
+## 🔒 **Every string the player reads here takes this one path** (#363) — the
+## tone question, the tone wordings, a step's prompt and an option's label. They
+## are the same kind of string, and when each had its own path only the labels
+## were ever rendered.
+func _rendered(text: String, line: Dictionary, context: LetterContext) -> String:
+	return renderer.resolve_slots(text, line, letter, context)

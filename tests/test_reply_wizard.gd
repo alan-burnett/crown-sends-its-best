@@ -55,23 +55,25 @@ func test_the_tone_block_comes_before_the_steps() -> void:
 
 	wizard.choose_tone(Tone.DUTIFUL)
 	assert_eq(wizard.next_step_index(), 0, "then the first step")
-	assert_eq(wizard.step_prompt(0), "The supplies")
+	assert_eq(wizard.step_prompt(0, _context(&"marshal", {})), "The supplies")
 
 
 func test_each_letter_phrases_the_tone_question_in_its_own_words() -> void:
 	# The tone id is the fixed global key; the wording is written fresh per letter.
 	var marshal := _wizard("marshal.request_supplies", &"marshal")
 	var chancellor := _wizard("chancellor.how_to_answer", &"chancellor")
-	assert_ne(marshal.tone_prompt(), chancellor.tone_prompt())
-	assert_not_empty(marshal.tone_prompt())
+	var to_marshal := _context(&"marshal", {})
+	assert_ne(marshal.tone_prompt(to_marshal), chancellor.tone_prompt(_context(&"chancellor", {})))
+	assert_not_empty(marshal.tone_prompt(to_marshal))
 
 
 func test_the_tone_prompt_reads_as_a_blank_to_fill() -> void:
 	# The insertion point is the mad-libs blank. The raw token must never reach
 	# the player — it did, until somebody looked at the screen.
 	var wizard := _wizard("chancellor.how_to_answer", &"chancellor")
-	assert_false(wizard.tone_prompt().contains(LetterSchema.CHOICE_TOKEN), wizard.tone_prompt())
-	assert_true(wizard.tone_prompt().contains(ReplyWizard.BLANK), wizard.tone_prompt())
+	var prompt := wizard.tone_prompt(_context(&"chancellor", {}))
+	assert_false(prompt.contains(LetterSchema.CHOICE_TOKEN), prompt)
+	assert_true(prompt.contains(ReplyWizard.BLANK), prompt)
 
 
 func test_a_letter_may_offer_any_subset_of_the_five() -> void:
@@ -107,6 +109,55 @@ func test_an_option_the_letter_does_not_offer_is_refused() -> void:
 
 
 # --- Legibility ------------------------------------------------------------
+
+## A context that can answer every param a letter declares, all with one value,
+## so the only question left is whether a string is put through the renderer.
+func _answering(letter: Letter) -> LetterContext:
+	var params := {}
+	for name in letter.params:
+		params[name] = "Kettleburn"
+	var context := _context(&"steward", params)
+	context.tone = Tone.DUTIFUL
+	return context
+
+
+func test_nothing_the_wizard_shows_carries_a_raw_slot() -> void:
+	# 🔒 #363. A step's prompt and an option's label are the same kind of
+	# string, and only the label was ever rendered — so twelve prompts reached the
+	# player as *What is to come first at {param:town}*, and eleven tone
+	# questions the same way. **Every string the screen takes from the wizard,
+	# over every letter that ships**, because the validator checks that a slot
+	# resolves and has no way to know whether anything resolves it.
+	var shown := 0
+	for id in content.ids("letters"):
+		var letter := Letter.from_record(content.record("letters", id))
+		if not letter.has_reply():
+			continue
+		var wizard := ReplyWizard.new(letter, OutgoingLetter.new(id, &"steward"))
+		var context := _answering(letter)
+		var texts := PackedStringArray([wizard.tone_prompt(context)])
+		for option in wizard.tone_options(context):
+			texts.append(String(option["text"]))
+		for index in wizard.steps().size():
+			texts.append(wizard.step_prompt(index, context))
+			for option in wizard.options_for(index, context):
+				texts.append(String(option["label"]))
+		for text in texts:
+			shown += 1
+			assert_empty(LetterSchema.slots_in(text), "'%s' shows a raw slot: %s" % [id, text])
+	assert_true(shown > 100, "the sweep saw %d strings, so it read almost nothing" % shown)
+
+
+func test_a_prompt_names_the_town_its_letter_is_about() -> void:
+	# The acceptance line, on the letter that opens every run.
+	var wizard := _wizard("governor.report_month", &"steward")
+	var context := _context(&"steward", {"town": "Kettleburn"})
+	var prompts := PackedStringArray()
+	for index in wizard.steps().size():
+		prompts.append(wizard.step_prompt(index, context))
+	assert_true("".join(prompts).contains("Kettleburn"),
+		"the governor's question does not name his town: %s" % prompts)
+
 
 func test_every_options_effect_is_legible_from_its_label() -> void:
 	# **🔒 Every choice's mechanical effect can be understood from its wording.**

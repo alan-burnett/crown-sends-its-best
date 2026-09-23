@@ -241,8 +241,8 @@ func _show_step() -> void:
 		return
 
 	if wizard.has_tone_step() and wizard.outgoing.tone.is_empty():
-		_add_prompt(wizard.tone_prompt())
-		for option in wizard.tone_options():
+		_add_prompt(wizard.tone_prompt(context))
+		for option in wizard.tone_options(context):
 			var tone: StringName = option["tone"]
 			_add_option(String(option["text"]), func() -> void:
 				wizard.choose_tone(tone)
@@ -252,7 +252,7 @@ func _show_step() -> void:
 
 	var index := wizard.next_step_index()
 	if index >= 0:
-		_add_prompt(wizard.step_prompt(index))
+		_add_prompt(wizard.step_prompt(index, context))
 		for option in wizard.options_for(index, context):
 			var step_id := String(wizard.steps()[index].get("id", ""))
 			var option_id := String(option["id"])
