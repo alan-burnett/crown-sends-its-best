@@ -35,8 +35,8 @@ extends RefCounted
 ##
 ## ## 🔒 And neither path touches influence
 ##
-## `natives.md` §12.5 has tribes **taking tiles**, which is a contest over
-## influence and is neither razing nor battle. §10 holds it open and **it stays
+## SPEC §12.5 has tribes **taking tiles**, which is a contest over influence and
+## is neither razing nor battle. `natives.md` §10 holds it open and **it stays
 ## open**: nothing here reads or writes a village's influence, and a test says so.
 
 const EVENT_WAR_PARTY: StringName = &"war_party_raised"

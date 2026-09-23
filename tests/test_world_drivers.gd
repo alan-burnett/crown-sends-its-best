@@ -31,7 +31,7 @@ func _run(months: int, seed_value: int = SEED) -> Dictionary:
 	var streams := RngStreams.new(seed_value)
 	var month := WorldMonth.new(IntentBook.new(), streams)
 	month.drivers = [CrownAffairs.new(), _colony_driver()]
-	month.executors = [StubIntentExecutor.new()]
+	month.executors = [WorldValueExecutor.new()]
 
 	var history: Array = []
 	for i in months:
@@ -152,16 +152,16 @@ func test_a_decision_changes_the_following_month() -> void:
 	var book := IntentBook.new()
 	var month := WorldMonth.new(book, RngStreams.new(SEED))
 	month.drivers = [CrownAffairs.new(), _colony_driver()]
-	month.executors = [StubIntentExecutor.new()]
+	month.executors = [WorldValueExecutor.new()]
 
 	var untouched := WorldValues.initial_state()
 	var untouched_log := EventLog.new()
 	var untouched_month := WorldMonth.new(IntentBook.new(), RngStreams.new(SEED))
 	untouched_month.drivers = [CrownAffairs.new(), _colony_driver()]
-	untouched_month.executors = [StubIntentExecutor.new()]
+	untouched_month.executors = [WorldValueExecutor.new()]
 
 	book.commit(Intent.new(
-		&"", StubIntentExecutor.KIND, &"marshal", WorldValues.SUPPLY, 1, {"per_month": 25.0}
+		&"", WorldValueExecutor.KIND, &"marshal", WorldValues.SUPPLY, 1, {"per_month": 25.0}
 	), log, state.month)
 
 	month.run(state, log)

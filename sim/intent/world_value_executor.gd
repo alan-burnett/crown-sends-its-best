@@ -1,12 +1,21 @@
-class_name StubIntentExecutor
+class_name WorldValueExecutor
 extends IntentExecutor
 
-## The M1 executor: moves one of the stub world's scalars, a month at a time.
+## Moves one of the world's named values, a month at a time.
 ##
-## Deliberately thin. The point of M1 is whether reading and answering the mail
-## is fun, so the world only has to move plausibly underneath the letters (#20).
-## What matters is that this is a **real executor against the real model**, so
-## M2's colony month swaps in behind the seam without the Intent model changing.
+## **Every Order that reaches a world value comes through here** — the war, the
+## Crown's supply and immigration drive, every tax rate, the mandate. It was
+## written for M1 against the stub world (#20) and was called `StubIntentExecutor`
+## until M7, by which time nothing about it was a stub: `turn_machine.gd` builds
+## one every run and hands it `order_effects()`, the whole table of what an Order
+## means in the world.
+##
+## The old name invited somebody to delete it with the rest of M1. The Orders
+## that do *not* come through here each have an executor of their own —
+## `UrgeIntentExecutor` reaches a town, `ShipmentExecutor` moves goods,
+## `FoundingExecutor` proposes a town — which is the pattern
+## `deliberation.md` §7 means by *later milestones add executors, not a new
+## model*.
 ##
 ## An Intent it handles looks like:
 ##
@@ -33,7 +42,7 @@ const EVENT_PROGRESSED: StringName = &"intent_progressed"
 ## **What each kind of Order means in the world.** The sim cannot name the Order
 ## kinds — they belong to the correspondence layer — so the table is handed in by
 ## whoever can see both, which is the turn loop. That also keeps the whole
-## mapping in one readable place, to be deleted with the rest of the stub in M2.
+## mapping in one readable place.
 ##
 ## A `target` of `""` means the Order has no effect on the world at all. It still
 ## completes rather than stalling: a stall is "nothing could carry this out",

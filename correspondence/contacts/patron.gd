@@ -49,8 +49,24 @@ const CATALOGUE_RECORD: String = "catalogue"
 ## ⚠️ **`patrons.md` §12 leaves this open** — *nothing fixes it, and §9.6's
 ## letter volume is the real constraint; three is probably the ceiling.* Three is
 ## what shipped, and it is the same figure the dukes carry for the same reason.
-## One constant, and the PO's to overturn.
-const HOW_MANY: int = 3
+## The PO's to overturn.
+##
+## A quirk names it (`perks-and-quirks.md` §4, *Busy patrons*), and **that is why
+## §9.6 is the constraint rather than a footnote**: more patrons is more of the
+## desk, which is the drawback the entry is built on rather than a side effect to
+## be tuned away.
+static var _how_many: int = 3
+
+
+static func how_many() -> int:
+	return _how_many
+
+
+## Turn it. Never below zero; a run with no patrons in it is a run that has not
+## met one yet, which is already the first four years of every run.
+static func set_how_many(count: int) -> void:
+	_how_many = maxi(0, count)
+
 
 ## How many hands are out before one of them is a patron.
 ##
@@ -71,6 +87,7 @@ static func load_from(record: Dictionary) -> void:
 
 static func reset() -> void:
 	_catalogue = []
+	_how_many = 3
 
 
 ## Every id in the catalogue, in file order.
@@ -111,7 +128,7 @@ static func how_many_arrived(growth: DemandGrowth) -> int:
 	if growth == null:
 		return 0
 	return clampi(
-		DemandSchedule.askers(growth) - ASKERS_FOR_PATRONS + 1, 0, HOW_MANY)
+		DemandSchedule.askers(growth) - ASKERS_FOR_PATRONS + 1, 0, _how_many)
 
 
 ## The id the nth patron goes by.

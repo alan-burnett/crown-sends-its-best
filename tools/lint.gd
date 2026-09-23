@@ -4,7 +4,7 @@ extends SceneTree
 ##
 ##     godot --headless --script res://tools/lint.gd
 ##
-## Two rules that later tickets depend on and that are cheap to check now and
+## Three rules that later tickets depend on and that are cheap to check now and
 ## expensive to retrofit once hundreds of files exist:
 ##
 ## 1. **`sim/` references no Godot node type** (#1). The world sim is
@@ -14,6 +14,9 @@ extends SceneTree
 ##    from a named stream, so adding a die roll in one system cannot perturb
 ##    another's sequence. `randi()`, and also `Array.shuffle()` and
 ##    `pick_random()`, which quietly use the same global generator.
+## 3. **Every doc citation resolves** (#386). `` `battles.md` §2 `` names a real
+##    document and a real section of it. See `CITATION` for what this cannot
+##    check, which is most of what a citation means.
 ##
 ## It keeps **Crown standing**, **rebel sentiment** and **prestige** out of
 ## `presentation/`
@@ -31,6 +34,31 @@ extends SceneTree
 ## name the project, the tile or the month, and the check is here rather than in
 ## a review because the tempting version of that bug — a letter effect that sets
 ## `town.objective` directly — looks entirely reasonable in isolation.
+
+## Rule 3: a doc citation must resolve.
+##
+## `` `battles.md` §2 `` names a real document and a real section of it. 495 such
+## citations are in the tree and this is the cheapest way to keep it that way —
+## a doc gains a section, the numbering shifts, and every comment pointing past
+## it is quietly wrong.
+##
+## **It cannot check that the section says what the comment claims**, and that
+## failure mode is real: `ASKERS_FOR_PATRONS` once cited `patrons.md` §7, which
+## resolves, and §7 says *"nothing here adds a clock"* — the opposite of the
+## ladder the constant built (#339). **That check is a person reading**, and a
+## green lint is not a verified citation.
+##
+## `§N.M` is tolerated and only `N` is checked, because SPEC-style subsections do
+## not appear as headings in the mechanics docs.
+const CITATION: String = "`([A-Za-z0-9/._-]+\\.md)`\\s*§\\s*([0-9]+)"
+
+## Where a cited document may live. A citation may name the file alone
+## (`battles.md`) or the path (`docs/mechanics/battles.md`); both resolve to the
+## same doc, so only the basename is looked up.
+const DOC_DIRS: PackedStringArray = ["res://docs/mechanics/", "res://"]
+
+## A top-level section heading: `## 3. What moves it`.
+const SECTION_HEADING: String = "^##\\s+([0-9]+)\\."
 
 const SIM_ROOT: String = "res://sim"
 const PRESENTATION_ROOT: String = "res://presentation"
@@ -215,6 +243,10 @@ const HASH_EXEMPT: PackedStringArray = ["res://sim/rng/stable_hash.gd"]
 
 var _violations: PackedStringArray = PackedStringArray()
 
+## Cited document basename -> its top-level section numbers, or `null` when the
+## document does not exist. Read once each rather than once per citation.
+var _doc_sections: Dictionary = {}
+
 
 func _init() -> void:
 	for root in SCAN_ROOTS:
@@ -241,6 +273,11 @@ func _check(path: String) -> void:
 	var in_presentation := path.begins_with(PRESENTATION_ROOT)
 
 	for index in lines.size():
+		# 🔒 **On the raw line**, because citations live in doc comments and
+		# `_strip` removes those. Every other rule wants them gone; this one is
+		# the only rule whose subject is the prose.
+		_check_citations(path, index, lines[index])
+
 		var line := _strip(lines[index])
 		if line.strip_edges().is_empty():
 			continue
@@ -290,6 +327,49 @@ func _check(path: String) -> void:
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")
+
+
+## Rule 3: every `` `doc.md` §N `` on this line names a real doc and a real
+## section of it.
+func _check_citations(path: String, index: int, line: String) -> void:
+	var regex := RegEx.new()
+	regex.compile(CITATION)
+	for hit in regex.search_all(line):
+		var name := hit.get_string(1)
+		var wanted := hit.get_string(2)
+		var found: Variant = _sections_of(name)
+		if found == null:
+			_report(path, index, "cites `%s`, which is not a document" % name)
+			continue
+		var sections: PackedStringArray = found
+		if not sections.has(wanted):
+			_report(path, index,
+				"cites `%s` §%s, which has no section %s" % [name, wanted, wanted])
+
+
+## The top-level section numbers of a cited document, or `null` when no such
+## document exists. Read once each.
+func _sections_of(name: String) -> Variant:
+	var base := name.get_file()
+	if _doc_sections.has(base):
+		return _doc_sections[base]
+
+	for directory in DOC_DIRS:
+		var path := directory + base
+		if not FileAccess.file_exists(path):
+			continue
+		var found := PackedStringArray()
+		var heading := RegEx.new()
+		heading.compile(SECTION_HEADING)
+		for doc_line in FileAccess.get_file_as_string(path).split("\n"):
+			var hit := heading.search(doc_line)
+			if hit != null:
+				found.append(hit.get_string(1))
+		_doc_sections[base] = found
+		return found
+
+	_doc_sections[base] = null
+	return null
 
 
 func _match(path: String, index: int, line: String, pattern: String, message: String) -> void:

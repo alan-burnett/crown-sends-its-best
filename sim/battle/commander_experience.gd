@@ -68,6 +68,7 @@ static func load_from(record: Dictionary) -> void:
 static func reset() -> void:
 	_levels = []
 	_bonuses = []
+	_starting_level = 0
 
 
 static func is_knob(id: String) -> bool:
@@ -143,13 +144,40 @@ static func top_level() -> int:
 ## cannot disagree — and so retuning the thresholds re-ranks every commander in
 ## a saved run rather than only the ones raised afterwards.
 static func level_for(inflicted: float) -> int:
-	var level := 0
+	var level := _starting_level
 	for entry in _levels:
 		if inflicted + 0.0001 >= float((entry as Dictionary).get("casualties", 0.0)):
 			level += 1
 		else:
 			break
-	return level
+	return mini(level, top_level())
+
+
+# --- 🔒 The knob: what a man knows before his first battle ------------------
+
+## How many levels a commander is credited with the day he is commissioned.
+##
+## Zero in every run until a quirk says otherwise (`perks-and-quirks.md` §4,
+## *Commando commanders*), which is the whole history of the game so far: a new
+## man has killed nobody and is ranked accordingly.
+##
+## 🔒 **Added to the tally's reading, not written into the tally.** The level is
+## *read from casualties inflicted and never stored* so that a thousand men
+## killed and a level cannot disagree — and so retuning the thresholds re-ranks
+## every commander in a saved run. A starting credit written into `inflicted`
+## would be a lie in the book about what a man had done, and the letters read
+## that book.
+static var _starting_level: int = 0
+
+
+static func starting_level() -> int:
+	return _starting_level
+
+
+## Turn it. Capped at the top rank, because a man cannot begin above the highest
+## thing the colony has a word for.
+static func start_at(level: int) -> void:
+	_starting_level = clampi(level, 0, top_level())
 
 
 ## What the colony calls a man of this level.

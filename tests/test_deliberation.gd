@@ -56,13 +56,13 @@ var context: DeliberationContext = null
 
 
 func before_each() -> void:
-	Deliberation.reset()
+	reset_world()
 	log = EventLog.new()
 	context = DeliberationContext.new(KIND, WorldState.new(4, {}), log)
 
 
 func after_each() -> void:
-	Deliberation.reset()
+	reset_world()
 
 
 func _candidates() -> Array:

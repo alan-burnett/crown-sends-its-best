@@ -69,6 +69,7 @@ static func load_from(records: Array, levels: Dictionary = {}) -> void:
 
 static func reset() -> void:
 	_terrains = {}
+	_yield_scale = {}
 
 
 static func has(id: StringName) -> bool:
@@ -129,7 +130,40 @@ static func levels() -> Dictionary:
 func yield_of(resource: StringName) -> float:
 	if not yields.has(String(resource)):
 		return 0.0
-	return Terrain.level_value(String(yields[String(resource)]))
+	return Terrain.level_value(String(yields[String(resource)])) \
+		* Terrain.yield_scale_of(resource)
+
+
+# --- 🔒 The knob: what the ground gives, by resource ------------------------
+
+## A standing multiplier on every tile's yield of one resource.
+##
+## **A fact about the world the PC was given**, which is what makes it a quirk's
+## business (`perks-and-quirks.md` §1, §4 *Scarce iron*) rather than a terrain's.
+## A colony where ore is scarce is one where every mountain gives less, and
+## authoring that on each terrain record would be six places to forget.
+##
+## 🔒 **Applied at the single source of a yield**, so improvements, town work,
+## site preference and the harness all see the same ground. `Improvement.yield_of`
+## multiplies this value rather than the authored one, which is what makes a mine
+## on poor ore still poor.
+##
+## Empty is the only state the game had before quirks, and it means every yield
+## is exactly as authored.
+static var _yield_scale: Dictionary = {}
+
+
+static func yield_scale_of(resource: StringName) -> float:
+	return float(_yield_scale.get(String(resource), 1.0))
+
+
+## Turn it. **Never below zero**: ground that owes the colony resources is not a
+## thing the economy can express.
+static func scale_yields(scales: Dictionary) -> void:
+	var resources: Array = scales.keys()
+	resources.sort()
+	for resource in resources:
+		_yield_scale[String(resource)] = maxf(0.0, float(scales[resource]))
 
 
 ## Resources this terrain yields anything of, sorted.

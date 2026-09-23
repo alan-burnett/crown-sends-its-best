@@ -43,13 +43,14 @@ extends RefCounted
 static func reason_for(
 	colony: Colony,
 	parties: Array,
+	companies: Companies,
 	standing: CrownStanding,
 	marshal: Contact,
 	state: WorldState,
 ) -> StringName:
 	if is_overrun(colony, parties):
 		return OVERRUN
-	if is_independent(colony, standing, marshal, state):
+	if is_independent(colony, companies, standing, marshal, state):
 		return INDEPENDENCE
 	return &""
 
@@ -105,6 +106,7 @@ static func _experts_in(party: ExpeditionParty) -> int:
 ## 🔒 **Four conditions, together** (§1). Any one untrue and the run goes on.
 static func is_independent(
 	colony: Colony,
+	companies: Companies,
 	standing: CrownStanding,
 	marshal: Contact,
 	state: WorldState,
@@ -113,7 +115,7 @@ static func is_independent(
 		return false
 	return not any_town_is_loyal(colony) \
 		and standing != null and standing.has_lost_confidence() \
-		and crown_troops_in(colony) <= 0 \
+		and crown_troops_in(companies) <= 0 \
 		and not will_send_more(marshal, standing, state)
 
 
@@ -126,14 +128,28 @@ static func any_town_is_loyal(colony: Colony) -> bool:
 	return colony != null and not colony.loyal().is_empty()
 
 
-## Condition 3, and **nothing produces one yet**.
+## Condition 3: how many Crown soldiers are standing in the colony.
 ##
-## Crown troops are M6. Deriving the count rather than assuming none means the
-## milestone that brings them gives this function a body and changes nothing
-## else — the condition is already wired, already tested, and already reads as
-## *true* in the only way it can be true today.
-static func crown_troops_in(_colony: Colony) -> int:
-	return 0
+## 🔒 **The men, not the companies.** Two half-dead companies are not twice the
+## garrison of one whole one, and §13.1's condition is whether the Crown still
+## has force here at all.
+##
+## **No position test, deliberately.** Every Crown company in the run is in the
+## colony — the Marshal raises them nowhere else and they are sent nowhere else
+## — so asking where one stands would invent a distinction the sim does not have
+## and would answer differently the month one marched between two towns.
+##
+## `Companies.list` holds only the living (`bury_the_dead`), so a company wiped
+## out last month is already gone rather than counted at zero.
+static func crown_troops_in(companies: Companies) -> int:
+	if companies == null:
+		return 0
+	var men := 0
+	for entry in companies.list:
+		var company: Company = entry
+		if company != null and company.allegiance == Company.CROWN:
+			men += company.size
+	return men
 
 
 ## Condition 4, and the one where a run actually ends.

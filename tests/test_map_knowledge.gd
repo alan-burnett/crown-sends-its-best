@@ -12,8 +12,7 @@ const SEED: int = 1649
 
 
 func before_each() -> void:
-	Terrain.reset()
-	Improvement.reset()
+	reset_world()
 	Terrain.load_from([
 		{"id": "ocean", "name": "ocean", "land": false, "colour": "#123456"},
 		{"id": "plains", "name": "plains", "land": true, "colour": "#abcdef",
@@ -24,8 +23,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	Terrain.reset()
-	Improvement.reset()
+	reset_world()
 
 
 func _world() -> Dictionary:

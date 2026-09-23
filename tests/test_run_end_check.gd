@@ -21,17 +21,7 @@ var content: ContentDatabase = null
 
 
 func before_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	Threshold.reset()
-	Consultation.reset()
-	HarshClause.reset()
+	reset_world()
 	M1Registrations.register_all()
 	content = ContentDatabase.new()
 	content.load_all("en")
@@ -39,17 +29,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	Threshold.reset()
-	Consultation.reset()
-	HarshClause.reset()
+	reset_world()
 	content.free()
 
 
@@ -166,7 +146,7 @@ func _independent() -> RunState:
 func test_all_four_together_end_the_run() -> void:
 	var run := _independent()
 	assert_true(RunEndCheck.is_independent(
-		run.colony, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		"every condition held and the colony was still the Crown's")
 
 
@@ -175,7 +155,7 @@ func test_one_loyal_town_is_enough_to_go_on() -> void:
 	run.colony.in_order()[0].rebelling = false
 	assert_true(RunEndCheck.any_town_is_loyal(run.colony))
 	assert_false(RunEndCheck.is_independent(
-		run.colony, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		"a colony with a loyal town in it declared independence")
 
 
@@ -183,7 +163,7 @@ func test_standing_that_is_merely_alarmed_is_enough_to_go_on() -> void:
 	var run := _independent()
 	run.standing.band = CrownStanding.BAND_ALARM
 	assert_false(RunEndCheck.is_independent(
-		run.colony, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		"the Crown had not given up and the colony left anyway")
 
 
@@ -195,7 +175,7 @@ func test_a_marshal_who_would_still_send_is_enough_to_go_on() -> void:
 		run.contact(&"marshal"), run.standing, run.world),
 		"a devoted Marshal would send nobody")
 	assert_false(RunEndCheck.is_independent(
-		run.colony, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		"the colony went while the Marshal was still willing")
 
 
@@ -249,7 +229,7 @@ func test_no_marshal_at_all_is_not_a_refusal() -> void:
 	assert_true(RunEndCheck.will_send_more(null, run.standing, run.world))
 	run.contacts.erase("marshal")
 	assert_false(RunEndCheck.is_independent(
-		run.colony, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		"a colony declared independence because nobody held the Marshal's office")
 
 
@@ -301,7 +281,7 @@ func test_overrun_beats_independence_when_both_would_fire() -> void:
 	var run := _independent()
 	_emptied(run)
 	assert_eq(RunEndCheck.reason_for(
-		run.colony, run.parties, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.parties, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		RunEndCheck.OVERRUN,
 		"an empty colony declared independence")
 
@@ -309,7 +289,7 @@ func test_overrun_beats_independence_when_both_would_fire() -> void:
 func test_a_going_concern_ends_nothing() -> void:
 	var run := _run()
 	assert_eq(String(RunEndCheck.reason_for(
-		run.colony, run.parties, run.standing, run.contact(&"marshal"), run.world)), "",
+		run.colony, run.parties, run.companies, run.standing, run.contact(&"marshal"), run.world)), "",
 		"a colony going about its business was reported lost")
 
 
@@ -365,12 +345,68 @@ func test_how_survives_the_save() -> void:
 		"how the colony was lost did not survive the save")
 
 
-# --- 🔒 Crown troops, which do not exist yet --------------------------------
+# --- 🔒 Crown troops, condition 3 -------------------------------------------
 
-func test_the_troop_condition_is_derived_and_reads_true_today() -> void:
-	# Crown troops are M6. Deriving the count rather than assuming none means the
-	# milestone that brings them gives one function a body and changes nothing
-	# else — the condition is already wired and already tested.
+## Put a company of the given allegiance in the colony.
+func _company(run: RunState, allegiance: StringName, size: int) -> Company:
+	var company := Company.new(StringName("company_%d" % (run.companies.raised + 1)),
+		run.companies.raised + 1)
+	run.companies.raised += 1
+	company.allegiance = allegiance
+	company.size = size
+	run.companies.list.append(company)
+	return company
+
+
+func test_a_colony_with_no_crown_company_has_no_crown_troops() -> void:
 	var run := _run()
-	assert_eq(RunEndCheck.crown_troops_in(run.colony), 0,
-		"something is producing Crown troops and this has not been told")
+	assert_eq(RunEndCheck.crown_troops_in(run.companies), 0,
+		"a colony that has asked for nobody has a garrison")
+
+
+func test_it_counts_the_men_and_not_the_companies() -> void:
+	# 🔒 Two half-dead companies are not twice the garrison of one whole one.
+	# §13.1's condition is whether the Crown still has force here at all.
+	var run := _run()
+	_company(run, Company.CROWN, 40)
+	_company(run, Company.CROWN, 15)
+	assert_eq(RunEndCheck.crown_troops_in(run.companies), 55,
+		"the count is not of men")
+
+
+func test_a_colonial_company_is_not_crown_troops() -> void:
+	# 🔒 SPEC §12.3: *colonial forces will not take up arms against other
+	# colonists*, so a militia is precisely not what condition 3 asks about. A
+	# rebel colony full of its own companies is still a colony the Crown has
+	# abandoned.
+	var run := _run()
+	_company(run, Company.COLONIAL, 90)
+	assert_eq(RunEndCheck.crown_troops_in(run.companies), 0,
+		"a town's own militia was counted as the Crown's garrison")
+
+
+func test_crown_troops_on_the_ground_hold_the_run_open() -> void:
+	# 🔒 The interlock, and the reason this is not cosmetic. Independence is four
+	# conditions **together**. While the Crown still has men here it has not
+	# abandoned the colony, whatever the Marshal says about sending more.
+	var run := _independent()
+	assert_true(RunEndCheck.is_independent(
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
+		"the fixture does not reach Independence, so this proves nothing")
+
+	_company(run, Company.CROWN, 1)
+	assert_false(RunEndCheck.is_independent(
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
+		"a colony declared independence with Crown troops standing in it")
+
+
+func test_the_chancellor_and_the_check_agree_about_the_troops() -> void:
+	# 🔒 `RunEndCheck` owns the test and `LastChance` only names it. Two readings
+	# would mean the Chancellor warning about a condition the check did not
+	# believe in.
+	var run := _independent()
+	_company(run, Company.CROWN, 25)
+	var flags := LastChance.conditions_of(
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world)
+	assert_false(bool(flags[LastChance.NO_TROOPS]),
+		"the Chancellor reported no troops while a Crown company stood in the colony")

@@ -25,10 +25,7 @@ var marshal: Contact = null
 
 
 func before_each() -> void:
-	ResourceCatalogue.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
+	reset_world()
 	M1Registrations.register_all()
 	content = ContentDatabase.new()
 	content.load_all("en")
@@ -40,10 +37,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ResourceCatalogue.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
+	reset_world()
 	content.free()
 
 

@@ -21,17 +21,7 @@ var content: ContentDatabase = null
 
 
 func before_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	NameBags.reset()
-	HarshClause.reset()
-	IndependenceClause.reset()
+	reset_world()
 	M1Registrations.register_all()
 	content = ContentDatabase.new()
 	content.load_all("en")
@@ -39,17 +29,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	NameBags.reset()
-	HarshClause.reset()
-	IndependenceClause.reset()
+	reset_world()
 	content.free()
 
 
@@ -62,7 +42,7 @@ func _run() -> RunState:
 func _look(run: RunState, month: int) -> Dictionary:
 	run.world.month = month
 	return LastChance.look(
-		run.colony, run.parties, run.standing, run.contact(&"marshal"),
+		run.colony, run.parties, run.companies, run.standing, run.contact(&"marshal"),
 		run.world, run.log)
 
 
@@ -175,7 +155,7 @@ func test_reversing_one_condition_exits_the_stage() -> void:
 	assert_true(outside < inside,
 		"a town came home and nothing about the colony's position changed")
 	assert_false(RunEndCheck.is_independent(
-		run.colony, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		"a colony with a loyal town in it still reads as independent")
 
 

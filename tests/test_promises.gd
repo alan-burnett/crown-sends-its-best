@@ -11,8 +11,7 @@ var marshal: Contact = null
 
 
 func before_each() -> void:
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 	M1Registrations.register_all()
 	log = EventLog.new()
 	book = PromiseBook.new()
@@ -21,8 +20,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 
 
 func _gold(amount: int, month: int = 0) -> Promise:

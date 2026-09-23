@@ -24,17 +24,7 @@ var content: ContentDatabase = null
 
 
 func before_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	Threshold.reset()
-	Consultation.reset()
-	HarshClause.reset()
+	reset_world()
 	M1Registrations.register_all()
 	content = ContentDatabase.new()
 	content.load_all("en")
@@ -42,17 +32,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	Threshold.reset()
-	Consultation.reset()
-	HarshClause.reset()
+	reset_world()
 	content.free()
 
 

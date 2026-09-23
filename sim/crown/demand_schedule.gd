@@ -73,6 +73,27 @@ static func _growth_value(dimension: StringName, key: String, fallback: float) -
 	return float(entry.get(key, fallback))
 
 
+# --- 🔒 The knob: how many hands the world holds ----------------------------
+
+## Lift one dimension's ceiling, for a run whose world is more crowded than most.
+##
+## 🔒 **The ceiling binds, not the count.** §6 wrote the reach ceiling as *there
+## are only so many people in the world with a hand out*, and `demands.json`
+## records that the last three of those hands **are** the three patrons. So a
+## colony that draws more patrons is one where more hands are out, and a quirk
+## that raised `Patron`'s count without this would be a number with nothing
+## behind it — which is exactly what it was, and the test that asked for more
+## patrons caught it.
+##
+## 🔒 **It only ever raises.** A quirk that quietly removed a rival duke from a
+## run would be a far larger claim than any of them makes, and `rival-pressure.md`
+## has the three dukes as a fixture of every run.
+static func raise_ceiling(dimension: StringName, ceiling: int) -> void:
+	var entry: Dictionary = _growth.get(String(dimension), {})
+	entry["ceiling"] = maxf(float(entry.get("ceiling", 4.0)), float(ceiling))
+	_growth[String(dimension)] = entry
+
+
 ## Months between demands. **Shortened by `frequency`, with a floor**, because
 ## the one thing growth must not do is bury the desk (SPEC §9.6).
 static func months_between(growth: DemandGrowth) -> float:

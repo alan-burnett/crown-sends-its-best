@@ -48,6 +48,12 @@ const QUIRKS_RECORD: String = "quirks"
 ## use, so nothing holds a `Callable` at shutdown.
 const APPLIES: Dictionary = {
 	"crown_grace": "_crown_grace",
+	"crown_price_scale": "_crown_price_scale",
+	"yield_scale": "_yield_scale",
+	"commander_start_level": "_commander_start_level",
+	"commander_survival": "_commander_survival",
+	"patrons_at_once": "_patrons_at_once",
+	"hands_out": "_hands_out",
 }
 
 
@@ -135,3 +141,70 @@ static func _apply_one(
 static func _crown_grace(run: RunState, _args: Dictionary) -> void:
 	if run.refusal != null:
 		run.refusal.has_grace = true
+
+
+## **Scarce iron**, the Crown's half: what it charges for a named resource, for
+## the whole run.
+##
+## 🔒 **A price, never an instruction** (SPEC §11.3). It reaches the towns
+## through `Valuation.crown` exactly as the war lift does, so they turn away from
+## dear resources because they are dear.
+##
+## Args: `{"resources": {"iron": 2.4, ...}}`.
+static func _crown_price_scale(_run: RunState, args: Dictionary) -> void:
+	CrownPrices.scale_prices(args.get("resources", {}))
+
+
+## **Scarce iron**, the ground's half: what every tile gives of a named resource.
+##
+## The asymmetry between this and the price above **is the whole quirk**
+## (`perks-and-quirks.md` §4): the Crown's price rises far more than the yield
+## falls, so buying your way out stops working and the way out is your own
+## foundry.
+##
+## Args: `{"resources": {"ore": 0.8, ...}}`.
+static func _yield_scale(_run: RunState, args: Dictionary) -> void:
+	Terrain.scale_yields(args.get("resources", {}))
+
+
+## **Commando commanders**, the benefit: a man knows his trade before his first
+## battle.
+##
+## Args: `{"levels": 2}`.
+static func _commander_start_level(_run: RunState, args: Dictionary) -> void:
+	CommanderExperience.start_at(int(args.get("levels", 0)))
+
+
+## **Commando commanders**, the cost: he is likelier to die with his men.
+##
+## The pair is the quirk — a colony that breeds veterans is one that buries them
+## faster — and `commanders.md` §7 already notes the flip *need not be even*.
+##
+## Args: `{"chance": 0.3}`.
+static func _commander_survival(_run: RunState, args: Dictionary) -> void:
+	CommanderFate.set_survives(float(args.get("chance", 0.5)))
+
+
+## **Busy patrons**: how many may be in the correspondence at once.
+##
+## 🔒 **More prestige and more of the desk**, which SPEC §9.6 makes the real
+## constraint. The drawback is not a penalty bolted on; it is the letters.
+##
+## Args: `{"count": 5}`.
+static func _patrons_at_once(_run: RunState, args: Dictionary) -> void:
+	Patron.set_how_many(int(args.get("count", 3)))
+
+
+## **Busy patrons**, the half that makes the other half mean anything: how many
+## hands the world holds out at full reach.
+##
+## 🔒 **Raising the count alone does nothing**, because `DemandSchedule`'s reach
+## ceiling is what actually caps arrivals — seven hands, of which the last three
+## are the patrons. A quirk that promised five and delivered three would be a
+## number in a file, and that is precisely what it was until a test asked for
+## the fifth.
+##
+## Args: `{"reach_ceiling": 9}`.
+static func _hands_out(_run: RunState, args: Dictionary) -> void:
+	DemandSchedule.raise_ceiling(
+		DemandGrowth.REACH, int(args.get("reach_ceiling", 0)))

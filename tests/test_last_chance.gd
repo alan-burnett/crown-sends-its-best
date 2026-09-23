@@ -21,17 +21,7 @@ var content: ContentDatabase = null
 
 
 func before_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	NameBags.reset()
-	HarshClause.reset()
-	IndependenceClause.reset()
+	reset_world()
 	M1Registrations.register_all()
 	content = ContentDatabase.new()
 	content.load_all("en")
@@ -39,17 +29,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	NameBags.reset()
-	HarshClause.reset()
-	IndependenceClause.reset()
+	reset_world()
 	content.free()
 
 
@@ -62,7 +42,7 @@ func _run() -> RunState:
 func _look(run: RunState, month: int) -> Dictionary:
 	run.world.month = month
 	return LastChance.look(
-		run.colony, run.parties, run.standing, run.contact(&"marshal"),
+		run.colony, run.parties, run.companies, run.standing, run.contact(&"marshal"),
 		run.world, run.log)
 
 
@@ -171,7 +151,7 @@ func test_the_four_are_the_ones_the_check_decides_on() -> void:
 	# condition the check did not believe in.
 	var run := _run()
 	var flags := LastChance.conditions_of(
-		run.colony, run.standing, run.contact(&"marshal"), run.world)
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world)
 	assert_eq(flags.size(), 4)
 	for name in LastChance.CONDITIONS:
 		assert_has(flags, name)
@@ -180,9 +160,9 @@ func test_the_four_are_the_ones_the_check_decides_on() -> void:
 	for town in run.colony.in_order():
 		town.rebelling = true
 	var all_true := LastChance.how_many_true(LastChance.conditions_of(
-		run.colony, run.standing, run.contact(&"marshal"), run.world)) == 4
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world)) == 4
 	assert_eq(all_true, RunEndCheck.is_independent(
-		run.colony, run.standing, run.contact(&"marshal"), run.world),
+		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world),
 		"the four the Chancellor names and the four the check decides on disagree")
 
 
