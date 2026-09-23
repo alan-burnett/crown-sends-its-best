@@ -36,6 +36,14 @@ for the design. Only the Author edits it.
   unbuilt for two days.
 - Labels: `author` (needs an Author decision), `blocked` (depends on unfinished
   work).
+- **`blocked` names what it is blocked on**, in the body, as `Depends on #N`.
+  A label with no such line cannot be checked and will not be cleared, because
+  nobody can tell when it stopped being true. **That has already happened**:
+  twenty tickets across M7 and M8 sat labelled `blocked` after every one of
+  their blockers had closed — five of them never said what they were waiting
+  for — and M7 read as entirely unavailable while all of it was ready to build.
+- **Clearing the label is the PO's job and part of closing the blocker**, not
+  something the dev should have to discover.
 
 ## Terminology
 
