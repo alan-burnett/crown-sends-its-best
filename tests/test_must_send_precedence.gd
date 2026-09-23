@@ -51,6 +51,17 @@ func _clamouring() -> Dictionary:
 	run.contact(&"chancellor").relationship = Relationship.new(
 		&"chancellor", Relationship.HIGH_AT)
 	run.world.values[WorldValues.REVENUE_BASELINE] = 60.0
+
+	# **And there is something to warn about** (#364, #365). The standing warning
+	# reports what the Treasury has paid on the PC's word this year, so it cannot
+	# be true of a run that has paid nothing; and no complaint is true of a colony
+	# that has not yet had a month.
+	for town in run.colony.in_order():
+		run.log.emit(SettlePhase.EVENT_LIVED, town.id, run.world.month, {"town": String(town.id)})
+	var promise := Promise.new(&"marshal", &"gold", {"amount": 200.0}, 0, 1)
+	run.promises.make(promise, run.contact(&"marshal"), run.log, 0)
+	run.promises.settle_due(run.contacts, run.log, 1)
+	run.world.month = 1
 	return {"run": run, "machine": machine}
 
 

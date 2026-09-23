@@ -24,6 +24,10 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"warning_turns", {}, ColonyParamSources.warning_turns
 	)
+	# What the Treasury has actually paid on the PC's word this year (#364).
+	ContentRegistry.register_param_source(
+		"treasury_honoured_this_year", {}, ColonyParamSources.treasury_honoured_this_year
+	)
 	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
 	ContentRegistry.register_param_source(
 		"patron_who_spoke", {"fallback": "string"}, ColonyParamSources.patron_who_spoke
@@ -131,6 +135,20 @@ static func register_all() -> void:
 ## it without anybody seeing a standing figure.
 static func warning_turns(_args: Dictionary, _context: LetterContext) -> Variant:
 	return CrownRefusal.WARNING_TURNS
+
+
+## 🔒 **What the Treasury has honoured on the PC's word this year** (#364,
+## SPEC §9.1).
+##
+## `chancellor.warning_standing` used to take this figure from colony revenue,
+## doubled and floored at 100 — so on the first turn of every run, with nothing
+## promised and nothing paid, the Chancellor reported a payout of 100 that never
+## happened. A `{param:}` is exact and truthful, and this is the figure the
+## Ledger shows.
+static func treasury_honoured_this_year(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null:
+		return 0
+	return int(roundf(CrownAccounts.of(context.log).paid_in_year_of(context.month)))
 
 
 ## How many years the PC has held the post.

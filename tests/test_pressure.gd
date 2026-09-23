@@ -287,6 +287,17 @@ func test_a_colony_where_nothing_is_wrong_brings_no_complaints() -> void:
 	machine.use_content(content)
 	machine.saves_on_send = false
 
+	# A colony that has had its month, so the complaints are **true** and only
+	# pressure can keep them off the desk (#365). On a brand-new run nothing is
+	# true yet, and this passed by asserting nothing.
+	for town in run.colony.in_order():
+		run.log.emit(SettlePhase.EVENT_LIVED, town.id, run.world.month, {"town": String(town.id)})
+	var director := machine.director
+	assert_true(director._conditions_hold(
+		content.collection("triggers")["trigger.steward.request_tax_rise"],
+		director._context(run, run.contact(&"steward"))),
+		"no complaint is true of the fixture, so this proves nothing")
+
 	# Every man on the roster given exactly what he wants.
 	for id in run.contact_ids():
 		var contact := run.contact(StringName(id))

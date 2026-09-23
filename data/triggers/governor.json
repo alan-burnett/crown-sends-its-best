@@ -137,6 +137,7 @@
   {
     "id": "trigger.governor.report_shortage",
     "letter": "governor.report_shortage",
+    "note": "Issue 365: not before the colony has lived a month. A new town starts with little in store, which is the ground it was given rather than a shortage anybody has had a month to notice.",
     "urgency": 0.8,
     "cooldown": 2,
     "params": {
@@ -155,6 +156,7 @@
       }
     },
     "conditions": [
+      { "the_colony_has_lived": { "months": 1 } },
       {
         "town_measure_below": {
           "measure": "stockpile_health",

@@ -39,6 +39,13 @@ func _fresh_run(world_values: Dictionary = {}) -> RunState:
 	return fresh
 
 
+## A colony that has had its first month, which every complaint waits for (#365).
+func _lived(of_run: RunState) -> RunState:
+	for town in of_run.colony.in_order():
+		of_run.log.emit(SettlePhase.EVENT_LIVED, town.id, of_run.world.month, {"town": String(town.id)})
+	return of_run
+
+
 func _letter_of(inbound: InboundLetter) -> Letter:
 	return Letter.from_record(content.record("letters", inbound.letter_id))
 
@@ -66,6 +73,7 @@ func test_a_trigger_whose_conditions_hold_and_whose_sender_minds_fires() -> void
 	# 🔒 **Conditions are no longer enough** (#254). They say whether a letter is
 	# *true*; pressure says whether he bothers. This test used to assert that a
 	# true letter fires, which is the gate this milestone replaced with a want.
+	_lived(run)
 	run.world.values["colony_revenue"] = 4.0
 	run.world.values[WorldValues.REVENUE_BASELINE] = 60.0
 	# And he is still on terms that let him ask. The Chancellor starts at twelve
@@ -83,13 +91,14 @@ func test_a_true_letter_from_a_contented_man_does_not_fire() -> void:
 	# The other half, and the point of the ticket. The arrears letter is *true*
 	# whenever the returns are under the bar — but a Chancellor whose colony is
 	# returning handsomely has nothing he wants to say about the returns.
+	_lived(run)
 	run.world.values["colony_revenue"] = 300.0
 	run.world.values[WorldValues.REVENUE_BASELINE] = 60.0
 
-	var context := LetterContext.new(run.world, run.contact(&"chancellor"))
-	context.measures = ColonyMeasures.for_contact(run, run.contact(&"chancellor"))
-	assert_true(ContentRegistry.test_condition(
-		"world_value_below", {"key": "colony_revenue", "value": 1400}, context),
+	var director := machine.director
+	assert_true(director._conditions_hold(
+		content.collection("triggers")["trigger.chancellor.how_to_answer"],
+		director._context(run, run.contact(&"chancellor"))),
 		"the fixture did not leave the letter true")
 
 	for inbound in machine.director.compose_inbox(run):
@@ -108,6 +117,101 @@ func test_selection_is_deterministic() -> void:
 	assert_not_empty(first)
 
 
+# --- 🔒 The opening post is the governor's (#365) ----------------------
+
+## Whether a trigger holds whatever the world looks like.
+func _unconditional(trigger: Dictionary) -> bool:
+	for entry in trigger.get("conditions", []):
+		for condition_id in entry:
+			if String(condition_id) != "always":
+				return false
+	return true
+
+
+## Every `trigger<sender>` whose conditions hold on a brand-new run.
+func _true_on_the_first_turn(seed_value: int) -> PackedStringArray:
+	var fresh := RunState.new_run(seed_value)
+	ContactRoster.load_into(fresh, content)
+	var director := machine.director
+	var out := PackedStringArray()
+	for trigger_id in content.ids("triggers"):
+		var trigger: Dictionary = content.collection("triggers")[trigger_id]
+		# The same two the director leaves out of its sweep.
+		if trigger.has("acknowledges") or bool(trigger.get(Composer.OFFERS_KEY, false)):
+			continue
+		var letter := Letter.from_record(content.record("letters", String(trigger["letter"])))
+		for contact in director.senders_of(letter, fresh):
+			if director._conditions_hold(trigger, director._context(fresh, contact)):
+				out.append("%s<%s>" % [trigger_id, (contact as Contact).id])
+	return out
+
+
+func test_only_a_standing_report_is_true_before_the_colony_has_lived() -> void:
+	# 🔒 #365. A new colony is poor and the Crown is already at war, so every
+	# letter whose condition meant *things are bad* was true before anything had
+	# happened — and the opening post was four men complaining about a colony
+	# the PC had not yet had a month to run. **Only a trigger with no condition
+	# but `always` may hold on the initial state**: the governor's report and
+	# the Steward's, the floor `the-director.md` §5 designs. A letter meant to
+	# open the run has to say so by being unconditional.
+	for seed_value in [SEED, SEED + 1, SEED + 2]:
+		var opening := _true_on_the_first_turn(seed_value)
+		var governor_writes := false
+		for fired in opening:
+			var trigger_id := fired.get_slice("<", 0)
+			governor_writes = governor_writes or trigger_id == "trigger.governor.report_month"
+			assert_true(_unconditional(content.collection("triggers")[trigger_id]),
+				"%s is true before the colony has lived a month (seed %d)" % [fired, seed_value])
+		assert_true(governor_writes,
+			"the governor's letter no longer opens the run, so the first desk is empty")
+
+
+# --- 🔒 The Chancellor reports only what the Treasury paid (#364) -------
+
+## The Chancellor's letter about the books, if his conditions hold for it.
+func _standing_warnings(of_run: RunState) -> Array[InboundLetter]:
+	var out: Array[InboundLetter] = []
+	for inbound in machine.director._fired_triggers(of_run):
+		if inbound.letter_id == "chancellor.warning_standing":
+			out.append(inbound)
+	return out
+
+
+## The Crown pays `amount` on the PC's word in `month`, through the promise book
+## as the Crown's month settles it.
+func _honour(of_run: RunState, amount: float, month: int) -> void:
+	var marshal := of_run.contact(&"marshal")
+	var promise := Promise.new(&"marshal", &"gold", {"amount": amount}, month - 1, month)
+	of_run.promises.make(promise, marshal, of_run.log, month - 1)
+	of_run.promises.settle_due(of_run.contacts, of_run.log, month)
+
+
+func test_a_fresh_run_hears_of_no_payout() -> void:
+	# 🔒 SPEC §9.1. With nothing promised and nothing paid, the Chancellor
+	# told the PC on the first turn of every run that the Treasury had honoured
+	# 100 on his word — revenue doubled and floored at 100.
+	var fresh := _fresh_run()
+	assert_true(fresh.world.get_value("colony_revenue", 0.0) < 820.0,
+		"a new colony no longer starts poor, so this proves nothing")
+	assert_empty(_standing_warnings(fresh),
+		"the Chancellor reported a payout on a run that has paid nothing")
+
+
+func test_the_figure_is_what_the_treasury_paid_this_year() -> void:
+	var paying := _fresh_run()
+	_honour(paying, 500.0, 5)
+	_honour(paying, 150.0, 13)
+	_honour(paying, 90.0, 14)
+	paying.world.month = 14
+
+	var warnings := _standing_warnings(paying)
+	assert_eq(warnings.size(), 1, "the Treasury has paid and the Chancellor does not say so")
+	if warnings.is_empty():
+		return
+	assert_eq(int(warnings[0].params.get("amount", -1)), 240,
+		"the Chancellor's figure is not what the Treasury paid in year two")
+
+
 # --- The params contract ---------------------------------------------------
 
 func test_every_declared_param_is_supplied_at_the_right_type() -> void:
@@ -124,11 +228,11 @@ func test_the_director_supplies_values_the_letter_never_decides() -> void:
 	# The letter declares; the director supplies. Change the world and the same
 	# letter arrives carrying different values.
 	var low := _find(
-		machine.director.compose_inbox(_fresh_run({"crown_war_intensity": 40.0})),
+		machine.director.compose_inbox(_lived(_fresh_run({"crown_war_intensity": 40.0}))),
 		"marshal.request_supplies",
 	)
 	var high := _find(
-		machine.director.compose_inbox(_fresh_run({"crown_war_intensity": 90.0})),
+		machine.director.compose_inbox(_lived(_fresh_run({"crown_war_intensity": 90.0}))),
 		"marshal.request_supplies",
 	)
 

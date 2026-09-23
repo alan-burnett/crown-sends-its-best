@@ -82,6 +82,23 @@ func paid_in(month: int) -> float:
 	return float(months.get(month, {}).get("paid", 0.0))
 
 
+## 🔒 **What the Treasury paid out on the PC's word in the calendar year
+## `month` falls in**, up to and including `month` (#364).
+##
+## The Ledger's *out* column, summed — honoured promises and the policies he is
+## funding, because both are the Crown's money spent on his say and both appear
+## there. The Chancellor's *"the Treasury has honoured this much on your word
+## this year"* reads it, and a player checking the letter against the Ledger has
+## to find the same figure.
+func paid_in_year_of(month: int) -> float:
+	var first := month - posmod(month, WorldState.MONTHS_PER_YEAR)
+	var total := 0.0
+	for recorded_month in recorded():
+		if recorded_month >= first and recorded_month <= month:
+			total += paid_in(recorded_month)
+	return total
+
+
 ## **This month's revenue minus this month's spending**, which is the figure the
 ## Crown's accountants actually react to.
 func net_in(month: int) -> float:

@@ -22,6 +22,7 @@
   {
     "id": "trigger.steward.request_tax_rise",
     "letter": "steward.request_tax_rise",
+    "note": "Issue 365: not before the colony has lived a month. A new colony starts poor, so the revenue threshold alone is true on turn one - and a colony that has never earned anything has not disappointed anybody yet.",
     "urgency": 0.4,
     "cooldown": 6,
     "params": {
@@ -38,6 +39,7 @@
       }
     },
     "conditions": [
+      { "the_colony_has_lived": { "months": 1 } },
       {
         "world_value_below": {
           "key": "colony_revenue",
@@ -49,6 +51,7 @@
   {
     "id": "trigger.steward.question_tea",
     "letter": "steward.question_tea",
+    "note": "Issue 365: year two, not year one. Year one is the first year, so year_at_least 1 was a condition that was never false, and the Steward raised the tea on the first turn of every run.",
     "urgency": 0.2,
     "cooldown": 8,
     "params": {
@@ -63,7 +66,7 @@
     "conditions": [
       {
         "year_at_least": {
-          "year": 1
+          "year": 2
         }
       }
     ]

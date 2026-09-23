@@ -2,6 +2,7 @@
   {
     "id": "trigger.marshal.request_supplies",
     "letter": "marshal.request_supplies",
+    "note": "Issue 365: not before the colony has lived a month. The war opens above this threshold, and the fix belongs here rather than in the war's curve (#376), so the first turn is quiet whatever #376 decides.",
     "urgency": 0.5,
     "cooldown": 4,
     "params": {
@@ -18,6 +19,7 @@
       }
     },
     "conditions": [
+      { "the_colony_has_lived": { "months": 1 } },
       {
         "world_value_above": {
           "key": "crown_war_intensity",

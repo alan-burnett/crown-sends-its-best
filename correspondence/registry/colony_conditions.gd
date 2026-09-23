@@ -65,6 +65,11 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_opened_the_window", {}, ColonyConditions.crown_opened_the_window
 	)
+	# Whether the Treasury has paid anything on the PC's word this year (#364).
+	ContentRegistry.register_condition(
+		"treasury_honoured_this_year", {"at_least": "number"},
+		ColonyConditions.treasury_honoured_this_year,
+	)
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
 	)
@@ -840,6 +845,16 @@ static func town_disagrees_with_the_crown(_args: Dictionary, context: LetterCont
 ## **Fires on the month the window opens**, which is the letter SPEC §10.3 locks:
 ## the player always gets it before the Crown first refuses. The countdown is at
 ## its full length only on that month, so this cannot fire twice for one window.
+## 🔒 **Whether the Treasury has paid at least this much on the PC's word this
+## year** (#364).
+##
+## Asked of the same figure the letter prints, so the condition and the slot can
+## never disagree about whether anything was paid.
+static func treasury_honoured_this_year(args: Dictionary, context: LetterContext) -> bool:
+	var at_least := float(args.get("at_least", 1.0))
+	return float(ColonyParamSources.treasury_honoured_this_year({}, context)) >= at_least
+
+
 static func crown_opened_the_window(_args: Dictionary, context: LetterContext) -> bool:
 	var refusal := context.refusal
 	return (
