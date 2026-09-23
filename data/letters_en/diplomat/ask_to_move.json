@@ -24,7 +24,9 @@
       { "id": "move", "prompt": "The Diplomat's posting", "options": [
         { "id": "move_him", "label": "move him",
           "text": "Go to {param:to}. The Crown will meet the cost of it.",
-          "effect": { "promise_gold": { "to": "diplomat", "amount": 240 } } },
+          "effect": {
+            "move_diplomat": { "to": "diplomat", "town": "{to}" },
+            "promise_gold": { "to": "diplomat", "amount": 240 } } },
         { "id": "stay", "label": "he stays where he is",
           "text": "You will remain where you are. I need eyes in that town more than you need a quiet one.",
           "effect": { "adjust_loyalty": { "to": "diplomat", "amount": -6 } } }

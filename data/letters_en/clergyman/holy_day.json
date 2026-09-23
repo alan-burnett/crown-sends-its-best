@@ -1,6 +1,6 @@
 {
   "id": "clergyman.holy_day",
-  "sender": "institutional",
+  "sender": "clergyman",
   "type": "demand",
   "skippable": false,
   "note": "Issue 278, institutional-contacts.md section 3. He asks for every duty to be set aside for the one month. The Author's second ruling took away the three-month announcement, so there is nothing scheduled here: the priest writes, the PC answers, and it starts - which is why the letter talks about a month already begun rather than one coming. The Author's third ruling is what the last body line is about: a resource under protest keeps its duty through either waiver, so a colony in protest does not get a holiday from the thing it is protesting. He does not know that, and the letter does not tell him; the PC finds out when the waiver does not reach it.",

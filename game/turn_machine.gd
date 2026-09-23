@@ -88,6 +88,9 @@ func _init(p_run: RunState) -> void:
 
 	orders = OrderDriver.new(run.intents, run.promises)
 	orders.contacts = run.contacts
+	# The run's own bag, so an Order still at sea under *Distant colony* is in the
+	# save and back in the driver when the game is loaded (#390).
+	orders.pending = run.orders_at_sea
 	promise_driver = PromiseDriver.new(run.promises)
 	promise_driver.contacts = run.contacts
 
@@ -123,6 +126,10 @@ func _init(p_run: RunState) -> void:
 	var deflection := DeflectionExecutor.new()
 	var embargoes := EmbargoExecutor.new()
 	embargoes.colony = run.colony
+	# **Where the Diplomat lives** (#393), which nothing could change before.
+	var diplomat_moves := DiplomatMoveExecutor.new()
+	diplomat_moves.colony = run.colony
+	diplomat_moves.contacts = run.contacts
 	urging.colony = run.colony
 
 	month_runner = WorldMonth.new(run.intents, run.streams)
@@ -327,7 +334,7 @@ func _init(p_run: RunState) -> void:
 	# everything else.
 	month_runner.executors = [
 		urging, shipments, embargoes, tribute, deflection, preferences, foundings,
-		executor,
+		diplomat_moves, executor,
 	]
 
 
@@ -374,6 +381,9 @@ static func order_effects() -> Dictionary:
 		# A waiver names its world value for the same reason a rate does, and sets
 		# it outright rather than drifting towards it — what it holds is a count
 		# of months, and `TaxWaiver` takes one off it each Crown's month.
+		# **The Diplomat moves through `DiplomatMoveExecutor`**, not through a
+		# world value. Listed so every Order kind is accounted for here.
+		String(M1Registrations.ORDER_MOVE_DIPLOMAT): {"target": ""},
 		String(M1Registrations.ORDER_WAIVE_DUTY):
 			{"target_from_data": "key", "set_from_data": "months_left"},
 		String(M1Registrations.ORDER_SET_POLICY): {"target": ""},
@@ -643,6 +653,14 @@ func _build_orders() -> Array[Order]:
 				if order == null:
 					continue
 				order.id = StringName("%s.%s" % [outgoing.id, step_id])
+				# 🔒 **One letter, one instruction** (#393). Every Order this
+				# letter carries shares its id, so none of them overtakes another.
+				#
+				# **With the month**, because the post is new each turn and its
+				# numbering starts again: `outgoing_0` in March and `outgoing_0` in
+				# May are two letters, and the May one must still be able to
+				# contradict the March one.
+				order.letter = StringName("%d.%s" % [run.world.month, outgoing.id])
 				# 🔒 **Harsh orders come from the PC only** (#71). This loop runs
 				# over his outgoing post and nothing else, so an NPC's Intent can
 				# never arrive carrying it however the content is authored.

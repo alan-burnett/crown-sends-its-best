@@ -437,3 +437,272 @@ func test_every_trouble_has_a_remedy_and_none_of_them_is_a_tax_rise() -> void:
 		assert_false(remedy.to_lower().contains("raise the dut")
 				or remedy.to_lower().contains("raise the tax"),
 			"he proposed raising a duty to fix '%s', which would not work" % trouble)
+
+# --- 🔒 He is paid to move, and he moves (#393) ------------------------------
+
+## A run with the Diplomat housed in the capital and a second town to send him to.
+func _two_town_run() -> RunState:
+	var run := RunState.new_run(SEED)
+	ContactRoster.load_into(run, content)
+	var town := Town.new(&"kettleburn", "Kettleburn", Vector2i(6, 6))
+	town.workers = 12
+	run.colony.add(town)
+	var governor := Governor.generate(town, run.streams)
+	town.governor_id = governor.id
+	run.add_contact(governor)
+	return run
+
+
+func _the_diplomat(run: RunState) -> Contact:
+	return ColonyConditions.diplomat_in(run.contacts)
+
+
+## A desk for this run at its first month, with every letter in it set aside.
+func _desk(run: RunState) -> TurnMachine:
+	var machine := TurnMachine.new(run)
+	machine.use_content(content)
+	machine.saves_on_send = false
+	machine.begin_turn()
+	_set_aside(run)
+	return machine
+
+
+func _set_aside(run: RunState) -> void:
+	for inbound in run.inbox:
+		inbound.status = InboundLetter.SET_ASIDE
+
+
+## 🔒 **Through the desk, not beside it.** The Orders in a letter are built
+## by `TurnMachine`, which is what stamps the letter they came in (#393). A helper
+## that built them itself would pass against a desk that does not exist — and
+## did, until the payment was found overtaking the move it paid for.
+func _agree_to_move(run: RunState) -> TurnMachine:
+	var him := _the_diplomat(run)
+	var machine := _desk(run)
+	var outgoing := OutgoingLetter.new("diplomat.ask_to_move", him.id)
+	outgoing.params = {"town": him.town, "to": "Kettleburn", "amount": 240}
+	var wizard := ReplyWizard.new(
+		Letter.from_record(content.record("letters", "diplomat.ask_to_move")), outgoing)
+	wizard.choose_tone(Tone.DUTIFUL)
+	wizard.choose("move", "move_him")
+	run.post.add(outgoing)
+	machine.send_post()
+	return machine
+
+
+## The PC's own letter to Kettleburn's governor, composed as the desk composes it.
+func _send_him_to_kettleburn(run: RunState) -> TurnMachine:
+	var machine := _desk(run)
+	var governor_id := run.colony.by_id(&"kettleburn").governor_id
+	var wizard := Composer.new(content).begin(run, "pc.send_the_diplomat", governor_id)
+	wizard.choose_tone(Tone.DUTIFUL)
+	wizard.choose("resident", "send")
+	machine.send_post()
+	return machine
+
+
+## What he made of the move, in the Reckoning of the month it was sent.
+func _his_answer(machine: TurnMachine) -> String:
+	for result in machine.orders.results:
+		if (result["order"] as Order).kind == M1Registrations.ORDER_MOVE_DIPLOMAT:
+			return String(result["outcome"])
+	return ""
+
+
+## The months after the post, with every letter they bring set aside.
+func _wait(machine: TurnMachine, months: int = 4) -> void:
+	for step in months:
+		machine.begin_turn()
+		_set_aside(machine.run)
+		machine.send_post()
+
+
+func _moves_in(orders: Array[Order]) -> Array[Order]:
+	var out: Array[Order] = []
+	for order in orders:
+		if order.kind == M1Registrations.ORDER_MOVE_DIPLOMAT:
+			out.append(order)
+	return out
+
+
+func test_the_move_he_asked_for_is_a_move_and_not_only_a_payment() -> void:
+	# 🔒 The defect. "Move him" was `promise_gold` and nothing else, and
+	# `Diplomat.rehome` had no caller but its tests — so the PC paid 240 gold
+	# for a move that never happened.
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	var machine := _agree_to_move(run)
+
+	var moves := _moves_in(machine.issued_orders)
+	assert_eq(moves.size(), 1, "agreeing to move him still produces nothing but a payment")
+	assert_eq(String(moves[0].addressed_to), String(him.id),
+		"the move was addressed to somebody other than the man who is moving")
+	assert_eq(String(moves[0].get_param("town", "")), "Kettleburn",
+		"the move named a town other than the one he asked for")
+	var paid := false
+	for order in machine.issued_orders:
+		paid = paid or order.kind == M1Registrations.ORDER_PROMISE_GOLD
+	assert_true(paid, "the journey stopped costing the Crown anything (`the-diplomat.md` §3)")
+
+
+func test_agreeing_to_his_request_moves_him() -> void:
+	# The acceptance line, end to end: the letter's option, the Order, his
+	# decision in Reckoning, and the move in phase 2 of a later month — with the
+	# payment in the same letter, which is what used to overtake it.
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	him.relationship.loyalty = 90.0
+	var home := him.town
+	assert_ne(home, "Kettleburn", "he already lives there, so this proves nothing")
+
+	var machine := _agree_to_move(run)
+	var answer := _his_answer(machine)
+	assert_ne(answer, "", "his Order was never read")
+	assert_ne(answer, String(Compliance.REFUSE),
+		"a contented man refused the move he asked for, so this proves nothing")
+	_wait(machine)
+
+	assert_eq(him.town, "Kettleburn", "he was paid to move and is still in %s" % home)
+	assert_eq(run.log.of_type(Diplomat.EVENT_MOVED).size(), 1,
+		"he moved and nobody was told")
+
+
+func test_the_same_answer_next_month_is_a_different_letter() -> void:
+	# 🔒 The post is new each turn and numbers its letters from the start
+	# again, so an Order's id repeats from month to month. The letter it came in
+	# must not, or a letter could never contradict one sent before it.
+	var run := _two_town_run()
+	var first := _agree_to_move(run).issued_orders
+	var second := _agree_to_move(run).issued_orders
+	assert_eq(String(first[0].id), String(second[0].id),
+		"the post stopped repeating its numbering, so this proves nothing")
+	assert_ne(String(first[0].letter), String(second[0].letter),
+		"two posts a month apart were read as one letter")
+
+
+func test_he_goes_quiet_while_he_travels() -> void:
+	# §3's other price: *a couple of months without reports.*
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	him.relationship.loyalty = 90.0
+	_wait(_agree_to_move(run))
+
+	var moved := run.log.of_type(Diplomat.EVENT_MOVED)
+	assert_eq(moved.size(), 1, "he never moved")
+	if moved.is_empty():
+		return
+	assert_true(Diplomat.is_travelling(him, (moved[0] as SimEvent).month),
+		"he moved and was writing the same month")
+
+
+# --- 🔒 And the PC can send him toward trouble (the-diplomat.md §7) --------
+
+func test_the_pc_chooses_the_town_by_choosing_its_governor() -> void:
+	# The composer offers recipients and nothing else, so *send the Resident to
+	# Kettleburn* is a letter to Kettleburn's governor — and never to the
+	# governor of the town he already lives in.
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	var composer := Composer.new(content)
+	var offered: Array[StringName] = []
+	for purpose in composer.purposes(run):
+		if String(purpose["letter_id"]) == "pc.send_the_diplomat":
+			offered = purpose["recipients"]
+	assert_not_empty(offered, "the PC cannot send the Diplomat anywhere")
+
+	var there := run.colony.by_id(&"kettleburn")
+	assert_true(offered.has(there.governor_id),
+		"Kettleburn's governor cannot be told the Resident is coming")
+	var home := Diplomat.home_of(him, run.colony)
+	assert_false(offered.has(home.governor_id),
+		"the PC was offered to send him where he already lives")
+
+
+func test_the_order_goes_to_him_and_he_decides() -> void:
+	# 🔒 Seam B. The letter is written to the governor; the Order in it is
+	# addressed to the Diplomat, whose regard and temper decide whether he goes.
+	var run := _two_town_run()
+	var machine := _send_him_to_kettleburn(run)
+
+	var moves := _moves_in(machine.issued_orders)
+	assert_eq(moves.size(), 1, "sending him produced no move")
+	assert_eq(String(moves[0].addressed_to), String(_the_diplomat(run).id),
+		"the governor was asked to move the Diplomat, which is not his to decide")
+	assert_eq(String(moves[0].get_param("town", "")), "Kettleburn",
+		"the letter to Kettleburn's governor sent him to some other town")
+
+
+func test_sent_toward_trouble_he_goes() -> void:
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	him.relationship.loyalty = 90.0
+
+	var machine := _send_him_to_kettleburn(run)
+	var answer := _his_answer(machine)
+	assert_ne(answer, "", "his Order was never read")
+	assert_ne(answer, String(Compliance.REFUSE),
+		"a contented man refused to go, so this proves nothing")
+	_wait(machine)
+	assert_eq(him.town, "Kettleburn", "the PC sent him and he stayed where he was")
+
+
+func test_he_is_not_offered_while_at_sea_or_dead() -> void:
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	var governor := run.contact(run.colony.by_id(&"kettleburn").governor_id)
+	var context := LetterContext.new(run.world, governor, &"")
+	context.colony = run.colony
+	context.contacts = run.contacts
+	context.month = run.world.month
+	assert_true(ColonyConditions.the_diplomat_could_come_here({}, context),
+		"he cannot be sent to a town he has never been to, so this proves nothing")
+
+	him.travelling_until = run.world.month + 2
+	assert_false(ColonyConditions.the_diplomat_could_come_here({}, context),
+		"he was offered a new posting while still at sea from the last one")
+	him.travelling_until = -1
+	him.is_dead = true
+	assert_false(ColonyConditions.the_diplomat_could_come_here({}, context),
+		"the PC was offered to send a dead man somewhere")
+
+
+func test_a_move_to_a_town_that_is_gone_is_overtaken() -> void:
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	var intent := Intent.new(&"", DiplomatMoveExecutor.KIND, him.id, him.id, 1,
+		{"town": "Nowhere-on-Sea"})
+	var mover := DiplomatMoveExecutor.new()
+	mover.colony = run.colony
+	mover.contacts = run.contacts
+	var home := him.town
+	assert_eq(mover.execute(intent, run.world, run.log), Intent.OVERTAKEN_BY_EVENTS,
+		"he set off for a town that is not there")
+	assert_eq(him.town, home, "he moved to a town that is not there")
+
+
+func test_cultivation_follows_him() -> void:
+	# §7: he can only cultivate the governor he lives with, and the target is
+	# worked out from where he is each month (#285) — so moving him is all it
+	# takes. Asked of the driver, not of where he lives: the claim is that the
+	# regard he buys lands on the new governor.
+	var run := _two_town_run()
+	var him := _the_diplomat(run)
+	var there := run.colony.by_id(&"kettleburn")
+	var newcomer := run.contact(there.governor_id)
+	var old_host := run.contact(Diplomat.home_of(him, run.colony).governor_id)
+	run.world.values[PolicyEffects.CULTIVATE_GOVERNOR_KEY] = 1.0
+
+	CultivationDriver.new(run).on_phase(
+		WorldPhase.RECKONING, run.world, run.log, run.streams)
+	assert_true(old_host.relationship.cultivated > 0.0,
+		"he was cultivating nobody before he moved, so this proves nothing")
+	assert_almost_eq(newcomer.relationship.cultivated, 0.0, 0.0001)
+
+	Diplomat.rehome(him, there, _context(run.colony))
+	run.world.month += 1
+	CultivationDriver.new(run).on_phase(
+		WorldPhase.RECKONING, run.world, run.log, run.streams)
+	assert_true(newcomer.relationship.cultivated > 0.0,
+		"he moved and went on buying regard for the governor he left")
+	assert_almost_eq(old_host.relationship.cultivated, 0.0, 0.0001,
+		"the governor he left kept what the Diplomat was buying him")

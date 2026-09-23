@@ -39,5 +39,16 @@
         "town_is_preparing_to_leave": {}
       }
     ]
+  },
+  {
+    "id": "trigger.pc.send_the_diplomat",
+    "letter": "pc.send_the_diplomat",
+    "offers_composition": true,
+    "note": "Issue 393. Offered for every governor whose town the Diplomat could go to - not while he is dead, at sea, or already living there.",
+    "conditions": [
+      {
+        "the_diplomat_could_come_here": {}
+      }
+    ]
   }
 ]

@@ -120,11 +120,12 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 
 ## Everybody who could send this letter, sorted (#361).
 ##
-## 🔒 **A named man, or a role.** `sender` is read as a contact id first, so
+## 🔒 **A named man, a role, or a kind.** `sender` is read as a contact id first, so
 ## every letter addressed to one particular office — the Chancellor, the Steward,
 ## the Marshal — behaves exactly as it always has. A `sender` that names nobody
 ## is read as a **role**, and expands to one candidate per contact holding it,
-## each with his own context.
+## each with his own context — or, failing that, as a **kind** of resident
+## (#392), which reaches only the residents of that kind.
 ##
 ## That is what the folder layout always implied and what the director never
 ## did: before this, `sender: "governor"` matched no contact and was skipped in
@@ -137,10 +138,19 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 ## institutional contacts, commanders and patrons as roles a colony accumulates.
 ## That rule has simply never had a second governor to apply to.
 func senders_of(letter: Letter, run: RunState) -> Array:
-	var named := run.contact(StringName(letter.sender))
+	var sender := StringName(letter.sender)
+	var named := run.contact(sender)
 	if named != null:
 		return [named]
-	if not Contact.is_role(StringName(letter.sender)):
+
+	# 🔒 **A role, or a kind of resident** (#392). Clergyman, journalist,
+	# quartermaster and scholar share the `institutional` role, so a letter that
+	# named the role could be sent by any of the four — and the clergy's festival
+	# was, by a journalist. Naming the kind reaches that kind and no other, which
+	# is what `data/letters_en/clergyman/` always meant.
+	var by_role := Contact.is_role(sender)
+	var by_kind := not by_role and ContactRoster.is_kind(sender)
+	if not by_role and not by_kind:
 		return []
 
 	var out: Array = []
@@ -148,7 +158,9 @@ func senders_of(letter: Letter, run: RunState) -> Array:
 	ids.sort()
 	for id in ids:
 		var contact: Contact = run.contacts[id]
-		if contact != null and not contact.is_dead 				and contact.role == StringName(letter.sender):
+		if contact == null or contact.is_dead:
+			continue
+		if (by_role and contact.role == sender) or (by_kind and contact.kind == sender):
 			out.append(contact)
 	return out
 

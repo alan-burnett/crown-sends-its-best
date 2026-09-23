@@ -114,8 +114,13 @@ static var _favour: Dictionary = {}
 static func favour_toward(contact: Contact) -> float:
 	if contact == null or _favour.is_empty():
 		return 0.0
-	var kind := contact.title.to_lower()
-	return float(_favour.get(kind, _favour.get(String(contact.role), 0.0)))
+	# **His kind, not his title** (#392). `title` is flavour and can be retitled;
+	# a perk about the clergy that read it would stop working the day somebody
+	# called a clergyman a parish priest.
+	var kind := String(contact.kind)
+	if not kind.is_empty() and _favour.has(kind):
+		return float(_favour[kind])
+	return float(_favour.get(String(contact.role), 0.0))
 
 
 ## Turn it, by kind or by role.

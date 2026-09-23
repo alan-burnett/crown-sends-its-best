@@ -1,9 +1,9 @@
 {
   "id": "clergyman.festival",
-  "sender": "institutional",
+  "sender": "clergyman",
   "type": "demand",
   "skippable": false,
-  "note": "Issue 278, institutional-contacts.md section 3. He asks for the duty on ONE resource to be set aside for a season, and the resource is whatever sold the most gold this month (the Author's first ruling) - so the ask swings with the colony's fortunes rather than settling on one staple. The letter says out loud that the relief is colony-wide, because section 10.2 locks that there are no per-town rates: a priest asking relief for his own poor IS asking the whole colony to go without the duty, and the letter must not pretend otherwise. Sender is the institutional role, which the director expands to one candidate per man holding it - so every clergyman in the colony can send his own, and Threshold's redundancy rule is what stops three of them asking at once.",
+  "note": "Issue 278, institutional-contacts.md section 3. He asks for the duty on ONE resource to be set aside for a season, and the resource is whatever sold the most gold this month (the Author's first ruling) - so the ask swings with the colony's fortunes rather than settling on one staple. The letter says out loud that the relief is colony-wide, because section 10.2 locks that there are no per-town rates: a priest asking relief for his own poor IS asking the whole colony to go without the duty, and the letter must not pretend otherwise. Sender is the clergyman KIND (#392): the institutional role is shared with journalists, quartermasters and scholars, so naming the role let a journalist send this. The director expands a kind to one candidate per clergyman, so every clergyman in the colony can send his own, and Threshold's redundancy rule is what stops three of them asking at once.",
   "params": {
     "clergyman": "contact",
     "resource": "resource"

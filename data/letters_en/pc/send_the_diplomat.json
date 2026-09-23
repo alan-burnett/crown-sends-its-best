@@ -1,0 +1,41 @@
+{
+  "id": "pc.send_the_diplomat",
+  "type": "request",
+  "purpose": "Send the Crown's Resident to this governor's town",
+  "note": "Issue 393, the-diplomat.md section 7: he can only cultivate the governor he lives with, which gives the PC a reason to move him TOWARD trouble. The composer offers recipients and nothing else, so the PC chooses the town by choosing its governor - the letter is to him, and the Order in it is addressed to the Diplomat, who decides whether to go exactly as he decides everything. The gold is section 3's: a move costs the Crown the journey, whoever asked for it.",
+  "to_roles": ["governor"],
+  "params": { "to": "contact", "town": "town", "amount": "gold" },
+  "compose_defaults": {
+    "town": { "from": "town_name" },
+    "amount": { "from": "literal", "value": "240" }
+  },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        { "tone": "pleased",   "text": "with news I hope you will welcome" },
+        { "tone": "dutiful",   "text": "to tell you of an arrangement" },
+        { "tone": "annoyed",   "text": "since matters in {param:town} want watching" },
+        { "tone": "desperate", "text": "because I do not know what else to send you" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "resident",
+        "prompt": "The Crown's Resident",
+        "options": [
+          { "id": "send", "label": "send the Resident to {param:town}",
+            "text": "The Crown's Resident will be coming to {param:town}, and I should take it kindly if you made him welcome at your table{insert:edge}. He will be a guest of yours for some time.",
+            "insert": { "edge": { "annoyed": ", whatever you may think of the reason" } },
+            "effect": {
+              "move_diplomat": { "to": "diplomat", "town": "{town}" },
+              "promise_gold": { "to": "diplomat", "amount": "{amount}" }
+            } }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant," }
+    ]
+  }
+}

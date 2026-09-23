@@ -156,6 +156,19 @@ var role_word: String = ""
 var title: String = ""
 var role: StringName = &""
 
+## 🔒 **Which of the institutional kinds he is** (#392) — `clergyman`,
+## `journalist`, `quartermaster`, `scholar` — or empty for everybody else.
+##
+## Four kinds share the `institutional` role the way four offices share
+## `crown_officer`, so the role cannot say it. This was worked out from the id
+## prefix in one place and from `title` in another, which is a flavour field and
+## can be retitled freely; and a letter's `sender` could not name it at all, so
+## the clergy's letters could be sent by a journalist. **One field, written where
+## he is brought, and asked by everybody.**
+##
+## It is the template id `ContactRoster` brought him from.
+var kind: StringName = &""
+
 ## An id into the asset registry, never a path (SPEC §16.3).
 var portrait_asset: String = ""
 
@@ -330,6 +343,7 @@ static func from_data(record: Dictionary) -> Contact:
 	# took the empty role's qualifier, and the Diplomat's letterhead lost its town.
 	contact.qualifier = String(record.get("qualifier", Letterhead.qualifier_for(contact.role)))
 	contact.role_word = String(record.get("role_word", ""))
+	contact.kind = StringName(record.get("kind", ""))
 	contact.prominence_override = float(record.get("prominence", -1.0))
 	contact.portrait_asset = String(record.get("portrait", ""))
 	contact.town = String(record.get("town", ""))
@@ -422,6 +436,7 @@ func to_dict() -> Dictionary:
 		"role_word": role_word,
 		"title": title,
 		"role": String(role),
+		"kind": String(kind),
 		"prominence": prominence_override,
 		"portrait": portrait_asset,
 		"town": town,

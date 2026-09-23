@@ -86,8 +86,13 @@ func recipients_for(letter: Letter, run: RunState, trigger: Dictionary) -> Array
 		if not letter.to_roles.is_empty() and not letter.to_roles.has(String(contact.role)):
 			continue
 
-		var context := LetterContext.new(run.world, contact, &"")
-		context.diff = run.last_diff
+		# 🔒 **The same context the letter's params get** (#393). This used to
+		# carry the recipient and the diff and nothing else, so a condition on
+		# who may be written to could not see the colony, his town or the other
+		# contacts — and *send the Diplomat to this governor's town* needs all
+		# three. Two contexts for one letter would also be two answers to what
+		# the letter knows.
+		var context := _context_for(run, contact)
 		var allowed := true
 		for entry in trigger.get("conditions", []):
 			for condition_id in entry:
@@ -118,14 +123,15 @@ func begin(run: RunState, letter_id: String, to: StringName) -> ReplyWizard:
 	return ReplyWizard.new(letter, outgoing)
 
 
-## A composed letter's params come from the world at the moment of writing, since
-## there is no incoming letter to have carried them.
-func _params_for(letter: Letter, run: RunState, to: StringName) -> Dictionary:
-	var contact := run.contact(to)
+## What a letter to this man knows, whether it is asking if he may be written to
+## or filling in what it says to him.
+func _context_for(run: RunState, contact: Contact) -> LetterContext:
 	var context := LetterContext.new(run.world, contact, &"")
+	context.month = run.world.month
 	context.diff = run.last_diff
 	context.measures = ColonyMeasures.for_contact(run, contact)
-	context.town = run.colony.governed_by(contact.id) if run.colony != null else null
+	context.town = run.colony.governed_by(contact.id) \
+		if run.colony != null and contact != null else null
 	context.refusal = run.refusal
 	context.prestige = run.prestige
 	context.colony = run.colony
@@ -136,6 +142,14 @@ func _params_for(letter: Letter, run: RunState, to: StringName) -> Dictionary:
 	context.log = run.log
 	context.pc = run.setup
 	context.policies = run.policies
+	return context
+
+
+## A composed letter's params come from the world at the moment of writing, since
+## there is no incoming letter to have carried them.
+func _params_for(letter: Letter, run: RunState, to: StringName) -> Dictionary:
+	var contact := run.contact(to)
+	var context := _context_for(run, contact)
 
 	# The recipient is chosen in the flow, not declared with a default, so
 	# `{to}` in an effect resolves to whoever the player picked.

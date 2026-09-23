@@ -62,6 +62,18 @@ func get_param(key: String, default_value: Variant = null) -> Variant:
 	return params.get(key, default_value)
 
 
+## 🔒 **The letter this was written in** (#393), or empty for an Order no
+## letter carried.
+##
+## One letter can carry several Orders to one man — found a town *and* pay for
+## it, move *and* meet the cost of the journey — and they are one instruction.
+## Without this they were indistinguishable from a later letter contradicting an
+## earlier one, and the second Order's Intent overtook the first: the Provost was
+## paid for foundings that never happened, and the Diplomat for moves he never
+## made.
+var letter: StringName = &""
+
+
 func to_dict() -> Dictionary:
 	return {
 		"id": String(id),
@@ -71,6 +83,7 @@ func to_dict() -> Dictionary:
 		"issued_month": issued_month,
 		"tone": String(tone),
 		"harsh": harsh,
+		"letter": String(letter),
 	}
 
 
@@ -84,6 +97,7 @@ static func from_dict(data: Dictionary) -> Order:
 	order.id = StringName(data.get("id", ""))
 	order.tone = StringName(data.get("tone", ""))
 	order.harsh = bool(data.get("harsh", false))
+	order.letter = StringName(data.get("letter", ""))
 	return order
 
 

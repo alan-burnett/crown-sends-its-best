@@ -133,6 +133,12 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"a_duty_could_be_waived", {}, ColonyConditions.a_duty_could_be_waived
 	)
+	# Where the PC may send the Diplomat (#393). Asked of the governor being
+	# written to, because choosing him is how the PC chooses the town.
+	ContentRegistry.register_condition(
+		"the_diplomat_could_come_here", {},
+		ColonyConditions.the_diplomat_could_come_here,
+	)
 	ContentRegistry.register_condition(
 		"a_trade_could_be_celebrated", {},
 		ColonyConditions.a_trade_could_be_celebrated,
@@ -692,6 +698,41 @@ static func a_duty_could_be_waived(_args: Dictionary, context: LetterContext) ->
 	if TaxWaiver.running(context.state, TaxWaiver.ALL):
 		return false
 	return TaxRates.base_rate(context.state) > 0.0
+
+
+## Whether the Diplomat could be sent to **this governor's** town (#393,
+## `the-diplomat.md` §7).
+##
+## 🔒 **The PC chooses the town by choosing its governor.** The composer
+## offers recipients and nothing else, and a town picker would be a second way to
+## choose where a letter goes. So *send the Resident to Ashmere* is a letter to
+## Ashmere's governor, and the Order in it is addressed to the Diplomat — who
+## decides, as he decides everything.
+##
+## Not while he is dead, at sea, or already living there.
+static func the_diplomat_could_come_here(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null or context.colony == null:
+		return false
+	var town := context.colony.governed_by(context.sender.id)
+	if town == null:
+		return false
+	var him := diplomat_in(context.contacts)
+	if him == null or him.is_dead:
+		return false
+	if Diplomat.is_travelling(him, context.month):
+		return false
+	return him.town != town.display_name
+
+
+## The Diplomat, or null. There is one, and he is never replaced (SPEC §8.1).
+static func diplomat_in(contacts: Dictionary) -> Contact:
+	var ids: Array = contacts.keys()
+	ids.sort()
+	for id in ids:
+		var contact: Contact = contacts[id]
+		if contact != null and contact.role == Contact.ROLE_DIPLOMAT:
+			return contact
+	return null
 
 
 ## Whether there is a trade this month worth holding a festival for (#278).

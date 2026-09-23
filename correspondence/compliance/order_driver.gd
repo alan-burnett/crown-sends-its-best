@@ -28,6 +28,12 @@ var colony: Colony = null
 var policies: PolicyBook = null
 
 ## Orders waiting to be read. Filled when the post is sent, emptied when it lands.
+##
+## 🔒 **The run's array, not the driver's** (#390). Under *Distant colony* an
+## Order is still at sea when the game is saved, and the driver is rebuilt on
+## load — so the bag it carries has to be one the save knows about. The turn
+## machine hands it `RunState.orders_at_sea`, and nothing here may replace the
+## array, only change what is in it.
 var pending: Array[Order] = []
 
 ## What each order came to, for the letters that report it next month.
@@ -83,7 +89,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		_enact_if_agreed(order, contact, result, state, log)
 		_settle_policy(order, contact, state, log)
 
-	pending = still_at_sea
+	pending.clear()
+	pending.append_array(still_at_sea)
 
 
 ## A policy stands from the month its enactor agrees to it.

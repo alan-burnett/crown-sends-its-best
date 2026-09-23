@@ -332,6 +332,60 @@ func test_the_cost_lands_on_the_ordinary_promise_path() -> void:
 	assert_true(paid >= 3, "the PC is not offered a real choice about how handsomely")
 
 
+## 🔒 **The Provost is paid, and the founding happens** (#393).
+##
+## The letter carries `fund_founding` and `promise_gold` to one man, and the
+## second Order's Intent used to overtake the first: every Crown founding by
+## letter was paid for and never founded. **Through the desk**, because the desk
+## is what marks two Orders as one letter — a test that built the Orders itself
+## would pass whether it did or not.
+func test_the_payment_does_not_overtake_the_founding_it_pays_for() -> void:
+	var run := RunState.new_run(SEED)
+	ContactRoster.load_into(run, content)
+	run.contact(&"provost").relationship.loyalty = 90.0
+	var machine := TurnMachine.new(run)
+	machine.use_content(content)
+	machine.saves_on_send = false
+
+	machine.begin_turn()
+	_set_aside(run)
+	var outgoing := OutgoingLetter.new("provost.propose_a_founding", &"provost")
+	outgoing.params = {"amount": 1600}
+	var wizard := ReplyWizard.new(
+		Letter.from_record(content.record("letters", "provost.propose_a_founding")), outgoing)
+	wizard.choose_tone(Tone.DUTIFUL)
+	wizard.choose("founding", "handsomely")
+	run.post.add(outgoing)
+	machine.send_post()
+
+	var answer := ""
+	for result in machine.orders.results:
+		if (result["order"] as Order).kind == FoundingExecutor.KIND_FUND:
+			answer = String(result["outcome"])
+	assert_ne(answer, "", "the founding was never read")
+	assert_ne(answer, String(Compliance.REFUSE),
+		"a contented Provost refused his own proposal, so this proves nothing")
+
+	for month in 4:
+		machine.begin_turn()
+		_set_aside(run)
+		machine.send_post()
+
+	var funded := 0
+	for intent in run.intents.all():
+		if intent.kind != FoundingExecutor.KIND_FUND:
+			continue
+		assert_ne(intent.resolution, Intent.OVERTAKEN_BY_EVENTS,
+			"the payment in the same letter overtook the founding it paid for")
+		funded += 1 if intent.resolution == Intent.COMPLETED else 0
+	assert_eq(funded, 1, "the PC paid for a founding and none was ever made")
+
+
+func _set_aside(run: RunState) -> void:
+	for inbound in run.inbox:
+		inbound.status = InboundLetter.SET_ASIDE
+
+
 func test_the_letter_offers_arguing_against_it() -> void:
 	var record := content.record("letters", "provost.propose_a_founding")
 	var argued := false

@@ -299,6 +299,28 @@ func test_a_letter_at_sea_survives_the_save() -> void:
 		"it arrived at a different time in the loaded run")
 
 
+func test_an_order_at_sea_survives_the_save() -> void:
+	# 🔒 The outbound half. The driver is rebuilt on load, so an Order held only
+	# by it was an instruction the PC gave and nobody ever received.
+	var run := _run()
+	_distant(run)
+	var machine := TurnMachine.new(run)
+	machine.orders.carry(Order.new(
+		M1Registrations.ORDER_REFUSE, &"steward", {"to": "steward"}, run.world.month))
+	machine.orders.on_phase(WorldPhase.RECKONING, run.world, run.log, run.streams)
+	assert_empty(machine.orders.results, "it was read at once, so this proves nothing")
+
+	var restored := RunState.from_dict(run.to_dict())
+	var reloaded := TurnMachine.new(restored)
+	assert_eq(reloaded.orders.pending.size(), 1, "the Order sank on the way to the save file")
+
+	restored.world.month += Crossing.months()
+	reloaded.orders.on_phase(
+		WorldPhase.RECKONING, restored.world, restored.log, restored.streams)
+	assert_eq(reloaded.orders.results.size(), 1, "it survived the load and was never read")
+	assert_empty(restored.orders_at_sea, "it was read and is still on the water")
+
+
 func test_an_ordinary_save_carries_an_empty_hold() -> void:
 	var run := _run()
 	assert_empty(RunState.from_dict(run.to_dict()).at_sea,

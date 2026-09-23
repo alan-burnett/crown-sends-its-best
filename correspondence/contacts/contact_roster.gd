@@ -87,6 +87,11 @@ static func template_for(kind: String) -> Dictionary:
 	return _templates.get(kind, {})
 
 
+## Whether this names a kind of resident a building can bring (#392).
+static func is_kind(name: StringName) -> bool:
+	return _templates.has(String(name))
+
+
 ## Put the Diplomat somewhere (#81, `the-diplomat.md` §2).
 ##
 ## **Data cannot know which town**, because the towns are made per run. He starts
@@ -196,6 +201,10 @@ static func _bring(town: Town, kind: String, run: RunState) -> void:
 	# him prominence, and prominence is what makes a slighted clergyman a
 	# mechanical problem rather than a flavour one.
 	contact.town = town.display_name
+	# 🔒 **What he is, as a field** (#392). A letter's sender names it, and
+	# every rule that is about *a clergyman* asks it, rather than reading the id
+	# or the title and hoping.
+	contact.kind = StringName(kind)
 	contact.title = kind.capitalize()
 	# §2's table: *Journalist Aldous Crane of Kettleburn*. The word is his kind,
 	# because four kinds share the institutional role the way four offices share

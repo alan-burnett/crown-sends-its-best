@@ -313,6 +313,9 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 		params,
 	)
 	intent.origin = Intent.ORIGIN_WILL if outcome == ACT_ALONE else Intent.ORIGIN_ORDER
+	# **Which letter it came from** (#393), so the other Orders in the same letter
+	# are not mistaken for a later one contradicting it.
+	intent.letter = order.letter
 	return intent
 
 
@@ -393,12 +396,17 @@ static func _priced(order: Order) -> Variant:
 			# consideration's business rather than a price.
 			return 0.0
 		M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY, \
-		M1Registrations.ORDER_WAIVE_DUTY:
+		M1Registrations.ORDER_WAIVE_DUTY, M1Registrations.ORDER_MOVE_DIPLOMAT:
 			# 🔒 **A rate costs the colony, not the man who sets it** (#302, SPEC
 			# §8.1). The Steward is being asked to do his job, in the direction he
 			# already wants — and priced at the fall-through's two hundred, against
 			# a man whose heaviest weight is `cost_of_request`, the Steward of the
 			# Revenue refused an order to raise the revenue on turn one.
+			#
+			# **And a move costs the Crown, not the Diplomat** (#393). The gold for
+			# his journey is a separate promise in the same letter; pricing the move
+			# as well would charge him for travelling on the Crown's business, and
+			# he would refuse even the move he asked for.
 			return 0.0
 		M1Registrations.ORDER_PREFER_SITE, M1Registrations.ORDER_DISSUADE_FOUNDING:
 			# **An opinion about where a town goes costs nothing to receive.** What

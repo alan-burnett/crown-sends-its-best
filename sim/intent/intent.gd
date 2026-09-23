@@ -73,6 +73,10 @@ var resolved_month: int = -1
 ## Whatever the executor needs: an amount, a resource, a destination.
 var data: Dictionary = {}
 
+## The letter whose Order this came from, or empty (#393). Intents from one letter
+## are one instruction and do not overtake each other; see `contends_with`.
+var letter: StringName = &""
+
 
 func _init(
 	p_id: StringName = &"",
@@ -97,8 +101,16 @@ func is_live() -> bool:
 ## Two Intents contend when they come from the same actor and are aimed at the
 ## same thing. Committing the second resolves the first as `overtaken_by_events`
 ## — a later letter contradicting an earlier one, which SPEC §8.5 expects.
+##
+## 🔒 **But never two from one letter** (#393). A letter that funds a
+## founding and promises the gold for it is one instruction in two Orders, not a
+## contradiction — and read as one, the payment overtook the founding it paid
+## for. Every Crown founding by letter and every move of the Diplomat was lost
+## this way.
 func contends_with(other: Intent) -> bool:
-	return source == other.source and target == other.target
+	if source != other.source or target != other.target:
+		return false
+	return letter.is_empty() or letter != other.letter
 
 
 ## Whether this may advance during `month`.
@@ -141,6 +153,7 @@ func to_dict() -> Dictionary:
 		"resolution": String(resolution),
 		"resolved_month": resolved_month,
 		"data": data.duplicate(true),
+		"letter": String(letter),
 	}
 
 
@@ -158,6 +171,7 @@ static func from_dict(source_data: Dictionary) -> Intent:
 	intent.progress = int(source_data.get("progress", 0))
 	intent.resolution = StringName(source_data.get("resolution", IN_PROGRESS))
 	intent.resolved_month = int(source_data.get("resolved_month", -1))
+	intent.letter = StringName(source_data.get("letter", ""))
 	return intent
 
 

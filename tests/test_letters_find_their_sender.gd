@@ -201,6 +201,88 @@ func test_every_letter_that_ships_has_somebody_who_could_send_it() -> void:
 		"letters nobody can send: %s" % ", ".join(orphaned))
 
 
+## Every kind of resident a building can bring, housed in the first town.
+##
+## **All four at once**, because the defect this guards against is one kind
+## sending another's letter — and a fixture with only a clergyman in it cannot
+## show a journalist sending his festival.
+func _every_resident(run: RunState) -> void:
+	var town: Town = run.colony.in_order()[0]
+	for building in ["church", "printing_press", "library", "gunsmith"]:
+		if not town.buildings.has(building):
+			town.buildings.append(building)
+	ContactRoster.house_the_residents(run)
+
+
+func test_a_letter_filed_under_a_kind_is_sent_only_by_that_kind() -> void:
+	# 🔒 #392. Clergyman, journalist, quartermaster and scholar share the
+	# `institutional` role, and the clergy's festival named the role — so a
+	# journalist could send it, and in a run with a printing press, did.
+	#
+	# **Asked of the folder, not of the `sender` field**, because the field is
+	# what was wrong: `data/letters_en/clergyman/` is where the Author put a
+	# clergyman's letter, and whoever the director finds to send it must be one.
+	var run := _run()
+	_every_resident(run)
+	var wrong := PackedStringArray()
+	var checked := 0
+	for id in content.ids("letters"):
+		var folder := StringName(String(id).get_slice(".", 0))
+		if not ContactRoster.is_kind(folder):
+			continue
+		checked += 1
+		for entry in director.senders_of(_letter(String(id)), run):
+			var sender: Contact = entry
+			if sender.kind != folder:
+				wrong.append("%s could be sent by %s, a %s" % [id, sender.id, sender.kind])
+	assert_true(checked > 0, "no letter is filed under a kind, so this proves nothing")
+	assert_empty(wrong, ", ".join(wrong))
+
+
+func test_a_kind_reaches_every_resident_of_it_and_nobody_else() -> void:
+	var run := _run()
+	_every_resident(run)
+	var second := _another_town(run, &"kettleburn", "Kettleburn")
+	var town := run.colony.by_id(&"kettleburn")
+	town.buildings.append("church")
+	ContactRoster.house_the_residents(run)
+	assert_true(second != null)
+
+	var letter := _letter("clergyman.festival")
+	var ids := PackedStringArray()
+	for entry in director.senders_of(letter, run):
+		ids.append(String((entry as Contact).id))
+	assert_eq(ids.size(), 2, "two towns have a church and the festival has %s" % [ids])
+	for id in ids:
+		assert_true(id.begins_with("clergyman_"), "%s is not a clergyman" % id)
+
+
+func test_a_resident_knows_his_kind() -> void:
+	# One field, written where he is brought. It was guessed from the id in one
+	# place and from his title in another, and `title` is flavour.
+	var run := _run()
+	_every_resident(run)
+	var town: Town = run.colony.in_order()[0]
+	for kind in ["clergyman", "journalist", "scholar", "quartermaster"]:
+		var man := run.contact(ContactRoster.resident_id(town, kind))
+		assert_true(man != null, "no %s was housed" % kind)
+		assert_eq(String(man.kind), kind, "%s does not know what he is" % man.id)
+		var restored := Contact.from_dict(man.to_dict())
+		assert_eq(String(restored.kind), kind, "a %s forgot what he was in the save" % kind)
+
+
+func test_a_role_still_reaches_everybody_holding_it() -> void:
+	# The kind is an addition, not a replacement: `sender: "institutional"` still
+	# means any resident, and `governor` still means every governor.
+	var run := _run()
+	_every_resident(run)
+	var any_resident := Letter.new()
+	any_resident.id = "test.any_resident"
+	any_resident.sender = "institutional"
+	assert_eq(director.senders_of(any_resident, run).size(), 4,
+		"the institutional role no longer reaches every resident")
+
+
 func test_the_rebellion_letters_have_a_sender() -> void:
 	# Named, because they are the ones that mattered: SPEC §12.3's whole arc had
 	# never reached a desk.

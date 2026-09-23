@@ -216,6 +216,15 @@ var inbox: Array[InboundLetter] = []
 ## written. That is the quirk, and it costs nothing because the contract was
 ## already right.
 var at_sea: Array[InboundLetter] = []
+
+## 🔒 **The PC's Orders not yet read by the men they are for** (#390).
+##
+## The outbound half of the crossing. **Always empty at a save without the
+## quirk**, because every Order posted is read in the Reckoning of the month it is
+## sent. Under *Distant colony* an Order waits here for a month, and it has to be
+## in the save: a corrupt save is a lost run, and an Order that did not survive a
+## load is an instruction the PC gave and nobody received.
+var orders_at_sea: Array[Order] = []
 var post: Post = null
 
 # --- The turn --------------------------------------------------------------
@@ -477,6 +486,9 @@ func to_dict() -> Dictionary:
 	var at_sea_entries: Array = []
 	for letter in at_sea:
 		at_sea_entries.append(letter.to_dict())
+	var orders_at_sea_entries: Array = []
+	for order in orders_at_sea:
+		orders_at_sea_entries.append(order.to_dict())
 
 	return {
 		"version": version,
@@ -514,6 +526,7 @@ func to_dict() -> Dictionary:
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
 		"at_sea": at_sea_entries,
+		"orders_at_sea": orders_at_sea_entries,
 		"letters_sent": letters_sent.duplicate(),
 		"writings": writings.to_dict(),
 		"post": post.to_dict(),
@@ -571,6 +584,8 @@ static func from_dict(data: Dictionary) -> RunState:
 		run.inbox.append(InboundLetter.from_dict(entry))
 	for entry in data.get("at_sea", []):
 		run.at_sea.append(InboundLetter.from_dict(entry))
+	for entry in data.get("orders_at_sea", []):
+		run.orders_at_sea.append(Order.from_dict(entry))
 
 	return run
 

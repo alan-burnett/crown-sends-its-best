@@ -56,6 +56,12 @@ const ORDER_REQUEST_TROOPS: StringName = &"request_troops"
 const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
 const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
 
+## **Send the Diplomat to a town** (#393, `the-diplomat.md` §3, §7).
+##
+## Addressed to him and decided by him: agreeing to the move he asked for and
+## sending him toward trouble are the same Order, and he may refuse either.
+const ORDER_MOVE_DIPLOMAT: StringName = &"move_diplomat"
+
 ## **A duty set aside for a stated number of months** (#278,
 ## `institutional-contacts.md` §3).
 ##
@@ -359,6 +365,11 @@ static func register_effects() -> void:
 		{"to": "contact", "resource": "string", "steps": "number"},
 		ORDER_SET_TAX_RATE,
 		M1Registrations.build_tax_order,
+	)
+	# **Where the Diplomat lives** (#393). It was a gold promise and nothing else,
+	# so the PC paid for a move that never happened; this is the move.
+	ContentRegistry.register_effect(
+		"move_diplomat", {"to": "contact", "town": "town"}, ORDER_MOVE_DIPLOMAT
 	)
 	# **The clergy's two asks, which are one effect** (#278). `resource` empty is
 	# a holy day — every duty, for the month — and a named resource is a festival

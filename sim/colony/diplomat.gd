@@ -149,7 +149,7 @@ static func rehome(contact: Contact, to: Town, context: ColonyContext) -> void:
 		"from": was,
 		"to": to.display_name,
 		"silent_until": contact.travelling_until,
-	}, WorldPhase.CROWNS_MONTH)
+	}, WorldPhase.MOVEMENT)
 
 
 ## Whether he is somewhere at sea and therefore writing nothing.

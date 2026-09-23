@@ -170,6 +170,48 @@ func test_another_actors_intent_does_not_contend() -> void:
 	assert_true(marshal.is_live())
 
 
+func test_two_intents_from_one_letter_do_not_contend() -> void:
+	# 🔒 #393. A letter that funds a founding and promises the gold for it is one
+	# instruction in two Orders. Read as a contradiction, the payment overtook
+	# the founding it paid for.
+	var founding := _adjust(3)
+	founding.letter = &"4.outgoing_0"
+	var payment := _adjust(1)
+	payment.letter = &"4.outgoing_0"
+	book.commit(founding, log, state.month)
+	book.commit(payment, log, state.month)
+	assert_true(founding.is_live(), "one letter overtook itself")
+
+
+func test_a_later_letter_still_contradicts_an_earlier_one() -> void:
+	# The rule above must not become *nothing a letter says can be taken back.*
+	var earlier := _adjust(3)
+	earlier.letter = &"4.outgoing_0"
+	var later := _adjust(1)
+	later.letter = &"6.outgoing_0"
+	book.commit(earlier, log, state.month)
+	book.commit(later, log, state.month)
+	assert_eq(earlier.resolution, Intent.OVERTAKEN_BY_EVENTS,
+		"the PC can no longer countermand his own letter")
+
+
+func test_will_contends_as_it_always_did() -> void:
+	# An Intent no letter carried is a man making up his mind again, and the
+	# second thought replaces the first.
+	var first := book.commit(_adjust(3), log, state.month)
+	book.commit(_adjust(1), log, state.month)
+	assert_eq(first.resolution, Intent.OVERTAKEN_BY_EVENTS)
+
+
+func test_the_letter_survives_a_round_trip() -> void:
+	# Or a founding and its payment, reloaded between them, contend again.
+	var founding := _adjust(3)
+	founding.letter = &"4.outgoing_0"
+	book.commit(founding, log, state.month)
+	var restored := IntentBook.from_dict(book.to_dict())
+	assert_eq(String(restored.live()[0].letter), "4.outgoing_0")
+
+
 # --- Origin ----------------------------------------------------------------
 
 func test_order_and_will_are_the_same_code_path() -> void:
