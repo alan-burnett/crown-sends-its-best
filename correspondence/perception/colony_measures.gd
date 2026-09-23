@@ -66,6 +66,27 @@ const WORST_QUALITY_OF_LIFE: String = "worst_quality_of_life"
 ## to make a hard decision.
 const COLONY_AT_PEACE: String = "colony_at_peace"
 
+## 🔒 **Guns in the stockpiles and guns in the companies' hands** (#281,
+## `institutional-contacts.md` §3).
+##
+## What the quartermaster judges the Crown by, and the reason his own contract
+## unmakes him: **shipping guns to the Crown is the precise opposite of the
+## colony being well armed**, so the harder the PC works the instrument the
+## faster he loses the only man who can grant it. That closure needs no cap and
+## no cooldown — it is this measure falling.
+##
+## **Both halves, deliberately.** Counting only the stores would let a colony
+## that had armed every company read as defenceless; counting only the companies
+## would let one sitting on a mountain of muskets read the same. He wants the
+## guns to exist.
+const COLONY_IS_ARMED: String = "colony_is_armed"
+
+## How many guns a head reads as a colony that has armed itself. Tuning.
+##
+## A share rather than a total, so a hamlet and a province that have made the
+## same effort read the same — and so `test_measure_ranges`' rule holds.
+const WELL_ARMED_PER_HEAD: float = 0.8
+
 ## How far back a scholar's memory of fighting runs. Tuning.
 const PEACE_WINDOW: int = 12
 
@@ -184,6 +205,7 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	# it today, and nothing about it is his alone.
 	measures[WORST_QUALITY_OF_LIFE] = worst_quality_of_life(run)
 	measures[COLONY_AT_PEACE] = at_peace(run)
+	measures[COLONY_IS_ARMED] = armed_of(run)
 
 	# **What a man at court can see, which is the ledger** (#282). On the patrons
 	# alone: `COLONY_REACH` above is the lock that a rival never reads the Crown's
@@ -236,6 +258,36 @@ static func worst_quality_of_life(run: RunState) -> float:
 		worst = minf(worst, clampf(town.quality_of_life, 0.0, 1.0))
 		seen = true
 	return worst if seen else 1.0
+
+
+## How well armed the colony is, counting the stores and the companies both.
+##
+## **A share of what it would take to arm everybody**, so a hamlet and a province
+## that have made the same effort read the same — and so this cannot become a
+## measure that says one word for the whole of a large colony's run.
+##
+## **One for a colony with nobody in it**, which is the honest answer: a place
+## with no people to arm is not a place the quartermaster is worried about.
+static func armed_of(run: RunState) -> float:
+	if run == null or run.colony == null:
+		return 1.0
+
+	var guns := 0.0
+	var people := 0.0
+	for town in run.colony.in_order():
+		guns += town.held(&"guns")
+		people += float(town.population())
+	if run.companies != null:
+		for entry in run.companies.list:
+			var company: Company = entry
+			if company == null or company.allegiance == Company.NATIVE:
+				continue
+			guns += float(company.arms.get("guns", 0.0))
+			people += float(company.size)
+
+	if people <= 0.0:
+		return 1.0
+	return clampf(guns / (people * WELL_ARMED_PER_HEAD), 0.0, 1.0)
 
 
 ## How quiet the last year has been, with nobody asked who began it.

@@ -422,6 +422,9 @@ static func register_measures() -> void:
 	MeasureRegistry.register_linear(ColonyMeasures.WORST_QUALITY_OF_LIFE, 0.0, 1.0)
 	# **Whether anybody has been fighting** (#280), never who began it.
 	MeasureRegistry.register_linear(ColonyMeasures.COLONY_AT_PEACE, 0.0, 1.0)
+	# **Guns in the stores and in the companies hands** (#281), as a share of
+	# what it would take to arm everybody.
+	MeasureRegistry.register_linear(ColonyMeasures.COLONY_IS_ARMED, 0.0, 1.0)
 	# 🔒 **The whole of the player's sight of the natives** (#208). Across the
 	# full range, so the bottom rung covers a people who have concluded the
 	# colony means them destroyed *and* a people who very nearly have — which is

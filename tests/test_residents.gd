@@ -1319,3 +1319,167 @@ func test_the_inversion_reaches_what_the_town_actually_feels() -> void:
 
 	assert_true(rebel > loyal,
 		"the church comforted a rebel town no more than it comforted a Crown one")
+
+
+# --- 🔒 The quartermaster: a contract that unmakes the man who grants it ----
+#
+# ⚠️ Placeholder at the Author's direction — what guns are *for* is a larger
+# question than this contact, so expect the particulars to move. What is locked
+# here is the shape, not the figures.
+
+func _quartermaster(run: RunState, town: Town) -> Contact:
+	return run.contacts.get(
+		String(ContactRoster.resident_id(town, "quartermaster")), null)
+
+
+func test_a_contract_is_a_price_and_instructs_no_town_to_make_anything() -> void:
+	# 🔒 SPEC §11.3 locks that towns run themselves and the PC never manages them
+	# directly. A contract raises what the Crown pays; **town valuation does the
+	# rest**, and towns turn to muskets because muskets are suddenly worth making.
+	var book := PolicyBook.new()
+	book.enact(Policy.new(
+		&"quartermaster_ashmere", PolicyEffects.GUN_CONTRACT, 0.0, Policy.ALL),
+		EventLog.new(), 3)
+
+	var pressing := PolicyEffects.pressure(book)
+	var key := PolicyEffects.PRICE_PREFIX + "guns"
+	assert_has(pressing, key, "a gun contract raises nobody's price for guns")
+	assert_true(float(pressing[key]) > 0.0, "the contract was worth nothing")
+
+
+func test_the_contract_reaches_what_a_town_is_paid_for_a_musket() -> void:
+	# A knob nothing reads is a number in a file: it has to arrive through
+	# `Valuation.crown`, the same door the war lift and a patron's barony use.
+	var run := _run()
+	var plain := Valuation.crown(&"guns", run.world)
+	run.world.values[PolicyEffects.PRICE_PREFIX + "guns"] = PolicyEffects.CONTRACT_LIFT
+	assert_true(Valuation.crown(&"guns", run.world) > plain,
+		"the Crown paid a town no more for a musket under contract")
+
+
+func test_it_raises_guns_and_nothing_else() -> void:
+	# A contract for muskets is not a contract for grain.
+	var run := _run()
+	var food := Valuation.crown(&"food", run.world)
+	run.world.values[PolicyEffects.PRICE_PREFIX + "guns"] = PolicyEffects.CONTRACT_LIFT
+	assert_almost_eq(Valuation.crown(&"food", run.world), food, 0.0001,
+		"a gun contract moved the price of food")
+
+
+func test_nothing_in_the_contract_tells_a_town_to_build_anything() -> void:
+	# 🔒 The guard. The moment somebody reaches for an objective or a stockpile
+	# here, §11.3 is broken and a governor has stopped running his own town.
+	var code := _lines_of("res://sim/crown/policy_effects.gd")
+	for token in ["objective", "add_building", "town.store", "Objective."]:
+		assert_false(code.contains(token),
+			"the policy effects reach into a town directly: %s" % token)
+
+
+# --- 🔒 He gains regard from the colony being armed -------------------------
+
+func test_he_judges_the_crown_by_how_well_armed_the_colony_is() -> void:
+	var run := _run()
+	var town := _with(run, ["gunsmith"])
+	var man := _quartermaster(run, town)
+	assert_true(man != null, "the gunsmith brought nobody")
+	assert_true(man.cares_about.has(ColonyMeasures.COLONY_IS_ARMED),
+		"the quartermaster does not mind whether anybody has a musket")
+
+
+func test_the_measure_counts_the_stores_and_the_companies_both() -> void:
+	# 🔒 Counting only the stores would let a colony that had armed every company
+	# read as defenceless; counting only the companies would let one sitting on a
+	# mountain of muskets read the same. He wants the guns to exist.
+	var run := _run()
+	var town := run.colony.in_order()[0]
+	town.workers = 20
+	town.stockpile = {}
+	var bare := ColonyMeasures.armed_of(run)
+
+	town.store(&"guns", 10.0)
+	var stored := ColonyMeasures.armed_of(run)
+	assert_true(stored > bare, "ten muskets in the storehouse armed nobody")
+
+	town.take(&"guns", 10.0)
+	run.companies.raise_company(
+		Company.COLONIAL, 10, {"guns": 10.0}, town.id, town.at, _context(run))
+	var carried := ColonyMeasures.armed_of(run)
+	assert_true(carried > bare,
+		"ten muskets in a company's hands armed nobody")
+
+
+func test_shipping_the_guns_away_is_the_opposite_of_being_armed() -> void:
+	# 🔒 **The whole of why the instrument closes itself.** No cap and no cooldown
+	# are needed; this is the brake.
+	var run := _run()
+	var town := run.colony.in_order()[0]
+	town.workers = 20
+	town.stockpile = {}
+	town.store(&"guns", 30.0)
+	var armed := ColonyMeasures.armed_of(run)
+
+	town.take(&"guns", 25.0)
+	assert_true(ColonyMeasures.armed_of(run) < armed,
+		"the colony shipped its muskets abroad and read as well armed as ever")
+
+
+func test_a_colony_that_ships_its_guns_cools_the_man_who_signed_for_them() -> void:
+	# The closure, asked of his drift rather than of the measure — a measure
+	# nothing reads would not cost him a thing.
+	var run := _run()
+	var town := _with(run, ["gunsmith"])
+	town.workers = 20
+	town.stockpile = {}
+	var man := _quartermaster(run, town)
+
+	town.store(&"guns", 40.0)
+	var armed := LoyaltyDrift.for_contact(man, ColonyMeasures.for_contact(run, man))
+	town.take(&"guns", 38.0)
+	var stripped := LoyaltyDrift.for_contact(man, ColonyMeasures.for_contact(run, man))
+
+	assert_true(stripped < armed,
+		"selling the colony's muskets to the Crown did not cool the quartermaster")
+
+
+func test_no_cap_or_cooldown_limits_the_contract() -> void:
+	# 🔒 §3: **his loyalty is the only brake.** A cap here would be a second brake
+	# and the first thing a tuner would reach for.
+	var code := _lines_of("res://sim/crown/policy_effects.gd")
+	var from := code.find("GUN_CONTRACT:")
+	assert_true(from >= 0, "the contract has gone")
+	var body := code.substr(from, 400)
+	for token in ["cooldown", "months_left", "cap", "at_most", "limit"]:
+		assert_false(body.contains(token),
+			"something other than his regard brakes the contract: %s" % token)
+
+
+# --- 🔒 His bias holds at every level ---------------------------------------
+
+func test_the_stores_are_always_low_and_the_duty_always_high() -> void:
+	var run := _run()
+	var town := _with(run, ["gunsmith"])
+	var man := _quartermaster(run, town)
+
+	assert_true(man.lean_for(ColonyMeasures.COLONY_IS_ARMED) < 0.0,
+		"the quartermaster is content with the stockpiles")
+	assert_true(man.lean_for("tax_burden") > 0.0,
+		"the quartermaster thinks the duty on iron is fair")
+
+
+func test_his_alarm_is_bounded_at_every_level_of_supply() -> void:
+	# 🔒 Unlike the Provost's certainty about education, **the player can check**.
+	# So he must be reliably one rung out rather than hysterical, or the number
+	# the letters quote and the word he uses stop agreeing.
+	var run := _run()
+	var town := _with(run, ["gunsmith"])
+	var man := _quartermaster(run, town)
+	var lean := man.lean_for(ColonyMeasures.COLONY_IS_ARMED)
+
+	for raw in [0.0, 0.2, 0.5, 0.8, 1.0]:
+		var truth := Perception.truthful_rung(ColonyMeasures.COLONY_IS_ARMED, raw, 5)
+		var his := Perception.rung(
+			ColonyMeasures.COLONY_IS_ARMED, raw, lean, 5, man.lean_shape)
+		assert_true(truth - his <= 1,
+			"he was more than one rung bleaker than the truth at %f" % raw)
+		assert_true(his <= truth,
+			"he reported the stockpiles as better than they are at %f" % raw)

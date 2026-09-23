@@ -68,9 +68,25 @@ const CROWN_SENTIMENT: StringName = &"crown_sentiment"
 ## should take it.
 const TRAVELLING_EXPERTS: StringName = &"travelling_experts"
 
+## The quartermaster's (#281, `institutional-contacts.md` §3).
+##
+## 🔒 **A contract is a price, not an order.** SPEC §11.3 locks that towns run
+## themselves and the PC never manages them directly — so this raises what the
+## Crown pays for guns and **town valuation does the rest**. Towns turn to
+## muskets because muskets are suddenly worth making. The sim needs no override
+## and the PC issues no instruction.
+##
+## 🔒 **And it unmakes the man who granted it.** He gains regard from the colony
+## being well armed, and shipping guns abroad is the precise opposite — so the
+## harder the PC works the contract, the faster he loses the only man who can
+## grant it. **The instrument closes itself: no cap is needed and none should be
+## added.**
+const GUN_CONTRACT: StringName = &"gun_contract"
+
 const ALL: Array[StringName] = [
 	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK,
 	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT, TRAVELLING_EXPERTS,
+	GUN_CONTRACT,
 ]
 
 ## What each knob is set to. **Four settings and no numbers**, because the PC is
@@ -167,6 +183,11 @@ const PUBLIC_RELATIONS_LIFT: float = 0.6
 ## and nothing else; no town pays a penny less and the Ledger is unchanged.
 const CROWN_SENTIMENT_RELIEF: float = 0.25
 
+## How much more the Crown pays for guns it has contracted for. Tuning, and
+## **very lucrative** by §3 — the contract is meant to be worth working, which is
+## what makes losing the man who grants it a real cost.
+const CONTRACT_LIFT: float = 0.9
+
 
 static func is_effect(id: StringName) -> bool:
 	return ALL.has(id)
@@ -209,6 +230,12 @@ static func pressure(book: PolicyBook) -> Dictionary:
 					float(values.get(CROWN_SENTIMENT_KEY, 0.0)) + CROWN_SENTIMENT_RELIEF)
 			TRAVELLING_EXPERTS:
 				values[TRAVELLING_EXPERTS_KEY] = 1.0
+			GUN_CONTRACT:
+				# **Through the price seam `FAVOUR_OUR_MARKET` already uses**, so
+				# `Valuation.crown` needs no new reader and a town works out for
+				# itself that muskets have become worth making.
+				var guns := PRICE_PREFIX + "guns"
+				values[guns] = float(values.get(guns, 0.0)) + CONTRACT_LIFT
 			_:
 				# The Provost's five (#173). Each presses on its own world value,
 				# so the sim reads a figure and never the policy book.

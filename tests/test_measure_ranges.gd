@@ -184,6 +184,10 @@ func test_no_measure_is_normalised_against_a_raw_quantity() -> void:
 		# **A share of a year of fighting** (#280), not a count of battles — so a
 		# long run and a short one are read on the same scale.
 		ColonyMeasures.COLONY_AT_PEACE,
+		# **A share of what it would take to arm everybody** (#281), never a
+		# count of muskets - so a hamlet and a province that made the same effort
+		# read the same.
+		ColonyMeasures.COLONY_IS_ARMED,
 		ColonyMeasures.TRADE_VOLUME,
 		# **A standing on a fixed nought-to-a-hundred scale** (#208), like the
 		# Crown's war. It does not grow with the colony because it is not a

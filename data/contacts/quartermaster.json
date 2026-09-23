@@ -1,0 +1,19 @@
+[
+  {
+    "id": "quartermaster",
+    "template": true,
+    "note": "A template, not a contact - one per gunsmith rather than one in the game. institutional-contacts.md section 3, the quartermaster. PLACEHOLDER AT THE AUTHOR'S DIRECTION: what guns are for is a larger question than this contact, so expect the particulars to move. Every figure here is tuning and belongs to M8.",
+    "title": "Quartermaster",
+    "prominence": 0.5,
+    "prominence_note": "Between the scholar and the clergy. A man who arms the town is listened to when there is trouble and rather less when there is not - and the gunsmith is a late building, so he arrives in a town that already has other voices.",
+    "cares_about": [
+      "colony_is_armed"
+    ],
+    "cares_about_note": "Guns in the stockpiles and guns in the companies' hands, both. This is the whole of why his own contract unmakes him: shipping guns to the Crown is the precise opposite of the colony being well armed, so the harder the PC works the instrument the faster he loses the only man who can grant it. The instrument closes itself - no cap is needed and none should be added.",
+    "leans": {
+      "colony_is_armed": -0.35,
+      "tax_burden": 0.3
+    },
+    "leans_note": "The stockpiles are always dangerously low and the iron duty always too high, at every level of supply and every rate. Unlike the Provost's certainty about education, the player can check - the stockpile is a number the letters quote - which makes him the easiest of the four to discount correctly. tax_burden leans positive because a higher reading is a heavier duty, and he always reads it heavier than it is."
+  }
+]
