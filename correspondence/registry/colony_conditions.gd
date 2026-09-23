@@ -109,6 +109,9 @@ static func register_all() -> void:
 		"the_court_is_cooling", {}, ColonyConditions.the_court_is_cooling
 	)
 	ContentRegistry.register_condition(
+		"the_court_is_warming", {}, ColonyConditions.the_court_is_warming
+	)
+	ContentRegistry.register_condition(
 		"a_patron_has_spoken_ill", {"within": "integer"},
 		ColonyConditions.a_patron_has_spoken_ill,
 	)
@@ -426,6 +429,21 @@ static func _his_town(context: LetterContext, him: Contact) -> Town:
 static func the_court_is_cooling(_args: Dictionary, context: LetterContext) -> bool:
 	return context != null and context.prestige != null \
 		and context.prestige.direction() == "falling"
+
+
+## Whether the court thinks better of the PC this month than last (#187).
+##
+## 🔒 **The other direction, and it had been missing.** Only *cooling*
+## existed, so a run whose reputation was climbing read exactly like one that had
+## not moved — and `prestige.md` §7 has the player perceiving prestige **only**
+## through letters. A quantity he can hear falling and never hear rising teaches
+## him that his name is a thing which only gets worse.
+##
+## 🔒 **The direction, never the figure**, like its opposite. There is no
+## condition here that would let a letter compare the number to anything.
+static func the_court_is_warming(_args: Dictionary, context: LetterContext) -> bool:
+	return context != null and context.prestige != null \
+		and context.prestige.direction() == "rising"
 
 
 ## Whether any town has refused the Crown a resource lately (#75, SPEC §8.1).

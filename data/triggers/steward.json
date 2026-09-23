@@ -255,5 +255,17 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.steward.the_court_is_warming",
+    "letter": "steward.the_court_is_warming",
+    "urgency": 0.2,
+    "cooldown": 9,
+    "note": "Issue 187. The other direction, which had no voice: only the Chancellor's the_court_has_noticed existed and it fires only when the PC's name is falling, so a run whose reputation was climbing read exactly like one that had not moved. prestige.md section 7 has the player perceiving prestige ONLY through letters, so a quantity he can hear falling and never hear rising teaches him his name is a thing that only gets worse. The Steward is the voice because prestige is denominated in gold and he is the Crown's accounts man - and because his standing_recovering letter already establishes him as the officer who says so when a thing improves. Cooldown 9, matching the Chancellor's, because a reputation that is merely climbing is not news every month; urgency below his revenue report, because it asks for nothing.",
+    "conditions": [
+      {
+        "the_court_is_warming": {}
+      }
+    ]
   }
 ]

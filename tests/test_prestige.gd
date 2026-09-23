@@ -333,3 +333,238 @@ func test_settling_says_so_without_saying_how_much() -> void:
 		var value: Variant = measured[0].payload[key]
 		assert_false(typeof(value) == TYPE_FLOAT or typeof(value) == TYPE_INT,
 			"the payload carries '%s' as a figure, which a letter could render" % key)
+
+# --- 🔒 The reckoning: one table, and nothing silently unpriced -------------
+
+func test_every_price_is_a_stated_multiple_of_the_reference() -> void:
+	# 🔒 The point of the pass (#187): the table says what each embarrassment is
+	# worth **against the others**, not eight figures each set in whichever ticket
+	# introduced it. So every one of them moves when the reference moves.
+	var plain: Dictionary = OpticsRegister.prices()
+	assert_not_empty(plain, "there are no optics at all")
+	for type in plain:
+		assert_true(float(plain[type]) > 0.0,
+			"'%s' is in the table at nothing, which is not a price" % type)
+		var ratio := float(plain[type]) / OpticsRegister.A_PROTEST
+		assert_true(ratio > 0.0, "'%s' is priced against nothing" % type)
+
+
+func test_a_trade_protest_is_the_reference_itself() -> void:
+	assert_almost_eq(
+		OpticsRegister.price_of(TradeProtest.EVENT_DECLARED),
+		OpticsRegister.A_PROTEST, 0.0001,
+		"the optic the whole table is priced against is not the reference figure")
+
+
+func test_a_lost_town_costs_more_than_twice_a_rebellion() -> void:
+	# 🔒 The question the ticket asks by name, and the sharpest in the table. A
+	# rebellion is a town that stopped answering and **might yet be brought
+	# back**; a lost town is gone to a foreign power or destroyed. Two towns in
+	# revolt should frighten a PC less than one town taken.
+	var rebelled := OpticsRegister.price_of(Rebellion.EVENT_DECLARED)
+	var lost := OpticsRegister.price_of(OpticsRegister.EVENT_TOWN_LOST)
+	assert_true(rebelled > 0.0 and lost > 0.0, "one of the two is not priced")
+	assert_true(lost > rebelled * 2.0,
+		"two rebellions cost more than a town taken, which inverts the design")
+
+
+func test_losing_a_company_costs_more_than_paying_a_duke() -> void:
+	# 🔒 **The court minds losing more than it minds paying**, which is the whole
+	# of why the PC pays. Paying is humiliating and voluntary; annihilation is a
+	# defeat. Invert this and tribute stops being an instrument.
+	assert_true(
+		OpticsRegister.price_of(OpticsRegister.EVENT_COMPANY_DESTROYED)
+			> OpticsRegister.price_of(OpticsRegister.EVENT_TRIBUTE_PAID),
+		"paying a duke embarrassed the Crown more than losing a company to one")
+
+
+func test_the_failure_debt_stings_without_swallowing_the_table() -> void:
+	# 🔒 A failure so dear that nothing else could matter collapses the whole
+	# table into one question, and §3's fixed debts stop meaning anything. It is
+	# the largest figure and it is the same order as the one below it.
+	var failed := OpticsRegister.price_of(OpticsRegister.EVENT_RUN_FAILED)
+	var lost := OpticsRegister.price_of(OpticsRegister.EVENT_TOWN_LOST)
+	assert_true(failed > lost, "failing the run cost less than losing one town")
+	assert_true(failed < lost * 5.0,
+		"the failure debt is so large that no other optic could matter")
+
+
+func test_nothing_the_game_emits_is_silently_unpriced() -> void:
+	# 🔒 The acceptance line: *every optic emitted is either priced or explicitly
+	# listed as ignored*. Without the second list, an event nobody priced and an
+	# event somebody decided not to price look identical — and the second turns
+	# into the first the moment the man who decided leaves.
+	for type in _the_court_might_hear_about():
+		assert_true(
+			OpticsRegister.is_an_optic(StringName(type))
+				or OpticsRegister.is_ignored(StringName(type)),
+			"'%s' reaches the court and the register has no opinion about it" % type)
+
+
+func test_nothing_is_both_priced_and_ignored() -> void:
+	for type in OpticsRegister.IGNORED:
+		assert_false(OpticsRegister.is_an_optic(StringName(type)),
+			"'%s' is charged for and also listed as deliberately not charged for" % type)
+
+
+func test_every_reason_given_for_ignoring_one_says_something() -> void:
+	# A reason of "" is the same as no list at all.
+	for type in OpticsRegister.IGNORED:
+		assert_true(String(OpticsRegister.IGNORED[type]).length() > 10,
+			"'%s' is ignored for no stated reason" % type)
+
+
+func test_a_famine_is_ignored_and_that_is_the_pillar() -> void:
+	# 🔒 SPEC §14.1 and §18. People the PC was responsible for starved, and **the
+	# court does not care.** A PC can leave behind a wretched, half-starved colony
+	# and retire in glory, and the game must let him. This is that, in the one
+	# place somebody would be most tempted to fix it.
+	assert_true(OpticsRegister.is_ignored(&"famine_deaths"),
+		"the register stopped ignoring a famine, which reads the colony's welfare")
+	assert_almost_eq(OpticsRegister.price_of(&"famine_deaths"), 0.0, 0.0001)
+
+
+## Every event type a reader might reasonably expect the court to hear about.
+##
+## Deliberately **not every event in the game** — most of them are the colony's
+## own bookkeeping and nobody would look for them here. These are the ones that
+## sound like bad news about the PC, which is exactly the set where silence is
+## indistinguishable from an oversight.
+func _the_court_might_hear_about() -> PackedStringArray:
+	return PackedStringArray([
+		"company_destroyed", "company_dwindled", "convoy_lost", "crown_refusing",
+		"desperate_letter", "diplomat_died", "expedition_destroyed",
+		"famine_deaths", "patron_spoke_ill", "rival_parked_on_our_ground",
+		"rival_reached_minimum", "run_failed", "town_declared_rebellion",
+		"town_lost", "town_returned_to_the_crown", "town_stormed",
+		"town_went_short", "trade_protest_declared", "tribute_paid",
+	])
+
+
+# --- 🔒 The two the reckoning collected on --------------------------------
+
+func test_the_crowns_own_resident_dying_reaches_the_court() -> void:
+	# 🔒 Seam A, and the whole of why the emit-not-price rule is worth having.
+	# `Diplomat` emitted this for a milestone and has never mentioned prestige;
+	# the register began charging for it without that file changing at all.
+	assert_true(OpticsRegister.is_an_optic(Diplomat.EVENT_DIED),
+		"the Crown's own officer died in the colony and the court heard nothing")
+	assert_true(
+		OpticsRegister.price_of(Diplomat.EVENT_DIED)
+			> OpticsRegister.price_of(TradeProtest.EVENT_DECLARED),
+		"a shut market embarrassed the Crown more than its Resident's death")
+	assert_true(
+		OpticsRegister.price_of(Diplomat.EVENT_DIED)
+			< OpticsRegister.price_of(OpticsRegister.EVENT_COMPANY_DESTROYED),
+		"one man dead cost as much as a company of soldiers annihilated")
+
+
+func test_an_expedition_annihilated_reaches_the_court_and_costs_little() -> void:
+	# 🔒 **Less than a protest, and deliberately.** The Crown's stake in the party
+	# already left through `net_position` with its stores, and §3 forbids charging
+	# that twice — so what is priced is the embarrassment alone, and a failed
+	# settlement embarrasses the court less than a market that visibly shut.
+	assert_true(OpticsRegister.is_an_optic(ExpeditionParty.EVENT_DESTROYED),
+		"a founding party was wiped out and the court heard nothing")
+	assert_true(
+		OpticsRegister.price_of(ExpeditionParty.EVENT_DESTROYED)
+			< OpticsRegister.price_of(TradeProtest.EVENT_DECLARED),
+		"losing a settling party out-weighed a colony that stopped selling")
+
+
+func test_the_mechanics_that_emit_them_still_know_nothing_about_prestige() -> void:
+	# 🔒 §4: *a mechanic emits the event, it never prices it.* Both of these were
+	# collected on without their emitters changing, and a dev who prices an optic
+	# where it happens has broken the one rule that made this pass possible.
+	for path in ["res://sim/colony/diplomat.gd", "res://sim/colony/expedition_party.gd"]:
+		var file := FileAccess.open(path, FileAccess.READ)
+		assert_true(file != null, "%s is gone" % path)
+		var source := file.get_as_text()
+		file.close()
+		assert_false(source.contains("OpticsRegister"),
+			"%s decides what the court thinks of it, which is not its business" % path)
+
+# --- 🔒 And it can be heard rising, not only falling (#187) -----------------
+
+func _hearing(log: EventLog, prestige: Prestige, month: int) -> LetterContext:
+	var letter := LetterContext.new(WorldValues.initial_state(), null, &"")
+	letter.log = log
+	letter.month = month
+	letter.prestige = prestige
+	return letter
+
+
+func test_a_rising_reputation_reaches_a_letter_too() -> void:
+	# 🔒 **The other direction, and it had no voice.** Only `the_court_is_cooling`
+	# existed, so a run whose name was climbing read exactly like one that had not
+	# moved — and §7 has the player perceiving prestige **only** through letters.
+	# A quantity he can hear falling and never hear rising teaches him his name is
+	# a thing that only gets worse.
+	var log := _log()
+	var prestige := Prestige.new()
+	_paid(log, 1, 4_000.0)
+	_rebellion(log, 1)
+	prestige.settle(log, 1)
+
+	var letter := _hearing(log, prestige, 1)
+	assert_false(ColonyConditions.the_court_is_warming({}, letter),
+		"the Steward congratulated a PC whose colony had just revolted")
+
+	_received(log, 2, 12_000.0)
+	prestige.settle(log, 2)
+	letter.month = 2
+	assert_true(ColonyConditions.the_court_is_warming({}, letter),
+		"the PC made the Crown a fortune and nobody at court mentioned it")
+
+
+func test_a_falling_run_and_a_rising_one_do_not_read_alike() -> void:
+	# The acceptance line, asked directly: the two directions are never both true
+	# and never both false while the number is moving.
+	var log := _log()
+	var prestige := Prestige.new()
+	_received(log, 1, 5_000.0)
+	prestige.settle(log, 1)
+	_paid(log, 2, 20_000.0)
+	prestige.settle(log, 2)
+
+	var falling := _hearing(log, prestige, 2)
+	assert_true(ColonyConditions.the_court_is_cooling({}, falling),
+		"a reputation in free fall, and the court is not cooling")
+	assert_false(ColonyConditions.the_court_is_warming({}, falling),
+		"the same month reads as both a rise and a fall")
+
+
+func test_a_steady_run_hears_neither() -> void:
+	# 🔒 Silence is a reading too. A PC whose name has not moved should not be
+	# told that it has, in either direction — otherwise the letters stop carrying
+	# information and become weather.
+	var log := _log()
+	var prestige := Prestige.new()
+	prestige.settle(log, 1)
+	prestige.settle(log, 2)
+
+	var quiet := _hearing(log, prestige, 2)
+	assert_false(ColonyConditions.the_court_is_cooling({}, quiet),
+		"a month in which nothing happened was reported as a decline")
+	assert_false(ColonyConditions.the_court_is_warming({}, quiet),
+		"a month in which nothing happened was reported as a triumph")
+
+
+func test_neither_letter_may_read_the_figure() -> void:
+	# 🔒 §7: **the direction, never the number.** Prestige is never shown to the
+	# player as a quantity, so a condition that let a letter compare it to
+	# anything would be the screen the design refuses to draw.
+	#
+	# **Registered here on purpose.** `condition_params` answers `{}` for an id
+	# nobody registered as readily as for one that takes none, so asking an empty
+	# registry this question passes however the conditions are declared — and it
+	# did, until a mutation renamed one of them and nothing went red.
+	reset_world()
+	M1Registrations.register_all()
+
+	for id in ["the_court_is_cooling", "the_court_is_warming"]:
+		assert_true(ContentRegistry.has_condition(id),
+			"'%s' is not a condition any letter could name" % id)
+		assert_empty(ContentRegistry.condition_params(id),
+			"'%s' takes parameters, so a letter can ask about the figure" % id)
+	reset_world()

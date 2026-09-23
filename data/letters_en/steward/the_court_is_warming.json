@@ -1,0 +1,52 @@
+{
+  "id": "steward.the_court_is_warming",
+  "sender": "steward",
+  "type": "report",
+  "skippable": true,
+  "speaks_to": 0,
+  "perception": {
+    "purse": {
+      "measure": "colony_revenue",
+      "ladder": [
+        "ruinous",
+        "thin",
+        "tolerable",
+        "handsome"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "I do not write this sort of letter often, so I shall be brief about it and then we may both forget it happened."
+    },
+    {
+      "text": "Your name is being spoken of favourably. Not warmly, you understand. Favourably. There is a difference and the difference is most of what I am employed to notice."
+    },
+    {
+      "text": "I mention it because the returns are {perception:purse} and a man who knows only that figure would draw the wrong conclusion from it. The figure is one thing. What the Crown believes you are good for is another, and the second has moved."
+    },
+    {
+      "text": "It will not last unless you make it last, which I say to everybody and which nobody has yet taken as advice.",
+      "only_tones": [
+        "dutiful",
+        "annoyed"
+      ]
+    },
+    {
+      "text": "I take a small share of the credit. A very small one. I mention it so that you know where to send the wine.",
+      "only_tones": [
+        "pleased"
+      ]
+    },
+    {
+      "text": "I take no pleasure in reporting it. I report it because reporting is what I do, and because the day it reverses I should like to have been on record both ways.",
+      "only_tones": [
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "There is nothing to answer. I would not have you write back to thank me; it would go in a file and the file would outlive us both."
+    }
+  ]
+}
