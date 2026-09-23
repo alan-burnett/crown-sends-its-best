@@ -245,6 +245,7 @@ func _init(p_run: RunState) -> void:
 	companies.contacts = run.contacts
 	companies.commanders = run.commanders
 	companies.book = run.intents
+	companies.run = run
 
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and

@@ -115,6 +115,11 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 		# **It leaves.** The people, the cargo and the matching share of the
 		# purse go with it; where it goes is #176's business.
 		Expedition.launch(town, context)
+	elif kind == Objective.COMPANY:
+		# **Men under arms** (#342). The same shape one tier up: a body of people
+		# leaving a town with a share of its stores. Its commander, if the order
+		# it was given needs one, is found when it is time to move.
+		Raising.raise_from(town, context)
 	elif kind == Objective.IMPROVEMENT:
 		if context.map == null or not context.map.can_build(at.x, at.y, finished):
 			# The ground changed under it. Nothing is refunded, because the work

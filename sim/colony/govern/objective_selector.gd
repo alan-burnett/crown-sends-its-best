@@ -143,6 +143,22 @@ static func candidates(town: Town, context: ColonyContext, intent: StringName = 
 				"score": _scored(_expedition_axes(town), intent, EXPEDITION_MONTHS),
 			})
 
+	# 🔒 **Raising a company is an ordinary candidate too** (#342). Scored on the
+	# same axes as a granary, which is the only way a governor can decline to
+	# raise one because the harvest matters more — and that refusal is the thing
+	# that makes raising one mean something.
+	#
+	# 🔒 A town that cannot keep enough workers to work never offers it, and a
+	# rebel town never does: filters, not weights, for the same reason the
+	# expedition's are.
+	if Raising.may_raise(town):
+		for id in Objective.company_ids():
+			out.append({
+				"id": StringName(id),
+				"target": Vector2i(-1, -1),
+				"score": _scored(_company_axes(town), intent, COMPANY_MONTHS),
+			})
+
 	for id in Objective.posture_ids():
 		out.append({
 			"id": StringName(id),
@@ -223,6 +239,33 @@ static func _expedition_axes(town: Town) -> Dictionary:
 	# the overflow case arriving through the same scoring as the deliberate one.
 	var crowding := clampf(float(town.population()) / CROWDED, 0.0, 2.0)
 	return {"expansion": 0.5 + 0.5 * crowding}
+
+
+## How long a governor reckons putting men under arms takes.
+##
+## **Quicker than an expedition**, because the men are already here and the arms
+## are already in the warehouse — what takes the months is deciding, arming and
+## drilling rather than crossing country. Tuning.
+const COMPANY_MONTHS: int = 2
+
+
+## What a company is good for.
+##
+## **Defence, and a little capacity denied.** It costs the town workers it will
+## not get back and stores it has been holding, so a governor who is not thinking
+## about being attacked should never want one — and the axes say so rather than a
+## rule saying so.
+##
+## The negative on capacity is the honest half: men under arms are men not
+## working tiles, which is what a governor weighing a company against a granary
+## is actually weighing.
+static func _company_axes(town: Town) -> Dictionary:
+	# A town with the guns already bought gets more out of raising than one that
+	# would send a mob — which is what the defensive intents' stockpiling was
+	# always for.
+	var armed := clampf(
+		town.held(&"guns") / maxf(1.0, float(Raising.size_for(town))), 0.0, 1.0)
+	return {"defence": 0.6 + 0.4 * armed, "capacity": -0.3}
 
 
 ## The population at which a governor starts thinking about room.

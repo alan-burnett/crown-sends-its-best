@@ -121,6 +121,7 @@ static func load_resources(content: ContentDatabase) -> void:
 	# What a company wants and what a month without rations costs it (#211).
 	if content.has_record(Company.COLLECTION, Company.RECORD):
 		Company.load_from(content.record(Company.COLLECTION, Company.RECORD))
+		Raising.load_from(content.record(Company.COLLECTION, Company.RECORD))
 	# And what each of §5's six factors is worth (#214).
 	if content.has_record(Force.COLLECTION, Force.RECORD):
 		Force.load_from(content.record(Force.COLLECTION, Force.RECORD))

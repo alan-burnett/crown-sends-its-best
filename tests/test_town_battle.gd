@@ -394,15 +394,28 @@ func test_experts_go_only_when_no_worker_remains() -> void:
 func test_the_rule_has_exactly_one_home() -> void:
 	# 🔒 A second implementation is how *workers before experts* stops being true
 	# somewhere. Famine and a storming both call `Town.take_one_life`.
+	#
+	# ⚠️ **What is forbidden is a second *ordering*, not every write to
+	# `workers`.** People also leave a town alive — an expedition takes them
+	# (`founding-towns.md` §7) and #342's company enlists them — and those are
+	# **transfers rather than losses**: the men still exist somewhere, and nobody
+	# had to decide whose turn it was to die.
+	#
+	# The first cut of this scanned for `workers -=` and passed only because
+	# `Expedition` happens to spell it `workers - going`. So the test asks the
+	# question it means: **a file that removes workers *and* removes experts is
+	# deciding an order**, and there may be exactly one of those.
 	var found := PackedStringArray()
 	for path in _scripts_under("res://sim"):
 		if path.ends_with("town.gd"):
 			continue
 		var code := _code_of(path)
-		if code.contains("workers -= ") or code.contains("workers -="):
+		var takes_workers := code.contains("workers -=") or code.contains("workers - ")
+		var takes_experts := code.contains("add_experts(") and code.contains("-1")
+		if takes_workers and takes_experts:
 			found.append(path.get_file())
 	assert_empty(found,
-		"something takes a life without going through Town: %s" % ", ".join(found))
+		"something decides its own loss order: %s" % ", ".join(found))
 
 
 # --- 🔒 A town reduced to nothing is a lost town ----------------------------

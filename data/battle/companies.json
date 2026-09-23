@@ -12,6 +12,8 @@
     "unsupported_effect": 0.6,
     "tiles_per_month": 1,
     "cavalry_tiles": 2,
+    "worker_floor": 6,
+    "raises_share": 0.5,
     "militia_months": 6
   }
 ]
