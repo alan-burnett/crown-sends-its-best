@@ -390,12 +390,21 @@ func test_a_buildings_reserve_reaches_the_same_desired_stock_as_everything_else(
 
 # --- 🔒 A governor can want every building for the right reason -------------
 
-## Effects that reach `ObjectiveSelector._building_axes`, and so can be a reason
-## a governor chooses to build a thing.
+## Effects that reach `ObjectiveSelector._building_axes` **and can be scored on
+## their own**, so each one can be put on a bare probe building below.
+##
+## ⚠️ **Not the same list as `ObjectiveSelector.EFFECTS_READ`, and it must not be
+## consolidated with it.** That list is every key `_building_axes` knows about;
+## this one is the subset that scores without a town around it. `conversions`
+## is the difference: the selector reads it, but its worth is the margin a
+## recipe adds given what the town can get and what the Crown pays, so a probe
+## building carrying it alone is correctly worth nothing.
+##
+## Consolidating the two was tried and the probe test caught it immediately.
 const REACHES_THE_GOVERNOR: Array[String] = [
 	"amusement", "build_speed", "counts_distant_experts", "defence", "draws_experts",
 	"education", "education_per_expert", "growth", "immigration", "pasture",
-	"quality_of_life", "reserve_months", "yield_bonus",
+	"perceived_safety", "quality_of_life", "reserve_months", "yield_bonus",
 ]
 
 ## And effects that deliberately do not, with why.
@@ -425,9 +434,10 @@ func test_every_building_effect_is_something_a_governor_can_weigh() -> void:
 		for effect in Building.find(StringName(id)).effects:
 			seen[String(effect)] = true
 
+	var reaches := REACHES_THE_GOVERNOR
 	var unclassified: PackedStringArray = PackedStringArray()
 	for effect in seen:
-		if not REACHES_THE_GOVERNOR.has(String(effect)) \
+		if not reaches.has(String(effect)) \
 				and not DELIBERATELY_SILENT.has(String(effect)):
 			unclassified.append(String(effect))
 	unclassified.sort()

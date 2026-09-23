@@ -212,6 +212,18 @@ const EXPERTS_A_TOWN_MIGHT_HOLD: float = 3.0
 const AMUSEMENT_WORTH: float = 3.0
 
 
+## What the comfort of a church is worth beside the amusement of one.
+##
+## **Less than amusement, deliberately.** Amusement is had every month; perceived
+## safety only pays when the town has something to be frightened of, because it
+## lifts what danger has left rather than adding to a town in no danger at all.
+## A governor who could want a church as hard as a theatre would build one in a
+## quiet valley and get nothing for it.
+##
+## Tuning.
+const COMFORT_OF_FAITH: float = 1.8
+
+
 ## What one more unit a worker-month of a conversion is worth.
 ##
 ## A yield bonus is a share of everything the town will ever produce and is
@@ -319,8 +331,8 @@ static func improvement_axes_at(
 const EFFECTS_READ: PackedStringArray = [
 	"amusement", "build_speed", "conversions", "counts_distant_experts",
 	"defence", "draws_experts", "education", "education_per_expert",
-	"growth", "immigration", "pasture", "quality_of_life", "reserve_months",
-	"yield_bonus",
+	"growth", "immigration", "pasture", "perceived_safety", "quality_of_life",
+	"reserve_months", "yield_bonus",
 ]
 
 
@@ -348,9 +360,16 @@ static func _building_axes(id: StringName) -> Dictionary:
 	# what happened when the effect was added and this was not told: the colony
 	# built fourteen of the eighteen buildings in the tree and never the two that
 	# exist to make people happy.
+	# **Perceived safety is comfort and not defence** (`buildings.md` §4). A
+	# church stops nothing; it makes people feel less alone about what is coming,
+	# and it reaches quality of life through the safety component rather than
+	# through `Force`. Scoring it on `defence` would let a governor answer *raise
+	# the walls* with a chapel, which is exactly the misunderstanding the two
+	# words exist to keep apart.
 	axes["comfort"] = (
 		float(building.effect("quality_of_life", 0.0)) * 0.5
 		+ float(building.effect("amusement", 0.0)) * AMUSEMENT_WORTH
+		+ float(building.effect("perceived_safety", 0.0)) * COMFORT_OF_FAITH
 	)
 	# **A reserve is per-resource now** (#148). Read as a float this silently
 	# became zero the month the effect turned into a dictionary, and a governor

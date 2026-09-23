@@ -233,7 +233,8 @@
 	},
 	"upkeep": 2,
 	"effects": {
-	  "amusement": 0.3
+	  "amusement": 0.3,
+	  "perceived_safety": 0.3
 	},
 	"grants_contact": "clergyman",
 	"requires": []
@@ -250,7 +251,8 @@
 	},
 	"upkeep": 10,
 	"effects": {
-	  "amusement": 0.3
+	  "amusement": 0.3,
+	  "perceived_safety": 0.45
 	},
 	"extends_contact": "clergyman"
   },

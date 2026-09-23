@@ -67,6 +67,7 @@ static func load_from(records: Array) -> void:
 
 static func reset() -> void:
 	_buildings = {}
+	_regard_swing = 0.6
 
 
 static func has(id: StringName) -> bool:
@@ -344,6 +345,76 @@ static func amusement_for(town: Town) -> Dictionary:
 	# amusements clear `VARIETY_TARGET` on their own and make the cellar
 	# irrelevant.
 	return {"served": served, "kinds": 1 if served > 0.0 else 0}
+
+
+# --- 🔒 A building that brings a man works as well as he thinks of the PC ----
+
+## How far a resident's regard swings the effect of the building that brought him.
+##
+## **Neutral regard is the building as authored**, so nothing changes for a man
+## nobody has dealt with either way, and the authored figures in `buildings.md`
+## §4 go on meaning what they say. From there a slighted man drags it down and a
+## contented one lifts it.
+##
+## Tuning, and a quirk's to turn (`perks-and-quirks.md` §4, *A pious colony*).
+static var _regard_swing: float = 0.6
+
+
+static func regard_swing() -> float:
+	return _regard_swing
+
+
+static func set_regard_swing(swing: float) -> void:
+	_regard_swing = maxf(0.0, swing)
+
+
+## What this building's effect is multiplied by, given who lives here.
+##
+## 🔒 **One rule for every building that brings a contact**, not a clergy rule.
+## `institutional-contacts.md` §3 asks for it twice — *a contented clergyman
+## gives more* perceived safety, and *a slighted scholar teaches badly* — and a
+## second copy written for the scholar would be the first place the two could
+## disagree.
+##
+## **One is the answer for everything else**: a building that brings nobody, or
+## whose man is dead or not yet housed, performs exactly as authored. A town that
+## has just built a church is not penalised for the month before its priest
+## arrives.
+static func regard_scale(
+	building: Building, town: Town, contacts: Dictionary
+) -> float:
+	if building == null or building.grants_contact.is_empty() or town == null:
+		return 1.0
+	var resident: Contact = contacts.get(
+		String(ContactRoster.resident_id(town, building.grants_contact)), null)
+	if resident == null or resident.is_dead:
+		return 1.0
+	var from_neutral := (resident.loyalty() - Relationship.NEUTRAL_LOYALTY) \
+		/ Relationship.NEUTRAL_LOYALTY
+	return maxf(0.0, 1.0 + _regard_swing * from_neutral)
+
+
+## 🔒 **What the town believes about its own safety** (`buildings.md` §4).
+##
+## A church does not stop an attack. It makes people feel less alone in the face
+## of one — which is why it is *perceived* safety and why it is the clergyman's
+## regard that decides how much of it there is. **A church with a slighted priest
+## in it is a building the town has stopped believing in.**
+##
+## Summed like amusement and read through `is_lit` like every other effect, so a
+## town too poor to pay its upkeep loses the comfort in the month it can least
+## afford to.
+static func perceived_safety_for(town: Town, contacts: Dictionary) -> float:
+	var comfort := 0.0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building == null or not is_lit(town, StringName(id)):
+			continue
+		var authored := maxf(0.0, float(building.effect("perceived_safety", 0.0)))
+		if authored <= 0.0:
+			continue
+		comfort += authored * regard_scale(building, town, contacts)
+	return comfort
 
 
 ## How much this town's production of a resource is raised by what it has built.
