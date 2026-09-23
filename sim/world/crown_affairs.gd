@@ -43,8 +43,19 @@ const CAMPAIGN_CHANCE: float = 0.28
 const CAMPAIGN_MIN_MONTHS: int = 2
 const CAMPAIGN_MAX_MONTHS: int = 5
 const CAMPAIGN_CLIMB: float = 9.0
-const WAR_COOLING: float = 4.5
 const WAR_NOISE: float = 3.0
+
+## Where the war settles between campaigns while the Crown is at its peak.
+## Tuning.
+const WAR_SETTLE: float = 15.0
+
+## How far each turn of the Crown's decline lifts where it settles (#376).
+## Tuning.
+const WAR_SETTLE_PER_DECLINE: float = 3.2
+
+## The share of its height above where it settles that the war loses in a month
+## without a campaign (#376). Tuning.
+const WAR_COOLING_RATE: float = 0.35
 
 
 ## The run's growth state. Set by the turn machine; absent in the tests that
@@ -124,6 +135,21 @@ func _settle_emigration(state: WorldState, log: EventLog) -> void:
 		WorldPhase.CROWNS_MONTH)
 
 
+## 🔒 **Where the war settles between campaigns** (#376, `the-marshal.md` §8).
+##
+## *His war worsens on the same curve as the Crown's decline* — and the decline
+## is `DemandGrowth`'s own history, which the emigration flow reads for the same
+## reason: two curves for one fact about the Crown would eventually disagree
+## about how bad things have got. So the war is a variable all run, rising as
+## the Crown declines, rather than a ramp that reaches its ceiling and stops.
+##
+## 🔒 **Still nobody's to influence.** It reads the Crown's decline and nothing
+## in the colony; no letter, shipment or contact reaches it.
+func settles_at() -> float:
+	var declined := 0.0 if growth == null else float(growth.history.size())
+	return WAR_SETTLE + WAR_SETTLE_PER_DECLINE * declined
+
+
 func _advance_war(state: WorldState, log: EventLog, rng: RandomNumberGenerator) -> void:
 	var war := float(state.get_value(WorldValues.WAR, 0.0))
 	var months_left := int(state.get_value(WorldValues.CAMPAIGN_MONTHS_LEFT, 0))
@@ -134,9 +160,13 @@ func _advance_war(state: WorldState, log: EventLog, rng: RandomNumberGenerator) 
 		if months_left == 0:
 			log.emit(EVENT_CAMPAIGN_ENDED, &"crown", state.month, {"war": war}, WorldPhase.CROWNS_MONTH)
 	else:
-		# Between campaigns the war cools, but never all the way: the Crown is at
-		# the peak of its power and always fighting somebody.
-		war -= WAR_COOLING
+		# 🔒 **Between campaigns it cools toward where the Crown's decline has
+		# left it, and the higher it stands the faster it falls** (#376). A fixed
+		# cooling against a fixed climb was a ramp: it drifted up two points a
+		# month, sat at its ceiling from about year four, and was a constant for
+		# the rest of the run. Never all the way down: the Crown is always
+		# fighting somebody.
+		war -= WAR_COOLING_RATE * (war - settles_at())
 		if rng.randf() < CAMPAIGN_CHANCE:
 			months_left = rng.randi_range(CAMPAIGN_MIN_MONTHS, CAMPAIGN_MAX_MONTHS)
 			log.emit(EVENT_CAMPAIGN_BEGAN, &"crown", state.month, {
