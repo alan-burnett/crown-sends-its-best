@@ -187,6 +187,66 @@ func test_it_is_reached_in_a_real_deliberation_and_moves_the_scores() -> void:
 		"it scored against a governor who was urged toward what he already wanted")
 
 
+# --- 🔒 The Steward prefers high taxes (#303) ------------------------------
+
+## A tax order moving the base rate by `steps`, built as the desk builds it.
+func _tax(steps: float, state: WorldState) -> Order:
+	var steward := Contact.new(&"steward")
+	var context := LetterContext.new(state, steward, Tone.DUTIFUL)
+	return ContentRegistry.run_effect("set_tax_rate",
+		{"to": "steward", "resource": "", "steps": steps}, context)
+
+
+func test_a_rise_is_nothing_against_him() -> void:
+	var state := WorldValues.initial_state()
+	assert_almost_eq(Compliance.dissonance_of(_tax(1.0, state), null, state), 0.0, 0.0001,
+		"the Steward was asked to raise a tax and found it disagreeable")
+
+
+func test_a_cut_is_against_him_and_a_deeper_one_more_so() -> void:
+	var state := WorldValues.initial_state()
+	var small := Compliance.dissonance_of(_tax(-1.0, state), null, state)
+	var deep := Compliance.dissonance_of(_tax(-2.0, state), null, state)
+	assert_true(small > 0.0, "a cut was nothing to the man who prefers high taxes")
+	assert_true(deep > small, "a deep cut troubled him no more than a small one")
+
+
+func test_his_preference_is_the_rate_as_it_stands() -> void:
+	# Derived from the world, not stored on him: the same cut is measured from
+	# wherever the rate now is.
+	var low := WorldValues.initial_state()
+	low.values[TaxRates.BASE_KEY] = 0.05
+	var high := WorldValues.initial_state()
+	high.values[TaxRates.BASE_KEY] = 0.4
+	assert_almost_eq(Compliance.dissonance_of(_tax(-1.0, low), null, low),
+		Compliance.dissonance_of(_tax(-1.0, high), null, high), 0.0001,
+		"one step down meant a different thing depending on where it started")
+
+
+func test_the_steward_feels_it_in_a_real_deliberation_and_never_refuses_for_it() -> void:
+	# Through `Compliance.resolve`, so the trace proves it is wired. And the lock:
+	# a deep cut moves the manner of his answer, never to refusal — a Steward on
+	# good terms is never refused into *no* by his own bias, on any seed.
+	var state := WorldValues.initial_state()
+	var steward := Contact.new(&"steward")
+	steward.relationship.loyalty = 70.0
+	var felt := 0.0
+	for seed_value in 30:
+		var log := EventLog.new()
+		var result := Compliance.resolve(_tax(-2.0, state), steward, IntentBook.new(),
+			state, log, RngStreams.new(seed_value))
+		assert_ne(String(result["outcome"]), String(Compliance.REFUSE),
+			"seed %d: a deep cut was refused outright" % seed_value)
+		felt = maxf(felt, _weight_of({"log": log}, "against_his_judgement"))
+	assert_true(felt > 0.0, "the trace never shows his bias moving for a tax order")
+
+	var rise_log := EventLog.new()
+	Compliance.resolve(_tax(1.0, state), steward, IntentBook.new(), state, rise_log,
+		RngStreams.new(SEED))
+	assert_almost_eq(_weight_of({"log": rise_log}, "against_his_judgement"), 0.0, 0.0001,
+		"a rise scored against his judgement")
+
+
 # --- Fixture -----------------------------------------------------------------
 
 func _candidate(id: StringName) -> Candidate:

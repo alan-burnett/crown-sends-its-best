@@ -150,7 +150,7 @@ static func resolve(
 		# deliberation decides what he concludes, and collapsing them would put
 		# the PC's letter and the governor's judgement in one scoring pass and
 		# stop the argument being an argument.
-		"dissonance": dissonance_of(order, rebel),
+		"dissonance": dissonance_of(order, rebel, state),
 	}
 
 	# 🔒 **Answering has no compliance step** (#261, `tone.md` §3). *You* are the
@@ -443,15 +443,45 @@ static func _priced(order: Order) -> Variant:
 ## kind that names what the PC wants the town to be *for*, which is the thing a
 ## governor can hold a contrary opinion about. Another kind that acquires an
 ## answer to "against his judgement" adds a branch here and nothing else.
-static func dissonance_of(order: Order, town: Town) -> float:
-	if order == null or town == null:
+static func dissonance_of(order: Order, town: Town, state: WorldState = null) -> float:
+	if order == null:
 		return 0.0
-	if order.kind != M1Registrations.ORDER_URGE_INTENT:
+	match order.kind:
+		M1Registrations.ORDER_URGE_INTENT:
+			if town == null:
+				return 0.0
+			var urged := StringName(order.get_param("intent", ""))
+			if not GovernorIntent.is_intent(urged):
+				return 0.0
+			return GovernorIntent.distance_between(urged, town.intent)
+		M1Registrations.ORDER_SET_TAX_RATE:
+			return _cut_below_his_rate(order, state)
+	return 0.0
+
+
+## How many steps down a rate has to go before the Steward is wholly against it.
+## Tuning.
+const DEEP_CUT_STEPS: float = 2.0
+
+
+## 🔒 **The Steward's bias** (#303, `the-steward.md` §2, SPEC §10.2).
+##
+## *He prefers high taxes*, so the rate he would have set is **never lower than
+## the one standing** — derived from the world, never stored on him. A rise costs
+## him nothing; a cut is against his judgement by how far it goes, and two steps
+## down is as far against it as he gets.
+##
+## 🔒 **The manner of his answer, never the decision.** This feeds the same
+## `DissonanceConsideration` a governor's does, which pulls toward reinterpreting,
+## acting alone and delaying and deliberately not toward refusing — a Crown
+## officer who disagrees with the Crown's revenue policy finds the instruction
+## admitted of another reading. He never writes back *no*.
+static func _cut_below_his_rate(order: Order, state: WorldState) -> float:
+	if state == null:
 		return 0.0
-	var urged := StringName(order.get_param("intent", ""))
-	if not GovernorIntent.is_intent(urged):
-		return 0.0
-	return GovernorIntent.distance_between(urged, town.intent)
+	var standing := TaxRates.rate_for(state, StringName(order.get_param("resource", "")))
+	var ordered := float(order.get_param("rate", standing))
+	return clampf((standing - ordered) / (TaxRates.STEP * DEEP_CUT_STEPS), 0.0, 1.0)
 
 
 static func vagueness_of(order: Order) -> float:
