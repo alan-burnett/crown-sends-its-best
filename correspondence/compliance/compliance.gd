@@ -392,7 +392,8 @@ static func _priced(order: Order) -> Variant:
 			# actually costs him is his own judgement, and that is the `autonomy`
 			# consideration's business rather than a price.
 			return 0.0
-		M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY:
+		M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY, \
+		M1Registrations.ORDER_WAIVE_DUTY:
 			# 🔒 **A rate costs the colony, not the man who sets it** (#302, SPEC
 			# §8.1). The Steward is being asked to do his job, in the direction he
 			# already wants — and priced at the fall-through's two hundred, against

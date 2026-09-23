@@ -56,6 +56,15 @@ const ORDER_REQUEST_TROOPS: StringName = &"request_troops"
 const ORDER_ADJUST_LOYALTY: StringName = &"adjust_loyalty"
 const ORDER_SET_TAX_RATE: StringName = &"set_tax_rate"
 
+## **A duty set aside for a stated number of months** (#278,
+## `institutional-contacts.md` §3).
+##
+## Not a rate change. A rate change is standing and this one reverts on its own,
+## so `TaxWaiver` counts it down in the Crown's month — but it reaches the world
+## the same way any rate does, through `WorldValueExecutor`, because it is a
+## named world value being set.
+const ORDER_WAIVE_DUTY: StringName = &"waive_duty"
+
 ## **The only order that reaches a town** (SPEC §8.5, #53). It argues for a goal
 ## and names no project, no tile and no month. The letters that use it are #54.
 const ORDER_URGE_INTENT: StringName = &"urge_intent"
@@ -351,6 +360,19 @@ static func register_effects() -> void:
 		ORDER_SET_TAX_RATE,
 		M1Registrations.build_tax_order,
 	)
+	# **The clergy's two asks, which are one effect** (#278). `resource` empty is
+	# a holy day — every duty, for the month — and a named resource is a festival
+	# in that trade. A builder for the same reason the rate above has one: the
+	# world key and the number of months are worked out here, once.
+	#
+	# 🔒 **The PC never sets this directly either.** It is a reply to a letter
+	# the priest wrote, resolved through compliance like any other Order.
+	ContentRegistry.register_effect(
+		"waive_duty",
+		{"to": "contact", "resource": "string", "months": "integer"},
+		ORDER_WAIVE_DUTY,
+		M1Registrations.build_waiver_order,
+	)
 
 
 ## Turn "raise the rate on cloth" into an Order that names the world value it
@@ -365,6 +387,31 @@ static func build_tax_order(args: Dictionary, context: LetterContext) -> Order:
 	params["rate"] = TaxRates.moved(context.state, StringName(resource), steps)
 	return Order.new(
 		ORDER_SET_TAX_RATE,
+		StringName(args.get("to", "")),
+		params,
+		context.month,
+	)
+
+
+## Turn "waive the duty on cloth for three months" into an Order naming the world
+## value it sets and what it sets it to.
+##
+## 🔒 **An empty resource is a holy day**, which is `TaxWaiver.ALL` rather
+## than a loop over the catalogue — so a resource added next year is covered
+## without anybody remembering to cover it.
+static func build_waiver_order(args: Dictionary, context: LetterContext) -> Order:
+	var resource := String(args.get("resource", ""))
+	var named := TaxWaiver.ALL if resource.is_empty() else StringName(resource)
+	var months := int(args.get("months", TaxWaiver.HOLY_DAY_MONTHS))
+	var params := args.duplicate()
+	params["key"] = TaxWaiver.key_for(named)
+	# **The longer of the two wins**, worked out now so the letter and the Order
+	# agree: a priest granted a second festival in the same trade is not being told
+	# the first one is over.
+	params["months_left"] = maxi(
+		TaxWaiver.months_left(context.state, named), maxi(1, months))
+	return Order.new(
+		ORDER_WAIVE_DUTY,
 		StringName(args.get("to", "")),
 		params,
 		context.month,

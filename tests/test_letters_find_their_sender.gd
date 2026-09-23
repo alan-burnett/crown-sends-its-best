@@ -56,6 +56,16 @@ func _another_town(run: RunState, id: StringName, name: String) -> Contact:
 	return governor
 
 
+## A resident, who comes with the building that grants him (#277) and is
+## therefore never in a fresh run either. A church raises a clergyman.
+func _a_clergyman(run: RunState) -> Contact:
+	var town: Town = run.colony.in_order()[0]
+	if not town.buildings.has("church"):
+		town.buildings.append("church")
+	ContactRoster.house_the_residents(run)
+	return run.contact(ContactRoster.resident_id(town, "clergyman"))
+
+
 ## A patron, who arrives from the Squeeze and is therefore never in a fresh run.
 func _a_patron(run: RunState) -> Contact:
 	var patron := Patron.generate(run.patrons.next_id(), run.streams, 0)
@@ -179,6 +189,7 @@ func test_every_letter_that_ships_has_somebody_who_could_send_it() -> void:
 	# later, which is most of them.
 	var run := _run()
 	_a_patron(run)
+	_a_clergyman(run)
 	var orphaned := PackedStringArray()
 	for id in content.ids("letters"):
 		var letter := _letter(String(id))

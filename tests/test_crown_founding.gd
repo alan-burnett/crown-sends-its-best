@@ -96,7 +96,16 @@ func test_a_handsome_founding_arrives_already_being_something() -> void:
 	assert_true(town.has_building(&"granary"), "the granary in the hold was never unloaded")
 	assert_eq(String(town.intent), String(GovernorIntent.ECONOMY),
 		"a town founded for its sugar arrived with no idea what it was for")
-	assert_true(town.held(&"food") > 0.0 and town.gold_held() > 0.0)
+	# 🔒 **Asked of the arrival, not of the town.** `Town._gold` has no getter
+	# on purpose (SPEC §11.3 — a town's balance is invisible to the player), and
+	# this line used to call `town.gold_held()`, which has never existed: the call
+	# errored, returned null, and `assert_almost_eq(null, null)` counted as a pass.
+	# Seam A already says what came off the boat.
+	assert_true(town.held(&"food") > 0.0, "the flour in the hold was never unloaded")
+	var landed: Array = context.log.of_type(CrownFounding.EVENT_ARRIVED)
+	assert_eq(landed.size(), 1, "the town arrived without the log saying so")
+	assert_true(float((landed[0] as SimEvent).payload.get("gold", 0.0)) > 0.0,
+		"a handsomely funded town arrived with an empty purse")
 
 
 func test_a_parcel_of_poor_souls_arrives_with_nothing_of_the_kind() -> void:
@@ -341,3 +350,101 @@ func test_a_founding_survives_a_save() -> void:
 	assert_eq(String(restored.building), "granary")
 	assert_eq(restored.arrives_month, founding.arrives_month)
 	assert_almost_eq(restored.gold, founding.gold, 0.001)
+
+# --- 🔒 The pilgrims, and the odd founding (#278) ---------------------------
+
+## The clergy's route, which differs from the others in what the PC's gold buys.
+func _pilgrims(equipped: String, context: ColonyContext) -> CrownFounding:
+	return CrownFounding.proposed(
+		&"clergyman_ashmere", equipped, &"", &"", &"", context)
+
+
+func test_the_priest_supplies_the_people_and_the_pc_supplies_the_stores() -> void:
+	# 🔒 §3: **he supplies the people and none of the goods.** He gathers the
+	# devout from outside the colony entirely, so the count does not move with
+	# what the PC pays — what the PC's gold buys is their stores.
+	var context := _context()
+	var generous := _pilgrims("devoutly", context)
+	var thin := _pilgrims("plainly", context)
+
+	assert_eq(generous.people, thin.people,
+		"the priest gathered fewer souls because the PC was mean, which is not his to decide")
+	assert_true(generous.people > 0, "nobody came at all")
+	assert_true(
+		float(generous.cargo.get("food", 0.0)) > float(thin.cargo.get("food", 0.0)),
+		"provisioning them properly bought no more flour than not")
+
+
+func test_a_pilgrim_town_arrives_with_no_buildings() -> void:
+	# 🔒 The acceptance line. **A pilgrim town does not arrive with a church.** It
+	# arrives devout and unbuilt and must raise one for itself — the priest
+	# gathers people, not institutions, and does not get to seed a second
+	# clergyman on the PC's money.
+	#
+	# Asked of every provisioning, not of the two somebody remembered — and asked
+	# **with a granary offered**, because a fixture that passed no building would
+	# be asserting its own choice rather than the rule. The terms are what refuse
+	# it, whatever a letter asks for.
+	var context := _context()
+	for equipped in CrownFounding.DEVOUT:
+		assert_false(bool(CrownFounding.EQUIPPED[equipped]["building"]),
+			"the %s terms raise a building" % equipped)
+		var founding := CrownFounding.proposed(
+			&"clergyman_ashmere", String(equipped), &"", &"granary", &"", context)
+		assert_true(founding.building.is_empty(),
+			"a %s pilgrim town arrived with a %s already standing"
+				% [equipped, founding.building])
+
+
+func test_a_pilgrim_town_arrives_with_no_specialism_either() -> void:
+	# He gathers the devout, not botanists. The character a Crown founding can
+	# arrive with is bought by the man who proposed it, and this one has nothing
+	# to buy it with.
+	var context := _context()
+	for equipped in CrownFounding.DEVOUT:
+		var founding := _pilgrims(String(equipped), context)
+		assert_true(founding.expert_in.is_empty(),
+			"a pilgrim town arrived with an expert in %s" % founding.expert_in)
+
+
+func test_nobody_in_the_colony_is_displaced_to_make_one() -> void:
+	# 🔒 **He creates the population.** They come from outside the colony
+	# entirely, and no town sheds a soul — which is what makes this the Provost's
+	# bargain in another coat: population bought, bypassing immigration.
+	var colony := _colony()
+	var context := _context(colony)
+	var before := 0
+	for town in colony.in_order():
+		before += town.population()
+
+	var founding := _pilgrims("devoutly", context)
+	assert_true(founding.people > 0, "the expedition carries nobody")
+
+	var after := 0
+	for town in colony.in_order():
+		after += town.population()
+	assert_eq(after, before,
+		"a town lost people to an expedition that was supposed to come from home")
+
+
+func test_it_appears_rather_than_travelling() -> void:
+	# 🔒 §3: **it appears.** The Crown managed the ships, so none of §7's
+	# expedition dangers apply — there is no party on the map at any point, which
+	# is what separates this from a town walking its own people across country.
+	var context := _context()
+	var founding := _pilgrims("devoutly", context)
+	assert_true(founding.arrives_month > founding.proposed_month,
+		"it arrived the month it was proposed, so there was no crossing")
+	assert_eq(founding.arrives_month - founding.proposed_month,
+		CrownFounding.MONTHS_AT_SEA,
+		"the pilgrims took a different time to cross than everybody else")
+
+
+func test_an_unfunded_expedition_simply_does_not_exist() -> void:
+	# 🔒 **Gold, or it never materialises.** Refusing is not dissuading: the priest
+	# is not being argued out of anything, he has no supplies. So there is no
+	# abandoned founding to carry around — `proposed` is the only thing that makes
+	# one, and nothing calls it.
+	var context := _context()
+	assert_empty(context.log.of_type(CrownFounding.EVENT_PROPOSED),
+		"a founding existed before anybody funded one")

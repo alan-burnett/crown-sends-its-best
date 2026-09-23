@@ -104,9 +104,40 @@ func _init(
 	map = p_map
 
 
-## The rate a resource is taxed at, wherever it is traded (SPEC §10.2).
+## The rate a resource is **actually charged** at, wherever it is traded
+## (SPEC §10.2).
+##
+## 🔒 **The authored rate, unless a duty is presently set aside** (#278,
+## `institutional-contacts.md` §3). The clergy's festival and holy day are
+## time-limited waivers, and this is the one place that decides what a trade pays
+## — Exchange, Sell, Spending and `Valuation` all come through here, so none of
+## them can disagree about what a duty costs this month.
+##
+## 🔒 **A resource under protest keeps its duty**, which is the Author's
+## third ruling and is nearly definitional: a protest is a town refusing the
+## Crown's duty, so there is no duty flowing to waive. It bites on the holy day,
+## which waives everything else — **a colony in protest does not get a holiday
+## from the thing it is protesting.**
+##
+## The question needs the colony as well as the state, which is why it is asked
+## here and not in `TaxWaiver`.
 func tax_rate(resource: StringName) -> float:
-	return TaxRates.rate_for(state, resource)
+	var authored := TaxRates.rate_for(state, resource)
+	if not TaxWaiver.running(state, resource):
+		return authored
+	if is_protested(resource):
+		return authored
+	return TaxRates.MIN_RATE
+
+
+## Whether any town in the colony is refusing to deal in this resource.
+func is_protested(resource: StringName) -> bool:
+	if colony == null:
+		return false
+	for town in colony.in_order():
+		if TradeProtest.is_protesting(town, resource):
+			return true
+	return false
 
 
 ## What a town needs and can spare this month, once Reckon has run.

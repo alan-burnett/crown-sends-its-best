@@ -83,7 +83,12 @@ func test_the_town_begins_with_what_the_party_was_holding() -> void:
 	assert_eq(town.expert_count(&"food"), 1, "the skilled man was left on the road")
 	assert_almost_eq(town.held(&"food"), 600.0, 0.001, "the stores changed on the way in")
 	assert_almost_eq(town.held(&"wood"), 80.0, 0.001)
-	assert_true(town.gold_held() >= 900.0 - 0.001, "the purse did not arrive")
+	# 🔒 **`Town._gold` has no getter on purpose** (SPEC §11.3 — a town's
+	# balance is invisible to the player), and this line used to call
+	# `town.gold_held()`, which has never existed: the call errored, returned null,
+	# and the comparison counted as a pass. Spending is the only honest way to ask,
+	# and it answers exactly what was carried in.
+	assert_almost_eq(town.spend_gold(900.0), 900.0, 0.001, "the purse did not arrive")
 	assert_eq(town.at, Vector2i(6, 6), "it was founded somewhere other than where it stood")
 	assert_eq(String(town.governor_id), "governor_expedition_ashmere_3",
 		"the man the people elected is not the man who governs")

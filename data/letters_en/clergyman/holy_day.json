@@ -1,0 +1,108 @@
+{
+  "id": "clergyman.holy_day",
+  "sender": "institutional",
+  "type": "demand",
+  "skippable": false,
+  "note": "Issue 278, institutional-contacts.md section 3. He asks for every duty to be set aside for the one month. The Author's second ruling took away the three-month announcement, so there is nothing scheduled here: the priest writes, the PC answers, and it starts - which is why the letter talks about a month already begun rather than one coming. The Author's third ruling is what the last body line is about: a resource under protest keeps its duty through either waiver, so a colony in protest does not get a holiday from the thing it is protesting. He does not know that, and the letter does not tell him; the PC finds out when the waiver does not reach it.",
+  "params": {
+    "clergyman": "contact"
+  },
+  "body": [
+    {
+      "text": "The holy day is upon us. I did not write earlier because there was nothing earlier to write about — it arrives when it arrives, and it has arrived."
+    },
+    {
+      "text": "What I am asking is that every duty be set aside for the month. All of them, on everything, across the colony. I know how that reads written down. It reads worse than it is: it is one month, and the month is nearly always a poor one for trade anyway, which I mention as an argument and not as a confession.",
+      "only_tones": [
+        "pleased",
+        "dutiful",
+        "annoyed"
+      ]
+    },
+    {
+      "text": "What I am asking is that every duty be set aside for the month. All of them, on everything, across the colony. I have stopped dressing these requests up, since it has never made any difference to the answer.",
+      "only_tones": [
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "A colony that keeps the day together is a colony that has something in common besides a governor. I would not put it that way to the Crown. I am putting it that way to you."
+    },
+    {
+      "text": "I am told there are towns refusing the Crown's duty on this or that. I do not know what becomes of my request where a town has already stopped paying, and I confess I have not thought about it very hard. That is your arithmetic and not mine."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and would have the day kept properly"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your request"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered what a month of it would cost"
+        },
+        {
+          "tone": "desperate",
+          "text": "and must tell you how matters stand"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "holy_day",
+        "prompt": "The holy day, and every duty in the colony",
+        "options": [
+          {
+            "id": "grant",
+            "label": "set every duty aside for the month",
+            "text": "Let the day be kept. Every duty in the colony stands down for the month — excepting, I am told, wherever a town has already taken that decision for itself{insert:dryness}.",
+            "insert": {
+              "dryness": {
+                "annoyed": ", which I find I mind more than the month"
+              }
+            },
+            "effect": {
+              "waive_duty": {
+                "to": "{clergyman}",
+                "resource": "",
+                "months": 1
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "tell him the colony will keep the day and pay the duty",
+            "text": "Keep the day. Keep it thoroughly. The colony will also pay what it owes, which I do not think God will hold against anybody{insert:edge}.",
+            "insert": {
+              "edge": {
+                "hateful": ", and if He does, I shall take it up with Him myself"
+              }
+            },
+            "effect": {
+              "refuse": {
+                "to": "{clergyman}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

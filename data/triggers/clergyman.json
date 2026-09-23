@@ -1,0 +1,63 @@
+[
+  {
+    "id": "trigger.clergyman.festival",
+    "letter": "clergyman.festival",
+    "urgency": 0.4,
+    "cooldown": 18,
+    "note": "Issue 278. The resource comes from best_selling_resource - the most gold sold this month, the Author's first ruling - so the ask swings with the colony's fortunes rather than settling on one staple. The fallback keeps the letter renderable when nothing sold at all, which is a month nobody is celebrating anyway; a_duty_could_be_waived is what actually stops it firing then, because a rate of nothing is nothing to forgive. Cooldown 18: a festival is three months long, and a priest who asked for the next one the season it ended would be a standing discount rather than an occasion.",
+    "params": {
+      "clergyman": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "best_selling_resource",
+        "fallback": "food"
+      }
+    },
+    "conditions": [
+      {
+        "a_trade_could_be_celebrated": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.clergyman.holy_day",
+    "letter": "clergyman.holy_day",
+    "urgency": 0.5,
+    "cooldown": 24,
+    "note": "Issue 278. Nothing is scheduled: the Author's second ruling took away the three-month announcement, so this fires when it fires and the waiver begins the month the PC agrees. Cooldown 24, longer than the festival's, because a holy day waives EVERY duty and a colony that had two a year would be a colony with a lower base rate wearing a hat. Urgency above the festival's, since it asks for more and keeps a date the priest did not choose.",
+    "params": {
+      "clergyman": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "a_duty_could_be_waived": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.clergyman.pilgrims",
+    "letter": "clergyman.pilgrims",
+    "urgency": 0.55,
+    "cooldown": 48,
+    "note": "Issue 278, founding-towns.md section 3. A third founding route. Year 2 like the Provost's, because a priest with two years of correspondence behind him is the premise of the letter and a colony of one town has nowhere to put a second. Cooldown 48: this is a town, and a priest who could found one every three years would be a growth strategy rather than an occasion. Refusing creates no founding at all, which is the whole difference from the Provost's - the PC is not arguing him out of it, the man simply has no supplies.",
+    "params": {
+      "clergyman": {
+        "from": "sender_id"
+      },
+      "amount": {
+        "from": "literal",
+        "value": "1200"
+      }
+    },
+    "conditions": [
+      {
+        "year_at_least": {
+          "year": 2
+        }
+      }
+    ]
+  }
+]

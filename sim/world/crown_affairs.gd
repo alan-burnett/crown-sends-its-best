@@ -75,6 +75,11 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	# and both draw from the same stream — so one seed shorts the same harvest in
 	# the same month of the same campaign.
 	CrownPrices.advance(state, log, streams.stream("sim"))
+	# And the clergy's waivers count down beside them (#278). A duty set aside is
+	# one of the Crown's own arrangements running out, which is this phase's
+	# business — and doing it here means a waiver granted in March covers March
+	# and is gone before the trade of the month it expires in is priced.
+	TaxWaiver.advance(state, log)
 
 
 ## A learned colony warms the Provost, whoever paid for the learning (#174).

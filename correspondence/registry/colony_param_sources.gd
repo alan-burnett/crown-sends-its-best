@@ -31,6 +31,12 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"patron_ask", {}, ColonyParamSources.patron_ask
 	)
+	# What the priest asks a festival for (#278). The resource that sold the
+	# most gold this month, which is the Author's first ruling.
+	ContentRegistry.register_param_source(
+		"best_selling_resource", {"fallback": "string"},
+		ColonyParamSources.best_selling_resource,
+	)
 	ContentRegistry.register_param_source(
 		"patron_leaves_in", {}, ColonyParamSources.patron_leaves_in
 	)
@@ -648,6 +654,46 @@ static func tribute_amount(_args: Dictionary, context: LetterContext) -> Variant
 ## conclusion; a patron is asking a favour of somebody he likes, and a favour
 ## that beggared the colony would not be one. The share is tuning and M8 owns it.
 const PATRON_ASK_SHARE: float = 0.55
+
+
+## 🔒 **The resource that sold the most gold this month** (#278,
+## `institutional-contacts.md` §3, the Author's first ruling).
+##
+## **Not most duty collected, and not averaged over a season.** The liveliest of
+## the three readings, chosen deliberately: the priest asks about whatever had a
+## good harvest, so the ask **swings with the colony's fortunes** rather than
+## settling on one staple for the whole run.
+##
+## Gross rather than net, because what he is celebrating is the trade itself and
+## not the Crown's share of it — and because the duty is the thing he is about to
+## ask to have set aside, so pricing his question by it would be circular.
+##
+## Summed across every town, since §10.2 has no per-town rates and the festival
+## he is asking for is colony-wide.
+static func best_selling_resource(args: Dictionary, context: LetterContext) -> Variant:
+	var fallback := String(args.get("fallback", ""))
+	if context == null or context.log == null:
+		return fallback
+	var sold: Dictionary = {}
+	for event in context.log.of_type(Trade.EVENT_SOLD):
+		if event.month != context.month:
+			continue
+		var id := String(event.payload.get("resource", ""))
+		if id.is_empty():
+			continue
+		sold[id] = float(sold.get(id, 0.0)) + float(event.payload.get("gross", 0.0))
+
+	# **Sorted, and ties go to the earlier id.** Two trades that earned the same
+	# gold must not depend on which town's sale the log happened to hold first.
+	var best := ""
+	var most := 0.0
+	var names: Array = sold.keys()
+	names.sort()
+	for id in names:
+		if float(sold[id]) > most:
+			most = float(sold[id])
+			best = String(id)
+	return best if not best.is_empty() else fallback
 
 
 static func patron_ask(_args: Dictionary, context: LetterContext) -> Variant:

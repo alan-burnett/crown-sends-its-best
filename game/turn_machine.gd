@@ -371,6 +371,11 @@ static func order_effects() -> Dictionary:
 		# depends on the resource the letter asked about.
 		String(M1Registrations.ORDER_SET_TAX_RATE):
 			{"target_from_data": "key", "set_from_data": "rate"},
+		# A waiver names its world value for the same reason a rate does, and sets
+		# it outright rather than drifting towards it — what it holds is a count
+		# of months, and `TaxWaiver` takes one off it each Crown's month.
+		String(M1Registrations.ORDER_WAIVE_DUTY):
+			{"target_from_data": "key", "set_from_data": "months_left"},
 		String(M1Registrations.ORDER_SET_POLICY): {"target": ""},
 		String(M1Registrations.ORDER_GRANT_FAVOR): {"target": ""},
 		String(M1Registrations.ORDER_ADJUST_LOYALTY): {"target": ""},

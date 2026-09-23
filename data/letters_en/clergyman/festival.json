@@ -1,0 +1,109 @@
+{
+  "id": "clergyman.festival",
+  "sender": "institutional",
+  "type": "demand",
+  "skippable": false,
+  "note": "Issue 278, institutional-contacts.md section 3. He asks for the duty on ONE resource to be set aside for a season, and the resource is whatever sold the most gold this month (the Author's first ruling) - so the ask swings with the colony's fortunes rather than settling on one staple. The letter says out loud that the relief is colony-wide, because section 10.2 locks that there are no per-town rates: a priest asking relief for his own poor IS asking the whole colony to go without the duty, and the letter must not pretend otherwise. Sender is the institutional role, which the director expands to one candidate per man holding it - so every clergyman in the colony can send his own, and Threshold's redundancy rule is what stops three of them asking at once.",
+  "params": {
+    "clergyman": "contact",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "The {param:resource} has come in well this year. I do not say that as a man who knows anything about {param:resource}; I say it because the people who do have not stopped talking about it, and because they have been in better temper since."
+    },
+    {
+      "text": "I should like to hold a festival for it. Not a grand thing — a week of it, and then another, and the ordinary business of thanking God for a harvest He is under no obligation to provide."
+    },
+    {
+      "text": "What I am asking for is that the duty on {param:resource} be set aside while it lasts. I am aware what that means: the duty is the colony's and not this town's, so I am asking on behalf of people I have never met, in towns I shall never visit. I have made my peace with that. I would rather ask for too much honestly than for the right amount by pretending."
+    },
+    {
+      "text": "It will cost the Crown something. It will also cost the Crown nothing it was going to notice, and it will buy a season in which the word *governor* is said kindly in three thousand kitchens.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "It will cost the Crown something. I have given up pretending you will weigh that against anything I could say, so I shall simply have asked.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and am glad the year has been kind"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your request"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered what a week of it would cost"
+        },
+        {
+          "tone": "desperate",
+          "text": "and must tell you how matters stand"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "festival",
+        "prompt": "The festival, and the duty on {resource}",
+        "options": [
+          {
+            "id": "grant",
+            "label": "set the duty aside while the festival lasts",
+            "text": "The duty on {param:resource} is lifted, colony-wide, for the season. Hold your festival{insert:blessing}.",
+            "insert": {
+              "blessing": {
+                "pleased": ", and hold it well"
+              }
+            },
+            "effect": {
+              "waive_duty": {
+                "to": "{clergyman}",
+                "resource": "{resource}",
+                "months": 3
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "tell him the colony cannot spare the duty",
+            "text": "Hold your festival if you will, but it will be held on a colony that pays what it owes. The duty stands{insert:edge}.",
+            "insert": {
+              "edge": {
+                "hateful": ", and so does my patience, barely"
+              }
+            },
+            "effect": {
+              "refuse": {
+                "to": "{clergyman}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

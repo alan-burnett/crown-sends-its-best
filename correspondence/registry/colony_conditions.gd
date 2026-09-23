@@ -128,6 +128,15 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"he_is_taking_his_leave", {}, ColonyConditions.he_is_taking_his_leave
 	)
+	# The clergy's two asks (#278). A festival needs a trade worth celebrating
+	# and a duty still being charged on it; a holy day needs only the duty.
+	ContentRegistry.register_condition(
+		"a_duty_could_be_waived", {}, ColonyConditions.a_duty_could_be_waived
+	)
+	ContentRegistry.register_condition(
+		"a_trade_could_be_celebrated", {},
+		ColonyConditions.a_trade_could_be_celebrated,
+	)
 	# The Diplomat (#81). His regard governs **what he tells**, so every one of
 	# these is a gate on his own reporting rather than on the colony.
 	ContentRegistry.register_condition(
@@ -660,6 +669,47 @@ static func he_is_taking_his_leave(_args: Dictionary, context: LetterContext) ->
 	if context == null or context.sender == null:
 		return false
 	return PatronTerm.is_leaving(context.sender, context.month)
+
+
+## Whether there is a duty here worth asking to have set aside (#278).
+##
+## 🔒 **Two things, and both matter.** A priest does not ask for relief from
+## a duty that is already relieved, so a waiver already running silences him —
+## and a duty of nothing is nothing to forgive.
+##
+## With a `resource` named this asks about that trade; without one it asks about
+## the colony's base rate, which is the holy day's question.
+##
+## It does **not** ask about trade protests. A protested resource keeps its duty
+## through a waiver (§3, the Author's third ruling), so a priest asking about one
+## is asking for something that will not happen — but the answer to that is the
+## Author's *a colony in protest does not get a holiday from the thing it is
+## protesting*, which reads better as a granted waiver that does not reach it
+## than as a letter that never came.
+static func a_duty_could_be_waived(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.state == null:
+		return false
+	if TaxWaiver.running(context.state, TaxWaiver.ALL):
+		return false
+	return TaxRates.base_rate(context.state) > 0.0
+
+
+## Whether there is a trade this month worth holding a festival for (#278).
+##
+## 🔒 **It asks about the very resource the letter will name**, by the same
+## call the letter's param uses — so a priest cannot write asking relief on a
+## trade that is already relieved, and cannot write at all in a month when
+## nothing sold. A condition that guessed differently from the param would put a
+## letter on the desk about a thing that was not true.
+static func a_trade_could_be_celebrated(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.state == null:
+		return false
+	var id := String(ColonyParamSources.best_selling_resource({}, context))
+	if id.is_empty():
+		return false
+	if TaxWaiver.running(context.state, StringName(id)):
+		return false
+	return TaxRates.rate_for(context.state, StringName(id)) > 0.0
 
 
 ## Whether this contact has just learned the PC's cheque bounced (#80, §5).

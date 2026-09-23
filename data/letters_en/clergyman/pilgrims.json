@@ -1,0 +1,141 @@
+{
+  "id": "clergyman.pilgrims",
+  "sender": "institutional",
+  "type": "offer",
+  "skippable": false,
+  "note": "Issue 278, institutional-contacts.md section 3 and founding-towns.md section 3. A third founding route, and the odd one: he supplies the PEOPLE and none of the goods. The devout come from outside the colony entirely, so no town sheds a soul and the count does not move with what the PC pays - what the PC's gold buys is their stores, which is why the two funded options differ only in those. It is Crown-launched in shape: it arrives by ship after some months, with no ground travel and none of section 7's expedition dangers. Refusing is not dissuading: the priest is not being argued out of anything, he simply has no supplies, so an expedition nobody funds never sails and no founding is created at all. And neither option raises a church - a pilgrim town arrives devout and unbuilt and must raise one for itself.",
+  "params": {
+    "clergyman": "contact",
+    "amount": "gold"
+  },
+  "body": [
+    {
+      "text": "There are people at home who would come. Not colonists — I do not mean the sort who read a pamphlet about the price of tobacco and sell their furniture. I mean people who want to be somewhere they can worship without a magistrate present, and who have written to me about it, at length, for two years."
+    },
+    {
+      "text": "I can have them on a ship. I have the names, I have the parishes, and I have a correspondent at the port who owes me a considerable favour and has been dreading the day I collect it."
+    },
+    {
+      "text": "What I do not have is anything to feed them with when they arrive. I am a priest. My entire estate is a house I do not own and a horse the town bought me."
+    },
+    {
+      "text": "So I am asking for {param:amount} against their stores, and I am aware that is a great deal of money to send after people you will never meet. They will found a town. It will be a poor one to begin with, and it will be a *town*, which is more than the Crown gets out of most of what you spend.",
+      "only_tones": [
+        "pleased",
+        "dutiful",
+        "annoyed"
+      ]
+    },
+    {
+      "text": "So I am asking for {param:amount} against their stores. I know how that will read from where you sit. I have decided to ask anyway, since the alternative is writing to them that nobody here could spare it.",
+      "only_tones": [
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "They will need a church. I want to be clear that I am not asking you for one — they will raise it themselves, out of the ground, as people have always done. I am asking you for flour."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and would see them well provided"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your proposal"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered the figure"
+        },
+        {
+          "tone": "desperate",
+          "text": "and must be honest about what is left"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "pilgrims",
+        "prompt": "The pilgrims, and their stores",
+        "options": [
+          {
+            "id": "devoutly",
+            "label": "provision them properly",
+            "text": "Send for them, and send them with enough. A town that arrives hungry is a town that arrives already failing{insert:warmth}.",
+            "insert": {
+              "warmth": {
+                "pleased": ", and I would not have this one fail"
+              }
+            },
+            "effect": {
+              "fund_founding": {
+                "to": "{clergyman}",
+                "equipped": "devoutly",
+                "expert": "",
+                "building": "",
+                "intent": ""
+              },
+              "promise_gold": {
+                "to": "{clergyman}",
+                "amount": "{amount}"
+              }
+            }
+          },
+          {
+            "id": "plainly",
+            "label": "send them with flour and little else",
+            "text": "They may come. They will come to flour and a coastline, and what they make of it is between them and the ground{insert:dryness}.",
+            "insert": {
+              "dryness": {
+                "annoyed": ". I am told they are used to hardship"
+              }
+            },
+            "effect": {
+              "fund_founding": {
+                "to": "{clergyman}",
+                "equipped": "plainly",
+                "expert": "",
+                "building": "",
+                "intent": ""
+              },
+              "promise_gold": {
+                "to": "{clergyman}",
+                "amount": 400
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "tell him the colony cannot feed them",
+            "text": "Write to them that it cannot be done this year. I would rather they stayed where they are hungry than came here to be hungry at my expense{insert:edge}.",
+            "insert": {
+              "edge": {
+                "hateful": ", and at rather greater length"
+              }
+            },
+            "effect": {
+              "refuse": {
+                "to": "{clergyman}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

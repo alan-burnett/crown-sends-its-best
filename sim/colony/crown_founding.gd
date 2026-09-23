@@ -82,7 +82,29 @@ const EQUIPPED: Dictionary = {
 	"handsomely": {"people": 26, "food": 900.0, "tools": 120.0, "purse": 1.0, "building": true},
 	"adequately": {"people": 18, "food": 500.0, "tools": 60.0, "purse": 0.6, "building": false},
 	"meanly": {"people": 10, "food": 160.0, "tools": 0.0, "purse": 0.25, "building": false},
+	# 🔒 **The clergy's is the odd one** (#278, §3): **he supplies the people
+	# and none of the goods.** He gathers the devout from outside the colony
+	# entirely, so the count does not move with what the PC pays — what the PC's
+	# gold buys is their stores, and the two rows differ only in those.
+	#
+	# It is the Provost's bargain in another coat, and it carries the Provost's
+	# consequence: `immigration.md` §9 makes growth the engine of rebellion, so
+	# **a pilgrim town is future sentiment, bought.**
+	#
+	# 🔒 **And neither row raises a church.** A pilgrim town arrives devout and
+	# unbuilt and must raise one for itself — the priest gathers people, not
+	# institutions, and does not get to seed a second clergyman on the PC's money.
+	"devoutly": {"people": 30, "food": 900.0, "tools": 90.0, "purse": 0.5, "building": false},
+	"plainly": {"people": 30, "food": 380.0, "tools": 0.0, "purse": 0.2, "building": false},
 }
+
+
+## The ways a pilgrim expedition may be provisioned, sorted.
+##
+## Named so a test can ask the question the ticket asks — *a pilgrim town arrives
+## with no buildings* — of every one of them rather than of the two somebody
+## remembered.
+const DEVOUT: PackedStringArray = ["devoutly", "plainly"]
 
 
 ## Make one, as a letter's reply describes it (Seam A).
