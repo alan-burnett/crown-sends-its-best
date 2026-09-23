@@ -38,13 +38,38 @@ static func resolve_unanswered(run: RunState, content: ContentDatabase) -> Array
 	return resolved
 
 
+## 🔒 **What being unanswered costs him** (#390, *Distant colony*).
+##
+## **One in every run without the quirk**, and below one under it: a man who
+## knows his letter spent two months on a ship does not conclude he is being
+## ignored the moment it goes unanswered. **He gives the ocean the benefit of the
+## doubt**, which is the half of the quirk that makes distance liveable rather
+## than merely slower.
+##
+## It scales the deed and not the letter, so a contact who was *going* to mind
+## still minds — less.
+static var _costs: float = 1.0
+
+
+static func costs() -> float:
+	return _costs
+
+
+static func set_cost_scale(scale: float) -> void:
+	_costs = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_costs = 1.0
+
+
 static func resolve_one(contact: Contact, letter: Letter, inbound: InboundLetter, run: RunState) -> Dictionary:
 	# Reports and news asked for nothing, so silence costs nothing.
 	if not letter.silence_is_refusal() and not letter.silence_is_a_decision():
 		return {"letter": letter.id, "outcome": "no_penalty"}
 
 	# **He asked and was not answered**, which costs either way.
-	var moved := contact.relationship.record_deed(Relationship.IGNORED)
+	var moved := contact.relationship.record_deed(Relationship.IGNORED, _costs)
 	# **Being unanswered is a thing that happened to him**, and he can name the
 	# month it did (#127).
 	contact.relationship.remember(

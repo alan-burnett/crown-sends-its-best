@@ -34,6 +34,14 @@ var status: StringName = UNREAD
 ## The world month it was dispatched in.
 var month: int = 0
 
+## The month it comes off the ship, or `-1` when it never went on one (#390).
+##
+## 🔒 **Set by `Crossing` and by nothing else.** `month` is when it was
+## *written*, and the two differ only under *Distant colony* — which is the whole
+## of the quirk: the letter describes the colony as it was when composed, not as
+## it is when read.
+var arrives_month: int = -1
+
 
 func _init(p_letter_id: String = "", p_sender: StringName = &"", p_tone: StringName = &"") -> void:
 	letter_id = p_letter_id
@@ -55,6 +63,7 @@ func to_dict() -> Dictionary:
 		"measures": measures.duplicate(true),
 		"status": String(status),
 		"month": month,
+		"arrives_month": arrives_month,
 	}
 
 
@@ -68,5 +77,6 @@ static func from_dict(data: Dictionary) -> InboundLetter:
 	letter.params = data.get("params", {}).duplicate(true)
 	letter.measures = data.get("measures", {}).duplicate(true)
 	letter.status = StringName(data.get("status", UNREAD))
+	letter.arrives_month = int(data.get("arrives_month", -1))
 	letter.month = int(data.get("month", 0))
 	return letter

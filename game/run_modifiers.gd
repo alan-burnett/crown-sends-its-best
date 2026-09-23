@@ -70,6 +70,9 @@ const APPLIES: Dictionary = {
 	"village_yield": "_village_yield",
 	"war_party_share": "_war_party_share",
 	"native_reserve": "_native_reserve",
+	"post_crossing": "_post_crossing",
+	"silence_cost": "_silence_cost",
+	"damper_months": "_damper_months",
 }
 
 
@@ -429,3 +432,45 @@ static func _war_party_share(_run: RunState, args: Dictionary) -> void:
 ## Args: `{"scale": 0.6}`.
 static func _native_reserve(_run: RunState, args: Dictionary) -> void:
 	TradeAgreement.set_keeps_back(float(args.get("scale", 1.0)))
+
+
+## **Distant colony**: correspondence takes an extra month each way.
+##
+## 🔒 **One knob for both directions** (#390, §4 — *an extra month **each
+## way***). `OrderDriver` holds an Order for it going out and `Crossing` queues a
+## composed letter coming back, and both read this. Two numbers would let a run
+## exist in which the PC hears late and is obeyed promptly, which is a slow
+## contact rather than a distant colony.
+##
+## 🔒 **And the inbound half is a queue, not a delay.** A held letter says
+## what was true the month it was written, because `InboundLetter` is already a
+## snapshot — the director decides the letter *and its values* at composition.
+## A delay that re-read the state on arrival would give the PC timely news late,
+## which is the opposite of distance.
+##
+## Args: `{"months": 1}`.
+static func _post_crossing(_run: RunState, args: Dictionary) -> void:
+	Crossing.set_months(int(args.get("months", 0)))
+
+
+## **Distant colony**, the patience it buys: silence costs less.
+##
+## A man who knows his letter spent two months on a ship does not conclude he is
+## being ignored the moment it goes unanswered. **He gives the ocean the benefit
+## of the doubt** — and a quirk that made everything later without making anybody
+## more forgiving would be a straight penalty rather than a different game.
+##
+## Args: `{"scale": 0.5}`.
+static func _silence_cost(_run: RunState, args: Dictionary) -> void:
+	Silence.set_cost_scale(float(args.get("scale", 1.0)))
+
+
+## **Distant colony**, the other half of the patience: dampers run longer.
+##
+## A contact who knows the crossing takes months does not write again in three
+## weeks, so **the desk is thinner** — which is §4's own compensation for
+## everything arriving late: *you manage less and plan further.*
+##
+## Args: `{"months": 6}`.
+static func _damper_months(_run: RunState, args: Dictionary) -> void:
+	Pressure.set_damper_months(int(args.get("months", Pressure.CONTACT_MONTHS)))

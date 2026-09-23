@@ -51,7 +51,20 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		return
 
 	results.clear()
+	# 🔒 **The outbound half of the crossing** (#390). An Order written this
+	# month is read this month at the ordinary distance; under *Distant colony* it
+	# waits on the water, and the ones still out stay in `pending` rather than
+	# being dropped.
+	#
+	# It reads the same knob the inbound queue does, because §4 says *an extra
+	# month each way* — two numbers would let a run exist in which the PC hears
+	# late and is obeyed promptly, which is a slow contact rather than a distant
+	# colony.
+	var still_at_sea: Array[Order] = []
 	for order in pending:
+		if state.month - order.issued_month < Crossing.months():
+			still_at_sea.append(order)
+			continue
 		var contact: Contact = contacts.get(String(order.addressed_to))
 		if contact == null:
 			push_error("Order addressed to unknown contact '%s'." % order.addressed_to)
@@ -70,7 +83,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		_enact_if_agreed(order, contact, result, state, log)
 		_settle_policy(order, contact, state, log)
 
-	pending.clear()
+	pending = still_at_sea
 
 
 ## A policy stands from the month its enactor agrees to it.

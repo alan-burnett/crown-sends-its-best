@@ -175,9 +175,36 @@ static func topic_damper(contact: Contact, topic: String, book: WritingBook) -> 
 ## *I shall not pester the Crown.* Counted in months, on every concern he has.
 static func contact_damper(contact: Contact, month: int, book: WritingBook) -> float:
 	var ago := book.months_since(contact.id, month)
-	if ago < 0 or ago >= CONTACT_MONTHS:
+	var months := damper_months()
+	if ago < 0 or ago >= months:
 		return 0.0
-	return CONTACT_DAMPER * (1.0 - float(ago) / float(CONTACT_MONTHS))
+	return CONTACT_DAMPER * (1.0 - float(ago) / float(months))
+
+
+## 🔒 **How long a man leaves it before writing again** (#390, *Distant
+## colony*).
+##
+## **`CONTACT_MONTHS` in every run without the quirk**, and longer under it. A
+## contact who knows the crossing takes months does not write again in three
+## weeks — and that is what makes the desk thinner, which is the compensation
+## §4 promises for everything arriving late.
+##
+## 🔒 **On the span and not on the weight.** Lengthening the damper means he
+## writes *less often*; deepening it would mean he writes less *readily*, which
+## is `Threshold`'s business and a different man.
+static var _damper_months: int = CONTACT_MONTHS
+
+
+static func damper_months() -> int:
+	return maxi(1, _damper_months)
+
+
+static func set_damper_months(months: int) -> void:
+	_damper_months = maxi(1, months)
+
+
+static func reset() -> void:
+	_damper_months = CONTACT_MONTHS
 
 
 ## The one topic he would raise, and what it is worth — or empty.

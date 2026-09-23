@@ -148,6 +148,30 @@
             }
           }
         ]
+      },
+      {
+        "id": "distant_colony",
+        "name": "Distant colony",
+        "blurb": "Six weeks of open water, and every question you ask is answered by a man who has stopped waiting for it.",
+        "offered": true,
+        "note": "Correspondence takes an extra month each way (section 4), and this is the only quirk that changes the LOOP rather than a magnitude inside it - which is why section 7 said it wanted its knob designed deliberately and why it took three. post_crossing is one number read by both directions, because 'each way' means the same delay each way: two numbers would let a run exist where the PC hears late and is obeyed promptly, which is a slow contact rather than a distant colony. The inbound half is a QUEUE and not a delay on delivery - a held letter says what was true the month it was written, because InboundLetter is already a snapshot. The other two are the compensation section 4 promises: contacts are more patient, so silence costs less and their dampers run longer, and the desk is thinner for it. You manage less and plan further, which is a different game rather than a harder one. Every figure is M8's, and section 6 flags the crossing length as the one that decides whether the loop still reads as correspondence or starts reading as delay.",
+        "modifiers": [
+          {
+            "post_crossing": {
+              "months": 1
+            }
+          },
+          {
+            "silence_cost": {
+              "scale": 0.5
+            }
+          },
+          {
+            "damper_months": {
+              "months": 6
+            }
+          }
+        ]
       }
     ]
   }

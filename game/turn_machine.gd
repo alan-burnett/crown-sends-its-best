@@ -449,8 +449,12 @@ func begin_turn() -> void:
 	run.phase = DESK
 
 	# The month's letters arrive, acknowledging what became of last month's post.
+	#
+	# 🔒 **Through the crossing** (#390). At the ordinary distance `deliver`
+	# hands back exactly what it was given; under *Distant colony* this month's
+	# letters go on the water and whatever was posted months ago comes off it.
 	if director != null:
-		run.inbox = director.compose_inbox(run, orders.results)
+		run.inbox = Crossing.deliver(run, director.compose_inbox(run, orders.results))
 
 
 func at_desk() -> bool:

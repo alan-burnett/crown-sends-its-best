@@ -204,6 +204,18 @@ var writings: WritingBook = WritingBook.new()
 
 ## This turn's desk.
 var inbox: Array[InboundLetter] = []
+
+## 🔒 **Letters composed and not yet landed** (#390, *Distant colony*).
+##
+## **Always empty without the quirk**, because `Crossing` hands an ordinary run's
+## post straight back rather than queueing it — so this is a field a normal save
+## carries as `[]` and nothing else has to know about.
+##
+## They are already snapshots: the director decides a letter *and its values* at
+## composition, so a letter held here says what was true the month it was
+## written. That is the quirk, and it costs nothing because the contract was
+## already right.
+var at_sea: Array[InboundLetter] = []
 var post: Post = null
 
 # --- The turn --------------------------------------------------------------
@@ -460,6 +472,12 @@ func to_dict() -> Dictionary:
 	for letter in inbox:
 		inbox_entries.append(letter.to_dict())
 
+	# Ironman means a corrupt save is a lost run (`CLAUDE.md`), and a letter on
+	# the water that did not survive a load would be a letter nobody ever reads.
+	var at_sea_entries: Array = []
+	for letter in at_sea:
+		at_sea_entries.append(letter.to_dict())
+
 	return {
 		"version": version,
 		"run_seed": run_seed,
@@ -495,6 +513,7 @@ func to_dict() -> Dictionary:
 		"setup": setup.to_dict() if setup != null else {},
 		"contacts": contact_entries,
 		"inbox": inbox_entries,
+		"at_sea": at_sea_entries,
 		"letters_sent": letters_sent.duplicate(),
 		"writings": writings.to_dict(),
 		"post": post.to_dict(),
@@ -550,6 +569,8 @@ static func from_dict(data: Dictionary) -> RunState:
 
 	for entry in data.get("inbox", []):
 		run.inbox.append(InboundLetter.from_dict(entry))
+	for entry in data.get("at_sea", []):
+		run.at_sea.append(InboundLetter.from_dict(entry))
 
 	return run
 
