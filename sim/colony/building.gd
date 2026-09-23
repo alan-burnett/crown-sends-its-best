@@ -391,6 +391,21 @@ static func regard_scale(
 		return 1.0
 	var from_neutral := (resident.loyalty() - Relationship.NEUTRAL_LOYALTY) \
 		/ Relationship.NEUTRAL_LOYALTY
+
+	# 🔒 **A rebel town inverts it**, and that is the whole point of the man
+	# rather than a twist on the arithmetic.
+	#
+	# Under the Crown he runs a good church because the Crown gives him what he
+	# needs and a slighted man does not bother. **Once the town has flipped there
+	# is no Crown to be slighted by** — so the priest who detested the PC is the
+	# one who can finally get on with it, and the one who loved being a Crown
+	# parish is the one who has lost everything.
+	#
+	# Same knob, same neutral, read from the other end: `rebel-sentiment.md` §2's
+	# principle that the same wretchedness points in opposite directions
+	# depending on who is blamed, applied to a building.
+	if town.rebelling:
+		from_neutral = -from_neutral
 	return maxf(0.0, 1.0 + _regard_swing * from_neutral)
 
 

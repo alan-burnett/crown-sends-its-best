@@ -55,9 +55,22 @@ const PROVOST_KNOBS: Array[StringName] = [VOLUME, PROVISION, EXPERTS, LIVESTOCK,
 const PUBLIC_RELATIONS: StringName = &"public_relations"
 const CROWN_SENTIMENT: StringName = &"crown_sentiment"
 
+## The scholar's (#280, `institutional-contacts.md` §3).
+##
+## *"I would like our experts to spread knowledge around the colony. We just need
+## a little gold for their travel expenses. I will arrange all the travel and
+## send them where they will be most useful. I suggest you build libraries
+## wherever they go so they can keep up on their skills."*
+##
+## **Cheap, and not free.** It is travel expenses rather than an instrument, and
+## the cost is what keeps it a decision — but the thing it buys is the only cure
+## for expertise landing in the wrong town, so a PC who can afford anything
+## should take it.
+const TRAVELLING_EXPERTS: StringName = &"travelling_experts"
+
 const ALL: Array[StringName] = [
 	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK,
-	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT,
+	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT, TRAVELLING_EXPERTS,
 ]
 
 ## What each knob is set to. **Four settings and no numbers**, because the PC is
@@ -131,6 +144,12 @@ const IMMIGRATION_LIFT: float = 0.5
 const PUBLIC_RELATIONS_KEY: String = "policy.public_relations"
 const CROWN_SENTIMENT_KEY: String = "policy.crown_sentiment"
 
+## Whether the scholar is arranging travel this month (#280). A flag rather than
+## a figure: the transfers are an action, and `ExpertTravelDriver` is what takes
+## it. Written here so the sim reads a world value and never the policy book,
+## which is the rule every other policy follows.
+const TRAVELLING_EXPERTS_KEY: String = "policy.travelling_experts"
+
 ## How much regard a month of good press earns every governor in the colony.
 ##
 ## Tuning, and deliberately worth having: §3's lock is that the benefit is not
@@ -188,6 +207,8 @@ static func pressure(book: PolicyBook) -> Dictionary:
 				# make a town grateful for being taxed.
 				values[CROWN_SENTIMENT_KEY] = minf(1.0,
 					float(values.get(CROWN_SENTIMENT_KEY, 0.0)) + CROWN_SENTIMENT_RELIEF)
+			TRAVELLING_EXPERTS:
+				values[TRAVELLING_EXPERTS_KEY] = 1.0
 			_:
 				# The Provost's five (#173). Each presses on its own world value,
 				# so the sim reads a figure and never the policy book.

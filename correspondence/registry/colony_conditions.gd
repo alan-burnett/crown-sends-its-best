@@ -191,6 +191,13 @@ static func register_all() -> void:
 		"he_did_otherwise", {"within": "integer"},
 		ColonyConditions.he_did_otherwise,
 	)
+	# 🔒 **What the scholar needs before he suggests arranging travel** (#280).
+	# More than one of a kind, because a town holding the colony's only weaver
+	# has nothing to spare and no reason to write.
+	ContentRegistry.register_condition(
+		"i_have_experts_to_spare", {},
+		ColonyConditions.i_have_experts_to_spare,
+	)
 
 
 ## Whether this sender is a governor-elect who has only just set out (#178).
@@ -930,3 +937,18 @@ static func the_colony_has_fallen_further(
 	if context == null or context.log == null:
 		return false
 	return LastChance.newly_dire(context.log, context.month)
+
+
+## Whether this man's town holds more than one expert of some kind (#280).
+##
+## 🔒 **More than one, never the last man.** The scholar offers to arrange travel
+## when there is somebody to spare, and a town that holds the colony's only
+## weaver is not somewhere he can take one from — so the letter cannot fire on a
+## colony where accepting it would do nothing.
+##
+## Paired with `loyalty_above` in the trigger, which is the *and* in §3's rule:
+## a man at rock bottom does not offer to help.
+static func i_have_experts_to_spare(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.town == null:
+		return false
+	return not ExpertTransfer.spare_kinds(context.town).is_empty()

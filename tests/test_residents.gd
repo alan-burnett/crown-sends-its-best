@@ -317,6 +317,10 @@ func _context(run: RunState) -> ColonyContext:
 	context.companies = run.companies
 	context.commanders = run.commanders
 	context.contacts = run.contacts
+	# **Ground, because `Experts.worth_of` reads what a town can work.** Without
+	# it every town is worth nothing to every expert and nowhere is ever better
+	# than anywhere — which made the travel tests pass by arranging nothing.
+	context.territory = Territory.compute(run.map, run.colony.in_order())
 	return context
 
 
@@ -892,21 +896,42 @@ func test_nothing_else_in_the_game_takes_an_expert_off_a_town() -> void:
 
 # --- 🔒 Unprompted he gathers them; asked, he complies ----------------------
 
-func test_left_to_himself_he_sends_them_to_his_own_library() -> void:
-	# 🔒 **His bias corrupts his own capability**, which is the sharpest kind. He
-	# sincerely believes he wants experts spread about the colony; what he does is
-	# gather them.
+func test_he_sends_a_man_where_he_would_be_worth_more() -> void:
+	# 🔒 *Send them where they will be most useful* — and **asked of
+	# `Experts.worth_of`**, which is the same reading a town uses to decide what
+	# expertise it wants. A second opinion here would be a second answer to what
+	# an expert is for.
 	var run := _run()
-	var towns := _two_towns(run)
-	var home: Town = towns[0]
-	home.add_building(&"theatre")
-	home.add_building(&"library")
-	ContactRoster.house_the_residents(run)
+	var home := run.colony.in_order()[0]
+	home.add_experts(&"furs", 3)
 
-	var man := _scholar(run, home)
-	assert_true(man != null, "no scholar to ask")
-	assert_same(ExpertTransfer.where_he_would_send(man, run.colony), home,
-		"left to himself the scholar sent an expert somewhere other than his own town")
+	var frontier := _frontier(run, &"gallows_end")
+	var context := _context(run)
+
+	# 🔒 **A town with none of them comes first**, whatever the arithmetic says:
+	# the first expert is the difference between a trade the town can work and
+	# one it cannot, and `worth_of`'s diminishing returns describe the second.
+	assert_same(ExpertTransfer.most_useful_elsewhere(home, &"furs", context), frontier,
+		"he passed over the town that had no trapper at all")
+
+	# Once it has one, it is only worth more where it is worth more.
+	frontier.add_experts(&"furs", 1)
+	var second := ExpertTransfer.most_useful_elsewhere(home, &"furs", _context(run))
+	if second != null:
+		assert_true(
+			Experts.worth_of(second, &"furs", context)
+			> Experts.worth_of(home, &"furs", context),
+			"he moved a man somewhere he would be worth less")
+
+
+func test_he_sends_nobody_when_nowhere_is_better() -> void:
+	# A colony of one town has nowhere to send anybody, and a man already in the
+	# best place for him stays there.
+	var run := _run()
+	var home := run.colony.in_order()[0]
+	home.add_experts(&"furs", 3)
+	assert_eq(ExpertTransfer.most_useful_elsewhere(home, &"furs", _context(run)), null,
+		"a colony of one town found somewhere else to send a trapper")
 
 
 func test_asked_he_sends_the_man_where_he_is_told() -> void:
@@ -928,20 +953,28 @@ func test_asked_he_sends_the_man_where_he_is_told() -> void:
 		"the man went somewhere other than where he was sent")
 
 
-func test_he_takes_from_the_town_that_has_the_most() -> void:
-	# He raids the surplus rather than the last weaver a hamlet has.
+func test_only_a_town_with_more_than_one_has_anybody_to_spare() -> void:
+	# 🔒 *If I have more than one expert of a particular type.* The last weaver a
+	# town has is not spare, however badly somewhere else wants one.
 	var run := _run()
 	var towns := _two_towns(run)
 	var home: Town = towns[0]
-	var frontier: Town = towns[1]
-	home.add_experts(&"furs", 4)
-	frontier.add_experts(&"furs", 1)
 
-	var spare := Town.new(&"thornwick", "Thornwick", Vector2i(2, 7))
-	run.colony.add(spare)
-	assert_same(
-		ExpertTransfer.where_he_would_take_from(&"furs", run.colony, spare), home,
-		"he took a man from the town that could least spare one")
+	assert_empty(ExpertTransfer.spare_kinds(home),
+		"a town with no experts had somebody to spare")
+	home.add_experts(&"furs", 1)
+	assert_empty(ExpertTransfer.spare_kinds(home),
+		"a town with one trapper counted him as spare")
+	home.add_experts(&"furs", 1)
+	assert_true(ExpertTransfer.spare_kinds(home).has("furs"),
+		"a town with two trappers had nobody to spare")
+
+	home.add_experts(&"ore", 2)
+	var spare := ExpertTransfer.spare_kinds(home)
+	var sorted := spare.duplicate()
+	sorted.sort()
+	assert_eq(spare, sorted,
+		"the kinds came out unsorted, so two runs of one seed would differ")
 
 
 # --- 🔒 The college widens him and brings no second scholar -----------------
@@ -962,3 +995,327 @@ func test_the_college_widens_the_scholar_and_brings_nobody_new() -> void:
 	assert_same(_scholar(run, town), man, "the college replaced the man the library brought")
 	assert_true(Education.of(town, _context(run)) > narrow,
 		"the college widened nothing")
+
+
+# --- 🔒 Travelling experts: the scholar's policy (#280) ---------------------
+#
+# *"I would like our experts to spread knowledge around the colony. We just need
+# a little gold for their travel expenses. I will arrange all the travel and
+# send them where they will be most useful."*
+
+func _with_library(run: RunState) -> Town:
+	var home := run.colony.in_order()[0]
+	home.add_building(&"theatre")
+	home.add_building(&"library")
+	ContactRoster.house_the_residents(run)
+	return home
+
+
+## A second town on real ground, far enough from the capital to hold its own
+## tiles — so `Experts.worth_of` has something to read about it.
+func _frontier(run: RunState, id: StringName, _at: Vector2i = Vector2i.ZERO) -> Town:
+	var home := run.colony.in_order()[0]
+	var site := _land_away_from(run, home.at)
+	var town := Town.new(id, String(id).capitalize(), site)
+	town.workers = 10
+	run.colony.add(town)
+	return town
+
+
+func _land_away_from(run: RunState, from: Vector2i) -> Vector2i:
+	var best := from + Vector2i(5, 5)
+	for radius in [6, 7, 5, 8, 4]:
+		for step in 8:
+			var at := from + Vector2i(radius, step - 4)
+			if run.map.in_bounds(at.x, at.y) and run.map.is_land(at.x, at.y):
+				return at
+	return best
+
+
+func _reckon(run: RunState) -> void:
+	ExpertTravelDriver.new(run).on_phase(
+		WorldPhase.RECKONING, run.world, run.log, run.streams)
+
+
+func test_the_policy_presses_a_flag_the_sim_can_read() -> void:
+	# The rule every other policy follows: the sim reads a world value and never
+	# the policy book, so a policy that lapses stops arranging travel without
+	# anybody being told.
+	var book := PolicyBook.new()
+	book.enact(Policy.new(
+		&"scholar_ashmere", PolicyEffects.TRAVELLING_EXPERTS, 20.0, Policy.ALL),
+		EventLog.new(), 3)
+	assert_has(PolicyEffects.pressure(book), PolicyEffects.TRAVELLING_EXPERTS_KEY,
+		"the scholar's policy presses on nothing, so nobody will ever travel")
+
+
+func test_without_the_policy_nobody_goes_anywhere() -> void:
+	var run := _run()
+	var home := _with_library(run)
+	home.add_experts(&"furs", 3)
+	_frontier(run, &"gallows_end", Vector2i(6, 6))
+
+	_reckon(run)
+	assert_eq(home.expert_count(&"furs"), 3,
+		"experts travelled with no policy paying for the journey")
+
+
+func test_with_it_the_spare_man_goes_where_he_is_worth_more() -> void:
+	var run := _run()
+	var home := _with_library(run)
+	home.add_experts(&"furs", 3)
+	_frontier(run, &"gallows_end", Vector2i(6, 6))
+	run.world.values[PolicyEffects.TRAVELLING_EXPERTS_KEY] = 1.0
+
+	_reckon(run)
+	assert_true(home.expert_count(&"furs") < 3,
+		"the scholar was paid to arrange travel and arranged none")
+	assert_not_empty(run.log.of_type(ExpertTransfer.EVENT_MOVED),
+		"somebody moved and the log does not say so")
+
+
+func test_he_never_sends_the_last_man_of_a_kind() -> void:
+	# 🔒 *If I have more than one expert of a particular type.* A town holding the
+	# colony's only weaver keeps him however badly somewhere else wants one.
+	var run := _run()
+	var home := _with_library(run)
+	home.add_experts(&"furs", 1)
+	_frontier(run, &"gallows_end", Vector2i(6, 6))
+	run.world.values[PolicyEffects.TRAVELLING_EXPERTS_KEY] = 1.0
+
+	_reckon(run)
+	assert_eq(home.expert_count(&"furs"), 1,
+		"the scholar sent away the only trapper in the colony")
+
+
+func test_a_town_with_no_scholar_arranges_nothing() -> void:
+	# He is the one who arranges it, so a colony that has not built him a library
+	# has nobody to do it — and a town whose library burned down stops.
+	var run := _run()
+	var home := run.colony.in_order()[0]
+	home.add_experts(&"furs", 4)
+	_frontier(run, &"gallows_end", Vector2i(6, 6))
+	run.world.values[PolicyEffects.TRAVELLING_EXPERTS_KEY] = 1.0
+
+	_reckon(run)
+	assert_eq(home.expert_count(&"furs"), 4,
+		"experts travelled in a colony with no scholar to arrange it")
+
+
+func test_the_colony_keeps_every_man_it_had() -> void:
+	# 🔒 It moves a man and never makes or unmakes one, so this cannot become a
+	# second source of experts beside the Provost's.
+	var run := _run()
+	var home := _with_library(run)
+	home.add_experts(&"furs", 3)
+	home.add_experts(&"ore", 2)
+	_frontier(run, &"gallows_end", Vector2i(6, 6))
+	_frontier(run, &"thornwick", Vector2i(2, 7))
+	run.world.values[PolicyEffects.TRAVELLING_EXPERTS_KEY] = 1.0
+
+	var before := 0
+	for town in run.colony.in_order():
+		before += town.expert_total()
+
+	for month in 4:
+		run.world.month = month + 1
+		_reckon(run)
+
+	var after := 0
+	for town in run.colony.in_order():
+		after += town.expert_total()
+	assert_eq(after, before, "arranging travel made or unmade an expert")
+
+
+func test_he_offers_only_when_he_has_somebody_to_spare() -> void:
+	# 🔒 §3's condition, and the reason the letter cannot fire on a colony where
+	# accepting it would do nothing.
+	var run := _run()
+	var home := _with_library(run)
+	var man := _scholar(run, home)
+	assert_true(man != null, "the library brought nobody")
+
+	var context := LetterContext.new()
+	context.town = home
+	assert_false(ColonyConditions.i_have_experts_to_spare({}, context),
+		"a town with no experts at all had somebody to spare")
+
+	home.add_experts(&"furs", 1)
+	assert_false(ColonyConditions.i_have_experts_to_spare({}, context),
+		"a town with one trapper offered to send him away")
+
+	home.add_experts(&"furs", 1)
+	assert_true(ColonyConditions.i_have_experts_to_spare({}, context),
+		"a town with two trappers had nobody to spare")
+
+
+func test_a_resident_gets_the_town_he_lives_in() -> void:
+	# 🔒 The director asked `governed_by`, which is governors only — so every
+	# resident's letter was composed with no town at all, and any condition that
+	# mentioned the place he lives could never be true.
+	var run := _run()
+	var home := _with_library(run)
+	assert_same(ColonyMeasures.home_of(_scholar(run, home), run), home,
+		"the scholar lives nowhere as far as his letters are concerned")
+	assert_same(ColonyMeasures.home_of(_clergyman(run, _with(run, ["church"])), run), home,
+		"the clergyman lives nowhere either")
+
+
+# --- 🔒 It settles, and never shuffles ---------------------------------------
+#
+# Five towns and eight food experts must not spend the run passing men back and
+# forth. Three things hold it still: a town never sends its last of a kind, an
+# empty town is a one-way destination that stops being empty the moment he
+# arrives, and the fallback requires strictly more than standing still.
+
+func test_a_town_with_none_of_them_is_preferred_over_a_richer_one() -> void:
+	# 🔒 **The first expert a town has is worth more than the arithmetic admits.**
+	# He is the difference between a trade the town can work at all and one it
+	# cannot, and `worth_of`'s diminishing returns describe the second.
+	var run := _run()
+	var home := run.colony.in_order()[0]
+	home.add_experts(&"furs", 3)
+
+	var bare := _frontier(run, &"gallows_end")
+	var stocked := _frontier(run, &"thornwick")
+	stocked.add_experts(&"furs", 1)
+
+	assert_same(ExpertTransfer.most_useful_elsewhere(home, &"furs", _context(run)), bare,
+		"he sent a second trapper to a town that had one, over a town with none")
+
+
+func test_once_everybody_has_one_he_needs_a_reason_to_move_anybody() -> void:
+	# 🔒 Strictly more than standing still, or the colony shuffles for ever.
+	var run := _run()
+	var home := run.colony.in_order()[0]
+	home.add_experts(&"furs", 2)
+	var other := _frontier(run, &"gallows_end")
+	other.add_experts(&"furs", 1)
+
+	# **Asserted either way**, because both answers are correct and a test that
+	# skipped the null case would pass whatever the fallback did.
+	var context := _context(run)
+	var chosen := ExpertTransfer.most_useful_elsewhere(home, &"furs", context)
+	var staying := Experts.worth_of(home, &"furs", context)
+	assert_true(
+		chosen == null or Experts.worth_of(chosen, &"furs", context) > staying,
+		"he moved a man to a town where he was worth no more than where he was")
+
+
+func test_a_colony_left_alone_stops_moving_people() -> void:
+	# 🔒 **The anti-churn guarantee, asked of the driver over many months.** A
+	# settled arrangement must reach a month where nobody travels and stay there.
+	var run := _run()
+	var home := _with_library(run)
+	home.add_experts(&"food", 8)
+	for id in ["gallows_end", "thornwick", "marlow", "penhale"]:
+		_frontier(run, StringName(id))
+	run.world.values[PolicyEffects.TRAVELLING_EXPERTS_KEY] = 1.0
+
+	var moves_by_month := PackedInt32Array()
+	for month in 10:
+		run.world.month = month + 1
+		var before := run.log.of_type(ExpertTransfer.EVENT_MOVED).size()
+		_reckon(run)
+		moves_by_month.append(
+			run.log.of_type(ExpertTransfer.EVENT_MOVED).size() - before)
+
+	assert_true(moves_by_month[0] > 0,
+		"eight experts and four empty towns and nobody went anywhere")
+	assert_eq(moves_by_month[moves_by_month.size() - 1], 0,
+		"the colony was still shuffling experts in the tenth month: %s" % [moves_by_month])
+
+
+func test_nobody_is_ever_sent_away_from_a_town_that_has_one_of_him() -> void:
+	# The invariant underneath the settling: after any number of months, no town
+	# has been stripped of a kind it holds.
+	var run := _run()
+	var home := _with_library(run)
+	home.add_experts(&"food", 5)
+	home.add_experts(&"ore", 3)
+	for id in ["gallows_end", "thornwick"]:
+		_frontier(run, StringName(id))
+	run.world.values[PolicyEffects.TRAVELLING_EXPERTS_KEY] = 1.0
+
+	for month in 8:
+		run.world.month = month + 1
+		_reckon(run)
+		for town in run.colony.in_order():
+			for kind in ["food", "ore"]:
+				assert_true(town.expert_count(StringName(kind)) >= 0,
+					"a town ended the month owing an expert")
+	assert_true(home.expert_count(&"food") >= 1,
+		"the town that started with every food expert was stripped of all of them")
+
+
+# --- 🔒 A rebel town reads his regard from the other end --------------------
+
+func test_a_slighted_priest_runs_a_better_church_once_the_town_rebels() -> void:
+	# 🔒 Under the Crown he runs a good church because the Crown gives him what he
+	# needs. **Once the town has flipped there is no Crown to be slighted by** —
+	# so the priest who detested the PC is the one who can finally get on with it.
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+	priest.relationship = Relationship.new(priest.id, Relationship.MIN_LOYALTY)
+
+	town.rebelling = false
+	var under_the_crown := Building.regard_scale(
+		Building.find(&"church"), town, run.contacts)
+	town.rebelling = true
+	var independent := Building.regard_scale(
+		Building.find(&"church"), town, run.contacts)
+
+	assert_true(under_the_crown < 1.0,
+		"a slighted priest ran the church as well as a contented one")
+	assert_true(independent > 1.0,
+		"the town threw off the Crown and its priest went on sulking about it")
+
+
+func test_a_devoted_priest_loses_heart_when_his_town_goes() -> void:
+	# And the mirror: the man who loved being a Crown parish has lost everything.
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+	priest.relationship = Relationship.new(priest.id, Relationship.MAX_LOYALTY)
+
+	town.rebelling = true
+	assert_true(
+		Building.regard_scale(Building.find(&"church"), town, run.contacts) < 1.0,
+		"a priest devoted to the Crown was delighted by his town leaving it")
+
+
+func test_an_indifferent_man_is_unmoved_either_way() -> void:
+	# 🔒 Neutral is the hinge, so the authored figures still mean what they say
+	# whichever side of the rebellion the town is on.
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+	priest.relationship = Relationship.new(priest.id, Relationship.NEUTRAL_LOYALTY)
+
+	for rebelling in [false, true]:
+		town.rebelling = rebelling
+		assert_almost_eq(
+			Building.regard_scale(Building.find(&"church"), town, run.contacts),
+			1.0, 0.0001,
+			"an indifferent priest's church moved when the town's allegiance did")
+
+
+func test_the_inversion_reaches_what_the_town_actually_feels() -> void:
+	# Asked of the safety the town reads, not of the scale — a knob nothing reads
+	# is a number in a file.
+	var run := _run()
+	var town := _besieged(run)
+	town.add_building(&"church")
+	ContactRoster.house_the_residents(run)
+	var priest := _clergyman(run, town)
+	priest.relationship = Relationship.new(priest.id, Relationship.MIN_LOYALTY)
+	var context := _context(run)
+
+	town.rebelling = false
+	var loyal := QualityOfLife.safety_of(town, context)
+	town.rebelling = true
+	var rebel := QualityOfLife.safety_of(town, context)
+
+	assert_true(rebel > loyal,
+		"the church comforted a rebel town no more than it comforted a Crown one")

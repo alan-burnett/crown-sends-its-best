@@ -358,7 +358,14 @@ func _context(run: RunState, contact: Contact) -> LetterContext:
 	var context := LetterContext.new(run.world, contact, &"")
 	context.diff = run.last_diff
 	context.measures = ColonyMeasures.for_contact(run, contact)
-	context.town = run.colony.governed_by(contact.id) if run.colony != null else null
+	# 🔒 **The town this man lives in, however he came to live in it** (#280).
+	# This asked `governed_by` and so answered null for every resident, which
+	# meant no clergyman, scholar, journalist or quartermaster could write a
+	# letter that mentioned the place he lives. `ColonyMeasures.home_of` is the
+	# one rule — the governor by the town he governs, everybody else by the place
+	# named on his own record — and asking it here rather than writing a second
+	# one is what keeps a man's letters about the same town as his measures.
+	context.town = ColonyMeasures.home_of(contact, run)
 	context.refusal = run.refusal
 	context.prestige = run.prestige
 	context.colony = run.colony

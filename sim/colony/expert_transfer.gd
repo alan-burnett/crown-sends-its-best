@@ -66,44 +66,80 @@ static func move(
 	return true
 
 
-## Where this man would send an expert if nobody told him (§3).
+## What a town has more of than one, and could therefore spare.
 ##
-## 🔒 **His bias corrupts his own capability**, which is the sharpest kind.
-## `buildings.md` calls him *a contact who wants experts spread about the
-## colony*, and that is what he sincerely believes about himself. **What he
-## actually does is gather them** — toward his own library, because that is where
-## expertise can be properly used and where the real work is done. The frontier
-## town that needs a farmer is not his concern; it has no library to receive one.
+## 🔒 **More than one, never the last man.** *"If I have more than one expert of
+## a particular type"* — a town that holds the colony's only weaver keeps him,
+## so this can never strip a specialism out of the place that has it.
 ##
-## Follow his advice and you end with one brilliant town and a colony of hamlets,
-## and he will be sincerely delighted about it.
-##
-## 🔒 **Asked directly he still obeys.** This is his *unprompted* judgement, and
-## nothing here is consulted when a letter names a destination — exactly as the
-## Steward follows an instruction he disagrees with.
-static func where_he_would_send(scholar: Contact, colony: Colony) -> Town:
-	if scholar == null or colony == null:
-		return null
-	for town in colony.in_order():
-		if town.display_name == scholar.town:
-			return town
-	return null
+## Sorted, so the same colony always sends the same man in the same order.
+static func spare_kinds(town: Town) -> PackedStringArray:
+	var out := PackedStringArray()
+	if town == null:
+		return out
+	var kinds: Array = town.experts.keys()
+	kinds.sort()
+	for kind in kinds:
+		if town.expert_count(StringName(kind)) > 1:
+			out.append(String(kind))
+	return out
 
 
-## Somewhere to take one from, for a man who has decided where they should go.
+## Where a man of this kind would do the most good, other than where he is.
 ##
-## **The town with the most of them**, so he raids the colony's surplus rather
-## than the last weaver a hamlet has — sorted by id underneath, so the same
-## colony always gives up the same man.
-static func where_he_would_take_from(
-	resource: StringName, colony: Colony, destination: Town
+## 🔒 **Asked of `Experts.worth_of`**, which is the same reading a town uses to
+## decide what expertise it wants — so the scholar's judgement of *most useful*
+## and the colony's are one function. A second opinion here would be a second
+## answer to what an expert is for.
+##
+## ## 🔒 A town with none of them comes first, whatever the arithmetic says
+##
+## **The first expert a town has is worth more than the arithmetic admits.** He
+## is the difference between a trade the town can work at all and one it cannot,
+## and `worth_of`'s diminishing returns are a statement about the *second*. So a
+## town holding none of this kind wins outright, and among those the one that
+## would gain most.
+##
+## Only when every candidate already has one does this fall back to the plain
+## comparison — and then **only if somewhere genuinely beats standing still.**
+##
+## ## 🔒 And that is what stops the shuffling
+##
+## Five towns and eight food experts must not spend the run passing men back and
+## forth. Three things hold it still: a town never sends its last of a kind
+## (`spare_kinds`), an empty town is a one-way destination that stops being empty
+## the moment he arrives, and the fallback requires strictly more than staying
+## put — so an arrangement with nowhere better to be is an arrangement that stops
+## moving.
+##
+## Null when nowhere would be better, which includes a colony of one town.
+static func most_useful_elsewhere(
+	home: Town, resource: StringName, context: ColonyContext
 ) -> Town:
-	if colony == null or destination == null:
+	if home == null or context == null or context.colony == null:
 		return null
-	var best: Town = null
-	for town in colony.in_order():
-		if town == destination or town.expert_count(resource) <= 0:
+
+	# First pass: somewhere that has none of him at all.
+	var barest: Town = null
+	var barest_worth := 0.0
+	for town in context.colony.in_order():
+		if town == home or town.expert_count(resource) > 0:
 			continue
-		if best == null or town.expert_count(resource) > best.expert_count(resource):
+		var gain := Experts.worth_of(town, resource, context)
+		if barest == null or gain > barest_worth:
+			barest = town
+			barest_worth = gain
+	if barest != null:
+		return barest
+
+	# Second: everybody has one, so it is worth more only where it is worth more.
+	var best: Town = null
+	var best_worth := Experts.worth_of(home, resource, context)
+	for town in context.colony.in_order():
+		if town == home:
+			continue
+		var worth := Experts.worth_of(town, resource, context)
+		if worth > best_worth:
+			best_worth = worth
 			best = town
 	return best
