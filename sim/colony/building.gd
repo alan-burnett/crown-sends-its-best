@@ -68,7 +68,7 @@ static func load_from(records: Array) -> void:
 static func reset() -> void:
 	_buildings = {}
 	_regard_swing = 0.6
-	_amusement_worth = 1.0
+	reset_amusement_worth()
 
 
 static func has(id: StringName) -> bool:
@@ -386,6 +386,11 @@ static func amusement_worth() -> float:
 
 static func set_amusement_worth(worth: float) -> void:
 	_amusement_worth = maxf(0.0, worth)
+
+
+## The knob alone, for `RunModifiers.reset_knobs`; the buildings stay loaded.
+static func reset_amusement_worth() -> void:
+	_amusement_worth = 1.0
 
 
 ## What this building's effect is multiplied by, given who lives here.

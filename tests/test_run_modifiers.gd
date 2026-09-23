@@ -162,6 +162,111 @@ func test_the_quirks_are_applied_in_a_fixed_order() -> void:
 		"the order the quirks were listed in changed the run")
 
 
+# --- 🔒 A run starts from a fresh world, never from the last run ------------
+#
+# A knob is a static, and a static outlives the run that turned it. The game
+# loads its content once and then goes from one run straight to the next, so a
+# run that left a knob turned handed its quirks to whoever played next — and a
+# save loaded after it inherited every knob it does not turn itself.
+
+func _plain_run() -> RunState:
+	var run := RunState.new_run(SEED)
+	run.setup.perk = &""
+	run.setup.quirks = PackedStringArray()
+	return run
+
+
+## Every static the game's own classes hold, as text, keyed `Class.name`.
+##
+## 🔒 **Read off the scripts rather than listed.** A list of knobs to check would
+## be a second list of knobs to forget, and forgetting one is exactly the failure
+## this is for: a knob added tomorrow is in here without anybody touching this
+## file.
+func _every_static() -> Dictionary:
+	var out := {}
+	for entry in ProjectSettings.get_global_class_list():
+		var path := String(entry["path"])
+		if path.begins_with("res://tests/") or path.begins_with("res://tools/"):
+			continue
+		var script := load(path) as Script
+		if script == null:
+			continue
+		for property in script.get_property_list():
+			if (int(property["usage"]) & PROPERTY_USAGE_SCRIPT_VARIABLE) == 0:
+				continue
+			var name := String(property["name"])
+			out["%s.%s" % [entry["class"], name]] = var_to_str(script.get(name))
+	return out
+
+
+## The statics that read differently between two readings, sorted.
+func _moved(before: Dictionary, after: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
+	for key in before:
+		if String(after.get(key, "")) != String(before[key]):
+			out.append(String(key))
+	out.sort()
+	return out
+
+
+func test_a_plain_run_after_a_distant_busy_one_is_back_at_home() -> void:
+	# The case that was reported: *Distant colony* and *Busy patrons*, then New
+	# Game. Read against a fresh process rather than against the figures, which
+	# are M8's.
+	var home_crossing := Crossing.months()
+	var home_patrons := Patron.how_many()
+	var home_room := DemandSchedule.room_for(DemandGrowth.SOURCE_PATRON)
+	var quirked := RunState.new_run(SEED)
+	quirked.setup.quirks = PackedStringArray(["distant_colony", "busy_patrons"])
+	var plain := _plain_run()
+
+	RunModifiers.apply_all(quirked, content)
+	# Or the rest of this proves nothing.
+	assert_ne(Crossing.months(), home_crossing, "Distant colony never turned the crossing")
+	assert_ne(Patron.how_many(), home_patrons, "Busy patrons never turned the count")
+
+	RunModifiers.apply_all(plain, content)
+	assert_eq(Crossing.months(), home_crossing,
+		"a New Game after a distant colony kept its extra month at sea")
+	assert_eq(Patron.how_many(), home_patrons,
+		"a New Game after busy patrons kept a seat at the desk for more of them")
+	assert_eq(DemandSchedule.room_for(DemandGrowth.SOURCE_PATRON), home_room,
+		"the Squeeze kept room for patrons the next run will never meet")
+
+
+func test_no_run_leaves_a_knob_turned_for_the_next() -> void:
+	# 🔒 Every perk in the file, each with every quirk, and then a run with none:
+	# every static must read as a fresh process's does. **Every entry, not every
+	# offered one** — a locked perk is still a run somebody will play.
+	#
+	# It catches both halves: a knob `RunModifiers.reset_knobs` never puts back,
+	# and a reset that puts the knob back by clearing the table `load_resources`
+	# loaded beside it, which would hand the next run an empty world.
+	var quirks := PackedStringArray()
+	for entry in RunModifiers.entries_in(content, RunModifiers.QUIRKS_RECORD):
+		quirks.append(String((entry as Dictionary).get("id", "")))
+	var turned: Array[RunState] = []
+	for entry in RunModifiers.entries_in(content, RunModifiers.PERKS_RECORD):
+		var run := RunState.new_run(SEED)
+		run.setup.perk = StringName((entry as Dictionary).get("id", ""))
+		run.setup.quirks = quirks
+		turned.append(run)
+	var plain := _plain_run()
+	# Read once every run is made, because making one is not what is asked.
+	var fresh := _every_static()
+
+	assert_false(turned.is_empty(), "there are no perks, so this proves nothing")
+	for run in turned:
+		RunModifiers.apply_all(run, content)
+		assert_false(_moved(fresh, _every_static()).is_empty(),
+			"'%s' and every quirk turned nothing, so this proves nothing" % run.setup.perk)
+		RunModifiers.apply_all(plain, content)
+		var left := _moved(fresh, _every_static())
+		assert_true(left.is_empty(),
+			"a plain run after '%s' and every quirk did not start where a fresh process does: %s"
+				% [run.setup.perk, ", ".join(left)])
+
+
 # --- 🔒 Scarce iron, and the asymmetry that is the whole quirk --------------
 
 const SCARCE_IRON: String = "scarce_iron"

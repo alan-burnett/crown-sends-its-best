@@ -68,6 +68,11 @@ static func set_how_many(count: int) -> void:
 	_how_many = maxi(0, count)
 
 
+## The knob alone, for `RunModifiers.reset_knobs`; the catalogue stays loaded.
+static func reset_how_many() -> void:
+	_how_many = 3
+
+
 const EVENT_ARRIVED: StringName = &"patron_arrived"
 
 static var _catalogue: Array = []
@@ -79,7 +84,7 @@ static func load_from(record: Dictionary) -> void:
 
 static func reset() -> void:
 	_catalogue = []
-	_how_many = 3
+	reset_how_many()
 
 
 ## Every id in the catalogue, in file order.

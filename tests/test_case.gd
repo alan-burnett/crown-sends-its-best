@@ -43,6 +43,12 @@ func after_each() -> void:
 ## **Adding a resettable class means adding one line here**, and every test gets
 ## it. A class with a `load_from` and no `reset` is the bug this cannot catch, so
 ## `ColonyNeeds` gained one.
+##
+## 🔒 **`RunModifiers.reset_knobs` is not this list, on purpose.** It is the
+## game's, and puts back only what a perk or a quirk turns; this puts back
+## everything, and is the yardstick `test_run_modifiers.gd` measures that one
+## against. Folding it in here would leave a knob missing from both reset by
+## neither — so the test would read a leaked value as the fresh one and pass.
 func reset_world() -> void:
 	# Content definitions, in load order: the catalogue first, because terrain and
 	# improvements name resources.

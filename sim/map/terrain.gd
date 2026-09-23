@@ -69,7 +69,7 @@ static func load_from(records: Array, levels: Dictionary = {}) -> void:
 
 static func reset() -> void:
 	_terrains = {}
-	_yield_scale = {}
+	reset_yield_scale()
 
 
 static func has(id: StringName) -> bool:
@@ -164,6 +164,12 @@ static func scale_yields(scales: Dictionary) -> void:
 	resources.sort()
 	for resource in resources:
 		_yield_scale[String(resource)] = maxf(0.0, float(scales[resource]))
+
+
+## Every yield back to what the ground says, **and the ground kept** — the knob
+## alone, for `RunModifiers.reset_knobs`, where `reset` also forgets the terrain.
+static func reset_yield_scale() -> void:
+	_yield_scale = {}
 
 
 ## Resources this terrain yields anything of, sorted.

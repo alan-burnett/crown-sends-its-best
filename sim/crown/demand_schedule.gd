@@ -63,6 +63,13 @@ static func load_from(record: Dictionary) -> void:
 static func reset() -> void:
 	_steady = {}
 	_growth = {}
+	reset_room()
+
+
+## The lifts alone, for `RunModifiers.reset_knobs`. **The schedule stays
+## loaded**, which is why the lifts were kept apart from it: this puts the room
+## back to what the data says rather than to nothing.
+static func reset_room() -> void:
 	_room_lifts = {}
 
 

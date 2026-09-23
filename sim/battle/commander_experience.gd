@@ -68,7 +68,7 @@ static func load_from(record: Dictionary) -> void:
 static func reset() -> void:
 	_levels = []
 	_bonuses = []
-	_starting_level = 0
+	reset_starting_level()
 
 
 static func is_knob(id: String) -> bool:
@@ -178,6 +178,11 @@ static func starting_level() -> int:
 ## thing the colony has a word for.
 static func start_at(level: int) -> void:
 	_starting_level = clampi(level, 0, top_level())
+
+
+## The knob alone, for `RunModifiers.reset_knobs`; the ranks stay loaded.
+static func reset_starting_level() -> void:
+	_starting_level = 0
 
 
 ## What the colony calls a man of this level.

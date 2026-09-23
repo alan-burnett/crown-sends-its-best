@@ -91,7 +91,12 @@ static func ids() -> PackedStringArray:
 ## a quirk which happened to turn the same knob is the later word. Applied at run
 ## setup, once, because a modifier is a fact about the run rather than a thing
 ## that happens in it.
+##
+## 🔒 **From a fresh world's knobs, every time** — see `reset_knobs`. A run
+## with nothing to apply still gets them, because a run with no perk is a run
+## whose knobs are all at home, not a run whose knobs are whatever was left.
 static func apply_all(run: RunState, content: ContentDatabase) -> void:
+	reset_knobs()
 	if run == null or run.setup == null or content == null:
 		return
 	_apply_one(run, content, PERKS_RECORD, String(run.setup.perk))
@@ -99,6 +104,57 @@ static func apply_all(run: RunState, content: ContentDatabase) -> void:
 	quirks.sort()
 	for quirk in quirks:
 		_apply_one(run, content, QUIRKS_RECORD, String(quirk))
+
+
+## Every knob a modifier can turn, back where a fresh process has it.
+##
+## 🔒 **A knob is a static, and a static outlives the run that turned it.**
+## `load_resources` runs once, at startup, and New Game and Continue go straight
+## to a run — so without this a *Distant colony* run followed by New Game kept
+## its extra month at sea, and a save loaded after another run kept every knob
+## that run turned and the loaded one does not.
+##
+## 🔒 **The knob, never the table beside it.** Where a class holds content
+## `load_resources` loaded as well as a knob, it has a narrower reset for the
+## knob — the terrain, the ranks, the patron catalogue and the Squeeze's schedule
+## are not a run's to clear, and clearing them would hand the next run an empty
+## world rather than a fresh one.
+##
+## **Adding a modifier means adding its knob here, and its class to
+## `TestCase.reset_world`.** Two lists, deliberately: `test_run_modifiers.gd`
+## reads every static the game holds after a plain run and compares it with a
+## world `reset_world` put back, so a knob left off this list, or a reset here
+## that takes the table with it, fails there rather than in somebody's second
+## run. A yardstick built from the list it measures could not see a line missing
+## from both.
+##
+## `crown_grace` and `deed_worth_for_role` are absent because they write the run
+## itself, and every run is made or loaded afresh.
+static func reset_knobs() -> void:
+	CrownPrices.reset()  # crown_price_scale
+	Terrain.reset_yield_scale()  # yield_scale
+	CommanderExperience.reset_starting_level()  # commander_start_level
+	CommanderFate.reset()  # commander_survival
+	Patron.reset_how_many()  # patrons_at_once
+	DemandSchedule.reset_room()  # patrons_at_once
+	Perception.reset()  # perception_leans
+	Contact.reset()  # first_impression
+	LoyaltyDrift.reset()  # favour_toward
+	ContactRoster.reset_prominence()  # prominence_scale
+	Building.reset_amusement_worth()  # amusement_worth
+	OpticsRegister.reset()  # optics_favour
+	Relationship.reset()  # crown_break_cost
+	IntentConsiderations.reset_urging()  # urging_weight
+	QualityOfLife.reset()  # quality_felt
+	Immigration.reset()  # immigration_flow
+	RebelSentiment.reset()  # stakes_scale
+	Tribes.reset()  # tribe_standing_start
+	Village.reset()  # village_yield
+	Muster.reset()  # war_party_share
+	TradeAgreement.reset()  # native_reserve
+	Crossing.reset()  # post_crossing
+	Silence.reset()  # silence_cost
+	Pressure.reset()  # damper_months
 
 
 ## Everything a run may be offered, in id order.

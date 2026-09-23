@@ -72,6 +72,11 @@ static func scale_prominence(kinds: Dictionary) -> void:
 
 static func reset() -> void:
 	_templates = {}
+	reset_prominence()
+
+
+## The knob alone, for `RunModifiers.reset_knobs`; the templates stay loaded.
+static func reset_prominence() -> void:
 	_prominence_scales = {}
 
 
