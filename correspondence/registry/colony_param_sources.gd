@@ -395,7 +395,7 @@ static func recalled(args: Dictionary, context: LetterContext) -> Variant:
 		"broken_word":
 			memory = context.sender.relationship.last_broken_word()
 		"in_character":
-			memory = context.sender.relationship.recalled(_sourness(context.sender))
+			memory = context.sender.relationship.recalled(sourness_of(context.sender))
 
 	if memory == null:
 		return 0 if field != "resource" else ""
@@ -414,7 +414,7 @@ static func recalled(args: Dictionary, context: LetterContext) -> Variant:
 ## **Free characterisation from a weight he already has.** A man who leans hard
 ## on being let down reaches for the slight; a man who does not reaches for the
 ## kindness. Same log, same queries, different men.
-static func _sourness(contact: Contact) -> float:
+static func sourness_of(contact: Contact) -> float:
 	return clampf(1.0 - contact.loyalty() / Relationship.MAX_LOYALTY, 0.0, 1.0)
 
 

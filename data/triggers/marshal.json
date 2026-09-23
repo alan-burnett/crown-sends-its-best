@@ -156,5 +156,37 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.marshal.you_refused_me",
+    "letter": "marshal.you_refused_me",
+    "note": "Issue 391, contacts.md section 7. The Marshal asking again after being refused, while his war still wants it. Gated on remembers_a_slight, asked of the same memory the params read, so the refusal he names is a real one; and on the colony having lived a month, as every complaint is (#365).",
+    "urgency": 0.5,
+    "cooldown": 8,
+    "params": {
+      "last_amount": { "from": "recalled", "reach": "slight", "field": "amount" },
+      "last_resource": { "from": "recalled", "reach": "slight", "field": "resource" },
+      "months_ago": { "from": "recalled", "reach": "slight", "field": "months_ago" }
+    },
+    "conditions": [
+      { "the_colony_has_lived": { "months": 1 } },
+      { "remembers_a_slight": {} },
+      { "world_value_above": { "key": "crown_war_intensity", "value": 30 } }
+    ]
+  },
+  {
+    "id": "trigger.marshal.your_word",
+    "letter": "marshal.your_word",
+    "note": "Issue 391, contacts.md section 7. The Marshal, promised something that did not come. No recency limit: a player who broke his word in year one should hear about it in year three. The cooldown is long so that one broken promise is a grievance rather than a subscription.",
+    "urgency": 0.6,
+    "cooldown": 12,
+    "params": {
+      "promised_amount": { "from": "recalled", "reach": "broken_word", "field": "amount" },
+      "promised": { "from": "recalled", "reach": "broken_word", "field": "resource" },
+      "months_ago": { "from": "recalled", "reach": "broken_word", "field": "months_ago" }
+    },
+    "conditions": [
+      { "remembers_a_broken_word": {} }
+    ]
   }
 ]

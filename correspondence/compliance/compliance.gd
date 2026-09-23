@@ -239,11 +239,22 @@ static func _deed_of(order: Order) -> StringName:
 	return Relationship.DELIVERED
 
 
+## 🔒 **What a refusal was a refusal of** (#391, `contacts.md` §7).
+##
+## `refuse` takes nothing but its addressee, so a refusal was remembered with no
+## size and no subject — and *"you will remember that you refused me the iron"*
+## had nothing to name. The desk stamps these on a refusal written in answer to a
+## letter that asked for an amount of a resource (`TurnMachine._build_orders`),
+## under names of their own so nothing mistakes them for what was *given*.
+const ASKED_AMOUNT: String = "asked_amount"
+const ASKED_RESOURCE: String = "asked_resource"
+
+
 ## How much of it there was. **Two hundred measures of iron is a different
 ## memory from two**, and a letter that could only say "a kindness" would be
 ## saying nothing.
 static func _size_of(order: Order) -> float:
-	for name in ["amount", "payment", "months"]:
+	for name in ["amount", "payment", "months", ASKED_AMOUNT]:
 		if order.params.has(name):
 			return absf(float(order.get_param(name, 0.0)))
 	return 0.0
@@ -254,7 +265,7 @@ static func _size_of(order: Order) -> float:
 ## Empty when the deed had no subject. A refusal with nothing attached is still
 ## a refusal and the letters have to be able to say so.
 static func _about(order: Order) -> String:
-	for name in ["resource", "intent", "favor", "policy"]:
+	for name in ["resource", "intent", "favor", "policy", ASKED_RESOURCE]:
 		if order.params.has(name):
 			return String(order.get_param(name, ""))
 	return ""

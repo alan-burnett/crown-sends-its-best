@@ -1,0 +1,62 @@
+{
+  "id": "marshal.you_refused_me",
+  "sender": "marshal",
+  "type": "request",
+  "skippable": true,
+  "speaks_to": 70,
+  "note": "Issue 391, contacts.md section 7: the sour half of remembering, the mirror of governor.asking_again. He reaches for his last slight rather than his last kindness, and only when that slight was a refusal he can name - remembers_a_slight gates it on the same memory the params read, so he never says he was refused something he was not. The Marshal rather than a governor because his requests are the ones that name an amount of a resource, so his refusals are the ones he can name; no governor letter asks for one yet. Prose is placeholder: the final wording, and every other contact who should send this, belong to the authoring pass in #368.",
+  "params": {
+    "last_amount": "integer",
+    "last_resource": "resource",
+    "months_ago": "integer"
+  },
+  "perception": {
+    "northern_front": {
+      "measure": "crown_war_intensity",
+      "ladder": ["quiet", "troubled", "hard-pressed", "desperate"]
+    }
+  },
+  "body": [
+    { "text": "You will remember that you refused me {param:last_amount} of {param:last_resource}, {param:months_ago} months ago." },
+    { "text": "The front is {perception:northern_front}, and I ask again. I ask you also to remember that I asked." },
+    { "text": "I say so without rancour. I should only like it on the record.",
+      "only_tones": ["pleased", "dutiful"] },
+    { "text": "I have not forgotten the answer, and I do not suppose the men who went without it have either.",
+      "only_tones": ["annoyed", "hateful"] }
+  ],
+  "reply": {
+    "tone": {
+      "text": "Your letter finds me {choice}.",
+      "options": [
+        { "tone": "dutiful", "text": "mindful of the last one" },
+        { "tone": "annoyed", "text": "aware that you keep accounts" },
+        { "tone": "desperate", "text": "no better placed than I was then" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "grant",
+        "prompt": "What he asked for before",
+        "options": [
+          {
+            "id": "send",
+            "label": "send him the {param:last_amount} this time",
+            "text": "You shall have {param:last_amount} of {param:last_resource}, and I hope it goes some way to settling the account.",
+            "effect": {
+              "promise_resource": { "to": "marshal", "resource": "{last_resource}", "amount": "{last_amount}" }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "refuse him again",
+            "text": "The answer is what it was. I will not pretend otherwise for the sake of your record.",
+            "effect": { "refuse": { "to": "marshal" } }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant," }
+    ]
+  }
+}

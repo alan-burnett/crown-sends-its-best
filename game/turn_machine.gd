@@ -661,6 +661,15 @@ func _build_orders() -> Array[Order]:
 				# May are two letters, and the May one must still be able to
 				# contradict the March one.
 				order.letter = StringName("%d.%s" % [run.world.month, outgoing.id])
+				# 🔒 **A refusal remembers what it refused** (#391). The letter it
+				# answers asked for an amount of a resource; `refuse` carries neither,
+				# so they are carried here for the memory to name.
+				if order.kind == M1Registrations.ORDER_REFUSE \
+						or order.kind == M1Registrations.ORDER_DECLINE_DEMAND:
+					if letter.params.has("resource") and outgoing.params.has("resource"):
+						order.params[Compliance.ASKED_RESOURCE] = String(outgoing.params["resource"])
+					if letter.params.has("amount") and outgoing.params.has("amount"):
+						order.params[Compliance.ASKED_AMOUNT] = outgoing.params["amount"]
 				# 🔒 **Harsh orders come from the PC only** (#71). This loop runs
 				# over his outgoing post and nothing else, so an NPC's Intent can
 				# never arrive carrying it however the content is authored.

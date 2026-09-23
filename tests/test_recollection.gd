@@ -237,3 +237,132 @@ func test_a_letter_the_pc_sends_is_what_he_remembers() -> void:
 	assert_eq(String(memory.subject), "iron")
 	assert_almost_eq(memory.magnitude, 200.0, 0.001)
 	assert_eq(memory.month, 4)
+
+
+# --- 🔒 The sour half, and its gates (#391, `contacts.md` §7) ----------------
+
+func test_a_refusal_he_can_name_opens_the_sour_letter() -> void:
+	var marshal := _contact(40.0)
+	var context := _context(marshal, 9)
+	assert_false(ColonyConditions.remembers_a_slight({}, context),
+		"a man with nothing on record was ready to say he was refused")
+
+	marshal.relationship.remember(Relationship.REFUSED, 3, 40.0, "iron")
+	assert_true(ColonyConditions.remembers_a_slight({}, context),
+		"a man refused forty iron had nothing to say about it")
+	assert_eq(int(ColonyParamSources.recalled({"reach": "slight", "field": "amount"}, context)), 40)
+	assert_eq(String(ColonyParamSources.recalled({"reach": "slight", "field": "resource"}, context)), "iron")
+	assert_eq(int(ColonyParamSources.recalled({"reach": "slight", "field": "months_ago"}, context)), 6)
+
+
+func test_a_slight_he_cannot_name_says_nothing() -> void:
+	# Being ignored is a slight, and a true one, but *"you refused me 0 of "* is
+	# not a sentence (SPEC §9.1).
+	var marshal := _contact(40.0)
+	marshal.relationship.remember(Relationship.IGNORED, 5, 0.0, "request")
+	assert_false(ColonyConditions.remembers_a_slight({}, _context(marshal, 9)),
+		"he offered to name a slight that has nothing in it to name")
+
+
+func test_a_broken_word_is_not_called_a_refusal_and_a_refusal_is_not_a_broken_word() -> void:
+	# The two accusations are different letters. A man whose last grievance is a
+	# broken promise writes the angrier one, and never the refusal.
+	var promised := _contact(40.0)
+	promised.relationship.remember(Relationship.REFUSED, 2, 10.0, "food")
+	promised.relationship.remember(Relationship.PROMISE_BROKEN, 6, 80.0, "iron")
+	var context := _context(promised, 9)
+	assert_true(ColonyConditions.remembers_a_broken_word({}, context),
+		"a broken promise was not remembered as one")
+	assert_false(ColonyConditions.remembers_a_slight({}, context),
+		"a broken promise was about to be described as a refusal")
+
+	var refused := _contact(40.0)
+	refused.relationship.remember(Relationship.REFUSED, 6, 10.0, "food")
+	assert_false(ColonyConditions.remembers_a_broken_word({}, _context(refused, 9)),
+		"a plain refusal was about to be called a broken word")
+
+
+func test_temper_does_not_stand_in_for_the_gate() -> void:
+	# The acceptance line: a sour man with a slight and no kindness still sends;
+	# a warm one with only a kindness does not send the sour letter.
+	var sour := _contact(5.0)
+	sour.relationship.remember(Relationship.REFUSED, 3, 40.0, "iron")
+	assert_true(ColonyConditions.remembers_a_slight({}, _context(sour, 9)))
+	assert_true(ColonyConditions.remembers_in_character({}, _context(sour, 9)),
+		"a sour man with a slight was held back because he had no kindness")
+
+	var warm := _contact(95.0)
+	warm.relationship.remember(Relationship.GRANTED, 3, 200.0, "iron")
+	assert_false(ColonyConditions.remembers_a_slight({}, _context(warm, 9)),
+		"a man with nothing but kindness on record was ready to complain")
+	assert_true(ColonyConditions.remembers_in_character({}, _context(warm, 9)))
+
+
+func test_a_refusal_at_the_desk_remembers_what_it_refused() -> void:
+	# 🔒 Through the desk. `refuse` carries nothing but its addressee, so until
+	# the desk stamped what was asked, every refusal was remembered as a refusal
+	# of nothing, and the sour letter could never fire.
+	var run := RunState.new_run(1649)
+	ContactRoster.load_into(run, content)
+	var machine := TurnMachine.new(run)
+	machine.use_content(content)
+	machine.saves_on_send = false
+	machine.begin_turn()
+	for inbound in run.inbox:
+		inbound.status = InboundLetter.SET_ASIDE
+
+	var outgoing := OutgoingLetter.new("marshal.request_supplies", &"marshal")
+	outgoing.params = {"resource": "iron", "amount": 40}
+	var wizard := ReplyWizard.new(
+		Letter.from_record(content.record("letters", "marshal.request_supplies")), outgoing)
+	wizard.choose_tone(Tone.DUTIFUL)
+	wizard.choose("grant", "none")
+	run.post.add(outgoing)
+	machine.send_post()
+
+	var marshal := run.contact(&"marshal")
+	var slight := marshal.relationship.most_recent_slight()
+	assert_true(slight != null and slight.kind == Relationship.REFUSED, "the refusal was not remembered")
+	if slight == null:
+		return
+	assert_eq(String(slight.subject), "iron", "he could not say what he had been refused")
+	assert_almost_eq(slight.magnitude, 40.0, 0.001, "he could not say how much")
+	assert_true(ColonyConditions.remembers_a_slight({}, _context(marshal, run.world.month)),
+		"a refusal he can name did not open the sour letter")
+
+
+func test_a_broken_promise_of_gold_is_remembered_as_gold() -> void:
+	# A gold promise has no resource in its terms, so the broken word was about
+	# nothing — and gold is the promise the Crown breaks most.
+	var marshal := _contact(40.0)
+	var book := PromiseBook.new()
+	book.make(Promise.new(&"gov_ashmere", &"gold", {"amount": 300.0}, 1, 2),
+		marshal, EventLog.new(), 1)
+	book.settle_due({"gov_ashmere": marshal}, EventLog.new(), 3, false)
+	var broken := marshal.relationship.last_broken_word()
+	assert_true(broken != null, "the Crown's refusal was not remembered as a broken word")
+	if broken == null:
+		return
+	assert_eq(String(broken.subject), "gold")
+	assert_true(ColonyConditions.remembers_a_broken_word({}, _context(marshal, 9)),
+		"a broken promise of three hundred gold could not be named")
+
+
+func test_a_trigger_that_reaches_for_a_memory_carries_its_gate() -> void:
+	# 🔒 The validator's half of the lock: without the gate the params read zero
+	# and an empty string, and the letter says so to the player.
+	var ungated := ContentValidator.new()
+	ungated.validate_trigger({
+		"id": "trigger.test.ungated", "letter": "marshal.you_refused_me",
+		"params": {"last_amount": {"from": "recalled", "reach": "slight", "field": "amount"}},
+		"conditions": [{"always": {}}],
+	})
+	assert_false(ungated.ok(), "a trigger recalled a slight with nothing to say there was one")
+
+	var gated := ContentValidator.new()
+	gated.validate_trigger({
+		"id": "trigger.test.gated", "letter": "marshal.you_refused_me",
+		"params": {"last_amount": {"from": "recalled", "reach": "slight", "field": "amount"}},
+		"conditions": [{"remembers_a_slight": {}}],
+	})
+	assert_true(gated.ok(), gated.report())

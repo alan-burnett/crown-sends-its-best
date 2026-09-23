@@ -94,6 +94,17 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"remembers_a_kindness", {}, ColonyConditions.remembers_a_kindness
 	)
+	# 🔒 **The sour half, gated the same way** (#391, `contacts.md` §7). A
+	# letter that names a memory fires only when there is one to name.
+	ContentRegistry.register_condition(
+		"remembers_a_slight", {}, ColonyConditions.remembers_a_slight
+	)
+	ContentRegistry.register_condition(
+		"remembers_a_broken_word", {}, ColonyConditions.remembers_a_broken_word
+	)
+	ContentRegistry.register_condition(
+		"remembers_in_character", {}, ColonyConditions.remembers_in_character
+	)
 	ContentRegistry.register_condition(
 		"town_is_preparing_to_leave", {}, ColonyConditions.town_is_preparing_to_leave
 	)
@@ -572,7 +583,47 @@ static func town_came_back(args: Dictionary, context: LetterContext) -> bool:
 static func remembers_a_kindness(_args: Dictionary, context: LetterContext) -> bool:
 	if context.sender == null or context.sender.relationship == null:
 		return false
-	var memory := context.sender.relationship.most_generous()
+	return nameable(context.sender.relationship.most_generous())
+
+
+## 🔒 **Whether he remembers being refused, by name** (#391, `contacts.md` §7).
+##
+## Asked of **the same memory `recalled {reach: slight}` reads** — his most recent
+## slight — so the gate and the slot cannot disagree. And only when that slight
+## is a refusal: a man whose last grievance is a broken promise writes the angrier
+## letter, and *"you refused me"* would be the wrong accusation even if every
+## figure in it were true.
+static func remembers_a_slight(_args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.sender.relationship == null:
+		return false
+	var memory := context.sender.relationship.most_recent_slight()
+	return nameable(memory) and memory.kind == Relationship.REFUSED
+
+
+## 🔒 **Whether he remembers the PC's word failing, by name** (#391).
+static func remembers_a_broken_word(_args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.sender.relationship == null:
+		return false
+	return nameable(context.sender.relationship.last_broken_word())
+
+
+## Whether the memory **his temper** reaches for can be named (#391).
+##
+## For `recalled {reach: in_character}`, so a sour man with a slight and no
+## kindness is not held back by a kindness gate, and a warm one is not by a
+## slight gate.
+static func remembers_in_character(_args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.sender.relationship == null:
+		return false
+	return nameable(context.sender.relationship.recalled(
+		ColonyParamSources.sourness_of(context.sender)))
+
+
+## Whether a letter could say what this was: how much, and of what.
+##
+## A memory with neither is still true, and still a deed — being ignored is a
+## slight — but a letter that named it would print *"0 of "* (SPEC §9.1).
+static func nameable(memory: Recollection) -> bool:
 	return memory != null and memory.magnitude > 0.0 and not memory.subject.is_empty()
 
 

@@ -445,6 +445,8 @@ func validate_trigger(record: Dictionary) -> void:
 			for problem in ContentRegistry.check_param_source_call(source_id, args):
 				_problem("params.%s" % name, problem)
 
+	_check_recall_gates(params, conditions)
+
 	for index in conditions.size():
 		var entry: Variant = conditions[index]
 		var path := "conditions[%d]" % index
@@ -458,6 +460,45 @@ func validate_trigger(record: Dictionary) -> void:
 				continue
 			for problem in ContentRegistry.check_condition_call(String(condition_id), args):
 				_problem("%s.%s" % [path, condition_id], problem)
+
+
+## 🔒 **A letter that names a memory fires only when there is one to name**
+## (#391, `contacts.md` §7).
+##
+## `recalled` reads zero and an empty string when there is nothing of that kind
+## on record, so a trigger reaching for one without its gate renders *"you
+## refused me 0 of , 0 months ago"* — a SPEC §9.1 violation waiting for a
+## contact nobody has refused.
+const RECALL_GATES: Dictionary = {
+	"kindness": "remembers_a_kindness",
+	"slight": "remembers_a_slight",
+	"broken_word": "remembers_a_broken_word",
+	"in_character": "remembers_in_character",
+}
+
+
+func _check_recall_gates(params: Variant, conditions: Array) -> void:
+	if typeof(params) != TYPE_DICTIONARY:
+		return
+	var gates: Dictionary = {}
+	for entry in conditions:
+		if typeof(entry) == TYPE_DICTIONARY:
+			for condition_id in entry:
+				gates[String(condition_id)] = true
+	var names: Array = params.keys()
+	names.sort()
+	for name in names:
+		var spec: Variant = params[name]
+		if typeof(spec) != TYPE_DICTIONARY or String(spec.get("from", "")) != "recalled":
+			continue
+		var reach := String(spec.get("reach", "kindness"))
+		var gate := String(RECALL_GATES.get(reach, ""))
+		if gate.is_empty():
+			_problem("params.%s" % name, "recalls '%s', which no gate covers" % reach)
+		elif not gates.has(gate):
+			_problem("params.%s" % name,
+				"recalls a %s without the '%s' condition, so it can name a memory that does not exist"
+					% [reach, gate])
 
 
 ## Every param a letter declares must be supplied by the trigger that fires it,

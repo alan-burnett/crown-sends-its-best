@@ -192,9 +192,14 @@ func _break(
 		contact.relationship.settle_promise(String(promise.id), false, month, by_the_crown)
 		# The one a man is least likely to forget: being refused is
 		# disappointing, being promised is being lied to (#127).
+		# 🔒 **Named, gold included** (#391). A promise of gold has no resource
+		# in its terms, so the broken word was remembered about nothing and no
+		# letter could say what was promised — and gold is the promise the Crown
+		# breaks most. Kept promises are left as they were, so what a man
+		# remembers being *given* is unchanged.
 		contact.relationship.remember(
 			Relationship.PROMISE_BROKEN, month, promise.amount(),
-			String(promise.terms.get("resource", "")),
+			String(promise.terms.get("resource", String(promise.kind))),
 		)
 	var payload := promise.to_dict()
 	payload["reason"] = reason
