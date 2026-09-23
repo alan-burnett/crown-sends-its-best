@@ -83,10 +83,23 @@ const TRAVELLING_EXPERTS: StringName = &"travelling_experts"
 ## added.**
 const GUN_CONTRACT: StringName = &"gun_contract"
 
+## The Diplomat's (#285, `the-diplomat.md` §7).
+##
+## **The only policy in the game that buys another contact's regard.** He
+## undertakes to cultivate the governor of the town he lives in — dines him,
+## flatters him, is seen at his table — and that governor thinks better of the
+## Crown for as long as it runs.
+##
+## 🔒 **He can only cultivate the governor he lives with**, which turns rehoming
+## into a decision rather than a courtesy. §3 has him asking to be moved when his
+## town turns dangerous; this gives the PC a reason to move him *toward* trouble,
+## and the two pulls are opposite and both legitimate.
+const CULTIVATE_GOVERNOR: StringName = &"cultivate_governor"
+
 const ALL: Array[StringName] = [
 	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK,
 	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT, TRAVELLING_EXPERTS,
-	GUN_CONTRACT,
+	GUN_CONTRACT, CULTIVATE_GOVERNOR,
 ]
 
 ## What each knob is set to. **Four settings and no numbers**, because the PC is
@@ -166,6 +179,19 @@ const CROWN_SENTIMENT_KEY: String = "policy.crown_sentiment"
 ## which is the rule every other policy follows.
 const TRAVELLING_EXPERTS_KEY: String = "policy.travelling_experts"
 
+## Whether the Diplomat is cultivating his governor this month (#285). A flag,
+## like the scholar's: who is cultivated is worked out from where the Diplomat
+## lives, so rehoming moves the target without anything being told.
+const CULTIVATE_GOVERNOR_KEY: String = "policy.cultivate_governor"
+
+## How much regard a month at his table is worth, and how far it can carry.
+##
+## **Bounded, because it is flattery and not friendship.** A governor dined for
+## ten years is a governor who likes the Crown's man, not one who has forgotten
+## what the Crown did to his town. Both tuning.
+const CULTIVATION_A_MONTH: float = 1.1
+const CULTIVATION_CEILING: float = 22.0
+
 ## How much regard a month of good press earns every governor in the colony.
 ##
 ## Tuning, and deliberately worth having: §3's lock is that the benefit is not
@@ -230,6 +256,8 @@ static func pressure(book: PolicyBook) -> Dictionary:
 					float(values.get(CROWN_SENTIMENT_KEY, 0.0)) + CROWN_SENTIMENT_RELIEF)
 			TRAVELLING_EXPERTS:
 				values[TRAVELLING_EXPERTS_KEY] = 1.0
+			CULTIVATE_GOVERNOR:
+				values[CULTIVATE_GOVERNOR_KEY] = 1.0
 			GUN_CONTRACT:
 				# **Through the price seam `FAVOUR_OUR_MARKET` already uses**, so
 				# `Valuation.crown` needs no new reader and a town works out for

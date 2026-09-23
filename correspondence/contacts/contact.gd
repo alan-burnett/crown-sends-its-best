@@ -275,8 +275,17 @@ func _init(p_id: StringName = &"", p_weights: Dictionary = {}) -> void:
 	relationship = Relationship.new(p_id)
 
 
+## What this man thinks of the Crown, including whatever somebody is buying on
+## the PC's behalf (#285).
+##
+## 🔒 **One accessor, so the cultivated term reaches every reader** — compliance,
+## the director, rebel sentiment, his own letters. A bonus that only some of them
+## knew about would be a governor who complied like a friend and wrote like a
+## stranger.
 func loyalty() -> float:
-	return relationship.loyalty
+	return clampf(
+		relationship.loyalty + relationship.cultivated,
+		Relationship.MIN_LOYALTY, Relationship.MAX_LOYALTY)
 
 
 func lean_for(topic: String) -> float:

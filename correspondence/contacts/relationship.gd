@@ -124,6 +124,21 @@ var contact_id: StringName = &""
 
 var loyalty: float = NEUTRAL_LOYALTY
 
+## 🔒 **Regard somebody else is buying on the PC's behalf** (#285,
+## `the-diplomat.md` §7), held apart from the man's own.
+##
+## The Diplomat cultivates the governor he lives with — dines him, flatters him,
+## is seen at his table — and that governor thinks better of the Crown **for as
+## long as it runs**. It is the PC's only indirect lever on loyalty: everywhere
+## else a contact's regard answers to what the PC did to *him*.
+##
+## 🔒 **Kept separate because it does not persist.** When the policy lapses, or
+## the Diplomat dies in a town that turned on him, **the loyalty he was buying
+## dies with him** — which is only expressible if it was never part of what the
+## man himself felt. Folded into `Contact.loyalty()`, so every reader sees the
+## cultivated figure and nothing has to remember to ask.
+var cultivated: float = 0.0
+
 ## How apt he is to write to the PC, after everything the PC has written to him.
 ##
 ## Read by the director as a divisor on his threshold: **eager men have lower
@@ -409,6 +424,7 @@ func to_dict() -> Dictionary:
 	return {
 		"contact_id": String(contact_id),
 		"loyalty": loyalty,
+		"cultivated": cultivated,
 		"eagerness": eagerness,
 		"promises_broken": promises_broken,
 		"last_promise_broken_month": last_promise_broken_month,
@@ -432,6 +448,7 @@ static func from_dict(data: Dictionary) -> Relationship:
 		StringName(data.get("contact_id", "")),
 		float(data.get("loyalty", NEUTRAL_LOYALTY)),
 	)
+	relationship.cultivated = float(data.get("cultivated", 0.0))
 	relationship.eagerness = float(data.get("eagerness", EAGER_AT_FIRST))
 	relationship.outstanding_promises = PackedStringArray(data.get("outstanding_promises", []))
 	relationship.deeds = data.get("deeds", {}).duplicate()

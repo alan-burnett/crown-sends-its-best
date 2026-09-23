@@ -1483,3 +1483,194 @@ func test_his_alarm_is_bounded_at_every_level_of_supply() -> void:
 			"he was more than one rung bleaker than the truth at %f" % raw)
 		assert_true(his <= truth,
 			"he reported the stockpiles as better than they are at %f" % raw)
+
+
+# --- 🔒 The Diplomat cultivates the governor he lives with (#285) -----------
+
+func _cultivating(run: RunState) -> void:
+	run.world.values[PolicyEffects.CULTIVATE_GOVERNOR_KEY] = 1.0
+
+
+func _reckon_cultivation(run: RunState) -> void:
+	CultivationDriver.new(run).on_phase(
+		WorldPhase.RECKONING, run.world, run.log, run.streams)
+
+
+func _the_governor(run: RunState) -> Contact:
+	return run.contact(run.colony.in_order()[0].governor_id)
+
+
+func _house_the_diplomat_here(run: RunState) -> Town:
+	var town := run.colony.in_order()[0]
+	run.contact(&"diplomat").town = town.display_name
+	return town
+
+
+func test_the_policy_presses_a_flag_and_nothing_else() -> void:
+	var book := PolicyBook.new()
+	book.enact(Policy.new(
+		&"diplomat", PolicyEffects.CULTIVATE_GOVERNOR, 60.0, Policy.ALL),
+		EventLog.new(), 3)
+	assert_has(PolicyEffects.pressure(book), PolicyEffects.CULTIVATE_GOVERNOR_KEY,
+		"the Diplomat's policy presses on nothing, so nobody is ever cultivated")
+
+
+func test_it_raises_the_governor_of_the_town_he_lives_in() -> void:
+	var run := _run()
+	_house_the_diplomat_here(run)
+	var governor := _the_governor(run)
+	var before := governor.loyalty()
+
+	_cultivating(run)
+	_reckon_cultivation(run)
+
+	assert_true(governor.loyalty() > before,
+		"the Crown's man dined the governor all month and bought nothing")
+
+
+func test_it_targets_the_governor_and_no_other_contact() -> void:
+	# 🔒 **The only policy that buys another contact's regard**, and it buys
+	# exactly one man's.
+	var run := _run()
+	_house_the_diplomat_here(run)
+	var steward := run.contact(&"steward")
+	var marshal := run.contact(&"marshal")
+	var before := {"steward": steward.loyalty(), "marshal": marshal.loyalty()}
+
+	_cultivating(run)
+	_reckon_cultivation(run)
+
+	assert_eq(steward.loyalty(), float(before["steward"]),
+		"the Steward was cultivated from an ocean away")
+	assert_eq(marshal.loyalty(), float(before["marshal"]),
+		"the Marshal was cultivated from an ocean away")
+
+
+func test_without_the_policy_nobody_is_cultivated() -> void:
+	var run := _run()
+	_house_the_diplomat_here(run)
+	var governor := _the_governor(run)
+	var before := governor.loyalty()
+
+	_reckon_cultivation(run)
+	assert_eq(governor.loyalty(), before,
+		"a governor was dined by a policy nobody was paying for")
+
+
+func test_it_stops_rising_when_the_policy_lapses() -> void:
+	var run := _run()
+	_house_the_diplomat_here(run)
+	var governor := _the_governor(run)
+
+	_cultivating(run)
+	for month in 3:
+		run.world.month = month + 1
+		_reckon_cultivation(run)
+	var bought := governor.loyalty()
+
+	run.world.values[PolicyEffects.CULTIVATE_GOVERNOR_KEY] = 0.0
+	run.world.month = 9
+	_reckon_cultivation(run)
+	assert_true(governor.loyalty() < bought,
+		"the table was cleared and the governor went on feeling cultivated")
+
+
+func test_what_it_buys_never_runs_away_with_itself() -> void:
+	# 🔒 Bounded, because it is flattery and not friendship. A governor dined for
+	# ten years likes the Crown's man; he has not forgotten what the Crown did to
+	# his town.
+	var run := _run()
+	_house_the_diplomat_here(run)
+	var governor := _the_governor(run)
+	_cultivating(run)
+
+	for month in 60:
+		run.world.month = month + 1
+		_reckon_cultivation(run)
+	assert_true(governor.relationship.cultivated <= PolicyEffects.CULTIVATION_CEILING,
+		"five years at his table bought more than the ceiling allows")
+
+
+# --- 🔒 Rehoming moves the target, and death ends it ------------------------
+
+func test_rehoming_moves_who_is_being_cultivated() -> void:
+	# 🔒 **He can only cultivate the governor he lives with**, which is what turns
+	# rehoming into a decision rather than a courtesy — the PC now has a reason to
+	# move him *toward* trouble.
+	var run := _run()
+	var home := _house_the_diplomat_here(run)
+	var first := _the_governor(run)
+
+	var other := Town.new(&"gallows_end", "Gallows End", Vector2i(6, 6))
+	other.workers = 10
+	run.colony.add(other)
+	var second := Governor.generate(other, run.streams)
+	other.governor_id = second.id
+	run.add_contact(second)
+
+	_cultivating(run)
+	_reckon_cultivation(run)
+	assert_true(first.relationship.cultivated > 0.0, "nobody was cultivated at all")
+
+	run.contact(&"diplomat").town = other.display_name
+	run.world.month = 4
+	_reckon_cultivation(run)
+
+	assert_true(second.relationship.cultivated > 0.0,
+		"he moved towns and cultivated nobody there")
+	assert_eq(first.relationship.cultivated, 0.0,
+		"the governor he left behind went on feeling dined")
+	assert_true(home != other)
+
+
+func test_his_death_ends_it_and_what_he_bought_does_not_persist() -> void:
+	# 🔒 **A Diplomat kept in a rebellious town is one the PC may lose, and the
+	# loyalty he was buying dies with him.**
+	var run := _run()
+	_house_the_diplomat_here(run)
+	var governor := _the_governor(run)
+	_cultivating(run)
+
+	for month in 4:
+		run.world.month = month + 1
+		_reckon_cultivation(run)
+	var dined := governor.loyalty()
+	assert_true(governor.relationship.cultivated > 0.0, "nobody was cultivated")
+
+	run.contact(&"diplomat").is_dead = true
+	run.world.month = 9
+	_reckon_cultivation(run)
+
+	assert_eq(governor.relationship.cultivated, 0.0,
+		"the Crown's man was killed and the governor went on liking the Crown for it")
+	assert_true(governor.loyalty() < dined,
+		"what the Diplomat bought outlived him")
+
+
+func test_what_the_governor_himself_felt_is_untouched() -> void:
+	# 🔒 It is held apart from the man's own regard, which is the only reason it
+	# can be taken away again without unpicking anything he actually feels.
+	var run := _run()
+	_house_the_diplomat_here(run)
+	var governor := _the_governor(run)
+	var his_own := governor.relationship.loyalty
+	_cultivating(run)
+
+	for month in 3:
+		run.world.month = month + 1
+		_reckon_cultivation(run)
+
+	assert_eq(governor.relationship.loyalty, his_own,
+		"cultivating a man changed what he himself thought of the Crown")
+	assert_true(governor.loyalty() > his_own,
+		"the cultivated figure never reached anybody reading his regard")
+
+
+func test_it_survives_the_save() -> void:
+	# Ironman: a run that forgot what was being bought would quietly become a
+	# different run.
+	var relationship := Relationship.new(&"gov", 40.0)
+	relationship.cultivated = 7.5
+	assert_almost_eq(
+		Relationship.from_dict(relationship.to_dict()).cultivated, 7.5, 0.0001,
+		"what the Diplomat bought did not survive the save")

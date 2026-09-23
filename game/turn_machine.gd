@@ -236,6 +236,11 @@ func _init(p_run: RunState) -> void:
 	# no town benefits from being simulated first.
 	var expert_travel := ExpertTravelDriver.new(run)
 
+	# Phase 7, after the drift. The Diplomat cultivating the governor he lives
+	# with (#285) — the one instrument against a man the PC cannot otherwise
+	# reach, and the only policy that buys another contact's regard.
+	var cultivation := CultivationDriver.new(run)
+
 	# Phase 1. The neighbours put men under arms: a village past the point of no
 	# return, and a duke at Minimum (#225). Before the marching, so a muster is on
 	# the map a month before it reaches anybody.
@@ -307,7 +312,7 @@ func _init(p_run: RunState) -> void:
 		rival_tiles,
 		colony_month, villages, promise_driver, standings, native_trade,
 		policies, crown_standing, run_end, prestige, drift, rivals, patron_driver,
-		expert_travel,
+		expert_travel, cultivation,
 		companies,
 		orders, silence, governors,
 		grievances,
