@@ -31,6 +31,13 @@ const OBJECTIVE_PROGRESS: String = "objective_progress"
 ## How well stocked the town is against everything it needs, `0.0` to `1.0`.
 const STOCKPILE_HEALTH: String = "stockpile_health"
 
+## How the town's poorest live (#277, `institutional-contacts.md` §3).
+##
+## Read off `Town`, written in Settle from the same five parts quality of life
+## comes from — so the figure a clergyman reports and the figure the town lived
+## by are the same one.
+const POOREST_QUALITY_OF_LIFE: String = "poorest_quality_of_life"
+
 ## What the town bought and sold this month, in gold.
 const TRADE_VOLUME: String = "trade_volume"
 
@@ -154,17 +161,43 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 		_add_the_neighbours(measures, run, contact, Diplomat.home_of(contact, run.colony))
 		return measures
 
-	var town := run.colony.governed_by(contact.id)
+	# 🔒 **The town a man lives in, however he came to live in it** (#277).
+	# A governor is known by the town he governs and a resident by the place named
+	# on his own record — which is `RebelSentiment.lives_in`'s rule, and asking it
+	# here rather than writing a second one is what stops a clergyman reading a
+	# different town from the one whose sentiment he moves.
+	var town := home_of(contact, run)
 	if town == null:
 		return measures
 
 	measures[WorldValues.FOOD] = food_months(town)
 	measures[WorldValues.QUALITY_OF_LIFE] = town.quality_of_life
+	measures[POOREST_QUALITY_OF_LIFE] = town.poorest_quality_of_life
 	measures[OBJECTIVE_PROGRESS] = Objective.progress_fraction(town)
 	measures[STOCKPILE_HEALTH] = stockpile_health(town)
 	measures[TRADE_VOLUME] = trade_standing(run.colony, town)
 	_add_the_neighbours(measures, run, contact, town)
 	return measures
+
+
+## The town this contact lives in, or null for a man an ocean away.
+##
+## **One rule, and it is `RebelSentiment`'s** (§4): the governor by the town he
+## governs, everybody else by the place named on his own record — the same field
+## `{sender:town}` renders. The Crown's officers name no town and never reach
+## here.
+static func home_of(contact: Contact, run: RunState) -> Town:
+	if contact == null or run == null or run.colony == null:
+		return null
+	var governed := run.colony.governed_by(contact.id)
+	if governed != null:
+		return governed
+	if contact.town.is_empty():
+		return null
+	for town in run.colony.in_order():
+		if town.display_name == contact.town:
+			return town
+	return null
 
 
 ## What this man knows of the people next door, if anybody is next door (#208).

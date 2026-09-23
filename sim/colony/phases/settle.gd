@@ -192,6 +192,11 @@ func _live(town: Town, context: ColonyContext) -> void:
 	# quality of life is rather than measured again wherever it is wanted.
 	town.safety = clampf(float(parts["safety"]), 0.0, 1.0)
 
+	# **And how the poorest of them lived** (#277), out of the same five parts.
+	# The clergyman's regard answers to this and his letters report it, so the
+	# figure he writes about has to be the one the town lived by.
+	town.poorest_quality_of_life = QualityOfLife.from_below(parts)
+
 	# **Alongside quality of life, and for the same reason** (#168): a reader
 	# that recomputed it mid-month would get a different answer from the one the
 	# growth roll used.

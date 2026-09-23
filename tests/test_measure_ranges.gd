@@ -173,6 +173,11 @@ func test_no_measure_is_normalised_against_a_raw_quantity() -> void:
 		"supply_situation",       # a synthetic 0-100 condition
 		ColonyMeasures.OBJECTIVE_PROGRESS,
 		ColonyMeasures.STOCKPILE_HEALTH,
+		# **The same five parts as quality of life, weighted from the bottom**
+		# (#277), so it is a share by construction and cannot grow with the
+		# colony — a hamlet and a province whose poorest live equally badly read
+		# the same.
+		ColonyMeasures.POOREST_QUALITY_OF_LIFE,
 		ColonyMeasures.TRADE_VOLUME,
 		# **A standing on a fixed nought-to-a-hundred scale** (#208), like the
 		# Crown's war. It does not grow with the colony because it is not a

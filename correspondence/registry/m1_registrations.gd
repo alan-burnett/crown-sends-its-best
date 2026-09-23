@@ -115,6 +115,9 @@ static func load_resources(content: ContentDatabase) -> void:
 	# Where a generated name comes from (#304). No language suffix: a bag carries
 	# no prose and is not translated.
 	NameBags.load_from(content)
+	# What a generated resident starts from (#277). A template rather than a
+	# contact, in the same collection as every other contact record.
+	ContactRoster.load_from(content)
 	# Who a patron can be (#282). No language suffix either: the catalogue is a
 	# list of ids and a vice is a list of knobs, and neither carries a word the
 	# player reads.
@@ -407,6 +410,9 @@ static func register_measures() -> void:
 	# shares; trade is in gold and needs a scale.
 	MeasureRegistry.register_linear(ColonyMeasures.OBJECTIVE_PROGRESS, 0.0, 1.0)
 	MeasureRegistry.register_linear(ColonyMeasures.STOCKPILE_HEALTH, 0.0, 1.0)
+	# **How the poorest live** (#277). The same range as quality of life, because
+	# it is the same five parts weighted differently rather than a new quantity.
+	MeasureRegistry.register_linear(ColonyMeasures.POOREST_QUALITY_OF_LIFE, 0.0, 1.0)
 	# 🔒 **The whole of the player's sight of the natives** (#208). Across the
 	# full range, so the bottom rung covers a people who have concluded the
 	# colony means them destroyed *and* a people who very nearly have — which is

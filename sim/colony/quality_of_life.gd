@@ -134,6 +134,45 @@ static func of(town: Town, context: ColonyContext) -> Dictionary:
 	return parts
 
 
+# --- 🔒 The same five parts, read from the bottom ---------------------------
+
+## How the town's **poorest** live, out of the parts already reckoned.
+##
+## `institutional-contacts.md` §3: the clergy cares about his people and most
+## about the poorest, which is *quality of life weighted heavy on health and
+## means, and blind to pleasure*.
+##
+## 🔒 **Blind to pleasure, not merely light on it.** `combine` is never called
+## here, so a cellar of rum cannot lift this at all. That is the whole of what
+## makes him the one voice `quality-of-life.md` §8's trap does not fool: **a town
+## with a theatre, a cellar of rum and hungry people does not please him.**
+##
+## **The same parts, differently weighted** — never a second reckoning. A reader
+## that recomputed the components would eventually disagree with the one the
+## growth roll used, which is the reason `town.safety` is written where it is.
+##
+## Tuning, all four.
+static var _w_poorest: Dictionary = {
+	"health": 0.45, "safety": 0.15, "means": 0.35, "hope": 0.05,
+}
+
+
+static func poorest_weights() -> Dictionary:
+	return _w_poorest.duplicate()
+
+
+static func from_below(parts: Dictionary) -> float:
+	var total := 0.0
+	var weight := 0.0
+	var names: Array = _w_poorest.keys()
+	names.sort()
+	for name in names:
+		var share := float(_w_poorest[name])
+		total += share * float(parts.get(name, 0.0))
+		weight += share
+	return clampf(total / maxf(0.001, weight), 0.0, 1.0)
+
+
 ## The weighted sum of the components that are not pleasure.
 ##
 ## Renormalised over whichever of them can actually vary, so that leaving one out
@@ -216,8 +255,23 @@ static func health_of(town: Town, wellbeing: Dictionary) -> float:
 ## **And it recovers by itself.** Nothing decays and nothing remembers: the month
 ## the enemy is gone or destroyed, safety is whole again. §6 asks for exactly
 ## that, in both directions.
+## 🔒 **What the town believes, not what is true** (`buildings.md` §4).
+##
+## `Threat` answers the material question — how badly outmatched, how cut off —
+## and a church does nothing about either. What it does is make people feel less
+## alone in the face of it, so the comfort **lifts what is left** rather than
+## being added to it: the same shape `combine` uses for pleasure, and for the
+## same reason. A town in real danger is never talked all the way back to safe,
+## and a town in no danger gains nothing it did not already have.
+##
+## The clergyman's regard is what decides how much comfort there is, which is the
+## second thing his loyalty does (`institutional-contacts.md` §3).
 static func safety_of(town: Town, context: ColonyContext) -> float:
-	return float(Threat.to(town, context).get("safety", 1.0))
+	var material := float(Threat.to(town, context).get("safety", 1.0))
+	var comfort := clampf(
+		Building.perceived_safety_for(town, context.contacts if context != null else {}),
+		0.0, 1.0)
+	return clampf(material + comfort * (1.0 - material), 0.0, 1.0)
 
 
 ## **Means.** Can the town buy what it wants when the ship docks.
