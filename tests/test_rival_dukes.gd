@@ -44,7 +44,7 @@ func after_each() -> void:
 func _run() -> RunState:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
-	run.demands.levels[String(DemandGrowth.REACH)] = DemandSchedule.ASKERS_FOR_RIVALS
+	run.demands.sources.append(String(DemandGrowth.SOURCE_DUKE))
 	return run
 
 

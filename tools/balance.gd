@@ -401,10 +401,10 @@ func _row(
 		"standing_band": String(run.standing.band),
 		"letters": letters,
 		"promises_outstanding": run.promises.outstanding().size(),
-		# **The bar, and what moved it this year** (#69). Years one to three are a
-		# level and these should not budge; from year four exactly one of them
-		# should, and which one is the whole question §8 asks the harness.
-		"demand_axis": String(run.demands.drawn_in(run.world.year_index())),
+		# **The bar, and what moved it this year** (#69). Year one is a level and
+		# these should not budge; from year two two of them should (#339), and
+		# which is the whole question §8 asks the harness.
+		"demand_axis": ",".join(run.demands.drawn_in(run.world.year_index())),
 		"demand_interval": DemandSchedule.months_between(run.demands),
 		"demand_target": DemandSchedule.gold_target(run.demands),
 		"demand_refusal": DemandSchedule.refusal_cost(run.demands),

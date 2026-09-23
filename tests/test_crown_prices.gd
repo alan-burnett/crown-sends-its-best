@@ -289,7 +289,9 @@ func test_a_demand_is_the_same_size_whatever_prices_do() -> void:
 			at_war.world.values[CrownPrices.key_for(StringName(id))] = 2.0
 
 	var growth := DemandGrowth.new()
-	growth.levels[String(DemandGrowth.REACH)] = 4
+	growth.levels[String(DemandGrowth.REACH)] = 1
+	# The Marshal's hand, so goods are among what the Crown can ask for (#339).
+	growth.sources.append(String(DemandGrowth.SOURCE_CROWN))
 
 	var one := _asks_over(240, growth, quiet)
 	var other := _asks_over(240, growth, at_war)

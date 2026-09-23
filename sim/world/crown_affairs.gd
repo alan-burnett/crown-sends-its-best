@@ -105,9 +105,9 @@ func _please_the_provost(state: WorldState, log: EventLog) -> void:
 ## leaving are one fact about the Crown, and two independent curves would
 ## eventually disagree about how bad things have got at home.
 ##
-## So it reads `DemandGrowth`'s own history — one draw a year from year four,
-## which *is* the measure of how far past its peak the Crown is — and nothing
-## here has a calendar.
+## So it reads `DemandGrowth`'s own history — two draws a year from year two
+## (#339), which *is* the measure of how far past its peak the Crown is — and
+## nothing here has a calendar.
 ##
 ## The consequence is the point: **immigration rises precisely as demands grow
 ## and the PC can least afford to feed the arrivals.** It is also the mechanical

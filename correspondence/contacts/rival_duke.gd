@@ -134,30 +134,23 @@ static func forgives_a_missed_payment(band: StringName) -> bool:
 ## How many dukes have actually turned up (#300, `rival-pressure.md` §6).
 ##
 ## 🔒 **A duke arrives as the Squeeze's fourth dimension, and there is no second
-## schedule.** He spawns when the annual draw lands on dimension 4 and the source
-## taken from the catalogue is a rival — *that is the whole of it* — so this is
-## derived from `askers` rather than kept anywhere, and two properties the doc
-## names fall out instead of needing code:
+## schedule.** He spawns when a draw lands on dimension 4 and the hand it puts
+## out is a duke's — *that is the whole of it* — so this counts
+## `DemandGrowth.sources` rather than keeping anything, and two properties the
+## doc names fall out instead of needing code:
 ##
 ## **They arrive staggered**, one source per draw, so the colony faces one duke,
 ## then two, then three across a run. **And they cannot bunch**, because §7's
-## bucket guarantees dimension 4 at most twice in four years.
+## bucket guarantees dimension 4 at most twice in four draws.
 ##
-## Nought before the third hand is out. *Prospering does not attract rivals* —
-## they want the PC paying and weak, and in month one he is neither.
-## Nought before the third hand is out. *Prospering does not attract rivals* —
-## they want the PC paying and weak, and in month one he is neither.
-##
-## **That threshold is the arithmetic, not a second gate.**
-## `DemandSchedule.rivals_are_asking` says the same thing for demands, and
-## guarding with it as well is one rule written twice: below `ASKERS_FOR_RIVALS`
-## the subtraction is already negative and the clamp already returns nought.
+## 🔒 **And in no order** (#339). He waits on no count of other hands: the first
+## hand a run meets may be his, or a patron's, or a Crown officer's. Nought until
+## a draw puts his out — *prospering does not attract rivals*, and in month one
+## there is nothing to be attracted to.
 static func how_many_arrived(growth: DemandGrowth) -> int:
 	if growth == null:
 		return 0
-	return clampi(
-		DemandSchedule.askers(growth) - DemandSchedule.ASKERS_FOR_RIVALS + 1,
-		0, HOW_MANY)
+	return clampi(growth.sources_of(DemandGrowth.SOURCE_DUKE), 0, HOW_MANY)
 
 
 ## The dukes who have arrived, in the order they arrive.

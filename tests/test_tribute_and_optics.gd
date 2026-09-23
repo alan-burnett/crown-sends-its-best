@@ -44,10 +44,12 @@ func _context(run: RunState) -> ColonyContext:
 	return ColonyContext.new(run.world, run.log, run.streams, run.map)
 
 
-## A growth book with dimension 4 pushed to a level.
-func _growth(reach: int) -> DemandGrowth:
+## A growth book in which dimension 4 has put out this many dukes' hands.
+func _growth(dukes: int) -> DemandGrowth:
 	var growth := DemandGrowth.new()
-	growth.levels[String(DemandGrowth.REACH)] = reach
+	for _duke in dukes:
+		growth.sources.append(String(DemandGrowth.SOURCE_DUKE))
+	growth.levels[String(DemandGrowth.REACH)] = dukes
 	return growth
 
 
@@ -72,7 +74,7 @@ func test_no_rival_writes_until_more_hands_are_out() -> void:
 func test_a_rival_writes_once_dimension_four_has_grown_enough() -> void:
 	var run := _run()
 	var duke: Contact = RivalDuke.all_in(run)[0]
-	var grown := _growth(DemandSchedule.ASKERS_FOR_RIVALS)
+	var grown := _growth(1)
 	assert_true(DemandSchedule.rivals_are_asking(grown),
 		"the fixture did not push the dimension far enough")
 	assert_true(ContentRegistry.test_condition(
@@ -108,11 +110,21 @@ func test_the_dukes_arrive_on_the_bucket_and_nothing_else() -> void:
 				"%s decides for itself when a duke writes: %s" % [id, gate])
 
 
-func test_the_marshal_is_asking_before_any_duke_is() -> void:
-	# The order of §6's catalogue: Crown officers who were not asking before,
-	# and then the sharpest version, a foreign power.
-	assert_true(DemandSchedule.ASKERS_FOR_RIVALS > DemandBook.ASKERS_FOR_GOODS,
-		"a run meets a rival duke before it meets a requisition")
+func test_a_duke_waits_on_nobody_elses_hand() -> void:
+	# 🔒 **There is no ladder** (#339, `crown-demands.md` §6). This file once
+	# asserted the opposite — that the Marshal must be asking before any duke —
+	# which is the order the Author ruled out. A duke whose hand is the only one
+	# out is asking; a Crown officer's hand alone brings no duke.
+	var alone := _growth(1)
+	assert_eq(alone.sources_of(DemandGrowth.SOURCE_CROWN), 0,
+		"the fixture put out a Crown officer's hand too, so this proves nothing")
+	assert_true(DemandSchedule.rivals_are_asking(alone),
+		"a duke's hand was out and he was not asking, because nobody went first")
+
+	var officer := DemandGrowth.new()
+	officer.sources.append(String(DemandGrowth.SOURCE_CROWN))
+	assert_false(DemandSchedule.rivals_are_asking(officer),
+		"a Crown officer's hand brought a duke with it")
 
 
 # --- 🔒 What he asks for scales with his band -------------------------------
@@ -120,7 +132,7 @@ func test_the_marshal_is_asking_before_any_duke_is() -> void:
 func test_a_duke_who_is_being_paid_asks_less_than_one_who_is_not() -> void:
 	var run := _run()
 	var duke: Contact = RivalDuke.all_in(run)[0]
-	var grown := _growth(DemandSchedule.ASKERS_FOR_RIVALS)
+	var grown := _growth(1)
 
 	duke.relationship.loyalty = RivalDuke.HIGH_AT + 5.0
 	var reasonable := int(ContentRegistry.supply_param(
@@ -177,7 +189,7 @@ func test_the_figure_he_names_is_gold_and_not_a_count_of_goods() -> void:
 	var run := _run()
 	var duke: Contact = RivalDuke.all_in(run)[0]
 	duke.relationship.loyalty = RivalDuke.HIGH_AT + 5.0
-	var grown := _growth(DemandSchedule.ASKERS_FOR_RIVALS)
+	var grown := _growth(1)
 
 	var asked := float(ContentRegistry.supply_param(
 		"tribute_amount", {}, _letter_context(run, duke, grown)))

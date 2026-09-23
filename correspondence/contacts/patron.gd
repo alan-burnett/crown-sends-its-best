@@ -68,14 +68,6 @@ static func set_how_many(count: int) -> void:
 	_how_many = maxi(0, count)
 
 
-## How many hands are out before one of them is a patron.
-##
-## 🔒 **Dimension 4 and nothing else** (§7). Behind the dukes, because a patron
-## is the softest version of *more hands out* and the run should have met the
-## hard ones first — a man who wants a favour reads very differently once a
-## foreign power is already demanding tribute.
-const ASKERS_FOR_PATRONS: int = 5
-
 const EVENT_ARRIVED: StringName = &"patron_arrived"
 
 static var _catalogue: Array = []
@@ -118,17 +110,23 @@ static func is_patron(contact: Contact) -> bool:
 
 ## How many patrons the Squeeze has produced (§7).
 ##
-## 🔒 **Derived from `askers`, kept nowhere.** The same shape as
+## 🔒 **Counted off the Squeeze, kept nowhere.** The same shape as
 ## `RivalDuke.how_many_arrived`, and for the same reason: a stored count is a
 ## second clock, and §7 says there is not one. Two properties fall out of the
 ## bucket rather than needing code — they arrive staggered, one source per draw,
 ## and they cannot bunch, because §7 of `crown-demands.md` guarantees dimension 4
-## at most twice in four years.
+## at most twice in four draws.
+##
+## 🔒 **Not behind the dukes** (#339). This once waited for five hands out, on
+## the argument that a patron is the softest version of *more hands out* and the
+## run should meet the hard ones first. The Author heard it and ruled the other
+## way: any draw of dimension 4 can put out any of the three, and the first may
+## be a patron's. At five hands, the first patron came in year nine at the
+## earliest, outside the run SPEC §6.2 designs for.
 static func how_many_arrived(growth: DemandGrowth) -> int:
 	if growth == null:
 		return 0
-	return clampi(
-		DemandSchedule.askers(growth) - ASKERS_FOR_PATRONS + 1, 0, _how_many)
+	return clampi(growth.sources_of(DemandGrowth.SOURCE_PATRON), 0, _how_many)
 
 
 ## The id the nth patron goes by.

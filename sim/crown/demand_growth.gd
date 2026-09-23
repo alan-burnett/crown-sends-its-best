@@ -6,22 +6,23 @@ extends RefCounted
 ##
 ## ## 🔒 Two eras, and the first one does not move
 ##
-## **Years one to three carry a steady bar, set above what a young colony can
-## produce.** A player can grant everything in year one and still watch Crown
-## Standing fall, because he is paying out more than the colony returns. Nothing
-## has grown; the bar was simply set above him, and his job in those years is to
-## build an economy that clears it.
+## **Year one carries a steady bar, set above what a young colony can produce.**
+## A player can grant everything in year one and still watch Crown Standing fall,
+## because he is paying out more than the colony returns. Nothing has grown; the
+## bar was simply set above him, and his job in that year is to build an economy
+## that clears it. It was three years until the Author's ruling on #339.
 ##
 ## Implementing this as a curve from month one — which is the obvious reading of
 ## "demands grow over time" — produces a very different game. The two eras ask
 ## different questions: *can you clear a fixed bar*, and then *can you keep
 ## clearing it while it moves*.
 ##
-## ## The bar moves along one axis a year
+## ## 🔒 The bar moves twice a year, from year two (#339, §7)
 ##
-## From year four, one of four dimensions is drawn each year and grows. Giving
-## every dimension a curve makes the run impossible almost at once; drawing one
-## makes runs differ.
+## From year two, one of four dimensions is drawn **twice a year** and grows, in
+## two months of the year chosen at random — so a player cannot learn when the
+## next turn of the screw lands and bank against it. Giving every dimension a
+## curve makes the run impossible almost at once; drawing one makes runs differ.
 ##
 ## | Dimension | What grows |
 ## | :--- | :--- |
@@ -38,14 +39,26 @@ extends RefCounted
 ## merely unfair — they poison tuning and scoring, because the best scores start
 ## coming from lucky seeds rather than from good play.
 ##
-## Eight entries, two of each. Draw one a year without replacement; once four
-## have gone, put them back. The bucket therefore never holds more than two of
-## anything, and **five of the same axis in a row is impossible** rather than
-## unlikely.
+## Eight entries, two of each. Draw one at a time without replacement; once four
+## have gone, put them back — which at two draws a year is every two years. The
+## bucket therefore never holds more than two of anything, and **five of the
+## same axis in a row is impossible** rather than unlikely.
 ##
 ## Note what that does and does not guarantee: a run of four is reachable, by
 ## taking an axis twice at the end of one bucket and twice at the start of the
 ## next. See `tests/test_demand_growth.gd`.
+##
+## ## 🔒 More hands out, and whose (§6)
+##
+## **When `reach` is drawn, which source appears is drawn too**: a Crown officer
+## who was not asking before, a duke, or a patron. **Any draw can produce any of
+## the three** — the first hand a run meets may be a patron's. There is no ladder:
+## the thresholds that once put the Marshal's goods behind two hands, the dukes
+## behind three and the patrons behind five were invented in code and never in a
+## doc, and put the first patron in year nine at the earliest (#339).
+##
+## A source with no room left is not drawn — a fourth duke does not exist — so a
+## draw always produces somebody while anybody is left to produce.
 ##
 ## ## Nothing here loosens
 ##
@@ -62,8 +75,18 @@ const DIMENSIONS: PackedStringArray = ["desperation", "frequency", "reach", "siz
 
 const EVENT_GROWTH: StringName = &"crown_demand_grew"
 
-## The first year the bar moves. Years one to three are a level (§§1–2).
-const FIRST_GROWTH_YEAR: int = 4
+## The first year the bar moves. Year one is a level (§§1–2).
+const FIRST_GROWTH_YEAR: int = 2
+
+## 🔒 **How many times a year it moves** (#339, §7), on months drawn at random.
+const DRAWS_PER_YEAR: int = 2
+
+## The three sources *more hands out* can produce (§6). **In no order**: the
+## list is sorted so the draw does not depend on how it was written.
+const SOURCE_CROWN: StringName = &"crown"
+const SOURCE_DUKE: StringName = &"duke"
+const SOURCE_PATRON: StringName = &"patron"
+const SOURCES: PackedStringArray = ["crown", "duke", "patron"]
 
 ## How many go before the bucket is topped back up. Half of it, which is what
 ## keeps two of any one axis the most it can ever hold.
@@ -86,9 +109,27 @@ var bucket: PackedStringArray = PackedStringArray()
 ## have to be able to name what changed, and because the harness reads it.
 var history: PackedStringArray = PackedStringArray()
 
-## The last year a draw was made, so a year cannot grow twice however many times
-## the driver is called.
-var last_drawn_year: int = 0
+## The month each entry of `history` was drawn in.
+var drawn_months: PackedInt32Array = PackedInt32Array()
+
+## 🔒 **Which hand each `reach` draw put out**, in order (#339).
+##
+## The whole of what the dukes, the patrons and the Marshal's goods read to know
+## whether they are asking. Serialised, because it is the run's future as much
+## as the bucket is.
+var sources: PackedStringArray = PackedStringArray()
+
+## The year `growth_months` was drawn for.
+var schedule_year: int = 0
+
+## The months of `schedule_year` (0 to 11) the bar moves in, earliest first.
+## Drawn once, the first time the year is seen, and serialised — a reload must
+## not move the next turn of the screw.
+var growth_months: PackedInt32Array = PackedInt32Array()
+
+## How many of this year's draws have been made, so a month cannot grow twice
+## however many times the driver is called.
+var drawn_this_year: int = 0
 
 ## The month the bar last moved.
 ##
@@ -116,27 +157,58 @@ func has_begun() -> bool:
 	return not history.is_empty()
 
 
-## What was drawn in a given year, or empty.
-func drawn_in(year: int) -> StringName:
-	var index := year - FIRST_GROWTH_YEAR
-	if index < 0 or index >= history.size():
-		return &""
-	return StringName(history[index])
+## What was drawn in a given year, in order, or nothing.
+func drawn_in(year: int) -> PackedStringArray:
+	var out := PackedStringArray()
+	for at in history.size():
+		if drawn_months[at] / WorldState.MONTHS_PER_YEAR + 1 == year:
+			out.append(history[at])
+	return out
 
 
-## Move the bar, if this year is one that moves it.
+## How many hands of this kind the Squeeze has put out (#339).
+func sources_of(source: StringName) -> int:
+	return sources.count(String(source))
+
+
+## Move the bar, if this month is one that moves it.
 ##
-## Returns what grew, or empty. **Idempotent within a year**: the driver runs
-## every month and only the first call in a growth year draws.
+## Returns what grew, or empty. **Idempotent within a month**: the driver runs
+## every month, and a month grows only if it is one of the year's drawn months
+## and has not grown already. A caller that skips ahead catches up rather than
+## losing a draw.
 func advance(year: int, streams: RngStreams, log: EventLog, month: int) -> StringName:
-	if year < FIRST_GROWTH_YEAR or year <= last_drawn_year:
+	if year < FIRST_GROWTH_YEAR:
 		return &""
-	last_drawn_year = year
+	var rng := streams.stream(STREAM)
+	if schedule_year != year:
+		schedule_year = year
+		growth_months = _schedule(rng)
+		drawn_this_year = 0
 
-	var drawn := _draw(streams.stream(STREAM))
+	var in_year := posmod(month, WorldState.MONTHS_PER_YEAR)
+	var drawn: StringName = &""
+	while drawn_this_year < growth_months.size() and growth_months[drawn_this_year] <= in_year:
+		drawn_this_year += 1
+		drawn = _grow(year, month, rng, log)
+	return drawn
+
+
+## One turn of the screw.
+func _grow(year: int, month: int, rng: RandomNumberGenerator, log: EventLog) -> StringName:
+	var drawn := _draw(rng)
 	levels[String(drawn)] = level_of(drawn) + 1
 	history.append(String(drawn))
+	drawn_months.append(month)
 	grew_in_month = month
+
+	# 🔒 **And whose hand it is** (#339). Drawn in the same breath, from the same
+	# stream, so a seed's run of dukes and patrons is as fixed as its axes.
+	var source: StringName = &""
+	if drawn == REACH:
+		source = _draw_source(rng)
+		if not source.is_empty():
+			sources.append(String(source))
 
 	if log != null:
 		log.emit(EVENT_GROWTH, &"crown", month, {
@@ -144,8 +216,39 @@ func advance(year: int, streams: RngStreams, log: EventLog, month: int) -> Strin
 			"dimension": String(drawn),
 			"level": level_of(drawn),
 			"levels": levels.duplicate(),
+			"source": String(source),
 		}, WorldPhase.CROWNS_MONTH)
 	return drawn
+
+
+## The two months of the year the bar moves in, drawn without replacement.
+func _schedule(rng: RandomNumberGenerator) -> PackedInt32Array:
+	var months := PackedInt32Array()
+	for month in WorldState.MONTHS_PER_YEAR:
+		months.append(month)
+	var chosen := PackedInt32Array()
+	for _draw_index in mini(DRAWS_PER_YEAR, months.size()):
+		var at := rng.randi_range(0, months.size() - 1)
+		chosen.append(months[at])
+		months.remove_at(at)
+	chosen.sort()
+	return chosen
+
+
+## 🔒 **Any of the three, whichever still has room** (§6).
+##
+## Evenly among the sources that can still put a hand out. Room is
+## `DemandSchedule.room_for` — three dukes, as many patrons as the run allows, and
+## one Crown officer, the Marshal asking for goods as well as gold, which is the
+## one such ask built.
+func _draw_source(rng: RandomNumberGenerator) -> StringName:
+	var open := PackedStringArray()
+	for source in SOURCES:
+		if sources_of(StringName(source)) < DemandSchedule.room_for(StringName(source)):
+			open.append(source)
+	if open.is_empty():
+		return &""
+	return StringName(open[rng.randi_range(0, open.size() - 1)])
 
 
 ## Take one from the bucket, topping it back up once half of it has gone.
@@ -177,7 +280,11 @@ func to_dict() -> Dictionary:
 		"levels": levels.duplicate(),
 		"bucket": Array(bucket),
 		"history": Array(history),
-		"last_drawn_year": last_drawn_year,
+		"drawn_months": Array(drawn_months),
+		"sources": Array(sources),
+		"schedule_year": schedule_year,
+		"growth_months": Array(growth_months),
+		"drawn_this_year": drawn_this_year,
 		"grew_in_month": grew_in_month,
 	}
 
@@ -190,6 +297,10 @@ static func from_dict(data: Dictionary) -> DemandGrowth:
 		restored.levels[dimension] = int(stored.get(dimension, 0))
 	restored.bucket = PackedStringArray(data.get("bucket", []))
 	restored.history = PackedStringArray(data.get("history", []))
-	restored.last_drawn_year = int(data.get("last_drawn_year", 0))
+	restored.drawn_months = PackedInt32Array(data.get("drawn_months", []))
+	restored.sources = PackedStringArray(data.get("sources", []))
+	restored.schedule_year = int(data.get("schedule_year", 0))
+	restored.growth_months = PackedInt32Array(data.get("growth_months", []))
+	restored.drawn_this_year = int(data.get("drawn_this_year", 0))
 	restored.grew_in_month = int(data.get("grew_in_month", -1))
 	return restored

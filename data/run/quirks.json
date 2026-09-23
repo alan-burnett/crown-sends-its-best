@@ -52,16 +52,11 @@
         "name": "Busy patrons",
         "blurb": "Word of the colony has got about at court, and everyone has a proposal.",
         "offered": true,
-        "note": "More arrive and each is easier to please, against more hands out and more of the desk (section 4). Rewards a player who works the patron game; drowns one who ignores it. The drawback is not bolted on - it is the letters themselves, and SPEC section 9.6's volume is the real constraint. Two knobs, because the count alone does nothing: DemandSchedule's reach ceiling is what actually caps arrivals, and demands.json records that the last three of those seven hands are the three patrons. So more patrons means more hands out, which is also the drawback stated honestly. The 'easier to please' half waits on a per-role drift knob, which the clergy ticket (#277) brings.",
+        "note": "More arrive and each is easier to please, against more hands out and more of the desk (section 4). Rewards a player who works the patron game; drowns one who ignores it. The drawback is not bolted on - it is the letters themselves, and SPEC section 9.6's volume is the real constraint. One knob since #339: patrons_at_once sets how many may be here and makes room for that many in the Squeeze, whose draws of more hands out choose among the sources with room left. More patrons still means more hands out, which is the drawback stated honestly. The 'easier to please' half waits on a per-role drift knob, which the clergy ticket (#277) brings.",
         "modifiers": [
           {
             "patrons_at_once": {
               "count": 5
-            }
-          },
-          {
-            "hands_out": {
-              "reach_ceiling": 9
             }
           }
         ]

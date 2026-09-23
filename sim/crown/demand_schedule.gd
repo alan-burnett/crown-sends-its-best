@@ -12,7 +12,7 @@ extends RefCounted
 ## | `months_between` | how often a demand arrives — `frequency` shortens it |
 ## | `gold_target` | what a gold demand asks for — `size` raises it |
 ## | `refusal_cost` | what saying no costs — `desperation` raises it |
-## | `askers` | how many sources are demanding — `reach` raises it |
+## | `askers` | how many sources are demanding — every `reach` draw adds one |
 ##
 ## **Every magnitude is data** (`data/crown/demands.json`), because calibration
 ## is a harness sweep and not a judgement anyone can make at a keyboard. §8 sets
@@ -25,8 +25,8 @@ extends RefCounted
 ## Demands are unskippable, so growth in frequency pushes directly against SPEC
 ## §9.6's letter volume targets rather than being absorbed by them. It is the
 ## one axis whose growth can make the game *worse* rather than harder, so it
-## floors. Reach ceilings because there are only so many people in the world with
-## a hand out before M7 brings patrons.
+## floors. Reach is bounded by **room** — there are only so many people in the
+## world with a hand out, and `room_for` says how many of each.
 ##
 ## Size and desperation are deliberately unbounded here. §11 leaves open whether
 ## growth should saturate at all — a fifty-year run sees forty-odd growth events
@@ -41,18 +41,29 @@ const DEFAULT_TERM_MONTHS: int = 6
 const DEFAULT_RESOURCE_SHARE: float = 0.25
 const DEFAULT_DEADLINE_TURNS: int = 3
 
+## How many hands of each source the world holds (#339). The defaults are the
+## world's: one Crown officer's ask is built, there are three dukes, and a run
+## meets three patrons unless a quirk says otherwise.
+const DEFAULT_ROOM: Dictionary = {"crown": 1, "duke": 3, "patron": 3}
+
 static var _steady: Dictionary = {}
 static var _growth: Dictionary = {}
+
+## A run's lifts over the room in the data, kept apart from the loaded record so
+## a quirk in one run never rewrites the content another run reads.
+static var _room_lifts: Dictionary = {}
 
 
 static func load_from(record: Dictionary) -> void:
 	_steady = record.get("steady", {})
 	_growth = record.get("growth", {})
+	_room_lifts = {}
 
 
 static func reset() -> void:
 	_steady = {}
 	_growth = {}
+	_room_lifts = {}
 
 
 static func _steady_value(key: String, fallback: float) -> float:
@@ -75,23 +86,25 @@ static func _growth_value(dimension: StringName, key: String, fallback: float) -
 
 # --- 🔒 The knob: how many hands the world holds ----------------------------
 
-## Lift one dimension's ceiling, for a run whose world is more crowded than most.
+## How many hands of this source the Squeeze may put out (#339, §6).
 ##
-## 🔒 **The ceiling binds, not the count.** §6 wrote the reach ceiling as *there
-## are only so many people in the world with a hand out*, and `demands.json`
-## records that the last three of those hands **are** the three patrons. So a
-## colony that draws more patrons is one where more hands are out, and a quirk
-## that raised `Patron`'s count without this would be a number with nothing
-## behind it — which is exactly what it was, and the test that asked for more
-## patrons caught it.
+## **What bounds a source is how many of it the world holds**, not a count of
+## hands before it. A draw of *more hands out* chooses among the sources with
+## room left, so this is also what stops a fourth duke appearing.
+static func room_for(source: StringName) -> int:
+	var room: Dictionary = _growth.get(String(DemandGrowth.REACH), {}).get("room", {})
+	var base := int(room.get(String(source), DEFAULT_ROOM.get(String(source), 0)))
+	return maxi(base, int(_room_lifts.get(String(source), 0)))
+
+
+## Make room for more of one source, for a run whose world is more crowded than
+## most — *Busy patrons* (`perks-and-quirks.md` §4).
 ##
-## 🔒 **It only ever raises.** A quirk that quietly removed a rival duke from a
-## run would be a far larger claim than any of them makes, and `rival-pressure.md`
+## 🔒 **It only ever raises.** A quirk that quietly removed a duke from a run
+## would be a far larger claim than any of them makes, and `rival-pressure.md`
 ## has the three dukes as a fixture of every run.
-static func raise_ceiling(dimension: StringName, ceiling: int) -> void:
-	var entry: Dictionary = _growth.get(String(dimension), {})
-	entry["ceiling"] = maxf(float(entry.get("ceiling", 4.0)), float(ceiling))
-	_growth[String(dimension)] = entry
+static func make_room(source: StringName, count: int) -> void:
+	_room_lifts[String(source)] = maxi(int(_room_lifts.get(String(source), 0)), count)
 
 
 ## Months between demands. **Shortened by `frequency`, with a floor**, because
@@ -121,36 +134,27 @@ static func refusal_cost(growth: DemandGrowth) -> float:
 	return base * (1.0 + step * _level(growth, DemandGrowth.DESPERATION))
 
 
-## How many sources are demanding at all.
+## How many sources are demanding at all: the Steward's, and every hand the
+## Squeeze has put out since.
 ##
-## §6: not only patrons, who are M7 — Crown officers who were not asking before,
-## and **rival dukes demanding tribute**, whose demands cost prestige rather than
-## standing and so add pressure the player's existing defences do not answer.
+## 🔒 **A count, and nothing gates on it** (#339). It used to be `1 + reach` and
+## everything else read thresholds off it — goods at two hands, dukes at three,
+## patrons at five — which is a ladder no doc asked for. What is asking is now
+## `DemandGrowth.sources`, and this only counts them for the log and the harness.
 static func askers(growth: DemandGrowth) -> int:
 	var base := int(_steady_value("askers", float(DEFAULT_ASKERS)))
-	var step := int(_growth_value(DemandGrowth.REACH, "askers", 1.0))
-	var ceiling := int(_growth_value(DemandGrowth.REACH, "ceiling", 4.0))
-	return mini(ceiling, base + step * int(_level(growth, DemandGrowth.REACH)))
+	return base + (0 if growth == null else growth.sources.size())
 
 
-## How many hands are out before a rival is one of them.
+## Whether a duke is among the hands out yet.
 ##
 ## 🔒 **Dimension 4 and nothing else** (#210, `crown-demands.md` §6). A duke
-## demanding tribute is the fourth dimension selecting him from §4's catalogue —
-## *more sources of demand* — so there is **no second clock anywhere** and no
-## schedule of his own. Two things fall out of the bucket rather than needing
-## code: rivals arrive staggered, one source per draw, and they cannot bunch,
-## because §7 guarantees dimension 4 at most twice in four years.
-##
-## Third, behind the Marshal, because a foreign power with its hand out is the
-## sharpest version of *more hands out* and should not be the first thing a run
-## meets. Tuning.
-const ASKERS_FOR_RIVALS: int = 3
-
-
-## Whether a rival duke is among the hands out yet.
+## demanding tribute is a draw of *more hands out* that put out his hand, so
+## there is **no second clock anywhere** and no schedule of his own — and no
+## place in a queue either (#339): he may be the first hand a run meets, or the
+## last.
 static func rivals_are_asking(growth: DemandGrowth) -> bool:
-	return askers(growth) >= ASKERS_FOR_RIVALS
+	return growth != null and growth.sources_of(DemandGrowth.SOURCE_DUKE) > 0
 
 
 ## How long the colony has to reach a revenue target.

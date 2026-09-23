@@ -36,18 +36,20 @@ func after_each() -> void:
 	content.free()
 
 
-func _growth(reach: int) -> DemandGrowth:
+func _growth(dukes: int) -> DemandGrowth:
 	var growth := DemandGrowth.new()
-	growth.levels[String(DemandGrowth.REACH)] = reach
+	for _duke in dukes:
+		growth.sources.append(String(DemandGrowth.SOURCE_DUKE))
+	growth.levels[String(DemandGrowth.REACH)] = dukes
 	return growth
 
 
 ## A run at a given stage of the Squeeze, with every duke pushed to the bottom so
 ## that anything that *can* park does.
-func _run_at(reach: int) -> RunState:
+func _run_at(dukes: int) -> RunState:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
-	run.demands = _growth(reach)
+	run.demands = _growth(dukes)
 	for duke in RivalDuke.all_in(run):
 		duke.relationship = Relationship.new(duke.id, 1.0)
 	return run
@@ -64,16 +66,17 @@ func _park(run: RunState) -> void:
 
 # --- 🔒 Nobody is here at the start -----------------------------------------
 
-func test_no_duke_has_arrived_before_the_third_hand_is_out() -> void:
+func test_no_duke_has_arrived_until_the_squeeze_puts_one_out() -> void:
 	# 🔒 They want the PC paying and weak, and in month one he is neither — there
-	# is nothing to be attracted to.
-	for reach in range(0, DemandSchedule.ASKERS_FOR_RIVALS - 1):
-		var growth := _growth(reach)
-		assert_true(DemandSchedule.askers(growth) < DemandSchedule.ASKERS_FOR_RIVALS,
-			"the fixture already has rivals asking at reach %d" % reach)
-		assert_eq(RivalDuke.how_many_arrived(growth), 0,
-			"a duke had turned up at reach %d, with %d hands out"
-				% [reach, DemandSchedule.askers(growth)])
+	# is nothing to be attracted to. **And other hands do not bring him** (#339):
+	# a patron and a Crown officer asking are not a duke's turn coming closer,
+	# because there is no queue for it to come closer in.
+	var growth := _growth(0)
+	assert_eq(RivalDuke.how_many_arrived(growth), 0, "a duke was here in month one")
+	growth.sources.append(String(DemandGrowth.SOURCE_PATRON))
+	growth.sources.append(String(DemandGrowth.SOURCE_CROWN))
+	assert_eq(RivalDuke.how_many_arrived(growth), 0,
+		"two other hands went out and a duke arrived with them")
 
 
 func test_a_duke_who_has_not_arrived_parks_nothing() -> void:
@@ -120,7 +123,7 @@ func test_the_governor_cannot_write_about_fields_nobody_is_standing_on() -> void
 
 func test_a_duke_who_has_arrived_and_fallen_low_still_parks() -> void:
 	# The third acceptance line. Nothing about what a duke *does* has changed.
-	var run := _run_at(DemandSchedule.ASKERS_FOR_RIVALS)
+	var run := _run_at(1)
 	assert_true(RivalDuke.how_many_arrived(run.demands) > 0,
 		"the fixture summoned nobody, so this proves nothing")
 
@@ -132,10 +135,10 @@ func test_a_duke_who_has_arrived_and_fallen_low_still_parks() -> void:
 func test_they_arrive_staggered_and_never_all_at_once() -> void:
 	# 🔒 §6: one source enters per draw, so the colony faces one duke, then two,
 	# then three across a run rather than three in one spring. It falls out of
-	# `askers` rather than needing a schedule of its own.
+	# the hands the Squeeze put out rather than needing a schedule of its own.
 	var arrived: Array = []
-	for reach in range(0, 8):
-		arrived.append(RivalDuke.how_many_arrived(_growth(reach)))
+	for dukes in range(0, 8):
+		arrived.append(RivalDuke.how_many_arrived(_growth(dukes)))
 
 	assert_eq(arrived[0], 0, "a duke was here before the Squeeze had drawn one")
 	for step in range(1, arrived.size()):
@@ -150,7 +153,7 @@ func test_they_arrive_staggered_and_never_all_at_once() -> void:
 func test_the_same_run_always_meets_the_same_duke_first() -> void:
 	var first: Array = []
 	for pass_index in 2:
-		var run := _run_at(DemandSchedule.ASKERS_FOR_RIVALS)
+		var run := _run_at(1)
 		var arrived := RivalDuke.arrived_in(run, run.demands)
 		first.append(String((arrived[0] as Contact).id))
 	assert_eq(first[0], first[1], "two identical runs met different dukes first")
@@ -160,7 +163,7 @@ func test_arrival_reads_the_squeeze_and_keeps_no_state_of_its_own() -> void:
 	# 🔒 §6: *there is no second schedule and no separate director.* A stored
 	# arrival month would be a second place the truth lived, and the two would
 	# disagree the first time a save was loaded.
-	var run := _run_at(DemandSchedule.ASKERS_FOR_RIVALS)
+	var run := _run_at(1)
 	for duke in RivalDuke.all_in(run):
 		for entry in duke.get_property_list():
 			var name := String(entry["name"])

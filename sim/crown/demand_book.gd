@@ -40,14 +40,6 @@ const EVENT_LAPSED: StringName = &"crown_demand_lapsed"
 ## made blind.
 const FIRST_DEMAND_MONTH: int = 3
 
-## How many hands have to be out before one of them is the Marshal's.
-##
-## The Provost and the rival dukes are the third and fourth (§4). The Provost
-## waits on M4 and a rival's tribute costs **prestige** rather than standing,
-## which is #76 — so `reach` beyond this point currently raises a figure with
-## nobody behind it yet, and that is recorded here rather than left to be
-## rediscovered.
-const ASKERS_FOR_GOODS: int = 2
 
 ## The month the Crown last asked for something, so the next one is `frequency`
 ## months after it rather than a fixed cooldown the growth could not reach.
@@ -184,7 +176,11 @@ func advance(month: int, growth: DemandGrowth, streams: RngStreams, log: EventLo
 ## desk becomes a logistics exercise and SPEC §9.6's promise that it will not
 ## become a chore is broken (§5).
 func _wants_goods(growth: DemandGrowth, streams: RngStreams) -> bool:
-	if streams == null or DemandSchedule.askers(growth) < ASKERS_FOR_GOODS:
+	# 🔒 **When the Squeeze has put out a Crown officer's hand** (#339, §6) —
+	# *the Marshal wanting supplies as well as gold*. It used to wait for a second
+	# hand of any kind, which is a ladder no doc asked for.
+	if streams == null or growth == null \
+			or growth.sources_of(DemandGrowth.SOURCE_CROWN) < 1:
 		return false
 	return streams.stream(DemandGrowth.STREAM).randf() < DemandSchedule.resource_share()
 

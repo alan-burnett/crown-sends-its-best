@@ -181,15 +181,16 @@ func test_the_flow_comes_off_the_same_decline_as_the_demands() -> void:
 	var affairs := CrownAffairs.new()
 	affairs.growth = DemandGrowth.new()
 
-	state.month = 12
-	affairs.on_phase(WorldPhase.CROWNS_MONTH, state, log, streams)
+	for month in DemandGrowth.FIRST_GROWTH_YEAR * 12 - 12:
+		state.month = month
+		affairs.on_phase(WorldPhase.CROWNS_MONTH, state, log, streams)
 	var early := float(state.get_value(Immigration.FLOW_KEY, 0.0))
 	assert_almost_eq(early, 0.0, 0.0001,
 		"people were leaving before the Crown was past its peak")
 
-	# Years four onward: the bar moves once a year, and the flow moves with it.
-	for year in range(DemandGrowth.FIRST_GROWTH_YEAR, DemandGrowth.FIRST_GROWTH_YEAR + 5):
-		state.month = year * 12
+	# From year two the bar moves twice a year (#339), and the flow moves with it.
+	for month in range(DemandGrowth.FIRST_GROWTH_YEAR * 12 - 12, DemandGrowth.FIRST_GROWTH_YEAR * 12 + 48):
+		state.month = month
 		affairs.on_phase(WorldPhase.CROWNS_MONTH, state, log, streams)
 	var late := float(state.get_value(Immigration.FLOW_KEY, 0.0))
 	assert_true(late > early, "five years of decline sent nobody anywhere")

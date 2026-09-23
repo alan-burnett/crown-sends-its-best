@@ -284,16 +284,26 @@ func test_commando_commanders_are_likelier_to_die_with_their_men() -> void:
 		"veterans were bred and none of them were buried any faster")
 
 
-func test_busy_patrons_lets_more_of_them_be_here_at_once() -> void:
-	# A court with every hand out, so the ceiling is the only thing capping it.
+## How many patrons a long Squeeze produces, drawn the way a run draws them.
+##
+## Through the draw rather than by writing the hands in, because the claim is
+## that the quirk reaches the Squeeze: a count of patrons the draw could never
+## fill would be a number in a file (#339).
+func _patrons_after_a_long_squeeze() -> int:
 	var growth := DemandGrowth.new()
-	growth.levels[String(DemandGrowth.REACH)] = 99
-	var few := Patron.how_many_arrived(growth)
+	var streams := RngStreams.new(SEED)
+	for month in 40 * 12:
+		growth.advance(month / 12 + 1, streams, null, month)
+	return Patron.how_many_arrived(growth)
+
+
+func test_busy_patrons_lets_more_of_them_be_here_at_once() -> void:
+	var few := _patrons_after_a_long_squeeze()
 	assert_true(few > 0, "no patron arrived at all, so this proves nothing")
 
 	_applied(func(run: RunState) -> void:
 		run.setup.quirks = PackedStringArray(["busy_patrons"]))
-	assert_true(Patron.how_many_arrived(growth) > few,
+	assert_true(_patrons_after_a_long_squeeze() > few,
 		"a court full of interested men produced no more patrons")
 
 

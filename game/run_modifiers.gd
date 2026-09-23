@@ -53,7 +53,6 @@ const APPLIES: Dictionary = {
 	"commander_start_level": "_commander_start_level",
 	"commander_survival": "_commander_survival",
 	"patrons_at_once": "_patrons_at_once",
-	"hands_out": "_hands_out",
 	"perception_leans": "_perception_leans",
 	"first_impression": "_first_impression",
 	"favour_toward": "_favour_toward",
@@ -209,24 +208,16 @@ static func _commander_survival(_run: RunState, args: Dictionary) -> void:
 ## 🔒 **More prestige and more of the desk**, which SPEC §9.6 makes the real
 ## constraint. The drawback is not a penalty bolted on; it is the letters.
 ##
+## 🔒 **One knob, and it reaches the Squeeze** (#339). A draw of *more hands
+## out* chooses among the sources with room left, so a count of patrons the
+## Squeeze could never fill would be a number in a file. The room is made here,
+## beside the count, so the two cannot disagree.
+##
 ## Args: `{"count": 5}`.
 static func _patrons_at_once(_run: RunState, args: Dictionary) -> void:
-	Patron.set_how_many(int(args.get("count", 3)))
-
-
-## **Busy patrons**, the half that makes the other half mean anything: how many
-## hands the world holds out at full reach.
-##
-## 🔒 **Raising the count alone does nothing**, because `DemandSchedule`'s reach
-## ceiling is what actually caps arrivals — seven hands, of which the last three
-## are the patrons. A quirk that promised five and delivered three would be a
-## number in a file, and that is precisely what it was until a test asked for
-## the fifth.
-##
-## Args: `{"reach_ceiling": 9}`.
-static func _hands_out(_run: RunState, args: Dictionary) -> void:
-	DemandSchedule.raise_ceiling(
-		DemandGrowth.REACH, int(args.get("reach_ceiling", 0)))
+	var count := int(args.get("count", 3))
+	Patron.set_how_many(count)
+	DemandSchedule.make_room(DemandGrowth.SOURCE_PATRON, count)
 
 
 ## **Read between the lines**: contacts' perception leans are reduced when

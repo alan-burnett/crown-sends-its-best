@@ -47,15 +47,17 @@ func _run() -> RunState:
 	return run
 
 
-## The REACH level at which the Squeeze has produced one patron.
-func _level_for_one() -> int:
-	return Patron.ASKERS_FOR_PATRONS - 1
+## Put out one more patron's hand, as a draw of dimension 4 would.
+func _one_more_patron(growth: DemandGrowth) -> void:
+	growth.sources.append(String(DemandGrowth.SOURCE_PATRON))
+	growth.levels[String(DemandGrowth.REACH)] = growth.level_of(DemandGrowth.REACH) + 1
 
 
 ## A run in which the Squeeze has produced every patron it can.
 func _run_with_patrons() -> RunState:
 	var run := _run()
-	run.demands.levels[String(DemandGrowth.REACH)] = 99
+	for _patron in Patron.how_many():
+		_one_more_patron(run.demands)
 	PatronDriver.new(run).on_phase(
 		WorldPhase.ARRIVALS, run.world, run.log, run.streams)
 	return run
@@ -128,9 +130,9 @@ func test_they_arrive_one_at_a_time_and_stop_at_three() -> void:
 	# than needing code, because dimension 4 comes up at most twice in four years.
 	var growth := DemandGrowth.new()
 	var seen := PackedInt32Array()
-	for level in range(0, 12):
-		growth.levels[String(DemandGrowth.REACH)] = level
+	for _draw in range(0, 12):
 		seen.append(Patron.how_many_arrived(growth))
+		_one_more_patron(growth)
 	assert_eq(seen[seen.size() - 1], Patron.how_many(),
 		"the Squeeze can never produce all three: %s" % [seen])
 	for index in range(1, seen.size()):
@@ -144,9 +146,20 @@ func test_the_driver_adds_nobody_the_squeeze_has_not_produced() -> void:
 	driver.on_phase(WorldPhase.ARRIVALS, run.world, run.log, run.streams)
 	assert_empty(Patron.all_in(run), "a patron arrived with no hands out")
 
-	run.demands.levels[String(DemandGrowth.REACH)] = _level_for_one()
+	_one_more_patron(run.demands)
 	driver.on_phase(WorldPhase.ARRIVALS, run.world, run.log, run.streams)
 	assert_eq(Patron.all_in(run).size(), 1, "the first draw produced more than one man")
+
+
+func test_a_patron_can_be_the_first_hand_out() -> void:
+	# 🔒 **No ladder** (#339, §7). A patron once waited for five hands, so the
+	# first came in year nine at the earliest. The first hand a run meets may be
+	# his, with no duke and no Crown officer ahead of him.
+	var growth := DemandGrowth.new()
+	_one_more_patron(growth)
+	assert_eq(growth.sources.size(), 1, "the fixture put out other hands first")
+	assert_eq(Patron.how_many_arrived(growth), 1,
+		"the first hand out was a patron's and no patron came")
 
 
 func test_asking_every_month_brings_nobody_twice() -> void:

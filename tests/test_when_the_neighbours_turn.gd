@@ -172,7 +172,8 @@ func test_and_it_attacks() -> void:
 func _run_with_dukes() -> RunState:
 	var run := _run()
 	var growth := DemandGrowth.new()
-	growth.levels[String(DemandGrowth.REACH)] = 6
+	for _duke in RivalDuke.HOW_MANY:
+		growth.sources.append(String(DemandGrowth.SOURCE_DUKE))
 	run.demands = growth
 	assert_false(RivalDuke.arrived_in(run, run.demands).is_empty(),
 		"the fixture produced no arrived dukes, so it would prove nothing")

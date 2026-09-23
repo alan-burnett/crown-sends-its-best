@@ -40,13 +40,23 @@ func _context(growth: DemandGrowth, month: int) -> LetterContext:
 	return context
 
 
-## Advance a growth to the month its first draw lands in.
+## Advance a growth, month by month, to the month its first draw lands in.
+##
+## **A drawn month, not a fixed one** (#339): the bar moves on two months of the
+## year chosen at random, so the fixture finds the first rather than assuming it.
 func _first_draw(seed_value: int = SEED) -> DemandGrowth:
 	var growth := DemandGrowth.new()
 	var streams := RngStreams.new(seed_value)
-	growth.advance(DemandGrowth.FIRST_GROWTH_YEAR, streams, null,
-		DemandGrowth.FIRST_GROWTH_YEAR * MONTHS)
+	var month := 0
+	while growth.history.is_empty():
+		growth.advance(month / MONTHS + 1, streams, null, month)
+		month += 1
 	return growth
+
+
+## The month the bar first moved.
+func _opened(growth: DemandGrowth) -> int:
+	return growth.drawn_months[0]
 
 
 func _fires(growth: DemandGrowth, month: int) -> bool:
@@ -58,16 +68,17 @@ func _fires(growth: DemandGrowth, month: int) -> bool:
 func test_it_does_not_fire_before_the_bar_moves() -> void:
 	var growth := DemandGrowth.new()
 	var streams := RngStreams.new(SEED)
-	for year in range(1, DemandGrowth.FIRST_GROWTH_YEAR):
-		growth.advance(year, streams, null, year * MONTHS)
-		assert_false(_fires(growth, year * MONTHS),
-			"the Chancellor announced the squeeze in year %d, before there was one" % year)
+	for month in DemandGrowth.FIRST_GROWTH_YEAR * MONTHS:
+		growth.advance(month / MONTHS + 1, streams, null, month)
+		if growth.history.is_empty():
+			assert_false(_fires(growth, month),
+				"the Chancellor announced the squeeze in month %d, before there was one" % month)
 
 
 func test_it_fires_in_the_month_the_bar_first_moves() -> void:
 	var growth := _first_draw()
-	assert_true(_fires(growth, DemandGrowth.FIRST_GROWTH_YEAR * MONTHS),
-		"year four came, the bar moved, and the Chancellor said nothing")
+	assert_true(_fires(growth, _opened(growth)),
+		"the bar moved, and the Chancellor said nothing")
 
 
 func test_it_does_not_fire_again_for_the_rest_of_that_year() -> void:
@@ -75,22 +86,25 @@ func test_it_does_not_fire_again_for_the_rest_of_that_year() -> void:
 	# a condition written against them would put the same letter on the desk
 	# twelve months running.
 	var growth := _first_draw()
-	var opened := DemandGrowth.FIRST_GROWTH_YEAR * MONTHS
+	var opened := _opened(growth)
 	for month in range(opened + 1, opened + MONTHS):
 		assert_false(_fires(growth, month),
 			"the announcement came round again in month %d" % month)
 
 
 func test_it_does_not_fire_on_later_growth() -> void:
-	# The bar moves every year from the fourth. The *announcement* happens once:
-	# it is news that the game changed, and it can only be news the first time.
+	# The bar moves twice a year from the second. The *announcement* happens
+	# once: it is news that the game changed, and it can only be news the first
+	# time.
 	var growth := DemandGrowth.new()
 	var streams := RngStreams.new(SEED)
-	for year in range(1, 12):
-		growth.advance(year, streams, null, year * MONTHS)
-		if year > DemandGrowth.FIRST_GROWTH_YEAR:
-			assert_false(_fires(growth, year * MONTHS),
-				"the Chancellor announced it all over again in year %d" % year)
+	var later := 0
+	for month in 11 * MONTHS:
+		if String(growth.advance(month / MONTHS + 1, streams, null, month)) != "" 				and growth.history.size() > 1:
+			later += 1
+			assert_false(_fires(growth, month),
+				"the Chancellor announced it all over again in month %d" % month)
+	assert_true(later > 0, "the bar never moved a second time, so this proves nothing")
 
 
 # --- 🔒 He names what changed ------------------------------------------------
@@ -102,7 +116,7 @@ func test_exactly_one_of_the_four_letters_matches() -> void:
 	# motion silently.
 	for seed_value in 40:
 		var growth := _first_draw(seed_value)
-		var context := _context(growth, DemandGrowth.FIRST_GROWTH_YEAR * MONTHS)
+		var context := _context(growth, _opened(growth))
 		var matched := 0
 		for axis in DemandGrowth.DIMENSIONS:
 			if ColonyConditions.crown_leaned_on({"axis": axis}, context):
@@ -114,7 +128,7 @@ func test_exactly_one_of_the_four_letters_matches() -> void:
 func test_the_axis_it_names_is_the_axis_that_grew() -> void:
 	var growth := _first_draw()
 	var drawn := String(growth.history[0])
-	var context := _context(growth, DemandGrowth.FIRST_GROWTH_YEAR * MONTHS)
+	var context := _context(growth, _opened(growth))
 	assert_true(ColonyConditions.crown_leaned_on({"axis": drawn}, context),
 		"the bar moved along %s and no letter said so" % drawn)
 

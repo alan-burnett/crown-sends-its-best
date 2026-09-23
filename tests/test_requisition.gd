@@ -141,11 +141,12 @@ func test_the_crown_closing_its_purse_does_not_excuse_the_goods() -> void:
 ## A run that has grown far enough for the Marshal to have a hand out.
 ##
 ## Only the Steward asks at the opening of a run; the Marshal is something
-## `reach` adds (`crown-demands.md` §6), so every fixture here needs a run that
-## has drawn that axis at least once.
+## `reach` adds (`crown-demands.md` §6), so every fixture here needs a run whose
+## draw of that axis put out a Crown officer's hand (#339).
 func _grown() -> DemandGrowth:
 	var growth := DemandGrowth.new()
 	growth.levels[String(DemandGrowth.REACH)] = 1
+	growth.sources.append(String(DemandGrowth.SOURCE_CROWN))
 	return growth
 
 
