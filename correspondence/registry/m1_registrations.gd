@@ -231,6 +231,7 @@ static func register_effects() -> void:
 		"enact_policy",
 		{"to": "contact", "effect": "string", "cost": "gold", "split": "string"},
 		ORDER_ENACT_POLICY,
+		M1Registrations.build_policy_order,
 	)
 	# **The Provost's knobs are a different shape** (#173, `the-provost.md` §2),
 	# so they are a different effect rather than `enact_policy` with an optional
@@ -400,6 +401,31 @@ static func build_tax_order(args: Dictionary, context: LetterContext) -> Order:
 		ORDER_SET_TAX_RATE,
 		StringName(args.get("to", "")),
 		params,
+		context.month,
+	)
+
+
+## A policy, refused when it and its target do not match (#396).
+##
+## 🔒 **A market policy needs its market.** `enact_policy` naming
+## `favour_our_market` produced a policy that pressed on no price and charged the
+## Crown every month for it, because `enact_policy` has no resource to give it.
+## Refused here rather than enacted and ignored. The effect that can name one
+## waits for a letter to carry it (#396).
+static func build_policy_order(args: Dictionary, context: LetterContext) -> Order:
+	var effect := StringName(args.get("effect", ""))
+	var needs_one := PolicyEffects.is_aimed_at_a_resource(effect)
+	if needs_one != args.has("resource"):
+		push_error("'%s' %s; use %s." % [
+			effect,
+			"needs a resource" if needs_one else "takes no resource",
+			"a letter that names one" if needs_one else "enact_policy",
+		])
+		return null
+	return Order.new(
+		ORDER_ENACT_POLICY,
+		StringName(args.get("to", "")),
+		args.duplicate(),
 		context.month,
 	)
 

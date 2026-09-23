@@ -172,6 +172,33 @@ func test_it_moves_only_what_it_names() -> void:
 		"a policy about horses moved the price of furs")
 
 
+# --- 🔒 A market policy needs its market (#396) ------------------------------
+
+## The Order a reply option produces, built the way the desk builds it.
+func _proposed(effect_id: String, args: Dictionary) -> Order:
+	var context := LetterContext.new(_state(3), enactor, Tone.DUTIFUL)
+	return ContentRegistry.run_effect(effect_id, args, context)
+
+
+func test_a_market_policy_with_no_market_is_refused() -> void:
+	# It used to be enacted, charged every month, and press on nothing.
+	assert_true(null == _proposed("enact_policy", {
+		"to": "steward", "effect": "favour_our_market", "cost": 80, "split": "all",
+	}), "a market policy with no market was enacted")
+	assert_true(null != _proposed("enact_policy", {
+		"to": "steward", "effect": "encourage_immigration", "cost": 80, "split": "all",
+	}), "an ordinary policy stopped being enactable")
+
+
+func test_the_target_survives_a_save() -> void:
+	book.enact(Policy.new(&"steward", PolicyEffects.FAVOUR_OUR_MARKET, 80.0,
+		Policy.ALL, {"resource": "horses"}), log, 3)
+	var restored := PolicyBook.from_dict(book.to_dict())
+	assert_eq(PolicyEffects.world_key(restored.active()[0]),
+		PolicyEffects.world_key(book.active()[0]),
+		"the market a policy was aimed at did not survive the save")
+
+
 func test_pressure_is_recomputed_rather_than_accumulated() -> void:
 	# A policy that ended should stop pressing **the month it ends**. A value
 	# that had been added to would have to be subtracted from by somebody who
