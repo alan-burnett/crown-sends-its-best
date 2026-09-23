@@ -446,6 +446,7 @@ func validate_trigger(record: Dictionary) -> void:
 				_problem("params.%s" % name, problem)
 
 	_check_recall_gates(params, conditions)
+	_check_reports(params, conditions)
 
 	for index in conditions.size():
 		var entry: Variant = conditions[index]
@@ -501,6 +502,56 @@ func _check_recall_gates(params: Variant, conditions: Array) -> void:
 					% [reach, gate])
 
 
+## 🔒 **A report reads only what it can understand, and only when it
+## happened** (#398).
+##
+## `it_happened` and `what_happened` name an event, whom it concerns and a field.
+## Each must be one `ReportableEvents` knows; and a `what_happened` param needs an
+## `it_happened` gate on the same event and scope, or the letter prints an empty
+## name for an event that never took place.
+func _check_reports(params: Variant, conditions: Array) -> void:
+	var gated: Dictionary = {}
+	for index in conditions.size():
+		var entry: Variant = conditions[index]
+		if typeof(entry) != TYPE_DICTIONARY or not entry.has("it_happened"):
+			continue
+		var args: Dictionary = entry["it_happened"]
+		var event := String(args.get("event", ""))
+		var concerning := String(args.get("concerning", ""))
+		_check_report_scope("conditions[%d].it_happened" % index, event, concerning)
+		gated["%s/%s" % [event, concerning]] = true
+
+	if typeof(params) != TYPE_DICTIONARY:
+		return
+	var names: Array = params.keys()
+	names.sort()
+	for name in names:
+		var spec: Variant = params[name]
+		if typeof(spec) != TYPE_DICTIONARY or String(spec.get("from", "")) != "what_happened":
+			continue
+		var event := String(spec.get("event", ""))
+		var concerning := String(spec.get("concerning", ""))
+		var path := "params.%s" % name
+		if not _check_report_scope(path, event, concerning):
+			continue
+		if ReportableEvents.field_kind(event, String(spec.get("field", ""))).is_empty():
+			_problem(path, "'%s' carries no readable field '%s'" % [event, spec.get("field", "")])
+		if not gated.has("%s/%s" % [event, concerning]):
+			_problem(path, (
+				"reads '%s' concerning %s without an it_happened gate on the same, "
+				+ "so it can name something that never happened") % [event, concerning])
+
+
+func _check_report_scope(path: String, event: String, concerning: String) -> bool:
+	if not ReportableEvents.is_reportable(event):
+		_problem(path, "'%s' is not a reportable event (see ReportableEvents)" % event)
+		return false
+	if not ReportableEvents.can_concern(event, concerning):
+		_problem(path, "'%s' cannot be asked about as '%s'" % [event, concerning])
+		return false
+	return true
+
+
 ## Every param a letter declares must be supplied by the trigger that fires it,
 ## or the director has nothing to put in the slot.
 func check_trigger_params(content: ContentDatabase) -> void:
@@ -524,6 +575,16 @@ func check_trigger_params(content: ContentDatabase) -> void:
 		for name in letter.params:
 			if not supplied.has(name):
 				_problem("params", "'%s' declares param '%s', which this trigger does not supply" % [letter_id, name])
+				continue
+			# 🔒 **A reported field is the type the letter expects** (#398): a
+			# tribe's name in a `tribe` param, a head count in an `integer` one.
+			var spec: Variant = supplied[name]
+			if typeof(spec) == TYPE_DICTIONARY and String(spec.get("from", "")) == "what_happened":
+				var kind := ReportableEvents.field_kind(
+					String(spec.get("event", "")), String(spec.get("field", "")))
+				if not kind.is_empty() and kind != String(letter.params[name]):
+					_problem("params.%s" % name, "reads a %s into a param declared %s" % [
+						kind, letter.params[name]])
 
 
 ## Report any registered effect that no letter uses.

@@ -28,6 +28,12 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"treasury_honoured_this_year", {}, ColonyParamSources.treasury_honoured_this_year
 	)
+	# What the reported event carried, as a name or a number (#398).
+	ContentRegistry.register_param_source(
+		"what_happened",
+		{"event": "string", "within": "integer", "concerning": "string", "field": "string"},
+		ReportableEvents.what_happened,
+	)
 	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
 	ContentRegistry.register_param_source(
 		"patron_who_spoke", {"fallback": "string"}, ColonyParamSources.patron_who_spoke

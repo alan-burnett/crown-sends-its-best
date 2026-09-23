@@ -99,6 +99,13 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"remembers_a_slight", {}, ColonyConditions.remembers_a_slight
 	)
+	# **Something happened that a letter may report** (#398). Any event in
+	# `ReportableEvents`, concerning the sender, his town or the colony.
+	ContentRegistry.register_condition(
+		"it_happened",
+		{"event": "string", "within": "integer", "concerning": "string"},
+		ReportableEvents.it_happened,
+	)
 	ContentRegistry.register_condition(
 		"remembers_a_broken_word", {}, ColonyConditions.remembers_a_broken_word
 	)
