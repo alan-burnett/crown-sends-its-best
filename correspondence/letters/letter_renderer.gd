@@ -24,9 +24,24 @@ extends RefCounted
 const CLINGING_PUNCTUATION: String = ",.;:!?)"
 
 
-## Render a letter's body.
+## Render a letter's body, **addressed to the PC**.
+##
+## 🔒 **The salutation is prepended here rather than written into each
+## letter file** (#358, `names.md` §2). It is a property of how the PC is
+## addressed, which is the same for every letter of a given tone, so a copy at
+## the top of eighty files would be eighty things to reword — and a letter
+## authored next year would forget.
+##
+## It is on the body alone. A reply's prose is the PC writing, and a man does not
+## address himself.
 func render_body(letter: Letter, context: LetterContext) -> String:
-	return render_lines(letter.body, letter, context)
+	var body := render_lines(letter.body, letter, context)
+	var addressed := Salutation.for_pc(context.tone, context.pc)
+	if addressed.is_empty():
+		return body
+	if body.is_empty():
+		return addressed
+	return "%s %s" % [addressed, body]
 
 
 ## Render any list of lines — body, closing, or the prose on a reply option.

@@ -69,6 +69,7 @@ func reset_world() -> void:
 	Threshold.reset()
 	Consultation.reset()
 	HarshClause.reset()
+	Salutation.reset()
 	IndependenceClause.reset()
 	NameBags.reset()
 	ContactRoster.reset()

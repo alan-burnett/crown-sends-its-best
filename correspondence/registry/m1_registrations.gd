@@ -114,6 +114,10 @@ static func load_resources(content: ContentDatabase) -> void:
 	# language-suffixed folder with everything else the player reads.
 	if content.has_record(HarshClause.COLLECTION, HarshClause.RECORD):
 		HarshClause.load_from(content.record(HarshClause.COLLECTION, HarshClause.RECORD))
+	# How a letter addresses the PC (#358). The other end of `names.md` §2 from
+	# the letterhead, and prose for the same reason.
+	if content.has_record(Salutation.COLLECTION, Salutation.RECORD):
+		Salutation.load_from(content.record(Salutation.COLLECTION, Salutation.RECORD))
 	if content.has_record(IndependenceClause.COLLECTION, IndependenceClause.RECORD):
 		IndependenceClause.load_from(
 			content.record(IndependenceClause.COLLECTION, IndependenceClause.RECORD))

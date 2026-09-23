@@ -73,8 +73,33 @@ static func load_from(content: ContentDatabase) -> void:
 		_bags[String(id)] = content.record(COLLECTION, String(id)).duplicate(true)
 
 
+## Names this run may not give to anybody, because something living already has
+## one (#358, §5 *no two live things share a name*).
+##
+## 🔒 **The PC is the one thing in the game that is not generated**, so he is
+## the one thing a bag cannot avoid on its own — a patron who happened to share
+## his name would read as a mistake even though nothing was wrong. Everybody else
+## is drawn from here and could in principle be checked against everybody else;
+## this is the case that has to be told.
+##
+## It costs a set membership. Run-scoped, like everything else a run turns.
+static var _struck: Dictionary = {}
+
+
 static func reset() -> void:
 	_bags = {}
+	_struck = {}
+
+
+## Take a name out of circulation for this run.
+static func strike(name: String) -> void:
+	var trimmed := name.strip_edges()
+	if not trimmed.is_empty():
+		_struck[trimmed] = true
+
+
+static func is_struck(name: String) -> bool:
+	return _struck.has(name.strip_edges())
 
 
 static func has(bag: String) -> bool:
@@ -107,10 +132,20 @@ static func person(bag: String, rng: RandomNumberGenerator) -> String:
 	var family := entries(bag, "family")
 	if given.is_empty() or family.is_empty() or rng == null:
 		return ""
-	return "%s %s" % [
-		String(given[rng.randi_range(0, given.size() - 1)]),
-		String(family[rng.randi_range(0, family.size() - 1)]),
-	]
+	# 🔒 **Two draws, always**, whatever is struck. Walking forward from the
+	# drawn family name rather than drawing again is what `place` does and for the
+	# same reason: a run that has struck a name must not consume a different number
+	# of rolls than one that has not, or the PC typing his own name would change
+	# who his patrons are.
+	var first := String(given[rng.randi_range(0, given.size() - 1)])
+	var at := rng.randi_range(0, family.size() - 1)
+	for step in family.size():
+		var whole := "%s %s" % [first, String(family[(at + step) % family.size()])]
+		if not is_struck(whole):
+			return whole
+	# Every surname in the bag makes a struck name with this given one. Better a
+	# repeat than a man with no name.
+	return "%s %s" % [first, String(family[at])]
 
 
 ## A town's name, avoiding any the colony already uses.

@@ -235,6 +235,15 @@ static func from_setup(setup: RunSetup) -> RunState:
 		setup.seed_value, Vector2i(-1, -1), setup.request, setup.proximity)
 	run.setup = setup
 
+	# 🔒 **The name he sails under is struck from the bag** (#358,
+	# `names.md` §1, §5). Here rather than on the setup screen alone, because a run
+	# assembled without one — the harness, a fixture, `play.gd` — has a PC too, and
+	# a patron sharing his name would read as a mistake in any of them.
+	#
+	# The bag is empty until content is loaded, in which case this strikes a name
+	# nobody can draw anyway and costs nothing.
+	setup.settle_the_name(setup.seed_value)
+
 	# **The perk, applied where the mechanic already was.** `CrownRefusal` has
 	# carried a grace since #68 with nothing able to switch it on.
 	# 🔒 **A perk names a knob** (#286, `perks-and-quirks.md` §2), and the

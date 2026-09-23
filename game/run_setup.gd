@@ -63,8 +63,33 @@ const SPLITS: Array[StringName] = [SPLIT_PEOPLE, SPLIT_GOLD, SPLIT_STORES]
 
 # --- Flavour, and nothing but ----------------------------------------------
 
+## 🔒 **The PC is named by the player, and the game guesses first**
+## (#358, `names.md` §1; SPEC §5 — *flavor only and has no effect*).
+##
+## 🔒 **The default title is *Lord*, and that is not a preference.** It was
+## *Governor*, and `names.md` §2 makes the first word of a letterhead the role —
+## so a PC styled *Governor* read exactly like one of his own colonial governors.
+## **It removes a collision.**
+##
+## The name is a placeholder until `suggest_a_name` has a bag to draw from, which
+## is content and arrives later than this object does.
 var pc_name: String = "Ashcombe"
-var pc_title: String = "Governor"
+var pc_title: String = DEFAULT_TITLE
+
+## What the player is allowed to type, **measured after trimming**.
+##
+## 🔒 **A minimum of one is what removes the empty case**, so nothing
+## downstream needs a fallback for a nameless PC — there is no such PC. It has to
+## be after trimming, or a single space satisfies a naive length check and puts
+## that case straight back.
+##
+## The maxima exist because both land in period-style prose and in a salutation
+## line that has to fit a phone (SPEC §15).
+const DEFAULT_TITLE: String = "Lord"
+const TITLE_MIN: int = 1
+const TITLE_MAX: int = 20
+const NAME_MIN: int = 1
+const NAME_MAX: int = 48
 var portrait: String = "portrait_default"
 var colour: Color = Color(0.42, 0.29, 0.20)
 
@@ -112,6 +137,75 @@ var proximity: StringName = Tribes.APART
 ## one, and every answer has sea within reach whatever was asked for.
 func site_in(map: WorldMap) -> Vector2i:
 	return SiteRequest.choose(map, request)
+
+
+## Whether what the player typed is a title, once it has been trimmed.
+static func is_a_title(text: String) -> bool:
+	var trimmed := text.strip_edges()
+	return trimmed.length() >= TITLE_MIN and trimmed.length() <= TITLE_MAX
+
+
+## Whether what the player typed is a name, once it has been trimmed.
+static func is_a_name(text: String) -> bool:
+	var trimmed := text.strip_edges()
+	return trimmed.length() >= NAME_MIN and trimmed.length() <= NAME_MAX
+
+
+## A name for a minor royal, from the **aristocrats'** bag.
+##
+## 🔒 **The same pool his patrons come from**, which is the point: he is one
+## of them, sent out. `names.md` §1.
+##
+## From the run's own seed, through a stream of its own, so the suggestion is the
+## same for a given chart and **drawing it shifts nobody else's rolls** — a PC who
+## retyped his name would otherwise have got different patrons
+## (`CLAUDE.md`, determinism).
+static func suggest_a_name(seed_value: int) -> String:
+	return NameBags.person(
+		NameBags.ARISTOCRATS, RngStreams.new(seed_value).contact_stream("the_pc"))
+
+
+## What the screen should pre-fill the name field with.
+##
+## The player's, if he has already typed one — a run rerolled to another chart
+## keeps the name he chose.
+func suggested_name() -> String:
+	if not pc_name.strip_edges().is_empty():
+		return pc_name.strip_edges()
+	var suggested := RunSetup.suggest_a_name(seed_value)
+	return suggested if not suggested.is_empty() else pc_name
+
+
+## Why these two will not do, or "" if they will.
+##
+## 🔒 **One function, so the screen and a test ask the same question.** A
+## screen with its own idea of what is too long is a second source of truth and
+## the one the player actually meets.
+static func what_is_wrong_with(title: String, name: String) -> String:
+	if not is_a_title(title):
+		return "A style is between %d and %d characters." % [TITLE_MIN, TITLE_MAX]
+	if not is_a_name(name):
+		return "A name is between %d and %d characters." % [NAME_MIN, NAME_MAX]
+	return ""
+
+
+## Fill in what the player has not chosen, and strike the name he keeps.
+##
+## 🔒 **A guessed name he keeps is struck from the bag for that run**
+## (`names.md` §1, §5's rule applied to the one thing that is not generated). A
+## patron who happened to share the PC's name would read as a mistake even though
+## nothing was wrong, and it costs a set membership.
+##
+## It strikes whatever he ends up with, typed or suggested. A player who names
+## himself after a man the bag also holds has the same claim on it.
+func settle_the_name(seed_value: int) -> void:
+	if pc_name.strip_edges().is_empty():
+		var suggested := RunSetup.suggest_a_name(seed_value)
+		if not suggested.is_empty():
+			pc_name = suggested
+	pc_name = pc_name.strip_edges()
+	pc_title = pc_title.strip_edges()
+	NameBags.strike(pc_name)
 
 
 func has_perk(id: StringName) -> bool:

@@ -4,13 +4,11 @@
   "type": "news",
   "skippable": false,
   "params": {
-    "years": "integer",
-    "pc_title": "pc",
-    "pc_name": "pc"
+    "years": "integer"
   },
   "body": [
     {
-      "text": "{param:pc_title} {param:pc_name}. You have had {param:years} years of us, and we have had {param:years} years of you. I write to tell you that the arrangement is changing, and that you had no part in the decision."
+      "text": "You have had {param:years} years of us, and we have had {param:years} years of you. I write to tell you that the arrangement is changing, and that you had no part in the decision."
     },
     {
       "text": "His Majesty's obligations have grown. They did not grow because of anything you did or failed to do out there, which I say partly to spare your feelings and partly because it is true."

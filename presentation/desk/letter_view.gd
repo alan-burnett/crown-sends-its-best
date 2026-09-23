@@ -151,11 +151,22 @@ func _build_options() -> PanelContainer:
 	return panel
 
 
+## 🔒 **`<Role> <name>` and then a qualifier** (`names.md` §2), which is
+## what `Letterhead` is for.
+##
+## This read `display_name` and `title` and rendered *Corvyn Thrale, Steward of
+## the Revenue* — and `contact.gd` carries a lock two lines long saying **no
+## letter reads `title` and the letterhead must not**, because the first word is
+## the role and it is there to be **scanned**. An experienced player should know
+## what came in without opening anything, and a stack of *Governor. Commander.
+## Patron.* tells him the month where a stack of styles tells him nothing.
+##
+## `Letterhead.of` existed, was tested, and nothing in `presentation/` called it.
 func _sender_line() -> String:
 	if context.sender == null:
 		return String(inbound.sender)
-	var title := context.sender.title
-	return context.sender.display_name if title.is_empty() else "%s, %s" % [context.sender.display_name, title]
+	var head := Letterhead.of(context.sender)
+	return head if not head.is_empty() else context.sender.display_name
 
 
 # --- Layout ----------------------------------------------------------------

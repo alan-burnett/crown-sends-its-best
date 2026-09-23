@@ -1,0 +1,12 @@
+{
+  "id": "salutation",
+  "note": "How a letter addresses the PC (issue 358, names.md section 2). Tone-keyed, because the whole line moves with the writer's tone and not just an adjective in front of a fixed name - note that the hateful form drops the title entirely, which is a contact refusing the PC his style and a thing the prose has to be able to say. Two slots, {title} and {name}, both of which the player typed at Run Setup; a form that omits {title} withholds it. Prose, so the folder carries the language and a second language is a copied folder where only these strings change. One place rather than a line in every letter file: the salutation is a property of how the PC is addressed, which is the same for every letter of a given tone, and a per-file copy would go stale the moment one of them was reworded.",
+  "by_tone": {
+    "pleased": "To the most noble {title} {name},",
+    "dutiful": "To {title} {name},",
+    "annoyed": "To {title} {name}.",
+    "desperate": "To {title} {name}, and I pray you read it,",
+    "hateful": "To the despicable {name}."
+  },
+  "default": "To {title} {name},"
+}

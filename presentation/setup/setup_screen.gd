@@ -90,6 +90,7 @@ var _column: VBoxContainer = null
 var _seed_label: Label = null
 var _name_field: LineEdit = null
 var _title_field: LineEdit = null
+var _complaint: Label = null
 var _mandate_buttons: Array[Button] = []
 var _split_buttons: Array[Button] = []
 var _request_buttons: Array[Button] = []
@@ -145,8 +146,16 @@ func _build() -> void:
 
 	_rule()
 	_heading("The appointment")
-	_name_field = _field("Name", setup.pc_name)
+	# 🔒 **Both fields arrive filled in** (#358, `names.md` §1). The name is
+	# drawn from the **aristocrats'** bag, which is the pool his patrons come from
+	# and the right one for a minor royal.
+	_name_field = _field("Name", setup.suggested_name())
+	_name_field.max_length = RunSetup.NAME_MAX
 	_title_field = _field("Style", setup.pc_title)
+	_title_field.max_length = RunSetup.TITLE_MAX
+	_complaint = _note("")
+	_complaint.add_theme_color_override("font_color", DeskTheme.SEAL)
+	_complaint.visible = false
 
 	_rule()
 	_heading("The Crown's purpose")
@@ -298,10 +307,21 @@ func _on_reseed() -> void:
 func _on_begin() -> void:
 	# Read the flavour at the last moment, so a player who is still typing when
 	# he taps is not punished for it.
+	var complaint := RunSetup.what_is_wrong_with(
+		_title_field.text, _name_field.text)
+	if not complaint.is_empty():
+		# 🔒 **Refused, not quietly corrected.** The old code substituted
+		# *Ashcombe* for an empty name, which meant a player who cleared the field
+		# and tapped sailed as somebody else without being told. A field he typed
+		# into is a field he meant.
+		_complaint.text = complaint
+		_complaint.visible = true
+		return
+
 	setup.pc_name = _name_field.text.strip_edges()
 	setup.pc_title = _title_field.text.strip_edges()
-	if setup.pc_name.is_empty():
-		setup.pc_name = "Ashcombe"
+	# And the name he sailed under is not a name a patron may also carry.
+	setup.settle_the_name(setup.seed_value)
 	begun.emit(setup)
 
 
