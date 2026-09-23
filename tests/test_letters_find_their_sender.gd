@@ -56,6 +56,13 @@ func _another_town(run: RunState, id: StringName, name: String) -> Contact:
 	return governor
 
 
+## A patron, who arrives from the Squeeze and is therefore never in a fresh run.
+func _a_patron(run: RunState) -> Contact:
+	var patron := Patron.generate(run.patrons.next_id(), run.streams, 0)
+	run.add_contact(patron)
+	return patron
+
+
 func _letter(id: String) -> Letter:
 	return Letter.from_record(content.record("letters", id))
 
@@ -163,7 +170,15 @@ func test_every_letter_that_ships_has_somebody_who_could_send_it() -> void:
 	# 🔒 The measurement in #361, turned into a guard. Six letters could never
 	# fire — including `town_has_declared` and `we_are_coming_back`, which are how
 	# the player finds out a town has gone and come back.
+	#
+	# **A run with everybody in it who ever turns up**, not a run on its first
+	# month. A patron arrives from the Squeeze rather than at founding (#388,
+	# `patrons.md` §7), so a fresh colony has none — and the guard is about a
+	# sender nobody could *ever* hold, not about who happens to be here in month
+	# zero. Asking the empty run would have this fail for every role that arrives
+	# later, which is most of them.
 	var run := _run()
+	_a_patron(run)
 	var orphaned := PackedStringArray()
 	for id in content.ids("letters"):
 		var letter := _letter(String(id))

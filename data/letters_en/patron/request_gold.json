@@ -1,0 +1,108 @@
+{
+  "id": "patron.request_gold",
+  "sender": "patron",
+  "type": "demand",
+  "skippable": false,
+  "note": "Issue 388, patrons.md section 10. Modelled on rival_duke.tribute_demand - same shape, different currency, and deliberately not the same letter. A duke describes a difficulty he has and lets the PC draw the conclusion; a patron is asking a favour of somebody he likes, and the letter must not read as a threat. The difference that matters is what refusal costs: a duke's costs prestige through an optic and defers an attack, a patron's costs his regard, which prestige.md section 2 already makes a live term - so refusing a patron is a prestige loss that arrives quietly, through the man, rather than as a debt entered against the PC. He names the date once he has given notice (section 8), because the six months are the last chance to move what he banks and the PC is meant to know it to the month. The doc's 'every letter from here names the date' is NOT here: body lines carry no conditions (only reply options do), so a line about his departure would render for a man who had not given notice. Flagged on the ticket rather than growing the renderer a feature nobody asked for; patron.taking_his_leave names the date, which is what the acceptance asks.",
+  "params": {
+    "patron": "contact",
+    "amount": "gold"
+  },
+  "body": [
+    {
+      "text": "I am afraid this is the sort of letter I told you I would not write, and here it is."
+    },
+    {
+      "text": "A matter at home has gone against me. It is nobody's doing and there is no villain in it, which somehow makes it worse. The short of it is that I am {param:amount} short of where I should like to be, and the people I would ordinarily ask are the people I am short because of."
+    },
+    {
+      "text": "It would be a kindness, and I should not forget it. I am aware that is what everybody says. I would point out that I am in a position to make it true.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "It would be a kindness. I am aware I have not always made myself easy to be kind to.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "If you cannot, say so plainly and we will speak of it no more. I would rather a clean no than a long silence, and I have had a great many long silences lately."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and was sorry to hear it"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your letter"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered what you ask"
+        },
+        {
+          "tone": "desperate",
+          "text": "and must be honest about the colony's state"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "kindness",
+        "prompt": "What he is asking for",
+        "options": [
+          {
+            "id": "pay",
+            "label": "send him the money",
+            "text": "The sum will be sent. Do not make anything of it{insert:grace}.",
+            "insert": {
+              "grace": {
+                "pleased": ", and do not thank me at length"
+              }
+            },
+            "effect": {
+              "promise_gold": {
+                "to": "{patron}",
+                "amount": "{amount}"
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "tell him plainly that you cannot",
+            "text": "You asked for a clean no and you shall have one. There is nothing here to send{insert:sting}.",
+            "insert": {
+              "sting": {
+                "hateful": ", and there would be nothing if there were"
+              }
+            },
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

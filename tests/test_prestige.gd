@@ -45,6 +45,13 @@ func _protest(log: EventLog, month: int, town: StringName = &"ashmere") -> void:
 	}, WorldPhase.COLONY_MONTH)
 
 
+## Bank a deed done to a patron, through the event prestige actually reduces.
+func _a_kindness_done(log: EventLog, month: int, amount: float) -> void:
+	log.emit(Prestige.EVENT_PATRON_CREDIT, &"patron_1", month, {
+		"contact": "patron_1", "deed": "granted", "amount": amount,
+	}, WorldPhase.RECKONING)
+
+
 func _rebellion(log: EventLog, month: int, town: StringName = &"ashmere") -> void:
 	log.emit(Rebellion.EVENT_DECLARED, town, month, {
 		"town": String(town), "population": 40, "governor": "governor_ashmere",
@@ -239,14 +246,35 @@ func test_a_black_mark_ruins_a_small_man_and_embarrasses_a_great_one() -> void:
 
 # --- The terms, and the save -------------------------------------------------
 
-func test_the_patron_term_exists_and_reads_zero() -> void:
-	# Patrons are M7 (SPEC §8.3). It is named here so that milestone fills it in
-	# rather than threading a third term through everything.
+func test_the_patron_term_moves() -> void:
+	# 🔒 **It used to read zero and this test used to assert that** (#388),
+	# with a note saying patrons are M7 and that milestone would fill it in. M7
+	# built the machinery and did not: `PatronCredit.bank` had two callers and
+	# neither could be reached, because no letter from a patron existed and so no
+	# Order could ever be addressed to one. **A term in the formula that cannot
+	# move is not a term**, and a test asserting it reads zero is a test defending
+	# the hole.
 	var log := _log()
 	_received(log, 1, 700.0)
 	assert_almost_eq(float(Prestige.of(log)["patron_credit"]), 0.0, 0.0001,
-		"patrons contribute before patrons exist")
+		"credit was banked before the PC answered anybody")
 	assert_almost_eq(float(Prestige.of(log)["total"]), 700.0, 0.001)
+
+	_a_kindness_done(log, 2, 90.0)
+	assert_true(float(Prestige.of(log)["patron_credit"]) > 0.0,
+		"the PC did a patron a kindness and the court heard nothing")
+	assert_true(float(Prestige.of(log)["total"]) > 700.0,
+		"the term moved and the score did not")
+
+
+func test_the_patron_term_falls_as_well_as_rises() -> void:
+	# 🔒 **Granting is a favour and refusing is a slight**, and both are things
+	# he will say at court. A term that could only rise would make a patron a free
+	# source of prestige and the whole of §1's drain meaningless.
+	var log := _log()
+	_a_kindness_done(log, 1, -120.0)
+	assert_true(float(Prestige.of(log)["patron_credit"]) < 0.0,
+		"the PC turned a patron down and it cost him nothing at court")
 
 
 func test_gold_enters_linearly_and_with_no_ceiling() -> void:

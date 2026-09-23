@@ -28,6 +28,12 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"patron_who_spoke", {"fallback": "string"}, ColonyParamSources.patron_who_spoke
 	)
+	ContentRegistry.register_param_source(
+		"patron_ask", {}, ColonyParamSources.patron_ask
+	)
+	ContentRegistry.register_param_source(
+		"patron_leaves_in", {}, ColonyParamSources.patron_leaves_in
+	)
 	ContentRegistry.register_param_source("town_name", {}, ColonyParamSources.town_name)
 	ContentRegistry.register_param_source(
 		"idle_building", {"field": "building"}, ColonyParamSources.idle_building
@@ -628,6 +634,35 @@ static func tribute_amount(_args: Dictionary, context: LetterContext) -> Variant
 	var band := RivalDuke.band_of(context.loyalty())
 	return maxf(1.0, DemandSchedule.gold_target(context.demands)
 		* RivalDuke.tribute_multiple(band))
+
+
+## 🔒 **What a patron asks for when a matter at home has gone against him**
+## (#388, `patrons.md` §10).
+##
+## A share of the Crown's own monthly ask, so it grows with the colony exactly as
+## every other figure the PC is asked for does — a fixed sum would be ruinous in
+## year one and beneath notice in year eight.
+##
+## 🔒 **Below what a duke demands, and that is the difference between them.**
+## A duke is describing a difficulty he has and letting the PC draw the
+## conclusion; a patron is asking a favour of somebody he likes, and a favour
+## that beggared the colony would not be one. The share is tuning and M8 owns it.
+const PATRON_ASK_SHARE: float = 0.55
+
+
+static func patron_ask(_args: Dictionary, context: LetterContext) -> Variant:
+	return maxf(1.0, DemandSchedule.gold_target(context.demands) * PATRON_ASK_SHARE)
+
+
+## How many months until this patron goes (#388, `patrons.md` §8).
+##
+## 🔒 **Every letter from here names the date**, and the reason is that his
+## final loyalty banks permanently when he leaves: the six months are the last
+## chance to move it and the PC is supposed to know it to the month.
+static func patron_leaves_in(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null or context.sender == null:
+		return 0
+	return PatronTerm.months_left(context.sender, context.month)
 
 
 ## How many of this town's fields somebody's men are standing on (#188).

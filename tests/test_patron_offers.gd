@@ -406,3 +406,190 @@ func _code_of(path: String) -> String:
 		if not String(line).strip_edges().begins_with("#"):
 			kept.append(String(line))
 	return "\n".join(kept)
+
+# --- 🔒 He writes, and answering him reaches prestige (#388) ----------------
+
+func _letter(id: String) -> Letter:
+	return Letter.from_record(content.record("letters", id))
+
+
+func _context_for(run: RunState, patron: Contact, month: int = 3) -> LetterContext:
+	var context := LetterContext.new(run.world, patron, Tone.DUTIFUL)
+	context.log = run.log
+	context.month = month
+	context.pc = run.setup
+	context.demands = run.demands
+	context.contacts = run.contacts
+	return context
+
+
+## Put an Order on a patron's desk the way answering his letter does, and run
+## the month's compliance over it.
+func _answer(run: RunState, patron: Contact, kind: StringName, params: Dictionary) -> Dictionary:
+	var order := Order.new(kind, patron.id, params)
+	return Compliance.resolve(
+		order, patron, run.intents, run.world, run.log, run.streams)
+
+
+func test_a_patron_has_letters_of_his_own() -> void:
+	# 🔒 The acceptance line, and the whole of the finding: there was no
+	# `data/letters_en/patron/` at all, and the only time one reached the desk was
+	# a third party reporting that a man the PC had never met had been rude about
+	# him at court.
+	for id in ["patron.introduction", "patron.request_gold", "patron.taking_his_leave"]:
+		assert_true(content.has_record("letters", id), "%s does not exist" % id)
+		assert_eq(String(_letter(id).sender), "patron",
+			"%s is not sent by a patron" % id)
+
+
+func test_one_file_serves_every_patron() -> void:
+	# 🔒 §7's template pattern: `sender` names no contact, so the director reads
+	# it as a role and expands it to one candidate per man holding it, each with
+	# his own context. Three patrons do not need three files.
+	var run := _run()
+	var first := _patron(run, 0, 60.0)
+	var second := _patron(run, 0, 60.0)
+	assert_ne(first.id, second.id, "the fixture made one man twice")
+
+	var senders := Director.new(content).senders_of(_letter("patron.introduction"), run)
+	var ids := PackedStringArray()
+	for contact in senders:
+		ids.append(String((contact as Contact).id))
+	assert_true(ids.has(String(first.id)) and ids.has(String(second.id)),
+		"one of the two patrons could not send his own introduction: %s" % ids)
+
+
+func test_the_pc_still_cannot_write_to_a_patron_unprompted() -> void:
+	# 🔒 §1, the Author's ruling: **the duke's model exactly.** You read what he
+	# sends and you answer it. `data/letters_en/pc/` gains nothing, and the lever
+	# is reactive rather than absent — a reply produces an Order addressed to the
+	# sender, which is the same path every other contact's compliance runs.
+	# A composable letter is one with `to_roles`; that list is the whole of who
+	# the PC may pick from, so asking it is asking the question directly.
+	var composable := 0
+	for id in content.ids("letters"):
+		var record: Dictionary = content.record("letters", String(id))
+		var roles: Array = record.get("to_roles", [])
+		if roles.is_empty():
+			continue
+		composable += 1
+		assert_false(roles.has(String(Contact.ROLE_PATRON)),
+			"%s lets the PC compose a letter to a patron" % id)
+	assert_true(composable > 0, "no letter is composable at all, so this proves nothing")
+
+
+func test_answering_him_well_banks_credit() -> void:
+	# 🔒 The acceptance line. `PatronCredit.bank` had two callers and neither
+	# could be reached: `PatronOffer.settle`, which nothing called, and
+	# `compliance.gd`, which banks on an Order addressed to a patron — and no
+	# Order could be addressed to one, because no letter from one existed.
+	var run := _run()
+	var patron := _patron(run, 0, 60.0)
+
+	assert_almost_eq(float(Prestige.of(run.log)["patron_credit"]), 0.0, 0.0001,
+		"credit was banked before the PC answered anything")
+
+	_answer(run, patron, M1Registrations.ORDER_GRANT_FAVOR,
+		{"to": String(patron.id), "favor": "the colony's friendship"})
+
+	assert_true(float(Prestige.of(run.log)["patron_credit"]) > 0.0,
+		"the PC welcomed a patron and the court heard nothing of it")
+
+
+func test_refusing_him_costs_credit_and_his_regard() -> void:
+	# 🔒 **The difference from a duke is what refusal costs.** A duke's costs
+	# prestige through an optic; a patron's costs his regard, which is a live
+	# term — so refusing a patron is a prestige loss that arrives quietly,
+	# through the man, rather than as a debt entered against the PC.
+	var run := _run()
+	var patron := _patron(run, 0, 60.0)
+	var before := patron.loyalty()
+
+	_answer(run, patron, M1Registrations.ORDER_REFUSE, {"to": String(patron.id)})
+
+	assert_true(patron.loyalty() < before,
+		"the PC turned him down flat and he thought no less of him")
+	assert_true(float(Prestige.of(run.log)["patron_credit"]) < 0.0,
+		"a refusal cost nothing at court")
+
+
+func test_nothing_banks_for_a_man_who_is_not_a_patron() -> void:
+	# 🔒 One guard in one place. `compliance.gd` calls `bank` on every deed and it
+	# returns at once for everybody else, rather than compliance knowing which
+	# contacts are patrons — a guard at the call site is a rule somebody has to
+	# remember at the next call site.
+	var run := _run()
+	var steward := run.contact(&"steward")
+	assert_true(steward != null, "there is no Steward to answer")
+
+	_answer(run, steward, M1Registrations.ORDER_REFUSE, {"to": "steward"})
+	assert_almost_eq(float(Prestige.of(run.log)["patron_credit"]), 0.0, 0.0001,
+		"refusing a Crown officer banked patron credit")
+
+
+# --- 🔒 The six months, and the date he names ------------------------------
+
+func test_the_window_opening_is_a_letter_and_not_only_an_event() -> void:
+	# 🔒 §8: the PC is supposed to know it **to the month**, because his final
+	# loyalty banks permanently when he goes. `patron_leaving` had been emitted
+	# since #283 and read by nothing, so the deadline the doc designed as
+	# actionable was a number in a log.
+	var run := _run()
+	var patron := _patron(run, 0, 60.0)
+	var context := _context_for(run, patron)
+
+	assert_false(ColonyConditions.he_is_taking_his_leave({}, context),
+		"a man who has given no notice is already saying goodbye")
+
+	patron.leaves_month = context.month + PatronTerm.NOTICE_MONTHS
+	assert_true(ColonyConditions.he_is_taking_his_leave({}, context),
+		"he gave his notice and the letter could not tell")
+
+
+func test_the_letter_can_say_how_long_is_left() -> void:
+	var run := _run()
+	var patron := _patron(run, 0, 60.0)
+	var context := _context_for(run, patron)
+	patron.leaves_month = context.month + PatronTerm.NOTICE_MONTHS
+
+	assert_eq(int(ColonyParamSources.patron_leaves_in({}, context)),
+		PatronTerm.NOTICE_MONTHS,
+		"he named a date that is not the one he sails on")
+
+
+func test_the_introduction_is_asked_of_the_man_and_not_the_colony() -> void:
+	# 🔒 Every other patron in the post is a different man with a different
+	# arrival. A condition reading *any* arrival would have all of them
+	# introducing themselves at once on the month the third one came.
+	var run := _run()
+	var old_hand := _patron(run, 0, 60.0)
+	var newcomer := _patron(run, 0, 60.0)
+	run.log.emit(Patron.EVENT_ARRIVED, newcomer.id, 9, {}, WorldPhase.ARRIVALS)
+
+	var about_the_newcomer := _context_for(run, newcomer, 9)
+	assert_true(ColonyConditions.he_has_just_arrived({"within": 2}, about_the_newcomer),
+		"the man who just landed does not introduce himself")
+
+	var about_the_old_hand := _context_for(run, old_hand, 9)
+	assert_false(ColonyConditions.he_has_just_arrived({"within": 2}, about_the_old_hand),
+		"a patron of long standing introduced himself again because somebody else arrived")
+
+
+func test_what_he_proposes_is_gated_by_the_offer_model_and_not_the_letter() -> void:
+	# 🔒 §4's rule lives in `PatronOffer.shapes_at`, and a letter that made its
+	# own judgement about when a man is generous would be a second answer to a
+	# question the model already answers — and the two would disagree the first
+	# time either moved.
+	var run := _run()
+	var cold := _patron(run, 0, 5.0)
+	var warm := _patron(run, 0, 95.0)
+
+	assert_true(
+		ColonyConditions.he_would_propose({"shape": "request"}, _context_for(run, cold)),
+		"a man who thinks little of the PC will not even ask him for anything")
+	assert_false(
+		ColonyConditions.he_would_propose({"shape": "gift"}, _context_for(run, cold)),
+		"a man who thinks little of the PC is sending him presents")
+	assert_true(
+		ColonyConditions.he_would_propose({"shape": "gift"}, _context_for(run, warm)),
+		"a man who thinks the world of the PC will not send him anything")

@@ -1,0 +1,63 @@
+[
+  {
+    "id": "trigger.patron.introduction",
+    "letter": "patron.introduction",
+    "urgency": 0.5,
+    "cooldown": 240,
+    "note": "Issue 388, patrons.md section 7. He introduces himself once, on arrival. The cooldown is longer than any run so that a man cannot introduce himself twice, and the condition is asked of the SENDER rather than of the colony - every other patron in the post is a different man with a different arrival, and a condition reading any arrival would have all of them introducing themselves on the month the third one came. Urgency in the middle: it is the first thing he ever sends and it asks for nothing, so it should not shoulder a demand off the desk.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "he_has_just_arrived": {
+          "within": 2
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.request_gold",
+    "letter": "patron.request_gold",
+    "urgency": 0.6,
+    "cooldown": 14,
+    "note": "Issue 388, patrons.md section 10. Gated by loyalty through PatronOffer.shapes_at, which is where the rule about what a man will propose at what regard already lives - a letter that made its own judgement would be a second answer to a question the offer model already answers, and the two would disagree the first time either moved. A bare request is unconditional there, so this gates nothing today and gates everything for the four shapes #368 brings. Cooldown 14, as the duke's is: a man who asked twice a year would be a tax rather than a character. Urgency below a duke's 0.7, because a patron is asking a favour and a duke is describing a difficulty he has.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "amount": {
+        "from": "patron_ask"
+      }
+    },
+    "conditions": [
+      {
+        "he_would_propose": {
+          "shape": "request"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.taking_his_leave",
+    "letter": "patron.taking_his_leave",
+    "urgency": 0.8,
+    "cooldown": 240,
+    "note": "Issue 388, patrons.md section 8. Fires once, the month he gives notice, and the cooldown is longer than any run because a man gives notice once. High urgency: it is the month a closing window opens and the PC cannot act on a deadline he was not told about. patron_leaving had been emitted since #283 and read by nothing.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "leaves": {
+        "from": "patron_leaves_in"
+      }
+    },
+    "conditions": [
+      {
+        "he_is_taking_his_leave": {}
+      }
+    ]
+  }
+]

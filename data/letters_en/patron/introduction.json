@@ -1,0 +1,103 @@
+{
+  "id": "patron.introduction",
+  "sender": "patron",
+  "type": "question",
+  "skippable": false,
+  "note": "Issue 388, patrons.md section 7. One file serves every patron: the director reads a sender that names no contact as a role and expands it to one candidate per man holding it, each with his own context, so {sender:name} and {sender:specialty} are this patron's and not a template's. It establishes the correspondence and nothing else - which is the whole of its job, because a reply produces an Order addressed to the sender and that is the first thing in the game that can bank patron credit. Both answers are materially free; what they cost is his regard, which prestige.md section 2 already makes a live term.",
+  "params": {
+    "patron": "contact"
+  },
+  "body": [
+    {
+      "text": "{sender:name}, at your service, though we have not met and you have no particular reason to want me."
+    },
+    {
+      "text": "I have been following your colony's fortunes with rather more attention than is quite decent. A man at court must take an interest in something, and I have grown tired of horses."
+    },
+    {
+      "text": "I will not pretend to disinterest. I have {sender:specialty} to spare and a use for {sender:need}, and I would sooner deal with a man I have written to than one I have not. You will find I am reasonable and that I remember things.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I will not pretend to disinterest. I have {sender:specialty} to spare and a use for {sender:need}, and I am told you are difficult, which I mention so that neither of us is surprised later.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "Write back or do not. I shall draw my own conclusions either way, and I am afraid I shall share them."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and am glad of the acquaintance"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having read your letter"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having read your letter, and wondered at it"
+        },
+        {
+          "tone": "hateful",
+          "text": "and shall be brief"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "acquaintance",
+        "prompt": "What this man is to you",
+        "options": [
+          {
+            "id": "welcome",
+            "label": "welcome him, and say the colony is open to him",
+            "text": "You will find the colony open to you, and its governor glad of a correspondent who is not obliged to write. Send word when your season turns{insert:warmth}.",
+            "insert": {
+              "warmth": {
+                "pleased": ", and send it often"
+              }
+            },
+            "effect": {
+              "grant_favor": {
+                "to": "{patron}",
+                "favor": "the colony's friendship"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "tell him the colony has no need of a benefactor",
+            "text": "The colony answers to the Crown and is provisioned by it. I am sure your attentions would find a better object elsewhere{insert:edge}.",
+            "insert": {
+              "edge": {
+                "hateful": ", and I am sure you will look for one"
+              }
+            },
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

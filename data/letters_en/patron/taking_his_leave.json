@@ -1,0 +1,53 @@
+{
+  "id": "patron.taking_his_leave",
+  "sender": "patron",
+  "type": "news",
+  "skippable": true,
+  "speaks_to": 0,
+  "note": "Issue 388, patrons.md section 8. The window the whole patron game closes through: his final loyalty banks permanently when he goes, so these six months are the last chance to move it - and the PC is meant to know it TO THE MONTH. patron_leaving had been emitted since #283 and read by nothing, so the deadline the doc designed as actionable was a number in a log. The letter names the date and says plainly that business continues, because a man who stopped trading the month he gave notice would make the window worthless rather than valuable.",
+  "params": {
+    "patron": "contact",
+    "leaves": "integer"
+  },
+  "body": [
+    {
+      "text": "I am going home. Not immediately — I sail in {param:leaves} months, and I shall say so in every letter between now and then so that neither of us can pretend to have forgotten."
+    },
+    {
+      "text": "It is nothing you have done. My affairs want me and I have put them off twice already. One reaches an age where the putting-off costs more than the going."
+    },
+    {
+      "text": "Nothing changes until I sail. I shall trade as before, ask as before, and be as useful as I have been.",
+      "only_tones": [
+        "pleased",
+        "dutiful",
+        "annoyed"
+      ]
+    },
+    {
+      "text": "Nothing changes until I sail, which I say as a courtesy and not as an encouragement.",
+      "only_tones": [
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "When I am back at court I shall be asked about you. I mention it not as a threat — I am in no position to threaten anybody from a chair in Westminster — but because you should know the question will be put, and that I shall answer it honestly.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "When I am back at court I shall be asked about you, and I shall answer honestly. I would think about that, in your place.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    },
+    {
+      "text": "There is nothing to answer here. I am telling you the date, which is more than most men get."
+    }
+  ]
+}
