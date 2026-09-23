@@ -231,6 +231,24 @@ static func register_effects() -> void:
 		"enact_policy",
 		{"to": "contact", "effect": "string", "cost": "gold", "split": "string"},
 		ORDER_ENACT_POLICY,
+		M1Registrations.build_policy_order,
+	)
+	# 🔒 **A policy aimed at a resource** (#396, `policy.md` §8). Its own effect
+	# rather than `enact_policy` with an optional field, for the reason the
+	# Provost's knobs are: effect params are all required, and a different shape
+	# is a different effect. It produces the same Order kind, because it is the
+	# same act — the charge, the split and the renegotiation are all `policy.md`'s.
+	#
+	# A town is not a target yet: no policy reads one, and a param nothing reads
+	# is a promise the content cannot keep.
+	ContentRegistry.register_effect(
+		"enact_policy_on",
+		{
+			"to": "contact", "effect": "string", "cost": "gold", "split": "string",
+			"resource": "resource",
+		},
+		ORDER_ENACT_POLICY,
+		M1Registrations.build_policy_order,
 	)
 	# **The Provost's knobs are a different shape** (#173, `the-provost.md` §2),
 	# so they are a different effect rather than `enact_policy` with an optional
@@ -400,6 +418,31 @@ static func build_tax_order(args: Dictionary, context: LetterContext) -> Order:
 		ORDER_SET_TAX_RATE,
 		StringName(args.get("to", "")),
 		params,
+		context.month,
+	)
+
+
+## A policy, refused when it and its target do not match (#396).
+##
+## 🔒 **A market policy needs its market, and nothing else takes one.**
+## `enact_policy` naming `favour_our_market` produced a policy that pressed on no
+## price and charged the Crown every month for it; `enact_policy_on` naming a
+## policy that reads no resource would carry a target nothing honours. Both are
+## refused here rather than enacted and ignored.
+static func build_policy_order(args: Dictionary, context: LetterContext) -> Order:
+	var effect := StringName(args.get("effect", ""))
+	var needs_one := PolicyEffects.is_aimed_at_a_resource(effect)
+	if needs_one != args.has("resource"):
+		push_error("'%s' %s; use %s." % [
+			effect,
+			"needs a resource" if needs_one else "takes no resource",
+			"enact_policy_on" if needs_one else "enact_policy",
+		])
+		return null
+	return Order.new(
+		ORDER_ENACT_POLICY,
+		StringName(args.get("to", "")),
+		args.duplicate(),
 		context.month,
 	)
 

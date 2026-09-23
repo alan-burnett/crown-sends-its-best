@@ -172,6 +172,73 @@ func test_it_moves_only_what_it_names() -> void:
 		"a policy about horses moved the price of furs")
 
 
+# --- 🔒 A letter can name what the policy is aimed at (#396) ------------------
+
+## The Order a reply option produces, built the way the desk builds it.
+func _proposed(effect_id: String, args: Dictionary) -> Order:
+	var context := LetterContext.new(_state(3), enactor, Tone.DUTIFUL)
+	return ContentRegistry.run_effect(effect_id, args, context)
+
+
+func test_a_letter_can_turn_the_crowns_market_toward_a_resource() -> void:
+	# The acceptance, end to end: an option names the resource, he agrees in
+	# Reckoning, and the Crown's price for it rises while the policy stands.
+	# `favour_our_market` was complete in the sim and reachable only from tests.
+	var order := _proposed("enact_policy_on", {
+		"to": "steward", "effect": "favour_our_market", "cost": 80, "split": "all",
+		"resource": "horses",
+	})
+	assert_true(order != null, "no letter can propose a market policy")
+	if order == null:
+		return
+	var driver := OrderDriver.new(IntentBook.new(), PromiseBook.new())
+	driver.contacts = _contacts()
+	driver.policies = book
+	driver.carry(order)
+	var state := _state(3)
+	driver.on_phase(WorldPhase.RECKONING, state, log, RngStreams.new(SEED))
+	assert_eq(book.active().size(), 1, "he agreed and nothing was enacted, so this proves nothing")
+
+	var before := Valuation.crown(&"horses", state)
+	for key in PolicyEffects.pressure(book):
+		state.values[key] = float(PolicyEffects.pressure(book)[key])
+	assert_true(Valuation.crown(&"horses", state) > before,
+		"the letter named horses and the Crown's price for them did not move")
+
+
+func test_a_market_policy_with_no_market_is_refused() -> void:
+	# It used to be enacted, charged every month, and press on nothing.
+	assert_true(null == _proposed("enact_policy", {
+		"to": "steward", "effect": "favour_our_market", "cost": 80, "split": "all",
+	}), "a market policy with no market was enacted")
+	assert_true(null != _proposed("enact_policy", {
+		"to": "steward", "effect": "encourage_immigration", "cost": 80, "split": "all",
+	}), "an ordinary policy stopped being enactable")
+
+
+func test_a_policy_that_reads_no_resource_takes_none() -> void:
+	assert_true(null == _proposed("enact_policy_on", {
+		"to": "steward", "effect": "encourage_immigration", "cost": 80, "split": "all",
+		"resource": "horses",
+	}), "a target was accepted by a policy that honours none")
+
+
+func test_the_target_is_typed_like_every_other_param() -> void:
+	assert_not_empty(ContentRegistry.check_effect_call("enact_policy_on", {
+		"to": "steward", "effect": "favour_our_market", "cost": 80, "split": "all",
+		"resource": 7,
+	}), "a number was accepted as a resource")
+
+
+func test_the_target_survives_a_save() -> void:
+	book.enact(Policy.new(&"steward", PolicyEffects.FAVOUR_OUR_MARKET, 80.0,
+		Policy.ALL, {"resource": "horses"}), log, 3)
+	var restored := PolicyBook.from_dict(book.to_dict())
+	assert_eq(PolicyEffects.world_key(restored.active()[0]),
+		PolicyEffects.world_key(book.active()[0]),
+		"the market a policy was aimed at did not survive the save")
+
+
 func test_pressure_is_recomputed_rather_than_accumulated() -> void:
 	# A policy that ended should stop pressing **the month it ends**. A value
 	# that had been added to would have to be subtracted from by somebody who

@@ -96,6 +96,14 @@ const GUN_CONTRACT: StringName = &"gun_contract"
 ## and the two pulls are opposite and both legitimate.
 const CULTIVATE_GOVERNOR: StringName = &"cultivate_governor"
 
+## 🔒 **The policies aimed at a resource** (#396, `policy.md` §8).
+##
+## *A patron whose specialty is horses* moves the Crown's price for **horses**,
+## so the policy is nothing without the resource it names. Asked by the effect
+## that proposes one, so a letter cannot enact a market policy with no market —
+## which it could, and which did nothing.
+const AIMED_AT_A_RESOURCE: Array[StringName] = [FAVOUR_OUR_MARKET]
+
 const ALL: Array[StringName] = [
 	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK,
 	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT, TRAVELLING_EXPERTS,
@@ -217,6 +225,11 @@ const CONTRACT_LIFT: float = 0.9
 
 static func is_effect(id: StringName) -> bool:
 	return ALL.has(id)
+
+
+## Whether this policy needs a resource to mean anything (#396).
+static func is_aimed_at_a_resource(id: StringName) -> bool:
+	return AIMED_AT_A_RESOURCE.has(id)
 
 
 ## The world value one policy moves, or empty for the ones that do not.
