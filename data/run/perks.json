@@ -12,6 +12,50 @@
             "crown_grace": {}
           }
         ]
+      },
+      {
+        "id": "righteous",
+        "name": "Righteous",
+        "blurb": "The Church has decided, on balance, to be pleased with you.",
+        "offered": true,
+        "note": "Clergy gain loyalty every turn (section 3). You get more out of them without giving as much - and since a contented clergyman is a standing weight against rebel sentiment at high prominence, this is quietly a sentiment perk as much as a charity one. A drift term on one class of contact: a knob that already exists, turned.",
+        "modifiers": [
+          {
+            "favour_toward": {
+              "kinds": {
+                "clergyman": 0.5
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "good_first_impression",
+        "name": "Good first impression",
+        "blurb": "People tend to like you before they know why.",
+        "offered": true,
+        "note": "Every new contact starts warmer: governors of founded towns, patrons arriving, the commander who comes with the Marshal's troops, the clergyman of a new church. Strongest for a player who goes wide and long - a colony of nine towns has met a great many people; one holding two for six years has met almost nobody. That variance is SPEC section 14.3's variety rather than power. It does not touch the Crown's officers, who are fixed in every run and whose loyalties are characterisation.",
+        "modifiers": [
+          {
+            "first_impression": {
+              "warmth": 8.0
+            }
+          }
+        ]
+      },
+      {
+        "id": "read_between_the_lines",
+        "name": "Read between the lines",
+        "blurb": "You have a good ear for what a man is not saying.",
+        "offered": true,
+        "note": "Contacts' perception leans are reduced when reporting to you. They still deceive themselves - the Marshal still minimises every threat, the clergy still sees the worst - but they present it to you more plainly. The only perk that changes what you can SEE rather than what you can do, and the one that rewards a player who reads letters closely rather than one who plays the numbers.",
+        "modifiers": [
+          {
+            "perception_leans": {
+              "scale": 0.5
+            }
+          }
+        ]
       }
     ]
   }

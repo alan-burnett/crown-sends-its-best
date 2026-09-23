@@ -68,6 +68,7 @@ static func load_from(records: Array) -> void:
 static func reset() -> void:
 	_buildings = {}
 	_regard_swing = 0.6
+	_amusement_worth = 1.0
 
 
 static func has(id: StringName) -> bool:
@@ -344,6 +345,10 @@ static func amusement_for(town: Town) -> Dictionary:
 	# otherwise have to buy. Counting each building as its own kind would let six
 	# amusements clear `VARIETY_TARGET` on their own and make the cellar
 	# irrelevant.
+	# 🔒 **And a pious colony is less amused by it** (#288). They disapprove, so
+	# bread and circuses buy less — which closes off `quality-of-life.md` §8's rum
+	# trap from the other end and makes investing in faith the way up instead.
+	served *= _amusement_worth
 	return {"served": served, "kinds": 1 if served > 0.0 else 0}
 
 
@@ -359,6 +364,13 @@ static func amusement_for(town: Town) -> Dictionary:
 ## Tuning, and a quirk's to turn (`perks-and-quirks.md` §4, *A pious colony*).
 static var _regard_swing: float = 0.6
 
+## How much pleasure an amusement building is worth (#288, *A pious colony*).
+##
+## One in every run without the quirk. Below one, a colony that disapproves of
+## theatres gets less from them — which is the drawback half of a quirk whose
+## benefit is that its priests loom larger.
+static var _amusement_worth: float = 1.0
+
 
 static func regard_swing() -> float:
 	return _regard_swing
@@ -366,6 +378,14 @@ static func regard_swing() -> float:
 
 static func set_regard_swing(swing: float) -> void:
 	_regard_swing = maxf(0.0, swing)
+
+
+static func amusement_worth() -> float:
+	return _amusement_worth
+
+
+static func set_amusement_worth(worth: float) -> void:
+	_amusement_worth = maxf(0.0, worth)
 
 
 ## What this building's effect is multiplied by, given who lives here.

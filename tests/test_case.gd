@@ -69,6 +69,9 @@ func reset_world() -> void:
 	IndependenceClause.reset()
 	NameBags.reset()
 	ContactRoster.reset()
+	Perception.reset()
+	Contact.reset()
+	LoyaltyDrift.reset()
 
 	# Contacts that carry tuning of their own.
 	Patron.reset()

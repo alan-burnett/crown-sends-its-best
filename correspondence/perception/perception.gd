@@ -58,6 +58,39 @@ const SHAPE_SANGUINE: StringName = &"sanguine"
 
 const SHAPES: Array[StringName] = [SHAPE_FLAT, SHAPE_ALARMED, SHAPE_SANGUINE]
 
+# --- 🔒 The knob: how plainly they put it to the PC --------------------------
+
+## How much of a man's lean reaches the page (#287, *Read between the lines*).
+##
+## **One in every run without the perk**, so the pipeline reads exactly as it
+## always did.
+##
+## 🔒 **They still deceive themselves.** The perk reduces the lean *when
+## reporting to the PC* — the Marshal goes on minimising every threat and the
+## clergy goes on seeing the worst; they simply present it more plainly. So this
+## belongs here, at the point a judgement becomes a word, and **not** on
+## `Contact.leans`, which is what the man believes.
+##
+## It is the only perk that changes what the PC can *see* rather than what he can
+## do, and it rewards a player who reads letters closely rather than one who
+## plays the numbers.
+static var _lean_scale: float = 1.0
+
+
+static func lean_scale() -> float:
+	return _lean_scale
+
+
+## Turn it. Never below nothing and never past the truth: a scale above one would
+## make contacts *more* biased than they are, which is a different perk and not
+## this one.
+static func set_lean_scale(scale: float) -> void:
+	_lean_scale = clampf(scale, 0.0, 1.0)
+
+
+static func reset() -> void:
+	_lean_scale = 1.0
+
 
 static func is_shape(id: StringName) -> bool:
 	return SHAPES.has(id)
@@ -122,6 +155,7 @@ static func rung(
 		return -1
 
 	var p := MeasureRegistry.normalize(measure_id, raw)
+	lean *= _lean_scale
 	# 🔒 **The shape bends the truth he is looking at; the lean then moves it.**
 	# The cap below is measured against the *real* truth, so a shape can no more
 	# carry a word two rungs than a lean can.

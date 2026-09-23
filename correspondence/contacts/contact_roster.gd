@@ -52,8 +52,27 @@ static func load_from(content: ContentDatabase) -> void:
 			_templates[String(id)] = record
 
 
+## How large each kind of resident looms, against what his record says (#288).
+## Empty in every run without a quirk, and then every man is as authored.
+static var _prominence_scales: Dictionary = {}
+
+
+static func _prominence_scale(kind: String) -> float:
+	return float(_prominence_scales.get(kind.to_lower(), 1.0))
+
+
+## Turn it. **Never below nothing**: a man who looms negatively in his town is
+## not a thing `rebel-sentiment.md` can express.
+static func scale_prominence(kinds: Dictionary) -> void:
+	var names: Array = kinds.keys()
+	names.sort()
+	for name in names:
+		_prominence_scales[String(name).to_lower()] = maxf(0.0, float(kinds[name]))
+
+
 static func reset() -> void:
 	_templates = {}
+	_prominence_scales = {}
 
 
 ## What a generated contact of this kind starts from, or empty when nothing is
@@ -191,7 +210,14 @@ static func _bring(town: Town, kind: String, run: RunState) -> void:
 	var template := template_for(kind)
 	if not template.is_empty():
 		contact.title = String(template.get("title", contact.title))
-		contact.prominence_override = float(template.get("prominence", -1.0))
+		# 🔒 **Scaled by kind** (#288, *A pious colony*): clergy carry higher
+		# prominence everywhere, so churches matter more in both directions — a
+		# contented priest holds his town down harder and a slighted one carries
+		# it out faster. One knob, both directions, because prominence is what
+		# `rebel-sentiment.md` §4 scales his regard by whichever way it points.
+		var authored := float(template.get("prominence", -1.0))
+		contact.prominence_override = -1.0 if authored < 0.0 \
+			else authored * _prominence_scale(kind)
 		contact.cares_about = PackedStringArray(template.get("cares_about", []))
 		contact.leans = template.get("leans", {}).duplicate()
 		contact.lean_shape = StringName(

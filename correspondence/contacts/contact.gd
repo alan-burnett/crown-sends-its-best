@@ -62,6 +62,22 @@ const WRITES_READILY_MAX: float = 1.5
 const WEIGHT_MIN: float = 0.5
 const WEIGHT_MAX: float = 1.6
 
+## How much warmer every generated contact begins (#287, *Good first
+## impression*). Nought in every run without the perk.
+static var _first_impression: float = 0.0
+
+
+static func first_impression() -> float:
+	return _first_impression
+
+
+static func set_first_impression(warmth: float) -> void:
+	_first_impression = warmth
+
+
+static func reset() -> void:
+	_first_impression = 0.0
+
 ## How large each kind of man looms in the town he lives in. Tuning.
 ##
 ## The Crown's officers sit at nothing deliberately — they are an ocean away and
@@ -381,7 +397,17 @@ static func generate(
 	contact.traits = Temperament.draw(rng)
 	Temperament.write_into(contact.traits, contact)
 	contact.writes_readily = rng.randf_range(WRITES_READILY_MIN, WRITES_READILY_MAX)
-	contact.relationship = Relationship.new(id, starting_loyalty)
+	# 🔒 **Every new contact starts warmer** (#287, *Good first impression*), and
+	# only a generated one: the Crown's officers are fixed in every run (SPEC
+	# §8.1) and their authored loyalties are characterisation — the Chancellor
+	# beginning very low is who he is, not a number to be improved.
+	#
+	# **Strongest for a player who goes wide and long**, which is §14.3's variety
+	# rather than power: a colony of nine towns has met a great many people, and
+	# one that held two for six years has met almost nobody.
+	contact.relationship = Relationship.new(
+		id, clampf(starting_loyalty + _first_impression,
+			Relationship.MIN_LOYALTY, Relationship.MAX_LOYALTY))
 	return contact
 
 

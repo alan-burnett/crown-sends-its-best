@@ -362,3 +362,177 @@ func test_a_missing_file_is_refused() -> void:
 	assert_false(validator.ok(),
 		"a missing quirks file passed, so adding a quirk means adding a file")
 	db.free()
+
+
+# --- 🔒 Righteous: a drift term on one class of contact ---------------------
+
+func _with_clergy(run: RunState) -> Contact:
+	var town := run.colony.in_order()[0]
+	town.add_building(&"church")
+	ContactRoster.house_the_residents(run)
+	return run.contacts.get(String(ContactRoster.resident_id(town, "clergyman")), null)
+
+
+func test_righteous_warms_the_clergy_every_month() -> void:
+	# 🔒 §2's own example of what naming a knob means: *Righteous is not +5 clergy
+	# loyalty, it is a drift term on one class of contact.*
+	var plain := _applied(func(r: RunState) -> void: r.setup.perk = &"")
+	var priest := _with_clergy(plain)
+	assert_true(priest != null, "the church brought nobody")
+	var without := LoyaltyDrift.for_contact(
+		priest, ColonyMeasures.for_contact(plain, priest))
+
+	var blessed := _applied(func(r: RunState) -> void: r.setup.perk = &"righteous")
+	var his_priest := _with_clergy(blessed)
+	var with := LoyaltyDrift.for_contact(
+		his_priest, ColonyMeasures.for_contact(blessed, his_priest))
+
+	assert_true(with > without,
+		"the Church decided to be pleased with the PC and nothing happened")
+
+
+func test_righteous_warms_nobody_else() -> void:
+	# Keyed by the kind of man, because four institutional contacts share one
+	# role and a perk about the clergy must not warm the quartermaster.
+	var run := _applied(func(r: RunState) -> void: r.setup.perk = &"righteous")
+	var town := run.colony.in_order()[0]
+	town.add_building(&"gunsmith")
+	ContactRoster.house_the_residents(run)
+
+	var quartermaster: Contact = run.contacts.get(
+		String(ContactRoster.resident_id(town, "quartermaster")), null)
+	assert_true(quartermaster != null, "the gunsmith brought nobody")
+	assert_eq(LoyaltyDrift.favour_toward(quartermaster), 0.0,
+		"a perk about the clergy warmed the man who makes the muskets")
+	assert_eq(LoyaltyDrift.favour_toward(run.contact(&"steward")), 0.0,
+		"a perk about the clergy warmed the Steward")
+
+
+# --- 🔒 Good first impression -----------------------------------------------
+
+func test_a_new_contact_starts_warmer() -> void:
+	var run := _applied(func(r: RunState) -> void:
+		r.setup.perk = &"good_first_impression")
+	assert_true(Contact.first_impression() > 0.0, "nobody starts any warmer")
+
+	var plain := Contact.generate(&"a_man", Contact.ROLE_GOVERNOR, run.streams,
+		IntentConsiderations.ALL)
+	assert_true(plain.loyalty() > Relationship.NEUTRAL_LOYALTY,
+		"a man generated under the perk was no warmer than neutral")
+
+
+func test_it_does_not_touch_the_crowns_fixed_officers() -> void:
+	# 🔒 They are the same in every run (SPEC §8.1) and their loyalties are
+	# characterisation — the Chancellor beginning very low is who he is.
+	var run := _applied(func(r: RunState) -> void:
+		r.setup.perk = &"good_first_impression")
+	ContactRoster.load_into(run, content)
+	var chancellor := run.contact(&"chancellor")
+	assert_true(chancellor != null, "there is no Chancellor to ask about")
+
+	# The same man loaded with the perk off. His regard is read from the file
+	# either way, so the two must agree.
+	Contact.reset()
+	var fresh := RunState.new_run(SEED)
+	ContactRoster.load_into(fresh, content)
+	assert_eq(chancellor.loyalty(), fresh.contact(&"chancellor").loyalty(),
+		"the perk warmed a Crown officer whose regard is authored")
+
+
+# --- 🔒 Read between the lines ----------------------------------------------
+
+func test_the_leans_bite_less_when_reporting_to_the_pc() -> void:
+	# 🔒 They still deceive themselves; they present it more plainly. So the
+	# perk turns the pipeline's scale and not anybody's `leans`.
+	MeasureRegistry.register_linear("probe", 0.0, 1.0)
+	var lean := -0.4
+	var samples := [0.2, 0.35, 0.5, 0.65, 0.8, 0.95]
+
+	var plain: Array = []
+	for raw in samples:
+		plain.append(Perception.rung("probe", float(raw), lean, 5))
+
+	_applied(func(r: RunState) -> void: r.setup.perk = &"read_between_the_lines")
+	assert_true(Perception.lean_scale() < 1.0, "the leans were not reduced at all")
+
+	# **Never further from the truth anywhere, and nearer somewhere.** A halved
+	# lean does not stop biting — it bites less — so asserting it lands exactly
+	# on the truth would be asserting the perk cured him, which is the thing §3
+	# says it does not do.
+	var nearer := 0
+	for index in samples.size():
+		var raw := float(samples[index])
+		var truth := Perception.truthful_rung("probe", raw, 5)
+		var plainer := Perception.rung("probe", raw, lean, 5)
+		assert_true(absi(truth - plainer) <= absi(truth - int(plain[index])),
+			"reading between the lines put him further from the truth at %f" % raw)
+		if absi(truth - plainer) < absi(truth - int(plain[index])):
+			nearer += 1
+	assert_true(nearer > 0,
+		"a bleak reader was no plainer anywhere on the ladder")
+
+
+func test_the_man_still_believes_what_he_believed() -> void:
+	# 🔒 The lock. The Marshal still minimises every threat; he simply says so
+	# more plainly. A perk that edited his `leans` would have changed the man.
+	var run := _applied(func(r: RunState) -> void:
+		r.setup.perk = &"read_between_the_lines")
+	var priest := _with_clergy(run)
+	assert_true(priest.lean_for(ColonyMeasures.POOREST_QUALITY_OF_LIFE) < 0.0,
+		"the perk cured the clergyman of seeing the worst")
+
+
+func test_without_it_the_leans_are_untouched() -> void:
+	_applied(func(r: RunState) -> void: r.setup.perk = &"")
+	assert_eq(Perception.lean_scale(), 1.0,
+		"a run with no perk read its letters more plainly anyway")
+
+
+# --- 🔒 A pious colony: both directions, and a drawback ---------------------
+
+func test_a_pious_colony_makes_its_priests_loom_larger() -> void:
+	var plain := _applied(func(r: RunState) -> void: r.setup.quirks = PackedStringArray())
+	var ordinary := _with_clergy(plain).prominence()
+
+	var pious := _applied(func(r: RunState) -> void:
+		r.setup.quirks = PackedStringArray(["a_pious_colony"]))
+	assert_true(_with_clergy(pious).prominence() > ordinary,
+		"a colony that came for the freedom to worship listens no harder to its priest")
+
+
+func test_it_cuts_both_ways_because_prominence_does() -> void:
+	# 🔒 The whole reason one knob serves the benefit and the drawback: a
+	# contented priest holds his town down harder and a slighted one carries it
+	# out faster, and `rebel-sentiment.md` §4 scales his regard whichever way it
+	# points.
+	var run := _applied(func(r: RunState) -> void:
+		r.setup.quirks = PackedStringArray(["a_pious_colony"]))
+	var town := run.colony.in_order()[0]
+	var priest := _with_clergy(run)
+	var context := ColonyContext.new(run.world, run.log, run.streams, run.map)
+	context.colony = run.colony
+
+	priest.relationship = Relationship.new(priest.id, Relationship.MAX_LOYALTY)
+	var contented := float(RebelSentiment.of(
+		town, context, run.grievances, run.contacts)["contacts"])
+	priest.relationship = Relationship.new(priest.id, Relationship.MIN_LOYALTY)
+	var slighted := float(RebelSentiment.of(
+		town, context, run.grievances, run.contacts)["contacts"])
+
+	assert_true(slighted > contented,
+		"a slighted priest in a pious colony carried his town nowhere")
+
+
+func test_and_the_theatre_buys_less() -> void:
+	# The drawback. They disapprove, so bread and circuses buy less, which closes
+	# `quality-of-life.md` §8's rum trap from the other end.
+	var run := _applied(func(r: RunState) -> void: r.setup.quirks = PackedStringArray())
+	var town := run.colony.in_order()[0]
+	town.add_building(&"theatre")
+	var ordinary := float(Building.amusement_for(town)["served"])
+	assert_true(ordinary > 0.0, "a theatre amused nobody, so this proves nothing")
+
+	_applied(func(r: RunState) -> void:
+		r.setup.quirks = PackedStringArray(["a_pious_colony"]))
+	assert_true(float(Building.amusement_for(town)["served"]) < ordinary,
+		"a pious colony enjoyed the theatre exactly as much as anybody else")

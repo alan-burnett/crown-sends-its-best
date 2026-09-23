@@ -54,6 +54,11 @@ const APPLIES: Dictionary = {
 	"commander_survival": "_commander_survival",
 	"patrons_at_once": "_patrons_at_once",
 	"hands_out": "_hands_out",
+	"perception_leans": "_perception_leans",
+	"first_impression": "_first_impression",
+	"favour_toward": "_favour_toward",
+	"prominence_scale": "_prominence_scale",
+	"amusement_worth": "_amusement_worth",
 }
 
 
@@ -208,3 +213,59 @@ static func _patrons_at_once(_run: RunState, args: Dictionary) -> void:
 static func _hands_out(_run: RunState, args: Dictionary) -> void:
 	DemandSchedule.raise_ceiling(
 		DemandGrowth.REACH, int(args.get("reach_ceiling", 0)))
+
+
+## **Read between the lines**: contacts' perception leans are reduced when
+## reporting to the PC.
+##
+## 🔒 **They still deceive themselves.** The Marshal goes on minimising every
+## threat and the clergy goes on seeing the worst — they present it more plainly.
+## That is why this turns the pipeline's scale and not anybody's `leans`, which
+## is what the man believes.
+##
+## The only perk that changes what the PC can **see** rather than what he can do.
+##
+## Args: `{"scale": 0.5}`.
+static func _perception_leans(_run: RunState, args: Dictionary) -> void:
+	Perception.set_lean_scale(float(args.get("scale", 1.0)))
+
+
+## **Good first impression**: every new contact starts warmer.
+##
+## Generated contacts only — the Crown's officers are fixed in every run and
+## their authored loyalties are characterisation.
+##
+## Args: `{"warmth": 8.0}`.
+static func _first_impression(_run: RunState, args: Dictionary) -> void:
+	Contact.set_first_impression(float(args.get("warmth", 0.0)))
+
+
+## **Righteous**: clergy gain loyalty every turn.
+##
+## 🔒 **A drift term on one class of contact**, which is §2's own example of what
+## naming a knob means. Quietly a sentiment perk as much as a charity one: a
+## contented clergyman is a standing weight against his town's rebel sentiment.
+##
+## Args: `{"kinds": {"clergyman": 0.5}}`.
+static func _favour_toward(_run: RunState, args: Dictionary) -> void:
+	LoyaltyDrift.favour(args.get("kinds", {}))
+
+
+## **A pious colony**: clergy carry higher prominence everywhere.
+##
+## Both directions at once, which is the quirk: a contented priest holds his town
+## down harder and a slighted one carries it out faster.
+##
+## Args: `{"kinds": {"clergyman": 1.3}}`.
+static func _prominence_scale(_run: RunState, args: Dictionary) -> void:
+	ContactRoster.scale_prominence(args.get("kinds", {}))
+
+
+## **A pious colony**, the drawback: amusement contributes less pleasure.
+##
+## They disapprove, so bread and circuses buy less — which closes
+## `quality-of-life.md` §8's rum trap from the other end.
+##
+## Args: `{"worth": 0.7}`.
+static func _amusement_worth(_run: RunState, args: Dictionary) -> void:
+	Building.set_amusement_worth(float(args.get("worth", 1.0)))

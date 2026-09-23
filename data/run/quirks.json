@@ -65,6 +65,27 @@
             }
           }
         ]
+      },
+      {
+        "id": "a_pious_colony",
+        "name": "A pious colony",
+        "blurb": "They came for the freedom to worship, and they have not forgotten it.",
+        "offered": true,
+        "note": "Clergy carry higher prominence everywhere, so churches matter more in BOTH directions - a contented priest holds his town down harder and a slighted one carries it out faster. And amusement contributes less pleasure, because they disapprove. Rewards investing in faith; punishes bread and circuses, which closes off quality-of-life.md section 8's rum trap from the other end. Both figures are tuning.",
+        "modifiers": [
+          {
+            "prominence_scale": {
+              "kinds": {
+                "clergyman": 1.35
+              }
+            }
+          },
+          {
+            "amusement_worth": {
+              "worth": 0.7
+            }
+          }
+        ]
       }
     ]
   }

@@ -85,8 +85,49 @@ static func for_contact(contact: Contact, measures: Dictionary) -> float:
 		counted += 1
 
 	if counted == 0:
+		return favour_toward(contact)
+	return MONTHLY_REACH * (judged / float(counted) - INDIFFERENT) / INDIFFERENT \
+		+ favour_toward(contact)
+
+
+# --- 🔒 The knob: a standing warmth toward one kind of man -------------------
+
+## What a class of contact gains every month regardless of the world (#287,
+## *Righteous*).
+##
+## 🔒 **A drift term on one class of contact, which is what §2 means by naming a
+## knob.** *Righteous* is not `+5 clergy loyalty`; it is this, turned. And it is
+## quietly a sentiment perk as much as a charity one, because a contented
+## clergyman is a standing weight against his town's rebel sentiment at high
+## prominence.
+##
+## **Added even to a man who judges the Crown by nothing**, deliberately: a
+## contact with no `cares_about` has no stake in the world, but a PC the Church
+## approves of is still a PC the Church approves of.
+##
+## Keyed by the *kind* of man rather than the role, because four institutional
+## contacts share one role and a perk about the clergy must not warm the
+## quartermaster.
+static var _favour: Dictionary = {}
+
+
+static func favour_toward(contact: Contact) -> float:
+	if contact == null or _favour.is_empty():
 		return 0.0
-	return MONTHLY_REACH * (judged / float(counted) - INDIFFERENT) / INDIFFERENT
+	var kind := contact.title.to_lower()
+	return float(_favour.get(kind, _favour.get(String(contact.role), 0.0)))
+
+
+## Turn it, by kind or by role.
+static func favour(kinds: Dictionary) -> void:
+	var names: Array = kinds.keys()
+	names.sort()
+	for name in names:
+		_favour[String(name).to_lower()] = float(kinds[name])
+
+
+static func reset() -> void:
+	_favour = {}
 
 
 ## Which of the things he cares about is doing the most to his regard.
