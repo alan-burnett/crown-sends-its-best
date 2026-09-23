@@ -1,0 +1,21 @@
+[
+  {
+    "id": "journalist",
+    "template": true,
+    "note": "A template, not a contact - one per printing press rather than one in the game. institutional-contacts.md section 3, the journalist. Every figure here is tuning and belongs to M8.",
+    "title": "Journalist",
+    "prominence": 1.0,
+    "prominence_note": "His prominence EQUALS the governor's, and no other resident comes close. This is the sharpest sword in the tree and everything about him follows from holding it by the blade: his regard pushes his own town's sentiment down hard, at a governor's weight, while his programme raises the stakes everywhere else over years. Do not tune this away.",
+    "cares_about": [
+      "worst_quality_of_life"
+    ],
+    "cares_about_note": "The worst town in the colony, never the average. People write to him and he prints what they send, so he holds the PC to account for the bleakest headline available. One neglected hamlet poisons him however well the capital lives - and the wider the colony goes the likelier it is to own somewhere wretched, so the most influential man in it becomes harder to please the more of it there is.",
+    "lean_shape": "alarmed",
+    "leans": {
+      "worst_quality_of_life": -0.35,
+      "quality_of_life": -0.3,
+      "food_security": -0.3
+    },
+    "leans_note": "He thinks every problem is equally important, so small troubles move him nearly as far as large ones. That is the SHAPE of his lean rather than its size: steep where there is little wrong and flattening as things worsen, which makes him the mirror of the Marshal, who minimises every threat. perception.md's one-rung cap still bounds him, so he is reliably one notch more alarmed than the truth rather than hysterical - and the player who learns to discount him is the one who will miss the real famine."
+  }
+]

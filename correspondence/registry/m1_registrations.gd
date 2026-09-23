@@ -413,6 +413,9 @@ static func register_measures() -> void:
 	# **How the poorest live** (#277). The same range as quality of life, because
 	# it is the same five parts weighted differently rather than a new quantity.
 	MeasureRegistry.register_linear(ColonyMeasures.POOREST_QUALITY_OF_LIFE, 0.0, 1.0)
+	# **The worst town, not the average** (#279). Same range as quality of life,
+	# because it is a quality of life - the lowest one there is.
+	MeasureRegistry.register_linear(ColonyMeasures.WORST_QUALITY_OF_LIFE, 0.0, 1.0)
 	# 🔒 **The whole of the player's sight of the natives** (#208). Across the
 	# full range, so the bottom rung covers a people who have concluded the
 	# colony means them destroyed *and* a people who very nearly have — which is

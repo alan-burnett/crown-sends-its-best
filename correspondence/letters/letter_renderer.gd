@@ -106,7 +106,12 @@ func _perception(name: String, letter: Letter, context: LetterContext) -> String
 	var measure_id := String(entry.get(LetterSchema.KEY_MEASURE, ""))
 	var ladder := PackedStringArray(entry.get(LetterSchema.KEY_LADDER, []))
 	var lean: float = context.sender.lean_for(measure_id) if context.sender != null else 0.0
-	return Perception.word(measure_id, context.measure(measure_id), lean, ladder)
+	# **The shape belongs to the sender too** (#279). It is a fact about how he
+	# reads the world rather than about what he is reading, so it travels with his
+	# lean and not with the ladder.
+	var shape: StringName = \
+		context.sender.lean_shape if context.sender != null else Perception.SHAPE_FLAT
+	return Perception.word(measure_id, context.measure(measure_id), lean, ladder, shape)
 
 
 ## A tone-keyed fragment, local to its own line. **Missing renders as empty, not

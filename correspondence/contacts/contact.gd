@@ -172,6 +172,14 @@ var leans: Dictionary = {}
 ## "going well" half belongs to the measure registry (#10).
 var cares_about: PackedStringArray = PackedStringArray()
 
+## **How his bias varies with how bad things are** (#279, `perception.md`).
+##
+## Flat for almost everybody — the same lean wherever the truth sits. The
+## journalist is `alarmed`, steep where there is little wrong; the Marshal is his
+## mirror. It is a property of the man rather than of the topic, because it is a
+## fact about how he reads the world and not about what he is reading.
+var lean_shape: StringName = Perception.SHAPE_FLAT
+
 ## **What he would be content with**, per topic he cares about (#254).
 ##
 ## Normalised like the measure itself, so `0.2` means *he wants the war nearly
@@ -304,6 +312,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.travelling_until = int(record.get("travelling_until", -1))
 	contact.leans = record.get("leans", {}).duplicate()
 	contact.cares_about = PackedStringArray(record.get("cares_about", []))
+	contact.lean_shape = StringName(record.get("lean_shape", Perception.SHAPE_FLAT))
 	# **Authored for a named character**, filled in at the middle for anyone the
 	# data is silent about — a contact with no temperament at all would be one
 	# the tone considerations could never distinguish.
@@ -385,6 +394,7 @@ func to_dict() -> Dictionary:
 		"travelling_until": travelling_until,
 		"leans": leans.duplicate(),
 		"cares_about": cares_about.duplicate(),
+		"lean_shape": String(lean_shape),
 		"wants": wants.duplicate(),
 		"traits": traits.duplicate(),
 		"writes_readily": writes_readily,

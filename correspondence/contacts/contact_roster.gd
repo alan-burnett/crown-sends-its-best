@@ -194,6 +194,8 @@ static func _bring(town: Town, kind: String, run: RunState) -> void:
 		contact.prominence_override = float(template.get("prominence", -1.0))
 		contact.cares_about = PackedStringArray(template.get("cares_about", []))
 		contact.leans = template.get("leans", {}).duplicate()
+		contact.lean_shape = StringName(
+			template.get("lean_shape", Perception.SHAPE_FLAT))
 
 	run.add_contact(contact)
 
