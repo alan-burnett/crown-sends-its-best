@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v2.4: Under Author ownership, actively being read by PO and Dev
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v3.0: Under Author ownership, actively being read by PO and Dev
 
 ---
 
@@ -216,7 +216,7 @@ These five contacts are the same in every run and are **not randomized**. Each o
 ### 8.4 Rivals (fixed)
 
 - Each of the three rivals has a ‘duke’ who will be your only contact.  
-- The relationship is purely adversarial, they covet the land your colony is on, especially if your colony prospers. They will bully you into giving them resources, attack your colony, and mislead you about their intentions.   
+- The relationship is purely adversarial, they covet the land your colony is on, especially if your colony prospers. They will bully you into giving them gold, attack your colony, and mislead you about their intentions.   
 - Rivals will not ask for help with other rivals or with natives. They will not offer any of their own resources to you. They will either ignore you, make demands, or attack. Accepting their demands may defer the risk of an attack but will never create a peaceful or mutually beneficial relationship. 
 
 ### 8.5 Loyalty and Compliance
@@ -424,9 +424,20 @@ Each town has:
 
 **Reconsideration.** A town holds its objective until it completes or **stalls** — the governor judges it can no longer be advanced, as when a militia needs guns the town can no longer forge. The stall check runs every month and is deterministic, not a matter of temperament: a governor who has not stalled does not waver.
 
-**The Colony Month.** The month resolves in phases. **🔒 Every town completes a phase before any town begins the next**, and every choice in a phase is made from the colony's state as it stood when that phase began. No town benefits from being simulated first, and ties are broken by a rule fixed by the seed.
+The Colony Month. The month resolves in nine phases. 🔒 Every town completes a phase before any town begins the next, and every choice in a phase is made from the colony's state as it stood when that phase began. No town benefits from being simulated first, and ties are broken by a rule fixed by the seed.
 
-Details are in the Town Economy mechanics doc.
+1. Work. The town assigns its people between working tiles in its influence area and town work, and the tiles are harvested.  
+2. Reckon. The town works out, in priority order, its needs / objective / wants / reserve for each resource.  
+3. Relief. Towns holding more than their reserve give to towns in deficit, free and expecting nothing in return.  
+4. Exchange. The town buys what it still lacks, from the natives first and the Crown second.  
+5. Consume. People and livestock eat, clothing wears out, luxuries are enjoyed, and going without hurts.  
+6. Convert. The hands held back in Work turn raw resources into processed ones.  
+7. Build. The objective advances, consuming resources, and may complete.  
+8. Sell. Surplus above the reserve is sold to the Crown, and taxed.  
+9. Settle. The month is totted up: how the town lived, whether it grew, and what it does next.
+
+🔒 Conversion sits after Consume and before Build, so a town cannot brew the grain its people need, and this month's ore can become this month's iron and go into this month's frame.  
+Numbers, formulas and the order within a phase are in the Town Economy mechanics doc.
 
 **🔒 Towns spend mostly in their best interests.** A town’s balance of gold is carefully managed when they decide what resources to spend gold on. They will favor trying to meet their needs, then complete their objectives, then spend on luxuries, but they will behave realistically \- trying to keep a reserve month to month when their survival is not at stake, and spending a little on luxuries even when there are more important things to buy. 
 
@@ -643,7 +654,7 @@ A town tracks three distinct types of population
 
 ## 17\. Open Questions
 
-These are for the Author to settle. Once decided, move the answer into the relevant section.
+There are no more open questions
 
 ---
 
