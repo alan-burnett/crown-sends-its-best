@@ -343,7 +343,6 @@ func test_experts_multiply_processed_yields_too() -> void:
 func test_a_building_that_helps_a_conversion_helps_it() -> void:
 	var plain := _town({"ore": 500.0}, 6)
 	var equipped := _town({"ore": 500.0}, 6)
-	equipped.add_building(&"crane")
 	equipped.add_building(&"foundry")  # `buildings.md` §6: 20 ore to 4 iron
 
 	_run_month(_harness(plain))
@@ -435,7 +434,6 @@ func test_a_better_building_supersedes_the_hall_for_that_one_conversion() -> voi
 	# conversion its own building.
 	var plain := _town({"ore": 500.0, "food": 500.0}, 6)
 	var smithing := _town({"ore": 500.0, "food": 500.0}, 6)
-	smithing.add_building(&"crane")
 	smithing.add_building(&"foundry")
 
 	for entry in Conversion.all():
@@ -654,7 +652,6 @@ func test_a_worker_makes_two() -> void:
 func test_a_building_doubles_what_a_worker_puts_through() -> void:
 	var plain := _town({}, 4)
 	var equipped := _town({}, 4)
-	equipped.add_building(&"crane")
 	equipped.add_building(&"foundry")
 
 	for entry in Conversion.all():

@@ -232,14 +232,33 @@ func test_progress_survives_save_and_reload_mid_construction() -> void:
 	assert_almost_eq(Objective.progress_fraction(restored), Objective.progress_fraction(town), 0.001)
 
 
-func test_a_crane_shortens_a_build() -> void:
-	var plain := _town(&"church", {})
-	var helped := _town(&"church", {})
-	helped.add_building(&"crane")
-	assert_true(Objective.months_required(helped) < Objective.months_required(plain),
-		"the crane saves nobody any time")
+func test_nothing_in_the_tree_speeds_building() -> void:
+	# 🔒 `buildings.md` §3 (#327). **Build speed is a policy's business, not a
+	# building's.** A building whose only effect is building faster is one a
+	# governor can never sensibly want, because everything it would accelerate
+	# outscores it — the crane was scored at 0.07, and every conversion building
+	# sat behind it for seven years.
+	assert_not_empty(Building.ids(), "no buildings loaded, so this proves nothing")
+	for id in Building.ids():
+		assert_almost_eq(float(Building.find(StringName(id)).effect("build_speed", 0.0)), 0.0,
+			0.0001, "%s speeds building" % id)
 
 
+func test_nothing_gates_the_way_out() -> void:
+	# 🔒 `buildings.md` §5 (#327): *no cheap entry fee ahead of it and no
+	# cheaper thing to build first.* Every building that converts one resource
+	# into another asks for nothing before it — except the guns, whose chain §6
+	# locks: armoury, then gunsmith, then foundry.
+	var chain := {"gunsmith": ["foundry"], "armoury": ["gunsmith"]}
+	var converting := 0
+	for id in Building.ids():
+		var building := Building.find(StringName(id))
+		if not building.effects.has("conversions"):
+			continue
+		converting += 1
+		assert_eq(Array(building.requires), chain.get(String(id), []),
+			"%s is gated on %s" % [id, Array(building.requires)])
+	assert_true(converting >= 9, "only %d buildings convert anything" % converting)
 # --- Standing postures ------------------------------------------------------
 
 func test_a_posture_is_an_objective_without_a_finish() -> void:
@@ -329,16 +348,6 @@ func test_build_capacity_comes_from_the_population() -> void:
 		"forty people build no faster than four")
 
 
-func test_build_speed_multiplies_capacity() -> void:
-	var plain := _town(&"church", {})
-	var helped := _town(&"church", {})
-	helped.add_building(&"crane")
-	assert_true(Objective.build_capacity(helped) > Objective.build_capacity(plain),
-		"the crane saves nobody any time")
-	assert_true(Objective.months_required(helped) <= Objective.months_required(plain),
-		"and it did not shorten the build")
-
-
 func test_duration_is_the_cost_over_the_capacity_and_is_not_authored() -> void:
 	# 🔒 **One authored number per building instead of two**, so they can no
 	# longer disagree. Doubling a cost doubles the schedule with nothing else
@@ -374,7 +383,6 @@ func test_a_buildings_reserve_reaches_the_same_desired_stock_as_everything_else(
 	# Buildings are a fourth contributor to #135's figure, not a separate system.
 	var plain := _town(&"", {})
 	var weaving := _town(&"", {})
-	weaving.add_building(&"crane")
 	weaving.add_building(&"weaving_shed")
 
 	var colony := Colony.new()

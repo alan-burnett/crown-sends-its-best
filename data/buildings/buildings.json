@@ -351,20 +351,6 @@
 	"requires": []
   },
   {
-	"id": "crane",
-	"name": "a crane",
-	"cost": {
-	  "wood": 30,
-	  "iron": 20,
-	  "tools": 4
-	},
-	"upkeep": 2,
-	"effects": {
-	  "build_speed": 0.5
-	},
-	"requires": []
-  },
-  {
 	"id": "stonecutters",
 	"name": "a stonecutters'",
 	"cost": {
@@ -452,9 +438,7 @@
   {
 	"id": "foundry",
 	"name": "a foundry",
-	"requires": [
-      "crane"
-	],
+	"requires": [],
 	"cost": {
 	  "wood": 40,
 	  "stone": 10,
@@ -476,9 +460,7 @@
   {
 	"id": "toolworks",
 	"name": "a toolworks",
-	"requires": [
-      "crane"
-	],
+	"requires": [],
 	"cost": {
 	  "wood": 40,
 	  "stone": 10,
@@ -500,9 +482,7 @@
   {
 	"id": "furriers",
 	"name": "a furrier's",
-	"requires": [
-      "crane"
-	],
+	"requires": [],
 	"cost": {
 	  "wood": 40,
 	  "stone": 10,
@@ -524,9 +504,7 @@
   {
 	"id": "weaving_shed",
 	"name": "a weaving shed",
-	"requires": [
-      "crane"
-	],
+	"requires": [],
 	"cost": {
 	  "wood": 40,
 	  "stone": 10,
@@ -548,9 +526,7 @@
   {
 	"id": "rolling_house",
 	"name": "a rolling house",
-	"requires": [
-      "crane"
-	],
+	"requires": [],
 	"cost": {
 	  "wood": 40,
 	  "stone": 10,
@@ -572,9 +548,7 @@
   {
 	"id": "distillery",
 	"name": "a distillery",
-	"requires": [
-      "crane"
-	],
+	"requires": [],
 	"cost": {
 	  "wood": 40,
 	  "stone": 10,
@@ -596,9 +570,7 @@
   {
 	"id": "brewhouse",
 	"name": "a brewhouse",
-	"requires": [
-      "crane"
-	],
+	"requires": [],
 	"cost": {
 	  "wood": 40,
 	  "stone": 10,

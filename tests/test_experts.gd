@@ -183,7 +183,7 @@ func test_a_better_loom_is_worth_a_better_weaver() -> void:
 	# The other half of the same reading: the building is a term in what he is
 	# worth rather than a gate on whether he can exist.
 	var plain := _town(&"ashmere")
-	var equipped := _town(&"brackwater", 40, ["crane", "weaving_shed"])
+	var equipped := _town(&"brackwater", 40, ["weaving_shed"])
 	for town in [plain, equipped]:
 		town.store(&"cotton", 400.0)
 
@@ -197,7 +197,7 @@ func test_the_specialism_follows_the_town_it_has_become() -> void:
 	# Fixed at the moment he materialises rather than when the fraction was
 	# earned, so a town that changes character while accumulating gets an expert
 	# suited to what it is now. The fraction carries no memory of what earned it.
-	var town := _town(&"ashmere", 40, ["crane", "weaving_shed"])
+	var town := _town(&"ashmere", 40, ["weaving_shed"])
 	town.store(&"cotton", 400.0)
 	assert_true(Experts.worth_of(town, &"clothing", _context([town])) > 0.0,
 		"the fixture was not a cloth town to begin with")
@@ -217,7 +217,7 @@ func test_the_specialism_follows_the_town_it_has_become() -> void:
 func test_stacking_turns_the_town_to_something_else() -> void:
 	# Diminishing returns (SPEC §12.2) reach the choice as well as the yield, so
 	# a town lucky in one trade starts turning out another.
-	var town := _town(&"ashmere", 40, ["crane", "weaving_shed"])
+	var town := _town(&"ashmere", 40, ["weaving_shed"])
 	town.store(&"cotton", 400.0)
 	town.store(&"food", 4_000.0)
 	var first := Experts.specialism_for(town, _context([town]))
