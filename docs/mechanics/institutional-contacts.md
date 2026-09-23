@@ -225,14 +225,41 @@ follows from holding it by the blade.
 in `policy.md`'s sense, recurring monthly cost, carried by him, renegotiated
 rather than cancelled, with the 3x asymmetry on non-payment.
 
-They sway public opinion, which nothing else can do directly. **It is a deep
-unlock**: a press requires a college and a stockade, and the policies require the
-man who comes with it to think well of the PC on top. A colony reaches this late
-or not at all.
+**It is a deep unlock**: a press requires a college and a stockade, and the
+policies require the man who comes with it to think well of the PC on top. A
+colony reaches this late or not at all.
 
-He also **moves prestige** — a contented journalist prints well of the Crown and
-banks it, a slighted one prints the other thing. **He cannot touch an optic**:
-`prestige.md` §4 locks that optics never decay, and good press is not a pardon.
+**There are two, and both are plain benefits.** Author's ruling, and the
+distinction matters more than either policy does:
+
+| | What it does |
+| :--- | :--- |
+| **Public Relations** | every governor's loyalty to the PC rises each month. He is printing well of the Crown, governors read it, and their regard reaches their own towns through §4's prominence term |
+| **Crown Sentiment** | he prints the Crown's difficulties as readily as he prints a hamlet's, so the colony bears the burden better. **Rebel sentiment reads every tax rate a quarter lower than it is** — 10 per cent counted as 7.5, 40 per cent as 30 |
+
+**The Crown still collects the real rate.** Only sentiment reads it lower, and
+the reduction is a quarter *of* the rate rather than twenty-five points off it.
+
+### 🔒 Neither policy is the trap
+
+**What the PC must do to keep him loyal is the trap. What he gets for it is not.**
+
+Both of these are things a player should reach for. He earns them by holding the
+colony to the journalist's standard — the worst town, not the average — and by
+pursuing a programme that quietly raises the stakes everywhere. **The cost is
+paid before the benefit arrives**, and the benefit being genuinely good is what
+makes the bargain worth taking and therefore worth regretting.
+
+A policy that was itself a hidden cost would turn the whole man into a trick.
+He is not a trick; he is sincere, and he is dangerous because of it.
+
+**They cost like any policy** — full, half or nothing, with `policy.md`'s 3x
+asymmetry testing his loyalty when the PC underpays.
+
+### He does not move prestige
+
+**Nobody at court reads the colony's papers.** Author's ruling, and it removes
+what was a second prestige bank with nobody behind it.
 
 **How he gets loyalty.** Beyond his own dealings with the PC, he reads **the
 quality of life of the worst town in the colony** — not the average.
