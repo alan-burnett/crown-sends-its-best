@@ -536,3 +536,426 @@ func test_and_the_theatre_buys_less() -> void:
 		r.setup.quirks = PackedStringArray(["a_pious_colony"]))
 	assert_true(float(Building.amusement_for(town)["served"]) < ordinary,
 		"a pious colony enjoyed the theatre exactly as much as anybody else")
+
+
+# --- 🔒 Good PR: every optic rings quieter, and none of them decays ---------
+
+func test_good_pr_makes_every_optic_cost_less() -> void:
+	var plain := OpticsRegister.price_of(Rebellion.EVENT_DECLARED)
+	assert_true(plain > 0.0, "a rebellion costs nothing, so this proves nothing")
+
+	_applied(func(r: RunState) -> void: r.setup.perk = &"good_pr")
+	assert_true(OpticsRegister.price_of(Rebellion.EVENT_DECLARED) < plain,
+		"the pamphlets were kind and the court minded exactly as much")
+
+
+func test_it_reaches_the_debt_the_court_actually_tallies() -> void:
+	# A scale nothing reads is a number in a file.
+	var run := _applied(func(r: RunState) -> void: r.setup.perk = &"")
+	run.log.emit(Rebellion.EVENT_DECLARED, &"ashmere", 4, {}, WorldPhase.COLONY_MONTH)
+	var plain := OpticsRegister.debt_in(run.log)
+	assert_true(plain > 0.0, "a rebellion left no debt at all")
+
+	var kind := _applied(func(r: RunState) -> void: r.setup.perk = &"good_pr")
+	kind.log.emit(Rebellion.EVENT_DECLARED, &"ashmere", 4, {}, WorldPhase.COLONY_MONTH)
+	assert_true(OpticsRegister.debt_in(kind.log) < plain,
+		"good press never reached the tally")
+
+
+func test_it_does_not_make_an_optic_decay() -> void:
+	# 🔒 **Nothing does.** A run with two rebellions in it is still a run with two
+	# rebellions in it, and merely less ruinous — which is the difference between
+	# a perk and a pardon.
+	var run := _applied(func(r: RunState) -> void: r.setup.perk = &"good_pr")
+	run.log.emit(Rebellion.EVENT_DECLARED, &"ashmere", 1, {}, WorldPhase.COLONY_MONTH)
+	var owed := OpticsRegister.debt_in(run.log)
+
+	run.world.month = 40
+	assert_eq(OpticsRegister.debt_in(run.log), owed,
+		"an optic faded with time, and prestige.md §4 says none of them does")
+
+	run.log.emit(Rebellion.EVENT_DECLARED, &"gallows_end", 2, {}, WorldPhase.COLONY_MONTH)
+	assert_true(OpticsRegister.debt_in(run.log) > owed,
+		"a second rebellion cost nothing on top of the first")
+
+
+# --- 🔒 My boss is a jerk: it matters whose treasury said no ----------------
+
+func _let_down(perk: StringName, by_the_crown: bool) -> float:
+	var run := _applied(func(r: RunState) -> void: r.setup.perk = perk)
+	ContactRoster.load_into(run, content)
+	var marshal := run.contact(&"marshal")
+	var before := marshal.loyalty()
+
+	var promise := Promise.new(&"marshal", &"gold", {"amount": 300.0}, 1, 2)
+	var promises := PromiseBook.new()
+	promises.make(promise, marshal, run.log, 1)
+	if by_the_crown:
+		promises.settle_due({"marshal": marshal}, run.log, 3, false)
+	else:
+		promises.break_promise(promise, marshal, run.log, 3, "the PC changed his mind")
+	return before - marshal.loyalty()
+
+
+func test_a_promise_the_crown_broke_costs_less_under_the_perk() -> void:
+	var plain := _let_down(&"", true)
+	assert_true(plain > 0.0, "the Crown repudiated a promise and nobody minded")
+	var defused := _let_down(&"my_boss_is_a_jerk", true)
+	assert_true(defused < plain,
+		"they knew whose treasury said no and blamed the PC exactly as much")
+
+
+func test_a_promise_the_pc_broke_himself_costs_what_it_always_did() -> void:
+	# 🔒 The scale is on **who refused**, never on the promise. A PC who simply
+	# went back on his word is not covered by his employer being difficult.
+	var plain := _let_down(&"", false)
+	var with_perk := _let_down(&"my_boss_is_a_jerk", false)
+	assert_true(plain > 0.0, "breaking a promise cost nothing")
+	assert_almost_eq(with_perk, plain, 0.0001,
+		"the perk excused the PC a promise he broke himself")
+
+
+# --- 🔒 Well connected at court ---------------------------------------------
+
+func test_granting_a_crown_officers_demand_earns_more() -> void:
+	var plain := _applied(func(r: RunState) -> void: r.setup.perk = &"")
+	ContactRoster.load_into(plain, content)
+	var ordinary := plain.contact(&"steward")
+	var was := ordinary.loyalty()
+	ordinary.relationship.record_deed(Relationship.GRANTED)
+	var earned := ordinary.loyalty() - was
+
+	var connected := _applied(func(r: RunState) -> void:
+		r.setup.perk = &"well_connected_at_court")
+	ContactRoster.load_into(connected, content)
+	var steward := connected.contact(&"steward")
+	RunModifiers.apply_all(connected, content)
+	var before := steward.loyalty()
+	steward.relationship.record_deed(Relationship.GRANTED)
+
+	assert_true(earned > 0.0, "granting a demand earned nothing at all")
+	assert_true(steward.loyalty() - before > earned,
+		"a word from a well-connected PC went no further than anybody else's")
+
+
+func test_it_does_not_reach_a_governor() -> void:
+	# The perk is about the court. A governor is not at it.
+	var run := _applied(func(r: RunState) -> void:
+		r.setup.perk = &"well_connected_at_court")
+	ContactRoster.load_into(run, content)
+	RunModifiers.apply_all(run, content)
+
+	var governor := run.contact(run.colony.in_order()[0].governor_id)
+	assert_true(governor != null, "there is no governor to ask about")
+	assert_almost_eq(governor.relationship.scale_for(Relationship.GRANTED), 1.0, 0.0001,
+		"a perk about the court reached a man in the colony")
+
+
+# --- 🔒 Hard to say no to: it wins close arguments, never a hopeless one ----
+
+func _urging_at(perk: StringName, months_later: int, raw: bool = false) -> float:
+	var run := _applied(func(r: RunState) -> void: r.setup.perk = perk)
+	var context := DeliberationContext.new(
+		DecisionKind.GOVERNOR_INTENT, run.world, EventLog.new())
+	context.month = months_later
+	context.data = {
+		"urged": String(GovernorIntent.ECONOMY),
+		"urged_tone": String(Tone.DUTIFUL),
+		"urged_month": 0,
+	}
+	var urging := IntentConsiderations.CrownUrging.new()
+	var candidate := Candidate.new(GovernorIntent.ECONOMY, {})
+	# `scored` is the kernel's own `[-1, +1]` guard, so asking it what the
+	# consideration is worth would hide a consideration that shouts. `raw` asks the
+	# consideration directly, which is the only way to see that.
+	if raw:
+		return urging.score(null, candidate, context)
+	return urging.scored(null, candidate, context)
+
+
+func test_a_letter_from_him_is_still_scoring_when_another_mans_has_faded() -> void:
+	# Not the accessor — what a governor actually reads off the letter a year on.
+	var plain := _urging_at(&"", 12)
+	assert_true(plain > 0.0, "a year-old urging scored nothing at all, so this proves nothing")
+	assert_true(_urging_at(&"hard_to_say_no_to", 12) > plain,
+		"the PC is no harder to say no to than anybody else")
+
+
+func test_it_never_shouts_louder_than_the_contract_allows() -> void:
+	# 🔒 §3: *it never overrides him.* A consideration scores in `[-1, +1]`, and
+	# one that breaks out of that drowns the weight vector — personality stops
+	# meaning anything and the perk has become a command. So the month the letter
+	# lands, when the pull is already at the ceiling, the perk buys nothing; what
+	# it buys is the tail.
+	assert_almost_eq(_urging_at(&"", 0, true), 1.0, 0.0001,
+		"a fresh urging was not at the ceiling, so the test below shows nothing")
+	assert_almost_eq(_urging_at(&"hard_to_say_no_to", 0, true), 1.0, 0.0001,
+		"a fresh urging under the perk scored outside the range every consideration shares")
+
+
+func test_it_is_one_consideration_among_nine_and_not_a_command() -> void:
+	# The other half of the same lock: a perk turns a knob, it does not add or
+	# remove something a governor weighs.
+	_applied(func(r: RunState) -> void: r.setup.perk = &"hard_to_say_no_to")
+	assert_true(IntentConsiderations.ALL.has("crown_urging"),
+		"the urging is no longer a consideration at all")
+	assert_eq(IntentConsiderations.ALL.size(), 9,
+		"the perk changed how many things a governor weighs")
+
+# --- 🔒 It could be worse: the curve flattens both ways ---------------------
+
+func test_misery_hurts_less_and_comfort_helps_less() -> void:
+	var wretched := QualityOfLife.combine(0.1, 0.0)
+	var thriving := QualityOfLife.combine(0.9, 0.0)
+	assert_true(thriving > wretched, "the measure did not distinguish them at all")
+
+	_applied(func(r: RunState) -> void: r.setup.quirks = [&"it_could_be_worse"])
+	assert_true(QualityOfLife.combine(0.1, 0.0) > wretched,
+		"a wretched town read exactly as wretched, so misery did not hurt less")
+	assert_true(QualityOfLife.combine(0.9, 0.0) < thriving,
+		"a thriving town read exactly as thriving, so comfort still helped as much")
+
+
+func test_it_narrows_the_measure_rather_than_lowering_it() -> void:
+	# 🔒 **Both ways, and that is the quirk.** A damper that only took the top off
+	# would be a straight penalty, and a player would simply never choose it.
+	var spread := QualityOfLife.combine(0.9, 0.0) - QualityOfLife.combine(0.1, 0.0)
+	_applied(func(r: RunState) -> void: r.setup.quirks = [&"it_could_be_worse"])
+	var narrowed := QualityOfLife.combine(0.9, 0.0) - QualityOfLife.combine(0.1, 0.0)
+	assert_true(narrowed < spread,
+		"the distance between a good life here and a bad one did not close")
+	assert_true(narrowed > 0.0,
+		"the quirk erased the difference, and a colony nobody can improve is not a game")
+
+
+func test_the_poorest_are_read_through_it_too() -> void:
+	# The clergyman's regard answers to this figure and his letters report it, and
+	# *fewer complaints* is half of what the quirk buys.
+	var parts := {"health": 0.1, "safety": 0.1, "means": 0.1, "hope": 0.1}
+	var plain := QualityOfLife.from_below(parts)
+	_applied(func(r: RunState) -> void: r.setup.quirks = [&"it_could_be_worse"])
+	assert_true(QualityOfLife.from_below(parts) > plain,
+		"the poorest were read exactly as poorly, so the priest complains as much")
+
+
+func test_it_does_not_touch_what_actually_happened_to_the_town() -> void:
+	# 🔒 **On the measure, never on the five components.** The food really did run
+	# out, and `town.safety` — which the Diplomat asks to be moved on — is a fact
+	# about danger rather than a judgement about comfort.
+	var parts := {"health": 0.2, "safety": 0.3, "means": 0.2, "hope": 0.1}
+	var substance := QualityOfLife.substance_of(parts)
+	_applied(func(r: RunState) -> void: r.setup.quirks = [&"it_could_be_worse"])
+	assert_almost_eq(QualityOfLife.substance_of(parts), substance, 0.0001,
+		"the quirk changed what happened to the town rather than what was made of it")
+
+
+# --- 🔒 Boom town: the same sentence is the benefit and the cost ------------
+
+func _boom_town(quality: float = 0.9) -> Town:
+	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
+	town.workers = 12
+	town.quality_of_life = quality
+	town.receive_gold(5_000.0)
+	return town
+
+
+func _boom_context(town: Town) -> ColonyContext:
+	var colony := Colony.new()
+	colony.add(town)
+	var context := ColonyContext.new(
+		WorldValues.initial_state(), EventLog.new(), RngStreams.new(SEED), null)
+	context.run_seed = SEED
+	context.colony = colony
+	return context
+
+
+func _arriving(quirk: StringName, quality: float = 0.9) -> float:
+	_with_quirk(quirk)
+	var town := _boom_town(quality)
+	var due := Immigration.due(town, _boom_context(town))
+	return float(due["workers"]) + float(due["experts"])
+
+
+## A run carrying one quirk, or none when the id is empty.
+func _with_quirk(quirk: StringName) -> RunState:
+	var carried: Array[StringName] = []
+	if not String(quirk).is_empty():
+		carried.append(quirk)
+	return _applied(func(r: RunState) -> void: r.setup.quirks = carried)
+
+
+func test_more_of_them_come() -> void:
+	var plain := _arriving(&"")
+	assert_true(plain > 0.0, "nobody came to a thriving town, so this proves nothing")
+	assert_true(_arriving(&"boom_town") > plain, "the boom brought no one extra")
+
+
+func test_a_wretched_town_still_draws_nobody() -> void:
+	# 🔒 **On the flow, not on the appeal.** The quirk multiplies the reasons a
+	# town has earned; it never invents one. A player who cannot hold a colony
+	# gets to the cliff faster rather than being handed a colony.
+	assert_almost_eq(_arriving(&"boom_town", 0.1), 0.0, 0.0001,
+		"people crossed an ocean to a place nobody would live in")
+
+
+func test_the_stakes_run_higher_with_them() -> void:
+	# The other half of the same sentence: `immigration.md` §9's chain — growth is
+	# the engine of prosperity and the engine of rebellion at once.
+	var town := _boom_town()
+	town.buildings.append("granary")
+	town.buildings.append("chapel")
+	town.traded_value = 4_000.0
+	var plain := RebelSentiment.stakes_for(town)
+	assert_true(plain > 1.0, "a developed town had nothing at stake, so this proves nothing")
+
+	_with_quirk(&"boom_town")
+	assert_true(RebelSentiment.stakes_for(town) > plain,
+		"the town filled up and had no more to lose")
+
+
+func test_a_hamlet_with_nothing_at_stake_is_still_placid() -> void:
+	# 🔒 **It amplifies both directions and cannot by itself put a town anywhere.**
+	# The multiplier's floor is one, and a quirk that lifted it would say that
+	# arriving in a boom country makes a shed want independence.
+	var hamlet := _boom_town()
+	_with_quirk(&"boom_town")
+	assert_almost_eq(RebelSentiment.stakes_for(hamlet), 1.0, 0.0001,
+		"a town with nothing built and nothing traded was driven harder for it")
+
+
+# --- 🔒 Restless country: stronger, not merely grumpier ---------------------
+
+func test_the_tribes_begin_further_down() -> void:
+	var plain := Tribes.generate(RngStreams.new(SEED))
+	var was: Array = []
+	for tribe in plain.all:
+		was.append((tribe as Tribe).standing_toward(Tribe.COLONY))
+
+	_with_quirk(&"restless_country")
+	var restless := Tribes.generate(RngStreams.new(SEED))
+	assert_eq(restless.all.size(), was.size(), "the quirk changed how many there are")
+	for index in restless.all.size():
+		var tribe: Tribe = restless.all[index]
+		assert_true(tribe.standing_toward(Tribe.COLONY) < float(was[index]),
+			"a tribe met the colony exactly as warmly as in a quiet country")
+
+
+func _standing_spread(tribes: Tribes) -> float:
+	var lowest := 200.0
+	var highest := -200.0
+	for entry in tribes.all:
+		var standing: float = (entry as Tribe).standing_toward(Tribe.COLONY)
+		lowest = minf(lowest, standing)
+		highest = maxf(highest, standing)
+	return highest - lowest
+
+
+func test_they_are_still_three_peoples_and_not_one_in_triplicate() -> void:
+	# 🔒 **A shift on the band, not a narrowing of it.** The spread between a
+	# tribe that will deal and one that will not is what makes three neighbours
+	# three characters.
+	var spread := _standing_spread(Tribes.generate(RngStreams.new(SEED)))
+	assert_true(spread > 0.0, "the three already start identical, so this proves nothing")
+
+	_with_quirk(&"restless_country")
+	assert_almost_eq(_standing_spread(Tribes.generate(RngStreams.new(SEED))), spread, 0.0001,
+		"they all start lower and they no longer differ by as much")
+
+
+func _gathered(quirk: StringName) -> float:
+	_with_quirk(quirk)
+	var map := WorldMap.new(24, 24, &"ocean")
+	for y in range(2, 22):
+		for x in range(2, 22):
+			map.set_terrain(x, y, &"plains")
+
+	var tribe := Tribe.new()
+	tribe.id = &"tribe_test"
+	tribe.standing = {String(Tribe.COLONY): 70.0}
+
+	var village := Village.new()
+	village.id = &"village_test_0"
+	village.tribe = &"tribe_test"
+	village.at = Vector2i(10, 10)
+	village.people = 30
+	village.stores = {"food": 400.0}
+
+	var context := ColonyContext.new(
+		WorldValues.initial_state(), EventLog.new(), RngStreams.new(SEED), map)
+	var before := float(village.stores.get("food", 0.0))
+	village.live(tribe, context)
+	return float(village.stores.get("food", 0.0)) - before
+
+
+func test_their_villages_take_more_off_the_same_ground() -> void:
+	var plain := _gathered(&"")
+	assert_true(_gathered(&"restless_country") > plain,
+		"the ground fed them no better in a restless country")
+
+
+func test_the_ground_itself_is_the_ground_the_colony_farms() -> void:
+	# 🔒 **On what they gather, never on the map.** A quirk that moved `yield_at`
+	# would quietly hand the PC richer tiles as well, which is the opposite of the
+	# quirk.
+	var plain := WorldMap.new(24, 24, &"plains").yield_at(10, 10, &"food")
+	assert_true(plain > 0.0, "plains grew nothing, so this proves nothing")
+	_with_quirk(&"restless_country")
+	assert_almost_eq(
+		WorldMap.new(24, 24, &"plains").yield_at(10, 10, &"food"), plain, 0.0001,
+		"the colony's own fields got better because the neighbours were angry")
+
+
+func test_their_war_parties_are_more_numerous() -> void:
+	var people := 30
+	var plain := _marching(people)
+	_with_quirk(&"restless_country")
+	assert_true(_marching(people) > plain, "the same men marched out")
+
+
+func test_a_village_still_keeps_enough_to_come_home_to() -> void:
+	# 🔒 `VILLAGE_KEEPS` holds whatever sort of country this is. A village that
+	# emptied itself would win one battle and then cease to exist, and the point
+	# of the quirk is neighbours who last.
+	_with_quirk(&"restless_country")
+	# **Small enough that the floor is what binds**, not the share. A village big
+	# enough to spare its share freely would satisfy this either way.
+	var people := 12
+	assert_true(_marching(people) > 0, "nobody marched at all, so this proves nothing")
+	assert_true(_marching(people) <= people - Muster.VILLAGE_KEEPS,
+		"the whole village marched and left nothing behind it")
+
+
+## How many of a village of this size would go out with a war party.
+##
+## Through `Muster` itself. A helper that recomputed the arithmetic would be a
+## second copy of the rule, and mutating the real one would leave it passing.
+func _marching(people: int) -> int:
+	var village := Village.new()
+	village.id = &"village_test_0"
+	village.people = people
+	return Muster.going_from(village)
+
+
+func test_their_agreements_move_more_of_the_winter() -> void:
+	var village := Village.new()
+	village.id = &"village_test_0"
+	village.people = 40
+	var plain := TradeAgreement.kept_back_by(village)
+	assert_true(plain > 0.0, "they kept nothing back at all, so this proves nothing")
+
+	_with_quirk(&"restless_country")
+	assert_true(TradeAgreement.kept_back_by(village) < plain,
+		"they held back exactly as much, so nothing more reaches the town")
+
+
+func test_what_they_keep_is_the_winter_and_not_a_musket() -> void:
+	# 🔒 *Months of eating for food and nothing for the rest*, which is what the
+	# function always said and did not do: a village trading hides held back a
+	# quantity of hides equal to two months of everyone's grain.
+	var village := Village.new()
+	village.id = &"village_test_0"
+	village.people = 40
+	assert_true(TradeAgreement.kept_back_by(village) > 0.0,
+		"they will trade away the winter's food")
+	assert_almost_eq(TradeAgreement.kept_back_by(village, &"furs"), 0.0, 0.0001,
+		"they kept back furs against a hungry month")

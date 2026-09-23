@@ -147,6 +147,38 @@ const DEVELOPMENT_PER_BUILDING: float = 0.08
 const DEVELOPMENT_PER_TRADE: float = 0.0002
 const DEVELOPMENT_CEILING: float = 0.5
 
+## 🔒 **How much a town having something to lose is worth** (#288,
+## *Boom town*).
+##
+## **One in every run without the quirk**, and above one the stakes multiplier
+## runs higher with the immigration that fills the town. That pairing is the
+## whole quirk: `immigration.md` §9's chain — *growth is the engine of prosperity
+## and the engine of rebellion at once* — made into a choice a player takes on
+## purpose.
+##
+## 🔒 **On the term and its ceiling together**, so the shape holds: a hamlet
+## with nothing at stake is still placid, and what moves is how far a developed
+## town can be driven by whatever is already driving it. **It amplifies both
+## directions and cannot by itself put a town anywhere** — a well-kept developed
+## colony is held down harder, exactly as it was.
+##
+## The ceiling above is load-bearing and says why. Anything here that let the
+## product run away would re-make the bug it records, so this is one scale on a
+## figure already capped, and M8 owns how far.
+static var _stakes_scale: float = 1.0
+
+
+static func stakes_scale() -> float:
+	return _stakes_scale
+
+
+static func set_stakes_scale(scale: float) -> void:
+	_stakes_scale = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_stakes_scale = 1.0
+
 ## What a neighbour in open rebellion is worth, at its worst.
 const NEIGHBOUR_WEIGHT: float = 18.0
 
@@ -201,7 +233,7 @@ static func of(
 	# is not more rebellious for being developed; it is more *consequential*, so
 	# the same squeeze moves it further and the same contentment holds it down
 	# further.
-	var stakes := 1.0 + _development(town)
+	var stakes := stakes_for(town)
 	parts["stakes"] = stakes
 	parts["total"] = clampf(driving * stakes, MINIMUM, MAXIMUM)
 	return parts
@@ -317,6 +349,15 @@ static func _quality(town: Town) -> float:
 ## the month the town hall was introduced, which is exactly the sort of silent
 ## shift a building that is "not built, not chosen and not optional" should never
 ## cause.
+## **How much harder whatever is already driving this town drives it.**
+##
+## One for a hamlet with nothing at stake, and it never goes below that: the term
+## is a gain on the sum rather than a contributor to it, so it amplifies both
+## directions and cannot by itself put a town anywhere.
+static func stakes_for(town: Town) -> float:
+	return 1.0 + _development(town)
+
+
 static func _development(town: Town) -> float:
 	var chosen := 0
 	for id in town.buildings:
@@ -324,7 +365,7 @@ static func _development(town: Town) -> float:
 			chosen += 1
 	var built := float(chosen) * DEVELOPMENT_PER_BUILDING
 	var traded := town.traded_value * DEVELOPMENT_PER_TRADE
-	return minf(DEVELOPMENT_CEILING, built + traded)
+	return minf(DEVELOPMENT_CEILING, built + traded) * _stakes_scale
 
 
 ## A neighbour in open rebellion, **especially while it looks prosperous and

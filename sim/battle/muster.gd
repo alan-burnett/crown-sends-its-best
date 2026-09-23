@@ -51,6 +51,33 @@ const EVENT_LANDED: StringName = &"rival_landed"
 const VILLAGE_SHARE: float = 0.4
 const VILLAGE_KEEPS: int = 6
 
+## 🔒 **How much of that share the quirk moves** (#288, *Restless
+## country*).
+##
+## **One in every run without the quirk**, and above one their forces are more
+## numerous — *stronger, not merely grumpier*, which is what makes low standing
+## genuinely dangerous and the richer trade agreements worth reaching for.
+##
+## 🔒 **On the share and never on `PARTIES_PER_VILLAGE`.** That one is not
+## tuning: it is the rule that stops the same men being counted twice, and a
+## quirk raising it would put a village in the field against itself.
+##
+## 🔒 **And `VILLAGE_KEEPS` holds too.** A village that empties itself has
+## nothing to come home to, whatever sort of country this is.
+static var _party_scale: float = 1.0
+
+
+static func party_scale() -> float:
+	return _party_scale
+
+
+static func set_party_scale(scale: float) -> void:
+	_party_scale = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_party_scale = 1.0
+
 ## One war party in the field per village at a time.
 ##
 ## 🔒 Not a cap on aggression — a cap on *double-counting the same people*. The
@@ -114,12 +141,22 @@ static func _tribes(run: RunState, context: ColonyContext) -> int:
 	return raised
 
 
+## **How many of a village would go out with a war party.**
+##
+## Never more than the village can spare, whatever the country is like: a village
+## that empties itself has nothing to come home to.
+static func going_from(village: Village) -> int:
+	if village == null:
+		return 0
+	return mini(
+		maxi(1, int(round(float(village.people) * VILLAGE_SHARE * _party_scale))),
+		village.people - VILLAGE_KEEPS)
+
+
 static func _war_party(
 	run: RunState, village: Village, context: ColonyContext
 ) -> Company:
-	var going := mini(
-		maxi(1, int(round(float(village.people) * VILLAGE_SHARE))),
-		village.people - VILLAGE_KEEPS)
+	var going := going_from(village)
 	if going <= 0:
 		return null
 

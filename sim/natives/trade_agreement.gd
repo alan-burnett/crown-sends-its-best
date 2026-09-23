@@ -49,6 +49,31 @@ const CLOSES_BELOW: float = 34.0
 ## Months of nothing to trade before they stop bothering. Tuning.
 const PATIENCE: int = 4
 
+## 🔒 **How much of the winter they keep back** (#288, *Restless country*).
+##
+## **One in every run without the quirk**, and below one their trade agreements
+## are richer: a people who get more off their land can put more of it on the
+## table and still keep the winter.
+##
+## 🔒 **Volume, never the ratio.** `natives.md` §5 fixes that each side
+## *receives at fair value* and that gold sets only the rate — a knob that bent
+## the terms would make the tribes charitable rather than strong, which is the one
+## thing the design says they are not. A richer agreement is one where more of it
+## moves.
+static var _keeps_back: float = 1.0
+
+
+static func keeps_back() -> float:
+	return _keeps_back
+
+
+static func set_keeps_back(scale: float) -> void:
+	_keeps_back = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_keeps_back = 1.0
+
 var tribe: StringName = &""
 var town: StringName = &""
 
@@ -84,7 +109,8 @@ func run(
 	if the_town == null or village == null:
 		return 0.0
 
-	var theirs := maxf(0.0, float(village.stores.get(String(they_give), 0.0)) - _their_reserve(village))
+	var theirs := maxf(0.0, float(village.stores.get(String(they_give), 0.0))
+		- kept_back_by(village, they_give))
 	var ours := maxf(0.0, the_town.held(we_give) - reserve)
 	if theirs <= 0.0 or ours <= 0.0:
 		idle_months += 1
@@ -132,8 +158,17 @@ func run(
 ##
 ## **Months of eating for food and nothing for the rest.** They are not running a
 ## warehouse; they are keeping the winter.
-static func _their_reserve(village: Village) -> float:
-	return float(village.people) * ColonyNeeds.per_head(&"food") * 2.0
+##
+## 🔒 **And *nothing for the rest* meant nothing.** This took no resource
+## and charged every axis the food reserve, so a village trading hides held back a
+## quantity of hides equal to two months of everyone's grain — a figure with
+## nothing to do with hides, which grows with the village and silently shut the
+## richest agreements the design has. What they are keeping is the winter, and you
+## cannot eat a musket.
+static func kept_back_by(village: Village, resource: StringName = &"food") -> float:
+	if resource != &"food":
+		return 0.0
+	return float(village.people) * ColonyNeeds.per_head(&"food") * 2.0 * _keeps_back
 
 
 ## Whether this is still a bargain either side would keep.

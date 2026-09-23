@@ -87,6 +87,36 @@ const MANDATE_HALF_LIFE: float = 18.0
 ## for a decade is too strong for how little it costs to send.
 const URGING_HALF_LIFE: float = 12.0
 
+## 🔒 **How much the Crown's urging weighs** (#287, *Hard to say no to*).
+##
+## One in every run without the perk.
+##
+## **On the score rather than on the drawn weight**, because the first town's
+## governor exists before a perk is applied — `RunState.new_run` makes him and
+## `use_content` turns the knobs — so a scale at generation would miss the one
+## governor every run has. Weight times score is one product either way.
+##
+## 🔒 **It never overrides him.** `crown_urging` is still weighed against
+## eight other considerations and his own reading of his town, so this **wins close
+## arguments and loses hopeless ones**: the Crown's pressure, not the Crown's
+## command. And because a fresh urging is already at the ceiling, what the perk
+## really buys is that the letter is *still scoring* next spring when an
+## ordinary one has faded.
+static var _urging_weight: float = 1.0
+
+
+static func urging_weight() -> float:
+	return _urging_weight
+
+
+static func set_urging_weight(weight: float) -> void:
+	_urging_weight = maxf(0.0, weight)
+
+
+static func reset_urging() -> void:
+	_urging_weight = 1.0
+
+
 ## What the manner of the letter does to how hard it pulls, and for how long
 ## (#262, `docs/mechanics/tone.md` §4).
 ##
@@ -433,8 +463,14 @@ class CrownUrging extends Consideration:
 		var intensity := IntentConsiderations.intensity_of(
 			StringName(context.get_value("urged_tone", "")))
 		var age := float(context.month - int(context.get_value("urged_month", 0)))
-		return IntentConsiderations.decayed(
+		var pull := IntentConsiderations.decayed(
 			age, IntentConsiderations.URGING_HALF_LIFE * intensity)
+		# 🔒 **Clamped here, not left to the kernel's guard.** `scored()` treats a
+		# score outside `[-1, +1]` as a bug and says so, which is right — a
+		# consideration that shouts drowns out the weight vector and personality
+		# stops meaning anything. So the perk cannot buy a louder letter than the
+		# contract allows; what it buys is the tail.
+		return minf(1.0, pull * IntentConsiderations.urging_weight())
 
 
 # --- The filter -------------------------------------------------------------

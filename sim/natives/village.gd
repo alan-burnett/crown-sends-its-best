@@ -160,7 +160,7 @@ func live(its_tribe: Tribe, context: ColonyContext) -> void:
 	# `natives.md` §5 has them offering *what the village is actually producing*.
 	# They take the raw things: they do not work iron and they do not brew.
 	if context.map != null:
-		var working := 1.3 if objective == WORK_MORE_LAND else 1.0
+		var working := (1.3 if objective == WORK_MORE_LAND else 1.0) * _gathers
 		var fields := land(context.map)
 		for resource in _what_the_land_gives():
 			var gathered := 0.0
@@ -230,6 +230,31 @@ static func _what_the_land_gives() -> Array[StringName]:
 ## Above this, a thing takes a craft they do not have, and they gather none of
 ## it however much of it is lying about. Tuning.
 const CRAFT_THEY_LACK: float = 1.0
+
+## 🔒 **What the ground gives a village that works it** (#288, *Restless
+## country*).
+##
+## **One in every run without the quirk**, and above one their villages take more
+## off the same tiles than a colonial town would. They grow faster, they have more
+## to spare, and they field more men when they conclude.
+##
+## 🔒 **On what they gather, never on the map.** `WorldMap.yield_at` is the
+## ground, and it is the same ground the colony farms — a quirk that moved it
+## would quietly hand the PC richer tiles as well, which is the opposite of the
+## quirk. What changes is how much these neighbours get out of it.
+static var _gathers: float = 1.0
+
+
+static func gathers() -> float:
+	return _gathers
+
+
+static func set_gathers(scale: float) -> void:
+	_gathers = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_gathers = 1.0
 
 
 ## How fast they grow, which is faster when they are at ease. Tuning.

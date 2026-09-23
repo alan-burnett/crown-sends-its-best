@@ -86,6 +86,68 @@
             }
           }
         ]
+      },
+      {
+        "id": "it_could_be_worse",
+        "name": "It could be worse",
+        "blurb": "Whatever befalls this colony, somebody here has seen worse and says so.",
+        "offered": true,
+        "note": "Everything that measures quality of life does so with a dampened effect (section 4). It flattens the curve in BOTH directions: misery hurts less, so less rebel sentiment, fewer complaints and a steadier colony; comfort helps less, so weaker immigration appeal, slower births and less of the virtuous circle. Rewards a player who never meant to invest in how people live; punishes one whose whole plan was to make the colony pleasant. One knob rather than two, because one measure feeds every reader - the damper contracts the measure toward the middle of its range and each reader goes on reading it exactly as it always did. Section 5 names this with Boom town as the pair to watch: one raises the pressure and the other numbs the feedback. The magnitude is M8's.",
+        "modifiers": [
+          {
+            "quality_felt": {
+              "scale": 0.6
+            }
+          }
+        ]
+      },
+      {
+        "id": "boom_town",
+        "name": "Boom town",
+        "blurb": "Every ship brings more of them, and they all mean to stay.",
+        "offered": true,
+        "note": "Immigration runs higher and the stakes multiplier on rebel sentiment runs higher with it (section 4). This is immigration.md section 9's chain - growth is the engine of prosperity and the engine of rebellion at once - made into a choice. A player who can hold a large colony gets a larger one sooner; a player who cannot gets to the cliff faster. The drawback is not bolted on, it is the same sentence as the benefit. The stakes knob scales a figure that is already capped, and rebel_sentiment.gd records why that cap is load-bearing: both magnitudes are M8's and neither should be moved without the harness.",
+        "modifiers": [
+          {
+            "immigration_flow": {
+              "scale": 1.5
+            }
+          },
+          {
+            "stakes_scale": {
+              "scale": 1.4
+            }
+          }
+        ]
+      },
+      {
+        "id": "restless_country",
+        "name": "Restless country",
+        "blurb": "The people here have met Europeans before, and they are ready for you.",
+        "offered": true,
+        "note": "The tribes are stronger, not merely grumpier (section 4). They start at lower standing, their villages yield more from the tiles they work, their forces are more numerous, and their trade agreements are richer. So the escape from the Crown's monopoly (natives.md section 5) is both more valuable and harder to reach, and a colony that mishandles its neighbours faces something that can actually take a town. Four knobs for four bullets. The richer agreements are volume and never the ratio: natives.md section 5 fixes that each side receives at fair value, so what a richer agreement means is that a people who get more off their land put more of it on the table and still keep the winter. Every figure is M8's.",
+        "modifiers": [
+          {
+            "tribe_standing_start": {
+              "shift": -14.0
+            }
+          },
+          {
+            "village_yield": {
+              "scale": 1.3
+            }
+          },
+          {
+            "war_party_share": {
+              "scale": 1.4
+            }
+          },
+          {
+            "native_reserve": {
+              "scale": 0.6
+            }
+          }
+        ]
       }
     ]
   }

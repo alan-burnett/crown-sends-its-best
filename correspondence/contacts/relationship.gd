@@ -358,6 +358,10 @@ func scale_for(deed: StringName) -> float:
 	return maxf(0.0, float(deed_scale.get(String(deed), 1.0)))
 
 
+static func reset() -> void:
+	_crown_break_scale = 1.0
+
+
 ## Say that this man feels a deed differently (#282, `patrons.md` §6).
 func scale_deed(deed: StringName, scale: float) -> void:
 	if not DEEDS.has(deed):
@@ -408,14 +412,39 @@ var last_promise_broken_month: int = -1
 ## than merely thinking less of the PC. A loyalty drop nobody mentions is a
 ## number moving in the dark, and the cascade this feeds is supposed to be
 ## watchable (#70).
-func settle_promise(promise_id: String, kept: bool, month: int = -1) -> float:
+func settle_promise(
+	promise_id: String, kept: bool, month: int = -1, by_the_crown: bool = false
+) -> float:
 	var index := outstanding_promises.find(promise_id)
 	if index >= 0:
 		outstanding_promises.remove_at(index)
 	if not kept:
 		promises_broken += 1
 		last_promise_broken_month = month
+	# 🔒 **A promise the Crown broke is not a promise the PC broke** (#287, *My
+	# boss is a jerk*). `REFUSING` breaks every gold promise at once, and because
+	# the PC typically owes several people it lands as a broad collapse in
+	# goodwill rather than one penalty — then worse compliance, then rising
+	# sentiment. **The nastiest spiral in the game**, and the perk defuses it.
+	#
+	# Thematically: people believe he meant it, and they know whose treasury said
+	# no. So the scale is on *who refused*, never on the promise itself.
+	if not kept and by_the_crown:
+		return record_deed(PROMISE_BROKEN, _crown_break_scale)
 	return record_deed(DELIVERED if kept else PROMISE_BROKEN)
+
+
+## What a promise the **Crown** broke costs, against one the PC broke himself.
+## One in every run without the perk.
+static var _crown_break_scale: float = 1.0
+
+
+static func crown_break_scale() -> float:
+	return _crown_break_scale
+
+
+static func set_crown_break_scale(scale: float) -> void:
+	_crown_break_scale = maxf(0.0, scale)
 
 
 # --- Serialisation ---------------------------------------------------------

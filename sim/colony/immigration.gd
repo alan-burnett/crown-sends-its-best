@@ -53,6 +53,31 @@ const EVENT_ARRIVED: StringName = &"settlers_arrived"
 const FLOW_KEY: String = "crown.emigration"
 const FLOW_BASE: float = 1.0
 
+## 🔒 **How hard the crossing runs, for the whole run** (#288, *Boom town*).
+##
+## **One in every run without the quirk.** Above one, more people come to a
+## colony worth coming to — and `immigration.md` §9's chain does the rest: growth
+## is the engine of prosperity and the engine of rebellion at once.
+##
+## 🔒 **On the flow and not on the appeal**, so it multiplies a town's own
+## reasons rather than inventing one. A wretched town still draws nobody, however
+## boomy the country: the quirk is *more of what you have earned*, and a player
+## who cannot hold a large colony only gets to the cliff faster.
+static var _flow_scale: float = 1.0
+
+
+static func flow_scale() -> float:
+	return _flow_scale
+
+
+static func set_flow_scale(scale: float) -> void:
+	_flow_scale = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_flow_scale = 1.0
+
+
 ## Quality of life below which essentially nobody comes.
 const MISERY_FLOOR: float = 0.35
 
@@ -82,6 +107,9 @@ static func due(town: Town, context: ColonyContext) -> Dictionary:
 	var flow := FLOW_BASE
 	if context != null and context.state != null:
 		flow += maxf(0.0, float(context.state.get_value(FLOW_KEY, 0.0)))
+	# After the Crown's own driver, not before it: the quirk is a fact about how
+	# hard the whole crossing runs, so a bad year at home is boomier too.
+	flow *= _flow_scale
 
 	# **The Provost's volume knob** (#173, `the-provost.md` §2). It multiplies,
 	# because a policy that added a flat number would send the same wave to a

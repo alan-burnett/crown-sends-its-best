@@ -110,7 +110,34 @@ static func prices() -> Dictionary:
 
 ## What one event costs the Crown's face. Zero for everything not an optic.
 static func price_of(type: StringName) -> float:
-	return float(prices().get(String(type), 0.0))
+	return float(prices().get(String(type), 0.0)) * _favour
+
+
+# --- 🔒 The knob: how loudly each optic rings -------------------------------
+
+## What the court makes of the PC's optics, as a scale on every price (#287,
+## *Good PR*).
+##
+## **One in every run without the perk.** Below one, good ones ring harder and
+## bad ones ring quieter — because an optic's price *is* its debt, and there is
+## one register for all of them.
+##
+## 🔒 **It does not make an optic decay. Nothing does.** A run with two
+## rebellions in it is still a run with two rebellions in it, and merely less
+## ruinous — which is the difference between a perk and a pardon.
+static var _favour: float = 1.0
+
+
+static func favour() -> float:
+	return _favour
+
+
+static func set_favour(scale: float) -> void:
+	_favour = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_favour = 1.0
 
 
 ## Whether the court would hear about this at all.
@@ -129,9 +156,15 @@ static func debt_in(log: EventLog) -> float:
 	if log == null:
 		return 0.0
 	var owed := 0.0
-	var table := prices()
-	for type in table:
-		owed += float(table[type]) * float(log.of_type(StringName(type)).size())
+	# 🔒 **Through `price_of`, like every other reader.** This read the table
+	# directly and so was a second place a price was decided — which went wrong
+	# the moment there was anything to apply on top of the authored figure: *Good
+	# PR* scaled `price_of` and the tally the court actually keeps did not move.
+	#
+	# One function answers what an optic costs, and the register has two readers
+	# of it rather than two answers.
+	for type in prices():
+		owed += price_of(StringName(type)) * float(log.of_type(StringName(type)).size())
 	return owed
 
 

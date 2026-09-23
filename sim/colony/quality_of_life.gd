@@ -170,7 +170,9 @@ static func from_below(parts: Dictionary) -> float:
 		var share := float(_w_poorest[name])
 		total += share * float(parts.get(name, 0.0))
 		weight += share
-	return clampf(total / maxf(0.001, weight), 0.0, 1.0)
+	# Dampened like the headline figure, and for the same reason: the clergyman's
+	# regard answers to this, and *fewer complaints* is half of what the quirk is.
+	return damped(clampf(total / maxf(0.001, weight), 0.0, 1.0))
 
 
 ## The weighted sum of the components that are not pleasure.
@@ -204,9 +206,60 @@ static func effective_weight(raw: float) -> float:
 	return raw / live_weight()
 
 
+# --- 🔒 The knob: how far a life here is allowed to be from any other ---
+
+## What a town's life is **felt** to be, against what it is (#288,
+## *It could be worse*).
+##
+## **One in every run without the quirk**, and below one the whole measure
+## contracts toward indifference: a wretched town reads less wretched and a
+## thriving one reads less thriving. **It flattens the curve in both
+## directions** — misery hurts less, so less rebel sentiment and fewer
+## complaints; comfort helps less, so weaker immigration appeal and slower
+## births.
+##
+## 🔒 **On what the measure reads, never on the components.** Health,
+## safety, means, hope and pleasure are what actually happened to the town and
+## keep happening at full strength: the food really did run out, and `town.safety`
+## — which the Diplomat asks to be moved on — is a fact about danger rather than
+## a judgement about comfort. What the quirk changes is how much anybody makes of
+## it, which is exactly what the name says.
+##
+## Because it contracts toward the middle rather than scaling toward zero, it is
+## also a **floor as well as a ceiling**, which is the sentence *it could be
+## worse* in one line of arithmetic.
+static var _felt: float = 1.0
+
+## The value a dampened measure contracts toward: the middle of `[0, 1]`.
+##
+## One pivot for every reader rather than each reader's own indifference point —
+## immigration's misery floor is not rebel sentiment's and neither is the
+## clergy's. The quirk narrows *the measure*, and each reader goes on reading it
+## exactly as it always did.
+const INDIFFERENT: float = 0.5
+
+
+static func felt() -> float:
+	return _felt
+
+
+static func set_felt(scale: float) -> void:
+	_felt = maxf(0.0, scale)
+
+
+static func reset() -> void:
+	_felt = 1.0
+
+
+## One quality-of-life figure, as the colony feels it.
+static func damped(value: float) -> float:
+	return clampf(INDIFFERENT + _felt * (value - INDIFFERENT), 0.0, 1.0)
+
+
 ## Pleasure lifts, it does not add.
 static func combine(substance: float, pleasure: float) -> float:
-	return clampf(substance + PLEASURE_LIFT * pleasure * (1.0 - substance), 0.0, 1.0)
+	return damped(
+		clampf(substance + PLEASURE_LIFT * pleasure * (1.0 - substance), 0.0, 1.0))
 
 
 # --- The five components ----------------------------------------------------

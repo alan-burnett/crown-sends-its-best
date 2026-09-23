@@ -56,6 +56,64 @@
             }
           }
         ]
+      },
+      {
+        "id": "good_pr",
+        "name": "Good PR",
+        "blurb": "The pamphlets are unusually kind to you.",
+        "offered": true,
+        "note": "Your optics all land in your favour - good ones ring harder, bad ones ring quieter (prestige.md section 4). It does NOT make an optic decay; nothing does. It scales what each is worth in the tally, so a run with two rebellions in it is still a run with two rebellions in it, and merely less ruinous. That is the difference between a perk and a pardon.",
+        "modifiers": [
+          {
+            "optics_favour": {
+              "scale": 0.6
+            }
+          }
+        ]
+      },
+      {
+        "id": "my_boss_is_a_jerk",
+        "name": "My boss is a jerk",
+        "blurb": "Everyone knows whose treasury said no.",
+        "offered": true,
+        "note": "When the CROWN breaks your promise it costs you far less loyalty. REFUSING (crown-standing.md section 3) breaks every gold promise at once, and because the PC typically owes several people it lands as a broad collapse in goodwill rather than one penalty - then worse compliance, then rising sentiment. This perk defuses the nastiest spiral in the game, and only ever matters once you are already in trouble. A promise you broke yourself costs exactly what it always did.",
+        "modifiers": [
+          {
+            "crown_break_cost": {
+              "scale": 0.3
+            }
+          }
+        ]
+      },
+      {
+        "id": "well_connected_at_court",
+        "name": "Well connected at court",
+        "blurb": "A word from you goes further than it has any right to.",
+        "offered": true,
+        "note": "Granting a Crown officer's demand earns more loyalty than it should. The gold leaves your accounts exactly as it would have; what you buy with it is worth more, which makes the officers cheaper to keep and the Squeeze's 'more hands out' dimension less punishing. It turns what a deed is WORTH and never the promise, the payment or the Crown's books.",
+        "modifiers": [
+          {
+            "deed_worth_for_role": {
+              "role": "crown_officer",
+              "deed": "granted",
+              "scale": 1.7
+            }
+          }
+        ]
+      },
+      {
+        "id": "hard_to_say_no_to",
+        "name": "Hard to say no to",
+        "blurb": "People find it difficult to disappoint you.",
+        "offered": true,
+        "note": "Your urging weighs more in a governor's intent deliberation (governor-objectives.md section 4). Worth knowing what this does NOT do: it never overrides him. crown_urging remains one of eight considerations against his own reading of his town, so this wins close arguments and loses hopeless ones. The Crown's pressure, not the Crown's command. Because a fresh urging is already at the ceiling, what it really buys is that the letter is still scoring next spring when an ordinary one has faded.",
+        "modifiers": [
+          {
+            "urging_weight": {
+              "weight": 1.8
+            }
+          }
+        ]
       }
     ]
   }

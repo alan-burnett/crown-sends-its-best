@@ -29,6 +29,33 @@ const STREAM: String = "mapgen"
 const START_MIN: float = 38.0
 const START_MAX: float = 62.0
 
+## 🔒 **How much further down that band begins** (#288, *Restless
+## country*).
+##
+## **Zero in every run without the quirk**, and negative under it: they have seen
+## ships before and they did not care for them.
+##
+## 🔒 **A shift on the band, not a narrowing of it.** The spread between a
+## tribe that will deal and one that will not is what makes three neighbours three
+## characters, and a quirk that collapsed it would leave the PC facing one people
+## in triplicate. They all start lower and they still differ by as much.
+##
+## It moves the draw rather than the tribes afterwards, so it costs nothing at
+## run time and a save carries only the figures it produced.
+static var _start_shift: float = 0.0
+
+
+static func start_shift() -> float:
+	return _start_shift
+
+
+static func set_start_shift(shift: float) -> void:
+	_start_shift = shift
+
+
+static func reset() -> void:
+	_start_shift = 0.0
+
 const NAMES: PackedStringArray = [
 	"Aneshko", "Wendat", "Katamik", "Osseo", "Tanaquil", "Chiwaya",
 	"Meskwan", "Abenki", "Tsalagi", "Nipmuc",
@@ -72,12 +99,20 @@ static func generate(streams: RngStreams) -> Tribes:
 		var tribe := Tribe.new()
 		tribe.id = StringName("tribe_%s" % name.to_lower())
 		tribe.display_name = name
+		# **Both draws happen whatever the shift is**, so the stream advances the
+		# same way and a run with the quirk is the same map as one without it.
+		var toward_colony := rng.randf_range(START_MIN, START_MAX)
+		var toward_crown := rng.randf_range(START_MIN, START_MAX)
 		tribe.standing = {
-			String(Tribe.COLONY): rng.randf_range(START_MIN, START_MAX),
-			String(Tribe.CROWN_TROOPS): rng.randf_range(START_MIN, START_MAX),
+			String(Tribe.COLONY): _shifted(toward_colony),
+			String(Tribe.CROWN_TROOPS): _shifted(toward_crown),
 		}
 		tribes.all.append(tribe)
 	return tribes
+
+
+static func _shifted(standing: float) -> float:
+	return clampf(standing + _start_shift, Tribe.MINIMUM, Tribe.MAXIMUM)
 
 
 ## How near the colony settles to its neighbours (#274, `map.md` §8).

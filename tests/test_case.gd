@@ -53,6 +53,9 @@ func reset_world() -> void:
 	Building.reset()
 	Objective.reset()
 	ColonyNeeds.reset()
+	QualityOfLife.reset()
+	RebelSentiment.reset()
+	Immigration.reset()
 	Spending.reset()
 	DemandSchedule.reset()
 
@@ -72,6 +75,9 @@ func reset_world() -> void:
 	Perception.reset()
 	Contact.reset()
 	LoyaltyDrift.reset()
+	Relationship.reset()
+	OpticsRegister.reset()
+	IntentConsiderations.reset_urging()
 
 	# Contacts that carry tuning of their own.
 	Patron.reset()
@@ -84,6 +90,12 @@ func reset_world() -> void:
 	Battle.reset()
 	CommanderExperience.reset()
 	CommanderFate.reset()
+	Muster.reset()
+
+	# The neighbours.
+	Tribes.reset()
+	Village.reset()
+	TradeAgreement.reset()
 
 	# Player-level state that outlives a run. In memory only — neither touches
 	# disk here, and both reload on next access.

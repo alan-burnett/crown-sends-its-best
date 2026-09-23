@@ -117,7 +117,7 @@ func settle_due(
 		var contact: Contact = contacts.get(String(promise.to))
 
 		if crown_refused:
-			_break(promise, contact, log, month, "the Crown refused the payment")
+			_break(promise, contact, log, month, "the Crown refused the payment", true)
 		elif promise.is_a_wager() and not bool(verdicts.get(String(promise.id), false)):
 			# **The bet the PC lost.** He promised what his colony would return and
 			# it did not return it. Nobody refused him anything; he was wrong about
@@ -148,8 +148,12 @@ func repudiate(contacts: Dictionary, log: EventLog, month: int) -> Array[Promise
 	for promise in outstanding():
 		if promise.payer != Promise.PAYER_CROWN or promise.kind != &"gold":
 			continue
+		# 🔒 **This is the spiral the perk defuses** (#287, *My boss is a jerk*).
+		# `REFUSING` breaks every gold promise at once, so it lands as a broad
+		# collapse in goodwill rather than one penalty — and it is the Crown that
+		# said no, not the PC.
 		_break(promise, contacts.get(String(promise.to)), log, month,
-			"the Crown has stopped honouring what you pledged")
+			"the Crown has stopped honouring what you pledged", true)
 		broken.append(promise)
 	return broken
 
@@ -172,13 +176,20 @@ func _keep(promise: Promise, contact: Contact, log: EventLog, month: int) -> voi
 	log.emit(EVENT_KEPT, promise.to, month, promise.to_dict(), WorldPhase.CROWNS_MONTH)
 
 
-func _break(promise: Promise, contact: Contact, log: EventLog, month: int, reason: String) -> void:
+func _break(
+	promise: Promise,
+	contact: Contact,
+	log: EventLog,
+	month: int,
+	reason: String,
+	by_the_crown: bool = false,
+) -> void:
 	promise.status = Promise.BROKEN
 	promise.settled_month = month
 	promise.broken_reason = reason
 	# **A broken promise costs loyalty**, however it broke.
 	if contact != null:
-		contact.relationship.settle_promise(String(promise.id), false, month)
+		contact.relationship.settle_promise(String(promise.id), false, month, by_the_crown)
 		# The one a man is least likely to forget: being refused is
 		# disappointing, being promised is being lied to (#127).
 		contact.relationship.remember(
