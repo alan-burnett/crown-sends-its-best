@@ -59,6 +59,19 @@ const POSTURE: StringName = &"posture"
 ## outcomes.
 const EXPEDITION: StringName = &"expedition"
 
+## 🔒 **Raising a company is an objective like any other** (#342,
+## `battles.md` §1).
+##
+## Not a second path that bypasses the objective system. A town weighs a company
+## against a granary **on the same axes**, which is the only way a governor can
+## decline to raise one because the harvest matters more — and that refusal is
+## the thing that makes raising one mean something.
+##
+## It is also what keeps §11 true: the PC's instrument is *raising companies
+## through a governor's intent*. He shifts the weights by letter and the governor
+## decides, the same relationship he has with everything else a town does.
+const COMPANY: StringName = &"company"
+
 ## **A cost is met when it is met to within this.**
 ##
 ## Resources are floats and arrive by purchase, so the last unit of a thirty-unit
@@ -72,6 +85,7 @@ static var _postures: Dictionary = {}
 
 ## Expedition id -> its record. One today; the shape is the postures'.
 static var _expeditions: Dictionary = {}
+static var _companies: Dictionary = {}
 
 ## Intent id -> how a letter says it.
 ##
@@ -84,6 +98,12 @@ static var _intents: Dictionary = {}
 
 
 static func load_from(record: Dictionary) -> void:
+	_companies = {}
+	for entry in record.get("companies", []):
+		var raising := String(entry.get("id", ""))
+		if not raising.is_empty():
+			_companies[raising] = {"name": String(entry.get("name", raising))}
+
 	_expeditions = {}
 	for entry in record.get("expeditions", []):
 		var expedition := String(entry.get("id", ""))
@@ -172,6 +192,16 @@ static func is_expedition(id: StringName) -> bool:
 	return _expeditions.has(String(id))
 
 
+static func company_ids() -> PackedStringArray:
+	var out: PackedStringArray = PackedStringArray(_companies.keys())
+	out.sort()
+	return out
+
+
+static func is_company(id: StringName) -> bool:
+	return _companies.has(String(id))
+
+
 ## Which sort of objective this is. **A building id that is not a known building
 ## and not a known posture is `NONE`**, not a crash: content can be wrong.
 static func kind_of(id: StringName) -> StringName:
@@ -185,6 +215,8 @@ static func kind_of(id: StringName) -> StringName:
 		return POSTURE
 	if is_expedition(id):
 		return EXPEDITION
+	if is_company(id):
+		return COMPANY
 	return NONE
 
 
@@ -193,6 +225,8 @@ static func display_name(id: StringName) -> String:
 		return Building.find(id).display_name
 	if is_expedition(id):
 		return String(_expeditions[String(id)].get("name", String(id)))
+	if is_company(id):
+		return String(_companies[String(id)].get("name", String(id)))
 	if Improvement.has(id):
 		return Improvement.find(id).display_name
 	if is_posture(id):
@@ -278,7 +312,7 @@ static func cost_of(town: Town, resource: StringName) -> float:
 ## Whether this is a thing that finishes at all.
 static func completes(id: StringName) -> bool:
 	var kind := kind_of(id)
-	return kind == CONSTRUCTION or kind == IMPROVEMENT or kind == EXPEDITION
+	return kind == CONSTRUCTION or kind == IMPROVEMENT or kind == EXPEDITION 		or kind == COMPANY
 
 
 ## What the build still needs that the town does not already have to hand.

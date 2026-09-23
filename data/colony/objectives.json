@@ -104,6 +104,12 @@
       }
     }
   ],
+  "companies": [
+    {
+      "id": "raise_a_company",
+      "name": "putting men under arms"
+    }
+  ],
   "expeditions": [
     {
       "id": "amass_expedition",

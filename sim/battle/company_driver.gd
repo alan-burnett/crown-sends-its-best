@@ -52,6 +52,12 @@ var commanders: CommanderBook = null
 ## other — Seam C, and the reason coordination needs no structure of its own.
 var book: IntentBook = null
 
+## 🔒 **Only for commissioning** (#342). `Commanders.take_command` is the one
+## door into the contact roster, and that door is `RunState`'s — a company that
+## found itself a commander by writing into the dictionary directly would join
+## without the date redundancy ranks by (#255).
+var run: RunState = null
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if companies == null:
@@ -93,7 +99,29 @@ func _settle_objectives(context: ColonyContext) -> void:
 		MarchingOrders.settle(company, context, book, contacts)
 
 
+## 🔒 **A company raised in the colony month finds its man when it is time to
+## move** (#342).
+##
+## Phase 4 of month N puts men under arms; phase 2 of month N+1 is the first time
+## they could go anywhere, and that is where a commander is needed. It is the
+## same one-month separation everything else runs on rather than a delay invented
+## here — and a militia raised to defend its town needs nobody at all, which
+## `StandingOrder` answers and this does not.
+func _commission(context: ColonyContext) -> void:
+	if run == null:
+		return
+	for entry in companies.in_resolution_order():
+		var company: Company = entry
+		if company.is_empty() or not company.is_headless():
+			continue
+		if not StandingOrder.needs_a_commander(company.order):
+			continue
+		Commanders.take_command(
+			company, _home_of(company), run, context)
+
+
 func _march(context: ColonyContext) -> void:
+	_commission(context)
 	for entry in companies.in_resolution_order():
 		var company: Company = entry
 		if company.is_empty():
