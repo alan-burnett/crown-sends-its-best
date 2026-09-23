@@ -334,6 +334,33 @@ Three properties make this work:
   contact in a save. Keep the most significant and the most recent, and let the
   middle fall away — which is also how people remember.
 
+### The sour half: *you will remember that you refused me*
+
+The kindness has a mirror, and it is two accusations rather than one:
+
+| He reaches for | Because |
+| :--- | :--- |
+| **the last slight** — a refusal | being refused is disappointing |
+| **the last broken word** | being promised is being lied to |
+
+**Kept apart deliberately.** A man who was told no and a man who was told yes and
+then let down are writing different letters, and the second is the angrier one.
+
+**Which he reaches for is his temper, not a rule.** A warm man leads with the
+kindness and a sour one with the slight, and sourness comes from his regard — so
+a contact the PC has neglected remembers the neglect, which is the whole point.
+Neither is lying.
+
+### 🔒 A letter that names a memory fires only when there is one to name
+
+The kindness letter already works this way, and the sour one must too. A letter
+that opens *"you will remember that you refused me the iron in March"* when no
+refusal happened would break SPEC §9.1, and the cheapest way to be sure is to
+**send it only when something true can be said.**
+
+So every reach carries a gate: remembering a kindness, a slight, or a broken
+word is a condition the letter must pass, not a figure that quietly reads zero.
+
 ## 8. Death, and what does not happen
 
 **A contact can be killed.** The conditions belong to whatever kills him and are
