@@ -250,6 +250,33 @@ stops being live.
 - **Time the rival specialty** against where that duke already stands (§5).
 - **Spend the last six months well** (§8).
 
+### 🔒 Every one of those happens in a reply
+
+**The PC never writes to a patron unprompted.** Author's ruling, and it is the
+duke's model exactly: you read what he sends and you answer it, and there is no
+letter you may decide to send him.
+
+So *ask for a specialty* is **a reply option on a letter he wrote**, not a
+composed letter. A patron who has not written cannot be asked.
+
+**That is the whole shape of the relationship.** He is a man who takes an
+interest in you; the correspondence is his, and the PC's power in it is the
+power to answer well. A patron the PC could summon would be a resource, and §1
+is careful that he is a leech you make use of rather than a supplier.
+
+### And it is still how the prestige term moves
+
+`prestige.md` §2 has `patron_credit` in the sum, and a term the player cannot
+touch is not a term (#388).
+
+**A reply produces an Order addressed to the sender**, which is the same path
+every other contact's compliance runs on — so answering a patron banks credit
+without the PC ever composing anything. The lever is real; it is simply
+**reactive**, which is what the ruling above makes it.
+
+**It follows that a patron who never writes is a patron who cannot be scored.**
+That is why §7's arrival has to produce a letter, not merely a contact.
+
 ## 11. Tuning targets
 
 - How far a specialty's worth exceeds what a need costs, and whether *net drain*
