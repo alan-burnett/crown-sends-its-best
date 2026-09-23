@@ -10,11 +10,7 @@ var composer: Composer = null
 
 
 func before_each() -> void:
-	Deliberation.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	ResourceCatalogue.reset()
-	Terrain.reset()
+	reset_world()
 	M1Registrations.register_all()
 
 	content = ContentDatabase.new()
@@ -27,9 +23,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	Deliberation.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 	content.free()
 
 

@@ -45,10 +45,12 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 	# is a *look*, not a stage — nothing is recorded, nothing counts down, and the
 	# log is the whole of the memory.
 	LastChance.look(
-		run.colony, run.parties, run.standing, run.contact(&"marshal"), state, log)
+		run.colony, run.parties, run.companies, run.standing,
+		run.contact(&"marshal"), state, log)
 
 	var reason := RunEndCheck.reason_for(
-		run.colony, run.parties, run.standing, run.contact(&"marshal"), state)
+		run.colony, run.parties, run.companies, run.standing,
+		run.contact(&"marshal"), state)
 	if String(reason).is_empty():
 		return
 

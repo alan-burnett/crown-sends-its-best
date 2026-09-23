@@ -27,6 +27,19 @@ static func load_from(record: Dictionary) -> void:
 	_severity = record.get("severity", _severity).duplicate()
 
 
+## Back to the declared defaults.
+##
+## **The only `load_from` in the game that had no partner**, so a test that loaded
+## a tuned record left it loaded for whatever ran next. `TestCase.reset_world()`
+## calls this one with the rest.
+static func reset() -> void:
+	_per_head = {"food": 1.0, "clothing": 0.15}
+	_reserve_months = {"food": 2.0, "clothing": 1.0}
+	_default_reserve_months = 0.5
+	_luxury_per_head = 0.12
+	_severity = {"food": 1.0, "clothing": 0.5}
+
+
 ## Consumed per head each month. **Absence of these threatens survival**, which
 ## is what makes them needs rather than wants (SPEC §11.3).
 static func per_head(resource: StringName) -> float:

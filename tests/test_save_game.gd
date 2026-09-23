@@ -14,8 +14,7 @@ var content: ContentDatabase = null
 
 func before_each() -> void:
 	SaveGame.delete_save(PATH)
-	ResourceCatalogue.reset()
-	Terrain.reset()
+	reset_world()
 	# A run carries a map, and a map needs its terrain, so the save test loads
 	# the world it is going to round-trip.
 	content = ContentDatabase.new()
@@ -25,8 +24,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	SaveGame.delete_save(PATH)
-	ResourceCatalogue.reset()
-	Terrain.reset()
+	reset_world()
 	content.free()
 
 
@@ -41,7 +39,7 @@ func _run_with_history() -> RunState:
 
 	# An Intent mid-flight, with months still to run.
 	run.intents.commit(Intent.new(
-		&"", StubIntentExecutor.KIND, &"marshal", WorldValues.SUPPLY, 4, {"per_month": 3.0}
+		&"", WorldValueExecutor.KIND, &"marshal", WorldValues.SUPPLY, 4, {"per_month": 3.0}
 	), run.log, run.world.month)
 
 	# Draw from a couple of streams so their state is somewhere non-initial.

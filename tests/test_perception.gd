@@ -10,12 +10,12 @@ const RATIO: float = 0.9
 
 
 func before_each() -> void:
-	MeasureRegistry.reset()
+	reset_world()
 	MeasureRegistry.register_linear("food_security", 0.0, 3.0)
 
 
 func after_each() -> void:
-	MeasureRegistry.reset()
+	reset_world()
 
 
 func test_the_worked_example_reproduces_exactly() -> void:

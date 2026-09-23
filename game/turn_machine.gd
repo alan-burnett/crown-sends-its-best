@@ -91,7 +91,7 @@ func _init(p_run: RunState) -> void:
 	promise_driver = PromiseDriver.new(run.promises)
 	promise_driver.contacts = run.contacts
 
-	var executor := StubIntentExecutor.new()
+	var executor := WorldValueExecutor.new()
 	executor.table = order_effects()
 
 	# The one Order that reaches a town rather than a world value. It needs the

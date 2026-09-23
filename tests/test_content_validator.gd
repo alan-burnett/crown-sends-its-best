@@ -5,14 +5,12 @@ extends TestCase
 
 
 func before_each() -> void:
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 	M1Registrations.register_all()
 
 
 func after_each() -> void:
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 
 
 func _valid_record() -> Dictionary:
@@ -60,6 +58,11 @@ func test_a_letter_with_no_reply_is_valid() -> void:
 func test_the_real_data_tree_validates() -> void:
 	var content := ContentDatabase.new()
 	content.load_all("en")
+	# 🔒 **It loads what it validates.** This used to rely on whichever test file
+	# ran before it having loaded the clause prose and the resource catalogue —
+	# so it passed on state it never set up, and would have failed the moment the
+	# suite was reordered or run alone.
+	M1Registrations.load_resources(content)
 	var validator := ContentValidator.new()
 	validator.validate(content)
 	validator.check_trigger_targets(content)

@@ -44,13 +44,13 @@ class Stage:
 
 
 func before_each() -> void:
-	BeatKinds.reset()
+	reset_world()
 	BeatKinds.register(WRITE, "write_a_line", 0.4, "sound.pen", "sprite.hand")
 	BeatKinds.register(SETTLE_TOWN, "settle_a_town", 0.8, "sound.settle", "sprite.town")
 
 
 func after_each() -> void:
-	BeatKinds.reset()
+	reset_world()
 
 
 ## Six beats a producer might hand over, mixing both kinds.

@@ -11,10 +11,7 @@ var content: ContentDatabase = null
 
 
 func before_each() -> void:
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	ResourceCatalogue.reset()
-	Terrain.reset()
+	reset_world()
 	M1Registrations.register_all()
 	SaveGame.delete_save(PATH)
 
@@ -31,8 +28,7 @@ func before_each() -> void:
 
 func after_each() -> void:
 	SaveGame.delete_save(PATH)
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 	content.free()
 
 
@@ -301,7 +297,7 @@ func test_an_order_with_no_world_effect_completes_rather_than_stalling() -> void
 	assert_eq(String(effects[String(M1Registrations.ORDER_SET_POLICY)]["target"]), "",
 		"set_policy has no world effect in M1")
 
-	var executor := StubIntentExecutor.new()
+	var executor := WorldValueExecutor.new()
 	executor.table = effects
 	var intent := Intent.new(&"", M1Registrations.ORDER_SET_POLICY, &"steward", &"", 1, {})
 	run.intents.commit(intent, run.log, run.world.month)

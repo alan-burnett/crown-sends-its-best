@@ -23,6 +23,68 @@ func after_each() -> void:
 	pass
 
 
+## Put every class that holds tuning in static state back to its declared
+## defaults.
+##
+## ## 🔒 One list, in one place
+##
+## This used to be hand-rolled in each test file, and **each file reset only the
+## classes its author happened to know about**. The lists drifted: `Deliberation`
+## appeared in 111 files, `Threshold` in twelve, `Raising` in one, and `Spending`
+## and `DemandSchedule` in none at all — though `M1Registrations.load_resources`
+## loads both.
+##
+## That is not a tidiness problem. A class left un-reset carries whatever the
+## previous test loaded into the next one, so a test can pass on state it never
+## set up and fail only when the suite is reordered. **It is the exact shape of a
+## test that looks like it bites and does not**, and it gets worse with every
+## knob moved out of a `const` and into a `static var`.
+##
+## **Adding a resettable class means adding one line here**, and every test gets
+## it. A class with a `load_from` and no `reset` is the bug this cannot catch, so
+## `ColonyNeeds` gained one.
+func reset_world() -> void:
+	# Content definitions, in load order: the catalogue first, because terrain and
+	# improvements name resources.
+	ResourceCatalogue.reset()
+	Terrain.reset()
+	Improvement.reset()
+	Building.reset()
+	Objective.reset()
+	ColonyNeeds.reset()
+	Spending.reset()
+	DemandSchedule.reset()
+
+	# The registries letters and deliberation resolve against.
+	ContentRegistry.reset()
+	MeasureRegistry.reset()
+	Deliberation.reset()
+	BeatKinds.reset()
+
+	# The post: who writes, how readily, and in what words.
+	Threshold.reset()
+	Consultation.reset()
+	HarshClause.reset()
+	IndependenceClause.reset()
+	NameBags.reset()
+
+	# Contacts that carry tuning of their own.
+	Patron.reset()
+	PatronVices.reset()
+
+	# Force.
+	Company.reset()
+	Raising.reset()
+	Force.reset()
+	Battle.reset()
+	CommanderExperience.reset()
+
+	# Player-level state that outlives a run. In memory only — neither touches
+	# disk here, and both reload on next access.
+	Records.reset()
+	Settings.reset()
+
+
 ## Run every `test_` method. Returns {passed, failed, assertions, failures}.
 func run_all() -> Dictionary:
 	var passed: int = 0

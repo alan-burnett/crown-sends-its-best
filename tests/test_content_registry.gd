@@ -6,8 +6,7 @@ var context: LetterContext = null
 
 
 func before_each() -> void:
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 	M1Registrations.register_all()
 
 	var sender := Contact.from_data({"id": "marshal", "name": "Vane", "loyalty": 40.0})
@@ -16,8 +15,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
+	reset_world()
 
 
 # --- Effects produce Orders, never writes ----------------------------------

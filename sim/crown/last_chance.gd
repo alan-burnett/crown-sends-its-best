@@ -74,13 +74,14 @@ const DIRE_AT: Array[int] = [40, 25, 15, 8, 3]
 static func look(
 	colony: Colony,
 	parties: Array,
+	companies: Companies,
 	standing: CrownStanding,
 	marshal: Contact,
 	state: WorldState,
 	log: EventLog,
 ) -> Dictionary:
 	var people := RunEndCheck.people_in(colony, parties)
-	var flags := conditions_of(colony, standing, marshal, state)
+	var flags := conditions_of(colony, companies, standing, marshal, state)
 
 	var payload := flags.duplicate()
 	payload["people"] = people
@@ -99,6 +100,7 @@ static func look(
 ## writing about a condition the check did not believe in.
 static func conditions_of(
 	colony: Colony,
+	companies: Companies,
 	standing: CrownStanding,
 	marshal: Contact,
 	state: WorldState,
@@ -111,7 +113,7 @@ static func conditions_of(
 	return {
 		EVERY_TOWN_REBELS: not RunEndCheck.any_town_is_loyal(colony),
 		CONFIDENCE_LOST: standing != null and standing.has_lost_confidence(),
-		NO_TROOPS: RunEndCheck.crown_troops_in(colony) <= 0,
+		NO_TROOPS: RunEndCheck.crown_troops_in(companies) <= 0,
 		NO_MORE_COMING: not RunEndCheck.will_send_more(marshal, standing, state),
 	}
 

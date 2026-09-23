@@ -7,7 +7,7 @@ var sender: Contact = null
 
 
 func before_each() -> void:
-	MeasureRegistry.reset()
+	reset_world()
 	MeasureRegistry.register_linear("food_security", 0.0, 3.0)
 	renderer = LetterRenderer.new()
 	sender = Contact.from_data({
@@ -20,7 +20,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	MeasureRegistry.reset()
+	reset_world()
 
 
 func _letter(body: Array, extra: Dictionary = {}) -> Letter:

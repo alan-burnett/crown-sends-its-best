@@ -13,12 +13,12 @@ func before_each() -> void:
 	log = EventLog.new()
 	book = IntentBook.new()
 	state = WorldState.new(0, {"crown_war_intensity": 50.0})
-	executors = [StubIntentExecutor.new()]
+	executors = [WorldValueExecutor.new()]
 
 
 func _adjust(months: int, per_month: float = -4.0, source: StringName = &"marshal") -> Intent:
 	return Intent.new(
-		&"", StubIntentExecutor.KIND, source, &"crown_war_intensity", months, {"per_month": per_month}
+		&"", WorldValueExecutor.KIND, source, &"crown_war_intensity", months, {"per_month": per_month}
 	)
 
 
@@ -159,7 +159,7 @@ func test_a_resolved_intent_does_not_resolve_twice() -> void:
 
 func test_intents_aimed_elsewhere_do_not_contend() -> void:
 	var first := book.commit(_adjust(3), log, state.month)
-	var elsewhere := Intent.new(&"", StubIntentExecutor.KIND, &"marshal", &"colony_revenue", 1, {})
+	var elsewhere := Intent.new(&"", WorldValueExecutor.KIND, &"marshal", &"colony_revenue", 1, {})
 	book.commit(elsewhere, log, state.month)
 	assert_true(first.is_live(), "a different target is a different matter")
 
@@ -243,7 +243,7 @@ func test_committing_emits_in_the_intent_phase() -> void:
 func test_execution_emits_in_the_movement_phase() -> void:
 	book.commit(_adjust(1), log, state.month)
 	_run_month()
-	assert_eq(log.of_type(StubIntentExecutor.EVENT_PROGRESSED)[0].phase, WorldPhase.MOVEMENT)
+	assert_eq(log.of_type(WorldValueExecutor.EVENT_PROGRESSED)[0].phase, WorldPhase.MOVEMENT)
 
 
 func test_an_unknown_resolution_is_refused() -> void:
