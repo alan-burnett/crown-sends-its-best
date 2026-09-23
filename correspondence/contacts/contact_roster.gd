@@ -18,11 +18,54 @@ const COLLECTION: String = "contacts"
 static func load_into(run: RunState, content: ContentDatabase) -> Array[Contact]:
 	var loaded: Array[Contact] = []
 	for id in content.ids(COLLECTION):
-		var contact := Contact.from_data(content.collection(COLLECTION)[id])
+		var record: Dictionary = content.collection(COLLECTION)[id]
+		# 🔒 **A template is not a contact.** There is one Diplomat in the game and
+		# one clergyman per church, so the second kind is authored as what a
+		# generated man *starts from* rather than as a man. Loading one as a
+		# contact would put a person called "clergyman" on the roster who lived
+		# nowhere and wrote about nothing.
+		if bool(record.get("template", false)):
+			continue
+		var contact := Contact.from_data(record)
 		run.add_contact(contact)
 		loaded.append(contact)
 	house_the_diplomat(run)
 	return loaded
+
+
+## Kind -> the record a generated contact of that kind starts from.
+##
+## **Held here because `house_the_residents` runs inside the colony month**, which
+## has no content database in hand — the same reason `NameBags` and `Patron` keep
+## theirs.
+static var _templates: Dictionary = {}
+
+
+## Take the templates out of the content, once.
+static func load_from(content: ContentDatabase) -> void:
+	_templates = {}
+	if content == null:
+		return
+	for id in content.ids(COLLECTION):
+		var record: Dictionary = content.collection(COLLECTION)[id]
+		if bool(record.get("template", false)):
+			_templates[String(id)] = record
+
+
+static func reset() -> void:
+	_templates = {}
+
+
+## What a generated contact of this kind starts from, or empty when nothing is
+## authored for it.
+##
+## **The ordinary contact record, read for a man who does not exist yet.** Same
+## collection, same fields, same validator — which is what keeps
+## `institutional-contacts.md` §1's lock that there is no institutional-contact
+## machinery, and what will answer #279, #280 and #281 without a line of new
+## code.
+static func template_for(kind: String) -> Dictionary:
+	return _templates.get(kind, {})
 
 
 ## Put the Diplomat somewhere (#81, `the-diplomat.md` §2).
@@ -140,6 +183,18 @@ static func _bring(town: Town, kind: String, run: RunState) -> void:
 	# the Crown officer's.
 	contact.role_word = kind.capitalize()
 	contact.portrait_asset = "portrait.%s" % kind
+
+	# 🔒 **His four answers, authored** (§1): what his loyalty does is prominence,
+	# how he gets it is `cares_about`, and his bias is his leans. His name, his
+	# personality and his temperament stay drawn from his own stream, so two
+	# clergymen in one colony are two men and not one man twice.
+	var template := template_for(kind)
+	if not template.is_empty():
+		contact.title = String(template.get("title", contact.title))
+		contact.prominence_override = float(template.get("prominence", -1.0))
+		contact.cares_about = PackedStringArray(template.get("cares_about", []))
+		contact.leans = template.get("leans", {}).duplicate()
+
 	run.add_contact(contact)
 
 

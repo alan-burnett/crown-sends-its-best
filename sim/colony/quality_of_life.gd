@@ -134,6 +134,45 @@ static func of(town: Town, context: ColonyContext) -> Dictionary:
 	return parts
 
 
+# --- 🔒 The same five parts, read from the bottom ---------------------------
+
+## How the town's **poorest** live, out of the parts already reckoned.
+##
+## `institutional-contacts.md` §3: the clergy cares about his people and most
+## about the poorest, which is *quality of life weighted heavy on health and
+## means, and blind to pleasure*.
+##
+## 🔒 **Blind to pleasure, not merely light on it.** `combine` is never called
+## here, so a cellar of rum cannot lift this at all. That is the whole of what
+## makes him the one voice `quality-of-life.md` §8's trap does not fool: **a town
+## with a theatre, a cellar of rum and hungry people does not please him.**
+##
+## **The same parts, differently weighted** — never a second reckoning. A reader
+## that recomputed the components would eventually disagree with the one the
+## growth roll used, which is the reason `town.safety` is written where it is.
+##
+## Tuning, all four.
+static var _w_poorest: Dictionary = {
+	"health": 0.45, "safety": 0.15, "means": 0.35, "hope": 0.05,
+}
+
+
+static func poorest_weights() -> Dictionary:
+	return _w_poorest.duplicate()
+
+
+static func from_below(parts: Dictionary) -> float:
+	var total := 0.0
+	var weight := 0.0
+	var names: Array = _w_poorest.keys()
+	names.sort()
+	for name in names:
+		var share := float(_w_poorest[name])
+		total += share * float(parts.get(name, 0.0))
+		weight += share
+	return clampf(total / maxf(0.001, weight), 0.0, 1.0)
+
+
 ## The weighted sum of the components that are not pleasure.
 ##
 ## Renormalised over whichever of them can actually vary, so that leaving one out

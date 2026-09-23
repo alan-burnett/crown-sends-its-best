@@ -70,6 +70,17 @@ var education: float = 0.0
 ## and the figure the town lived by must be the same one.
 var safety: float = 1.0
 
+## How the town's **poorest** live (#277, `institutional-contacts.md` §3).
+##
+## **Stored and written in Settle**, for the same reason safety is: the clergyman
+## reports it, his regard answers to it, and the figure he writes about and the
+## figure the town lived by must be the same one.
+##
+## 🔒 **Blind to pleasure**, which is what makes him the one voice
+## `quality-of-life.md` §8's rum trap does not fool. It is the same five parts as
+## `quality_of_life`, weighted from the bottom — never a second reckoning.
+var poorest_quality_of_life: float = 0.0
+
 ## How close the town is to deciding it would be better off without the Crown
 ## (#71). Written by Settle each month; see `RebelSentiment`.
 ##
@@ -471,6 +482,7 @@ func to_dict() -> Dictionary:
 		"quality_of_life": quality_of_life,
 		"education": education,
 		"safety": safety,
+		"poorest_quality_of_life": poorest_quality_of_life,
 		"arrivals_accrued": arrivals_accrued,
 		"native_arrivals_accrued": native_arrivals_accrued,
 		"experts_accrued": experts_accrued,
@@ -520,6 +532,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.quality_of_life = float(data.get("quality_of_life", 0.0))
 	town.education = float(data.get("education", 0.0))
 	town.safety = float(data.get("safety", 1.0))
+	town.poorest_quality_of_life = float(data.get("poorest_quality_of_life", 0.0))
 	town.arrivals_accrued = float(data.get("arrivals_accrued", 0.0))
 	town.native_arrivals_accrued = float(data.get("native_arrivals_accrued", 0.0))
 	town.experts_accrued = float(data.get("experts_accrued", 0.0))

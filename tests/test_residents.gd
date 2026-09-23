@@ -405,3 +405,140 @@ func test_the_cathedral_widens_the_church_and_brings_nobody_new() -> void:
 		"the cathedral replaced the man the church brought")
 	assert_true(_comfort(run, town) > one,
 		"the cathedral widened nothing")
+
+
+# --- 🔒 How he gets loyalty: the town read from the bottom ------------------
+
+func test_he_is_among_the_most_prominent_men_in_the_colony() -> void:
+	# 🔒 §3: very influential, so his regard moves his town's sentiment hard
+	# either way. Above the Diplomat and the commander; below the governor, whose
+	# prominence only the journalist matches.
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+	assert_true(priest.prominence() > Contact.prominence_of(Contact.ROLE_DIPLOMAT),
+		"the clergyman looms smaller than the Crown's resident")
+	assert_true(priest.prominence() > Contact.prominence_of(Contact.ROLE_COMMANDER),
+		"the clergyman looms smaller than a commander")
+	assert_true(priest.prominence() <= Contact.prominence_of(Contact.ROLE_GOVERNOR),
+		"the clergyman looms larger than the man who governs the town")
+	assert_true(priest.prominence() > Contact.prominence_of(Contact.ROLE_INSTITUTIONAL),
+		"he carries the bare institutional prominence, so nothing was authored for him")
+
+
+func test_what_he_judges_the_pc_by_is_the_poorest_and_not_the_average() -> void:
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+	assert_true(priest.cares_about.has(ColonyMeasures.POOREST_QUALITY_OF_LIFE),
+		"the clergyman judges the Crown by nothing, so nothing will ever move him")
+
+
+func test_he_reads_his_own_town_and_the_reading_reaches_him() -> void:
+	# 🔒 A resident used to get no town measures at all — only governors did — so
+	# a `cares_about` naming one would have drifted on a measure nobody supplied.
+	var run := _run()
+	var town := _with(run, ["church"])
+	town.poorest_quality_of_life = 0.2
+	var priest := _clergyman(run, town)
+
+	var measures := ColonyMeasures.for_contact(run, priest)
+	assert_has(measures, ColonyMeasures.POOREST_QUALITY_OF_LIFE,
+		"the clergyman was handed no reading of the town he lives in")
+	assert_almost_eq(float(measures[ColonyMeasures.POOREST_QUALITY_OF_LIFE]), 0.2, 0.0001)
+
+
+func test_a_wretched_town_cools_him_and_a_comfortable_one_warms_him() -> void:
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+
+	town.poorest_quality_of_life = 0.05
+	var wretched := LoyaltyDrift.for_contact(priest, ColonyMeasures.for_contact(run, priest))
+	town.poorest_quality_of_life = 0.95
+	var kindly := LoyaltyDrift.for_contact(priest, ColonyMeasures.for_contact(run, priest))
+
+	assert_true(wretched < 0.0, "a town of hungry people did not cool the priest")
+	assert_true(kindly > wretched,
+		"the priest thinks no better of a town that looks after its poor")
+
+
+# --- 🔒 Blind to pleasure, which is the trap he does not fall into ----------
+
+func test_rum_and_a_theatre_do_not_please_him() -> void:
+	# 🔒 `quality-of-life.md` §8's trap, and **the clergy is the one voice that
+	# will not be fooled by it** (§3). A town scoring well on pleasure and badly
+	# on health must not read to him as a town doing well.
+	var comfortable := {
+		"health": 0.15, "safety": 0.8, "means": 0.2, "hope": 0.5, "pleasure": 1.0,
+	}
+	var plain := comfortable.duplicate()
+	plain["pleasure"] = 0.0
+
+	assert_eq(QualityOfLife.from_below(comfortable), QualityOfLife.from_below(plain),
+		"a cellar of rum improved how the poorest of the town were judged to live")
+
+	# And the ordinary reading *is* lifted by it, or the test above proves only
+	# that pleasure does nothing anywhere.
+	assert_true(
+		QualityOfLife.combine(
+			QualityOfLife.substance_of(comfortable), float(comfortable["pleasure"]))
+		> QualityOfLife.combine(
+			QualityOfLife.substance_of(plain), float(plain["pleasure"])),
+		"pleasure lifts nothing at all, so being blind to it means nothing")
+
+
+func test_he_weighs_health_and_means_over_the_rest() -> void:
+	var weights := QualityOfLife.poorest_weights()
+	for lighter in ["safety", "hope"]:
+		assert_true(float(weights["health"]) > float(weights[lighter]),
+			"health weighs no more to him than %s" % lighter)
+		assert_true(float(weights["means"]) > float(weights[lighter]),
+			"means weighs no more to him than %s" % lighter)
+	assert_false(weights.has("pleasure"),
+		"pleasure has a weight in a reading that is supposed to be blind to it")
+
+
+func test_a_hungry_town_with_a_theatre_reads_worse_to_him_than_to_anyone() -> void:
+	# The whole point, as a comparison rather than a magnitude.
+	var parts := {
+		"health": 0.1, "safety": 0.9, "means": 0.15, "hope": 0.6, "pleasure": 1.0,
+	}
+	var ordinary := QualityOfLife.combine(
+		QualityOfLife.substance_of(parts), float(parts["pleasure"]))
+	assert_true(QualityOfLife.from_below(parts) < ordinary,
+		"the priest is no harder to satisfy than the town's own reckoning")
+
+
+# --- 🔒 His bias: every welfare measure leans dark --------------------------
+
+func test_every_welfare_measure_he_reports_leans_dark() -> void:
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+	assert_not_empty(priest.leans, "the clergyman has no bias at all")
+	for topic in priest.leans:
+		assert_true(priest.lean_for(String(topic)) < 0.0,
+			"the clergyman leans bright on '%s', and §3 has him dark on every welfare measure"
+				% topic)
+	assert_true(priest.lean_for(ColonyMeasures.POOREST_QUALITY_OF_LIFE) < 0.0,
+		"he reports the thing he cares most about without any bias at all")
+
+
+func test_his_gloom_is_bounded_by_the_one_rung_cap() -> void:
+	# 🔒 `perception.md`'s cap is what keeps him readable: reliably one notch
+	# bleaker than the truth rather than hysterical. A PC who discounts him
+	# entirely is the one who misses the famine.
+	var run := _run()
+	var town := _with(run, ["church"])
+	var priest := _clergyman(run, town)
+	for raw in [0.1, 0.35, 0.6, 0.9]:
+		var truth := Perception.truthful_rung(
+			ColonyMeasures.POOREST_QUALITY_OF_LIFE, raw, 5)
+		var his := Perception.rung(
+			ColonyMeasures.POOREST_QUALITY_OF_LIFE, raw,
+			priest.lean_for(ColonyMeasures.POOREST_QUALITY_OF_LIFE), 5)
+		assert_true(his <= truth,
+			"the priest reported a town at %f as better than it is" % raw)
+		assert_true(truth - his <= 1,
+			"the priest was more than one rung bleaker than the truth at %f" % raw)
