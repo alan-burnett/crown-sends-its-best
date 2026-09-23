@@ -104,18 +104,38 @@ is asking the whole colony to go without the duty.
 | | The ask | Scope | Length |
 | :--- | :--- | :--- | :--- |
 | **A festival** | *the people are holding a festival to celebrate {resource}; waive the duty on it* | **one resource** | about three months |
-| **A holy day** | *a holiday falls in three months; waive all duties so we may keep it properly* | **everything** | the one month |
+| **A holy day** | *a holiday is upon us; waive all duties so we may keep it properly* | **everything** | the one month |
 
 Narrow and long, or broad and brief.
 
-**The festival names one of the colony's best-selling resources**, which makes it
-self-targeting: **the better the colony trades, the more the priest asks the Crown
-to give up.** Prosperity draws the cost, exactly as it does with the rivals.
+**Best-selling means the most gold sold this month.** Author's ruling, and it is
+the liveliest of the readings on purpose: the priest asks about whatever had a
+good harvest, so the ask swings with the colony's fortunes rather than settling
+on one staple. **The better the colony trades, the more he asks the Crown to give
+up.** Prosperity draws the cost, exactly as it does with the dukes.
 
-**The holy day is announced three months out**, so the PC sees it coming and can
-do nothing about it but decide. A month of no duty is a month of cheap goods for
-every town — quality of life up, sentiment down — paid for out of Crown revenue,
-which is `net_position` and therefore standing *and* prestige.
+**🔒 The waiver begins the month the PC agrees.** Not announced in advance and
+not scheduled — the priest writes, the PC answers, and it starts.
+
+There is no scheduled-future-event path in the game, and this deliberately does
+not build one. A general scheduler standing up for a single caller is a system
+nobody asked for; **the second thing that genuinely needs one can generalise from
+it.**
+
+A month of no duty is a month of cheap goods for every town — quality of life up,
+sentiment down — paid for out of Crown revenue, which is `net_position` and
+therefore standing *and* prestige.
+
+**🔒 A resource under trade protest is exempt from either waiver.**
+
+A protest is a town refusing the Crown's duty (`trade-protests.md`), so there is
+no duty flowing to waive — the exemption is nearly definitional rather than a
+special case. It matters most for the holy day, which waives everything else:
+**a colony in protest does not get a holiday from the thing it is protesting.**
+
+For the festival it rarely arises at all, and that falls out of the ruling above:
+a resource nobody is trading cannot be the one that sold the most gold this
+month.
 
 So both are the same bargain in different clothes: **buy the colony's goodwill
 with the Crown's money.** That is the clergy's whole character in one instrument.
@@ -429,10 +449,6 @@ why the theatre does not.
   safety. If that holds for all four it is an elegant pattern: the building gives
   the effect, the man decides how much of it the town actually gets. If it holds
   only for the clergy it should be said plainly, or a dev will infer the rule.
-- **Whether towns anticipate an announced holy day.** They buy monthly on
-  valuation and know nothing of the calendar, so a known month of free trade is
-  simply a windfall they do not plan for. Making them save for it would be a new
-  kind of foresight and probably not worth it.
 - **What a contact does at very low loyalty.** `contacts.md` §4 has the general
   answer, but these four each have an obvious betrayal — the journalist who turns
   on the PC in print is not the quartermaster who simply stops caring.
