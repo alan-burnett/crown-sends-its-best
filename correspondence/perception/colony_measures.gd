@@ -51,6 +51,27 @@ const POOREST_QUALITY_OF_LIFE: String = "poorest_quality_of_life"
 ## same scale.
 const WORST_QUALITY_OF_LIFE: String = "worst_quality_of_life"
 
+## 🔒 **Whether anybody has been fighting, and never who started it** (#280,
+## `institutional-contacts.md` §3).
+##
+## A deliberate inversion of `rebel-sentiment.md` §2, whose whole organizing
+## principle is attribution — *sentiment measures who is blamed, not how bad life
+## is.* The scholar measures how bad it is and blames whoever is in charge, so
+## **he blames the PC when a rival attacks an expedition**, which is not the PC's
+## aggression by any reading.
+##
+## **Attribution-blind by construction, not by a rule somebody remembers.** This
+## counts battles; there is nowhere in it to put an aggressor even if a later dev
+## wanted one. That is the whole of what it means to be a man who has never had
+## to make a hard decision.
+const COLONY_AT_PEACE: String = "colony_at_peace"
+
+## How far back a scholar's memory of fighting runs. Tuning.
+const PEACE_WINDOW: int = 12
+
+## How many battles in that window read as a colony wholly at war. Tuning.
+const FIGHTING_ENOUGH: float = 6.0
+
 ## What the town bought and sold this month, in gold.
 const TRADE_VOLUME: String = "trade_volume"
 
@@ -162,6 +183,7 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	# arrangement `COLONY_REACH` has. Only the journalist's `cares_about` names
 	# it today, and nothing about it is his alone.
 	measures[WORST_QUALITY_OF_LIFE] = worst_quality_of_life(run)
+	measures[COLONY_AT_PEACE] = at_peace(run)
 
 	# **What a man at court can see, which is the ledger** (#282). On the patrons
 	# alone: `COLONY_REACH` above is the lock that a rival never reads the Crown's
@@ -214,6 +236,23 @@ static func worst_quality_of_life(run: RunState) -> float:
 		worst = minf(worst, clampf(town.quality_of_life, 0.0, 1.0))
 		seen = true
 	return worst if seen else 1.0
+
+
+## How quiet the last year has been, with nobody asked who began it.
+##
+## **One at a year of peace**, falling as the fighting mounts. The window is a
+## scholar's memory rather than the run's, so a colony that fought a war and then
+## kept the peace for a year is a colony at peace again — he is unreasonable, not
+## unforgiving.
+static func at_peace(run: RunState) -> float:
+	if run == null or run.log == null:
+		return 1.0
+	var since := run.world.month - PEACE_WINDOW if run.world != null else 0
+	var battles := 0.0
+	for event in run.log.of_type(Battle.EVENT_FOUGHT):
+		if event.month >= since:
+			battles += 1.0
+	return clampf(1.0 - battles / FIGHTING_ENOUGH, 0.0, 1.0)
 
 
 ## The town this contact lives in, or null for a man an ocean away.

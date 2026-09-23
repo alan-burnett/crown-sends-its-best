@@ -73,14 +73,23 @@ static func of(town: Town, context: ColonyContext) -> float:
 ##
 ## **The building carries the rate**, so a library and a college are the same
 ## rule with different numbers rather than two mechanisms.
+##
+## 🔒 **And a slighted scholar teaches badly** (#280,
+## `institutional-contacts.md` §3). The building stands and the learning stops —
+## through `Building.regard_scale`, the same rule the church's comfort goes
+## through, because §3 asks for it twice and two copies would be the first place
+## the two could disagree.
 static func _from_scholars(town: Town, context: ColonyContext) -> float:
+	var contacts: Dictionary = context.contacts if context != null else {}
 	var per_expert := 0.0
 	var reaches_the_colony := false
 	for id in town.buildings:
 		var building := Building.find(StringName(id))
 		if building == null or not Building.is_lit(town, StringName(id)):
 			continue
-		per_expert = maxf(per_expert, float(building.effect("education_per_expert", 0.0)))
+		per_expert = maxf(per_expert,
+			float(building.effect("education_per_expert", 0.0))
+				* Building.regard_scale(building, town, contacts))
 		if float(building.effect("counts_distant_experts", 0.0)) > 0.0:
 			reaches_the_colony = true
 	if per_expert <= 0.0:

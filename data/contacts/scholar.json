@@ -1,0 +1,20 @@
+[
+  {
+    "id": "scholar",
+    "template": true,
+    "note": "A template, not a contact - one per library rather than one in the game. institutional-contacts.md section 3, the scholar. Every figure here is tuning and belongs to M8.",
+    "title": "Scholar",
+    "prominence": 0.45,
+    "prominence_note": "Medium. A learned man looms reasonably large in a colonial town, but he is respected rather than popular - so less than the priest and far less than the journalist, whose prominence equals a governor's.",
+    "cares_about": [
+      "colony_education",
+      "colony_at_peace"
+    ],
+    "cares_about_note": "Education across the colony, not only his own town - which means the Provost's curriculum policy now pleases two contacts at once, and a PC who funds the cheapest instrument in the game keeps a Crown officer and a resident contented for almost nothing. And peace: he wants quiet, cooperation, low duties and schooling, because he believes everyone is as reasonable as he is. He does not ask who started it - colony_at_peace counts battles and has nowhere to put an aggressor, so he blames the PC when a rival attacks an expedition. That is the whole of what it means to be a man who has never had to make a hard decision.",
+    "leans": {
+      "colony_education": -0.22,
+      "colony_at_peace": -0.2
+    },
+    "leans_note": "Academia for its own sake. He thinks the colony under-taught and the world more violent than it is, which is the same complaint from two directions: both are arguments for more of what he does. Mild - he is not the clergy and not the journalist, and perception.md's one-rung cap bounds him like everybody else."
+  }
+]

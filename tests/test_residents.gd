@@ -727,3 +727,238 @@ func test_an_unknown_shape_falls_back_to_flat() -> void:
 	assert_false(Perception.is_shape(&"wishful"))
 	for shape in Perception.SHAPES:
 		assert_true(Perception.is_shape(shape))
+
+
+# --- 🔒 The scholar: education, peace, and the experts he gathers -----------
+
+func _scholar(run: RunState, town: Town) -> Contact:
+	return run.contacts.get(String(ContactRoster.resident_id(town, "scholar")), null)
+
+
+func _lines_of(path: String) -> String:
+	var kept := PackedStringArray()
+	for line in FileAccess.get_file_as_string(path).split("\n"):
+		if not String(line).strip_edges().begins_with("#"):
+			kept.append(String(line))
+	return "\n".join(kept)
+
+
+func test_a_slighted_scholar_teaches_badly() -> void:
+	# 🔒 §3: the library turns resident experts into education, and his regard
+	# scales it. **The building stands and the learning stops.** Asked of
+	# `Education.of` rather than of the knob — the same rule the church's comfort
+	# goes through, because §3 asks for it twice.
+	var run := _run()
+	var town := _with(run, ["theatre", "library"])
+	town.add_experts(&"furs", 3)
+	var man := _scholar(run, town)
+	assert_true(man != null, "the library brought nobody")
+
+	var context := _context(run)
+	man.relationship = Relationship.new(man.id, Relationship.NEUTRAL_LOYALTY)
+	var indifferent := Education.of(town, context)
+	assert_true(indifferent > 0.0, "the library taught nothing at all")
+
+	man.relationship = Relationship.new(man.id, Relationship.MAX_LOYALTY)
+	var contented := Education.of(town, context)
+	man.relationship = Relationship.new(man.id, Relationship.MIN_LOYALTY)
+	var slighted := Education.of(town, context)
+
+	assert_true(contented > indifferent, "a contented scholar taught no better")
+	assert_true(slighted < indifferent,
+		"a slighted scholar taught just as well, so his regard does nothing")
+
+
+func test_he_judges_the_colony_by_its_schooling_and_its_quiet() -> void:
+	var run := _run()
+	var town := _with(run, ["theatre", "library"])
+	var man := _scholar(run, town)
+	assert_true(man.cares_about.has(WorldValues.EDUCATION),
+		"the scholar does not care whether anybody is taught")
+	assert_true(man.cares_about.has(ColonyMeasures.COLONY_AT_PEACE),
+		"the scholar does not mind the fighting")
+	assert_true(man.prominence() < _clergyman(run, _with(run, ["church"])).prominence(),
+		"the scholar looms as large as the priest, and §3 has him smaller")
+
+
+# --- 🔒 He does not ask who started it --------------------------------------
+
+func test_an_attack_on_the_colony_costs_him_as_much_as_one_by_it() -> void:
+	# 🔒 §3, and a deliberate inversion of `rebel-sentiment.md` §2. Sentiment
+	# measures **who is blamed**; the scholar measures how bad it is and blames
+	# whoever is in charge. He blames the PC when a rival attacks an expedition,
+	# which is not the PC's aggression by any reading.
+	var run := _run()
+	var quiet := ColonyMeasures.at_peace(run)
+	assert_almost_eq(quiet, 1.0, 0.0001, "a colony that has fought nobody is not at peace")
+
+	run.world.month = 6
+	for round in 3:
+		run.log.emit(Battle.EVENT_FOUGHT, &"somewhere", 5, {}, WorldPhase.MOVEMENT)
+	assert_true(ColonyMeasures.at_peace(run) < quiet,
+		"three battles did not trouble a man who wants everyone to get along")
+
+
+func test_nothing_in_the_peace_measure_can_name_an_aggressor() -> void:
+	# 🔒 **Attribution-blind by construction**, not by a rule somebody remembers.
+	# A later dev who wanted to excuse the PC a battle he did not start would
+	# have nowhere to put the exception.
+	var code := _lines_of("res://correspondence/perception/colony_measures.gd")
+	var from := code.find("func at_peace")
+	assert_true(from >= 0, "the peace measure has gone")
+	var body := code.substr(from)
+	var ends := body.find("\nstatic func ", 10)
+	if ends > 0:
+		body = body.substr(0, ends)
+	for token in ["aggressor", "attacker", "provoked", "blame", "defender"]:
+		assert_false(body.contains(token),
+			"the peace measure asks who began it: %s" % token)
+
+
+# --- 🔒 He can move an expert, and nothing else can -------------------------
+
+func _two_towns(run: RunState) -> Array:
+	var home := run.colony.in_order()[0]
+	var frontier := Town.new(&"gallows_end", "Gallows End", Vector2i(6, 6))
+	frontier.workers = 8
+	run.colony.add(frontier)
+	return [home, frontier]
+
+
+func test_he_moves_a_man_and_the_colony_keeps_the_same_number() -> void:
+	var run := _run()
+	var towns := _two_towns(run)
+	var home: Town = towns[0]
+	var frontier: Town = towns[1]
+	home.add_experts(&"furs", 2)
+
+	var before := home.expert_count(&"furs") + frontier.expert_count(&"furs")
+	assert_true(ExpertTransfer.move(home, frontier, &"furs", _context(run)),
+		"the scholar could not move a trapper to a town that wanted one")
+
+	assert_eq(home.expert_count(&"furs"), 1, "he took more than one man")
+	assert_eq(frontier.expert_count(&"furs"), 1, "nobody arrived")
+	assert_eq(home.expert_count(&"furs") + frontier.expert_count(&"furs"), before,
+		"moving a man made or unmade one")
+
+
+func test_he_cannot_move_a_man_who_is_not_there() -> void:
+	var run := _run()
+	var towns := _two_towns(run)
+	assert_false(ExpertTransfer.move(towns[0], towns[1], &"tobacco", _context(run)),
+		"a town with no tobacco expert sent one anyway")
+	assert_false(ExpertTransfer.may_move(towns[0], towns[0], &"furs"),
+		"a town moved a man to itself")
+
+
+func test_the_move_is_in_the_log_for_the_letters_to_read() -> void:
+	var run := _run()
+	var towns := _two_towns(run)
+	(towns[0] as Town).add_experts(&"furs", 1)
+	ExpertTransfer.move(towns[0], towns[1], &"furs", _context(run))
+
+	var moved := run.log.of_type(ExpertTransfer.EVENT_MOVED)
+	assert_eq(moved.size(), 1, "moving a man emitted %d events" % moved.size())
+	assert_eq(String(moved[0].payload["to"]), "gallows_end")
+
+
+func test_nothing_else_in_the_game_takes_an_expert_off_a_town() -> void:
+	# 🔒 Two ways to move a man is two rules about who may, and the first time one
+	# is tuned the other will not know. `Experts` makes them and `ExpertTransfer`
+	# moves them.
+	# **Taking one off is the distinctive act**, so the scan is for a negative
+	# count rather than for the word — `Experts.materialise` calls `add_experts`
+	# every month and is not moving anybody, which a cruder guard flagged.
+	# ⚠️ **`town.gd` is deliberately not scanned.** `take_one_life` removes an
+	# expert when a town has no worker left to lose, which is `CLAUDE.md`'s
+	# workers-before-experts rule and is a death rather than a relocation. The
+	# distinction is the whole point: this guard is about a man arriving
+	# somewhere else, and nobody arrives from that one.
+	var movers := PackedStringArray()
+	for path in ["res://sim/colony/experts.gd", "res://sim/colony/education.gd",
+			"res://sim/colony/phases/settle.gd", "res://sim/colony/colony.gd"]:
+		for line in _lines_of(path).split("\n"):
+			var text := String(line)
+			if text.contains("add_experts(") and text.contains(", -"):
+				movers.append("%s: %s" % [path, text.strip_edges()])
+	assert_empty(movers,
+		"something other than ExpertTransfer takes an expert off a town: %s" % [movers])
+
+	# And the one that does, does. Or the scan above proves only that nobody
+	# anywhere moves an expert, which was true before this ticket.
+	assert_true(_lines_of("res://sim/colony/expert_transfer.gd").contains(", -1"),
+		"ExpertTransfer no longer takes the man off the town he left")
+
+
+# --- 🔒 Unprompted he gathers them; asked, he complies ----------------------
+
+func test_left_to_himself_he_sends_them_to_his_own_library() -> void:
+	# 🔒 **His bias corrupts his own capability**, which is the sharpest kind. He
+	# sincerely believes he wants experts spread about the colony; what he does is
+	# gather them.
+	var run := _run()
+	var towns := _two_towns(run)
+	var home: Town = towns[0]
+	home.add_building(&"theatre")
+	home.add_building(&"library")
+	ContactRoster.house_the_residents(run)
+
+	var man := _scholar(run, home)
+	assert_true(man != null, "no scholar to ask")
+	assert_same(ExpertTransfer.where_he_would_send(man, run.colony), home,
+		"left to himself the scholar sent an expert somewhere other than his own town")
+
+
+func test_asked_he_sends_the_man_where_he_is_told() -> void:
+	# 🔒 The capability stays the PC's instrument. Nothing consults his
+	# preference when a letter names a destination — exactly as the Steward
+	# follows an instruction he disagrees with.
+	var run := _run()
+	var towns := _two_towns(run)
+	var home: Town = towns[0]
+	var frontier: Town = towns[1]
+	home.add_building(&"theatre")
+	home.add_building(&"library")
+	home.add_experts(&"furs", 1)
+	ContactRoster.house_the_residents(run)
+
+	assert_true(ExpertTransfer.move(home, frontier, &"furs", _context(run)),
+		"the scholar refused to send a man away from his own library")
+	assert_eq(frontier.expert_count(&"furs"), 1,
+		"the man went somewhere other than where he was sent")
+
+
+func test_he_takes_from_the_town_that_has_the_most() -> void:
+	# He raids the surplus rather than the last weaver a hamlet has.
+	var run := _run()
+	var towns := _two_towns(run)
+	var home: Town = towns[0]
+	var frontier: Town = towns[1]
+	home.add_experts(&"furs", 4)
+	frontier.add_experts(&"furs", 1)
+
+	var spare := Town.new(&"thornwick", "Thornwick", Vector2i(2, 7))
+	run.colony.add(spare)
+	assert_same(
+		ExpertTransfer.where_he_would_take_from(&"furs", run.colony, spare), home,
+		"he took a man from the town that could least spare one")
+
+
+# --- 🔒 The college widens him and brings no second scholar -----------------
+
+func test_the_college_widens_the_scholar_and_brings_nobody_new() -> void:
+	var run := _run()
+	var town := _with(run, ["theatre", "library"])
+	town.add_experts(&"furs", 2)
+	var man := _scholar(run, town)
+	man.relationship = Relationship.new(man.id, Relationship.NEUTRAL_LOYALTY)
+	var before := run.contacts.size()
+	var narrow := Education.of(town, _context(run))
+
+	town.add_building(&"college")
+	ContactRoster.house_the_residents(run)
+
+	assert_eq(run.contacts.size(), before, "the college brought a second scholar")
+	assert_same(_scholar(run, town), man, "the college replaced the man the library brought")
+	assert_true(Education.of(town, _context(run)) > narrow,
+		"the college widened nothing")

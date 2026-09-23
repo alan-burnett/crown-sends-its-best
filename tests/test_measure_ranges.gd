@@ -181,6 +181,9 @@ func test_no_measure_is_normalised_against_a_raw_quantity() -> void:
 		# **The lowest quality of life in the colony** (#279), which is a share
 		# already and does not grow with the number of towns.
 		ColonyMeasures.WORST_QUALITY_OF_LIFE,
+		# **A share of a year of fighting** (#280), not a count of battles — so a
+		# long run and a short one are read on the same scale.
+		ColonyMeasures.COLONY_AT_PEACE,
 		ColonyMeasures.TRADE_VOLUME,
 		# **A standing on a fixed nought-to-a-hundred scale** (#208), like the
 		# Crown's war. It does not grow with the colony because it is not a
