@@ -1,19 +1,19 @@
 [
   {
-    "id": "clergyman",
-    "template": true,
-    "note": "A template, not a contact. There is one clergyman per church rather than one in the game, so this is what ContactRoster generates him from - his name, his personality and his temperament are still drawn from his own stream. institutional-contacts.md section 3. Every figure here is tuning and belongs to M8 (section 8, prominence per role).",
-    "title": "Clergyman",
-    "prominence": 0.8,
-    "cares_about": [
+	"id": "clergyman",
+	"template": true,
+	"note": "A template, not a contact. There is one clergyman per church rather than one in the game, so this is what ContactRoster generates him from - his name, his personality and his temperament are still drawn from his own stream. institutional-contacts.md section 3. Every figure here is tuning and belongs to M8 (section 8, prominence per role).",
+	"title": "Clergyman",
+	"prominence": 0.8,
+	"cares_about": [
       "poorest_quality_of_life"
-    ],
-    "leans": {
-      "poorest_quality_of_life": -0.3,
-      "quality_of_life": -0.3,
-      "food_security": -0.25
-    },
-    "leans_note": "He talks to the poorest of the poor, the ones with nowhere else to go, so he believes the colony is far worse off than it is. Every welfare measure he reports leans dark. He is never lying (SPEC section 9.1); he simply sees the part of the town nobody else writes about. perception.md's one-rung cap bounds him, so a PC who believes him overspends and a PC who discounts him entirely misses the famine.",
-    "prominence_note": "Among the highest authored, below the governor and the journalist whose prominence equals a governor's. A slighted clergyman is a mechanical problem and not a flavour one: rebel-sentiment.md section 4 has a resident push his town's sentiment by loyalty scaled by prominence."
+	],
+	"leans": {
+	  "poorest_quality_of_life": -0.3,
+	  "quality_of_life": -0.3,
+	  "food_security": -0.25
+	},
+	"leans_note": "He talks to the poorest of the poor, the ones with nowhere else to go, so he believes the colony is far worse off than it is. Every welfare measure he reports leans dark. He is never lying (SPEC section 9.1); he simply sees the part of the town nobody else writes about. perception.md's one-rung cap bounds him, so a PC who believes him overspends and a PC who discounts him entirely misses the famine.",
+	"prominence_note": "Among the highest authored, below the governor and the journalist whose prominence equals a governor's. A slighted clergyman is a mechanical problem and not a flavour one: rebel-sentiment.md section 4 has a resident push his town's sentiment by loyalty scaled by prominence."
   }
 ]

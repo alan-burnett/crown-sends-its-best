@@ -1,68 +1,68 @@
 [
   {
-    "id": "trigger.rival_duke.tribute_demand",
-    "letter": "rival_duke.tribute_demand",
-    "urgency": 0.7,
-    "cooldown": 14,
-    "params": {
-      "amount": {
-        "from": "tribute_amount"
-      },
-      "town": {
-        "from": "town_name"
-      }
-    },
-    "conditions": [
-      {
-        "a_rival_has_a_hand_out": {}
-      },
-      {
-        "he_is_free_to_demand": {}
-      }
-    ]
+	"id": "trigger.rival_duke.tribute_demand",
+	"letter": "rival_duke.tribute_demand",
+	"urgency": 0.7,
+	"cooldown": 14,
+	"params": {
+	  "amount": {
+		"from": "tribute_amount"
+	  },
+	  "town": {
+		"from": "town_name"
+	  }
+	},
+	"conditions": [
+	  {
+		"a_rival_has_a_hand_out": {}
+	  },
+	  {
+		"he_is_free_to_demand": {}
+	  }
+	]
   },
   {
-    "id": "trigger.rival_duke_montargis.tribute_demand",
-    "letter": "rival_duke_montargis.tribute_demand",
-    "urgency": 0.68,
-    "cooldown": 14,
-    "params": {
-      "amount": {
-        "from": "tribute_amount"
-      },
-      "town": {
-        "from": "town_name"
-      }
-    },
-    "conditions": [
-      {
-        "a_rival_has_a_hand_out": {}
-      },
-      {
-        "he_is_free_to_demand": {}
-      }
-    ]
+	"id": "trigger.rival_duke_montargis.tribute_demand",
+	"letter": "rival_duke_montargis.tribute_demand",
+	"urgency": 0.68,
+	"cooldown": 14,
+	"params": {
+	  "amount": {
+		"from": "tribute_amount"
+	  },
+	  "town": {
+		"from": "town_name"
+	  }
+	},
+	"conditions": [
+	  {
+		"a_rival_has_a_hand_out": {}
+	  },
+	  {
+		"he_is_free_to_demand": {}
+	  }
+	]
   },
   {
-    "id": "trigger.rival_duke_vasterholm.tribute_demand",
-    "letter": "rival_duke_vasterholm.tribute_demand",
-    "urgency": 0.66,
-    "cooldown": 14,
-    "params": {
-      "amount": {
-        "from": "tribute_amount"
-      },
-      "town": {
-        "from": "town_name"
-      }
-    },
-    "conditions": [
-      {
-        "a_rival_has_a_hand_out": {}
-      },
-      {
-        "he_is_free_to_demand": {}
-      }
-    ]
+	"id": "trigger.rival_duke_vasterholm.tribute_demand",
+	"letter": "rival_duke_vasterholm.tribute_demand",
+	"urgency": 0.66,
+	"cooldown": 14,
+	"params": {
+	  "amount": {
+		"from": "tribute_amount"
+	  },
+	  "town": {
+		"from": "town_name"
+	  }
+	},
+	"conditions": [
+	  {
+		"a_rival_has_a_hand_out": {}
+	  },
+	  {
+		"he_is_free_to_demand": {}
+	  }
+	]
   }
 ]
