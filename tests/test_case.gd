@@ -47,6 +47,7 @@ func reset_world() -> void:
 	# Content definitions, in load order: the catalogue first, because terrain and
 	# improvements name resources.
 	ResourceCatalogue.reset()
+	CrownPrices.reset()
 	Terrain.reset()
 	Improvement.reset()
 	Building.reset()
@@ -78,6 +79,7 @@ func reset_world() -> void:
 	Force.reset()
 	Battle.reset()
 	CommanderExperience.reset()
+	CommanderFate.reset()
 
 	# Player-level state that outlives a run. In memory only — neither touches
 	# disk here, and both reload on next access.

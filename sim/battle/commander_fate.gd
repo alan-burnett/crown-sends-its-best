@@ -43,7 +43,24 @@ const EVENT_SURVIVED: StringName = &"commander_survived"
 
 ## The chance he walks away. **Tuning**, and `commanders.md` §9 says so in as
 ## many words: *the survival coin flip. It is currently even; it need not be.*
-const SURVIVES: float = 0.5
+##
+## A quirk names it (`perks-and-quirks.md` §4, *Commando commanders*), which is
+## why it is a `static var` rather than the constant it was: a colony that breeds
+## veterans is one that buries them faster, and that trade is the whole entry.
+static var _survives: float = 0.5
+
+
+static func survives() -> float:
+	return _survives
+
+
+## Turn it. A chance, so it stays a chance.
+static func set_survives(chance: float) -> void:
+	_survives = clampf(chance, 0.0, 1.0)
+
+
+static func reset() -> void:
+	_survives = 0.5
 
 
 ## Settle what happened to the man who was leading this company.
@@ -58,7 +75,7 @@ static func settle(company: Company, context: ColonyContext) -> bool:
 		return true
 
 	var drawn := context.streams.contact_stream(String(company.commander)).randf()
-	if drawn < SURVIVES:
+	if drawn < _survives:
 		_he_lived(company, commander, context)
 		return true
 	_he_died(company, commander, context)

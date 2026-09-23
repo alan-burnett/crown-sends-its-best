@@ -29,17 +29,7 @@ var content: ContentDatabase = null
 
 
 func before_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	NameBags.reset()
-	Patron.reset()
-	PatronVices.reset()
+	reset_world()
 	M1Registrations.register_all()
 	content = ContentDatabase.new()
 	content.load_all("en")
@@ -47,17 +37,7 @@ func before_each() -> void:
 
 
 func after_each() -> void:
-	ResourceCatalogue.reset()
-	Terrain.reset()
-	Improvement.reset()
-	Building.reset()
-	Objective.reset()
-	ContentRegistry.reset()
-	MeasureRegistry.reset()
-	Deliberation.reset()
-	NameBags.reset()
-	Patron.reset()
-	PatronVices.reset()
+	reset_world()
 	content.free()
 
 
@@ -151,7 +131,7 @@ func test_they_arrive_one_at_a_time_and_stop_at_three() -> void:
 	for level in range(0, 12):
 		growth.levels[String(DemandGrowth.REACH)] = level
 		seen.append(Patron.how_many_arrived(growth))
-	assert_eq(seen[seen.size() - 1], Patron.HOW_MANY,
+	assert_eq(seen[seen.size() - 1], Patron.how_many(),
 		"the Squeeze can never produce all three: %s" % [seen])
 	for index in range(1, seen.size()):
 		assert_true(seen[index] - seen[index - 1] <= 1,
@@ -185,8 +165,8 @@ func test_his_arrival_is_an_event() -> void:
 	# man.
 	var run := _run_with_patrons()
 	var arrivals := run.log.of_type(Patron.EVENT_ARRIVED)
-	assert_eq(arrivals.size(), Patron.HOW_MANY,
-		"%d men arrived and %d events said so" % [Patron.HOW_MANY, arrivals.size()])
+	assert_eq(arrivals.size(), Patron.how_many(),
+		"%d men arrived and %d events said so" % [Patron.how_many(), arrivals.size()])
 	assert_false(String(arrivals[0].payload.get("vice", "")).is_empty(),
 		"the arrival event does not say what makes him difficult")
 

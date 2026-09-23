@@ -65,8 +65,47 @@ const SHORTAGE_FLOOR: float = 0.02
 ## authored prices and the table in §1 reads as written.
 static func multiplier(state: WorldState, resource: StringName) -> float:
 	if state == null:
-		return 1.0
-	return war_lift(state, resource) * shortage_lift(state, resource)
+		return scarcity_of(resource)
+	return war_lift(state, resource) \
+		* shortage_lift(state, resource) \
+		* scarcity_of(resource)
+
+
+# --- 🔒 The knob: what the Crown charges, standing ---------------------------
+
+## A standing multiplier on what the Crown asks for one resource, for the whole
+## run.
+##
+## **Not a shortage and not the war.** Those two come and go with the Crown's
+## circumstances and are already here; this is a fact about the world the PC was
+## given (`perks-and-quirks.md` §1, §4 *Scarce iron*) and it never moves.
+##
+## 🔒 **It is a price, so the towns decide what to do about it.** SPEC §11.3
+## locks that towns run themselves, and this reaches them exactly as the war lift
+## does — through `Valuation.crown` — so a colony facing dear iron buys less of
+## it and builds a mineworks because a mineworks is suddenly worth building. The
+## sim needs no override and the PC issues no instruction.
+##
+## Empty means the authored prices, which is every run before quirks.
+static var _scarcity: Dictionary = {}
+
+
+static func scarcity_of(resource: StringName) -> float:
+	return float(_scarcity.get(String(resource), 1.0))
+
+
+## Turn it. **Never below zero**, and a resource the Crown pays nothing for is a
+## resource nobody can sell, which the economy can express and a negative one
+## cannot.
+static func scale_prices(scales: Dictionary) -> void:
+	var resources: Array = scales.keys()
+	resources.sort()
+	for resource in resources:
+		_scarcity[String(resource)] = maxf(0.0, float(scales[resource]))
+
+
+static func reset() -> void:
+	_scarcity = {}
 
 
 ## 🔒 **The war lift, and it needs no new state** (§1).
