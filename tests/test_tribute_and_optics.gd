@@ -122,33 +122,56 @@ func test_a_duke_who_is_being_paid_asks_less_than_one_who_is_not() -> void:
 		"a duke who had stopped being paid asked no more than one who had not")
 
 
-func test_each_duke_asks_for_the_same_thing_all_run() -> void:
-	# Off the sender rather than a die, so the player learns what each of them
-	# wants rather than being handed a fresh surprise every time.
-	var run := _run()
-	var wanted: Dictionary = {}
-	for duke in RivalDuke.all_in(run):
-		var context := _letter_context(
-			run, duke, _growth(DemandSchedule.ASKERS_FOR_RIVALS))
-		var first := String(ContentRegistry.supply_param(
-			"tribute_resource", {"fallback": "iron"}, context))
-		var again := String(ContentRegistry.supply_param(
-			"tribute_resource", {"fallback": "iron"}, context))
-		assert_eq(first, again, "%s wanted two different things in one month" % duke.id)
-		wanted[String(duke.id)] = first
+# --- 🔒 A duke asks for gold, and never for goods (SPEC §8.4, v3.0) ---------
+#
+# **Only the Crown trades with these colonies** (§10.1), so a duke paid in goods
+# would mean his ships docking at a Crown wharf to collect them. The gold comes
+# out of the Crown's purse, which is also why there is no governor in the loop:
+# the Crown may ask for *resources* and that takes a second letter to a man who
+# can refuse, but a duke asks for money the PC never had in his hands.
+
+func test_nothing_in_the_post_lets_a_duke_name_a_resource() -> void:
+	# 🔒 The guard. `tribute_resource` is gone, and a letter that asked for one
+	# again would be a foreign hold at a Crown wharf.
+	assert_false(ContentRegistry.has_param_source("tribute_resource"),
+		"something still picks a resource for a duke to demand")
+
+	for id in ["rival_duke.tribute_demand", "rival_duke_montargis.tribute_demand",
+			"rival_duke_vasterholm.tribute_demand"]:
+		var record: Dictionary = content.record("letters", id)
+		assert_false(record.get("params", {}).has("resource"),
+			"%s still declares a resource for the duke to ask for" % id)
 
 
-func test_no_duke_asks_for_a_comfort() -> void:
-	# A man idling his captains through a long season is not writing about tea.
+func test_what_he_asks_for_is_gold_and_is_the_crowns_to_pay() -> void:
+	# 🔒 It is an ordinary gold promise, so it lands on `net_position` and lowers
+	# Crown Standing *and* prestige together (`rival-pressure.md` §4).
+	var order := Order.new(
+		M1Registrations.ORDER_PAY_TRIBUTE, &"rival_duke",
+		{"amount": 400.0, "months": 9})
+
+	var promise := PromiseBook.from_order(order, 3)
+	assert_true(promise != null, "agreeing to pay a duke promised nobody anything")
+	assert_eq(promise.kind, &"gold", "tribute was promised in something other than gold")
+	assert_eq(promise.payer, Promise.PAYER_CROWN,
+		"a governor was asked to find the money for a duke")
+
+
+func test_the_figure_he_names_is_gold_and_not_a_count_of_goods() -> void:
+	# It always was gold underneath — `tribute_amount` computed the Crown's own
+	# demand scaled by his band and then divided it by a resource price on the
+	# way out. The division is what is gone.
 	var run := _run()
-	for duke in RivalDuke.all_in(run):
-		var asked := StringName(ContentRegistry.supply_param(
-			"tribute_resource", {"fallback": "iron"},
-			_letter_context(run, duke, _growth(DemandSchedule.ASKERS_FOR_RIVALS))))
-		assert_false(ResourceCatalogue.is_luxury(asked),
-			"%s demanded %s as tribute" % [duke.id, asked])
-		assert_false(ResourceCatalogue.is_livestock(asked),
-			"%s demanded livestock as tribute" % duke.id)
+	var duke: Contact = RivalDuke.all_in(run)[0]
+	duke.relationship.loyalty = RivalDuke.HIGH_AT + 5.0
+	var grown := _growth(DemandSchedule.ASKERS_FOR_RIVALS)
+
+	var asked := float(ContentRegistry.supply_param(
+		"tribute_amount", {}, _letter_context(run, duke, grown)))
+	assert_almost_eq(asked,
+		DemandSchedule.gold_target(grown) * RivalDuke.tribute_multiple(RivalDuke.HIGH),
+		0.01,
+		"the duke's ask is not the Crown's own demand scaled by his band")
 
 
 # --- 🔒 Paying fires the optic once, and the money is not counted twice -----

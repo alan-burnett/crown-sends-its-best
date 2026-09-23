@@ -5,10 +5,6 @@
     "urgency": 0.7,
     "cooldown": 14,
     "params": {
-      "resource": {
-        "from": "tribute_resource",
-        "fallback": "iron"
-      },
       "amount": {
         "from": "tribute_amount"
       },
@@ -28,10 +24,6 @@
     "urgency": 0.68,
     "cooldown": 14,
     "params": {
-      "resource": {
-        "from": "tribute_resource",
-        "fallback": "iron"
-      },
       "amount": {
         "from": "tribute_amount"
       },
@@ -51,10 +43,6 @@
     "urgency": 0.66,
     "cooldown": 14,
     "params": {
-      "resource": {
-        "from": "tribute_resource",
-        "fallback": "iron"
-      },
       "amount": {
         "from": "tribute_amount"
       },

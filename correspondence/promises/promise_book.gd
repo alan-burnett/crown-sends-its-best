@@ -45,7 +45,13 @@ func make(promise: Promise, contact: Contact, log: EventLog, month: int) -> Prom
 ## Build a promise from an Order, or null if that Order promises nothing.
 static func from_order(order: Order, month: int) -> Promise:
 	match order.kind:
-		M1Registrations.ORDER_PROMISE_GOLD:
+		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PAY_TRIBUTE:
+			# 🔒 **Tribute is a gold promise like any other** (SPEC §8.4, v3.0).
+			# It comes out of the Crown's purse, so it lands on `net_position` and
+			# lowers Crown Standing *and* prestige together
+			# (`rival-pressure.md` §4) — and a Crown that has closed its purse
+			# breaks it, which costs the PC the duke's regard at the worst
+			# possible moment. None of that needs a second mechanism.
 			return Promise.new(order.addressed_to, &"gold", {
 				"amount": order.get_param("amount", 0),
 			}, month, 0)

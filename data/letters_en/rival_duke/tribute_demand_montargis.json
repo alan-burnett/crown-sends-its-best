@@ -4,8 +4,7 @@
   "type": "demand",
   "skippable": false,
   "params": {
-    "resource": "resource",
-    "amount": "integer",
+    "amount": "gold",
     "town": "town"
   },
   "body": [
@@ -16,7 +15,7 @@
       "text": "Your settlement at {param:town} grows. I have counted the roofs from the water twice this year and there are more of them each time. This is admirable in you and inconvenient for me."
     },
     {
-      "text": "I should like {param:amount} of {param:resource}. It is not a trade; I have nothing to offer you and I would not insult you by pretending otherwise."
+      "text": "I should like {param:amount}, in coin. It is not a trade; I have nothing to offer you and I would not insult you by pretending otherwise."
     },
     {
       "text": "My frigates winter badly and their officers grow quarrelsome. I say this as a man describing his own difficulties, not yours."
@@ -50,12 +49,11 @@
         "options": [
           {
             "id": "pay",
-            "label": "send the goods",
-            "text": "The goods will be sent. I trust your season improves.",
+            "label": "pay him",
+            "text": "The sum will be sent from my Treasury. I trust your season improves.",
             "effect": {
               "pay_tribute": {
                 "to": "rival_duke_montargis",
-                "resource": "{resource}",
                 "amount": "{amount}",
                 "months": 9
               }

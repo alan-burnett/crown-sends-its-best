@@ -295,9 +295,13 @@ static func register_effects() -> void:
 	# the Crown's books are untouched and the court hears about it anyway — which
 	# is the whole reason the rival is in the table of askers: a fourth pocket the
 	# player's existing defences do not reach.
+	# 🔒 **Gold, and only ever gold** (SPEC §8.4, v3.0). A duke's ships do not dock
+	# at a colonial town: **only the Crown trades with these colonies**, so tribute
+	# in goods would put a foreign hold at a Crown wharf. It comes out of the
+	# Crown's purse, which is why this makes an ordinary gold promise.
 	ContentRegistry.register_effect(
 		"pay_tribute",
-		{"to": "contact", "resource": "resource", "amount": "integer", "months": "integer"},
+		{"to": "contact", "amount": "gold", "months": "integer"},
 		ORDER_PAY_TRIBUTE,
 	)
 	ContentRegistry.register_effect(

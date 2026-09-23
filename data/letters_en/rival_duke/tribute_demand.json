@@ -4,8 +4,7 @@
   "type": "demand",
   "skippable": false,
   "params": {
-    "resource": "resource",
-    "amount": "integer",
+    "amount": "gold",
     "town": "town"
   },
   "body": [
@@ -13,10 +12,10 @@
       "text": "Sir — we have not met, and I hope we shall not have to."
     },
     {
-      "text": "My people at the southern anchorage report that your settlement at {param:town} is prospering, and that its stores are better kept than mine. I congratulate you. I am obliged to add that they are also nearer to me than to you."
+      "text": "My people at the southern anchorage report that your settlement at {param:town} is prospering, and that it is better kept than mine. I congratulate you. I am obliged to add that they are also nearer to me than to you."
     },
     {
-      "text": "I ask for {param:amount} of {param:resource}. I do not ask it as a duty, and I am not entitled to it, and we may both be clear that this is not a trade."
+      "text": "I ask for {param:amount} in coin. I do not ask it as a duty, and I am not entitled to it, and we may both be clear that this is not a trade. Your Treasury will not miss it as your storehouses would."
     },
     {
       "text": "You will understand that I am not threatening you. I am describing a difficulty I have, which is that my captains are idle and my season is long. Should it be resolved I expect I shall not need to write again for some while."
@@ -50,12 +49,11 @@
         "options": [
           {
             "id": "pay",
-            "label": "send the goods",
-            "text": "The goods will be sent. I trust your season improves.",
+            "label": "pay him",
+            "text": "The sum will be sent from my Treasury. I trust your season improves.",
             "effect": {
               "pay_tribute": {
                 "to": "rival_duke",
-                "resource": "{resource}",
                 "amount": "{amount}",
                 "months": 9
               }

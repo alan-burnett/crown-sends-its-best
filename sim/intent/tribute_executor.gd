@@ -17,20 +17,30 @@ extends IntentExecutor
 ##
 ## ## 🔒 It defers the risk. It never buys peace
 ##
-## SPEC §8.4: they bully the PC into giving them resources, and accepting puts
-## the attack off without ever settling anything. So paying writes a date on the
+## SPEC §8.4: they bully the PC into giving them gold, and accepting puts the
+## attack off without ever settling anything. So paying writes a date on the
 ## world and nothing else; the rival comes back, and comes back asking for more.
 ##
 ## **Nothing reads that date yet** — rivals are M5 and their attacks M6. Writing
 ## it here means the milestone that brings them reads a world value rather than
 ## reopening this, the same seam shape as `crown.emigration` for #171.
 ##
-## ## The goods move as any other shipment does
+## ## 🔒 The gold comes from the Crown, and no governor is asked
 ##
-## 🔒 **The PC cannot move a town's stockpile** (SPEC §11.3). Tribute is goods in
-## somebody's warehouse exactly as the Marshal's requisition is, so it takes the
-## same second letter to a governor who may refuse — and a governor who refuses
-## to be bullied is a man the player may find he agrees with.
+## **Only the Crown trades with these colonies** (SPEC §10.1). A duke paid in
+## goods would mean his ships docking at a Crown wharf to collect them, which is
+## not a thing the world allows — so tribute is gold out of the Crown's purse,
+## and it is an ordinary gold promise (`PromiseBook.from_order`).
+##
+## **That is the difference between a duke and the Marshal.** The Crown may ask
+## for *resources*, and that takes a second letter to a governor who can refuse
+## to part with them. A duke asks for money the PC never had in his hands, so
+## there is nobody in the colony to ask and nothing for a governor to decline.
+##
+## It also means paying reaches `net_position`, lowering Crown Standing *and*
+## prestige together (`rival-pressure.md` §4) — and a Crown that has closed its
+## purse (§10.3) breaks the promise, so a PC in financial trouble cannot buy a
+## duke off at all. The machinery for every part of that already existed.
 
 ## The world value being written — **not the optic**.
 ##
@@ -70,8 +80,10 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	# payload — SPEC §14.1 keeps prestige off the player's screens.
 	log.emit(OpticsRegister.EVENT_TRIBUTE_PAID, StringName(to), state.month, {
 		"to": to,
-		"resource": String(intent.data.get("resource", "")),
-		"amount": int(intent.data.get("amount", 0)),
+		# **Gold, and no resource** (SPEC §8.4, v3.0). The figure is here for the
+		# log and the letters; `OpticsRegister` prices the optic and does not read
+		# it, because the court minds that he paid rather than how much.
+		"gold": float(intent.data.get("amount", 0.0)),
 		"quiet_until": quiet_until,
 		# **Not peace.** He will be back, and the payload says so rather than
 		# leaving a reader to assume the matter is closed.

@@ -4,8 +4,7 @@
   "type": "demand",
   "skippable": false,
   "params": {
-    "resource": "resource",
-    "amount": "integer",
+    "amount": "gold",
     "town": "town"
   },
   "body": [
@@ -16,7 +15,7 @@
       "text": "Men of mine have walked the country inland of {param:town} and come back saying your people are further west each season, and better fed than mine. I do not blame you for that. I am obliged to do something about it."
     },
     {
-      "text": "{param:amount} of {param:resource} would answer for this year. Understand that I am not selling you anything: there is nothing you could buy from me and nothing I will offer."
+      "text": "{param:amount} in coin would answer for this year. Understand that I am not selling you anything: there is nothing you could buy from me and nothing I will offer."
     },
     {
       "text": "If you refuse I shall think no worse of you personally, which I mention because you will hear it said that I am a reasonable man, and it is true, and it will make no difference at all."
@@ -50,12 +49,11 @@
         "options": [
           {
             "id": "pay",
-            "label": "send the goods",
-            "text": "The goods will be sent. I trust your season improves.",
+            "label": "pay him",
+            "text": "The sum will be sent from my Treasury. I trust your season improves.",
             "effect": {
               "pay_tribute": {
                 "to": "rival_duke_vasterholm",
-                "resource": "{resource}",
                 "amount": "{amount}",
                 "months": 9
               }
