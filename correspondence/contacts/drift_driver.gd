@@ -32,7 +32,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 			continue
 
 		var measures := ColonyMeasures.for_contact(run, contact)
-		var drift := LoyaltyDrift.for_contact(contact, measures)
+		var drift := LoyaltyDrift.for_contact(contact, measures) \
+			+ _good_press(contact, state)
 		if is_zero_approx(drift):
 			continue
 
@@ -48,6 +49,24 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 			"about": LoyaltyDrift.loudest(contact, measures),
 			"crossed": _crossed(before, contact.relationship.loyalty),
 		}, WorldPhase.RECKONING)
+
+
+## What a month of the journalist's *Public Relations* is worth to this man
+## (#279, `institutional-contacts.md` §3).
+##
+## 🔒 **Governors only.** §3 has the policy swaying public opinion, and a
+## governor is the town's leader and its voice — so what it buys is the regard of
+## the men who run the colony, which `rebel-sentiment.md` §4 then carries into
+## their towns through the prominence term that already exists. It buys nothing
+## at court: the Crown's officers are an ocean away and do not read the colony's
+## papers.
+##
+## **Read off a world value**, so this knows nothing about a policy book and a
+## policy that ended stops pressing the month it ends.
+func _good_press(contact: Contact, state: WorldState) -> float:
+	if contact.role != Contact.ROLE_GOVERNOR or state == null:
+		return 0.0
+	return maxf(0.0, float(state.get_value(PolicyEffects.PUBLIC_RELATIONS_KEY, 0.0)))
 
 
 ## Whether this month took him past a figure that changes how he behaves.

@@ -231,6 +231,18 @@ static func _tax(town: Town, context: ColonyContext) -> float:
 				continue
 		weighted += float(event.payload.get("tax", 0.0)) \
 			* float(TIER_WEIGHT.get(tier, TIER_WEIGHT["want"]))
+
+	# 🔒 **What the town believes it paid** (#279, the journalist's *Crown
+	# Sentiment*). The duty above is the real transaction and the Crown collected
+	# every penny of it; this is the only reader that is talked out of part of
+	# it, and a quarter off the rate is a quarter off the duty because the duty
+	# is the rate times the trade.
+	#
+	# **Before the ceiling**, so a relieved colony saturates later rather than
+	# sitting at the same cap having been persuaded of nothing.
+	weighted *= 1.0 - clampf(
+		float(context.state.get_value(PolicyEffects.CROWN_SENTIMENT_KEY, 0.0)),
+		0.0, 1.0)
 	return minf(TAX_CEILING, weighted * TAX_RESENTMENT)
 
 

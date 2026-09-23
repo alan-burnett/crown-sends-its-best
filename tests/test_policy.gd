@@ -434,3 +434,82 @@ func test_the_book_survives_a_round_trip() -> void:
 	assert_almost_eq(restored.bill({}, null, 9), book.bill({}, null, 9), 0.001,
 		"the bill came back a different size")
 	assert_eq(String(restored.active()[1].params.get("resource", "")), "guns")
+
+
+# --- 🔒 The journalist's two (#279) -----------------------------------------
+#
+# `institutional-contacts.md` §3. **Neither policy is the trap.** What the PC
+# must do to keep him loyal is the trap; what he gets for it is not, and neither
+# of these is tuned down to compensate for one.
+
+func test_public_relations_presses_where_governors_read() -> void:
+	_enact(Policy.ALL, 100.0, PolicyEffects.PUBLIC_RELATIONS)
+	var pressing := PolicyEffects.pressure(book)
+	assert_has(pressing, PolicyEffects.PUBLIC_RELATIONS_KEY,
+		"good press presses on nothing, so no governor will ever feel it")
+	assert_true(float(pressing[PolicyEffects.PUBLIC_RELATIONS_KEY]) > 0.0,
+		"a month of good press was worth nothing to anybody")
+
+
+func test_public_relations_raises_a_governor_and_not_a_crown_officer() -> void:
+	# 🔒 §3: it sways **public** opinion. A governor is the town's leader and its
+	# voice; the Crown's officers are an ocean away and do not read the colony's
+	# papers.
+	# **Against each man's own ordinary drift**, not against a standing figure —
+	# everybody moves a little every month anyway, and a test that compared
+	# against a fixed number would be measuring the month rather than the policy.
+	var quiet := _month_of_drift(false)
+	var printed := _month_of_drift(true)
+
+	assert_true(printed["governor"] > quiet["governor"],
+		"a month of good press bought the governor nothing")
+	assert_almost_eq(printed["steward"], quiet["steward"], 0.0001,
+		"the Steward read the colony's newspapers")
+
+
+## What one Reckoning does to a governor and to a Crown officer, with the press
+## running or not.
+func _month_of_drift(printing: bool) -> Dictionary:
+	var run := RunState.new_run(SEED)
+	ContactRoster.load_into(run, content)
+	var governor: Contact = run.contacts[String(run.colony.in_order()[0].governor_id)]
+	var steward := run.contact(&"steward")
+	var before := {"governor": governor.loyalty(), "steward": steward.loyalty()}
+
+	if printing:
+		run.world.values[PolicyEffects.PUBLIC_RELATIONS_KEY] = \
+			PolicyEffects.PUBLIC_RELATIONS_LIFT
+	DriftDriver.new(run).on_phase(
+		WorldPhase.RECKONING, run.world, run.log, run.streams)
+
+	return {
+		"governor": governor.loyalty() - float(before["governor"]),
+		"steward": steward.loyalty() - float(before["steward"]),
+	}
+
+
+func test_the_lift_is_worth_having_and_is_not_tuned_to_nothing() -> void:
+	# 🔒 §3: **do not tune the benefits down to compensate for the trap.** A lift
+	# smaller than the noise of an ordinary month would be a policy the player
+	# pays for every month and cannot tell is running.
+	assert_true(PolicyEffects.PUBLIC_RELATIONS_LIFT
+			> LoyaltyDrift.MONTHLY_REACH * 0.25,
+		"a month of good press is worth less than a quarter of an ordinary month's drift")
+
+
+# --- 🔒 Crown Sentiment: a quarter off the rate, and the Crown still collects -
+
+func test_crown_sentiment_presses_a_quarter_and_never_more_than_all_of_it() -> void:
+	_enact(Policy.ALL, 100.0, PolicyEffects.CROWN_SENTIMENT)
+	assert_almost_eq(
+		float(PolicyEffects.pressure(book)[PolicyEffects.CROWN_SENTIMENT_KEY]),
+		0.25, 0.0001,
+		"it is a quarter of the rate, not some other share of it")
+
+	# 🔒 No arrangement of policies may make a town grateful for being taxed.
+	for round in 8:
+		book.enact(Policy.new(
+			&"steward", PolicyEffects.CROWN_SENTIMENT, 10.0, Policy.ALL), log, 3)
+	assert_true(
+		float(PolicyEffects.pressure(book)[PolicyEffects.CROWN_SENTIMENT_KEY]) <= 1.0,
+		"enough policies talked a town out of more duty than it paid")

@@ -466,3 +466,72 @@ func test_a_rebellion_survives_a_round_trip() -> void:
 	var restored := Town.from_dict(town.to_dict())
 	assert_true(restored.rebelling, "a reload brought a rebel town quietly back into the fold")
 	assert_eq(restored.rebelling_since, 8, "it came back having always been out, or never")
+
+
+# --- 🔒 Crown Sentiment: the town is talked out of a quarter of the duty -----
+#
+# The journalist's second policy (#279, `institutional-contacts.md` §3).
+
+## A town that has just paid duty on a month's food, with the policy pressing or
+## not.
+func _taxed(relief: float) -> Dictionary:
+	var town := _town()
+	town.receive_gold(5_000.0)
+	var context := _context([town])
+	if relief > 0.0:
+		context.state.values[PolicyEffects.CROWN_SENTIMENT_KEY] = relief
+	Trade.buy(town, &"food", 80.0, context, Trade.TIER_NEED)
+	return {
+		"town": town,
+		"context": context,
+		"parts": RebelSentiment.of(town, context, null, {}),
+	}
+
+
+func test_the_policy_talks_the_town_out_of_a_quarter_of_what_it_resents() -> void:
+	var plain := _taxed(0.0)
+	assert_true(float(plain["parts"]["tax"]) > 0.0,
+		"the town resented no duty at all, so this proves nothing")
+
+	var relieved := _taxed(PolicyEffects.CROWN_SENTIMENT_RELIEF)
+	assert_almost_eq(
+		float(relieved["parts"]["tax"]),
+		float(plain["parts"]["tax"]) * (1.0 - PolicyEffects.CROWN_SENTIMENT_RELIEF),
+		0.0001,
+		"the town was talked out of some other share of the duty")
+
+
+func test_the_crown_still_collects_every_penny_of_the_real_rate() -> void:
+	# 🔒 The lock. Only sentiment reads the rate lower; no town pays less and the
+	# Crown's books are untouched.
+	var plain := _taxed(0.0)
+	var relieved := _taxed(PolicyEffects.CROWN_SENTIMENT_RELIEF)
+
+	var collected := func(harness: Dictionary) -> float:
+		var total := 0.0
+		for event in (harness["context"] as ColonyContext).log.for_month(
+				(harness["context"] as ColonyContext).state.month):
+			total += float(event.payload.get("tax", 0.0))
+		return total
+
+	assert_true(collected.call(plain) > 0.0, "no duty was collected at all")
+	assert_almost_eq(collected.call(relieved), collected.call(plain), 0.0001,
+		"a policy about what a town believes changed what the Crown collected")
+
+	# And the town bought exactly as much, so nothing about the transaction moved
+	# — only what the town made of it afterwards.
+	assert_almost_eq(
+		(relieved["town"] as Town).held(&"food"),
+		(plain["town"] as Town).held(&"food"), 0.0001,
+		"the town came away with a different quantity of food")
+
+
+func test_relief_leaves_a_town_that_paid_nothing_resenting_nothing() -> void:
+	# A share of nothing is nothing, and the policy must not invent gratitude.
+	var town := _town()
+	var context := _context([town])
+	context.state.values[PolicyEffects.CROWN_SENTIMENT_KEY] = \
+		PolicyEffects.CROWN_SENTIMENT_RELIEF
+	assert_almost_eq(
+		float(RebelSentiment.of(town, context, null, {})["tax"]), 0.0, 0.0001,
+		"a town that bought nothing was made grateful about the duty on it")

@@ -40,8 +40,24 @@ const CURRICULUM: StringName = &"curriculum"
 
 const PROVOST_KNOBS: Array[StringName] = [VOLUME, PROVISION, EXPERTS, LIVESTOCK, CURRICULUM]
 
+## The journalist's two (#279, `institutional-contacts.md` §3).
+##
+## 🔒 **Neither is the trap.** What the PC must do to keep him loyal is the trap
+## — hold the colony to the worst town rather than the average, and carry a
+## programme that raises the stakes everywhere else over years. **What he gets
+## for it is not.** Both of these are things a player should reach for, the cost
+## is paid before the benefit arrives, and the benefit being genuinely good is
+## what makes the bargain worth taking and worth regretting.
+##
+## A policy that was itself a hidden cost would make the whole man a trick. He is
+## not a trick; he is sincere, and dangerous because of it. **Do not tune these
+## down to compensate for the trap.**
+const PUBLIC_RELATIONS: StringName = &"public_relations"
+const CROWN_SENTIMENT: StringName = &"crown_sentiment"
+
 const ALL: Array[StringName] = [
-	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK, CURRICULUM,
+	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK,
+	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT,
 ]
 
 ## What each knob is set to. **Four settings and no numbers**, because the PC is
@@ -110,6 +126,28 @@ const MARKET_LIFT: float = 0.35
 ## How much faster people come to a colony the Crown is subsidising. Tuning.
 const IMMIGRATION_LIFT: float = 0.5
 
+## Where the journalist's two press. Read by `DriftDriver` and `RebelSentiment`,
+## which is what keeps either of them from having to know a policy book exists.
+const PUBLIC_RELATIONS_KEY: String = "policy.public_relations"
+const CROWN_SENTIMENT_KEY: String = "policy.crown_sentiment"
+
+## How much regard a month of good press earns every governor in the colony.
+##
+## Tuning, and deliberately worth having: §3's lock is that the benefit is not
+## the trap and must not be tuned down to offset one.
+const PUBLIC_RELATIONS_LIFT: float = 0.6
+
+## 🔒 **A quarter of the rate, not twenty-five points off it** (#279).
+##
+## Ten per cent is counted as seven and a half, forty as thirty. **Not tuning** —
+## the ticket fixes the figure, because "a quarter lower" is the whole
+## description of what the policy does and a different number would be a
+## different policy.
+##
+## 🔒 **The Crown still collects the real rate.** This reaches `RebelSentiment`
+## and nothing else; no town pays a penny less and the Ledger is unchanged.
+const CROWN_SENTIMENT_RELIEF: float = 0.25
+
 
 static func is_effect(id: StringName) -> bool:
 	return ALL.has(id)
@@ -142,6 +180,14 @@ static func pressure(book: PolicyBook) -> Dictionary:
 			IMMIGRATION:
 				values[WorldValues.IMMIGRATION] = \
 					float(values.get(WorldValues.IMMIGRATION, 0.0)) + IMMIGRATION_LIFT
+			PUBLIC_RELATIONS:
+				values[PUBLIC_RELATIONS_KEY] = \
+					float(values.get(PUBLIC_RELATIONS_KEY, 0.0)) + PUBLIC_RELATIONS_LIFT
+			CROWN_SENTIMENT:
+				# **Never past the whole rate**, so no arrangement of policies can
+				# make a town grateful for being taxed.
+				values[CROWN_SENTIMENT_KEY] = minf(1.0,
+					float(values.get(CROWN_SENTIMENT_KEY, 0.0)) + CROWN_SENTIMENT_RELIEF)
 			_:
 				# The Provost's five (#173). Each presses on its own world value,
 				# so the sim reads a figure and never the policy book.
