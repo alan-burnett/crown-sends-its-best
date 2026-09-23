@@ -38,6 +38,19 @@ const STOCKPILE_HEALTH: String = "stockpile_health"
 ## by are the same one.
 const POOREST_QUALITY_OF_LIFE: String = "poorest_quality_of_life"
 
+## 🔒 **The worst town in the colony, never the average** (#279,
+## `institutional-contacts.md` §3).
+##
+## People write to the journalist and he prints what they send, so he holds the
+## PC to account for the bleakest headline available. **One neglected hamlet
+## poisons him however well the capital lives** — and it gets harder as the
+## colony spreads, so the most influential man in it becomes harder to please the
+## more of it there is.
+##
+## A share by construction, so a wide colony and a narrow one are read on the
+## same scale.
+const WORST_QUALITY_OF_LIFE: String = "worst_quality_of_life"
+
 ## What the town bought and sold this month, in gold.
 const TRADE_VOLUME: String = "trade_volume"
 
@@ -145,6 +158,10 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	# threat, which is the whole of the inversion.
 	measures[COLONY_REACH] = reach_of(run)
 	measures[COLONY_IS_NO_THREAT] = 1.0 - reach_of(run)
+	# **On every contact, because it is a fact about the colony** — the same
+	# arrangement `COLONY_REACH` has. Only the journalist's `cares_about` names
+	# it today, and nothing about it is his alone.
+	measures[WORST_QUALITY_OF_LIFE] = worst_quality_of_life(run)
 
 	# **What a man at court can see, which is the ledger** (#282). On the patrons
 	# alone: `COLONY_REACH` above is the lock that a rival never reads the Crown's
@@ -178,6 +195,25 @@ static func for_contact(run: RunState, contact: Contact) -> Dictionary:
 	measures[TRADE_VOLUME] = trade_standing(run.colony, town)
 	_add_the_neighbours(measures, run, contact, town)
 	return measures
+
+
+## How the worst-off town in the colony lives.
+##
+## 🔒 **The minimum, not the mean** (#279). Averaging would let a prosperous
+## capital cover for a hamlet nobody has visited in two years, which is the
+## precise failure the journalist exists to punish.
+##
+## **One is the answer for a colony with no towns left**, so a man who has just
+## watched it fall does not also read it as the worst place he ever heard of.
+static func worst_quality_of_life(run: RunState) -> float:
+	if run == null or run.colony == null:
+		return 1.0
+	var worst := 1.0
+	var seen := false
+	for town in run.colony.in_order():
+		worst = minf(worst, clampf(town.quality_of_life, 0.0, 1.0))
+		seen = true
+	return worst if seen else 1.0
 
 
 ## The town this contact lives in, or null for a man an ocean away.

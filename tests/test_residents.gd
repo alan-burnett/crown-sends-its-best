@@ -542,3 +542,188 @@ func test_his_gloom_is_bounded_by_the_one_rung_cap() -> void:
 			"the priest reported a town at %f as better than it is" % raw)
 		assert_true(truth - his <= 1,
 			"the priest was more than one rung bleaker than the truth at %f" % raw)
+
+
+# --- 🔒 The journalist: the sharpest sword in the tree ----------------------
+
+func _journalist(run: RunState, town: Town) -> Contact:
+	return run.contacts.get(
+		String(ContactRoster.resident_id(town, "journalist")), null)
+
+
+func test_his_prominence_equals_a_governors() -> void:
+	# 🔒 §3, and everything about him follows from it. No other resident comes
+	# close, and a press gives one building a second voice as loud as the man who
+	# runs the town.
+	var run := _run()
+	var town := _with(run, ["printing_press"])
+	var press := _journalist(run, town)
+	assert_true(press != null, "the printing press brought nobody")
+	assert_eq(press.prominence(), Contact.prominence_of(Contact.ROLE_GOVERNOR),
+		"the journalist does not carry a governor's weight")
+	assert_true(press.prominence() > _clergyman(run, _with(run, ["church"])).prominence(),
+		"the clergyman is louder than the press, and §3 has it the other way")
+
+
+func test_he_reads_the_worst_town_and_not_the_average() -> void:
+	var run := _run()
+	var town := _with(run, ["printing_press"])
+	var press := _journalist(run, town)
+	assert_true(press.cares_about.has(ColonyMeasures.WORST_QUALITY_OF_LIFE),
+		"the journalist judges the Crown by nothing")
+
+	town.quality_of_life = 0.9
+	var narrow: float = ColonyMeasures.for_contact(run, press)[ColonyMeasures.WORST_QUALITY_OF_LIFE]
+
+	var hamlet := Town.new(&"gallows_end", "Gallows End", Vector2i(6, 6))
+	hamlet.quality_of_life = 0.1
+	run.colony.add(hamlet)
+	var wide: float = ColonyMeasures.for_contact(run, press)[ColonyMeasures.WORST_QUALITY_OF_LIFE]
+
+	assert_true(float(wide) < float(narrow),
+		"one wretched hamlet did not reach the man who prints what people send him")
+	assert_almost_eq(float(wide), 0.1, 0.0001,
+		"he read something other than the worst town in the colony")
+
+
+func test_a_wide_colony_is_harder_to_please_at_the_same_average() -> void:
+	# 🔒 The acceptance line, and the whole of why the minimum is not the mean.
+	# Two colonies of equal average quality of life, one of them holding a
+	# neglected hamlet, must not read the same to him.
+	var run := _run()
+	var town := _with(run, ["printing_press"])
+	town.quality_of_life = 0.5
+
+	var even: float = ColonyMeasures.for_contact(run, _journalist(run, town))[
+		ColonyMeasures.WORST_QUALITY_OF_LIFE]
+
+	# Same average of 0.5 across two towns, arranged badly.
+	town.quality_of_life = 0.9
+	var hamlet := Town.new(&"gallows_end", "Gallows End", Vector2i(6, 6))
+	hamlet.quality_of_life = 0.1
+	run.colony.add(hamlet)
+	var lopsided: float = ColonyMeasures.for_contact(run, _journalist(run, town))[
+		ColonyMeasures.WORST_QUALITY_OF_LIFE]
+
+	assert_true(float(lopsided) < float(even),
+		"a colony that neglects one town reads to him exactly as one that does not")
+
+
+func test_he_is_alarmed_and_the_clergyman_is_not() -> void:
+	var run := _run()
+	var town := _with(run, ["printing_press", "church"])
+	assert_eq(_journalist(run, town).lean_shape, Perception.SHAPE_ALARMED,
+		"the journalist reads the world like everybody else")
+	assert_eq(_clergyman(run, town).lean_shape, Perception.SHAPE_FLAT,
+		"the clergyman picked up a shape that was never authored for him")
+
+
+# --- 🔒 The shape of a lean is not its size ---------------------------------
+
+## How much alarm a man of this shape feels, where the truth is `p`.
+func _alarm(shape: StringName, p: float) -> float:
+	return 1.0 - Perception.trouble_seen(shape, p)
+
+
+func test_a_small_trouble_moves_him_nearly_as_far_as_a_large_one() -> void:
+	# 🔒 §3: *small troubles move him nearly as far as large ones*. A tenth of
+	# the trouble there could be already reads to him as a large share of the
+	# alarm of all of it — which is what "steep near zero and flattening out"
+	# means, and it is the opposite of everybody else.
+	var slight := _alarm(Perception.SHAPE_ALARMED, 0.9)
+	var total := _alarm(Perception.SHAPE_ALARMED, 0.0)
+	var truthful := _alarm(Perception.SHAPE_FLAT, 0.9)
+
+	assert_true(slight > 3.0 * truthful,
+		"a tenth of the trouble there could be read to him as a tenth of the alarm")
+	assert_true(slight > 0.25 * total,
+		"a slight trouble barely registered with the man who prints every one")
+
+
+func test_the_sanguine_shape_is_its_mirror() -> void:
+	# The Marshal's curve, built here because it is the same machinery and a
+	# second copy written later would be the first place the two disagreed.
+	var slight := 0.9
+	assert_true(_alarm(Perception.SHAPE_SANGUINE, slight)
+			< _alarm(Perception.SHAPE_FLAT, slight),
+		"the man who minimises every threat did not minimise a small one")
+	assert_true(_alarm(Perception.SHAPE_ALARMED, slight)
+			> _alarm(Perception.SHAPE_SANGUINE, slight),
+		"the press and the Marshal saw the same small trouble the same way")
+
+	# 🔒 And they agree about the ends, because neither invents trouble that is
+	# not there nor overlooks a colony in ruins.
+	for p in [0.0, 1.0]:
+		assert_almost_eq(_alarm(Perception.SHAPE_ALARMED, p),
+			_alarm(Perception.SHAPE_SANGUINE, p), 0.0001,
+			"two men disagreed about a colony that is plainly fine or plainly lost")
+
+
+func test_a_flat_shape_changes_nothing_at_all() -> void:
+	# 🔒 Almost every contact in the game is flat, and this must stay exactly what
+	# the pipeline always did.
+	for p in [0.0, 0.25, 0.5, 0.75, 1.0]:
+		assert_almost_eq(Perception.trouble_seen(Perception.SHAPE_FLAT, p), p, 0.0001,
+			"a flat reader stopped seeing the truth as it is")
+
+
+func test_the_shape_never_carries_a_lean_past_the_one_rung_cap() -> void:
+	# 🔒 What keeps him readable. He is reliably one notch bleaker than the truth,
+	# never two, whatever the shape does to where his lean bites.
+	MeasureRegistry.register_linear("probe", 0.0, 1.0)
+	for raw in [0.05, 0.2, 0.45, 0.7, 0.95]:
+		var truth := Perception.truthful_rung("probe", raw, 5)
+		for shape in Perception.SHAPES:
+			var his := Perception.rung("probe", raw, -0.9, 5, shape)
+			assert_true(absi(truth - his) <= 1,
+				"a %s lean moved the word more than one rung at %f" % [shape, raw])
+
+
+func test_the_shape_reaches_the_word_a_letter_prints() -> void:
+	# 🔒 **Asked of `rung`, not of `shape_scale`.** A curve nothing applies is a
+	# function nobody calls: the first version of the tests above checked the
+	# shape in isolation and passed with `rung` ignoring it entirely, which
+	# mutation caught and reading did not.
+	#
+	# At a level where there is little wrong, the alarmed man must reach a
+	# different rung from the flat one carrying the same lean.
+	# 🔒 **With no lean at all**, which is the whole of what *the shape of his
+	# lean rather than its size* means: the curve is the bias, and a man carrying
+	# none of the second still reports differently because of the first.
+	MeasureRegistry.register_linear("probe", 0.0, 1.0)
+	var raw := 0.9
+
+	var flat := Perception.rung("probe", raw, 0.0, 5, Perception.SHAPE_FLAT)
+	var alarmed := Perception.rung("probe", raw, 0.0, 5, Perception.SHAPE_ALARMED)
+	var sanguine := Perception.rung("probe", raw, 0.0, 5, Perception.SHAPE_SANGUINE)
+
+	assert_true(alarmed < flat,
+		"the man who prints every trouble said the same word as the truth")
+	assert_eq(flat, Perception.truthful_rung("probe", raw, 5),
+		"a flat reader with no lean said something other than the truth")
+	assert_true(sanguine >= flat,
+		"the man who minimises every threat was bleaker than a plain reading")
+
+
+func test_the_shape_is_the_senders_and_travels_with_his_lean() -> void:
+	# It belongs to the man rather than to the ladder, so two men reading one
+	# measure through one letter can still disagree about how loudly to say it.
+	var run := _run()
+	var town := _with(run, ["printing_press", "church"])
+	var press := _journalist(run, town)
+	var priest := _clergyman(run, town)
+
+	MeasureRegistry.register_linear("probe", 0.0, 1.0)
+	var raw := 0.97
+	var his := Perception.rung("probe", raw, -0.34, 5, press.lean_shape)
+	var the_priests := Perception.rung("probe", raw, -0.34, 5, priest.lean_shape)
+	assert_true(his <= the_priests,
+		"the press was no quicker to print trouble than the pulpit was to preach it")
+
+
+func test_an_unknown_shape_falls_back_to_flat() -> void:
+	# A content mistake must not silently change what a man sees.
+	assert_almost_eq(Perception.trouble_seen(&"wishful", 0.4), 0.4, 0.0001)
+	assert_false(Perception.is_shape(&"wishful"))
+	for shape in Perception.SHAPES:
+		assert_true(Perception.is_shape(shape))

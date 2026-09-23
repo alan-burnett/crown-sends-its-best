@@ -30,22 +30,103 @@ extends RefCounted
 ## SPEC §9.1. Direct contradiction is the failure mode this system exists to
 ## prevent.
 
+# --- 🔒 The shape of a lean, which is not its size --------------------------
+
+## How a man's bias varies with how bad things actually are.
+##
+## Most contacts are **flat**: the same lean wherever the truth sits, which is
+## what the pipeline has always done and remains the default.
+##
+## **Alarmed** is steep where there is little to worry about and flattens as
+## things worsen (#279, `institutional-contacts.md` §3). The journalist thinks
+## every problem is equally important, so *small troubles move him nearly as far
+## as large ones* — a minor shortage in a hamlet gets the same headline as a
+## famine in the capital.
+##
+## **Sanguine** is its mirror, and it is the Marshal: flat where the journalist
+## is steep, so a small threat reads as nothing at all and only a real one moves
+## him. Same machinery, opposite curves, and the player has two different
+## discounts to learn.
+##
+## 🔒 **The cap still holds.** A shape changes where a lean bites, never how far
+## it may carry — so the journalist is reliably one notch more alarmed than the
+## truth rather than hysterical, and the player who learns to discount him is the
+## one who will miss the real famine.
+const SHAPE_FLAT: StringName = &"flat"
+const SHAPE_ALARMED: StringName = &"alarmed"
+const SHAPE_SANGUINE: StringName = &"sanguine"
+
+const SHAPES: Array[StringName] = [SHAPE_FLAT, SHAPE_ALARMED, SHAPE_SANGUINE]
+
+
+static func is_shape(id: StringName) -> bool:
+	return SHAPES.has(id)
+
+
+## How much trouble this man sees, given how much there is.
+##
+## 🔒 **A curve on the trouble, not a scaling of the lean.** §3 asks for *the
+## shape of his lean rather than its size*, and scaling the magnitude turns out
+## to say something else entirely: it makes every curve agree at both ends and
+## differ only in the middle, which is the opposite of what *small troubles move
+## him nearly as far as large ones* means.
+##
+## So the measure itself is bent before his flat lean goes on top. `p` is
+## normalised with **1 as the untroubled end**, so trouble is `1 - p`:
+##
+## | | At a tenth of the trouble there is | Reads as |
+## | :--- | :--- | :--- |
+## | **alarmed** | most of the alarm of all of it | small troubles nearly as loud as large |
+## | **sanguine** | almost none of it | a small threat is no threat |
+##
+## The two are mirror images and the player has two different discounts to learn.
+static func trouble_seen(shape: StringName, p: float) -> float:
+	var here := clampf(p, 0.0, 1.0)
+	var trouble := 1.0 - here
+	match shape:
+		SHAPE_ALARMED:
+			# Concave in the trouble: steep where there is barely any, flattening
+			# once there plainly is.
+			return 1.0 - sqrt(trouble)
+		SHAPE_SANGUINE:
+			# Convex, the mirror: nothing registers until it is genuinely bad.
+			return 1.0 - trouble * trouble
+		_:
+			return here
+
+
 ## The word this contact would use.
-static func word(measure_id: String, raw: float, lean: float, ladder: PackedStringArray) -> String:
-	var index := rung(measure_id, raw, lean, ladder.size())
+static func word(
+	measure_id: String,
+	raw: float,
+	lean: float,
+	ladder: PackedStringArray,
+	shape: StringName = SHAPE_FLAT,
+) -> String:
+	var index := rung(measure_id, raw, lean, ladder.size(), shape)
 	if index < 0:
 		return ""
 	return ladder[index]
 
 
 ## The rung index, or -1 if the ladder is unusable.
-static func rung(measure_id: String, raw: float, lean: float, rung_count: int) -> int:
+static func rung(
+	measure_id: String,
+	raw: float,
+	lean: float,
+	rung_count: int,
+	shape: StringName = SHAPE_FLAT,
+) -> int:
 	if rung_count < 2:
 		push_error("A ladder needs at least two rungs, got %d." % rung_count)
 		return -1
 
 	var p := MeasureRegistry.normalize(measure_id, raw)
-	var perceived := clampf(p + clampf(lean, -1.0, 1.0), 0.0, 1.0)
+	# 🔒 **The shape bends the truth he is looking at; the lean then moves it.**
+	# The cap below is measured against the *real* truth, so a shape can no more
+	# carry a word two rungs than a lean can.
+	var seen := trouble_seen(shape, p)
+	var perceived := clampf(seen + clampf(lean, -1.0, 1.0), 0.0, 1.0)
 
 	var truth_index := _index(p, rung_count)
 	var biased_index := _index(perceived, rung_count)
