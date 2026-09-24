@@ -1,0 +1,22 @@
+{
+	"id": "shots_exchanged",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"ground": "place",
+		"attacker": "company",
+		"attacker_side": "side",
+		"attacker_men": "people",
+		"defender": "company",
+		"defender_side": "side",
+		"defender_men": "people",
+		"attacker_lost": "people",
+		"defender_lost": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.shots_exchanged.1",
+			"text": "Shots Exchanged on {param:ground}, {param:date}. {param:attacker} ({param:attacker_side}), {param:attacker_men} men, against {param:defender} ({param:defender_side}), {param:defender_men} men. Lost: {param:attacker_lost} and {param:defender_lost}."
+		}
+	]
+}

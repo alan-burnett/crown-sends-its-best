@@ -1,0 +1,1335 @@
+[
+	{
+		"id": "trigger.cutscene.ending_overrun",
+		"cutscene": "ending_overrun",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "colony_was_lost",
+				"where": {
+					"how": "colony_overrun",
+					"last_lost_to": ""
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"towns": {
+				"from": "event",
+				"field": "towns",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.ending_overrun_by_natives",
+		"cutscene": "ending_overrun_by_natives",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "colony_was_lost",
+				"where": {
+					"how": "colony_overrun",
+					"last_lost_to": "native"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"towns": {
+				"from": "event",
+				"field": "towns",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.ending_overrun_by_dukes",
+		"cutscene": "ending_overrun_by_dukes",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "colony_was_lost",
+				"where": {
+					"how": "colony_overrun",
+					"last_lost_to": "rival"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"towns": {
+				"from": "event",
+				"field": "towns",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.ending_overrun_by_rebels",
+		"cutscene": "ending_overrun_by_rebels",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "colony_was_lost",
+				"where": {
+					"how": "colony_overrun",
+					"last_lost_to": "rebel"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"towns": {
+				"from": "event",
+				"field": "towns",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.ending_independence",
+		"cutscene": "ending_independence",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "colony_was_lost",
+				"where": {
+					"how": "independence"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"towns": {
+				"from": "event",
+				"field": "towns",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.ending_retired",
+		"cutscene": "ending_retired",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "run_ended",
+				"where": {
+					"reason": "retired"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"years": {
+				"from": "event",
+				"field": "years",
+				"as": "number"
+			},
+			"people": {
+				"from": "colony",
+				"measure": "people"
+			},
+			"towns": {
+				"from": "colony",
+				"measure": "towns"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.ending_term_expired",
+		"cutscene": "ending_term_expired",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "run_ended",
+				"where": {
+					"reason": "term_expired"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"years": {
+				"from": "event",
+				"field": "years",
+				"as": "number"
+			},
+			"people": {
+				"from": "colony",
+				"measure": "people"
+			},
+			"towns": {
+				"from": "colony",
+				"measure": "towns"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.landfall",
+		"cutscene": "landfall",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "town_lived"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"ground": {
+				"from": "event",
+				"field": "town",
+				"as": "place"
+			},
+			"people": {
+				"from": "colony",
+				"measure": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_first_works",
+		"cutscene": "the_first_works",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "building_completed",
+				"where": {
+					"kind": "construction"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"building": {
+				"from": "event",
+				"field": "objective",
+				"as": "building"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"months": {
+				"from": "event",
+				"field": "months_required",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_man_who_knows_his_trade",
+		"cutscene": "a_man_who_knows_his_trade",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "expert_appeared"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"specialism": {
+				"from": "event",
+				"field": "specialism",
+				"as": "text"
+			},
+			"experts": {
+				"from": "event",
+				"field": "experts",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.new_arrivals",
+		"cutscene": "new_arrivals",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "settlers_arrived"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"workers": {
+				"from": "event",
+				"field": "workers",
+				"as": "people"
+			},
+			"experts": {
+				"from": "event",
+				"field": "experts",
+				"as": "people"
+			},
+			"gold": {
+				"from": "event",
+				"field": "brought",
+				"as": "gold"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.into_the_interior",
+		"cutscene": "into_the_interior",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "expedition_launched"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"governor": {
+				"from": "event",
+				"field": "governor",
+				"as": "contact"
+			},
+			"gold": {
+				"from": "event",
+				"field": "gold",
+				"as": "gold"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_second_town",
+		"cutscene": "a_second_town",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "town_founded"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"name": {
+				"from": "event",
+				"field": "name",
+				"as": "text"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"from": {
+				"from": "event",
+				"field": "from",
+				"as": "town"
+			},
+			"months": {
+				"from": "event",
+				"field": "months_out",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_friend_at_court",
+		"cutscene": "a_friend_at_court",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "patron_arrived"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"patron": {
+				"from": "event",
+				"field": "name",
+				"as": "text"
+			},
+			"specialty": {
+				"from": "event",
+				"field": "specialty",
+				"as": "text"
+			},
+			"need": {
+				"from": "event",
+				"field": "need",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_church_is_raised",
+		"cutscene": "the_church_is_raised",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "building_completed",
+				"where": {
+					"grants_contact": "clergyman"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"building": {
+				"from": "event",
+				"field": "objective",
+				"as": "building"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_quartermaster",
+		"cutscene": "the_quartermaster",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "building_completed",
+				"where": {
+					"grants_contact": "quartermaster"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"building": {
+				"from": "event",
+				"field": "objective",
+				"as": "building"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_press",
+		"cutscene": "the_press",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "building_completed",
+				"where": {
+					"grants_contact": "journalist"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"building": {
+				"from": "event",
+				"field": "objective",
+				"as": "building"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_scholar",
+		"cutscene": "the_scholar",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "building_completed",
+				"where": {
+					"grants_contact": "scholar"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"building": {
+				"from": "event",
+				"field": "objective",
+				"as": "building"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_neighbour_declares_himself",
+		"cutscene": "a_neighbour_declares_himself",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "crown_demand_grew",
+				"where": {
+					"source": "duke"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"year": {
+				"from": "event",
+				"field": "year",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_dukes_price",
+		"cutscene": "the_dukes_price",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "letter_dispatched",
+				"where": {
+					"letter": "rival_duke.tribute_demand"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"duke": {
+				"from": "subject",
+				"as": "contact"
+			},
+			"amount": {
+				"from": "event",
+				"field": "params.amount",
+				"as": "gold"
+			},
+			"town": {
+				"from": "event",
+				"field": "params.town",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_dukes_price.montargis",
+		"cutscene": "the_dukes_price",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "letter_dispatched",
+				"where": {
+					"letter": "rival_duke_montargis.tribute_demand"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"duke": {
+				"from": "subject",
+				"as": "contact"
+			},
+			"amount": {
+				"from": "event",
+				"field": "params.amount",
+				"as": "gold"
+			},
+			"town": {
+				"from": "event",
+				"field": "params.town",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_dukes_price.vasterholm",
+		"cutscene": "the_dukes_price",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "letter_dispatched",
+				"where": {
+					"letter": "rival_duke_vasterholm.tribute_demand"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"duke": {
+				"from": "subject",
+				"as": "contact"
+			},
+			"amount": {
+				"from": "event",
+				"field": "params.amount",
+				"as": "gold"
+			},
+			"town": {
+				"from": "event",
+				"field": "params.town",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.under_arms",
+		"cutscene": "under_arms",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "company_raised",
+				"where": {
+					"allegiance": "colonial"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"company": {
+				"from": "event",
+				"field": "company",
+				"as": "company"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			},
+			"men": {
+				"from": "event",
+				"field": "size",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_first_blood",
+		"cutscene": "the_first_blood",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "battle_fought"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			},
+			"attacker": {
+				"from": "event",
+				"field": "attacker",
+				"as": "company"
+			},
+			"attacker_side": {
+				"from": "event",
+				"field": "attacker_allegiance",
+				"as": "side"
+			},
+			"attacker_men": {
+				"from": "event",
+				"field": "attacker_men",
+				"as": "people"
+			},
+			"defender": {
+				"from": "event",
+				"field": "defender",
+				"as": "company"
+			},
+			"defender_side": {
+				"from": "event",
+				"field": "defender_allegiance",
+				"as": "side"
+			},
+			"defender_men": {
+				"from": "event",
+				"field": "defender_men",
+				"as": "people"
+			},
+			"attacker_lost": {
+				"from": "event",
+				"field": "attacker_lost",
+				"as": "people"
+			},
+			"defender_lost": {
+				"from": "event",
+				"field": "defender_lost",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_town_is_lost",
+		"cutscene": "a_town_is_lost",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "town_lost"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "name",
+				"as": "text"
+			},
+			"to": {
+				"from": "event",
+				"field": "to",
+				"as": "side"
+			},
+			"people": {
+				"from": "event",
+				"field": "population",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.they_came_at_dawn",
+		"cutscene": "they_came_at_dawn",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "war_party_raised"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"tribe": {
+				"from": "event",
+				"field": "tribe",
+				"as": "tribe"
+			},
+			"men": {
+				"from": "event",
+				"field": "size",
+				"as": "people"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.an_agreement",
+		"cutscene": "an_agreement",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "native_trade_opened"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"tribe": {
+				"from": "event",
+				"field": "tribe",
+				"as": "tribe"
+			},
+			"we_give": {
+				"from": "event",
+				"field": "we_give",
+				"as": "text"
+			},
+			"they_give": {
+				"from": "event",
+				"field": "they_give",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.beyond_reconciling",
+		"cutscene": "beyond_reconciling",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "tribe_irreconcilable"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"tribe": {
+				"from": "event",
+				"field": "tribe",
+				"as": "tribe"
+			},
+			"toward": {
+				"from": "event",
+				"field": "toward",
+				"as": "text"
+			},
+			"why": {
+				"from": "event",
+				"field": "why",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_hungry_month",
+		"cutscene": "the_hungry_month",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "famine_deaths"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"months": {
+				"from": "event",
+				"field": "months_hungry",
+				"as": "number"
+			},
+			"remaining": {
+				"from": "event",
+				"field": "remaining",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_town_refuses",
+		"cutscene": "a_town_refuses",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "town_declared_rebellion"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"people": {
+				"from": "event",
+				"field": "population",
+				"as": "people"
+			},
+			"governor": {
+				"from": "event",
+				"field": "governor",
+				"as": "contact"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_chancellor_writes",
+		"cutscene": "the_chancellor_writes",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "letter_dispatched",
+				"where": {
+					"letter": "chancellor.last_chance"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"people": {
+				"from": "colony",
+				"measure": "people"
+			},
+			"towns": {
+				"from": "colony",
+				"measure": "towns"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_colony_grows",
+		"cutscene": "the_colony_grows",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "town_grew"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"people": {
+				"from": "event",
+				"field": "population",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_land_improved",
+		"cutscene": "the_land_improved",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "improvement_built"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"improvement": {
+				"from": "event",
+				"field": "improvement",
+				"as": "improvement"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.they_do_not_return",
+		"cutscene": "they_do_not_return",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "expedition_destroyed"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_cost_of_it",
+		"cutscene": "the_cost_of_it",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "town_stormed"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "name",
+				"as": "text"
+			},
+			"by": {
+				"from": "event",
+				"field": "by",
+				"as": "side"
+			},
+			"lost": {
+				"from": "event",
+				"field": "lost",
+				"as": "people"
+			},
+			"remaining": {
+				"from": "event",
+				"field": "remaining",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_ground_is_taken",
+		"cutscene": "the_ground_is_taken",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "rival_parked_on_our_ground"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"duke": {
+				"from": "event",
+				"field": "rival",
+				"as": "contact"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			},
+			"tiles": {
+				"from": "event",
+				"field": "tiles",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.he_will_not_do_it",
+		"cutscene": "he_will_not_do_it",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "order_refused"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"contact": {
+				"from": "subject",
+				"as": "contact"
+			},
+			"order": {
+				"from": "event",
+				"field": "order.kind",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.the_steward_acts",
+		"cutscene": "the_steward_acts",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "contact_acted_alone"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"contact": {
+				"from": "subject",
+				"as": "contact"
+			},
+			"order": {
+				"from": "event",
+				"field": "order.kind",
+				"as": "text"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_promise_unpaid",
+		"cutscene": "a_promise_unpaid",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "promise_broken"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"contact": {
+				"from": "subject",
+				"as": "contact"
+			},
+			"kind": {
+				"from": "event",
+				"field": "kind",
+				"as": "text"
+			},
+			"amount": {
+				"from": "event",
+				"field": "terms.amount",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.colony_holds_trade_protest",
+		"cutscene": "colony_holds_trade_protest",
+		"kind": "recurring",
+		"on": {
+			"event_happened": {
+				"event": "trade_protest_declared"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"resource": {
+				"from": "event",
+				"field": "resource",
+				"as": "text"
+			},
+			"rate": {
+				"from": "event",
+				"field": "rate",
+				"as": "percent"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.shots_exchanged",
+		"cutscene": "shots_exchanged",
+		"kind": "recurring",
+		"after": "the_first_blood",
+		"on": {
+			"event_happened": {
+				"event": "battle_fought"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			},
+			"attacker": {
+				"from": "event",
+				"field": "attacker",
+				"as": "company"
+			},
+			"attacker_side": {
+				"from": "event",
+				"field": "attacker_allegiance",
+				"as": "side"
+			},
+			"attacker_men": {
+				"from": "event",
+				"field": "attacker_men",
+				"as": "people"
+			},
+			"defender": {
+				"from": "event",
+				"field": "defender",
+				"as": "company"
+			},
+			"defender_side": {
+				"from": "event",
+				"field": "defender_allegiance",
+				"as": "side"
+			},
+			"defender_men": {
+				"from": "event",
+				"field": "defender_men",
+				"as": "people"
+			},
+			"attacker_lost": {
+				"from": "event",
+				"field": "attacker_lost",
+				"as": "people"
+			},
+			"defender_lost": {
+				"from": "event",
+				"field": "defender_lost",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_town_changes_hands.lost",
+		"cutscene": "a_town_changes_hands",
+		"kind": "recurring",
+		"after": "a_town_is_lost",
+		"on": {
+			"event_happened": {
+				"event": "town_lost"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "name",
+				"as": "text"
+			},
+			"people": {
+				"from": "event",
+				"field": "population",
+				"as": "people"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.a_town_changes_hands.returned",
+		"cutscene": "a_town_changes_hands",
+		"kind": "recurring",
+		"after": "a_town_is_lost",
+		"on": {
+			"event_happened": {
+				"event": "town_returned_to_the_crown"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"people": {
+				"from": "event",
+				"field": "population",
+				"as": "people"
+			}
+		}
+	}
+]

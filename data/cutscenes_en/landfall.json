@@ -1,0 +1,20 @@
+{
+	"id": "landfall",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Fires on the first town to live a month, which is the landing: the first town is placed, not founded.",
+	"params": {
+		"date": "date",
+		"town": "town",
+		"ground": "place",
+		"people": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.landfall.1",
+			"text": "Landfall, {param:date}."
+		},
+		{
+			"image": "cutscene.landfall.2",
+			"text": "{param:town} is founded on {param:ground}. The colony: {param:people} people."
+		}
+	]
+}

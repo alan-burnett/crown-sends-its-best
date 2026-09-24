@@ -1,0 +1,16 @@
+{
+	"id": "a_friend_at_court",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"patron": "text",
+		"specialty": "text",
+		"need": "text"
+	},
+	"panels": [
+		{
+			"image": "cutscene.a_friend_at_court.1",
+			"text": "A Friend at Court, {param:date}. {param:patron} takes an interest in the colony. Specialty: {param:specialty}. Wants: {param:need}."
+		}
+	]
+}

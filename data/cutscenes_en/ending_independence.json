@@ -1,0 +1,19 @@
+{
+	"id": "ending_independence",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"people": "people",
+		"towns": "number"
+	},
+	"panels": [
+		{
+			"image": "cutscene.ending_independence.1",
+			"text": "Independence, {param:date}."
+		},
+		{
+			"image": "cutscene.ending_independence.2",
+			"text": "{param:towns} towns and {param:people} people no longer answer to the Crown."
+		}
+	]
+}

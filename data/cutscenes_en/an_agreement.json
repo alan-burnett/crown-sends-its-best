@@ -1,0 +1,17 @@
+{
+	"id": "an_agreement",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"town": "town",
+		"tribe": "tribe",
+		"we_give": "text",
+		"they_give": "text"
+	},
+	"panels": [
+		{
+			"image": "cutscene.an_agreement.1",
+			"text": "An Agreement, {param:date}. {param:town} and {param:tribe} agree to trade: {param:we_give} for {param:they_give}."
+		}
+	]
+}

@@ -1,0 +1,18 @@
+{
+	"id": "a_second_town",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"name": "text",
+		"ground": "place",
+		"people": "people",
+		"from": "town",
+		"months": "number"
+	},
+	"panels": [
+		{
+			"image": "cutscene.a_second_town.1",
+			"text": "A Second Town, {param:date}. {param:name} is founded on {param:ground} by {param:people} people from {param:from}, {param:months} months after they set out."
+		}
+	]
+}

@@ -1,0 +1,15 @@
+{
+	"id": "blooded",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Nothing in the sim emits this moment yet, so no trigger shows it.",
+	"params": {
+		"date": "date",
+		"commander": "commander",
+		"level": "number"
+	},
+	"panels": [
+		{
+			"image": "cutscene.blooded.1",
+			"text": "Blooded, {param:date}. {param:commander} rises to level {param:level}."
+		}
+	]
+}

@@ -10,10 +10,11 @@ extends RefCounted
 ## | :--- | :--- |
 ## | **first** | the first time ever in the run |
 ## | **recurring** | the first time **each turn** |
-## | **bookend** | scripted, at run start and run end — *not by this* |
+## | **bookend** | the run's end, as it happens — never remembered, never competing |
 ##
-## Bookends compete with nothing and are shown by whoever opens or closes the
-## run. Everything else fires **from the event log**, and the desk is in it: a
+## The opening bookend is shown by the menu before there is a run; the endings
+## fire here, from the event that ended it. Everything else fires **from the
+## event log**, and the desk is in it: a
 ## contact refusing an order or acting without asking is an event
 ## (`order_refused`, `contact_acted_alone`) exactly as a battle is. One trigger
 ## source, not two (§2).
@@ -41,9 +42,14 @@ extends RefCounted
 ## ```
 ##
 ## `on` names a condition in `CONDITIONS` — **an id into a code-side registry,
-## never logic in a data file** (`CLAUDE.md`, §5). The records live beside the
+## never logic in a data file** (`CLAUDE.md`, §5). `where` narrows it to events
+## whose payload fields equal the values given: the church among buildings, the
+## natives among the ways a colony can fall. The records live beside the
 ## letters' in `data/triggers`, told apart by naming a `cutscene` rather than a
-## `letter`; the catalog and its validator are #299.
+## `letter`, and `params` says what the caption is told (`CutsceneParams`).
+##
+## **Several triggers may name one cutscene** — a town changes hands whether it
+## was taken or retaken — and it is still shown once.
 
 const FIRST: String = "first"
 const RECURRING: String = "recurring"
@@ -59,7 +65,12 @@ const KEY_AFTER: String = "after"
 ## The conditions a trigger may name, with their params. Matched in `_matches`;
 ## a row here and a branch there, and nothing callable is held (`CLAUDE.md`).
 const CONDITIONS: Dictionary = {
-	"event_happened": {"event": "string"},
+	"event_happened": {"event": "string", "where": "object"},
+}
+
+## The params a condition must be given. `where` may be left out.
+const REQUIRED: Dictionary = {
+	"event_happened": ["event"],
 }
 
 
@@ -76,45 +87,50 @@ static func from_content(content: ContentDatabase) -> Array:
 	return out
 
 
-## The cutscenes these events earned, as `{cutscene, kind, seq}`, in the order
-## they happened. **Pure**: `seen` — the firsts already shown this run — is read
-## and not written. `record` writes it.
+## The cutscenes these events earned, as `{cutscene, kind, seq, event,
+## trigger}`, in the order they happened. **Pure**: `seen` — the firsts already
+## shown this run — is read and not written. `record` writes it.
 static func fired(triggers: Array, events: Array, seen: Dictionary) -> Array[Dictionary]:
-	var out: Array[Dictionary] = []
-	var firsts_now: Dictionary = {}
+	var earned: Dictionary = {}
 
-	for trigger in _in_order(triggers):
-		if String(trigger.get(KEY_KIND, "")) != FIRST:
-			continue
-		var cutscene := String(trigger.get(KEY_CUTSCENE, ""))
-		if seen.has(cutscene):
-			continue
-		var because := _first_match(trigger, events)
-		if because == null:
-			continue
-		firsts_now[cutscene] = true
-		out.append({"cutscene": cutscene, "kind": FIRST, "seq": because.seq})
+	for kind in [BOOKEND, FIRST]:
+		for trigger in _in_order(triggers):
+			if String(trigger.get(KEY_KIND, "")) != kind:
+				continue
+			var cutscene := String(trigger.get(KEY_CUTSCENE, ""))
+			if kind == FIRST and seen.has(cutscene):
+				continue
+			_earn(earned, trigger, kind, _first_match(trigger, events))
 
 	for trigger in _in_order(triggers):
 		if String(trigger.get(KEY_KIND, "")) != RECURRING:
 			continue
 		# 🔒 Never in the turn its first fired.
-		if firsts_now.has(String(trigger.get(KEY_AFTER, ""))):
+		if earned.has(String(trigger.get(KEY_AFTER, ""))):
 			continue
-		var because := _first_match(trigger, events)
-		if because == null:
-			continue
-		out.append({
-			"cutscene": String(trigger.get(KEY_CUTSCENE, "")),
-			"kind": RECURRING,
-			"seq": because.seq,
-		})
+		_earn(earned, trigger, RECURRING, _first_match(trigger, events))
 
+	var out: Array[Dictionary] = []
+	for cutscene in earned:
+		out.append(earned[cutscene])
 	out.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		if int(a["seq"]) != int(b["seq"]):
 			return int(a["seq"]) < int(b["seq"])
 		return String(a["cutscene"]) < String(b["cutscene"]))
 	return out
+
+
+## One cutscene earned once, by the earliest event of any of its triggers.
+static func _earn(earned: Dictionary, trigger: Dictionary, kind: String, because: SimEvent) -> void:
+	if because == null:
+		return
+	var cutscene := String(trigger.get(KEY_CUTSCENE, ""))
+	if earned.has(cutscene) and int(earned[cutscene]["seq"]) <= because.seq:
+		return
+	earned[cutscene] = {
+		"cutscene": cutscene, "kind": kind, "seq": because.seq,
+		"event": because, "trigger": trigger,
+	}
 
 
 ## Remember the firsts that fired, against the turn they fired in.
@@ -151,7 +167,15 @@ static func _first_match(trigger: Dictionary, events: Array) -> SimEvent:
 static func _matches(condition_id: String, args: Dictionary, event: SimEvent) -> bool:
 	match condition_id:
 		"event_happened":
-			return String(event.type) == String(args.get("event", ""))
+			if String(event.type) != String(args.get("event", "")):
+				return false
+			var where: Variant = args.get("where", {})
+			if typeof(where) != TYPE_DICTIONARY:
+				return false
+			for field in where:
+				if String(event.payload.get(String(field), "")) != String(where[field]):
+					return false
+			return true
 	return false
 
 

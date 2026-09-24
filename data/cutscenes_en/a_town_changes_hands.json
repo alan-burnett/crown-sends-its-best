@@ -1,0 +1,15 @@
+{
+	"id": "a_town_changes_hands",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"town": "text",
+		"people": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.a_town_changes_hands.1",
+			"text": "A Town Changes Hands, {param:date}. {param:town}: {param:people} people."
+		}
+	]
+}

@@ -72,7 +72,14 @@ var assets: AssetRegistry = null
 var sound: SoundEngine = null
 
 var _at: int = 0
+
+## The facts this showing's captions name (#299), from `RunState.cutscenes_due`.
+var values: Dictionary = {}
+
 var _painting: TextureRect = null
+## 🔒 **Where a painting will go, until it is painted** (#299): its asset id
+## in brackets, in the painting's own space, so the art can be dropped in by name.
+var _unpainted: Label = null
 var _caption: Label = null
 var _advance: Button = null
 var _counter: Label = null
@@ -127,6 +134,13 @@ func _build() -> void:
 	_painting.gui_input.connect(_on_painting_input)
 	column.add_child(_painting)
 
+	_unpainted = DeskTheme.label("", DeskTheme.SIZE_HEADING, DeskTheme.PAPER_HANDLED)
+	_unpainted.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_unpainted.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_unpainted.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_unpainted.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_painting.add_child(_unpainted)
+
 	_caption = DeskTheme.label("", DeskTheme.SIZE_BODY, DeskTheme.PAPER)
 	_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(_caption)
@@ -148,8 +162,11 @@ func _build() -> void:
 func _show_panel() -> void:
 	if cutscene == null:
 		return
-	_painting.texture = _texture(cutscene.image_at(_at))
-	_caption.text = cutscene.text_at(_at)
+	var image := cutscene.image_at(_at)
+	var painted := _is_painted(image)
+	_painting.texture = _texture(image) if painted else null
+	_unpainted.text = "" if painted else "[%s]" % image
+	_caption.text = cutscene.caption_at(_at, values)
 	_counter.text = "" if cutscene.count() <= 1 \
 		else "%d of %d" % [_at + 1, cutscene.count()]
 	# **The last panel says it is the last.** A player who knows one more tap
@@ -219,6 +236,15 @@ func _apply_measure() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		_apply_measure()
+
+
+## Whether a painting exists for this id yet: registered, with a path, and the
+## file there. Anything less shows the id in its place.
+func _is_painted(id: String) -> bool:
+	if assets == null or id.is_empty() or not assets.has(id):
+		return false
+	var path := assets.resolve(id)
+	return not path.is_empty() and ResourceLoader.exists(path)
 
 
 func _texture(id: String) -> Texture2D:

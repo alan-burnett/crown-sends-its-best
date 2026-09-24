@@ -5,9 +5,9 @@ extends TestCase
 ##
 ## 🔒 **As many as the month earned, in the order they happened.** No budget, no
 ## deferral, no expiry. A first fires once a run; a recurrence once a turn, and
-## never in the turn its first did. Nothing here names a real catalog entry — the
-## catalog is #299's and the Author's to cut — so the fixtures are triggers
-## written here, over events emitted here.
+## never in the turn its first did; a bookend whenever the run ends. Nothing
+## here names a real catalog entry — the catalog is the Author's to cut — so the
+## fixtures are triggers written here, over events emitted here.
 
 const SEED: int = 2980
 
@@ -36,11 +36,14 @@ func _recurring(cutscene: String, event: String, after: String = "") -> Dictiona
 		"on": {"event_happened": {"event": event}}}
 
 
-## A month's events, in the order given.
+## A month's events, in the order given. An entry is a type, or `[type, payload]`.
 func _month(types: Array) -> Array[SimEvent]:
 	var log := EventLog.new()
-	for type in types:
-		log.emit(StringName(type), &"somewhere", 4, {})
+	for entry in types:
+		if typeof(entry) == TYPE_ARRAY:
+			log.emit(StringName(entry[0]), &"somewhere", 4, entry[1])
+		else:
+			log.emit(StringName(entry), &"somewhere", 4, {})
 	return log.all()
 
 
@@ -108,14 +111,49 @@ func test_a_recurrence_never_fires_in_its_firsts_turn() -> void:
 		"after its first's turn the recurrence did not fire")
 
 
-func test_only_the_kinds_named_fire_and_bookends_are_not_this() -> void:
+func test_an_unknown_condition_never_fires() -> void:
+	var triggers := [{"cutscene": "nonsense", "kind": "first", "on": {"no_such_condition": {}}}]
+	assert_empty(_fired(triggers, ["town_founded"]))
+
+
+func test_a_bookend_fires_whenever_the_run_ends_and_is_never_remembered() -> void:
+	# The run's end is not a first: it is shown every time it happens, and a
+	# run that has ended once is not spared its painting by a save that says so.
+	var triggers := [{"cutscene": "you_retire", "kind": "bookend",
+		"on": {"event_happened": {"event": "run_ended"}}}]
+	var seen: Dictionary = {"you_retire": 1}
+	var due := CutsceneTriggers.fired(triggers, _month(["run_ended"]), seen)
+	assert_eq(CutsceneTriggers.ids_of(due), PackedStringArray(["you_retire"]))
+	CutsceneTriggers.record(due, seen, 9)
+	assert_eq(seen["you_retire"], 1, "a bookend was remembered as though it were a first")
+
+
+# --- 🔒 Where: which of an event's kind ------------------------------------------
+
+func test_where_narrows_an_event_to_the_one_it_names() -> void:
+	# The church among buildings; the natives among the ways a colony falls.
+	var triggers := [{"cutscene": "the_church", "kind": "first",
+		"on": {"event_happened": {"event": "building_completed", "where": {"grants_contact": "clergyman"}}}}]
+	assert_empty(_fired(triggers, [["building_completed", {"grants_contact": "journalist"}]]),
+		"the church was painted for the press")
+	assert_empty(_fired(triggers, ["building_completed"]),
+		"a building that grants nobody was painted as the church")
+	assert_eq(_fired(triggers, [["building_completed", {"grants_contact": "clergyman"}]]),
+		PackedStringArray(["the_church"]))
+
+
+func test_several_triggers_for_one_cutscene_show_it_once_for_the_earliest() -> void:
+	# A town changes hands whether it was taken or retaken.
 	var triggers := [
-		{"cutscene": "your_appointment", "kind": "bookend",
-			"on": {"event_happened": {"event": "town_founded"}}},
-		{"cutscene": "nonsense", "kind": "first", "on": {"no_such_condition": {}}},
+		{"cutscene": "changes_hands", "kind": "recurring", "on": {"event_happened": {"event": "town_lost"}}},
+		{"cutscene": "changes_hands", "kind": "recurring",
+			"on": {"event_happened": {"event": "town_returned_to_the_crown"}}},
 	]
-	assert_empty(_fired(triggers, ["town_founded"]),
-		"a bookend or an unknown condition fired from the event log")
+	var due := CutsceneTriggers.fired(triggers,
+		_month(["town_returned_to_the_crown", "town_lost"]), {})
+	assert_eq(CutsceneTriggers.ids_of(due), PackedStringArray(["changes_hands"]))
+	assert_eq(String((due[0]["event"] as SimEvent).type), "town_returned_to_the_crown",
+		"the painting was told about the later of the two events")
 
 
 # --- 🔒 In the save, and the same every time ------------------------------------
@@ -123,15 +161,19 @@ func test_only_the_kinds_named_fire_and_bookends_are_not_this() -> void:
 func test_the_firsts_already_shown_survive_a_save() -> void:
 	var run := RunState.new_run(SEED)
 	run.cutscenes_seen = {"a_landfall": 1, "first_blood": 7}
-	run.cutscenes_due = PackedStringArray(["first_blood"])
+	run.cutscenes_due = [{"cutscene": "first_blood", "params": {"men": "2,400", "when": "year 1, month 8"}}]
+	run.cutscene_mark = 41
 	var restored := RunState.from_dict(run.to_dict())
 	assert_eq(restored.cutscenes_seen, run.cutscenes_seen,
 		"a reload forgot which firsts had been shown, so they would be painted again")
-	assert_eq(restored.cutscenes_due, run.cutscenes_due)
+	assert_eq(restored.cutscenes_due, run.cutscenes_due,
+		"a reload lost the paintings due, or the facts they were to show")
+	assert_eq(restored.cutscene_mark, 41,
+		"a reload forgot where in the log the paintings were worked out to, so it would pay out twice")
 
 
 func test_the_same_seed_earns_the_same_cutscenes_in_the_same_order() -> void:
-	# Through the turn machine, which works them out as the month resolves.
+	# Through the turn machine, which works them out as each turn opens.
 	var first := _earned(SEED)
 	assert_eq(first, _earned(SEED), "two identical runs earned different cutscenes")
 	var any := false
@@ -165,8 +207,11 @@ func _earned(seed_value: int) -> Array:
 	var earned: Array = []
 	for turn in 6:
 		machine.begin_turn()
+		var ids := PackedStringArray()
+		for due in run.cutscenes_due:
+			ids.append(String(due["cutscene"]))
+		earned.append(ids)
 		for inbound in run.inbox:
 			inbound.status = InboundLetter.SET_ASIDE
 		machine.send_post()
-		earned.append(run.cutscenes_due)
 	return earned

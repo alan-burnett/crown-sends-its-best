@@ -1,0 +1,16 @@
+{
+	"id": "a_man_who_knows_his_trade",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"town": "town",
+		"specialism": "text",
+		"experts": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.a_man_who_knows_his_trade.1",
+			"text": "A Man Who Knows His Trade, {param:date}. {param:town} produces its first expert, in {param:specialism}. Experts in {param:town}: {param:experts}."
+		}
+	]
+}

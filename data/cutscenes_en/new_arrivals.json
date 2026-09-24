@@ -1,0 +1,17 @@
+{
+	"id": "new_arrivals",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"town": "town",
+		"workers": "people",
+		"experts": "people",
+		"gold": "gold"
+	},
+	"panels": [
+		{
+			"image": "cutscene.new_arrivals.1",
+			"text": "New Arrivals, {param:date}. A ship lands {param:workers} settlers and {param:experts} experts at {param:town}, with {param:gold} gold."
+		}
+	]
+}

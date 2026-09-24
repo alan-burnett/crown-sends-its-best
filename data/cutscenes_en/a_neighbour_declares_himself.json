@@ -1,0 +1,14 @@
+{
+	"id": "a_neighbour_declares_himself",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"year": "number"
+	},
+	"panels": [
+		{
+			"image": "cutscene.a_neighbour_declares_himself.1",
+			"text": "A Neighbour Declares Himself, {param:date}. A duke now presses the colony, in year {param:year} of the Crown's demands."
+		}
+	]
+}

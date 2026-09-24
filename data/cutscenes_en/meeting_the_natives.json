@@ -1,0 +1,15 @@
+{
+	"id": "meeting_the_natives",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Nothing in the sim emits this moment yet, so no trigger shows it.",
+	"params": {
+		"date": "date",
+		"tribe": "tribe",
+		"town": "town"
+	},
+	"panels": [
+		{
+			"image": "cutscene.meeting_the_natives.1",
+			"text": "Meeting the Natives, {param:date}. {param:tribe}, near {param:town}."
+		}
+	]
+}

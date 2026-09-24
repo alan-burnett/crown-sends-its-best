@@ -179,6 +179,10 @@ static func resolve(
 
 	var they_lose := casualties_for(float(mine["force"]), float(theirs["force"]))
 	var i_lose := casualties_for(float(theirs["force"]), float(mine["force"]))
+	# **How many took the field**, before anybody fell (#299) — what a record of
+	# the battle opens with.
+	var my_men := attacker.size
+	var their_men := defender.size
 
 	var they_lost := defender.take_casualties(they_lose, EVENT_FOUGHT, context)
 	var i_lost := attacker.take_casualties(i_lose, EVENT_FOUGHT, context)
@@ -199,6 +203,10 @@ static func resolve(
 		# (#214) — *they were four to our one, and on a mountain.*
 		"attacker_force": mine,
 		"defender_force": theirs,
+		"attacker_men": my_men,
+		"defender_men": their_men,
+		"attacker_allegiance": String(attacker.allegiance),
+		"defender_allegiance": String(defender.allegiance),
 		"attacker_casualties": i_lose,
 		"defender_casualties": they_lose,
 		"attacker_lost": i_lost,

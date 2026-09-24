@@ -75,6 +75,9 @@ func compose_inbox(run: RunState, outcomes: Array = []) -> Array[InboundLetter]:
 		run.log.emit(EVENT_DISPATCHED, letter.sender, run.world.month, {
 			"letter": letter.letter_id,
 			"tone": String(letter.tone),
+			# **The values it was sent with** (#299), so a painting of the
+			# moment can name the sum a duke asked for, exactly as the letter did.
+			"params": letter.params.duplicate(true),
 		}, WorldPhase.DISPATCH)
 	return letters
 

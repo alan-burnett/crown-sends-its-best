@@ -422,6 +422,11 @@ func validate_trigger(record: Dictionary) -> void:
 	_file = String(record.get(JsonLoader.SOURCE_KEY, ""))
 	var id := String(record.get("id", ""))
 
+	# A trigger that names a cutscene is a different record (#299).
+	if record.has(CutsceneTriggers.KEY_CUTSCENE):
+		_check_cutscene_trigger(record)
+		return
+
 	var letter_id := String(record.get("letter", ""))
 	if letter_id.is_empty():
 		_problem("letter", "trigger '%s' names no letter" % id)
@@ -1088,10 +1093,133 @@ func check_commander_experience(content: ContentDatabase) -> void:
 
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
+# --- 🔒 Cutscenes (#299, `cutscenes.md` §5) ------------------------------------
+
+## A cutscene trigger's own shape: a kind, one registered condition with the
+## params it needs, and params the caption can be told from.
+func _check_cutscene_trigger(record: Dictionary) -> void:
+	var kind := String(record.get(CutsceneTriggers.KEY_KIND, ""))
+	if not CutsceneTriggers.KINDS.has(kind):
+		_problem("kind", "'%s' is not a kind of cutscene (%s)" % [kind, ", ".join(CutsceneTriggers.KINDS)])
+	if record.has(CutsceneTriggers.KEY_AFTER) and kind != CutsceneTriggers.RECURRING \
+			and not String(record[CutsceneTriggers.KEY_AFTER]).is_empty():
+		_problem("after", "only a recurring cutscene stands aside for a first")
+
+	var on: Variant = record.get(CutsceneTriggers.KEY_ON, {})
+	if typeof(on) != TYPE_DICTIONARY or (on as Dictionary).size() != 1:
+		_problem("on", "expected one condition, as {id: {params}}")
+	else:
+		var condition_id := String((on as Dictionary).keys()[0])
+		var args: Variant = on[condition_id]
+		if not CutsceneTriggers.CONDITIONS.has(condition_id):
+			_problem("on", "'%s' is not a cutscene condition (%s)" % [
+				condition_id, ", ".join(PackedStringArray(CutsceneTriggers.CONDITIONS.keys()))])
+		elif typeof(args) != TYPE_DICTIONARY:
+			_problem("on.%s" % condition_id, "expected an object of params")
+		else:
+			for required in CutsceneTriggers.REQUIRED.get(condition_id, []):
+				if not (args as Dictionary).has(required):
+					_problem("on.%s" % condition_id, "is missing '%s'" % required)
+			var declared: Dictionary = CutsceneTriggers.CONDITIONS[condition_id]
+			for name in args:
+				if not declared.has(name):
+					_problem("on.%s" % condition_id, "has no param '%s'" % name)
+			if (args as Dictionary).has("where") and typeof(args["where"]) != TYPE_DICTIONARY:
+				_problem("on.%s.where" % condition_id, "expected an object of field -> value")
+
+	var params: Variant = record.get("params", {})
+	if typeof(params) != TYPE_DICTIONARY:
+		_problem("params", "expected an object of param names to sources")
+		return
+	for name in params:
+		var source: Variant = params[name]
+		var path := "params.%s" % name
+		if typeof(source) != TYPE_DICTIONARY:
+			_problem(path, "expected a source object")
+			continue
+		var from := String(source.get("from", ""))
+		if not CutsceneParams.SOURCES.has(from):
+			_problem(path, "'%s' is not a cutscene param source (%s)" % [from, ", ".join(CutsceneParams.SOURCES)])
+			continue
+		if from == "event" and String(source.get("field", "")).is_empty():
+			_problem(path, "reads the event but names no field")
+		if (from == "event" or from == "subject") and source.has("as") \
+				and not CutsceneParams.KINDS.has(String(source["as"])):
+			_problem(path, "'%s' is not a kind of value (%s)" % [source["as"], ", ".join(CutsceneParams.KINDS)])
+		if from == "colony" and not ["people", "towns"].has(String(source.get("measure", ""))):
+			_problem(path, "a colony figure must be 'people' or 'towns'")
+
+
+## 🔒 **Every cutscene can be shown, and every trigger shows one.**
+##
+## At least one panel, an image and a caption on each, every image registered in
+## the asset store so the art can be dropped in by id, every `{param:}` a
+## caption uses declared, every declared param supplied by every trigger that
+## shows it, and every trigger naming a cutscene that exists. The opening is
+## required outright: SPEC §6.1 opens every run with it.
+func check_cutscenes(content: ContentDatabase) -> void:
+	var assets: Dictionary = content.collection(AssetRegistry.COLLECTION)
+	var firsts: Dictionary = {}
+	for id in content.ids("triggers"):
+		var record: Dictionary = content.collection("triggers")[id]
+		if String(record.get(CutsceneTriggers.KEY_KIND, "")) == CutsceneTriggers.FIRST:
+			firsts[String(record.get(CutsceneTriggers.KEY_CUTSCENE, ""))] = true
+
+	for id in content.ids(Cutscene.COLLECTION):
+		var record: Dictionary = content.record(Cutscene.COLLECTION, id)
+		_file = String(record.get(JsonLoader.SOURCE_KEY, id))
+		var panels: Variant = record.get(Cutscene.KEY_PANELS, [])
+		if typeof(panels) != TYPE_ARRAY or (panels as Array).is_empty():
+			_problem("panels", "'%s' has no panels" % id)
+			continue
+		var declared: Dictionary = record.get(Cutscene.KEY_PARAMS, {})
+		for index in (panels as Array).size():
+			var panel: Variant = panels[index]
+			var path := "panels[%d]" % index
+			if typeof(panel) != TYPE_DICTIONARY:
+				_problem(path, "expected an object with an image and a text")
+				continue
+			var image := String(panel.get(Cutscene.KEY_IMAGE, ""))
+			var text := String(panel.get(Cutscene.KEY_TEXT, ""))
+			if image.is_empty():
+				_problem(path, "has no image")
+			elif not assets.has(image):
+				_problem(path, "image '%s' is not in the asset store" % image)
+			if text.is_empty():
+				_problem(path, "has no caption")
+			for slot in LetterSchema.slots_in(text):
+				if String(slot["kind"]) != "param" or not declared.has(String(slot["name"])):
+					_problem(path, "uses %s, which the cutscene does not declare" % slot["token"])
+
+	if not content.has_record(Cutscene.COLLECTION, String(Cutscene.OPENING)):
+		_file = "data/cutscenes_en"
+		_problem(String(Cutscene.OPENING), "there is no opening cutscene, and SPEC §6.1 opens every run with one")
+
+	for id in content.ids("triggers"):
+		var trigger: Dictionary = content.collection("triggers")[id]
+		if not trigger.has(CutsceneTriggers.KEY_CUTSCENE):
+			continue
+		_file = String(trigger.get(JsonLoader.SOURCE_KEY, ""))
+		var cutscene := String(trigger[CutsceneTriggers.KEY_CUTSCENE])
+		if not content.has_record(Cutscene.COLLECTION, cutscene):
+			_problem("cutscene", "'%s' names cutscene '%s', which does not exist" % [id, cutscene])
+			continue
+		var after := String(trigger.get(CutsceneTriggers.KEY_AFTER, ""))
+		if not after.is_empty() and not firsts.has(after):
+			_problem("after", "'%s' stands aside for '%s', which no first shows" % [id, after])
+		var wanted: Dictionary = content.record(Cutscene.COLLECTION, cutscene).get(Cutscene.KEY_PARAMS, {})
+		var supplied: Dictionary = trigger.get("params", {})
+		for name in wanted:
+			if not supplied.has(name):
+				_problem("params", "'%s' shows '%s' without supplying '%s'" % [id, cutscene, name])
+
+
 func check_trigger_targets(content: ContentDatabase) -> void:
 	var referenced: Dictionary = {}
 	for id in content.ids("triggers"):
 		var record: Dictionary = content.collection("triggers")[id]
+		if record.has(CutsceneTriggers.KEY_CUTSCENE):
+			continue  # A cutscene's trigger; `check_cutscenes` covers it.
 		var letter_id := String(record.get("letter", ""))
 		referenced[letter_id] = true
 		if not letter_id.is_empty() and not content.has_record("letters", letter_id):

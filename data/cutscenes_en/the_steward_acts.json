@@ -1,0 +1,15 @@
+{
+	"id": "the_steward_acts",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"contact": "contact",
+		"order": "text"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_steward_acts.1",
+			"text": "The Steward Acts, {param:date}. {param:contact} acts without orders: {param:order}."
+		}
+	]
+}

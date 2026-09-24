@@ -1,0 +1,16 @@
+{
+	"id": "under_arms",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"company": "company",
+		"ground": "place",
+		"men": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.under_arms.1",
+			"text": "Under Arms, {param:date}. {param:company} is raised on {param:ground}: {param:men} men."
+		}
+	]
+}

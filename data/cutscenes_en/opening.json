@@ -1,0 +1,18 @@
+{
+	"id": "opening",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Shown by the menu before there is a run, so it has no facts and no trigger.",
+	"panels": [
+		{
+			"image": "cutscene.opening.1",
+			"text": "Your Appointment. The court."
+		},
+		{
+			"image": "cutscene.opening.2",
+			"text": "Your Appointment. The commission."
+		},
+		{
+			"image": "cutscene.opening.3",
+			"text": "Your Appointment. The ship."
+		}
+	]
+}

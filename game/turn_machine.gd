@@ -470,6 +470,34 @@ func begin_turn() -> void:
 	# letters go on the water and whatever was posted months ago comes off it.
 	if director != null:
 		run.inbox = Crossing.deliver(run, director.compose_inbox(run, orders.results))
+	earn_cutscenes()
+
+
+## 🔒 **The cutscenes the turn earned** (#298, #299, `cutscenes.md` §3).
+##
+## Everything the log has said since the last time this ran: the month the post
+## resolved and the letters that arrived for this turn, so a duke's tribute
+## demand earns its painting in the turn it is read. Every one triggered, in the
+## order it happened, each with its caption's facts taken now from the event and
+## the run (`CutsceneParams`). A first is remembered here and not when it is
+## shown, so a player who quits before seeing it cannot have it fire as a first
+## again.
+##
+## Shown after the map plays the month back: SPEC §7 lets cutscenes *follow* the
+## playback and §4 says they should, so `OPENING_CUTSCENES` stays the spec's slot
+## in `ORDER` and is still stubbed.
+func earn_cutscenes() -> void:
+	var events := run.log.since(run.cutscene_mark)
+	run.cutscene_mark = run.log.next_seq()
+	var due := CutsceneTriggers.fired(cutscene_triggers, events, run.cutscenes_seen)
+	CutsceneTriggers.record(due, run.cutscenes_seen, run.turn)
+	run.cutscenes_due = []
+	for entry in due:
+		var trigger: Dictionary = entry["trigger"]
+		run.cutscenes_due.append({
+			"cutscene": String(entry["cutscene"]),
+			"params": CutsceneParams.supply(trigger.get("params", {}), entry["event"], run),
+		})
 
 
 func at_desk() -> bool:
@@ -500,6 +528,7 @@ func retire() -> bool:
 		return false
 	run.ending = RunEnding.end(RunEnding.RETIRED, run.log, run.world.month)
 	run.phase = RESOLUTION
+	earn_cutscenes()
 	if saves_on_send:
 		SaveGame.delete_save(save_path)
 	_close_the_book()
@@ -550,9 +579,6 @@ func send_post() -> bool:
 		return false
 
 	run.phase = SENDING
-	# Where this post's month begins in the log, so the cutscenes it earns are
-	# worked out from exactly what it did — the desk's own refusals included.
-	var month_began := run.log.next_seq()
 
 	# Whatever the player set aside travels with the post as silence, and is read
 	# next month in the same phase a reply would have been.
@@ -607,16 +633,9 @@ func send_post() -> bool:
 		if phase == RESOLUTION:
 			_resolve()
 
-	# 🔒 **The cutscenes the month earned, decided before the save** (#298,
-	# `cutscenes.md` §3). Every one it triggered, in the order it happened; a
-	# first is remembered here and not when it is shown, so a player who quits
-	# before seeing it cannot have it fire as a first again. Shown after the map
-	# plays the month back — SPEC §7 lets cutscenes *follow* the playback, and
-	# `cutscenes.md` §4 says they should, so `OPENING_CUTSCENES` stays the
-	# spec's slot in `ORDER` and is still stubbed.
-	var due := CutsceneTriggers.fired(cutscene_triggers, run.log.since(month_began), run.cutscenes_seen)
-	CutsceneTriggers.record(due, run.cutscenes_seen, run.turn)
-	run.cutscenes_due = CutsceneTriggers.ids_of(due)
+	# A run that ended in this month ends on its own painting (#299).
+	if is_over():
+		earn_cutscenes()
 
 	# **The save happens as part of sending**, not on a timer and not on quit.
 	#

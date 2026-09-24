@@ -45,6 +45,7 @@ func _init() -> void:
 	validator.check_run_modifiers(content)
 	validator.check_patrons(content)
 	validator.check_commander_experience(content)
+	validator.check_cutscenes(content)
 	print(validator.report())
 
 	var ok := validator.ok()

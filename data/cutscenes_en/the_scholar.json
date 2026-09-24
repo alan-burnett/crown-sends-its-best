@@ -1,0 +1,15 @@
+{
+	"id": "the_scholar",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"building": "building",
+		"town": "town"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_scholar.1",
+			"text": "The Scholar, {param:date}. {param:building} is completed at {param:town}, and a scholar arrives."
+		}
+	]
+}

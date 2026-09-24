@@ -54,6 +54,9 @@ const OPENING: StringName = &"opening"
 
 const KEY_ID: String = "id"
 const KEY_PANELS: String = "panels"
+## What the captions are told, declared the way a letter declares its params:
+## name -> the kind of value (#299). The trigger supplies them.
+const KEY_PARAMS: String = "params"
 const KEY_IMAGE: String = "image"
 const KEY_TEXT: String = "text"
 
@@ -62,6 +65,9 @@ var id: StringName = &""
 ## `[{image, text}]`, advanced in order. **Never empty** for a cutscene that
 ## reached the screen.
 var panels: Array[Dictionary] = []
+
+## The facts the captions name, declared (#299).
+var params: Dictionary = {}
 
 
 func _init(p_id: StringName = &"") -> void:
@@ -90,6 +96,20 @@ func text_at(index: int) -> String:
 	return String(panels[index].get(KEY_TEXT, ""))
 
 
+## 🔒 **A panel's caption with its facts written in** (#299).
+##
+## `{param:x}` becomes what the trigger supplied, already written out; a param
+## nobody supplied reads `[x]`, which a placeholder caption should show rather
+## than hide.
+func caption_at(index: int, values: Dictionary) -> String:
+	var out := text_at(index)
+	for name in params:
+		var slot := "{param:%s}" % name
+		if out.contains(slot):
+			out = out.replace(slot, String(values.get(String(name), "[%s]" % name)))
+	return out
+
+
 ## Whether advancing from here leaves the cutscene.
 ##
 ## 🔒 **The same question for one panel and for three** (§1's acceptance). A
@@ -108,6 +128,9 @@ func is_last(index: int) -> bool:
 ## to make obvious, spent on the wrong problem.
 static func from_data(record: Dictionary) -> Cutscene:
 	var cutscene := Cutscene.new(StringName(record.get(KEY_ID, "")))
+	var declared: Variant = record.get(KEY_PARAMS, {})
+	if typeof(declared) == TYPE_DICTIONARY:
+		cutscene.params = (declared as Dictionary).duplicate()
 	var entries: Variant = record.get(KEY_PANELS, [])
 	if typeof(entries) != TYPE_ARRAY:
 		push_error("Cutscene '%s' has no panels." % cutscene.id)

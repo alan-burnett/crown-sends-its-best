@@ -1,0 +1,15 @@
+{
+	"id": "he_will_not_do_it",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"contact": "contact",
+		"order": "text"
+	},
+	"panels": [
+		{
+			"image": "cutscene.he_will_not_do_it.1",
+			"text": "He Will Not Do It, {param:date}. {param:contact} refuses the order: {param:order}."
+		}
+	]
+}

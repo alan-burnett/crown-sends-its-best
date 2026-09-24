@@ -1,0 +1,15 @@
+{
+	"id": "the_quartermaster",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"building": "building",
+		"town": "town"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_quartermaster.1",
+			"text": "The Quartermaster, {param:date}. {param:building} is completed at {param:town}, and a quartermaster arrives."
+		}
+	]
+}

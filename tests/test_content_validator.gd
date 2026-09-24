@@ -66,6 +66,7 @@ func test_the_real_data_tree_validates() -> void:
 	var validator := ContentValidator.new()
 	validator.validate(content)
 	validator.check_trigger_targets(content)
+	validator.check_cutscenes(content)
 	assert_true(validator.ok(), _problems_text(validator))
 	assert_true(validator.letters_checked > 0, "no letters were checked")
 	content.free()

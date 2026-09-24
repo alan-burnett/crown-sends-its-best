@@ -1,0 +1,26 @@
+{
+	"id": "the_first_blood",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"ground": "place",
+		"attacker": "company",
+		"attacker_side": "side",
+		"attacker_men": "people",
+		"defender": "company",
+		"defender_side": "side",
+		"defender_men": "people",
+		"attacker_lost": "people",
+		"defender_lost": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_first_blood.1",
+			"text": "The First Blood: the battle on {param:ground}, {param:date}. {param:attacker} ({param:attacker_side}), {param:attacker_men} men, attacks {param:defender} ({param:defender_side}), {param:defender_men} men."
+		},
+		{
+			"image": "cutscene.the_first_blood.2",
+			"text": "{param:attacker} lost {param:attacker_lost}. {param:defender} lost {param:defender_lost}."
+		}
+	]
+}

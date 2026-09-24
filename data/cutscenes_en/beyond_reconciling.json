@@ -1,0 +1,16 @@
+{
+	"id": "beyond_reconciling",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"tribe": "tribe",
+		"toward": "text",
+		"why": "text"
+	},
+	"panels": [
+		{
+			"image": "cutscene.beyond_reconciling.1",
+			"text": "Beyond Reconciling, {param:date}. {param:tribe} will not be reconciled with {param:toward}. Cause: {param:why}."
+		}
+	]
+}

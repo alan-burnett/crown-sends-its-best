@@ -60,12 +60,22 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 	# is what the summary and the epitaph read.
 	log.emit(EVENT_LOST, &"crown", state.month, {
 		"how": String(reason),
+		# **Who took the last town** (#299): the allegiance a storming records,
+		# so an Overrun can be painted by who overran it (SPEC §13.1).
+		"last_lost_to": _last_lost_to(log),
 		"people": RunEndCheck.people_in(run.colony, run.parties),
 		"towns": 0 if run.colony == null else run.colony.in_order().size(),
 	}, WorldPhase.RUN_END_CHECK)
 
 	run.ending = RunEnding.end(RunEnding.FAILED, log, state.month)
 	run.ending.how = reason
+
+
+static func _last_lost_to(log: EventLog) -> String:
+	var lost := log.of_type(Colony.EVENT_LOST)
+	if lost.is_empty():
+		return ""
+	return String((lost[lost.size() - 1] as SimEvent).payload.get("to", ""))
 
 
 ## How the colony was lost, for the summary to read. Distinct from

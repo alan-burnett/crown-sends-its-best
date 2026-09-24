@@ -1,0 +1,15 @@
+{
+	"id": "the_fort_falls",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Nothing in the sim emits this moment yet, so no trigger shows it.",
+	"params": {
+		"date": "date",
+		"duke": "contact",
+		"ground": "place"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_fort_falls.1",
+			"text": "The Fort Falls, {param:date}. The fort of {param:duke} on {param:ground} is destroyed."
+		}
+	]
+}

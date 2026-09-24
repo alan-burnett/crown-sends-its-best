@@ -1,0 +1,15 @@
+{
+	"id": "they_do_not_return",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Nothing attacks an expedition yet, so this never fires; the variants wait on the causes that attack will record.",
+	"params": {
+		"date": "date",
+		"town": "town",
+		"ground": "place"
+	},
+	"panels": [
+		{
+			"image": "cutscene.they_do_not_return.1",
+			"text": "They Do Not Return, {param:date}. The expedition from {param:town} is lost on {param:ground}."
+		}
+	]
+}

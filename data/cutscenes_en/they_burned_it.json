@@ -1,0 +1,16 @@
+{
+	"id": "they_burned_it",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Nothing in the sim emits this moment yet, so no trigger shows it.",
+	"params": {
+		"date": "date",
+		"duke": "contact",
+		"improvement": "improvement",
+		"ground": "place"
+	},
+	"panels": [
+		{
+			"image": "cutscene.they_burned_it.1",
+			"text": "They Burned It, {param:date}. The men of {param:duke} destroy the {param:improvement} on {param:ground}."
+		}
+	]
+}

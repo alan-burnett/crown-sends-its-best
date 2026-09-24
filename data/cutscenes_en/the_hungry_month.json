@@ -1,0 +1,16 @@
+{
+	"id": "the_hungry_month",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"town": "town",
+		"months": "number",
+		"remaining": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_hungry_month.1",
+			"text": "The Hungry Month, {param:date}. {param:town} loses its first to hunger, after {param:months} hungry months. {param:remaining} people remain."
+		}
+	]
+}

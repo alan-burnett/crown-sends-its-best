@@ -1,0 +1,19 @@
+{
+	"id": "ending_overrun_by_rebels",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"people": "people",
+		"towns": "number"
+	},
+	"panels": [
+		{
+			"image": "cutscene.ending_overrun_by_rebels.1",
+			"text": "The Colony is Overrun, {param:date}. The last town fell to the rebels."
+		},
+		{
+			"image": "cutscene.ending_overrun_by_rebels.2",
+			"text": "{param:people} people remain, in {param:towns} towns."
+		}
+	]
+}

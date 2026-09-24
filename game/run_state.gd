@@ -231,9 +231,14 @@ var orders_at_sea: Array[Order] = []
 ## forgot one would paint it again.
 var cutscenes_seen: Dictionary = {}
 
-## The cutscenes this turn earned, in the order they happened — worked out when
-## the month resolved, so the save holds them, and shown after the playback.
-var cutscenes_due: PackedStringArray = PackedStringArray()
+## The cutscenes this turn earned, in the order they happened, each with what
+## its caption is told — `{cutscene, params}` — worked out when the turn opened,
+## so the save holds them, and shown after the playback.
+var cutscenes_due: Array[Dictionary] = []
+
+## Where in the log the cutscenes were last worked out from, so no event earns
+## two paintings and none falls between two turns.
+var cutscene_mark: int = 0
 var post: Post = null
 
 # --- The turn --------------------------------------------------------------
@@ -538,7 +543,8 @@ func to_dict() -> Dictionary:
 		"orders_at_sea": orders_at_sea_entries,
 		"letters_sent": letters_sent.duplicate(),
 		"cutscenes_seen": cutscenes_seen.duplicate(),
-		"cutscenes_due": Array(cutscenes_due),
+		"cutscenes_due": cutscenes_due.duplicate(true),
+		"cutscene_mark": cutscene_mark,
 		"writings": writings.to_dict(),
 		"post": post.to_dict(),
 	}
@@ -587,7 +593,11 @@ static func from_dict(data: Dictionary) -> RunState:
 	var seen: Dictionary = data.get("cutscenes_seen", {})
 	for id in seen:
 		run.cutscenes_seen[String(id)] = int(seen[id])
-	run.cutscenes_due = PackedStringArray(data.get("cutscenes_due", []))
+	run.cutscenes_due = []
+	for entry in data.get("cutscenes_due", []):
+		if typeof(entry) == TYPE_DICTIONARY:
+			run.cutscenes_due.append((entry as Dictionary).duplicate(true))
+	run.cutscene_mark = int(data.get("cutscene_mark", 0))
 	run.writings = WritingBook.from_dict(data.get("writings", {}))
 
 	var saved_contacts: Dictionary = data.get("contacts", {})

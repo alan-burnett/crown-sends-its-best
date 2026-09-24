@@ -136,8 +136,11 @@ func _true_on_the_first_turn(seed_value: int) -> PackedStringArray:
 	var out := PackedStringArray()
 	for trigger_id in content.ids("triggers"):
 		var trigger: Dictionary = content.collection("triggers")[trigger_id]
-		# The same two the director leaves out of its sweep.
+		# The same two the director leaves out of its sweep, and the cutscenes'
+		# triggers, which name no letter (#299).
 		if trigger.has("acknowledges") or bool(trigger.get(Composer.OFFERS_KEY, false)):
+			continue
+		if trigger.has(CutsceneTriggers.KEY_CUTSCENE):
 			continue
 		var letter := Letter.from_record(content.record("letters", String(trigger["letter"])))
 		for contact in director.senders_of(letter, fresh):

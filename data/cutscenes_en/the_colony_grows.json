@@ -1,0 +1,15 @@
+{
+	"id": "the_colony_grows",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"town": "town",
+		"people": "people"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_colony_grows.1",
+			"text": "The Colony Grows, {param:date}. {param:town} grows of its own accord, to {param:people} people."
+		}
+	]
+}

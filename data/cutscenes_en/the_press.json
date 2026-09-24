@@ -1,0 +1,15 @@
+{
+	"id": "the_press",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"params": {
+		"date": "date",
+		"building": "building",
+		"town": "town"
+	},
+	"panels": [
+		{
+			"image": "cutscene.the_press.1",
+			"text": "The Press, {param:date}. {param:building} is completed at {param:town}, and a journalist arrives."
+		}
+	]
+}

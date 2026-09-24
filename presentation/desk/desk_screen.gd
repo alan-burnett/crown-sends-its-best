@@ -420,7 +420,8 @@ func _retire_from_the_desk() -> void:
 	if not machine.retire():
 		return
 	refresh()
-	_open_the_summary()
+	# 🔒 **The run ends on its own painting, then the summary** (#299).
+	_show_the_cutscenes(0, _open_the_summary)
 
 
 ## The last screen of the run (#78), laid over the closed desk.
@@ -442,6 +443,12 @@ func _send_the_post() -> void:
 	var mark := run.log.next_seq()
 	if not machine.send_post():
 		refresh()
+		return
+	# 🔒 **A month that ended the run** goes straight to its ending's painting
+	# and the summary (#299). There is no next turn to open.
+	if machine.is_over():
+		refresh()
+		_show_the_cutscenes(0, _open_the_summary)
 		return
 	machine.begin_turn()
 	refresh()
@@ -487,9 +494,12 @@ func _after_the_map() -> void:
 ## paintings are punctuation on the month rather than title cards for it: shown
 ## after the map, they are what the player is left holding when he sits down to
 ## his post. One whose panels have not been written yet is passed over.
-func _show_the_cutscenes(from: int = 0) -> void:
+##
+## `then` is what follows — the desk by default, the summary when the run ended.
+func _show_the_cutscenes(from: int = 0, then: Callable = Callable()) -> void:
 	for index in range(from, run.cutscenes_due.size()):
-		var id := run.cutscenes_due[index]
+		var due: Dictionary = run.cutscenes_due[index]
+		var id := String(due.get("cutscene", ""))
 		if content == null or not content.has_record(Cutscene.COLLECTION, id):
 			continue
 		var cutscene := Cutscene.from_data(content.record(Cutscene.COLLECTION, id))
@@ -499,9 +509,12 @@ func _show_the_cutscenes(from: int = 0) -> void:
 		add_child(screen)
 		screen.finished.connect(func() -> void:
 			screen.queue_free()
-			_show_the_cutscenes(index + 1))
+			_show_the_cutscenes(index + 1, then))
+		screen.values = due.get("params", {})
 		screen.assets = get_node_or_null(^"/root/Assets") as AssetRegistry
 		screen.sound = get_node_or_null(SoundEngine.AUTOLOAD_PATH) as SoundEngine
 		screen.begin(cutscene, screen.assets)
 		return
 	refresh()
+	if then.is_valid():
+		then.call()
