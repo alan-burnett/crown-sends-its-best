@@ -5,139 +5,139 @@
   "skippable": true,
   "speaks_to": 38,
   "params": {
-    "town": "town",
-    "tribe": "tribe",
-    "fields": "integer",
-    "governor": "contact"
+	"town": "town",
+	"tribe": "tribe",
+	"fields": "integer",
+	"governor": "contact"
   },
   "perception": {
-    "their_humour": {
-      "measure": "native_regard",
-      "ladder": [
-        "settled on being rid of us",
-        "cold",
-        "wary",
-        "civil enough",
+	"their_humour": {
+	  "measure": "native_regard",
+	  "ladder": [
+		"settled on being rid of us",
+		"cold",
+		"wary",
+		"civil enough",
         "friendly"
-      ]
-    },
-    "their_ground": {
-      "measure": "native_pressure",
-      "ladder": [
-        "a corner of it",
-        "a fair share of it",
+	  ]
+	},
+	"their_ground": {
+	  "measure": "native_pressure",
+	  "ladder": [
+		"a corner of it",
+		"a fair share of it",
         "the better part of it"
-      ]
-    }
+	  ]
+	}
   },
   "body": [
-    {
-      "text": "The {param:tribe} keep the country north and west of {param:town}. I count {param:fields} of the fields we should otherwise be working under their hand — {perception:their_ground}, as things stand."
-    },
-    {
-      "text": "As to their humour towards us, I judge them {perception:their_humour}. I say judge because nobody here can do better than judge it. They tell us what they choose to and no more."
-    },
-    {
-      "text": "I have had this from the men who go out to the boundary, and from nowhere else.",
-      "only_tones": [
-        "dutiful",
+	{
+	  "text": "The {param:tribe} keep the country north and west of {param:town}. I count {param:fields} of the fields we should otherwise be working under their hand — {perception:their_ground}, as things stand."
+	},
+	{
+	  "text": "As to their humour towards us, I judge them {perception:their_humour}. I say judge because nobody here can do better than judge it. They tell us what they choose to and no more."
+	},
+	{
+	  "text": "I have had this from the men who go out to the boundary, and from nowhere else.",
+	  "only_tones": [
+		"dutiful",
         "pleased"
-      ]
-    },
-    {
-      "text": "I will say plainly that I do not like the look of it, and that I have said so before.",
-      "only_tones": [
-        "annoyed",
-        "desperate",
+	  ]
+	},
+	{
+	  "text": "I will say plainly that I do not like the look of it, and that I have said so before.",
+	  "only_tones": [
+		"annoyed",
+		"desperate",
         "hateful"
-      ]
-    },
-    {
-      "text": "I do not ask you to decide anything at this distance. I ask only that you know it."
-    }
+	  ]
+	},
+	{
+	  "text": "I do not ask you to decide anything at this distance. I ask only that you know it."
+	}
   ],
   "reply": {
-    "tone": {
-      "text": "On the matter of the {param:tribe}, I am {choice}.",
-      "options": [
-        {
-          "tone": "dutiful",
-          "text": "obliged to you for the account"
-        },
-        {
-          "tone": "pleased",
-          "text": "glad it is you out there and not another man"
-        },
-        {
-          "tone": "desperate",
-          "text": "uneasy, and I will not pretend otherwise"
-        },
-        {
-          "tone": "annoyed",
-          "text": "tired of reading of it"
-        }
-      ]
-    },
-    "steps": [
-      {
-        "id": "course",
-        "prompt": "What is to come first at {param:town}",
-        "options": [
-          {
-            "id": "trade",
-            "label": "attend to the colony's profit",
-            "text": "Attend to the colony's profit. A neighbour you trade with is a neighbour, and one you do not is something else.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "increase_economic_output"
-              }
-            }
-          },
-          {
-            "id": "defence",
-            "label": "see to your defences",
-            "text": "See to your defences, and no further than that. I would rather pay for walls I did not need than explain why there were none.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "strengthen_defences"
-              }
-            }
-          },
-          {
-            "id": "elsewhere",
-            "label": "plant a new settlement, further off",
-            "text": "Plant a new settlement, and put it somewhere nobody else is standing. There is a great deal of country and we have taken very little of it.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "settle_a_new_town"
-              }
-            }
-          },
-          {
-            "id": "be_rid_of_them",
-            "label": "be rid of them",
-            "text": "Be rid of them. I confess I do not follow the difficulty: the land is good, the Crown has asked me for sugar, and you tell me there are people standing on it. Move them along and let us hear no more about the fields.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "drive_them_off"
-              }
-            }
-          }
-        ]
-      }
-    ],
-    "closing": [
-      {
-        "text": "I remain your servant,",
-        "tone": {
-          "pleased": "With every confidence in you,",
-          "annoyed": "I trust the matter will not want writing of again,"
-        }
-      }
-    ]
+	"tone": {
+	  "text": "On the matter of the {param:tribe}, I am {choice}.",
+	  "options": [
+		{
+		  "tone": "dutiful",
+		  "text": "obliged to you for the account"
+		},
+		{
+		  "tone": "pleased",
+		  "text": "glad it is you out there and not another man"
+		},
+		{
+		  "tone": "desperate",
+		  "text": "uneasy, and I will not pretend otherwise"
+		},
+		{
+		  "tone": "annoyed",
+		  "text": "tired of reading of it"
+		}
+	  ]
+	},
+	"steps": [
+	  {
+		"id": "course",
+		"prompt": "What is to come first at {param:town}",
+		"options": [
+		  {
+			"id": "trade",
+			"label": "attend to the colony's profit",
+			"text": "Attend to the colony's profit. A neighbour you trade with is a neighbour, and one you do not is something else.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "increase_economic_output"
+			  }
+			}
+		  },
+		  {
+			"id": "defence",
+			"label": "see to your defences",
+			"text": "See to your defences, and no further than that. I would rather pay for walls I did not need than explain why there were none.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "strengthen_defences"
+			  }
+			}
+		  },
+		  {
+			"id": "elsewhere",
+			"label": "plant a new settlement, further off",
+			"text": "Plant a new settlement, and put it somewhere nobody else is standing. There is a great deal of country and we have taken very little of it.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "settle_a_new_town"
+			  }
+			}
+		  },
+		  {
+			"id": "be_rid_of_them",
+			"label": "be rid of them",
+			"text": "Be rid of them. I confess I do not follow the difficulty: the land is good, the Crown has asked me for sugar, and you tell me there are people standing on it. Move them along and let us hear no more about the fields.",
+			"effect": {
+			  "urge_intent": {
+				"to": "{governor}",
+				"intent": "drive_them_off"
+			  }
+			}
+		  }
+		]
+	  }
+	],
+	"closing": [
+	  {
+		"text": "I remain your servant,",
+		"tone": {
+		  "pleased": "With every confidence in you,",
+		  "annoyed": "I trust the matter will not want writing of again,"
+		}
+	  }
+	]
   }
 }

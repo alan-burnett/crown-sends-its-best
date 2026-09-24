@@ -5,42 +5,42 @@
   "to_roles": ["governor"],
   "params": { "to": "contact", "resource": "resource", "amount": "integer", "payment": "gold" },
   "compose_defaults": {
-    "resource": { "from": "town_surplus", "fallback": "iron" },
-    "amount": { "from": "town_surplus_amount" },
-    "payment": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.75, "minimum": 40, "maximum": 3000 }
+	"resource": { "from": "town_surplus", "fallback": "iron" },
+	"amount": { "from": "town_surplus_amount" },
+	"payment": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.75, "minimum": 40, "maximum": 3000 }
   },
   "reply": {
-    "tone": {
-      "text": "I write to you {choice}.",
-      "options": [
-        { "tone": "dutiful",   "text": "on the Crown's account, and briefly" },
-        { "tone": "pleased",   "text": "in the expectation that we understand one another" },
-        { "tone": "annoyed",   "text": "for the second time on this matter" },
-        { "tone": "hateful",   "text": "and this is the last letter you will get about it" }
-      ]
-    },
-    "steps": [
-      {
-        "id": "manner",
-        "prompt": "How the thing is to be put to him",
-        "options": [
-          { "id": "ask", "label": "ask him, and leave the judgement to him",
-            "text": "If {param:to} can spare {param:amount} of {param:resource} this season I should be glad of it, and the Treasury will pay {param:payment}. You are there and I am not; if the moment is wrong, say so and I will hear it{insert:warmth}.",
-            "insert": { "warmth": { "pleased": ", as I have heard you before" } },
-            "effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": "{payment}" } } },
-          { "id": "press", "label": "tell him it is expected, and pay for it",
-            "text": "I expect {param:amount} of {param:resource} from {param:to} this season. {param:payment} is set aside against it. I would rather not have to write about it again, and I do not think I shall have to.",
-            "effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": "{payment}" } } },
-          { "id": "command", "label": "command it, and let him explain himself to his people",
-            "text": "You will have {param:amount} of {param:resource} on the quay by the turn of the season. I am not asking and there is nothing to discuss. What you tell {param:to} about where it went is your affair; I am content that it will be said I required it{insert:cold}.",
-            "insert": { "cold": { "hateful": ", which is no worse than the truth" } },
-            "harsh": true,
-            "effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": 0 } } }
-        ]
-      }
-    ],
-    "closing": [
-      { "text": "Your servant,", "tone": { "pleased": "With my thanks,", "annoyed": "I shall expect it,", "hateful": "Do not make me write again." } }
-    ]
+	"tone": {
+	  "text": "I write to you {choice}.",
+	  "options": [
+		{ "tone": "dutiful",   "text": "on the Crown's account, and briefly" },
+		{ "tone": "pleased",   "text": "in the expectation that we understand one another" },
+		{ "tone": "annoyed",   "text": "for the second time on this matter" },
+		{ "tone": "hateful",   "text": "and this is the last letter you will get about it" }
+	  ]
+	},
+	"steps": [
+	  {
+		"id": "manner",
+		"prompt": "How the thing is to be put to him",
+		"options": [
+		  { "id": "ask", "label": "ask him, and leave the judgement to him",
+			"text": "If {param:to} can spare {param:amount} of {param:resource} this season I should be glad of it, and the Treasury will pay {param:payment}. You are there and I am not; if the moment is wrong, say so and I will hear it{insert:warmth}.",
+			"insert": { "warmth": { "pleased": ", as I have heard you before" } },
+			"effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": "{payment}" } } },
+		  { "id": "press", "label": "tell him it is expected, and pay for it",
+			"text": "I expect {param:amount} of {param:resource} from {param:to} this season. {param:payment} is set aside against it. I would rather not have to write about it again, and I do not think I shall have to.",
+			"effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": "{payment}" } } },
+		  { "id": "command", "label": "command it, and let him explain himself to his people",
+			"text": "You will have {param:amount} of {param:resource} on the quay by the turn of the season. I am not asking and there is nothing to discuss. What you tell {param:to} about where it went is your affair; I am content that it will be said I required it{insert:cold}.",
+			"insert": { "cold": { "hateful": ", which is no worse than the truth" } },
+			"harsh": true,
+			"effect": { "ship_resource": { "to": "{to}", "resource": "{resource}", "amount": "{amount}", "payment": 0 } } }
+		]
+	  }
+	],
+	"closing": [
+	  { "text": "Your servant,", "tone": { "pleased": "With my thanks,", "annoyed": "I shall expect it,", "hateful": "Do not make me write again." } }
+	]
   }
 }

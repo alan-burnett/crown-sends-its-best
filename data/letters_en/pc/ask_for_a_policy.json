@@ -5,39 +5,39 @@
   "to_roles": ["crown_officer", "governor"],
   "params": { "to": "contact", "cost": "gold" },
   "compose_defaults": {
-    "cost": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.35, "minimum": 40, "maximum": 1200 }
+	"cost": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.35, "minimum": 40, "maximum": 1200 }
   },
   "reply": {
-    "tone": {
-      "text": "I write to you {choice}.",
-      "options": [
-        { "tone": "dutiful",   "text": "on a matter of standing policy" },
-        { "tone": "pleased",   "text": "with a proposal I think will suit us both" },
-        { "tone": "desperate", "text": "because I have very little else left to try" },
-        { "tone": "annoyed",   "text": "and will come straight to the point" }
-      ]
-    },
-    "steps": [
-      {
-        "id": "purse",
-        "prompt": "What the Crown will bear of it, each month",
-        "options": [
-          { "id": "all", "label": "bear the whole charge — {param:cost} a month",
-            "text": "Let it be settled, and let the whole of the charge fall on the Crown{insert:warmth}. I will not have it said that I asked a man to fund my own policy.",
-            "insert": { "warmth": { "pleased": ". You have enough to carry without this" } },
-            "effect": { "enact_policy": { "to": "{to}", "effect": "encourage_immigration", "cost": "{cost}", "split": "all" } } },
-          { "id": "half", "label": "bear half, and say so plainly",
-            "text": "The Crown will meet half the charge. I will not pretend that is generous, only that it is what there is, and I would rather tell you the truth about it than dress it up.",
-            "effect": { "enact_policy": { "to": "{to}", "effect": "encourage_immigration", "cost": "{cost}", "split": "half" } } },
-          { "id": "none", "label": "bear none of it",
-            "text": "There is nothing in the Treasury for this. I am asking you to carry it entire{insert:edge}, and I am aware of what I am asking.",
-            "insert": { "edge": { "annoyed": ", since nobody else will" } },
-            "effect": { "enact_policy": { "to": "{to}", "effect": "encourage_immigration", "cost": "{cost}", "split": "none" } } }
-        ]
-      }
-    ],
-    "closing": [
-      { "text": "Your servant,", "tone": { "desperate": "I shall not forget it if you do this." } }
-    ]
+	"tone": {
+	  "text": "I write to you {choice}.",
+	  "options": [
+		{ "tone": "dutiful",   "text": "on a matter of standing policy" },
+		{ "tone": "pleased",   "text": "with a proposal I think will suit us both" },
+		{ "tone": "desperate", "text": "because I have very little else left to try" },
+		{ "tone": "annoyed",   "text": "and will come straight to the point" }
+	  ]
+	},
+	"steps": [
+	  {
+		"id": "purse",
+		"prompt": "What the Crown will bear of it, each month",
+		"options": [
+		  { "id": "all", "label": "bear the whole charge — {param:cost} a month",
+			"text": "Let it be settled, and let the whole of the charge fall on the Crown{insert:warmth}. I will not have it said that I asked a man to fund my own policy.",
+			"insert": { "warmth": { "pleased": ". You have enough to carry without this" } },
+			"effect": { "enact_policy": { "to": "{to}", "effect": "encourage_immigration", "cost": "{cost}", "split": "all" } } },
+		  { "id": "half", "label": "bear half, and say so plainly",
+			"text": "The Crown will meet half the charge. I will not pretend that is generous, only that it is what there is, and I would rather tell you the truth about it than dress it up.",
+			"effect": { "enact_policy": { "to": "{to}", "effect": "encourage_immigration", "cost": "{cost}", "split": "half" } } },
+		  { "id": "none", "label": "bear none of it",
+			"text": "There is nothing in the Treasury for this. I am asking you to carry it entire{insert:edge}, and I am aware of what I am asking.",
+			"insert": { "edge": { "annoyed": ", since nobody else will" } },
+			"effect": { "enact_policy": { "to": "{to}", "effect": "encourage_immigration", "cost": "{cost}", "split": "none" } } }
+		]
+	  }
+	],
+	"closing": [
+	  { "text": "Your servant,", "tone": { "desperate": "I shall not forget it if you do this." } }
+	]
   }
 }
