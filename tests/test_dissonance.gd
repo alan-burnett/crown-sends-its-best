@@ -55,17 +55,25 @@ func test_an_intent_is_no_distance_from_itself() -> void:
 			"'%s' disagrees with itself" % intent)
 
 
-func test_opposites_are_further_apart_than_neighbours() -> void:
-	# Read off the table and nothing else, so "settling and rebelling want
-	# opposite things" falls out of the numbers rather than being written down
-	# where a later edit could contradict it.
-	var opposed := GovernorIntent.distance_between(
-		GovernorIntent.GO_WIDE, GovernorIntent.SEDITION)
-	var adjacent := GovernorIntent.distance_between(
-		GovernorIntent.GET_RICH, GovernorIntent.GO_TALL)
-	assert_true(opposed > adjacent,
-		"settling and rebelling are no further apart than trading and growing")
-	assert_true(opposed <= 1.0 and adjacent >= 0.0, "the figure left nought to one")
+func test_the_distance_is_read_off_the_table_and_spans_nought_to_one() -> void:
+	# Read off the considerations table and nothing else (#429), so which
+	# intents are far apart falls out of the Author's numbers rather than being
+	# written down where a later edit could contradict it. What is fixed is the
+	# shape: symmetric, nought to one, the widest pair reading exactly one, and
+	# not every pair alike.
+	var widest := 0.0
+	var seen: Dictionary = {}
+	for a in GovernorIntent.IN_ORDER:
+		for b in GovernorIntent.IN_ORDER:
+			var there := GovernorIntent.distance_between(a, b)
+			assert_almost_eq(there, GovernorIntent.distance_between(b, a), 0.0001,
+				"'%s' is further from '%s' than the other way about" % [a, b])
+			assert_true(there >= 0.0 and there <= 1.0, "the figure left nought to one")
+			widest = maxf(widest, there)
+			if a != b:
+				seen[snappedf(there, 0.001)] = true
+	assert_almost_eq(widest, 1.0, 0.0001, "the widest-apart pair did not read one")
+	assert_true(seen.size() > 1, "every pair of intents is the same distance apart")
 
 
 func test_an_unknown_intent_is_no_distance_at_all() -> void:

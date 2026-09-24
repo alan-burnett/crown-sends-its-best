@@ -172,8 +172,8 @@ var intent_since: int = 0
 var urgings: Array[Urging] = []
 
 ## What the town is working towards. **The town chooses it, deterministically,
-## to serve the intent** — a building, an improvement, or a standing posture.
-## See `Objective` and `ObjectiveSelector`.
+## to serve the intent**, by walking its menu — a building, an improvement, or
+## *no building*. See `Objective` and `AgendaMenu`.
 var objective: StringName = &""
 
 ## The tile, when the objective is an improvement. The governor picked it.
@@ -189,6 +189,14 @@ var objective_since: int = 0
 ## Months in a row the build has put in no labour. **Kept by Build, read by
 ## Reconsideration**: only Build knows whether a month moved the project on.
 var objective_idle_months: int = 0
+
+## What the town's tiles gave last month, by resource (#429). Written by Work;
+## read by the menus' `harvested_at_least`, which asks what the ground actually
+## gave rather than what it might.
+var harvested: Dictionary = {}
+
+## How many expeditions this town has ever sent (#429, `expeditions_launched_below`).
+var expeditions_launched: int = 0
 
 ## Months of labour already put in. Only construction advances it.
 var objective_progress: int = 0
@@ -547,6 +555,8 @@ func to_dict() -> Dictionary:
 		"objective_intent": String(objective_intent),
 		"objective_since": objective_since,
 		"objective_idle_months": objective_idle_months,
+		"harvested": harvested.duplicate(),
+		"expeditions_launched": expeditions_launched,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
 		"objective_cargo": objective_cargo.duplicate(),
@@ -598,6 +608,8 @@ static func from_dict(data: Dictionary) -> Town:
 	town.objective_intent = StringName(data.get("objective_intent", ""))
 	town.objective_since = int(data.get("objective_since", 0))
 	town.objective_idle_months = int(data.get("objective_idle_months", 0))
+	town.harvested = data.get("harvested", {}).duplicate()
+	town.expeditions_launched = int(data.get("expeditions_launched", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
 	town.objective_cargo = data.get("objective_cargo", {}).duplicate()

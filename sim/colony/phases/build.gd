@@ -45,8 +45,8 @@ const EVENT_COMPLETED: StringName = &"building_completed"
 
 
 func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
-	# A posture has nothing to advance and nothing to stall. It is not idleness —
-	# Work and Reckon are both already bent by it.
+	# *No building* has nothing to advance (#429). It is not idleness — Work is
+	# already working every tile harder for it.
 	if not Objective.completes(town.objective):
 		return
 

@@ -130,17 +130,6 @@ func test_the_objective_raises_the_reserve_on_what_it_consumes() -> void:
 		"a town raising a granary held back no more timber than one raising nothing")
 
 
-func test_a_hoarding_posture_still_reserves_everything() -> void:
-	# The strongest form the modifier takes: an order to hoard means Relief and
-	# Sell both find nothing to give away.
-	var hoarder := _town(&"", {"food": 400.0, "clothing": 80.0})
-	hoarder.objective = &"stockpile_food"
-
-	var reckoning := _reckon(hoarder)
-	assert_almost_eq(reckoning.spare_of(&"food"), 0.0, 0.001,
-		"a town under orders to stockpile food had food to spare")
-
-
 # --- 🔒 Who respects the reserve --------------------------------------------
 
 func test_needs_draw_freely_through_the_reserve() -> void:

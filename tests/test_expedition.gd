@@ -169,10 +169,9 @@ func test_a_rebel_town_never_takes_the_objective() -> void:
 	rebel.rebelling = true
 	assert_false(Expedition.may_launch(rebel), "a town at war with the Crown went colonising")
 
-	var context := _context([rebel])
-	for candidate in ObjectiveSelector.candidates(rebel, context, GovernorIntent.GO_WIDE):
-		assert_false(Objective.is_expedition(StringName(candidate["id"])),
-			"a rebel town was offered an expedition")
+	var chosen := ObjectiveSelector.choose(rebel, GovernorIntent.GO_WIDE, _context([rebel]))
+	assert_false(Objective.is_expedition(StringName(chosen["id"])),
+		"a rebel town took an expedition")
 
 
 func test_a_town_too_small_to_spare_anybody_does_not_launch() -> void:

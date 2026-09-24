@@ -315,24 +315,29 @@ func _breed(town: Town, context: ColonyContext) -> void:
 		}, WorldPhase.COLONY_MONTH)
 
 
-## The three tests, and a new objective when one of them fires.
+## Walk the menu when the objective is done, open, or no longer his intent's.
 func _reconsider(town: Town, context: ColonyContext) -> void:
-	var verdict := Reconsideration.verdict(town, context)
+	var verdict := Reconsideration.verdict(town)
 	if verdict == Reconsideration.NONE:
 		return
 
-	# A stalled objective is not offered again this month. Anything else is:
-	# a project the town finished is off the list on its own, and an objective
-	# the intent moved away from may still be the best answer to the new one.
-	var excluding: PackedStringArray = PackedStringArray()
-	if verdict == Reconsideration.HARD_STALL or verdict == Reconsideration.SOFT_STALL:
-		excluding.append(String(town.objective))
-
-	if verdict != Reconsideration.COMPLETED:
+	if verdict == Reconsideration.INTENT_CHANGED:
+		# **The new intent may want the very same thing.** Go wide and go tall
+		# both list the granary; tearing down a half-raised frame to begin the
+		# same frame would forfeit the timber for nothing, so the project carries
+		# on and now serves the new intent.
+		var instead := ObjectiveSelector.choose(town, town.intent, context)
+		if instead["id"] == town.objective and instead["target"] == town.objective_target:
+			town.objective_intent = town.intent
+			return
 		Reconsideration.abandon(town, verdict, context)
 
-	var chosen := ObjectiveSelector.choose(town, town.intent, context, excluding)
+	var chosen := ObjectiveSelector.choose(town, town.intent, context)
 	if chosen["id"] == &"":
+		return
+	# **Still nothing worth building**: the town stays on the fallback and says
+	# nothing new. A month of *no building* is not news.
+	if verdict == Reconsideration.OPEN and chosen["id"] == town.objective:
 		return
 
 	town.objective = chosen["id"]

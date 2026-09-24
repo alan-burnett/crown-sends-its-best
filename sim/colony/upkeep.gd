@@ -34,10 +34,10 @@ extends RefCounted
 ##
 ## ## What goes dark first
 ##
-## What the governor values least. A man on a military intent keeps the armoury
-## lit and lets the church go dark, and that falls out of the same axes the
-## objective selector scores a building on rather than out of a second opinion
-## about what a building is for.
+## What the governor values least. A man on a military intent keeps the stockade
+## lit and lets the church go dark, and that falls out of **where each sits on his
+## intent's menu** (#429) rather than out of a second opinion about what a
+## building is for. Anything his menu does not name comes last.
 
 const EVENT_PAID: StringName = &"upkeep_paid"
 const EVENT_DARK: StringName = &"building_went_dark"
@@ -94,7 +94,7 @@ static func _billable(town: Town, context: ColonyContext) -> Array:
 			"key": String(id),
 			"kind": "building",
 			"upkeep": building.upkeep,
-			"worth": _worth_to(town, ObjectiveSelector.building_axes(StringName(id))),
+			"worth": -float(AgendaMenu.rank_of(town.intent, StringName(id))),
 		})
 
 	if context.map == null or context.territory == null:
@@ -108,17 +108,9 @@ static func _billable(town: Town, context: ColonyContext) -> Array:
 			"kind": "improvement",
 			"at": at,
 			"upkeep": improvement.upkeep,
-			"worth": _worth_to(town, ObjectiveSelector.improvement_axes_at(at, improvement, context)),
+			"worth": -float(AgendaMenu.rank_of(town.intent, &"improvement")),
 		})
 	return items
-
-
-## What this governor's intent makes of a thing, on the selector's own axes.
-static func _worth_to(town: Town, axes: Dictionary) -> float:
-	var total := 0.0
-	for axis in axes:
-		total += float(axes[axis]) * GovernorIntent.value_of(town.intent, String(axis))
-	return total
 
 
 static func _light(town: Town, context: ColonyContext, item: Dictionary, lit: bool) -> void:

@@ -138,77 +138,41 @@ static func is_his_alone(id: StringName) -> bool:
 	return id == SEDITION
 
 
-## What the town is being steered towards, on each axis an objective can serve.
-##
-## **This table is the whole of "serving an intent".** `ObjectiveSelector` scores
-## every available project and posture on these axes and takes the best — so
-## adding an intent is adding a row, and adding an axis is teaching the selector
-## to measure one more thing. Neither is a branch.
-const PROFILES: Dictionary = {
-	# **Until #429 walks menus instead**, the selector still scores on axes, so
-	# each of the six keeps a row: the old intent each one replaced, and a new
-	# row for education, which wants the learning the capacity axis counts.
-	GET_RICH:  {"food": 0.2, "trade": 1.0, "defence": 0.0, "comfort": 0.2, "capacity": 0.3, "expansion": 0.0},
-	GO_TALL:   {"food": 1.0, "trade": 0.2, "defence": 0.1, "comfort": 0.9, "capacity": 0.5, "expansion": 0.0},
-	MILITARY:  {"food": 0.3, "trade": 0.1, "defence": 1.0, "comfort": 0.1, "capacity": 0.4, "expansion": 0.0},
-	GO_WIDE:   {"food": 0.6, "trade": 0.3, "defence": 0.1, "comfort": 0.0, "capacity": 0.3, "expansion": 1.0},
-	EDUCATION: {"food": 0.2, "trade": 0.1, "defence": 0.0, "comfort": 0.4, "capacity": 1.0, "expansion": 0.0},
-	# **A town being made ready to stand alone.** Walls and powder, grain it will
-	# not have to buy, and nothing whatever for the Crown's trade — the one
-	# profile that wants the colony's commerce to *fall*, because every shilling
-	# of it is a thread back to London.
-	SEDITION:  {"food": 0.9, "trade": -0.8, "defence": 1.0, "comfort": 0.2, "capacity": 0.6, "expansion": -0.5},
-}
-
-## The axes, sorted. Iterating the profile dictionary directly would make the
-## floating-point sum depend on insertion order.
-const AXES: Array[String] = ["capacity", "comfort", "defence", "expansion", "food", "trade"]
-
-
-## How much an intent values one axis.
 ## How far apart two intents are, from nought to one (#213).
 ##
-## **Measured off the profile table and nothing else.** The table already *is*
-## what an intent means, so "going wide and preparing for rebellion want
-## opposite things" falls out of the numbers rather than being written down
-## somewhere a later edit could contradict. Adding an intent adds a row and this
-## keeps working.
+## **Measured off the considerations table and nothing else** (#429,
+## `governor-agendas.md` §13). An intent's column is what moves a man toward it;
+## two intents the same troubles push toward are close, and two they push apart
+## are far — so "going wide and preparing for rebellion want different things"
+## falls out of the Author's cells rather than being written down somewhere a
+## later edit could contradict. Adding an intent adds a column and this keeps
+## working.
 ##
-## Normalised by the widest gap the table can produce, so the figure means the
-## same thing whatever the axes are worth.
+## Normalised by the widest gap the table produces, so the figure means the same
+## thing whatever the cells are worth.
 static func distance_between(a: StringName, b: StringName) -> float:
 	if String(a).is_empty() or String(b).is_empty() or a == b:
 		return 0.0
-	var first: Dictionary = PROFILES.get(a, {})
-	var second: Dictionary = PROFILES.get(b, {})
-	if first.is_empty() or second.is_empty():
+	if not is_intent(a) or not is_intent(b):
 		return 0.0
+	return clampf(_apart(a, b) / maxf(0.0001, _widest_gap()), 0.0, 1.0)
 
-	var axes: Array = first.keys()
-	axes.sort()
+
+## How far apart two columns of the table are, unnormalised. Over the rows in
+## their fixed order, so the floating-point sum cannot depend on how the table
+## was loaded.
+static func _apart(a: StringName, b: StringName) -> float:
 	var apart := 0.0
-	for axis in axes:
-		apart += absf(float(first[axis]) - float(second.get(axis, 0.0)))
-	return clampf(apart / maxf(0.0001, _widest_gap()), 0.0, 1.0)
+	for row in IntentConsiderations.TABLE_ROWS:
+		apart += absf(IntentConsiderations.cell(row, a) - IntentConsiderations.cell(row, b))
+	return apart
 
 
-## The largest distance any two profiles in the table are apart, unnormalised.
+## The largest distance any two intents are apart, unnormalised.
 static func _widest_gap() -> float:
 	var widest := 0.0
 	for a in IN_ORDER:
 		for b in IN_ORDER:
-			if a == b:
-				continue
-			var apart := 0.0
-			var first: Dictionary = PROFILES.get(a, {})
-			# Over `AXES` rather than the dictionary: a floating-point sum taken
-			# in insertion order is a sum that can change when a row is edited.
-			for axis in AXES:
-				apart += absf(float(first.get(axis, 0.0)) - float(PROFILES.get(b, {}).get(axis, 0.0)))
-			widest = maxf(widest, apart)
+			if a != b:
+				widest = maxf(widest, _apart(a, b))
 	return widest
-
-
-static func value_of(intent: StringName, axis: String) -> float:
-	var profile: Dictionary = PROFILES.get(intent, {})
-	return float(profile.get(axis, 0.0))

@@ -110,18 +110,6 @@ func test_no_letter_lets_the_crown_ask_a_man_to_turn_against_it() -> void:
 
 # --- 🔒 It serves the rebellion, not the town -------------------------------
 
-func test_its_objectives_turn_away_from_the_crown() -> void:
-	# A town being made ready to stand alone: walls and powder, grain it will not
-	# have to buy, and **the one profile that wants the colony's trade to fall**,
-	# because every shilling of it is a thread back to London.
-	assert_true(GovernorIntent.value_of(GovernorIntent.SEDITION, "trade") < 0.0,
-		"a town preparing to leave still wanted the Crown's commerce")
-	assert_true(GovernorIntent.value_of(GovernorIntent.SEDITION, "defence") > 0.0,
-		"a town preparing to leave wanted no walls")
-	assert_true(GovernorIntent.value_of(GovernorIntent.SEDITION, "food") > 0.0,
-		"a town preparing to leave made no provision for a siege")
-
-
 func test_it_lays_in_what_standing_alone_needs() -> void:
 	var stocks := Objective.intent_stocks(GovernorIntent.SEDITION)
 	assert_not_empty(stocks, "a town preparing to leave laid in nothing at all")

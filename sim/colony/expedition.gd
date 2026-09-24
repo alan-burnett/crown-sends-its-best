@@ -131,6 +131,7 @@ static func launch(town: Town, context: ColonyContext) -> ExpeditionParty:
 	var going := people_for(town)
 	if going <= 0:
 		return null
+	town.expeditions_launched += 1
 
 	# **The share its numbers represent**, taken before the people are, so the
 	# proportion is of the town that mounted it rather than of what is left.

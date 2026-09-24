@@ -76,9 +76,8 @@ func reach_of(resource: StringName) -> float:
 ##
 ## ## A want with no target, because that is what a standing order is
 ##
-## **Every other want is a quantity and this one is not.** A town told to
-## stockpile grain wants more grain — not more grain up to a number, which is a
-## project rather than a posture.
+## **Every other want is a quantity and this one is not.** A town leaning on a
+## resource wants more of it — not more up to a number, which is a project.
 ##
 ## Expressing it as a quantity was tried and it decays: a lean of a few months'
 ## eating is a rounding error beside a stockpile of a hundred, so the valuation
@@ -154,10 +153,6 @@ static func for_town(town: Town, before: ColonySnapshot) -> DesiredStock:
 	for resource in stocks:
 		desired._want(StringName(resource),
 			Population.amount_for(StringName(resource), float(stocks[resource]), people), REACH_INTENT)
-	for hoarded in Objective.posture_focus(town):
-		var id := StringName(hoarded)
-		desired.leans[String(hoarded)] = true
-		desired._want(id, maxf(before.held(town.id, id), Population.amount_for(id, 1.0, people)), REACH_INTENT)
 
 	# 4. **What the town's buildings give it a use for.** A loom makes furs worth
 	# having in a way they are not in a town without one, and that is a fact about

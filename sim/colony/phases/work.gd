@@ -162,6 +162,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 
 	for resource in produced:
 		town.store(StringName(resource), float(produced[resource]))
+	# What the ground gave, for the menus' gates (#429).
+	town.harvested = produced.duplicate()
 
 	context.log.emit(EVENT_WORKED, town.id, context.state.month, {
 		"town": String(town.id),
@@ -390,7 +392,7 @@ func _yield_of(context: ColonyContext, town: Town, at: Vector2i, resource: Strin
 	if amount <= 0.0 or town == null:
 		return amount
 	return amount * expert_multiplier(town, resource) \
-		* (1.0 + Building.yield_bonus_for(town, resource))
+		* (1.0 + Building.yield_bonus_for(town, resource)) * _fallback(town)
 
 
 ## What every tile of this town would yield a hand, this month (#351).
@@ -410,7 +412,7 @@ func _yields_for(town: Town, context: ColonyContext, tiles: Array) -> Dictionary
 	for resource in ResourceCatalogue.ids():
 		var id := StringName(resource)
 		multiplier[resource] = expert_multiplier(town, id) \
-			* (1.0 + Building.yield_bonus_for(town, id))
+			* (1.0 + Building.yield_bonus_for(town, id)) * _fallback(town)
 
 	var out: Dictionary = {}
 	if context.map == null:
@@ -423,6 +425,15 @@ func _yields_for(town: Town, context: ColonyContext, tiles: Array) -> Dictionary
 				here[resource] = amount * float(multiplier[resource])
 		out[_tile_key(at)] = here
 	return out
+
+
+## 🔒 **No building works every tile a tenth harder** (#429,
+## `governor-agendas.md` §3): the town has nothing to build, so its people work
+## the ground. One while anything else is the objective.
+static func _fallback(town: Town) -> float:
+	if town != null and town.objective == AgendaMenu.NO_BUILDING:
+		return 1.0 + AgendaMenu.NO_BUILDING_YIELD
+	return 1.0
 
 
 ## How a tile is looked up in the yield table.

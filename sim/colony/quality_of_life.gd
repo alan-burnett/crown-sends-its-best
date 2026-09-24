@@ -376,9 +376,9 @@ static func fitness_of(town: Town, context: ColonyContext) -> float:
 ## rather than merely failing to add.
 static func progress_of(town: Town) -> float:
 	if not Objective.completes(town.objective):
-		# A standing posture is always underway by definition. It is neither
-		# advancing nor stuck; the town simply does it.
-		return 0.5 if Objective.is_posture(town.objective) else 0.0
+		# *No building* is always underway by definition: the town is working
+		# its ground harder. Neither advancing nor stuck; the town simply does it.
+		return 0.5 if town.objective == AgendaMenu.NO_BUILDING else 0.0
 	return clampf(
 		Objective.progress_fraction(town) / float(1 + maxi(0, town.objective_idle_months)),
 		0.0,
@@ -503,8 +503,10 @@ static func marginal_pleasure(
 ## How much the current objective does about a resource the town is short of.
 static func _objective_addresses(town: Town, resource: StringName, context: ColonyContext) -> float:
 	match Objective.kind_of(town.objective):
-		Objective.POSTURE:
-			return 1.0 if Objective.posture_focus(town).has(String(resource)) else 0.0
+		Objective.NO_BUILDING:
+			# A tenth more off every tile: something done about every shortage
+			# the ground can answer, and not much about any of them.
+			return 0.5
 		Objective.CONSTRUCTION:
 			var building := Building.find(town.objective)
 			var bonuses: Dictionary = building.effect("yield_bonus", {})
@@ -517,7 +519,7 @@ static func _objective_addresses(town: Town, resource: StringName, context: Colo
 			# dictionary, and it threw only when a town's objective happened to be
 			# a storehouse or a granary — so the suite stayed green and the
 			# balance harness produced numbers with a hole in them. The same trap
-			# the ticket flagged for `_building_axes`, in a second place.
+			# #148's ticket flagged in a second place.
 			var months: Dictionary = building.effect("reserve_months", {})
 			if float(months.get(String(resource), 0.0)) > 0.0:
 				return 0.6
@@ -534,11 +536,7 @@ static func _objective_addresses(town: Town, resource: StringName, context: Colo
 
 
 ## How much the governor's standing intent is about a resource the town is short
-## of, through the axis that resource lives on.
+## of: **what his intent keeps in store** (#429, `governor-agendas.md` §11). An
+## intent that lays in a thousand's worth or more of it is wholly about it.
 static func _intent_addresses(town: Town, resource: StringName) -> float:
-	var axis := "food" if resource == &"food" else "trade"
-	if resource == &"clothing":
-		# Clothing cannot be produced until conversion exists, so a town short of
-		# it is waiting on trade whatever its governor intends.
-		axis = "trade"
-	return clampf(GovernorIntent.value_of(town.intent, axis), 0.0, 1.0)
+	return clampf(float(Objective.intent_stocks(town.intent).get(String(resource), 0.0)), 0.0, 1.0)

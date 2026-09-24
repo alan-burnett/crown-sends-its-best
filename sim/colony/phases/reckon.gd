@@ -148,15 +148,6 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 			Population.amount_for(StringName(resource), float(stocks[resource]), people),
 		)
 
-	# A standing posture to stockpile or harvest something means the town parts
-	# with none of it. Reserving all of it is how that becomes true everywhere at
-	# once, rather than in each of the four phases that might have moved it.
-	for hoarded in Objective.posture_focus(town):
-		reckoning.reserve[hoarded] = maxf(
-			reckoning.reserve_of(StringName(hoarded)),
-			before.held(town.id, StringName(hoarded)),
-		)
-
 	# 🔒 **Companies eat before the objective and after the people** (#211,
 	# `battles.md` §3). Counted as mouths, in a tier of their own — so the purse
 	# goes shopping for their rations above the project and below survival, and a

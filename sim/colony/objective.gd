@@ -3,22 +3,18 @@ extends RefCounted
 
 ## What a town is working towards, and how far along it is (SPEC §11.3, #49).
 ##
-## ## Two kinds, and the second is the one that gets forgotten
-##
-## The spec's examples are "constructing a building, stockpiling food, harvesting
-## a resource, fortifying". Only the first has a *finish*. The rest are **standing
-## postures** — a town told to stockpile food is not building a thing, it is
-## behaving a certain way for as long as the order stands.
+## ## Most have a finish, and one does not
 ##
 ## So an objective is either:
 ##
 ## - a **construction** — a building id, with a cost that Build consumes over
 ##   months and a completion that applies an effect;
 ## - an **improvement** — the same, raised on a named tile rather than in the
-##   town. **The governor picks the tile** (`docs/mechanics/governor-objectives.md`
-##   section 5); there is no code path by which the PC names one; or
-## - a **posture** — no cost, no completion, but it **bends Work and Reckon**: the
-##   town works its focus resources by preference and holds them back.
+##   town. **The governor picks the tile**; there is no code path by which the PC
+##   names one; or
+## - **no building** — the shared fallback of every menu (#429,
+##   `governor-agendas.md` §3): no cost, no completion, a tenth more off every
+##   tile the town works, and the menu walked again every Settle.
 ##
 ## A governor who can only ever be part-way through a church writes the same
 ## letter every month. This is the class that stops that.
@@ -41,8 +37,8 @@ const CONSTRUCTION: StringName = &"construction"
 ## the tile is part of the objective.
 const IMPROVEMENT: StringName = &"improvement"
 
-## A standing posture. No cost, no completion.
-const POSTURE: StringName = &"posture"
+## Nothing on the menu was taken (#429). No cost, no completion.
+const NO_BUILDING: StringName = &"no_building"
 
 ## **Amassing an expedition's supplies** (#175, `founding-towns.md` §2).
 ##
@@ -80,10 +76,10 @@ const COMPANY: StringName = &"company"
 ## afford the last plank.
 const MET: float = 0.001
 
-## Posture id -> its record. Data, like everything else the town does.
-static var _postures: Dictionary = {}
+## How a letter names *no building*. Prose, so it lives in the content.
+static var _no_building_name: String = "getting the most out of the land"
 
-## Expedition id -> its record. One today; the shape is the postures'.
+## Expedition id -> its record.
 static var _expeditions: Dictionary = {}
 static var _companies: Dictionary = {}
 
@@ -110,17 +106,7 @@ static func load_from(record: Dictionary) -> void:
 		if not expedition.is_empty():
 			_expeditions[expedition] = {"name": String(entry.get("name", expedition))}
 
-	_postures = {}
-	var records: Array = record.get("postures", [])
-	for entry in records:
-		var id := String(entry.get("id", ""))
-		if id.is_empty():
-			push_error("An objective posture has no id.")
-			continue
-		_postures[id] = {
-			"name": String(entry.get("name", id)),
-			"focus": PackedStringArray(entry.get("focus", [])),
-		}
+	_no_building_name = String(record.get("no_building", {}).get("name", _no_building_name))
 
 
 ## The intents' prose and stockpiles, from `data/colony/agendas.json` (#428,
@@ -138,7 +124,6 @@ static func load_intents(record: Dictionary) -> void:
 
 
 static func reset() -> void:
-	_postures = {}
 	_expeditions = {}
 	_intents = {}
 
@@ -175,17 +160,6 @@ static func named_intents() -> PackedStringArray:
 	return out
 
 
-## Posture ids, sorted.
-static func posture_ids() -> PackedStringArray:
-	var out: PackedStringArray = PackedStringArray(_postures.keys())
-	out.sort()
-	return out
-
-
-static func is_posture(id: StringName) -> bool:
-	return _postures.has(String(id))
-
-
 static func expedition_ids() -> PackedStringArray:
 	var out: PackedStringArray = PackedStringArray(_expeditions.keys())
 	out.sort()
@@ -206,8 +180,8 @@ static func is_company(id: StringName) -> bool:
 	return _companies.has(String(id))
 
 
-## Which sort of objective this is. **A building id that is not a known building
-## and not a known posture is `NONE`**, not a crash: content can be wrong.
+## Which sort of objective this is. **An id that names nothing known is
+## `NONE`**, not a crash: content can be wrong.
 static func kind_of(id: StringName) -> StringName:
 	if String(id).is_empty():
 		return NONE
@@ -215,8 +189,8 @@ static func kind_of(id: StringName) -> StringName:
 		return CONSTRUCTION
 	if Improvement.has(id):
 		return IMPROVEMENT
-	if is_posture(id):
-		return POSTURE
+	if id == AgendaMenu.NO_BUILDING:
+		return NO_BUILDING
 	if is_expedition(id):
 		return EXPEDITION
 	if is_company(id):
@@ -233,38 +207,9 @@ static func display_name(id: StringName) -> String:
 		return String(_companies[String(id)].get("name", String(id)))
 	if Improvement.has(id):
 		return Improvement.find(id).display_name
-	if is_posture(id):
-		return String(_postures[String(id)].get("name", String(id)))
+	if id == AgendaMenu.NO_BUILDING:
+		return _no_building_name
 	return ""
-
-
-# --- Postures ---------------------------------------------------------------
-
-## The resources a town's posture favours, sorted. Empty when it has no posture.
-##
-## **Read by Work**, which weights tiles yielding them, and by Reckon, which
-## holds them back. That is the whole of what a posture *is*.
-##
-## More than one, because gathering an expedition supplies grain *and* tools, and
-## a posture that could only ever name one resource would have to be split into
-## two orders the governor never meant to give separately.
-static func posture_focus(town: Town) -> PackedStringArray:
-	if not is_posture(town.objective):
-		return PackedStringArray()
-	var focus: PackedStringArray = _postures[String(town.objective)].get("focus", PackedStringArray())
-	var out := focus.duplicate()
-	out.sort()
-	return out
-
-
-## Whether the town's posture means it will not part with a resource.
-##
-## **A town stockpiling food that sold its surplus every month would be
-## stockpiling nothing.** Reckon answers this by reserving everything the town
-## holds of it, so Sell finds no spare and Relief finds nothing to give — which
-## is what a standing order to hoard something actually means.
-static func hoards(town: Town, resource: StringName) -> bool:
-	return posture_focus(town).has(String(resource))
 
 
 # --- Construction -----------------------------------------------------------
@@ -283,8 +228,8 @@ static func outstanding(town: Town) -> Dictionary:
 	return out
 
 
-## What this town is working towards costs, whichever kind it is. A posture
-## costs nothing, which is why it can never stall.
+## What this town is working towards costs, whichever kind it is. *No building*
+## costs nothing.
 static func costed_resources(town: Town) -> PackedStringArray:
 	match kind_of(town.objective):
 		CONSTRUCTION:
@@ -401,8 +346,8 @@ static func months_required(town: Town) -> int:
 ##
 ## **Materials and months, weighted evenly**, so "the church is half raised"
 ## (#49) means something whether the town is still gathering stone or already
-## cutting it. A posture has no progress and returns `0.0`; ask `kind_of` first
-## rather than reading a fraction that was never going to move.
+## cutting it. *No building* has no progress and returns `0.0`; ask `kind_of`
+## first rather than reading a fraction that was never going to move.
 static func progress_fraction(town: Town) -> float:
 	if not completes(town.objective):
 		return 0.0

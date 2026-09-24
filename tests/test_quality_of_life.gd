@@ -337,7 +337,7 @@ func test_a_stalled_project_has_less_hope_than_an_advancing_one() -> void:
 
 func test_a_starving_town_building_cannons_has_no_hope() -> void:
 	var farming := _town({"clothing": 40.0})
-	farming.objective = &"stockpile_food"
+	farming.objective = AgendaMenu.NO_BUILDING
 	var arming := _town({"clothing": 40.0})
 	arming.objective = &"palisade"
 
@@ -355,10 +355,13 @@ func test_a_starving_town_building_cannons_has_no_hope() -> void:
 func test_adopting_the_right_intent_raises_hope_before_anything_is_built() -> void:
 	# **The fastest lever the PC has.** Objective fitness responds the month a
 	# governor adopts a new goal, well before anything is finished.
+	#
+	# The town has no grain, and **an intent is about what it keeps in store**
+	# (#429): going wide lays in food, getting rich does not.
 	var indifferent := _town({"clothing": 40.0})
 	indifferent.intent = GovernorIntent.GET_RICH
 	var caring := _town({"clothing": 40.0})
-	caring.intent = GovernorIntent.GO_TALL
+	caring.intent = GovernorIntent.GO_WIDE
 
 	var one := _harness(indifferent)
 	var other := _harness(caring)

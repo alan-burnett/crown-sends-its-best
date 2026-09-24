@@ -104,7 +104,7 @@ func test_a_town_survives_a_round_trip_whole() -> void:
 	town.add_experts(&"ore", 1)
 	town.add_livestock(&"sheep", 3)
 	town.add_building(&"church")
-	town.objective = &"stockpile_food"
+	town.objective = AgendaMenu.NO_BUILDING
 	town.objective_progress = 2
 	town.quality_of_life = 3.5
 	town.governor_id = &"gov_ashmere"
@@ -112,7 +112,7 @@ func test_a_town_survives_a_round_trip_whole() -> void:
 	var restored := Town.from_dict(town.to_dict())
 	assert_eq(restored.to_dict(), town.to_dict())
 	assert_almost_eq(restored.held(&"food"), 40.0)
-	assert_eq(restored.objective, &"stockpile_food")
+	assert_eq(restored.objective, AgendaMenu.NO_BUILDING)
 	assert_true(restored.can_afford(275.0), "the balance survived")
 	assert_eq(restored.buildings, town.buildings)
 

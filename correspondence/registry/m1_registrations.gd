@@ -117,6 +117,7 @@ static func load_resources(content: ContentDatabase) -> void:
 	if content.has_record("colony", "agendas"):
 		Objective.load_intents(content.record("colony", "agendas"))
 		IntentConsiderations.load_table(content.record("colony", "agendas"))
+		AgendaMenu.load_from(content.record("colony", "agendas"))
 
 	if content.has_record("crown", "demands"):
 		DemandSchedule.load_from(content.record("crown", "demands"))

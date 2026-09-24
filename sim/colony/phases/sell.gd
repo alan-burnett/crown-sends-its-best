@@ -6,8 +6,8 @@ extends ColonyPhase
 ##
 ## **The reserve is the whole of the discipline here.** Reckon worked out what
 ## the town must keep — its needs, plus months of them against the winter, plus
-## whatever its granaries let it hold, plus whatever its standing posture says it
-## is hoarding. What is over *that* is spare, and only spare is sold.
+## whatever its granaries let it hold, plus what its intent keeps in store. What
+## is over *that* is spare, and only spare is sold.
 ##
 ## A town that sold down to its needs would look prosperous for a month and
 ## starve in the second. Sell does not get to decide any of this; it reads

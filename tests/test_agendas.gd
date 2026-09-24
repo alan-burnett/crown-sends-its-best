@@ -225,6 +225,63 @@ func test_the_validator_refuses_a_cell_out_of_range_or_a_missing_row() -> void:
 	assert_false(_checked().ok(), "a table with no loyalty row passed")
 
 
+# --- 🔒 The menus (#429) ---------------------------------------------------------
+
+func _menu(intent: String) -> Array:
+	for entry in content.record("colony", "agendas")["intents"]:
+		if String(entry["id"]) == intent:
+			return entry["menu"]
+	return []
+
+
+func test_the_validator_refuses_a_building_above_its_prerequisite() -> void:
+	# `governor-agendas.md` §3: *a menu must contain its items' prerequisites*,
+	# or they are unreachable, and higher up or the walk reaches the item first.
+	assert_true(_checked().ok(), "the shipped agendas do not validate")
+	var menu := _menu("education")
+	menu.push_front({"objective": "library"})
+	assert_false(_checked().ok(), "a library above its theatre passed")
+	menu.pop_front()
+	menu.append({"objective": "wharf"})
+	assert_false(_checked().ok(), "a wharf on a menu with no dock passed")
+
+
+func test_the_validator_refuses_a_condition_it_cannot_read() -> void:
+	# Conditions are ids into a code-side registry with typed params (§7), never
+	# logic, so a misspelling is a validation failure and not a gate that is
+	# quietly always shut.
+	var menu := _menu("education")
+	var bad: Array = [
+		{"objective": "stockade", "when": [{"is": "moon_is_full"}]},
+		{"objective": "stockade", "when": [{"is": "population_at_least", "n": "lots"}]},
+		{"objective": "stockade", "when": [{"is": "population_at_least"}]},
+		{"objective": "stockade", "when": [{"is": "harvested_at_least", "resource": "unobtainium", "n": 10}]},
+		{"objective": "stockade", "when": [{"is": "coastal", "n": 1}]},
+		{"objective": "improvement", "choose": "prettiest"},
+		{"objective": "a_pony"},
+	]
+	for entry in bad:
+		menu.push_front(entry)
+		assert_false(_checked().ok(), "%s passed" % JSON.stringify(entry))
+		menu.pop_front()
+	assert_true(_checked().ok(), "the menu did not recover, so the refusals above prove nothing")
+
+
+func test_no_posture_or_axis_code_remains() -> void:
+	# §1: **the axis model is retired**, and the four postures with it.
+	var gone := ["is_posture", "posture_ids", "posture_focus", "Objective.POSTURE", "building_axes",
+		"EFFECTS_READ", "PROFILES", "value_of(", "stockpile_food", "harvest_timber",
+		"harvest_stone", "trap_furs", "SOFT_STALL", "ROUTINE_SUNK", "CRISIS_SUNK"]
+	var found := PackedStringArray()
+	for root in ["res://sim", "res://correspondence", "res://data"]:
+		for path in _files_under(root):
+			var text := FileAccess.get_file_as_string(path)
+			for token in gone:
+				if text.contains(token):
+					found.append("%s: %s" % [path, token])
+	assert_empty(found, "the retired model is still named: %s" % ", ".join(found))
+
+
 func test_no_removed_intent_is_named_anywhere() -> void:
 	# The village's own objective *drive them off* is not a governor's intent
 	# (`natives.md`) and keeps its name.

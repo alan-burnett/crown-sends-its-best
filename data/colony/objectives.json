@@ -1,35 +1,9 @@
 {
   "id": "objectives",
-  "postures": [
-    {
-      "id": "stockpile_food",
-      "name": "stockpiling food",
-      "focus": [
-        "food"
-      ]
-    },
-    {
-      "id": "harvest_timber",
-      "name": "cutting timber",
-      "focus": [
-        "wood"
-      ]
-    },
-    {
-      "id": "harvest_stone",
-      "name": "quarrying stone",
-      "focus": [
-        "stone"
-      ]
-    },
-    {
-      "id": "harvest_furs",
-      "name": "trapping furs",
-      "focus": [
-        "furs"
-      ]
-    }
-  ],
+  "no_building": {
+    "name": "getting the most out of the land",
+    "note": "The shared fallback of every menu (governor-agendas.md section 3): nothing on the menu was taken, so the town works its ground harder. +10% yield on every tile it works, while it stands."
+  },
   "companies": [
     {
       "id": "raise_a_company",

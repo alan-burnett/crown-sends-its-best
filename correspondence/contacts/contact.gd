@@ -448,6 +448,9 @@ func to_dict() -> Dictionary:
 		"wants": wants.duplicate(),
 		"traits": traits.duplicate(),
 		"writes_readily": writes_readily,
+		# **Saved, or a reloaded Chancellor forgets his joke** and writes about
+		# ruin in whatever tone his loyalty bands to (#429 found it).
+		"writes_in": String(writes_in),
 		"specialty": specialty,
 		"need": need,
 		"vice": String(vice),

@@ -27,8 +27,7 @@ func after_each() -> void:
 
 # --- Fixture ----------------------------------------------------------------
 
-## A patch of plains with forest beside it, so a posture towards timber has
-## somewhere to send the men that a hungry town would not have chosen.
+## A patch of plains with forest beside it.
 func _map() -> WorldMap:
 	var map := WorldMap.new(7, 7, &"ocean")
 	for y in range(1, 6):
@@ -260,67 +259,66 @@ func test_nothing_gates_the_way_out() -> void:
 		assert_eq(Array(building.requires), chain.get(String(id), []),
 			"%s is gated on %s" % [id, Array(building.requires)])
 	assert_true(converting >= 9, "only %d buildings convert anything" % converting)
-# --- Standing postures ------------------------------------------------------
+# --- No building ------------------------------------------------------------
 
-func test_a_posture_is_an_objective_without_a_finish() -> void:
-	var town := _town(&"stockpile_food", {"food": 50.0})
+func test_no_building_is_an_objective_without_a_finish() -> void:
+	# `governor-agendas.md` §3: the shared fallback never completes, never
+	# gathers, and never reports itself stalled.
+	var town := _town(AgendaMenu.NO_BUILDING, {"food": 50.0})
 	var harness := _harness(town)
 	_run_month(harness)
 	_run_month(harness)
 
-	assert_eq(Objective.kind_of(town.objective), Objective.POSTURE)
-	assert_eq(String(town.objective), "stockpile_food", "a standing order ended by itself")
+	assert_eq(Objective.kind_of(town.objective), Objective.NO_BUILDING)
+	assert_eq(String(town.objective), String(AgendaMenu.NO_BUILDING), "the fallback ended by itself")
 	assert_eq(town.objective_progress, 0)
 	assert_empty(harness["context"].log.of_type(BuildPhase.EVENT_STALLED),
-		"a posture reported itself stalled for want of materials it never needed")
+		"the fallback reported itself stalled for want of materials it never needed")
 
 
-func test_a_posture_changes_what_work_does() -> void:
-	# Same map, same workers, same month — two different standing orders. **If
-	# the objective did not reach Work these would be the same month twice.**
-	#
-	# Compared against another posture rather than against no objective at all:
-	# forest outscores plains on this map before any weighting is applied, so a
-	# town with no orders already cuts timber, and "no orders" would have made a
-	# weaker comparison look like a passing one.
-	# **Both towns are fed and clothed.** A town with no cloth at all weights furs
-	# heavily enough to send everybody to the forest whatever its standing order
-	# is, which is correct behaviour and a second signal louder than the one this
-	# test is about.
-	var timber := _town(&"harvest_timber", {"food": 100.0, "clothing": 20.0})
-	var grain := _town(&"stockpile_food", {"food": 100.0, "clothing": 20.0})
-	_run_month(_harness(timber, [ColonyMonth.WORK]))
-	_run_month(_harness(grain, [ColonyMonth.WORK]))
+func test_no_building_works_every_tile_harder() -> void:
+	# 🔒 §3: **+10% yield on every tile the town works** while it stands.
+	# Same map, same workers, same month; the only difference is the fallback.
+	var idle := _town(AgendaMenu.NO_BUILDING, {"food": 100.0, "clothing": 20.0})
+	var building := _town(&"", {"food": 100.0, "clothing": 20.0})
+	_run_month(_harness(idle, [ColonyMonth.WORK]))
+	_run_month(_harness(building, [ColonyMonth.WORK]))
 
-	assert_true(timber.held(&"wood") > grain.held(&"wood"),
-		"a town told to cut timber cut no more of it than one told to store grain")
-	assert_true(grain.held(&"food") > timber.held(&"food"),
-		"a town told to store grain grew no more of it than one told to cut timber")
+	var more := 0.0
+	var less := 0.0
+	for resource in idle.harvested:
+		more += float(idle.harvested[resource])
+	for resource in building.harvested:
+		less += float(building.harvested[resource])
+	assert_true(less > 0.0, "the fixture town harvested nothing, so this compared nothing")
+	assert_almost_eq(more / less, 1.0 + AgendaMenu.NO_BUILDING_YIELD, 0.02,
+		"no building did not work the ground a tenth harder")
 
 
-func test_a_posture_changes_what_reckon_does() -> void:
-	# **A town stockpiling food that sold its surplus every month would be
-	# stockpiling nothing.** Reserving all of it is how the standing order
-	# becomes true in Relief and Sell at once.
-	var hoarder := _town(&"stockpile_food", {"food": 90.0})
+func test_no_building_hoards_nothing() -> void:
+	# The postures it replaces made a town sell none of what it stockpiled.
+	# **The fallback bends nothing but the yield**: a town on it has as much to
+	# spare as one with no objective at all.
+	var fallback := _town(AgendaMenu.NO_BUILDING, {"food": 90.0})
 	var ordinary := _town(&"", {"food": 90.0})
-	var hoarding := _harness(hoarder, [ColonyMonth.RECKON])
+	var on_it := _harness(fallback, [ColonyMonth.RECKON])
 	var usual := _harness(ordinary, [ColonyMonth.RECKON])
-	_run_month(hoarding)
+	_run_month(on_it)
 	_run_month(usual)
 
-	var hoarded: Reckoning = hoarding["context"].reckonings["ashmere"]
+	var spare: Reckoning = on_it["context"].reckonings["ashmere"]
 	var normal: Reckoning = usual["context"].reckonings["ashmere"]
+	assert_true(normal.spare_of(&"food") > 0.0, "the fixture had nothing to spare, so this compared nothing")
+	assert_almost_eq(spare.spare_of(&"food"), normal.spare_of(&"food"), 0.001,
+		"a town on the fallback held back food it had no use for")
 
-	assert_almost_eq(hoarded.spare_of(&"food"), 0.0, 0.001,
-		"a town under orders to stockpile food had food to spare")
-	assert_true(normal.spare_of(&"food") > 0.0)
 
-
-func test_a_posture_towards_a_resource_is_not_a_building() -> void:
+func test_the_kinds_of_objective() -> void:
 	# Content can be wrong, and an unknown objective must read as nothing rather
-	# than crash the month.
-	assert_eq(Objective.kind_of(&"stockpile_food"), Objective.POSTURE)
+	# than crash the month. **The retired postures are unknown now**, so an old
+	# name in a file reads as nothing rather than as a standing order.
+	assert_eq(Objective.kind_of(AgendaMenu.NO_BUILDING), Objective.NO_BUILDING)
+	assert_eq(Objective.kind_of(&"stockpile_food"), Objective.NONE)
 	assert_eq(Objective.kind_of(&"granary"), Objective.CONSTRUCTION)
 	assert_eq(Objective.kind_of(&"a_pony"), Objective.NONE)
 	assert_eq(Objective.kind_of(&""), Objective.NONE)
@@ -395,101 +393,3 @@ func test_a_buildings_reserve_reaches_the_same_desired_stock_as_everything_else(
 
 	assert_true(equipped.wanted(&"cotton") > bare.wanted(&"cotton"),
 		"a weaving shed gives the town no reason to lay in cotton")
-
-
-# --- 🔒 A governor can want every building for the right reason -------------
-
-## Effects that reach `ObjectiveSelector._building_axes` **and can be scored on
-## their own**, so each one can be put on a bare probe building below.
-##
-## ⚠️ **Not the same list as `ObjectiveSelector.EFFECTS_READ`, and it must not be
-## consolidated with it.** That list is every key `_building_axes` knows about;
-## this one is the subset that scores without a town around it. `conversions`
-## is the difference: the selector reads it, but its worth is the margin a
-## recipe adds given what the town can get and what the Crown pays, so a probe
-## building carrying it alone is correctly worth nothing.
-##
-## Consolidating the two was tried and the probe test caught it immediately.
-const REACHES_THE_GOVERNOR: Array[String] = [
-	"amusement", "build_speed", "counts_distant_experts", "defence", "draws_experts",
-	"education", "education_per_expert", "growth", "immigration", "pasture",
-	"perceived_safety", "quality_of_life", "reserve_months", "yield_bonus",
-]
-
-## And effects that deliberately do not, with why.
-##
-## `converts` and `conversions` are terms, not reasons: a town wants a foundry for
-## the iron it will yield, which arrives through `yield_bonus` or through the
-## recipe being worth running, rather than because the building has an opinion
-## about ratios.
-const DELIBERATELY_SILENT: Array[String] = ["conversions", "converts"]
-
-
-func test_every_building_effect_is_something_a_governor_can_weigh() -> void:
-	# 🔒 **The claim `_building_axes` makes about itself**: nothing there knows
-	# what a granary is, so adding a building to the data is enough for a governor
-	# to want it for the right reasons.
-	#
-	# An effect it has not been told about breaks that **silently**, and this has
-	# now happened three times in one milestone — `reserve_months` read as a float
-	# in #148 and again in #151, and `amusement` unread in #153, where the colony
-	# built fourteen of the eighteen buildings in the tree and never the two that
-	# exist to make people happy.
-	#
-	# So a new effect is now a decision: either it is a reason to build, or it is
-	# listed above as one that is not.
-	var seen: Dictionary = {}
-	for id in Building.ids():
-		for effect in Building.find(StringName(id)).effects:
-			seen[String(effect)] = true
-
-	var reaches := REACHES_THE_GOVERNOR
-	var unclassified: PackedStringArray = PackedStringArray()
-	for effect in seen:
-		if not reaches.has(String(effect)) \
-				and not DELIBERATELY_SILENT.has(String(effect)):
-			unclassified.append(String(effect))
-	unclassified.sort()
-	assert_empty(unclassified,
-		"%s reaches no governor and is not listed as deliberately silent, so no town will ever build for it" % [unclassified])
-
-
-## A value of the right shape for an effect, so it can be scored on its own.
-func _sample_for(effect: String) -> Variant:
-	match effect:
-		"yield_bonus":
-			return {"wood": 0.5}
-		"reserve_months":
-			return {"food": 2}
-		"pasture":
-			return 12
-		"counts_distant_experts":
-			return 1.0
-		_:
-			return 1.0
-
-
-func test_an_effect_that_reaches_the_governor_actually_moves_his_score() -> void:
-	# **Listing it is not the same as wiring it**, and asking whether any real
-	# building carrying it scores anything is not the same either: the theatre
-	# also carries `quality_of_life`, so unwiring `amusement` entirely left that
-	# version of this test green.
-	#
-	# So each effect is put on a building of its own, with nothing else on it.
-	# Then the only thing that can produce a score is the effect under test.
-	for effect in REACHES_THE_GOVERNOR:
-		Building.load_from([{
-			"id": "probe", "name": "a probe", "cost": {"wood": 10},
-			"effects": {effect: _sample_for(effect)},
-		}])
-		var axes := ObjectiveSelector.building_axes(&"probe")
-		var moved := false
-		for axis in axes:
-			if absf(float(axes[axis])) > 0.0001:
-				moved = true
-		assert_true(moved,
-			"a building whose only effect is '%s' is worth nothing to any governor" % effect)
-
-	# Put the real tree back for whatever runs next.
-	Building.reset()
-	M1Registrations.load_resources(content)

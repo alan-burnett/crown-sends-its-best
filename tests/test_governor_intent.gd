@@ -129,7 +129,7 @@ func test_intent_selection_goes_through_the_kernel_and_emits_a_trace() -> void:
 	var traces: Array = harness["context"].log.of_type(Deliberation.TRACE_EVENT)
 	assert_eq(traces.size(), 1, "the choice was made without a trace")
 	assert_eq(String(traces[0].payload["kind"]), String(DecisionKind.GOVERNOR_INTENT))
-	assert_not_empty(traces[0].payload["entries"])
+	assert_not_empty(traces[0].payload["candidates"])
 
 
 func test_two_governors_choose_differently_from_identical_state() -> void:
@@ -239,17 +239,165 @@ func test_different_intents_choose_different_objectives() -> void:
 	for intent in GovernorIntent.IN_ORDER:
 		chosen[String(ObjectiveSelector.choose(town, intent, harness["context"])["id"])] = true
 	assert_true(chosen.size() >= 3,
-		"five intents produced %d distinct objectives" % chosen.size())
+		"six intents produced %d distinct objectives" % chosen.size())
 
 
-## ⏸ **Parked** (#408). With the crane gone (#327) a governor of any intent can
-## reach a foundry, and the selector scores it without looking at the town, so
-## this fails — rightly. It waits on the Author's rework of governor agendas and
-## goes back to `test_` then. Renamed rather than deleted so the claim is kept.
-func parked_test_a_defensive_intent_builds_defences() -> void:
-	# The one place it is worth asserting *which* project, because a governor who
-	# answers a threat with a sugar plantation reads as broken however elegant
-	# the scoring is.
+func test_two_governors_with_the_same_intent_choose_the_same_objective() -> void:
+	# 🔒 `governor-agendas.md` §3: **objective choice is personality-free.**
+	# Two men of opposite temper set on going tall, in the same town, build the
+	# same thing; arguing with the intent is the game.
+	var harness := _harness(_town(GovernorIntent.GO_TALL))
+	var context: ColonyContext = harness["context"]
+	var bold := _town(GovernorIntent.GO_TALL)
+	bold.governor_id = &"governor_bold"
+	var timid := _town(GovernorIntent.GO_TALL)
+	timid.governor_id = &"governor_timid"
+	var one := ObjectiveSelector.choose(bold, GovernorIntent.GO_TALL, context)
+	var two := ObjectiveSelector.choose(timid, GovernorIntent.GO_TALL, context)
+	assert_eq(String(one["id"]), String(two["id"]))
+	assert_eq(one["target"], two["target"])
+
+
+func test_the_walk_consults_no_personality_and_no_dice() -> void:
+	# 🔒 The claim above, made about the code rather than one fixture: the walk
+	# never reaches for a governor, a weight or a stream, so no fixture could
+	# find two governors who disagree.
+	for path in ["res://sim/colony/govern/agenda_menu.gd", "res://sim/colony/govern/objective_selector.gd"]:
+		var code := FileAccess.get_file_as_string(path)
+		for word in ["Deliberation", "IntentConsiderations", "streams", "stream(", "governor_id", "Contacts"]:
+			assert_false(code.contains(word),
+				"%s mentions '%s', so the objective is no longer the town's alone" % [path.get_file(), word])
+
+
+func test_a_menu_edit_changes_what_a_town_builds() -> void:
+	# 🔒 §12: **menus are data.** Moving one line changes the build, and no
+	# code anywhere knows which building a go-tall town wants.
+	var town := _town(GovernorIntent.GO_TALL)
+	var harness := _harness(town)
+	AgendaMenu.load_from({"intents": [{"id": "go_tall", "menu": [
+		{"objective": "granary"}, {"objective": "church"},
+	]}]})
+	assert_eq(String(ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])["id"]), "granary")
+
+	AgendaMenu.load_from({"intents": [{"id": "go_tall", "menu": [
+		{"objective": "church"}, {"objective": "granary"},
+	]}]})
+	assert_eq(String(ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])["id"]), "church",
+		"the menu was reordered and the town built what it built before")
+
+
+func test_the_walk_takes_the_first_entry_that_passes_every_test() -> void:
+	# 🔒 §3: wanted, reachable, placeable, not already built — failing any
+	# one moves the walk on, and the first to pass all four is taken.
+	var town := _town(GovernorIntent.GO_TALL)
+	town.add_building(&"church")
+	var harness := _harness(town)
+	AgendaMenu.load_from({"intents": [{"id": "go_tall", "menu": [
+		# Not wanted: its gate is shut.
+		{"objective": "granary", "when": [{"is": "population_at_least", "n": 1_000_000}]},
+		# Not reachable: nothing in reach grows iron, and there is no money.
+		{"objective": "foundry"},
+		# Not placeable, until #430 builds its slot.
+		{"objective": "improve_yield"},
+		# Already built.
+		{"objective": "church"},
+		# Not reachable: the library stands on a theatre.
+		{"objective": "library"},
+		{"objective": "town_pasture"},
+	]}]})
+	town.spend_share(1.0)
+	assert_false(ObjectiveSelector.can_obtain(town, &"iron", harness["context"]),
+		"the fixture can get iron, so the foundry tests nothing")
+	assert_eq(String(ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])["id"]),
+		"town_pasture")
+
+
+## A town of `people` on a wide stretch of plains with no sea anywhere near it.
+func _inland(people: int) -> Dictionary:
+	var map := WorldMap.new(31, 31, &"plains")
+	var town := Town.new(&"ashmere", "Ashmere", Vector2i(15, 15))
+	town.workers = people
+	var colony := Colony.new()
+	colony.add(town)
+	var context := ColonyContext.new(WorldValues.initial_state(), EventLog.new(), RngStreams.new(SEED), map)
+	context.colony = colony
+	context.territory = Territory.compute(map, colony.in_order())
+	context.companies = Companies.new()
+	return {"town": town, "context": context}
+
+
+func test_every_registered_condition_can_hold_and_can_fail() -> void:
+	# 🔒 **A condition is an id into a switch, and an id the switch has no
+	# branch for reads as a gate that is always shut** — so the building behind
+	# it is never built, and nothing fails. Each id is checked both ways.
+	var world := _inland(8_000)
+	var town: Town = world["town"]
+	var context: ColonyContext = world["context"]
+	town.harvested = {"wood": 20.0}
+	town.safety = 0.4
+	town.quality_of_life = 0.4
+
+	var coast := _town()
+	var coastal: ColonyContext = _harness(coast)["context"]
+	coast.at = Vector2i(1, 4)
+	coastal.territory = Territory.compute(coastal.map, coastal.colony.in_order())
+
+	# id -> [a condition that holds for `town`, one that does not]
+	var cases := {
+		"unexplored_within": [{"n": 14}, {"n": 0}],
+		"companies_out_below": [{"n": 1}, {"n": 0}],
+		"expeditions_launched_below": [{"n": 1}, {"n": 0}],
+		"outgrows_the_colony": [{"offset": 2, "factor": 2}, {"offset": 50, "factor": 2}],
+		"population_at_least": [{"n": 8_000}, {"n": 8_001}],
+		"improvements_per_thousand_below": [{"n": 0.5}, {"n": 0}],
+		"harvested_at_least": [{"resource": "wood", "n": 20}, {"resource": "wood", "n": 21}],
+		"safety_below": [{"n": 0.5}, {"n": 0.3}],
+		"quality_of_life_below": [{"n": 0.5}, {"n": 0.3}],
+		"no_trade_protest_on": [{"resource": "beer"}, {"resource": "tea"}],
+	}
+	town.protests.append("tea")
+	for id in AgendaMenu.CONDITIONS:
+		if id == "coastal":
+			assert_true(AgendaMenu.holds({"is": "coastal"}, coast, coastal), "a town on the shore is not coastal")
+			assert_false(AgendaMenu.holds({"is": "coastal"}, town, context), "a town far inland is coastal")
+			continue
+		assert_true(cases.has(id), "the condition '%s' has no case here" % id)
+		if not cases.has(id):
+			continue
+		var yes: Dictionary = cases[id][0].duplicate()
+		var no: Dictionary = cases[id][1].duplicate()
+		yes["is"] = id
+		no["is"] = id
+		assert_true(AgendaMenu.holds(yes, town, context), "%s never holds" % JSON.stringify(yes))
+		assert_false(AgendaMenu.holds(no, town, context), "%s holds when it should not" % JSON.stringify(no))
+
+	# An id nobody registered reads shut, never open.
+	assert_false(AgendaMenu.holds({"is": "moon_is_full"}, town, context),
+		"a condition nobody registered let the entry through")
+	# Outgrowing counts the colony: a reach of one against a colony of one town.
+	assert_false(AgendaMenu.holds({"is": "outgrows_the_colony", "offset": 7, "factor": 1}, town, context),
+		"a town outgrew a colony exactly its own size")
+	# And the improvements are counted: one farm among eight thousand people.
+	context.map.build(15, 16, &"farm")
+	assert_true(context.tiles_of(town).has(Vector2i(15, 16)), "the farm is not on the town's ground")
+	assert_false(AgendaMenu.holds({"is": "improvements_per_thousand_below", "n": 0.1}, town, context),
+		"a farm among eight thousand counted as no improvement at all")
+	assert_true(AgendaMenu.holds({"is": "improvements_per_thousand_below", "n": 0.2}, town, context))
+
+	# And the two that count what the town has sent out, with something out.
+	context.companies.raise_company(Company.CROWN, 500, {}, town.id, town.at, context)
+	assert_false(AgendaMenu.holds({"is": "companies_out_below", "n": 1}, town, context),
+		"a town supporting a company counted none")
+	town.expeditions_launched = 1
+	assert_false(AgendaMenu.holds({"is": "expeditions_launched_below", "n": 1}, town, context),
+		"a town that had sent an expedition counted none")
+
+
+## #408's first parked test, rewritten against the menus (#429).
+func test_a_military_town_reaches_its_defences() -> void:
+	# A governor who answers a threat with a sugar plantation reads as broken
+	# however sound his reasons. With no company to raise and no ground to
+	# improve, what a military town builds is a wall.
 	var town := _town()
 	var harness := _harness(town)
 	var chosen := ObjectiveSelector.choose(town, GovernorIntent.MILITARY, harness["context"])
@@ -258,61 +406,62 @@ func parked_test_a_defensive_intent_builds_defences() -> void:
 		"a governor set on defence chose '%s'" % chosen["id"])
 
 
-func test_the_governor_chooses_the_tile() -> void:
+## ⏸ **Parked until #430**, which builds the improvement slot and its tile
+## scorers (`governor-agendas.md` §5, §8). Until then the walk skips the slot as
+## not placeable (#429), so no improvement is ever on offer. Renamed rather than
+## deleted so the claim is kept.
+func parked_test_the_governor_chooses_the_tile() -> void:
 	# SPEC §11.4 locks it, and `tools/lint.gd` fails if anything outside sim/
 	# writes a town's objective or its target. Here: an improvement objective
 	# arrives with a tile already chosen, and it is one the town can reach.
 	var town := _town()
 	var harness := _harness(town)
-	var sited: Dictionary = {}
-	for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.GO_TALL):
-		if Objective.kind_of(StringName(candidate["id"])) == Objective.IMPROVEMENT:
-			sited = candidate
-			break
-
-	assert_false(sited.is_empty(), "no improvement was ever on offer")
+	var sited := ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])
+	assert_eq(Objective.kind_of(StringName(sited["id"])), Objective.IMPROVEMENT,
+		"no improvement was ever on offer")
 	assert_ne(sited["target"], Vector2i(-1, -1), "an improvement was chosen with no tile")
 	assert_true(harness["context"].tiles_of(town).has(sited["target"]),
 		"the chosen tile is outside the town's reach")
 
 
-func test_the_tile_choice_is_deterministic() -> void:
-	var town := _town()
+## ⏸ **Parked until #430**, with the test above.
+func parked_test_the_tile_choice_is_deterministic() -> void:
 	var first: Variant = null
 	for _attempt in 3:
-		var harness := _harness(_town())
-		for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.GO_TALL):
-			if Objective.kind_of(StringName(candidate["id"])) != Objective.IMPROVEMENT:
-				continue
-			if first == null:
-				first = candidate["target"]
-			assert_eq(candidate["target"], first)
-			break
+		var town := _town(GovernorIntent.GO_TALL)
+		var harness := _harness(town)
+		var sited := ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])
+		assert_eq(Objective.kind_of(StringName(sited["id"])), Objective.IMPROVEMENT)
+		if first == null:
+			first = sited["target"]
+		assert_eq(sited["target"], first)
 
 
 func test_an_unobtainable_project_is_never_chosen() -> void:
 	# The militia needs guns, guns need iron, the town produces no ore and has no
 	# money. That objective is unreachable and no amount of patience fixes it, so
-	# it is not on the board.
+	# the walk passes over it.
 	var town := _town()
 	town.spend_gold(500.0)
 	var harness := _harness(town)
-	for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.GET_RICH):
-		for resource in Building.find(StringName(candidate["id"])).cost if Building.has(StringName(candidate["id"])) else {}:
-			assert_true(
-				ObjectiveSelector.can_obtain(town, StringName(resource), harness["context"]),
-				"'%s' was offered though its %s is unobtainable" % [candidate["id"], resource],
-			)
+	for intent in GovernorIntent.IN_ORDER:
+		var chosen := StringName(ObjectiveSelector.choose(town, intent, harness["context"])["id"])
+		var building := Building.find(chosen)
+		if building == null:
+			continue
+		for resource in building.cost:
+			assert_true(ObjectiveSelector.can_obtain(town, StringName(resource), harness["context"]),
+				"%s chose '%s' though its %s is unobtainable" % [intent, chosen, resource])
 
 
 # --- Both kinds of objective ------------------------------------------------
 
-## ⏸ **Parked** (#408). With the crane gone (#327) a governor of any intent can
-## reach a foundry, and the selector scores it without looking at the town, so
-## this fails — rightly. It waits on the Author's rework of governor agendas and
-## goes back to `test_` then. Renamed rather than deleted so the claim is kept.
-func parked_test_a_project_is_chosen_carried_and_completed() -> void:
-	var town := _town(GovernorIntent.GET_RICH, {"food": 200.0, "clothing": 50.0, "wood": 200.0, "stone": 200.0, "tools": 50.0})
+## #408's second parked test, rewritten against the menus (#429).
+func test_a_project_is_chosen_carried_and_completed() -> void:
+	var town := _town(GovernorIntent.GET_RICH, {
+		"food": 200.0, "clothing": 50.0, "wood": 200.0, "stone": 200.0,
+		"tools": 50.0, "iron": 50.0,
+	})
 	var harness := _harness(town, [
 		ColonyMonth.RECKON, ColonyMonth.EXCHANGE, ColonyMonth.CONSUME,
 		ColonyMonth.BUILD, ColonyMonth.SETTLE,
@@ -322,63 +471,72 @@ func parked_test_a_project_is_chosen_carried_and_completed() -> void:
 		_run_month(harness)
 
 	assert_not_empty(harness["context"].log.of_type(ObjectiveSelector.EVENT_CHOSEN))
-	# **A project, not specifically a building.** Which one the governor picks is
-	# his business and moves with the price list — a town attending to profit
-	# plants a cash crop when cash crops are worth planting. What this test is
-	# about is that whatever he picked got finished.
+	# **A project, not specifically a building.** Which one is the menu's
+	# business and the Author's to reorder. What this test is about is that
+	# whatever the walk took got finished.
 	assert_not_empty(harness["context"].log.of_type(BuildPhase.EVENT_COMPLETED),
-		"eight months and a full granary finished nothing at all")
+		"eight months and a full timber yard finished nothing at all")
 
 
-## ⏸ **Parked** (#408). With the crane gone (#327) a governor of any intent can
-## reach a foundry, and the selector scores it without looking at the town, so
-## this fails — rightly. It waits on the Author's rework of governor agendas and
-## goes back to `test_` then. Renamed rather than deleted so the claim is kept.
-func parked_test_something_other_than_a_building_can_win_the_board() -> void:
-	# **Every kind of objective has to be able to win**, or governors only ever
-	# write about construction.
-	#
-	# Settling used to be the posture case here, because gathering an
-	# expedition's stores was something a town could do and founding was not.
-	# It is a **project** since #175 — it has a target and it completes — so the
-	# posture case is a town told to stockpile instead.
-	# **Large enough to spare anybody.** A town of eight cannot send four people
-	# and keep a town behind, so the expedition is not on its board at all — which
-	# is the rule working, and would have made this test about the wrong thing.
-	var town := _town()
-	town.workers = 24
-	var harness := _harness(town)
-	assert_true(Expedition.may_launch(town), "the fixture town cannot mount an expedition")
+## #408's third parked test, rewritten against the menus (#429). The objective
+## that is not a building is now the shared fallback itself.
+func test_a_town_with_nothing_wanted_holds_no_building() -> void:
+	# 🔒 §3: when nothing on the menu is taken, the objective is *no
+	# building* — not a construction, and with no tile.
+	AgendaMenu.load_from({"intents": [{"id": "go_tall", "menu": [
+		{"objective": "granary", "when": [{"is": "population_at_least", "n": 1_000_000}]},
+	]}]})
+	var town := _town(GovernorIntent.GO_TALL, {"food": 200.0, "clothing": 50.0})
+	var harness := _harness(town, [ColonyMonth.SETTLE])
+	_run_month(harness)
 
-	var settling := ObjectiveSelector.choose(town, GovernorIntent.GO_WIDE, harness["context"])
-	assert_false(Building.has(StringName(settling["id"])),
-		"a governor set on settling chose to build '%s'" % settling["id"])
-	assert_eq(settling["target"], Vector2i(-1, -1), "a project without a tile was given one")
+	assert_eq(String(town.objective), String(AgendaMenu.NO_BUILDING))
+	assert_eq(Objective.kind_of(town.objective), Objective.NO_BUILDING)
+	assert_eq(town.objective_target, Vector2i(-1, -1), "the fallback was given a tile")
+	assert_false(Objective.display_name(town.objective).is_empty(),
+		"the fallback has no name a governor could write about")
 
 
-func test_a_posture_neither_completes_nor_stalls() -> void:
-	# It stands until the intent it serves changes, which is what makes it a
-	# posture rather than a project nobody finishes.
+func test_no_building_takes_a_menu_item_the_first_settle_its_gate_opens() -> void:
+	# 🔒 §3: *no building* **does not hold.** The menu is walked again every
+	# Settle, and the month a gate opens is the month the town takes it.
+	AgendaMenu.load_from({"intents": [{"id": "go_tall", "menu": [
+		{"objective": "granary", "when": [{"is": "population_at_least", "n": 50_000}]},
+	]}]})
+	var town := _town(GovernorIntent.GO_TALL, {"food": 400.0, "clothing": 100.0})
+	var harness := _harness(town, [ColonyMonth.SETTLE])
+	_run_month(harness)
+	_run_month(harness)
+	assert_eq(String(town.objective), String(AgendaMenu.NO_BUILDING))
+	assert_eq(harness["context"].log.of_type(ObjectiveSelector.EVENT_CHOSEN).size(), 1,
+		"a second month of the fallback was reported as a fresh choice")
+
+	town.workers = 50_000
+	_run_month(harness)
+	assert_eq(String(town.objective), "granary", "the gate opened and the town went on idling")
+
+
+func test_no_building_is_walked_again_and_a_building_is_held() -> void:
 	var town := _town(GovernorIntent.GO_TALL)
-	town.objective = &"stockpile_food"
+	town.objective = AgendaMenu.NO_BUILDING
 	town.objective_intent = GovernorIntent.GO_TALL
-	town.objective_idle_months = 99
-	var harness := _harness(town)
+	assert_eq(String(Reconsideration.verdict(town)), String(Reconsideration.OPEN),
+		"the fallback was held like a project")
 
-	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.NONE),
-		"a standing order was called stalled")
+	town.objective = &"granary"
+	assert_eq(String(Reconsideration.verdict(town)), String(Reconsideration.NONE),
+		"a project was reopened while its intent stood")
 
 	town.intent = GovernorIntent.MILITARY
-	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.INTENT_CHANGED),
-		"a standing order outlived the intent it stood for")
+	assert_eq(String(Reconsideration.verdict(town)), String(Reconsideration.INTENT_CHANGED),
+		"a project outlived the intent it stood for")
 
 
-# --- 🔒 No oscillation ------------------------------------------------------
+# --- 🔒 Held until complete or the intent changes -------------------------
 
 func test_a_town_does_not_oscillate() -> void:
-	# **Stickiness falls out of the three tests, not out of a switching margin.**
-	# A town making progress on a sensible project simply carries on, so months
-	# of running produce far fewer changes of mind than months.
+	# A town making progress simply carries on, so months of running produce no
+	# abandoned projects at all.
 	# **Iron is a build cost since `buildings.md` §5.** Without it in the stores
 	# a town with "everything it needed" could not finish anything it chose, and
 	# this test would be measuring that instead of oscillation.
@@ -399,9 +557,8 @@ func test_a_town_does_not_oscillate() -> void:
 
 
 func test_gathering_is_not_a_stall() -> void:
-	# A town buying its tools a few at a time is getting somewhere. Counting
-	# those months would have it give up on everything expensive and then give up
-	# on the replacement for exactly the same reason, for ever.
+	# A town buying its tools a few at a time is getting somewhere, and the idle
+	# count a letter reads says so.
 	var town := _town(GovernorIntent.GET_RICH)
 	town.objective = &"granary"
 	town.objective_intent = GovernorIntent.GET_RICH
@@ -415,25 +572,27 @@ func test_gathering_is_not_a_stall() -> void:
 	assert_eq(town.objective_idle_months, 1, "a month that put nothing in was not counted")
 
 
-func test_a_town_that_is_really_going_nowhere_gives_up() -> void:
+func test_a_town_going_nowhere_keeps_its_objective() -> void:
+	# 🔒 §3: *a town that goes broke keeps the objective and makes no
+	# progress — too bad.* No stall detection and no crisis override: ten years
+	# of nothing, hungry and penniless, is still the church.
 	var town := _town(GovernorIntent.GET_RICH)
 	town.objective = &"church"
 	town.objective_intent = GovernorIntent.GET_RICH
-	town.objective_idle_months = Reconsideration.SOFT_STALL_MONTHS
-	var harness := _harness(town)
+	town.objective_idle_months = 120
+	town.spend_share(1.0)
+	var harness := _harness(town, [ColonyMonth.BUILD, ColonyMonth.SETTLE])
+	for _month in 3:
+		_run_month(harness)
 
-	assert_true(Reconsideration.soft_stalled(town))
-	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.SOFT_STALL))
+	assert_eq(String(town.objective), "church", "a town gave up for want of progress")
+	assert_empty(harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED))
 
-
-# --- 🔒 Sunk progress -------------------------------------------------------
 
 ## A build with `share` of its materials already in the frame.
 ##
-## **Materials, not months** (#148). This used to invest the whole cost and then
-## set a month count, because progress was half one and half the other; now the
-## materials *are* the progress, so investing everything makes a finished build
-## rather than a half-raised one.
+## **Materials, not months** (#148): the materials *are* the progress, so
+## investing everything makes a finished build rather than a half-raised one.
 func _part_built(objective: StringName, share: float) -> Town:
 	var town := _town(GovernorIntent.GET_RICH)
 	town.objective = objective
@@ -447,14 +606,42 @@ func _part_built(objective: StringName, share: float) -> Town:
 	return town
 
 
-func test_a_routine_change_of_intent_does_not_abandon_a_project_underway() -> void:
-	var town := _part_built(&"granary", 0.5)
-	var harness := _harness(town)
-	assert_true(Objective.progress_fraction(town) > Reconsideration.ROUTINE_SUNK)
+func test_a_change_of_intent_ends_even_a_project_most_of_the_way_up() -> void:
+	# 🔒 §3: held until complete **or the intent changes**. There is no
+	# sunk-cost exception, and the timber already in the frame is lost.
+	var town := _part_built(&"church", 0.9)
+	AgendaMenu.load_from({"intents": [
+		{"id": "get_rich", "menu": [{"objective": "church"}]},
+		{"id": "military", "menu": [{"objective": "stockade"}]},
+	]})
+	var harness := _harness(town, [ColonyMonth.SETTLE])
+	town.intent = GovernorIntent.MILITARY
+	_run_month(harness)
 
+	var events: Array = harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED)
+	assert_eq(events.size(), 1, "a change of intent left the project standing")
+	assert_eq(String(events[0].payload["reason"]), String(Reconsideration.INTENT_CHANGED))
+	assert_eq(String(town.objective), "stockade")
+
+
+func test_a_new_intent_that_wants_the_same_building_carries_on_with_it() -> void:
+	# Both menus name the granary. Tearing down a frame to raise the same frame
+	# would forfeit the timber for nothing, so the town keeps building and the
+	# project now serves the new intent (assumption recorded on #429).
+	var town := _part_built(&"granary", 0.5)
+	AgendaMenu.load_from({"intents": [
+		{"id": "get_rich", "menu": [{"objective": "granary"}]},
+		{"id": "go_tall", "menu": [{"objective": "granary"}]},
+	]})
+	var invested := town.invested(&"wood")
+	var harness := _harness(town, [ColonyMonth.SETTLE])
 	town.intent = GovernorIntent.GO_TALL
-	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.NONE),
-		"a change of priorities threw away a project most of the way up")
+	_run_month(harness)
+
+	assert_eq(String(town.objective), "granary")
+	assert_eq(String(town.objective_intent), String(GovernorIntent.GO_TALL))
+	assert_almost_eq(town.invested(&"wood"), invested, 0.001, "the frame was torn down and begun again")
+	assert_empty(harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED))
 
 
 func test_abandoning_forfeits_what_was_invested() -> void:

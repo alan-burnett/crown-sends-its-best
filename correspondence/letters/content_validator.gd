@@ -1159,6 +1159,10 @@ func check_agendas(content: ContentDatabase) -> void:
 			if push < -1.0 or push > 1.0:
 				_problem(path + "." + String(intent), "%s is outside -1 to +1" % push)
 
+	_file = "data/colony/agendas.json"
+	for entry in record.get("intents", []):
+		_check_menu(String(entry.get("id", "")), entry.get("menu", null))
+
 	for id in content.ids("letters"):
 		var letter: Dictionary = content.collection("letters")[id]
 		_file = String(letter.get(JsonLoader.SOURCE_KEY, id))
@@ -1171,6 +1175,71 @@ func check_agendas(content: ContentDatabase) -> void:
 				if not GovernorIntent.pc_may_urge(urged):
 					_problem("options.%s" % option.get("id", "?"),
 						"urges '%s', which the PC may not ask for" % urged)
+
+
+## 🔒 **A menu the walk can read** (#429, `governor-agendas.md` §12): every
+## objective is a building or a slot the registry knows, every condition is
+## registered and its params typed, a slot's own params are its own, and **every
+## building's prerequisites sit higher on the same menu** — or the building
+## could never be reached, and nothing would say so.
+func _check_menu(intent: String, menu: Variant) -> void:
+	var path := "intents.%s.menu" % intent
+	if typeof(menu) != TYPE_ARRAY:
+		_problem(path, "expected a menu: an array of entries")
+		return
+	var above: Dictionary = {}
+	for index in (menu as Array).size():
+		var entry: Variant = menu[index]
+		var at := "%s[%d]" % [path, index]
+		if typeof(entry) != TYPE_DICTIONARY:
+			_problem(at, "expected an object with an objective")
+			continue
+		var objective := StringName(entry.get("objective", ""))
+		if AgendaMenu.is_slot(objective):
+			var takes: Dictionary = AgendaMenu.SLOTS[String(objective)]["params"]
+			for key in entry:
+				if key == "objective" or key == "when":
+					continue
+				if not takes.has(key):
+					_problem(at, "'%s' takes no '%s'" % [objective, key])
+				elif String(takes[key]) == "scorer" and not AgendaMenu.SCORERS.has(String(entry[key])):
+					_problem(at, "'%s' is not a scorer (%s)" % [entry[key], ", ".join(AgendaMenu.SCORERS)])
+				elif String(takes[key]) == "number" and typeof(entry[key]) not in [TYPE_INT, TYPE_FLOAT]:
+					_problem(at, "'%s' must be a number" % key)
+		elif Building.has(objective):
+			for key in entry:
+				if key != "objective" and key != "when":
+					_problem(at, "a building takes no '%s'" % key)
+			for required in Building.find(objective).requires:
+				if not above.has(String(required)):
+					_problem(at, "'%s' needs '%s', which is not above it on this menu" % [objective, required])
+		else:
+			_problem(at, "'%s' is neither a building nor a slot" % objective)
+		for condition in entry.get("when", []):
+			_check_menu_condition(at, condition)
+		above[String(objective)] = true
+
+
+func _check_menu_condition(at: String, condition: Variant) -> void:
+	if typeof(condition) != TYPE_DICTIONARY:
+		_problem(at + ".when", "expected {is, params...}")
+		return
+	var id := String(condition.get("is", ""))
+	if not AgendaMenu.CONDITIONS.has(id):
+		_problem(at + ".when", "'%s' is not a condition (%s)" % [id,
+			", ".join(PackedStringArray(AgendaMenu.CONDITIONS.keys()))])
+		return
+	var takes: Dictionary = AgendaMenu.CONDITIONS[id]
+	for key in takes:
+		if not condition.has(key):
+			_problem(at + ".when." + id, "is missing '%s'" % key)
+		elif String(takes[key]) == "number" and typeof(condition[key]) not in [TYPE_INT, TYPE_FLOAT]:
+			_problem(at + ".when." + id, "'%s' must be a number" % key)
+		elif String(takes[key]) == "resource" and not ResourceCatalogue.has(StringName(condition[key])):
+			_problem(at + ".when." + id, "'%s' is not a resource" % condition[key])
+	for key in condition:
+		if key != "is" and not takes.has(key):
+			_problem(at + ".when." + id, "has no param '%s'" % key)
 
 
 # --- 🔒 Cutscenes (#299, `cutscenes.md` §5) ------------------------------------

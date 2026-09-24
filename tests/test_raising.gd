@@ -78,21 +78,6 @@ func test_raising_is_an_objective_the_data_names() -> void:
 		"the objective has no name a governor could write about")
 
 
-func test_a_governor_weighs_it_against_everything_else() -> void:
-	# 🔒 §1: *scored through the deliberation kernel against every building and
-	# improvement he could choose instead.*
-	var run := _run()
-	var town := _town(run, 40_000, 60.0)
-	var offered := PackedStringArray()
-	for candidate in ObjectiveSelector.candidates(
-			town, _context(run), GovernorIntent.MILITARY):
-		offered.append(String(candidate["id"]))
-	assert_true(offered.has(String(_raising_id())),
-		"a governor bent on defence was never offered a company")
-	assert_true(offered.size() > 3,
-		"it was the only thing on offer, so nothing was weighed against it")
-
-
 func test_nothing_bypasses_the_objective_system() -> void:
 	# A second path would be one nobody could decline. `Build` is the only caller.
 	var callers := PackedStringArray()
@@ -123,12 +108,9 @@ func test_a_town_at_the_floor_offers_it_at_all() -> void:
 	assert_false(Raising.may_raise(town),
 		"a town with nobody to spare would still raise a company")
 
-	var offered := PackedStringArray()
-	for candidate in ObjectiveSelector.candidates(
-			town, _context(run), GovernorIntent.MILITARY):
-		offered.append(String(candidate["id"]))
-	assert_false(offered.has(String(_raising_id())),
-		"it was offered to a town that cannot raise one")
+	var chosen := ObjectiveSelector.choose(town, GovernorIntent.MILITARY, _context(run))
+	assert_false(Objective.kind_of(StringName(chosen["id"])) == Objective.COMPANY,
+		"a town that cannot raise a company took one")
 
 
 func test_a_rebel_town_raises_nothing_this_way() -> void:

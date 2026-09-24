@@ -433,8 +433,6 @@ func test_a_policy_names_no_project() -> void:
 	# SPEC §8.5 locks that the PC cannot name a project, and a policy names none
 	# — it is a rule the recipient follows until told otherwise.
 	for id in PolicyEffects.ALL:
-		assert_false(Objective.is_posture(StringName(id)),
-			"the policy effect '%s' is a posture wearing a policy's coat" % id)
 		assert_false(Building.find(StringName(id)) != null,
 			"the policy effect '%s' is a project the PC may not name" % id)
 		assert_false(GovernorIntent.is_intent(StringName(id)),

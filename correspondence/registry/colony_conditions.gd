@@ -36,7 +36,7 @@ static func register_all() -> void:
 		"town_is_building", {}, ColonyConditions.town_is_building
 	)
 	ContentRegistry.register_condition(
-		"town_holds_a_posture", {}, ColonyConditions.town_holds_a_posture
+		"town_holds_no_building", {}, ColonyConditions.town_holds_no_building
 	)
 	ContentRegistry.register_condition(
 		"town_objective_is_new", {}, ColonyConditions.town_objective_is_new
@@ -850,9 +850,9 @@ static func town_is_building(_args: Dictionary, context: LetterContext) -> bool:
 	return context.town != null and Objective.completes(context.town.objective)
 
 
-## Whether the town is under a standing order instead.
-static func town_holds_a_posture(_args: Dictionary, context: LetterContext) -> bool:
-	return context.town != null and Objective.is_posture(context.town.objective)
+## Whether nothing on the menu was worth building, so the town works its land.
+static func town_holds_no_building(_args: Dictionary, context: LetterContext) -> bool:
+	return context.town != null and context.town.objective == AgendaMenu.NO_BUILDING
 
 
 ## Whether the objective was settled on this month and nothing has been done

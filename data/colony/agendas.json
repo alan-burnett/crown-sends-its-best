@@ -1,6 +1,6 @@
 {
   "id": "agendas",
-  "note": "The six intents, what each keeps in store, and what moves a governor toward each (governor-agendas.md sections 2, 11, 13). Stocks are per thousand people; the considerations table is the Author's: a row measures how much of a problem one thing is in the town, nought to one, and a cell is how strongly that problem at its worst pushes toward an intent. Education has no cells, since only an urging reaches it. #429 adds each intent's menu.",
+  "note": "The six intents, what each keeps in store, what each builds, and what moves a governor toward each (governor-agendas.md sections 2, 3, 7, 11, 12, 13). Stocks are per thousand people. A menu is walked top to bottom and the first entry that is wanted (every 'when' holds), reachable, placeable and not already built is taken; nothing taken is 'no building', which is implicit at the end of every menu. Conditions are ids in the code-side registry. The considerations table is the Author's: a row measures how much of a problem one thing is in the town, nought to one, and a cell is how strongly that problem at its worst pushes toward an intent. Education has no cells, since only an urging reaches it. Every threshold is a placeholder.",
   "intents": [
     {
       "id": "go_tall",
@@ -10,7 +10,132 @@
         "wood": 1.5,
         "stone": 1.0,
         "clothing": 0.4
-      }
+      },
+      "menu": [
+        {
+          "objective": "thick_expedition",
+          "when": [
+            {
+              "is": "expeditions_launched_below",
+              "n": 2
+            },
+            {
+              "is": "population_at_least",
+              "n": 8000
+            }
+          ]
+        },
+        {
+          "objective": "improvement",
+          "choose": "tall",
+          "when": [
+            {
+              "is": "improvements_per_thousand_below",
+              "n": 0.4
+            }
+          ]
+        },
+        {
+          "objective": "scouting_company",
+          "when": [
+            {
+              "is": "unexplored_within",
+              "n": 8
+            },
+            {
+              "is": "companies_out_below",
+              "n": 1
+            }
+          ]
+        },
+        {
+          "objective": "granary"
+        },
+        {
+          "objective": "dock",
+          "when": [
+            {
+              "is": "coastal"
+            }
+          ]
+        },
+        {
+          "objective": "irrigation_station"
+        },
+        {
+          "objective": "church"
+        },
+        {
+          "objective": "town_pasture"
+        },
+        {
+          "objective": "theatre"
+        },
+        {
+          "objective": "library"
+        },
+        {
+          "objective": "stockade"
+        },
+        {
+          "objective": "ale_house",
+          "when": [
+            {
+              "is": "no_trade_protest_on",
+              "resource": "beer"
+            },
+            {
+              "is": "quality_of_life_below",
+              "n": 0.6
+            }
+          ]
+        },
+        {
+          "objective": "tea_house",
+          "when": [
+            {
+              "is": "no_trade_protest_on",
+              "resource": "tea"
+            },
+            {
+              "is": "quality_of_life_below",
+              "n": 0.6
+            }
+          ]
+        },
+        {
+          "objective": "improve_yield"
+        },
+        {
+          "objective": "foundry",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "ore",
+              "n": 10
+            }
+          ]
+        },
+        {
+          "objective": "toolworks",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "iron",
+              "n": 4
+            }
+          ]
+        },
+        {
+          "objective": "college"
+        },
+        {
+          "objective": "cathedral"
+        },
+        {
+          "objective": "printing_press"
+        }
+      ]
     },
     {
       "id": "go_wide",
@@ -20,7 +145,103 @@
         "food": 2.0,
         "wood": 1.0,
         "tools": 0.6
-      }
+      },
+      "menu": [
+        {
+          "objective": "scouting_company",
+          "when": [
+            {
+              "is": "unexplored_within",
+              "n": 8
+            },
+            {
+              "is": "companies_out_below",
+              "n": 1
+            }
+          ]
+        },
+        {
+          "objective": "lean_expedition",
+          "when": [
+            {
+              "is": "outgrows_the_colony",
+              "offset": 2,
+              "factor": 2
+            }
+          ]
+        },
+        {
+          "objective": "improvement",
+          "choose": "wide",
+          "when": [
+            {
+              "is": "improvements_per_thousand_below",
+              "n": 0.5
+            }
+          ]
+        },
+        {
+          "objective": "scouts"
+        },
+        {
+          "objective": "dock",
+          "when": [
+            {
+              "is": "coastal"
+            }
+          ]
+        },
+        {
+          "objective": "stockade"
+        },
+        {
+          "objective": "guard_towers"
+        },
+        {
+          "objective": "irrigation_station"
+        },
+        {
+          "objective": "worker_cabins"
+        },
+        {
+          "objective": "town_pasture"
+        },
+        {
+          "objective": "fairgrounds"
+        },
+        {
+          "objective": "granary"
+        },
+        {
+          "objective": "sawmill",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "wood",
+              "n": 10
+            }
+          ]
+        },
+        {
+          "objective": "stonecutters",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "stone",
+              "n": 10
+            }
+          ]
+        },
+        {
+          "objective": "windmill"
+        },
+        {
+          "objective": "river_mill"
+        },
+        {
+          "objective": "church"
+        }
+      ]
     },
     {
       "id": "get_rich",
@@ -30,7 +251,67 @@
         "wood": 1.2,
         "stone": 0.8,
         "tools": 0.4
-      }
+      },
+      "menu": [
+        {
+          "objective": "improvement",
+          "choose": "worth",
+          "when": [
+            {
+              "is": "improvements_per_thousand_below",
+              "n": 0.6
+            }
+          ]
+        },
+        {
+          "objective": "trade_conversion",
+          "choose": "worth",
+          "input_at_least": 6
+        },
+        {
+          "objective": "dock",
+          "when": [
+            {
+              "is": "coastal"
+            }
+          ]
+        },
+        {
+          "objective": "wharf"
+        },
+        {
+          "objective": "stockade"
+        },
+        {
+          "objective": "granary"
+        },
+        {
+          "objective": "church"
+        },
+        {
+          "objective": "improve_yield"
+        },
+        {
+          "objective": "foundry",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "ore",
+              "n": 10
+            }
+          ]
+        },
+        {
+          "objective": "toolworks",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "iron",
+              "n": 4
+            }
+          ]
+        }
+      ]
     },
     {
       "id": "military",
@@ -41,7 +322,86 @@
         "horses": 0.5,
         "food": 1.8,
         "stone": 1.5
-      }
+      },
+      "menu": [
+        {
+          "objective": "big_company",
+          "when": [
+            {
+              "is": "safety_below",
+              "n": 0.5
+            },
+            {
+              "is": "companies_out_below",
+              "n": 1
+            }
+          ]
+        },
+        {
+          "objective": "scouting_company",
+          "when": [
+            {
+              "is": "unexplored_within",
+              "n": 8
+            },
+            {
+              "is": "companies_out_below",
+              "n": 1
+            }
+          ]
+        },
+        {
+          "objective": "improvement",
+          "choose": "military",
+          "when": [
+            {
+              "is": "improvements_per_thousand_below",
+              "n": 0.3
+            }
+          ]
+        },
+        {
+          "objective": "stockade"
+        },
+        {
+          "objective": "guard_towers"
+        },
+        {
+          "objective": "big_company",
+          "when": [
+            {
+              "is": "companies_out_below",
+              "n": 1
+            }
+          ]
+        },
+        {
+          "objective": "trenches"
+        },
+        {
+          "objective": "palisade"
+        },
+        {
+          "objective": "scouts"
+        },
+        {
+          "objective": "granary"
+        },
+        {
+          "objective": "church"
+        },
+        {
+          "objective": "dock",
+          "when": [
+            {
+              "is": "coastal"
+            }
+          ]
+        },
+        {
+          "objective": "irrigation_station"
+        }
+      ]
     },
     {
       "id": "education",
@@ -50,7 +410,24 @@
       "stocks": {
         "wood": 1.5,
         "stone": 1.0
-      }
+      },
+      "menu": [
+        {
+          "objective": "theatre"
+        },
+        {
+          "objective": "library"
+        },
+        {
+          "objective": "college"
+        },
+        {
+          "objective": "stockade"
+        },
+        {
+          "objective": "printing_press"
+        }
+      ]
     },
     {
       "id": "prepare_for_rebellion",
@@ -62,7 +439,78 @@
         "iron": 0.6,
         "food": 2.5,
         "stone": 1.2
-      }
+      },
+      "menu": [
+        {
+          "objective": "big_company",
+          "when": [
+            {
+              "is": "companies_out_below",
+              "n": 1
+            }
+          ]
+        },
+        {
+          "objective": "stockade"
+        },
+        {
+          "objective": "mineworks",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "ore",
+              "n": 10
+            }
+          ]
+        },
+        {
+          "objective": "foundry",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "ore",
+              "n": 10
+            }
+          ]
+        },
+        {
+          "objective": "gunsmith"
+        },
+        {
+          "objective": "toolworks",
+          "when": [
+            {
+              "is": "harvested_at_least",
+              "resource": "iron",
+              "n": 4
+            }
+          ]
+        },
+        {
+          "objective": "palisade"
+        },
+        {
+          "objective": "guard_towers"
+        },
+        {
+          "objective": "trenches"
+        },
+        {
+          "objective": "armoury"
+        },
+        {
+          "objective": "theatre"
+        },
+        {
+          "objective": "library"
+        },
+        {
+          "objective": "college"
+        },
+        {
+          "objective": "printing_press"
+        }
+      ]
     }
   ],
   "considerations": {
