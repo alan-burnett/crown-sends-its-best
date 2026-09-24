@@ -1121,6 +1121,12 @@ func check_agendas(content: ContentDatabase) -> void:
 		for field in ["name", "pursuing"]:
 			if String(entry.get(field, "")).is_empty():
 				_problem(path, "has no %s" % field)
+		# How much it minds native land (#430, section 8): every tile scorer reads it.
+		var aversion: Variant = entry.get("native_aversion", null)
+		if typeof(aversion) not in [TYPE_INT, TYPE_FLOAT]:
+			_problem(path, "has no native_aversion, nought to one")
+		elif float(aversion) < 0.0 or float(aversion) > 1.0:
+			_problem(path + ".native_aversion", "%s is outside nought to one" % aversion)
 		var stocks: Variant = entry.get("stocks", {})
 		if typeof(stocks) != TYPE_DICTIONARY:
 			_problem(path, "stocks must be an object of resource -> per thousand")
@@ -1206,6 +1212,12 @@ func _check_menu(intent: String, menu: Variant) -> void:
 					_problem(at, "'%s' is not a scorer (%s)" % [entry[key], ", ".join(AgendaMenu.SCORERS)])
 				elif String(takes[key]) == "number" and typeof(entry[key]) not in [TYPE_INT, TYPE_FLOAT]:
 					_problem(at, "'%s' must be a number" % key)
+			# A slot that is scored must say how (#430): with no scorer it could
+			# never be placed, and nothing would say so.
+			if AgendaMenu.SLOT_SCORERS.has(String(objective)):
+				var allowed: Array = AgendaMenu.SLOT_SCORERS[String(objective)]
+				if not allowed.has(String(entry.get("choose", ""))):
+					_problem(at, "'%s' must choose with one of %s" % [objective, ", ".join(PackedStringArray(allowed))])
 		elif Building.has(objective):
 			for key in entry:
 				if key != "objective" and key != "when":

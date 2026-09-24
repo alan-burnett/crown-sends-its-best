@@ -297,7 +297,7 @@ func test_the_walk_takes_the_first_entry_that_passes_every_test() -> void:
 		{"objective": "granary", "when": [{"is": "population_at_least", "n": 1_000_000}]},
 		# Not reachable: nothing in reach grows iron, and there is no money.
 		{"objective": "foundry"},
-		# Not placeable, until #430 builds its slot.
+		# Not placeable: nothing was harvested, so nothing would add to it.
 		{"objective": "improve_yield"},
 		# Already built.
 		{"objective": "church"},
@@ -406,16 +406,14 @@ func test_a_military_town_reaches_its_defences() -> void:
 		"a governor set on defence chose '%s'" % chosen["id"])
 
 
-## ⏸ **Parked until #430**, which builds the improvement slot and its tile
-## scorers (`governor-agendas.md` §5, §8). Until then the walk skips the slot as
-## not placeable (#429), so no improvement is ever on offer. Renamed rather than
-## deleted so the claim is kept.
-func parked_test_the_governor_chooses_the_tile() -> void:
+func test_the_governor_chooses_the_tile() -> void:
 	# SPEC §11.4 locks it, and `tools/lint.gd` fails if anything outside sim/
 	# writes a town's objective or its target. Here: an improvement objective
 	# arrives with a tile already chosen, and it is one the town can reach.
+	# **A month's work first**, because a tile is judged by what it gave (#430).
 	var town := _town()
-	var harness := _harness(town)
+	var harness := _harness(town, [ColonyMonth.WORK])
+	_run_month(harness)
 	var sited := ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])
 	assert_eq(Objective.kind_of(StringName(sited["id"])), Objective.IMPROVEMENT,
 		"no improvement was ever on offer")
@@ -424,12 +422,12 @@ func parked_test_the_governor_chooses_the_tile() -> void:
 		"the chosen tile is outside the town's reach")
 
 
-## ⏸ **Parked until #430**, with the test above.
-func parked_test_the_tile_choice_is_deterministic() -> void:
+func test_the_tile_choice_is_deterministic() -> void:
 	var first: Variant = null
 	for _attempt in 3:
 		var town := _town(GovernorIntent.GO_TALL)
-		var harness := _harness(town)
+		var harness := _harness(town, [ColonyMonth.WORK])
+		_run_month(harness)
 		var sited := ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])
 		assert_eq(Objective.kind_of(StringName(sited["id"])), Objective.IMPROVEMENT)
 		if first == null:

@@ -96,6 +96,11 @@ static func crown(resource: StringName, state: WorldState = null) -> float:
 ##
 ## Not zero, only because a valuation at zero would let a town pay duty to be rid
 ## of something. Tuning (§10).
+##
+## **Per unit as authored**, so for livestock it is a thousandth of this a head
+## (`population.md` §4, `ResourceCatalogue.per_unit`). Left absolute, a sheep
+## nobody wanted was worth eighteen times its own base, and a town ranked horses
+## ten times too high at market (#430 found it).
 const SURPLUS_FLOOR: float = 0.25
 
 
@@ -138,7 +143,7 @@ static func town(resource: StringName, desired: DesiredStock, held: float) -> fl
 	var shortfall := 1.0 if desired.leans_toward(resource) \
 		else clampf((wanted - held) / maxf(wanted, 1.0), -1.0, 1.0)
 	var need := base * desired.reach_of(resource) * shortfall
-	return maxf(SURPLUS_FLOOR, base + need)
+	return maxf(SURPLUS_FLOOR / ResourceCatalogue.per_unit(resource), base + need)
 
 
 # --- The natives ------------------------------------------------------------

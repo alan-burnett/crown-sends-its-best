@@ -198,19 +198,32 @@ func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
 
 ## What the town's herds eat, over what its pasture supports.
 func _feed_required(town: Town, context: ColonyContext) -> float:
-	# Stock graze on pasture improvements in the town's reach, and shelter in
-	# what the town has built. Both are capacity; neither is grain.
+	var total := 0.0
+	var unsupported := unsupported_head(town, context)
+	for id in unsupported:
+		total += float(unsupported[id]) * ResourceCatalogue.feed_of(StringName(id))
+	return total
+
+
+## The head of each kind that no pasture supports, so the town feeds them grain.
+##
+## Stock graze on pasture improvements in the town's reach, and shelter in what
+## the town has built. Both are capacity; neither is grain. **The cheapest beasts
+## graze first.** Public because a governor weighing a pasture asks exactly this
+## (`governor-agendas.md` §5, #430), and a second answer would be a second rule.
+static func unsupported_head(town: Town, context: ColonyContext) -> Dictionary:
 	var pastured := float(Building.pasture_capacity_for(town))
 	if context.map != null:
 		for at in context.tiles_of(town):
 			pastured += float(context.map.livestock_capacity_at(at.x, at.y))
-	var total := 0.0
+	var out: Dictionary = {}
 	for id in _livestock_by_price():
 		var head := float(town.livestock_head(StringName(id)))
 		var grazing := minf(head, pastured)
 		pastured -= grazing
-		total += (head - grazing) * ResourceCatalogue.feed_of(StringName(id))
-	return total
+		if head - grazing > 0.0:
+			out[id] = head - grazing
+	return out
 
 
 ## Eat the herd, cheapest beast first, until the gap is closed.
@@ -282,7 +295,7 @@ func _starve(town: Town, unmet: float, context: ColonyContext) -> void:
 
 
 ## Livestock kinds, cheapest first, then by name.
-func _livestock_by_price() -> PackedStringArray:
+static func _livestock_by_price() -> PackedStringArray:
 	var entries: Array = []
 	for id in ResourceCatalogue.ids():
 		if ResourceCatalogue.is_livestock(StringName(id)):

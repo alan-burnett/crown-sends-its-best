@@ -1,6 +1,6 @@
 {
   "id": "agendas",
-  "note": "The six intents, what each keeps in store, what each builds, and what moves a governor toward each (governor-agendas.md sections 2, 3, 7, 11, 12, 13). Stocks are per thousand people. A menu is walked top to bottom and the first entry that is wanted (every 'when' holds), reachable, placeable and not already built is taken; nothing taken is 'no building', which is implicit at the end of every menu. Conditions are ids in the code-side registry. The considerations table is the Author's: a row measures how much of a problem one thing is in the town, nought to one, and a cell is how strongly that problem at its worst pushes toward an intent. Education has no cells, since only an urging reaches it. Every threshold is a placeholder.",
+  "note": "The six intents, what each keeps in store, what each builds, and what moves a governor toward each (governor-agendas.md sections 2, 3, 7, 11, 12, 13). Stocks are per thousand people. A menu is walked top to bottom and the first entry that is wanted (every 'when' holds), reachable, placeable and not already built is taken; nothing taken is 'no building', which is implicit at the end of every menu. Conditions are ids in the code-side registry. The considerations table is the Author's: a row measures how much of a problem one thing is in the town, nought to one, and a cell is how strongly that problem at its worst pushes toward an intent. Education has no cells, since only an urging reaches it. native_aversion is how much an intent minds building on native land, nought to one (section 8, Author ruling 422): a tile deep in it is worth 1 - aversion of the same tile outside. Every threshold is a placeholder.",
   "intents": [
     {
       "id": "go_tall",
@@ -11,6 +11,7 @@
         "stone": 1.0,
         "clothing": 0.4
       },
+      "native_aversion": 1.0,
       "menu": [
         {
           "objective": "thick_expedition",
@@ -146,6 +147,7 @@
         "wood": 1.0,
         "tools": 0.6
       },
+      "native_aversion": 0.3,
       "menu": [
         {
           "objective": "scouting_company",
@@ -252,6 +254,7 @@
         "stone": 0.8,
         "tools": 0.4
       },
+      "native_aversion": 0.5,
       "menu": [
         {
           "objective": "improvement",
@@ -323,6 +326,7 @@
         "food": 1.8,
         "stone": 1.5
       },
+      "native_aversion": 0.0,
       "menu": [
         {
           "objective": "big_company",
@@ -411,6 +415,7 @@
         "wood": 1.5,
         "stone": 1.0
       },
+      "native_aversion": 0.0,
       "menu": [
         {
           "objective": "theatre"
@@ -440,6 +445,7 @@
         "food": 2.5,
         "stone": 1.2
       },
+      "native_aversion": 0.0,
       "menu": [
         {
           "objective": "big_company",

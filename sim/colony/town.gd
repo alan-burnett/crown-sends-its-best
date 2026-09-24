@@ -187,13 +187,20 @@ var objective_intent: StringName = &""
 var objective_since: int = 0
 
 ## Months in a row the build has put in no labour. **Kept by Build, read by
-## Reconsideration**: only Build knows whether a month moved the project on.
+## hope** (`QualityOfLife.progress_of`): only Build knows whether a month moved the
+## project on. Nothing ends an objective for it (#429).
 var objective_idle_months: int = 0
 
 ## What the town's tiles gave last month, by resource (#429). Written by Work;
 ## read by the menus' `harvested_at_least`, which asks what the ground actually
 ## gave rather than what it might.
 var harvested: Dictionary = {}
+
+## And tile by tile: `"x,y"` -> resource -> what that tile gave (#430). **What an
+## improvement would have added is measured from what the tile gave**
+## (`governor-agendas.md` §5), so a farm goes only where food was harvested and a
+## tile nobody worked adds nothing to this month's harvest whatever is built on it.
+var harvested_at: Dictionary = {}
 
 ## How many expeditions this town has ever sent (#429, `expeditions_launched_below`).
 var expeditions_launched: int = 0
@@ -556,6 +563,7 @@ func to_dict() -> Dictionary:
 		"objective_since": objective_since,
 		"objective_idle_months": objective_idle_months,
 		"harvested": harvested.duplicate(),
+		"harvested_at": harvested_at.duplicate(true),
 		"expeditions_launched": expeditions_launched,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
@@ -609,6 +617,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.objective_since = int(data.get("objective_since", 0))
 	town.objective_idle_months = int(data.get("objective_idle_months", 0))
 	town.harvested = data.get("harvested", {}).duplicate()
+	town.harvested_at = data.get("harvested_at", {}).duplicate(true)
 	town.expeditions_launched = int(data.get("expeditions_launched", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()

@@ -40,7 +40,8 @@ const CONDITIONS: Dictionary = {
 ## 🔒 **The slots a menu may name besides a building** (§4, §5, §6), each with
 ## the params it takes and the ticket that makes it placeable. **Until that
 ## lands the walk skips the slot as not placeable** (#429's ruling), so a menu
-## can name it today and start using it the day it is built.
+## can name it today and start using it the day it is built. `SlotScorers`
+## fills the ones that are built (#430).
 const SLOTS: Dictionary = {
 	"scouting_company": {"params": {}, "built_by": "#432"},
 	"big_company": {"params": {}, "built_by": "#432"},
@@ -51,20 +52,31 @@ const SLOTS: Dictionary = {
 	"trade_conversion": {"params": {"choose": "scorer", "input_at_least": "number"}, "built_by": "#430"},
 }
 
-## The scorers a slot may `choose` with (§8, §9). Implemented by #430.
+## The scorers a slot may `choose` with (§8, §9), and which of them each slot
+## takes. Get rich's conversions are chosen by worth and nothing else (§9).
 const SCORERS: PackedStringArray = ["military", "tall", "wide", "worth"]
+const SLOT_SCORERS: Dictionary = {
+	"improvement": ["military", "tall", "wide", "worth"],
+	"trade_conversion": ["worth"],
+}
 
 ## Intent id -> its menu, as loaded.
 static var _menus: Dictionary = {}
 
+## Intent id -> how much it minds native land, nought to one (§8, #422).
+static var _aversions: Dictionary = {}
+
 
 static func load_from(record: Dictionary) -> void:
 	_menus = {}
+	_aversions = {}
 	for entry in record.get("intents", []):
 		var intent := String(entry.get("id", ""))
 		var menu: Variant = entry.get("menu", [])
 		if not intent.is_empty() and typeof(menu) == TYPE_ARRAY:
 			_menus[intent] = (menu as Array).duplicate(true)
+		if not intent.is_empty():
+			_aversions[intent] = clampf(float(entry.get("native_aversion", 0.0)), 0.0, 1.0)
 
 
 static func menu_of(intent: StringName) -> Array:
@@ -73,6 +85,13 @@ static func menu_of(intent: StringName) -> Array:
 
 static func is_slot(id: StringName) -> bool:
 	return SLOTS.has(String(id))
+
+
+## How much this intent minds building on native land, nought to one (§8
+## *Native land*): a tile deep in it is worth `1 − aversion` of the same tile
+## outside it.
+static func aversion_of(intent: StringName) -> float:
+	return float(_aversions.get(String(intent), 0.0))
 
 
 # --- The walk ------------------------------------------------------------------
@@ -86,9 +105,13 @@ static func walk(town: Town, intent: StringName, context: ColonyContext) -> Dict
 		if not wanted(entry, town, context):
 			continue
 		if is_slot(id):
-			# Not placeable until its ticket lands (#430, #431, #432).
-			continue
-		if not _building_is_takeable(id, town, context):
+			# Which tile, which one: scored (#430). Expeditions and companies
+			# are not placeable until #431 and #432.
+			var placed := SlotScorers.place(town, intent, entry, context)
+			if placed.is_empty():
+				continue
+			return placed
+		if not building_is_takeable(id, town, context):
 			continue
 		return {"id": id, "target": Vector2i(-1, -1)}
 	return {"id": NO_BUILDING, "target": Vector2i(-1, -1)}
@@ -104,7 +127,7 @@ static func wanted(entry: Dictionary, town: Town, context: ColonyContext) -> boo
 
 ## A building is taken when it exists, is not already standing, its
 ## prerequisites stand, and the town could get everything it costs.
-static func _building_is_takeable(id: StringName, town: Town, context: ColonyContext) -> bool:
+static func building_is_takeable(id: StringName, town: Town, context: ColonyContext) -> bool:
 	var building := Building.find(id)
 	if building == null or town.has_building(id):
 		return false

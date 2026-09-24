@@ -142,6 +142,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# it, and so does any question about whether a town's assignment is settled
 	# or reshuffling month to month (#116) — neither is answerable from a count.
 	var worked: PackedStringArray = PackedStringArray()
+	var by_tile: Dictionary = {}
 
 	for entry in work:
 		if hands >= town.workable_tiles():
@@ -154,6 +155,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 			var at: Vector2i = entry["at"]
 			worked.append("%d,%d" % [at.x, at.y])
 			_harvest(at, yields, produced)
+			by_tile[_tile_key(at)] = _yields_at(yields, at).duplicate()
 		else:
 			# **Assigned, not run.** Whether there is anything for him to work on
 			# is Convert's question, asked of the stores as they stand then.
@@ -162,8 +164,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 
 	for resource in produced:
 		town.store(StringName(resource), float(produced[resource]))
-	# What the ground gave, for the menus' gates (#429).
+	# What the ground gave, for the menus' gates (#429) and, tile by tile, for
+	# the governor's reckoning of what an improvement would add (#430).
 	town.harvested = produced.duplicate()
+	town.harvested_at = by_tile
 
 	context.log.emit(EVENT_WORKED, town.id, context.state.month, {
 		"town": String(town.id),

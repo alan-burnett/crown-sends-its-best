@@ -267,6 +267,30 @@ func test_the_validator_refuses_a_condition_it_cannot_read() -> void:
 	assert_true(_checked().ok(), "the menu did not recover, so the refusals above prove nothing")
 
 
+func test_the_validator_refuses_a_scored_slot_that_does_not_say_how() -> void:
+	# #430: a slot with no scorer could never be placed, and nothing would say so.
+	var menu := _menu("go_tall")
+	for entry in [
+		{"objective": "improvement"},
+		{"objective": "trade_conversion", "choose": "wide"},
+	]:
+		menu.push_front(entry)
+		assert_false(_checked().ok(), "%s passed" % JSON.stringify(entry))
+		menu.pop_front()
+	assert_true(_checked().ok())
+
+
+func test_the_validator_refuses_an_aversion_outside_nought_to_one() -> void:
+	var tall: Dictionary = {}
+	for entry in content.record("colony", "agendas")["intents"]:
+		if String(entry["id"]) == "go_tall":
+			tall = entry
+	tall["native_aversion"] = 1.5
+	assert_false(_checked().ok(), "an aversion of one and a half passed")
+	tall.erase("native_aversion")
+	assert_false(_checked().ok(), "an intent with no aversion passed")
+
+
 func test_no_posture_or_axis_code_remains() -> void:
 	# §1: **the axis model is retired**, and the four postures with it.
 	var gone := ["is_posture", "posture_ids", "posture_focus", "Objective.POSTURE", "building_axes",

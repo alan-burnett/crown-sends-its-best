@@ -64,6 +64,16 @@ func test_livestock_is_counted_by_the_head_and_priced_per_thousand() -> void:
 	assert_almost_eq(ResourceCatalogue.price_of(&"horses") * Population.THOUSAND, kind.price)
 
 
+func test_a_head_nobody_wants_is_worth_a_thousandth_of_a_unit_nobody_wants() -> void:
+	# The surplus floor is a town worth like any other (#430): absolute, it made
+	# an unwanted sheep worth many times its own base.
+	var nothing := DesiredStock.new()
+	assert_almost_eq(Valuation.town(&"sheep", nothing, 1_000_000.0) * Population.THOUSAND,
+		Valuation.town(&"wood", nothing, 1_000_000.0), 0.0001)
+	assert_true(Valuation.town(&"sheep", nothing, 1_000_000.0) <= ResourceCatalogue.town_base(&"sheep"),
+		"a sheep nobody wanted was worth more than a sheep")
+
+
 # --- 🔒 Shares no longer round to nothing ---------------------------------------------
 
 func test_a_share_of_thousands_loses_nobody_to_rounding() -> void:
