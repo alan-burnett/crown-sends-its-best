@@ -242,6 +242,28 @@ var commander_level: int = 0
 ## which is why this field is not called what #211 first called it.
 var order: StringName = StandingOrder.DEFEND_THE_TOWN
 
+## 🔒 **Who leads it, settled when it is raised** (#432, `governor-agendas.md`
+## §6). A scouting party is always a militia; a big company has a commander
+## unless its town was small. **This replaces the order deciding it**
+## (`commanders.md` §2) for a town's companies, so a scouting party sent to
+## explore stays a militia however far it goes. Empty for companies nobody
+## settled it for — a muster, a landing — which the order still decides.
+var led_by: StringName = &""
+
+const MILITIA: StringName = &"militia"
+const COMMANDED: StringName = &"commander"
+
+
+## Whether anybody will be deciding for it: its leadership where the raising
+## settled it, and otherwise its order (`commanders.md` §2).
+func wants_a_commander() -> bool:
+	match led_by:
+		MILITIA:
+			return false
+		COMMANDED:
+			return true
+	return StandingOrder.needs_a_commander(order)
+
 var at: Vector2i = NOWHERE
 
 ## Where it is marching. **Assigned by a standing order**, and one tile a month
@@ -404,6 +426,10 @@ func has_stood_its_time(month: int) -> bool:
 
 ## Send the survivors home (Seam A). Returns how many came back.
 ##
+## **Where it stands**, the month its term ends (`commanders.md` §3): the people
+## rejoin their town that month and nobody walks home. **Whatever arms it still
+## carries go back into the town's stores** (⚠ assumed there).
+##
 ## 🔒 **Disbanded, not destroyed.** The men go back into the town they were
 ## raised from and the company ends — and `commanders.md` §7 leans on the
 ## difference: a commander whose company stood down needs no coin flip, he simply
@@ -416,12 +442,19 @@ func stand_down(town: Town, context: ColonyContext) -> int:
 		# it — `the-provost.md` §4's rule that workers go before experts is about
 		# losses and has nothing to say about men coming home.
 		town.workers += returning
+		for resource in Company.armed_resources():
+			var carried := float(arms.get(String(resource), 0.0))
+			if carried > 0.0:
+				town.store(StringName(resource), carried)
+	var returned_arms := arms.duplicate()
+	arms = {}
 	size = 0
 	context.log.emit(EVENT_DISBANDED, id, context.state.month, {
 		"company": String(id),
 		"order": String(order),
 		"town": String(town.id) if town != null else "",
 		"returned": returning,
+		"arms": returned_arms,
 		"months": context.state.month - raised_month,
 	}, WorldPhase.RECKONING)
 	return returning
@@ -673,6 +706,7 @@ func to_dict() -> Dictionary:
 		"commander": String(commander),
 		"commander_level": commander_level,
 		"order": String(order),
+		"led_by": String(led_by),
 		"at": [at.x, at.y],
 		"destination": [destination.x, destination.y],
 		"raised_month": raised_month,
@@ -695,6 +729,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.commander = StringName(data.get("commander", ""))
 	company.commander_level = int(data.get("commander_level", 0))
 	company.order = StandingOrder.of(StringName(data.get("order", "")))
+	company.led_by = StringName(data.get("led_by", ""))
 	company.at = _vector(data.get("at", []))
 	company.destination = _vector(data.get("destination", []))
 	company.raised_month = int(data.get("raised_month", 0))

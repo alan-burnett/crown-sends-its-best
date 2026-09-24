@@ -226,13 +226,11 @@ func test_defence_raises_a_militia_that_needs_nobody() -> void:
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
 	assert_eq(company.order, StandingOrder.DEFEND_THE_TOWN)
-	assert_false(StandingOrder.needs_a_commander(company.order),
-		"a militia that never leaves was given a general")
 
 
 func test_every_company_holds_its_town_until_it_chooses_its_own_order() -> void:
 	# #428: *drive them off* went into *military*, which names no enemy; how a
-	# company picks an order that leaves is #432's. Until then, every intent's
+	# company picks an order that leaves is #434's. Until then, every intent's
 	# company holds the town.
 	var run := _run()
 	for intent in [GovernorIntent.MILITARY, GovernorIntent.SEDITION, GovernorIntent.GO_WIDE]:
@@ -292,9 +290,9 @@ func test_a_commander_is_found_when_it_is_time_to_move() -> void:
 	var town := _town(run, 40_000, 500.0)
 	town.intent = GovernorIntent.MILITARY
 	run.world.month = 5
+	# A big company from a town of forty thousand has a man (#432), whatever
+	# its order.
 	var company := Raising.raise_from(town, _context(run))
-	# An order that leaves, as #432 will give one; nothing raises it yet (#428).
-	company.order = Raising.MARCH
 	assert_true(company.is_headless(), "he was commissioned in the colony month")
 
 	var driver := CompanyDriver.new()
@@ -308,15 +306,20 @@ func test_a_commander_is_found_when_it_is_time_to_move() -> void:
 	driver.on_phase(WorldPhase.MOVEMENT, run.world, run.log, run.streams)
 
 	assert_false(company.is_headless(),
-		"a company ordered to march had nobody to march it")
+		"a big company from a town of forty thousand had nobody to lead it")
 
 
 func test_and_a_militia_is_never_given_one() -> void:
+	# A scouting party is always a militia (#432), from however large a town —
+	# **and whatever its order**: one sent off the town's ground (as #434 will
+	# send it to explore) still has nobody deciding for it.
 	var run := _run()
 	var town := _town(run, 40_000)
-	town.intent = GovernorIntent.MILITARY
+	town.intent = GovernorIntent.GO_WIDE
+	town.objective = &"scouting_company"
 	run.world.month = 5
 	var militia := Raising.raise_from(town, _context(run))
+	militia.order = Raising.MARCH
 
 	var driver := CompanyDriver.new()
 	driver.companies = run.companies
@@ -329,7 +332,108 @@ func test_and_a_militia_is_never_given_one() -> void:
 	driver.on_phase(WorldPhase.MOVEMENT, run.world, run.log, run.streams)
 
 	assert_true(militia.is_headless(),
-		"a militia behind a stockade was given a general")
+		"a scouting party was given a general")
+
+
+# --- 🔒 Small and big (#432, `governor-agendas.md` §6) --------------------------
+
+func _driver(run: RunState) -> CompanyDriver:
+	var driver := CompanyDriver.new()
+	driver.companies = run.companies
+	driver.colony = run.colony
+	driver.map = run.map
+	driver.contacts = run.contacts
+	driver.commanders = run.commanders
+	driver.run = run
+	return driver
+
+
+func test_a_big_company_from_a_town_of_5000_has_no_commander_and_from_5001_one() -> void:
+	# The worker floor is tuning (`battles.md` §1), and at the shipped figure no
+	# town of five thousand can spare a big company at all. Lowered here, so the
+	# rule under test is the only thing that differs.
+	Raising.load_from({"worker_floor": 1_000})
+	for pair in [[5_000, true], [5_001, false]]:
+		var run := _run()
+		var town := _town(run, int(pair[0]))
+		town.intent = GovernorIntent.MILITARY
+		town.objective = Raising.BIG
+		run.world.month = 5
+		var company := Raising.raise_from(town, _context(run))
+		assert_true(company != null, "a town of %d raised nothing" % pair[0])
+		run.world.month = 6
+		_driver(run).on_phase(WorldPhase.MOVEMENT, run.world, run.log, run.streams)
+		assert_eq(company.is_headless(), bool(pair[1]),
+			"a big company from a town of %d: headless is %s" % [pair[0], company.is_headless()])
+
+
+func test_a_scouting_party_is_a_tenth_of_the_town_whatever_the_floor() -> void:
+	# Sized for exploring rather than fighting (§6), so a town below the worker
+	# floor still sends one.
+	var run := _run()
+	var small := _town(run, 3_000)
+	assert_false(Raising.may_raise(small, Raising.BIG), "a town of three thousand spared a big company")
+	assert_true(Raising.may_raise(small, &"scouting_company"))
+	assert_eq(Raising.size_for(small, &"scouting_company"), 300)
+	var large := _town(run, 40_000)
+	assert_eq(Raising.size_for(large, &"scouting_company"), 4_000)
+
+
+func test_a_militia_raised_in_month_n_goes_home_at_the_end_of_its_term() -> void:
+	# `commanders.md` §3: it disbands where it stands, and its people are the
+	# town's workers again that month. Raised in a month other than nought, so
+	# the term is counted from the raising and not from the start of the run.
+	var run := _run()
+	var town := _town(run, 40_000, 20.0)
+	town.intent = GovernorIntent.GO_WIDE
+	town.objective = &"scouting_company"
+	run.world.month = 7
+	var militia := Raising.raise_from(town, _context(run))
+	var raised := militia.size
+	var armed := float(militia.arms.get("guns", 0.0))
+	var before := town.workers
+	var driver := _driver(run)
+
+	run.world.month = 7 + Company.militia_months() - 1
+	militia.was_supplied(run.world.month)
+	driver.on_phase(WorldPhase.RECKONING, run.world, run.log, run.streams)
+	assert_false(militia.is_empty(), "it went home a month early")
+
+	run.world.month = 7 + Company.militia_months()
+	militia.was_supplied(run.world.month)
+	driver.on_phase(WorldPhase.RECKONING, run.world, run.log, run.streams)
+	assert_true(militia.is_empty(), "it stood its term and stayed under arms")
+	assert_eq(town.workers, before + raised, "its people did not rejoin the town")
+	assert_true(armed > 0.0, "the fixture sent it out unarmed, so the next line proves nothing")
+	assert_almost_eq(town.held(&"guns"), 20.0, 0.001, "its muskets did not come back into the stores")
+
+
+func test_the_walk_raises_a_company_where_its_menu_says() -> void:
+	# Go wide's first move is a scouting party to *find* land (§13, Filters);
+	# a military town under threat raises a big company before anything else.
+	var run := _run()
+	var town := _town(run, 40_000)
+	var context := _context(run)
+	context.territory = Territory.compute(run.map, run.colony.in_order())
+	# Nothing seen beyond the town's own ground, and nobody in the field.
+	context.territory.visible = {}
+	context.companies = Companies.new()
+	assert_eq(String(ObjectiveSelector.choose(town, GovernorIntent.GO_WIDE, context)["id"]), "scouting_company")
+	town.safety = 0.3
+	assert_eq(String(ObjectiveSelector.choose(town, GovernorIntent.MILITARY, context)["id"]), "big_company")
+	town.rebelling = true
+	assert_false(Objective.is_company(StringName(ObjectiveSelector.choose(town, GovernorIntent.MILITARY, context)["id"])),
+		"a rebel town raised a company through the Crown's machinery")
+
+
+func test_who_leads_it_survives_the_save() -> void:
+	var run := _run()
+	var town := _town(run, 40_000)
+	town.objective = &"scouting_company"
+	var company := Raising.raise_from(town, _context(run))
+	var restored := Company.from_dict(company.to_dict())
+	assert_eq(String(restored.led_by), String(Company.MILITIA))
+	assert_false(restored.wants_a_commander(), "a reloaded scouting party wanted a general")
 
 
 func _code_of(path: String) -> String:

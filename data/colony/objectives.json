@@ -6,8 +6,18 @@
   },
   "companies": [
     {
-      "id": "raise_a_company",
-      "name": "putting men under arms"
+      "id": "scouting_company",
+      "name": "sending out a scouting party",
+      "note": "The small company go wide and go tall raise (governor-agendas.md section 6): takes_share of the town, sized for exploring rather than fighting, and always a militia.",
+      "takes_share": 0.1,
+      "led_by": "militia"
+    },
+    {
+      "id": "big_company",
+      "name": "putting men under arms",
+      "note": "Sized by what the town can spare (battles.md section 1). Led by a commander, or by nobody if the town held militia_up_to people or fewer when it was raised.",
+      "led_by": "commander",
+      "militia_up_to": 5000
     }
   ],
   "expeditions": [

@@ -70,7 +70,6 @@ static func place(town: Town, intent: StringName, entry: Dictionary, context: Co
 			return _improve_yield(town, intent, context)
 		"trade_conversion":
 			return _trade_conversion(town, float(entry.get("input_at_least", 0.0)), context)
-	# Companies are not placeable until #432.
 	return {}
 
 

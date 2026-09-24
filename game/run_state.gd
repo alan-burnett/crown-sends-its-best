@@ -14,7 +14,7 @@ extends RefCounted
 ## Bumped whenever the shape of a save changes. **During development a save from
 ## an older version is refused rather than migrated** (`CLAUDE.md`), so this
 ## going up invalidates saves, deliberately.
-const SAVE_VERSION: int = 5
+const SAVE_VERSION: int = 6
 
 ## What the Crown hands over. How the initial grant is split between people, gold
 ## and resources is a starting decision in M3 (SPEC §6.1); these are the numbers

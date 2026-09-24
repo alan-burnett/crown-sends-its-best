@@ -114,7 +114,7 @@ func _commission(context: ColonyContext) -> void:
 		var company: Company = entry
 		if company.is_empty() or not company.is_headless():
 			continue
-		if not StandingOrder.needs_a_commander(company.order):
+		if not company.wants_a_commander():
 			continue
 		Commanders.take_command(
 			company, _home_of(company), run, context)

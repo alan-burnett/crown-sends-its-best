@@ -396,10 +396,14 @@ func test_every_registered_condition_can_hold_and_can_fail() -> void:
 ## #408's first parked test, rewritten against the menus (#429).
 func test_a_military_town_reaches_its_defences() -> void:
 	# A governor who answers a threat with a sugar plantation reads as broken
-	# however sound his reasons. With no company to raise and no ground to
-	# improve, what a military town builds is a wall.
+	# however sound his reasons. With no foe to raise a company against, no
+	# country left to scout (#432) and no ground to improve, what a military town
+	# builds is a wall.
 	var town := _town()
 	var harness := _harness(town)
+	for y in harness["context"].map.height:
+		for x in harness["context"].map.width:
+			harness["context"].territory.visible[Vector2i(x, y)] = true
 	var chosen := ObjectiveSelector.choose(town, GovernorIntent.MILITARY, harness["context"])
 	var building := Building.find(StringName(chosen["id"]))
 	assert_true(building != null and float(building.effect("defence", 0.0)) > 0.0,

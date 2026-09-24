@@ -115,13 +115,17 @@ static func walk(town: Town, intent: StringName, context: ColonyContext) -> Dict
 	return {"id": NO_BUILDING, "target": Vector2i(-1, -1)}
 
 
-## Fill a slot. **An expedition is placed or it is not** (#431): a rebel town
-## never founds one (SPEC §11.4) and a town with nobody to send cannot. Which
-## tile and which one are scored (#430). Companies are not placeable until #432.
+## Fill a slot. **An expedition or a company is placed or it is not** (#431,
+## #432): a rebel town founds none (SPEC §11.4), and a town with nobody to send
+## or to spare cannot. Which tile and which one are scored (#430).
 static func _place(town: Town, intent: StringName, entry: Dictionary, context: ColonyContext) -> Dictionary:
 	var id := StringName(entry.get("objective", ""))
 	if Objective.is_expedition(id):
 		if not Expedition.may_launch(town, id):
+			return {}
+		return {"id": id, "target": Vector2i(-1, -1)}
+	if Objective.is_company(id):
+		if not Raising.may_raise(town, id):
 			return {}
 		return {"id": id, "target": Vector2i(-1, -1)}
 	return SlotScorers.place(town, intent, entry, context)

@@ -57,6 +57,7 @@ func raise_company(
 	at: Vector2i,
 	context: ColonyContext,
 	order: StringName = StandingOrder.DEFEND_THE_TOWN,
+	led_by: StringName = &"",
 ) -> Company:
 	raised += 1
 	var company := Company.new(StringName("company_%d" % raised), raised)
@@ -65,6 +66,7 @@ func raise_company(
 	company.support = support
 	company.at = at
 	company.order = StandingOrder.of(order)
+	company.led_by = led_by
 	company.raised_month = context.state.month
 	# **Copied, not referenced.** A town that handed its stockpile dictionary
 	# over would find the company spending it.
@@ -83,7 +85,7 @@ func raise_company(
 		# 🔒 **Whether anybody will be deciding for it** (#220, `commanders.md`
 		# §2). Said at the raising, because that is the moment the choice was
 		# made and the moment it can still be argued with.
-		"needs_a_commander": StandingOrder.needs_a_commander(company.order),
+		"needs_a_commander": company.wants_a_commander(),
 		"arms": company.arms.duplicate(),
 		"cavalry": company.is_cavalry(),
 		"at": [at.x, at.y],

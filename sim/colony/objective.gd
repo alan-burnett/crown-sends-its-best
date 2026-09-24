@@ -51,12 +51,12 @@ const NO_BUILDING: StringName = &"no_building"
 const EXPEDITION: StringName = &"expedition"
 
 ## 🔒 **Raising a company is an objective like any other** (#342,
-## `battles.md` §1).
+## `battles.md` §1): a scouting party or a big company, each on an intent's menu
+## with its own gate (#432, `governor-agendas.md` §6, §7).
 ##
-## Not a second path that bypasses the objective system. A town weighs a company
-## against a granary **on the same axes**, which is the only way a governor can
-## decline to raise one because the harvest matters more — and that refusal is
-## the thing that makes raising one mean something.
+## Not a second path that bypasses the objective system. Where it sits on the
+## menu is how a governor declines to raise one because something else comes
+## first — and that refusal is the thing that makes raising one mean something.
 ##
 ## It is also what keeps §11 true: the PC's instrument is *raising companies
 ## through a governor's intent*. He shifts the weights by letter and the governor
@@ -93,7 +93,12 @@ static func load_from(record: Dictionary) -> void:
 	for entry in record.get("companies", []):
 		var raising := String(entry.get("id", ""))
 		if not raising.is_empty():
-			_companies[raising] = {"name": String(entry.get("name", raising))}
+			_companies[raising] = {
+				"name": String(entry.get("name", raising)),
+				"share": clampf(float(entry.get("takes_share", 0.0)), 0.0, 1.0),
+				"led_by": StringName(entry.get("led_by", "")),
+				"militia_up_to": int(entry.get("militia_up_to", -1)),
+			}
 
 	_expeditions = {}
 	for entry in record.get("expeditions", []):
@@ -187,6 +192,22 @@ static func company_ids() -> PackedStringArray:
 
 static func is_company(id: StringName) -> bool:
 	return _companies.has(String(id))
+
+
+## The share of the town a company takes, or nought for one sized by what the
+## town can spare.
+static func company_share(id: StringName) -> float:
+	return float(_companies.get(String(id), {}).get("share", 0.0))
+
+
+## Who the data says leads a company of this kind, and up to what size of
+## town a commander's company is a militia instead (#432). `Raising` applies it.
+static func company_leadership(id: StringName) -> Dictionary:
+	var record: Dictionary = _companies.get(String(id), {})
+	return {
+		"led_by": StringName(record.get("led_by", "")),
+		"militia_up_to": int(record.get("militia_up_to", -1)),
+	}
 
 
 ## Which sort of objective this is. **An id that names nothing known is
