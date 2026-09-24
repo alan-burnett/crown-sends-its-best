@@ -8,9 +8,13 @@ extends RefCounted
 
 
 ## 🔒 **How many souls one unit of population stands for**, wherever the player
-## reads a head count — a letter, a cutscene, the run's summary. The sim counts
-## in units; a company of 2.4 is 2,400 men. The Author's figure.
+## reads a head count — a letter, a cutscene, the run's summary.
+##
+## **One, since the sim counts people** (#426, `population.md` §1). It was a
+## thousand while the sim counted in thousands and the display did the
+## multiplying; the thousand moved into the sim and this stayed as the one place
+## a display scale could be set again.
 ##
 ## Written out through `Figures.people`, never multiplied at the point of use,
 ## so there is exactly one place the two scales meet.
-const PEOPLE_PER_POPULATION: int = 1000
+const PEOPLE_PER_POPULATION: int = 1

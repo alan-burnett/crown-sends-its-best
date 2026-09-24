@@ -32,7 +32,7 @@ func after_each() -> void:
 ## dinner. It decides whether beer is even on the list.
 func _town(stock: Dictionary = {}, gold: float = 6_000.0, granary: float = 600.0) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = 20
+	town.workers = 20_000
 	town.receive_gold(gold)
 	town.store(&"food", granary)
 	town.store(&"clothing", 120.0)
@@ -258,7 +258,7 @@ func test_the_buying_side_and_the_drinking_side_value_a_cellar_alike() -> void:
 	var from_stock := QualityOfLife.pleasure_from(mouths, held)
 
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = 20
+	town.workers = 20_000
 	town.store(&"food", 600.0)
 	for id in held:
 		town.store(StringName(id), float(held[id]))

@@ -168,7 +168,7 @@ func run(
 static func kept_back_by(village: Village, resource: StringName = &"food") -> float:
 	if resource != &"food":
 		return 0.0
-	return float(village.people) * ColonyNeeds.per_head(&"food") * 2.0 * _keeps_back
+	return Population.of(ColonyNeeds.per_head(&"food"), float(village.people)) * 2.0 * _keeps_back
 
 
 ## Whether this is still a bargain either side would keep.

@@ -49,7 +49,7 @@ func _map() -> WorldMap:
 
 func _town(intent: StringName = GovernorIntent.ECONOMY, stock: Dictionary = {}) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(4, 4))
-	town.workers = 8
+	town.workers = 8_000
 	town.governor_id = &"governor_ashmere"
 	town.intent = intent
 	town.receive_gold(500.0)

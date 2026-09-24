@@ -41,7 +41,7 @@ const EVENT_LAUNCHED: StringName = &"expedition_launched"
 const SHARE_OF_PEOPLE: float = 0.25
 
 ## The fewest people worth calling an expedition.
-const FEWEST: int = 4
+const FEWEST: int = 4_000
 
 ## How far out the governor looks for new country, in tiles. Tuning.
 const REGION_DISTANCE: int = 5
@@ -74,7 +74,7 @@ static func cargo_for(town: Town, context: ColonyContext) -> Dictionary:
 
 		# It carries what the people who are leaving would want, and no more of
 		# it than the town can actually spare.
-		var wanted := float(going) * ColonyNeeds.per_head(id) * MONTHS_OF_KEEP
+		var wanted := Population.of(ColonyNeeds.per_head(id), float(going)) * MONTHS_OF_KEEP
 		if wanted <= 0.0:
 			# Not a need. A well-found expedition still takes tools and timber to
 			# build with, in proportion to what the parent can afford to lose.

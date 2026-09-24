@@ -73,7 +73,7 @@ func _deaf_to(id: StringName) -> Contact:
 ## in a world where the vote is close.
 func _town() -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(4, 4))
-	town.workers = 20
+	town.workers = 20_000
 	town.governor_id = &"gov_ashmere"
 	town.quality_of_life = 0.8
 	town.store(&"food", 400.0)
@@ -120,7 +120,7 @@ func _natives(where: Array = []) -> Tribes:
 		village.id = StringName("village_test_%d" % index)
 		village.tribe = tribe.id
 		village.at = where[index]
-		village.people = 30
+		village.people = 30_000
 		natives.villages.append(village)
 	return natives
 
@@ -230,7 +230,7 @@ func _worlds_for(id: StringName) -> Array:
 			# **Mouths against workable ground**, so the worlds are towns of very
 			# different sizes on the same country. A town of twenty with room to
 			# work is not crowded; the same country with two hundred in it is.
-			for people in [8, 20, 60, 200]:
+			for people in [8_000, 20_000, 60_000, 200_000]:
 				for month in MONTHS:
 					var packed := _town()
 					packed.workers = people

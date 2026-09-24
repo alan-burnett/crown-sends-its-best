@@ -8,23 +8,23 @@
         "rank": "rank.untried"
       },
       {
-        "casualties": 12,
+        "casualties": 12000,
         "rank": "rank.blooded"
       },
       {
-        "casualties": 40,
+        "casualties": 40000,
         "rank": "rank.steady"
       },
       {
-        "casualties": 90,
+        "casualties": 90000,
         "rank": "rank.known"
       },
       {
-        "casualties": 180,
+        "casualties": 180000,
         "rank": "rank.feared"
       },
       {
-        "casualties": 320,
+        "casualties": 320000,
         "rank": "rank.legend"
       }
     ],

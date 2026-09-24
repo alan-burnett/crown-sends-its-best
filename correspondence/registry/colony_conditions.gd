@@ -839,7 +839,7 @@ static func town_short_of(args: Dictionary, context: LetterContext) -> bool:
 	if context.town == null:
 		return false
 	var resource := StringName(args.get("resource", ""))
-	var monthly := maxf(1.0, float(context.town.population())) * ColonyNeeds.per_head(resource)
+	var monthly := context.town.mouths() * ColonyNeeds.per_head(resource)
 	if monthly <= 0.0:
 		return false
 	return context.town.held(resource) < monthly

@@ -211,7 +211,7 @@ class FoodSecurity extends Consideration:
 		var town: Town = context.get_value("town")
 		if town == null:
 			return 0.0
-		var mouths := maxf(1.0, float(town.population()))
+		var mouths := town.mouths()
 		var monthly := mouths * ColonyNeeds.per_head(&"food")
 		var months_held := town.held(&"food") / maxf(0.001, monthly)
 		var hunger := clampf(1.0 - months_held / IntentConsiderations.COMFORTABLE_MONTHS, 0.0, 1.0)
@@ -406,7 +406,7 @@ static func crowding_of(context: DeliberationContext) -> float:
 ## **The shared open item** between `founding-towns.md` §11 and
 ## `immigration.md` §10 — how crowded before a town starts shedding people — and
 ## it wants tuning against the two together rather than being settled here.
-const COMFORTABLE_MOUTHS_PER_TILE: float = 2.0
+const COMFORTABLE_MOUTHS_PER_TILE: float = 2_000.0
 
 
 ## What the Crown appointed him to do (SPEC §6.1).

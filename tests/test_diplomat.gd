@@ -354,7 +354,7 @@ func test_an_attack_that_leaves_a_crowd_is_survivable() -> void:
 		)
 		context.colony = _colony([town])
 		var him := _him(town, 90.0)
-		if not Diplomat.attack_took_him(him, town, 200, context):
+		if not Diplomat.attack_took_him(him, town, 200_000, context):
 			survived += 1
 	assert_true(survived > 0, "an attack on a town of two hundred killed him every time")
 

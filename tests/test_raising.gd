@@ -51,7 +51,8 @@ func _context(run: RunState) -> ColonyContext:
 	return context
 
 
-func _town(run: RunState, workers: int = 40, guns: float = 0.0) -> Town:
+## Sizes are people (#426): a town of forty is 40,000.
+func _town(run: RunState, workers: int = 40_000, guns: float = 0.0) -> Town:
 	var town := run.colony.in_order()[0]
 	town.workers = workers
 	town.experts = {}
@@ -81,7 +82,7 @@ func test_a_governor_weighs_it_against_everything_else() -> void:
 	# 🔒 §1: *scored through the deliberation kernel against every building and
 	# improvement he could choose instead.*
 	var run := _run()
-	var town := _town(run, 40, 60.0)
+	var town := _town(run, 40_000, 60.0)
 	var offered := PackedStringArray()
 	for candidate in ObjectiveSelector.candidates(
 			town, _context(run), GovernorIntent.DEFENCE):
@@ -109,9 +110,9 @@ func test_nothing_bypasses_the_objective_system() -> void:
 
 func test_a_town_of_twelve_may_not_put_ten_under_arms() -> void:
 	var run := _run()
-	var town := _town(run, 12)
+	var town := _town(run, 12_000)
 	var size := Raising.size_for(town)
-	assert_true(size < 10, "a town of twelve raised %d men" % size)
+	assert_true(size < 10_000, "a town of twelve thousand raised %d men" % size)
 	assert_true(town.workers - size >= Raising.worker_floor(),
 		"it kept %d workers" % [town.workers - size])
 
@@ -132,7 +133,7 @@ func test_a_town_at_the_floor_offers_it_at_all() -> void:
 
 func test_a_rebel_town_raises_nothing_this_way() -> void:
 	var run := _run()
-	var town := _town(run, 40)
+	var town := _town(run, 40_000)
 	town.rebelling = true
 	assert_false(Raising.may_raise(town))
 
@@ -141,13 +142,13 @@ func test_a_rebel_town_raises_nothing_this_way() -> void:
 
 func test_the_men_come_out_of_the_workers() -> void:
 	var run := _run()
-	var town := _town(run, 40)
+	var town := _town(run, 40_000)
 	town.add_experts(&"tobacco", 8)
 	run.world.month = 5
 
 	var company := Raising.raise_from(town, _context(run))
 	assert_true(company != null, "nobody was raised")
-	assert_eq(town.workers + company.size, 40,
+	assert_eq(town.workers + company.size, 40_000,
 		"%d workers left and %d under arms" % [town.workers, company.size])
 	assert_eq(town.expert_count(&"tobacco"), 8,
 		"a town sent its smith to carry a musket")
@@ -172,7 +173,7 @@ func test_and_a_company_is_never_larger_than_the_spare_workers() -> void:
 	# What makes the above structural. If this stops holding, the expert guard
 	# above is the only thing left.
 	var run := _run()
-	for workers in [7, 12, 20, 40, 200]:
+	for workers in [7_000, 12_000, 20_000, 40_000, 200_000]:
 		var town := _town(run, workers)
 		assert_true(Raising.size_for(town) <= Raising.spare_workers(town),
 			"a town of %d would raise %d from %d spare"
@@ -183,7 +184,7 @@ func test_and_they_go_all_at_once() -> void:
 	# 🔒 `CLAUDE.md`'s one-at-a-time rule governs hardship. Enlistment is a
 	# decision, and a company raised one man a month would never assemble.
 	var run := _run()
-	var town := _town(run, 40)
+	var town := _town(run, 40_000)
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
 	assert_true(company.size > 1, "only one man enlisted")
@@ -198,14 +199,14 @@ func test_a_town_that_stockpiled_guns_launches_an_armed_company() -> void:
 	# a governor under `drive_them_off` bought guns, held them, and never used
 	# them.
 	var run := _run()
-	var armed := _town(run, 40, 500.0)
+	var armed := _town(run, 40_000, 500.0)
 	run.world.month = 5
 	var good := Raising.raise_from(armed, _context(run))
 	assert_true(good.armed_share(&"guns") > 0.9,
 		"a warehouse full of muskets armed nobody")
 
 	var other := _run()
-	var bare := _town(other, 40, 0.0)
+	var bare := _town(other, 40_000, 0.0)
 	other.world.month = 5
 	var mob := Raising.raise_from(bare, _context(other))
 	assert_almost_eq(mob.armed_share(&"guns"), 0.0, 0.0001,
@@ -214,7 +215,7 @@ func test_a_town_that_stockpiled_guns_launches_an_armed_company() -> void:
 
 func test_the_arms_come_out_of_the_warehouse() -> void:
 	var run := _run()
-	var town := _town(run, 40, 500.0)
+	var town := _town(run, 40_000, 500.0)
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
 	assert_almost_eq(company.held(&"guns") + town.held(&"guns"), 500.0, 0.001,
@@ -226,7 +227,7 @@ func test_it_takes_no_more_than_a_head_wants() -> void:
 	# 🔒 §2: surplus does nothing. A town with ten thousand muskets does not send
 	# them all.
 	var run := _run()
-	var town := _town(run, 40, 10_000.0)
+	var town := _town(run, 40_000, 10_000.0)
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
 	assert_true(company.held(&"guns")
@@ -238,7 +239,7 @@ func test_it_takes_no_more_than_a_head_wants() -> void:
 
 func test_defence_raises_a_militia_that_needs_nobody() -> void:
 	var run := _run()
-	var town := _town(run, 40)
+	var town := _town(run, 40_000)
 	town.intent = GovernorIntent.DEFENCE
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
@@ -249,7 +250,7 @@ func test_defence_raises_a_militia_that_needs_nobody() -> void:
 
 func test_driving_them_off_raises_one_that_leaves() -> void:
 	var run := _run()
-	var town := _town(run, 40)
+	var town := _town(run, 40_000)
 	town.intent = GovernorIntent.DRIVE_OFF
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
@@ -260,7 +261,7 @@ func test_driving_them_off_raises_one_that_leaves() -> void:
 
 func test_preparing_for_rebellion_raises_a_militia() -> void:
 	var run := _run()
-	var town := _town(run, 40)
+	var town := _town(run, 40_000)
 	town.intent = GovernorIntent.SEDITION
 	run.world.month = 5
 	assert_eq(Raising.raise_from(town, _context(run)).order,
@@ -281,7 +282,7 @@ func test_the_order_is_not_a_separate_choice() -> void:
 
 func test_finishing_the_objective_puts_men_under_arms() -> void:
 	var run := _run()
-	var town := _town(run, 40, 500.0)
+	var town := _town(run, 40_000, 500.0)
 	town.objective = _raising_id()
 	town.objective_intent = GovernorIntent.DEFENCE
 	town.objective_since = 1
@@ -303,7 +304,7 @@ func test_a_commander_is_found_when_it_is_time_to_move() -> void:
 	# 🔒 Phase 4 puts men under arms; phase 2 of the next month is the first time
 	# they could go anywhere, and that is where a man is needed.
 	var run := _run()
-	var town := _town(run, 40, 500.0)
+	var town := _town(run, 40_000, 500.0)
 	town.intent = GovernorIntent.DRIVE_OFF
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
@@ -325,7 +326,7 @@ func test_a_commander_is_found_when_it_is_time_to_move() -> void:
 
 func test_and_a_militia_is_never_given_one() -> void:
 	var run := _run()
-	var town := _town(run, 40)
+	var town := _town(run, 40_000)
 	town.intent = GovernorIntent.DEFENCE
 	run.world.month = 5
 	var militia := Raising.raise_from(town, _context(run))

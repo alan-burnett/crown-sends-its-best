@@ -117,7 +117,7 @@ func test_trade_goes_through_the_crowns_dictionary() -> void:
 	# Not through a price table read directly, or a failed harvest at home would
 	# move the letters and not the trade.
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = 10
+	town.workers = 10_000
 	town.receive_gold(1_000.0)
 
 	var colony := Colony.new()
@@ -175,7 +175,8 @@ func test_no_effect_moves_anybody_s_prices() -> void:
 
 func _town(stock: Dictionary = {}, workers: int = 6) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(3, 3))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426).
+	town.workers = workers * Population.THOUSAND
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
 	return town

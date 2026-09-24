@@ -261,17 +261,19 @@ func _grow(town: Town, context: ColonyContext) -> void:
 	_breed(town, context)
 	Experts.materialise(town, context, Experts.RAISED, WorldPhase.COLONY_MONTH)
 
+	# **Whole people land, the fraction carries** (#426, `population.md` §6), in
+	# one event that says how many: a town of thousands has dozens of children a
+	# month, and an event for each would be a log of births and nothing else.
 	var born := int(floor(town.growth_accrued))
 	if born <= 0:
 		return
 	town.growth_accrued -= float(born)
-	for _each in born:
-		town.workers += 1
-		context.log.emit(EVENT_BORN, town.id, context.state.month, {
-			"town": String(town.id),
-			"born": 1,
-			"population": town.population(),
-		}, WorldPhase.COLONY_MONTH)
+	town.workers += born
+	context.log.emit(EVENT_BORN, town.id, context.state.month, {
+		"town": String(town.id),
+		"born": born,
+		"population": town.population(),
+	}, WorldPhase.COLONY_MONTH)
 
 
 ## The herds breed, up to what there is to graze them on.
@@ -295,13 +297,16 @@ func _breed(town: Town, context: ColonyContext) -> void:
 		var head := float(town.livestock_head(kind))
 		var grazing := minf(head, room)
 		room -= grazing
-		if grazing < 1.0:
+		# **Today's herd at the new scale** (#426): a head was a thousand head, so
+		# the herd breeds in lots of a thousand and at most one a month. The cap
+		# goes in #427.
+		if grazing < float(Population.THOUSAND):
 			continue
 		town.livestock_accrued[id] = float(town.livestock_accrued.get(id, 0.0)) + grazing * rate
-		if float(town.livestock_accrued[id]) < 1.0:
+		if float(town.livestock_accrued[id]) < float(Population.THOUSAND):
 			continue
-		town.livestock_accrued[id] = float(town.livestock_accrued[id]) - 1.0
-		town.add_livestock(kind, 1)
+		town.livestock_accrued[id] = float(town.livestock_accrued[id]) - float(Population.THOUSAND)
+		town.add_livestock(kind, Population.THOUSAND)
 		context.log.emit(EVENT_CALVED, town.id, context.state.month, {
 			"town": String(town.id),
 			"kind": id,
@@ -420,7 +425,7 @@ func _food_security(context: ColonyContext) -> float:
 	if mouths <= 0.0:
 		return 0.0
 
-	var monthly := mouths * ColonyNeeds.per_head(&"food")
+	var monthly := Population.of(ColonyNeeds.per_head(&"food"), mouths)
 	if monthly <= 0.0:
 		return 0.0
 	return clampf(held / monthly, 0.0, SECURE_MONTHS)

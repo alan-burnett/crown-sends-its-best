@@ -60,8 +60,9 @@ func _raise(
 	at: Vector2i = Company.NOWHERE,
 ) -> Company:
 	var town := run.colony.in_order()[0]
+	# Fixture sizes are in thousands (#426).
 	return run.companies.raise_company(
-		allegiance, size, {}, town.id,
+		allegiance, size * Population.THOUSAND, {}, town.id,
 		town.at if at == Company.NOWHERE else at, _context(run))
 
 
@@ -94,9 +95,11 @@ func test_the_same_pair_fights_the_same_way_every_time() -> void:
 # --- The formula ------------------------------------------------------------
 
 func test_casualties_are_lethality_times_the_force_ratio() -> void:
-	assert_almost_eq(Battle.casualties_for(40.0, 20.0), Battle.lethality() * 2.0, 0.0001)
-	assert_almost_eq(Battle.casualties_for(40.0, 10.0), Battle.lethality() * 4.0, 0.0001)
-	assert_almost_eq(Battle.casualties_for(40.0, 4.0), Battle.lethality() * 10.0, 0.0001)
+	# Lethality is men at parity, authored per thousand (#426).
+	var per := Battle.lethality() * Population.THOUSAND
+	assert_almost_eq(Battle.casualties_for(40.0, 20.0), per * 2.0, 0.0001)
+	assert_almost_eq(Battle.casualties_for(40.0, 10.0), per * 4.0, 0.0001)
+	assert_almost_eq(Battle.casualties_for(40.0, 4.0), per * 10.0, 0.0001)
 
 
 func test_forty_against_four_is_dramatically_worse_than_forty_against_twenty() -> void:
@@ -190,10 +193,10 @@ func test_a_slow_grind_takes_nobody_for_months_and_then_takes_somebody() -> void
 	for month in 4:
 		assert_eq(company.take_casualties(0.2, &"ground_down", context), 0,
 			"a fifth of a man was rounded up in month %d" % month)
-		assert_eq(company.size, 40)
+		assert_eq(company.size, 40_000)
 	assert_eq(company.take_casualties(0.2, &"ground_down", context), 1,
 		"five months at a fifth of a man cost nobody")
-	assert_eq(company.size, 39)
+	assert_eq(company.size, 39_999)
 
 
 func test_what_is_left_over_is_kept() -> void:
@@ -201,7 +204,7 @@ func test_what_is_left_over_is_kept() -> void:
 	var company := _raise(run, Company.REBEL, 40)
 	var context := _context(run)
 	company.take_casualties(1.5, &"mauled", context)
-	assert_eq(company.size, 39, "one and a half men cost %d" % (40 - company.size))
+	assert_eq(company.size, 39_999, "one and a half men cost %d" % (40_000 - company.size))
 	assert_almost_eq(company.casualties_owed, 0.5, 0.0001,
 		"the half man was forgiven")
 
@@ -348,7 +351,7 @@ func test_three_attacks_resolve_against_a_weakening_defender() -> void:
 	for index in range(1, suffered.size()):
 		assert_true(suffered[index] > suffered[index - 1],
 			"the defender did not weaken as they came: %s" % [suffered])
-	assert_true(defender.size < 20, "three battles cost him nobody")
+	assert_true(defender.size < 20_000, "three battles cost him nobody")
 
 
 func test_a_company_surrounded_can_be_destroyed_in_a_single_month() -> void:

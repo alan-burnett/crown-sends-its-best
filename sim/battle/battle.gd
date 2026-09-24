@@ -161,7 +161,10 @@ static func tiles_in_contact(mine: Vector2i, theirs: Vector2i) -> bool:
 static func casualties_for(my_force: float, their_force: float) -> float:
 	if my_force <= 0.0 or their_force <= 0.0:
 		return 0.0
-	return lethality() * (my_force / their_force)
+	# 🔒 **Lethality is men at parity, authored per thousand** (#426): it is a
+	# count and not a share, so the sim's thousandfold people take a thousandfold
+	# casualties and a siege lasts the months it did.
+	return lethality() * (my_force / their_force) * float(Population.THOUSAND)
 
 
 ## Fight one battle. Returns what it cost each side.

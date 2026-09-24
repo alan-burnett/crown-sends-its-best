@@ -206,7 +206,7 @@ func _spare(town: Town, before: ColonySnapshot, resource: StringName) -> float:
 	var per_head := ColonyNeeds.per_head(resource)
 	if per_head <= 0.0:
 		return held
-	return maxf(0.0, held - maxf(1.0, float(town.population())) * per_head)
+	return maxf(0.0, held - town.mouths() * per_head)
 
 
 ## What share of a month's batch this recipe could actually run.
@@ -265,7 +265,7 @@ func _redirect(
 
 	# What the town is short of, before any of this month's work is counted.
 	var owed: Dictionary = {}
-	var mouths := maxf(1.0, float(town.population()))
+	var mouths := town.mouths()
 	for resource in needs:
 		# **Measured against a comfortable store, not against this month's meal.**
 		# A town producing exactly what it eats and holding nothing is one bad

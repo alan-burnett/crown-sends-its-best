@@ -290,8 +290,10 @@ func _init(p_id: StringName = &"", p_name: String = "", p_at: Vector2i = Vector2
 # --- Population ------------------------------------------------------------
 
 ## How many tiles the town can work at once.
+## 🔒 **One tile, or one worker-slot, per thousand workers, floored** (#426,
+## `population.md` §3). A town of 1,999 works one.
 func workable_tiles() -> int:
-	return workers
+	return Population.slots_for(workers)
 
 
 func expert_count(resource: StringName) -> int:
@@ -312,6 +314,12 @@ func add_livestock(kind: StringName, head: int) -> void:
 
 func population() -> int:
 	return workers + expert_total()
+
+
+## The town's people in the thousands a per-head rate is written for (#426), and
+## never fewer than one person's worth, so an empty town still divides.
+func mouths() -> float:
+	return Population.thousands(maxf(1.0, float(population())))
 
 
 ## Everybody in the town who is expert in something.
@@ -340,17 +348,35 @@ func expert_total() -> int:
 ## Experts go in sorted order, so which one is lost is the colony's business
 ## rather than the dictionary's.
 func take_one_life() -> String:
-	if workers > 0:
-		workers -= 1
-		return "worker"
+	var taken := take_lives(1)
+	return "" if taken.is_empty() else String(taken.keys()[0])
 
+
+## Take up to `count` people, and say whose: `{"worker": n, <specialism>: n}`.
+## Empty when there is nobody left. The same rule as one life (#426): **every
+## worker before any expert**, and experts in sorted order.
+func take_lives(count: int) -> Dictionary:
+	var taken: Dictionary = {}
+	var left := maxi(0, count)
+	var from_workers := mini(left, workers)
+	if from_workers > 0:
+		workers -= from_workers
+		left -= from_workers
+		taken["worker"] = from_workers
+	if left <= 0:
+		return taken
 	var kinds: PackedStringArray = PackedStringArray(experts.keys())
 	kinds.sort()
 	for kind in kinds:
-		if expert_count(StringName(kind)) > 0:
-			add_experts(StringName(kind), -1)
-			return String(kind)
-	return ""
+		var here := mini(left, expert_count(StringName(kind)))
+		if here <= 0:
+			continue
+		add_experts(StringName(kind), -here)
+		taken[String(kind)] = int(taken.get(String(kind), 0)) + here
+		left -= here
+		if left <= 0:
+			break
+	return taken
 
 
 # --- Stockpile -------------------------------------------------------------
@@ -422,7 +448,7 @@ func can_afford(amount: float) -> bool:
 ## can buy what it wants when the ship docks (SPEC §11.3); it does not need the
 ## balance, and nothing that does not need the balance gets it.
 func prosperity(target_per_head: float) -> float:
-	var target := target_per_head * maxf(1.0, float(population()))
+	var target := target_per_head * mouths()
 	if target <= 0.0:
 		return 0.0
 	return clampf(_gold / target, 0.0, 1.0)

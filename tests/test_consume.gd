@@ -28,7 +28,9 @@ func after_each() -> void:
 
 func _town(workers: int, stock: Dictionary = {}, herd: Dictionary = {}) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = workers
+	# **Fixture sizes are in thousands** (#426): a town of `4` holds 4,000 people
+	# and eats as four did, since every rate is written per thousand.
+	town.workers = workers * Population.THOUSAND
 	# **Funded, so its buildings are lit** (#151). A town that cannot pay upkeep
 	# keeps its buildings and loses their effects, which would make every test
 	# here a test of upkeep rather than of the thing it is about.
@@ -36,7 +38,7 @@ func _town(workers: int, stock: Dictionary = {}, herd: Dictionary = {}) -> Town:
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
 	for kind in herd:
-		town.add_livestock(StringName(kind), int(herd[kind]))
+		town.add_livestock(StringName(kind), int(herd[kind]) * Population.THOUSAND)
 	return town
 
 
@@ -160,15 +162,14 @@ func test_a_brief_shortfall_kills_nobody() -> void:
 	assert_eq(town.months_hungry, 0, "the hunger counter did not reset once the town ate")
 
 	_eat(harness)  # short again, but the run was broken
-	assert_eq(town.population(), 20, "a brief shortfall killed people")
+	assert_eq(town.population(), 20 * Population.THOUSAND, "a brief shortfall killed people")
 	assert_empty(harness["context"].log.of_type(ConsumePhase.EVENT_FAMINE))
 
 
-func test_a_famine_takes_lives_one_at_a_time() -> void:
-	# **🔒 No single event ever costs a town more than one population**
-	# (CLAUDE.md). A bad month may take several, but each is its own resolution
-	# and its own event — never one event saying three died. The Diplomat's death
-	# roll and everything else per-population hangs off that.
+func test_a_famine_takes_lives_in_lots_of_a_thousand() -> void:
+	# **What one population was** (#426): a famine month takes its toll a
+	# thousand at a time, each lot its own event carrying how many it took, so the
+	# counts add up to the dead. One event for the whole toll is #427.
 	var town := _town(60)
 	var harness := _harness(town)
 	var before := town.population()
@@ -176,14 +177,15 @@ func test_a_famine_takes_lives_one_at_a_time() -> void:
 		_eat(harness)
 
 	var deaths: Array = harness["context"].log.of_type(ConsumePhase.EVENT_FAMINE)
-	assert_not_empty(deaths, "sixty people starved for three months and nobody died")
-	assert_eq(deaths.size(), before - town.population(),
-		"%d died and %d events were emitted" % [before - town.population(), deaths.size()])
-
+	assert_not_empty(deaths, "sixty thousand starved for three months and nobody died")
+	var counted := 0
 	for event in deaths:
-		# Each names one person, not a count.
-		assert_true(typeof(event.payload["lost"]) == TYPE_STRING,
-			"a famine event carried a tally rather than a single loss")
+		var count := int(event.payload["count"])
+		assert_true(count > 0 and count <= Population.THOUSAND,
+			"a famine event took %d at once" % count)
+		counted += count
+	assert_eq(counted, before - town.population(),
+		"%d died and the events counted %d" % [before - town.population(), counted])
 
 
 func test_a_famine_never_takes_more_than_the_town_has() -> void:
@@ -202,7 +204,7 @@ func test_famine_takes_workers_before_experts() -> void:
 	for _month in ConsumePhase.FAMINE_MONTHS:
 		_eat(harness)
 
-	assert_true(town.workers < 4, "nobody died")
+	assert_true(town.workers < 4 * Population.THOUSAND, "nobody died")
 	assert_eq(town.expert_count(&"wood"), 3, "an expert died while labourers remained")
 
 
@@ -211,12 +213,13 @@ func test_famine_takes_workers_before_experts() -> void:
 func test_livestock_are_eaten_only_when_the_town_would_go_hungry() -> void:
 	var fed := _town(4, {"food": 100.0}, {"sheep": 10})
 	_eat(_harness(fed))
-	assert_eq(fed.livestock_head(&"sheep"), 10, "a well-fed town killed its sheep")
+	assert_eq(fed.livestock_head(&"sheep"), 10 * Population.THOUSAND, "a well-fed town killed its sheep")
 
 	var starving := _town(4, {}, {"sheep": 10})
 	var harness := _harness(starving)
 	_eat(harness)
-	assert_true(starving.livestock_head(&"sheep") < 10, "a hungry town did not touch its herd")
+	assert_true(starving.livestock_head(&"sheep") < 10 * Population.THOUSAND,
+		"a hungry town did not touch its herd")
 	assert_not_empty(harness["context"].log.of_type(ConsumePhase.EVENT_SLAUGHTERED))
 
 

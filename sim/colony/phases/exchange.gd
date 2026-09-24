@@ -83,7 +83,7 @@ func _makes_its_own(
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := context.reckoning_for(town)
 	var desired := DesiredStock.for_town(town, before)
-	var mouths := maxf(1.0, float(town.population()))
+	var mouths := town.mouths()
 	var reserve := Spending.purse_reserve(town, context)
 	var spent_on: Dictionary = {}
 

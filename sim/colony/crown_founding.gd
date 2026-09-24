@@ -79,9 +79,9 @@ func is_due(month: int) -> bool:
 ## table of what each answer buys rather than a figure computed from anything.
 ## Every line of it is tuning.
 const EQUIPPED: Dictionary = {
-	"handsomely": {"people": 26, "food": 900.0, "tools": 120.0, "purse": 1.0, "building": true},
-	"adequately": {"people": 18, "food": 500.0, "tools": 60.0, "purse": 0.6, "building": false},
-	"meanly": {"people": 10, "food": 160.0, "tools": 0.0, "purse": 0.25, "building": false},
+	"handsomely": {"people": 26_000, "food": 900.0, "tools": 120.0, "purse": 1.0, "building": true},
+	"adequately": {"people": 18_000, "food": 500.0, "tools": 60.0, "purse": 0.6, "building": false},
+	"meanly": {"people": 10_000, "food": 160.0, "tools": 0.0, "purse": 0.25, "building": false},
 	# 🔒 **The clergy's is the odd one** (#278, §3): **he supplies the people
 	# and none of the goods.** He gathers the devout from outside the colony
 	# entirely, so the count does not move with what the PC pays — what the PC's
@@ -94,8 +94,8 @@ const EQUIPPED: Dictionary = {
 	# 🔒 **And neither row raises a church.** A pilgrim town arrives devout and
 	# unbuilt and must raise one for itself — the priest gathers people, not
 	# institutions, and does not get to seed a second clergyman on the PC's money.
-	"devoutly": {"people": 30, "food": 900.0, "tools": 90.0, "purse": 0.5, "building": false},
-	"plainly": {"people": 30, "food": 380.0, "tools": 0.0, "purse": 0.2, "building": false},
+	"devoutly": {"people": 30_000, "food": 900.0, "tools": 90.0, "purse": 0.5, "building": false},
+	"plainly": {"people": 30_000, "food": 380.0, "tools": 0.0, "purse": 0.2, "building": false},
 }
 
 

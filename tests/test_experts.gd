@@ -43,7 +43,8 @@ func _map() -> WorldMap:
 
 func _town(id: StringName = &"ashmere", workers: int = 40, buildings: Array = []) -> Town:
 	var town := Town.new(id, String(id).capitalize(), Vector2i(4, 4))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426).
+	town.workers = workers * Population.THOUSAND
 	town.quality_of_life = 0.9
 	town.receive_gold(50_000.0)  # so upkeep leaves its buildings lit (#151)
 	for name in buildings:
@@ -244,11 +245,10 @@ func test_every_appearance_is_on_the_record() -> void:
 
 # --- 🔒 Population moves one at a time --------------------------------------
 
-func test_each_birth_is_its_own_event() -> void:
-	# The mirror of the loss rule, and the same reason for it: per-population
-	# consequences stay uniform and legible because nothing ever reports a batch.
-	# A town of four hundred is owed more than one child a month and gets them —
-	# **one event each**, so a letter naming a birth never has to read a count.
+func test_a_months_births_are_one_event_that_says_how_many() -> void:
+	# #426: a town of thousands has dozens of children a month, and **one event
+	# says how many**, so the log accounts for every one of them without being a
+	# log of births and nothing else.
 	var town := _town(&"ashmere", 400)
 	var context := _context([town])
 	context.state.month = 0
@@ -256,15 +256,16 @@ func test_each_birth_is_its_own_event() -> void:
 	SettlePhase.new()._grow(town, context)
 
 	var births: Array = context.log.of_type(SettlePhase.EVENT_BORN)
-	assert_true(births.size() > 1, "the fixture town was not owed more than one child")
-	assert_eq(births.size(), town.population() - before,
-		"the town gained people the log does not account for one at a time")
-	for event in births:
-		assert_eq(int(event.payload["born"]), 1, "an event reported a batch of children")
+	assert_eq(births.size(), 1, "a month's children were reported %d times" % births.size())
+	assert_true(int(births[0].payload["born"]) > 1, "the fixture town was not owed more than one child")
+	assert_eq(int(births[0].payload["born"]), town.population() - before,
+		"the town gained people the log does not account for")
 
 
 func test_the_remainder_is_carried_rather_than_lost() -> void:
-	var town := _town(&"ashmere", 40)
+	# Forty people, not forty thousand: small enough to be owed less than a child.
+	var town := _town(&"ashmere", 0)
+	town.workers = 40
 	var context := _context([town])
 	context.state.month = 0
 	SettlePhase.new()._grow(town, context)
@@ -279,7 +280,7 @@ func test_births_scale_with_population() -> void:
 	var large := _town(&"brackwater", 200)
 	_years_of_growth(small, 24)
 	_years_of_growth(large, 24)
-	assert_true(large.population() - 200 > small.population() - 10,
+	assert_true(large.population() - 200_000 > small.population() - 10_000,
 		"a town of two hundred grew no faster in absolute terms than a town of ten")
 
 
@@ -287,7 +288,7 @@ func test_a_wretched_town_does_not_grow() -> void:
 	var town := _town(&"ashmere", 200)
 	town.quality_of_life = 0.05
 	_years_of_growth(town, 60)
-	assert_eq(town.population(), 200, "people had children in a town nobody wants to live in")
+	assert_eq(town.population(), 200_000, "people had children in a town nobody wants to live in")
 
 
 func test_a_granary_raises_the_birth_rate() -> void:
@@ -303,9 +304,9 @@ func test_a_granary_raises_the_birth_rate() -> void:
 
 func test_a_pastured_herd_breeds() -> void:
 	var town := _town(&"ashmere", 40, ["town_pasture"])
-	town.add_livestock(&"cows", 10)
+	town.add_livestock(&"cows", 10_000)
 	_years_of_growth(town, 120)
-	assert_true(town.livestock_head(&"cows") > 10,
+	assert_true(town.livestock_head(&"cows") > 10_000,
 		"ten cows with a pasture to graze on produced no calf in a decade")
 
 
@@ -313,9 +314,9 @@ func test_a_herd_with_nowhere_to_graze_does_not() -> void:
 	# 🔒 **Pasture is the ceiling.** Beasts over capacity are the ones Consume is
 	# buying grain for; they are a cost, not a herd with a future.
 	var town := _town(&"ashmere", 40)
-	town.add_livestock(&"cows", 10)
+	town.add_livestock(&"cows", 10_000)
 	_years_of_growth(town, 120)
-	assert_eq(town.livestock_head(&"cows"), 10,
+	assert_eq(town.livestock_head(&"cows"), 10_000,
 		"a herd with no pasture at all bred anyway")
 
 
@@ -341,8 +342,8 @@ func test_a_granary_speeds_the_herd_too() -> void:
 	# household through a winter and a herd through a lean spring.
 	var bare := _town(&"ashmere", 40, ["town_pasture"])
 	var stored := _town(&"brackwater", 40, ["town_pasture", "granary"])
-	bare.add_livestock(&"cows", 10)
-	stored.add_livestock(&"cows", 10)
+	bare.add_livestock(&"cows", 10_000)
+	stored.add_livestock(&"cows", 10_000)
 	_years_of_growth(bare, 240)
 	_years_of_growth(stored, 240)
 	assert_true(stored.livestock_head(&"cows") > bare.livestock_head(&"cows"),
@@ -351,7 +352,7 @@ func test_a_granary_speeds_the_herd_too() -> void:
 
 func test_the_calves_owed_survive_a_save() -> void:
 	var town := _town(&"ashmere", 40, ["town_pasture"])
-	town.add_livestock(&"cows", 10)
+	town.add_livestock(&"cows", 10_000)
 	_years_of_growth(town, 6)
 
 	var restored := Town.from_dict(town.to_dict())

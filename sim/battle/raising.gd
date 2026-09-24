@@ -43,7 +43,7 @@ const EVENT_RAISED: StringName = &"company_raised_by_town"
 ## Tuning (§12), and it trades directly against how threatened the town is — a
 ## colony about to be overrun should be able to empty itself further than a
 ## comfortable one. That softening is not built; the floor is flat for now.
-static var _worker_floor: int = 6
+static var _worker_floor: int = 6_000
 
 ## What share of the workers above the floor a governor is willing to send.
 ## Tuning.
@@ -56,7 +56,7 @@ static func load_from(record: Dictionary) -> void:
 
 
 static func reset() -> void:
-	_worker_floor = 6
+	_worker_floor = 6_000
 	_raises_share = 0.5
 
 
@@ -102,7 +102,7 @@ static func arms_for(town: Town, size: int) -> Dictionary:
 		return out
 	for resource in Company.armed_resources():
 		var id := StringName(resource)
-		var wanted := Company.want_per_head(id) * float(size)
+		var wanted := Population.amount_for(id, Company.want_per_head(id), float(size))
 		if wanted <= 0.0:
 			continue
 		var taken := minf(wanted, town.held(id))

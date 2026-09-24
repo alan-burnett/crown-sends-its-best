@@ -70,7 +70,10 @@ const HALF_LEARNED: float = 5.0
 static func share_of_growth(town: Town) -> float:
 	if town.education <= 0.0:
 		return 0.0
-	return LEARNED_SHARE * town.education / (town.education + HALF_LEARNED)
+	# 🔒 **Divided by a thousand** (#426, `population.md` §5): births are people
+	# and an expert is one man among them, or a town would raise hundreds a month.
+	return LEARNED_SHARE * town.education / (town.education + HALF_LEARNED) \
+		/ float(Population.THOUSAND)
 
 
 ## Put a fraction of a person aside. Whole people are `materialise`'s business.

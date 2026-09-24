@@ -60,7 +60,7 @@ func _village(food: float = 900.0, furs: float = 200.0) -> Village:
 	village.id = &"village_test_0"
 	village.tribe = &"tribe_test"
 	village.at = Vector2i(5, 5)
-	village.people = 40
+	village.people = 40_000
 	village.stores = {"food": food, "furs": furs}
 	village.objective = Village.GROW
 	return village
@@ -68,7 +68,7 @@ func _village(food: float = 900.0, furs: float = 200.0) -> Village:
 
 func _town(at: Vector2i = Vector2i(5, 5)) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", at)
-	town.workers = 40
+	town.workers = 40_000
 	town.governor_id = &"gov_ashmere"
 	town.intent = GovernorIntent.ECONOMY
 	town.store(&"guns", 200.0)

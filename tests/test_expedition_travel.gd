@@ -36,7 +36,7 @@ func after_each() -> void:
 
 func _town(id: StringName = &"ashmere", at: Vector2i = Vector2i(2, 2)) -> Town:
 	var town := Town.new(id, String(id).capitalize(), at)
-	town.workers = 40
+	town.workers = 40_000
 	return town
 
 

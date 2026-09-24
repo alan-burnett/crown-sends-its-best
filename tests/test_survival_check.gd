@@ -62,7 +62,8 @@ func _mixed() -> WorldMap:
 
 func _harness(map: WorldMap, workers: int, stock: Dictionary = {}, phases: Array = []) -> Dictionary:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(4, 4))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426): a worker per tile, as it was.
+	town.workers = workers * Population.THOUSAND
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
 
@@ -129,7 +130,7 @@ func test_it_goes_hungry_rather_than_pretending() -> void:
 	for _month in 4:
 		_worked(harness)
 	var town: Town = harness["town"]
-	assert_true(town.held(&"food") < float(town.population()) * ColonyNeeds.per_head(&"food")
+	assert_true(town.held(&"food") < town.mouths() * ColonyNeeds.per_head(&"food")
 		* ColonyNeeds.comfortable_months(),
 		"the town on ground that yields one food a tile ended up comfortable")
 

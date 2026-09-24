@@ -85,7 +85,7 @@ class Spare extends Consideration:
 		var spare := TradeConsiderations.spare_in(village, candidate.get_value("they_give", &""))
 		# Against a month of their own eating, so "a lot" means the same thing in
 		# a village of twenty and a village of two hundred.
-		var month := maxf(1.0, float(village.people) * ColonyNeeds.per_head(&"food"))
+		var month := maxf(1.0, Population.of(ColonyNeeds.per_head(&"food"), float(village.people)))
 		return clampf(spare / month, 0.0, 1.0)
 
 
@@ -184,5 +184,5 @@ static func spare_in(village: Village, resource: StringName) -> float:
 		return 0.0
 	var held := float(village.stores.get(String(resource), 0.0))
 	if resource == &"food":
-		return maxf(0.0, held - float(village.people) * ColonyNeeds.per_head(&"food") * 2.0)
+		return maxf(0.0, held - Population.of(ColonyNeeds.per_head(&"food"), float(village.people)) * 2.0)
 	return maxf(0.0, held)

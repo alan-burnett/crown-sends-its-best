@@ -58,14 +58,15 @@ func _village(people: int = 80) -> Village:
 	village.id = &"village_test_0"
 	village.tribe = &"tribe_test"
 	village.at = Vector2i(5, 5)
-	village.people = people
+	# Fixture sizes are in thousands (#426).
+	village.people = people * Population.THOUSAND
 	village.stores = {"food": 4_000.0, "furs": 600.0}
 	return village
 
 
 func _town() -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(5, 5))
-	town.workers = 40
+	town.workers = 40_000
 	town.governor_id = &"gov_ashmere"
 	return town
 
@@ -96,21 +97,22 @@ func test_a_people_on_good_terms_send_their_own() -> void:
 		"the town gained a different number of people than walked into it")
 
 
-func test_they_come_one_at_a_time() -> void:
-	# 🔒 `CLAUDE.md`: no single event moves a settlement by more than one
-	# population, and the whole file has to obey it uniformly.
+func test_a_months_arrivals_are_one_event_that_says_how_many() -> void:
+	# #426: hundreds walk in a month now, and **one event says how many**, so the
+	# log accounts for every one without being a log of arrivals and nothing else.
 	var town := _town()
 	var context := _context()
 	# 🔒 **Their own remainder**, not immigration's. Priming the shared one used
 	# to work and silently stopped meaning anything the day a colony attractive
 	# enough to draw settlers spent it on them first.
-	town.native_arrivals_accrued = 0.99
-	assert_eq(NativeHelp.join(_tribe(100.0), _village(), town, context), 1,
-		"a month brought a number of people other than one")
+	var had := town.population()
+	var came := NativeHelp.join(_tribe(100.0), _village(), town, context)
+	assert_true(came > 1, "a month beside a people who love the colony brought %d" % came)
 
-	for event in context.log.of_type(NativeHelp.EVENT_JOINED):
-		assert_eq(int(event.payload["people"]), 1,
-			"an event moved a town by more than one population")
+	var events := context.log.of_type(NativeHelp.EVENT_JOINED)
+	assert_eq(events.size(), 1, "a month's arrivals were reported %d times" % events.size())
+	assert_eq(int(events[0].payload["people"]), came)
+	assert_eq(town.population(), had + came)
 
 
 func test_a_village_is_one_fewer_for_every_man_who_goes() -> void:
@@ -119,10 +121,10 @@ func test_a_village_is_one_fewer_for_every_man_who_goes() -> void:
 	# from a tribe that likes it.
 	var town := _town()
 	var village := _village()
-	village.people = 30
-	town.native_arrivals_accrued = 0.99
-	NativeHelp.join(_tribe(100.0), village, town, _context())
-	assert_eq(village.people, 29, "a man joined a town and stayed in his village too")
+	village.people = 30_000
+	var came := NativeHelp.join(_tribe(100.0), village, town, _context())
+	assert_true(came > 0, "nobody came, so this proves nothing")
+	assert_eq(village.people, 30_000 - came, "men joined a town and stayed in their village too")
 
 
 func test_a_people_who_have_concluded_send_nobody_whatever_the_figure_says() -> void:
@@ -242,12 +244,11 @@ func test_their_people_do_not_move_the_crowns_books() -> void:
 	tribe.standing[String(Tribe.COLONY)] = Tribe.MAXIMUM
 	var village: Village = run.tribes.villages_of(tribe.id)[0]
 	village.at = town.at
-	village.people = 200
+	village.people = 200_000
 
 	var before := run.standing.net_position
 	var context := ColonyContext.new(run.world, run.log, run.streams, run.map)
-	town.native_arrivals_accrued = 0.99
-	assert_eq(NativeHelp.join(tribe, village, town, context), 1, "nobody came")
+	assert_true(NativeHelp.join(tribe, village, town, context) > 0, "nobody came")
 	NativeHelp.gifts(tribe, village, town, context)
 
 	assert_almost_eq(run.standing.net_position, before, 0.0001,
@@ -259,7 +260,7 @@ func test_their_people_do_not_move_the_crowns_books() -> void:
 func test_a_party_crossing_their_country_picks_up_guides() -> void:
 	var party := ExpeditionParty.new()
 	party.id = &"party_test"
-	party.people = 20
+	party.people = 20_000
 	party.at = Vector2i(5, 5)
 	var village := _village()
 	var tribe := _tribe(Tribe.MAXIMUM)
@@ -269,20 +270,20 @@ func test_a_party_crossing_their_country_picks_up_guides() -> void:
 		joined += NativeHelp.join_party(tribe, village, party, _context())
 	assert_true(joined > 0,
 		"a party walked through their country for three years and met nobody")
-	assert_eq(party.people, 20 + joined,
+	assert_eq(party.people, 20_000 + joined,
 		"the party gained a different number of people than joined it")
 
 
 func test_a_party_crossing_a_cold_country_walks_alone() -> void:
 	var party := ExpeditionParty.new()
 	party.id = &"party_test"
-	party.people = 20
+	party.people = 20_000
 	party.at = Vector2i(5, 5)
 
 	for _month in 40:
 		NativeHelp.join_party(
 			_tribe(NativeHelp.JOIN_ABOVE - 1.0), _village(), party, _context())
-	assert_eq(party.people, 20,
+	assert_eq(party.people, 20_000,
 		"a people who distrust the colony guided its expeditions anyway")
 
 
@@ -296,7 +297,7 @@ func test_a_well_liked_colony_grows_from_its_neighbours() -> void:
 		(tribe as Tribe).standing[String(Tribe.COLONY)] = Tribe.MAXIMUM
 	var village: Village = run.tribes.villages_in_order()[0]
 	village.at = town.at + Vector2i(1, 0)
-	village.people = 400
+	village.people = 400_000
 
 	var machine := TurnMachine.new(run)
 	machine.use_content(content)

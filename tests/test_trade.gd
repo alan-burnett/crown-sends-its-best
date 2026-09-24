@@ -40,7 +40,8 @@ func _context(rates: Dictionary = {}) -> ColonyContext:
 
 func _town(workers: int, gold: float, stock: Dictionary = {}) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426).
+	town.workers = workers * Population.THOUSAND
 	town.receive_gold(gold)
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))

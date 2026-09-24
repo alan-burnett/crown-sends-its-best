@@ -55,7 +55,8 @@ func _context(run: RunState) -> ColonyContext:
 func _hostile_village(run: RunState, people: int = 40) -> Village:
 	var village: Village = run.tribes.villages_in_order()[0]
 	village.at = run.colony.in_order()[0].at + Vector2i(2, 0)
-	village.people = people
+	# Fixture sizes are in thousands (#426).
+	village.people = people * Population.THOUSAND
 	village.objective = Village.DRIVE_THEM_OFF
 	return village
 
@@ -94,7 +95,7 @@ func test_the_party_is_the_villages_own_people() -> void:
 	Muster.run_month(run, _context(run))
 
 	var party := run.companies.in_resolution_order()[0] as Company
-	assert_eq(village.people + party.size, 40,
+	assert_eq(village.people + party.size, 40_000,
 		"the war party did not come out of the village: %d left, %d out"
 			% [village.people, party.size])
 	assert_true(village.people >= Muster.VILLAGE_KEEPS,
@@ -116,7 +117,7 @@ func test_a_village_does_not_send_the_same_men_twice() -> void:
 
 func test_a_village_too_small_sends_nobody() -> void:
 	var run := _run()
-	_hostile_village(run, Muster.VILLAGE_KEEPS)
+	_hostile_village(run, Muster.VILLAGE_KEEPS / Population.THOUSAND)
 	run.world.month = 3
 	assert_eq(Muster.run_month(run, _context(run)), 0,
 		"a village of six sent a war party and kept nobody")
@@ -143,7 +144,7 @@ func test_and_it_attacks() -> void:
 	# the march and the battle are the ordinary ones.
 	var run := _run()
 	var town := run.colony.in_order()[0]
-	town.workers = 12
+	town.workers = 12_000
 	var village := _hostile_village(run, 60)
 	village.at = town.at + Vector2i(1, 0)
 
@@ -245,12 +246,12 @@ func test_nothing_gates_him_but_the_band() -> void:
 func test_a_town_they_take_leaves_the_colony_and_fires_one_optic() -> void:
 	var run := _run()
 	var town := run.colony.in_order()[0]
-	town.workers = 8
+	town.workers = 8_000
 	town.experts = {}
 	var had := run.colony.in_order().size()
 
 	var host := run.companies.raise_company(
-		Company.NATIVE, 4_000, {"guns": 4_000.0, "tools": 4_000.0},
+		Company.NATIVE, 4_000_000, {"guns": 4_000.0, "tools": 4_000.0},
 		Company.SUPPORTED_ABROAD, town.at, _context(run))
 	run.world.month = 5
 	Battle.resolve(host, TownCompany.of(town, host), run.map, _context(run))

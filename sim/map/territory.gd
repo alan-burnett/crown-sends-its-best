@@ -20,7 +20,7 @@ extends RefCounted
 const BASE_INFLUENCE: int = 1
 
 ## Population per extra tile of reach. A bigger town works more ground.
-const POPULATION_PER_RING: int = 12
+const POPULATION_PER_RING: int = 12_000
 const MAX_INFLUENCE: int = 4
 
 ## **Vision reaches slightly past the border** (SPEC §11.2).

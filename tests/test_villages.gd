@@ -73,7 +73,8 @@ func _village(people: int = 30) -> Village:
 	village.id = &"village_test_0"
 	village.tribe = &"tribe_test"
 	village.at = Vector2i(10, 10)
-	village.people = people
+	# Fixture sizes are in thousands (#426).
+	village.people = people * Population.THOUSAND
 	village.stores = {"food": float(people) * 4.0}
 	return village
 
@@ -190,8 +191,11 @@ func test_influence_follows_the_people_and_nothing_else() -> void:
 func test_growing_past_a_ring_is_on_the_record() -> void:
 	# 🔒 Seam A. The event the map reads to draw the contest — a village that
 	# spread and emitted nothing would leave the map drawing last month's border.
-	var village := _village(Village.MOUTHS_PER_REACH as int - 1)
-	village.growth_accrued = 0.999
+	# A lot short of the next ring, and a lot owed (#426: a village grows a
+	# thousand at a time, as it grew one).
+	var village := _village()
+	village.people = int(Village.MOUTHS_PER_REACH) - 1
+	village.growth_accrued = float(Population.THOUSAND) - 0.001
 	village.stores = {"food": 9_000.0}
 	var context := _context()
 	village.live(_tribe(), context)
@@ -207,7 +211,7 @@ func test_growing_past_a_ring_is_on_the_record() -> void:
 
 func test_a_village_that_has_not_crossed_a_ring_says_nothing_about_ground() -> void:
 	var village := _village(2)
-	village.growth_accrued = 0.999
+	village.growth_accrued = float(Population.THOUSAND) - 0.001
 	village.stores = {"food": 9_000.0}
 	var context := _context()
 	village.live(_tribe(), context)
@@ -225,7 +229,7 @@ func test_a_village_with_nothing_to_eat_loses_one_person_and_only_one() -> void:
 	var village := _village(40)
 	village.stores = {"food": 0.0}
 	village.live(_tribe(), _context())
-	assert_eq(village.people, 39, "a hungry month emptied the place")
+	assert_eq(village.people, 40_000 - Population.THOUSAND, "a hungry month emptied the place")
 
 
 # --- 🔒 Objectives, and no layer a town has ---------------------------------
@@ -343,7 +347,7 @@ func test_the_map_is_told_which_people_work_a_tile_it_can_see() -> void:
 	# Put a village where the first town can see it, and recompute what the
 	# colony knows the way phase 3 does.
 	village.at = run.colony.in_order()[0].at + Vector2i(1, 0)
-	village.people = 200
+	village.people = 200_000
 	var territory := Territory.compute(run.map, run.colony.in_order())
 	run.knowledge.observe(run.map, territory, 1, run.colony.in_order(), run.tribes)
 
@@ -378,7 +382,7 @@ func test_the_map_reports_the_contest_and_refuses_to_settle_it() -> void:
 	var town: Town = run.colony.in_order()[0]
 	var village: Village = run.tribes.villages_in_order()[0]
 	village.at = town.at + Vector2i(1, 0)
-	village.people = 200
+	village.people = 200_000
 	var territory := Territory.compute(run.map, run.colony.in_order())
 	run.knowledge.observe(run.map, territory, 1, run.colony.in_order(), run.tribes)
 
@@ -421,7 +425,7 @@ func test_what_the_map_remembers_of_them_survives_a_save() -> void:
 	var run := RunState.new_run(SEED)
 	var village: Village = run.tribes.villages_in_order()[0]
 	village.at = run.colony.in_order()[0].at + Vector2i(1, 0)
-	village.people = 200
+	village.people = 200_000
 	run.knowledge.observe(
 		run.map, Territory.compute(run.map, run.colony.in_order()), 1,
 		run.colony.in_order(), run.tribes)

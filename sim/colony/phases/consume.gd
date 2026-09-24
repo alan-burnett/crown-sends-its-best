@@ -47,7 +47,8 @@ const FAMINE_DEATH_RATE: float = 0.12
 
 
 func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
-	var mouths := float(town.population())
+	# Thousands of people: every per-head rate is written per thousand (#426).
+	var mouths := Population.thousands(float(town.population()))
 	var record: Dictionary = {}
 
 	var unmet_food := _eat(town, mouths, context, record)
@@ -264,14 +265,24 @@ func _starve(town: Town, unmet: float, context: ColonyContext) -> void:
 	if town.months_hungry < FAMINE_MONTHS or unmet <= 0.0:
 		return
 
-	var toll := maxi(1, int(round(float(town.population()) * unmet * FAMINE_DEATH_RATE)))
-	for _each in toll:
-		var who := town.take_one_life()
-		if who.is_empty():
+	# **Today's famine at the new scale** (#426): the toll in people, taken in
+	# lots of a thousand — what one population was — each its own event, so a
+	# famine month reads exactly as it did. One event for the whole toll is #427.
+	var toll := maxi(Population.THOUSAND,
+		int(round(float(town.population()) * unmet * FAMINE_DEATH_RATE)))
+	while toll > 0:
+		var taken := town.take_lives(mini(toll, Population.THOUSAND))
+		if taken.is_empty():
 			break  # There is nobody left to lose.
+		var count := 0
+		for who in taken:
+			count += int(taken[who])
+		toll -= count
 		context.log.emit(EVENT_FAMINE, town.id, context.state.month, {
 			"town": String(town.id),
-			"lost": who,
+			"lost": "worker" if taken.has("worker") else String(taken.keys()[0]),
+			"count": count,
+			"taken": taken,
 			"remaining": town.population(),
 			"months_hungry": town.months_hungry,
 			"severity": String(Shortage.grade_of(unmet)),

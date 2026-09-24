@@ -287,7 +287,7 @@ static func armed_of(run: RunState) -> float:
 
 	if people <= 0.0:
 		return 1.0
-	return clampf(guns / (people * WELL_ARMED_PER_HEAD), 0.0, 1.0)
+	return clampf(guns / (Population.of(WELL_ARMED_PER_HEAD, people)), 0.0, 1.0)
 
 
 ## How quiet the last year has been, with nobody asked who began it.
@@ -469,7 +469,7 @@ static func quiet_of(run: RunState) -> float:
 
 ## What a colony that has got as far as it is going to looks like. Tuning.
 const TOWNS_AT_FULL_REACH: float = 8.0
-const PEOPLE_AT_FULL_REACH: float = 900.0
+const PEOPLE_AT_FULL_REACH: float = 900_000.0
 const GROUND_AT_FULL_REACH: float = 420.0
 
 
@@ -496,7 +496,7 @@ static func trade_standing(colony: Colony, town: Town) -> float:
 
 ## Months of food in the larder, per mouth.
 static func food_months(town: Town) -> float:
-	var monthly := maxf(1.0, float(town.population())) * ColonyNeeds.per_head(&"food")
+	var monthly := town.mouths() * ColonyNeeds.per_head(&"food")
 	if monthly <= 0.0:
 		return 0.0
 	return clampf(town.held(&"food") / monthly, 0.0, HEALTHY_MONTHS)
@@ -509,7 +509,7 @@ static func food_months(town: Town) -> float:
 ## writing home says so.
 static func stockpile_health(town: Town) -> float:
 	var worst := 1.0
-	var mouths := maxf(1.0, float(town.population()))
+	var mouths := town.mouths()
 	for resource in ColonyNeeds.needed_resources():
 		var monthly := mouths * ColonyNeeds.per_head(StringName(resource))
 		if monthly <= 0.0:

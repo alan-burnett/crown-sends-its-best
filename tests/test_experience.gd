@@ -61,7 +61,8 @@ func _context(run: RunState) -> ColonyContext:
 func _arms(size: int) -> Dictionary:
 	var out: Dictionary = {}
 	for resource in Company.armed_resources():
-		out[String(resource)] = Company.want_per_head(StringName(resource)) * float(size)
+		out[String(resource)] = Population.amount_for(StringName(resource),
+			Company.want_per_head(StringName(resource)), float(size * Population.THOUSAND))
 	return out
 
 
@@ -74,8 +75,9 @@ func _raise(
 	order: StringName = MARCH,
 ) -> Company:
 	var town := run.colony.in_order()[0]
+	# Fixture sizes are in thousands (#426): a company of `40` is 40,000 men.
 	var company := run.companies.raise_company(
-		allegiance, size, arms, town.id,
+		allegiance, size * Population.THOUSAND, arms, town.id,
 		town.at if at == Company.NOWHERE else at, _context(run), order)
 	Commanders.take_command(company, town, run, _context(run))
 	return company
@@ -198,10 +200,10 @@ func test_a_headless_company_earns_nobody_anything() -> void:
 func test_the_level_rises_with_the_tally() -> void:
 	assert_eq(CommanderExperience.level_for(0.0), 1,
 		"a man who has done nothing is not even untried")
-	assert_true(CommanderExperience.level_for(1_000.0)
-		> CommanderExperience.level_for(20.0),
-		"a thousand men killed ranked no higher than twenty")
-	assert_eq(CommanderExperience.level_for(1_000_000.0),
+	assert_true(CommanderExperience.level_for(1_000_000.0)
+		> CommanderExperience.level_for(20_000.0),
+		"a million men killed ranked no higher than twenty thousand")
+	assert_eq(CommanderExperience.level_for(1_000_000_000.0),
 		CommanderExperience.top_level(),
 		"a level above the top of the table")
 
@@ -218,7 +220,7 @@ func test_nothing_stores_a_level_that_could_disagree_with_the_tally() -> void:
 func test_a_killed_commander_leaves_nothing_behind() -> void:
 	# 🔒 §7: his experience dies with him. Nothing to recover, nothing to inherit.
 	var book := CommanderBook.new()
-	book.record(&"commander_1", 400.0)
+	book.record(&"commander_1", 400_000.0)
 	assert_true(book.level_of(&"commander_1") > 1)
 	book.he_died(&"commander_1")
 	assert_almost_eq(book.inflicted_by(&"commander_1"), 0.0, 0.0001)
@@ -237,7 +239,7 @@ func test_a_veteran_takes_the_next_command_at_the_level_he_left_at() -> void:
 	# the thing that persists, not the company.**
 	var run := _run()
 	var first := _raise(run, Company.COLONIAL, 40)
-	run.commanders.record(first.commander, 500.0)
+	run.commanders.record(first.commander, 500_000.0)
 	var earned := run.commanders.level_of(first.commander)
 	assert_true(earned > 1, "the fixture did not actually promote him")
 

@@ -75,8 +75,8 @@ var villages: Array = []
 const VILLAGES_EACH: int = 2
 
 ## What a village starts with. Tuning.
-const START_PEOPLE_MIN: int = 26
-const START_PEOPLE_MAX: int = 48
+const START_PEOPLE_MIN: int = 26_000
+const START_PEOPLE_MAX: int = 48_000
 
 
 ## Draw the three, in a fixed order, from the map's own stream.
@@ -190,7 +190,7 @@ func settle(
 			village.tribe = tribe.id
 			village.at = at
 			village.people = rng.randi_range(START_PEOPLE_MIN, START_PEOPLE_MAX)
-			village.stores = {"food": float(village.people) * 3.0}
+			village.stores = {"food": Population.of(3.0, float(village.people))}
 			villages.append(village)
 		rank += 1
 

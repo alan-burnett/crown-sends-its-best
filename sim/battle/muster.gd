@@ -49,7 +49,7 @@ const EVENT_LANDED: StringName = &"rival_landed"
 ## out of it and put under arms, not conjured. A village that empties itself has
 ## nothing left to come home to, which is why there is a floor.
 const VILLAGE_SHARE: float = 0.4
-const VILLAGE_KEEPS: int = 6
+const VILLAGE_KEEPS: int = 6_000
 
 ## 🔒 **How much of that share the quirk moves** (#288, *Restless
 ## country*).
@@ -89,7 +89,7 @@ const PARTIES_PER_VILLAGE: int = 1
 ## the field. Tuning, and `rival-pressure.md` §9 has both.
 const LANDS_EVERY: int = 4
 const LANDS_AT_MOST: int = 3
-const LANDS_WITH: int = 45
+const LANDS_WITH: int = 45_000
 
 ## What a landed company carries. A European army arrives equipped, which is most
 ## of what makes a duke at Minimum different from a raid. Tuning.

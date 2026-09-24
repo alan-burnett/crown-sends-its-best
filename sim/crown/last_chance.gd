@@ -65,7 +65,7 @@ const CONDITIONS: Array[String] = [
 ## worsens*). Tuning, and it is the one figure here that is: the rungs decide how
 ## much warning the player gets, and `endings.md` §2's claim is that by the time
 ## the Chancellor arrives *the player has watched it coming for a year*.
-const DIRE_AT: Array[int] = [40, 25, 15, 8, 3]
+const DIRE_AT: Array[int] = [40_000, 25_000, 15_000, 8_000, 3_000]
 
 
 ## Look at the colony and say what is true, in the log (Seam A).

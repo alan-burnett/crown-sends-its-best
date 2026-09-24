@@ -36,7 +36,10 @@ func _comfort_budget(town: Town, mouths: float) -> float:
 
 func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	var reckoning := Reckoning.new(town.id)
-	var mouths := float(town.population())
+	# Thousands of people for the per-head rates; the people themselves for the
+	# intent's stocks, which may be livestock (`Population.amount_for`).
+	var people := float(town.population())
+	var mouths := Population.thousands(people)
 
 	# What this governor's intent wants kept on hand, per head. Used twice: as a
 	# reserve the town will not sell below, and as a want it goes shopping for.
@@ -70,7 +73,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# demand side of the reserve above. Bought after the project and before the
 	# rum: a governor bent on defence wants powder more than he wants a drink.
 	for resource in stocks:
-		var wanted := mouths * float(stocks[resource]) - before.held(town.id, StringName(resource))
+		var wanted := Population.amount_for(StringName(resource), float(stocks[resource]), people) \
+			- before.held(town.id, StringName(resource))
 		if wanted > 0.0:
 			reckoning.wants[resource] = wanted
 
@@ -141,7 +145,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	for resource in stocks:
 		reckoning.reserve[resource] = maxf(
 			reckoning.reserve_of(StringName(resource)),
-			mouths * float(stocks[resource]),
+			Population.amount_for(StringName(resource), float(stocks[resource]), people),
 		)
 
 	# A standing posture to stockpile or harvest something means the town parts

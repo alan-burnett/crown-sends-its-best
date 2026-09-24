@@ -285,7 +285,7 @@ static func _company_axes(town: Town) -> Dictionary:
 ## **The shared open item** between this and `immigration.md` §10 — how crowded
 ## and how poor before a town sheds people — and it wants tuning against #170
 ## rather than being settled here.
-const CROWDED: float = 60.0
+const CROWDED: float = 60_000.0
 
 
 ## What a building is good for, read out of its effects rather than its name.
@@ -399,7 +399,8 @@ static func _building_axes(id: StringName) -> Dictionary:
 	axes["capacity"] = (
 		learning * 0.4
 		+ reserved * 0.5
-		+ float(building.effect("pasture", 0)) * 0.03
+		# In thousands of head, the scale the weight was set at (#426).
+		+ Population.thousands(float(building.effect("pasture", 0))) * 0.03
 		# **A granary is capacity and not expansion** (#172). It grows the town
 		# from inside, which is what `POPULATION` wants; `expansion` is the axis
 		# for founding a second town, and it is weighed by `SETTLEMENT` alone. A
@@ -528,7 +529,8 @@ static func _improvement_axes(at: Vector2i, improvement: Improvement, context: C
 			axes["food"] = float(axes.get("food", 0.0)) + change * PER_UNIT_YIELD
 		else:
 			axes["trade"] = float(axes.get("trade", 0.0)) + change * PER_UNIT_YIELD * _trade_weight(id)
-	axes["capacity"] = float(improvement.capacity_on(terrain.id)) * 0.05
+	# In thousands of head, the scale the weight was set at (#426).
+	axes["capacity"] = Population.thousands(float(improvement.capacity_on(terrain.id))) * 0.05
 	axes["expansion"] = 0.0
 	return axes
 

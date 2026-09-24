@@ -67,7 +67,8 @@ func _land() -> WorldMap:
 ## Fed, clothed, and holding whatever the test puts in its hands.
 func _town(stock: Dictionary = {}, workers: int = 4) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(3, 3))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426): a worker-slot per thousand, as it was.
+	town.workers = workers * Population.THOUSAND
 	# **Funded, so its buildings are lit** (#151). A town that cannot pay upkeep
 	# keeps its buildings and loses their effects, which would make every test
 	# here a test of upkeep rather than of the thing it is about.
@@ -82,7 +83,8 @@ func _town(stock: Dictionary = {}, workers: int = 4) -> Town:
 ## A town with nothing in the larder. Used only where that is the point.
 func _destitute(stock: Dictionary = {}, workers: int = 4) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(3, 3))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426): a worker-slot per thousand, as it was.
+	town.workers = workers * Population.THOUSAND
 	town.receive_gold(5_000.0)  # destitute in stores, not in coin (#151)
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))

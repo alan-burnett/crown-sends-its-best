@@ -79,7 +79,7 @@ const LEAST_REGARD: float = 0.1
 ## **An absolute, deliberately.** Beating a hundred men is the same feat whether
 ## you brought fifty or five hundred, which is what makes this a different
 ## question from the odds rather than the same one inverted.
-const GLORY_AT: float = 80.0
+const GLORY_AT: float = 80_000.0
 
 ## How long the PC's last word to a commander keeps half its pull.
 ##

@@ -109,7 +109,9 @@ func _want(resource: StringName, amount: float, tier: float) -> void:
 ## What this town wants to be holding, from the state the month opened with.
 static func for_town(town: Town, before: ColonySnapshot) -> DesiredStock:
 	var desired := DesiredStock.new()
-	var mouths := maxf(1.0, float(town.population()))
+	# Rates are per thousand people (`Population`).
+	var people := maxf(1.0, float(town.population()))
+	var mouths := Population.thousands(people)
 
 	# 1. **What the coming months' needs require.** This month's meal and the
 	# months of reserve behind it, which is what the town's storehouses extend.
@@ -150,11 +152,12 @@ static func for_town(town: Town, before: ColonySnapshot) -> DesiredStock:
 	# guns a town has; it creates a want for guns it does not.
 	var stocks := Objective.intent_stocks(town.intent)
 	for resource in stocks:
-		desired._want(StringName(resource), mouths * float(stocks[resource]), REACH_INTENT)
+		desired._want(StringName(resource),
+			Population.amount_for(StringName(resource), float(stocks[resource]), people), REACH_INTENT)
 	for hoarded in Objective.posture_focus(town):
 		var id := StringName(hoarded)
 		desired.leans[String(hoarded)] = true
-		desired._want(id, maxf(before.held(town.id, id), mouths), REACH_INTENT)
+		desired._want(id, maxf(before.held(town.id, id), Population.amount_for(id, 1.0, people)), REACH_INTENT)
 
 	# 4. **What the town's buildings give it a use for.** A loom makes furs worth
 	# having in a way they are not in a town without one, and that is a fact about

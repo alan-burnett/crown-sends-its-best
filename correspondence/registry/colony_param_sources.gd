@@ -285,7 +285,7 @@ static func town_lacks(args: Dictionary, context: LetterContext) -> Variant:
 	var worst := ""
 	var deepest := INF
 	for resource in ColonyNeeds.needed_resources():
-		var monthly := maxf(1.0, float(town.population())) * ColonyNeeds.per_head(StringName(resource))
+		var monthly := town.mouths() * ColonyNeeds.per_head(StringName(resource))
 		if monthly <= 0.0:
 			continue
 		var months := town.held(StringName(resource)) / monthly
@@ -327,7 +327,7 @@ static func town_surplus(args: Dictionary, context: LetterContext) -> Variant:
 	var fallback := String(args.get("fallback", "iron"))
 	if context.town == null:
 		return fallback
-	var mouths := maxf(1.0, float(context.town.population()))
+	var mouths := context.town.mouths()
 
 	var best := ""
 	var most := 0.0
@@ -354,7 +354,7 @@ static func town_surplus_amount(_args: Dictionary, context: LetterContext) -> Va
 	if context.town == null:
 		return 0
 	var resource := StringName(town_surplus({"fallback": "iron"}, context))
-	var mouths := maxf(1.0, float(context.town.population()))
+	var mouths := context.town.mouths()
 	var keep := mouths * ColonyNeeds.per_head(resource) \
 		* (1.0 + ColonyNeeds.reserve_months(resource))
 	return maxi(1, int(roundf(maxf(0.0, context.town.held(resource) - keep) * 0.5)))

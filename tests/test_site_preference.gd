@@ -138,7 +138,7 @@ func test_he_keeps_clear_of_the_towns_already_there() -> void:
 
 	var colony := Colony.new()
 	var town := Town.new(&"ashmere", "Ashmere", unguarded)
-	town.workers = 20
+	town.workers = 20_000
 	colony.add(town)
 
 	var site := SitePreference.site_in(region, SitePreference.GOOD_GROUND, map, colony)
@@ -307,7 +307,7 @@ func test_going_wide_of_the_tribes_is_not_free() -> void:
 
 func test_a_launched_party_sets_out_for_a_region_and_not_a_tile() -> void:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(11, 7))
-	town.workers = 40
+	town.workers = 40_000
 	town.objective_cargo = {"food": 50.0}
 	town.store(&"food", 300.0)
 	town.receive_gold(500.0)

@@ -57,7 +57,8 @@ func _context(run: RunState) -> ColonyContext:
 ## own, so every figure below is one the test set.
 func _town(run: RunState, workers: int = 40) -> Town:
 	var town := run.colony.in_order()[0]
-	town.workers = workers
+	# Fixture sizes are in thousands (#426).
+	town.workers = workers * Population.THOUSAND
 	town.experts = {}
 	town.stockpile = {}
 	town.buildings = PackedStringArray([String(Building.BASE)])
@@ -77,7 +78,7 @@ func _besieger(
 	run: RunState, size: int, at: Vector2i, arms: Dictionary = {}
 ) -> Company:
 	return run.companies.raise_company(
-		Company.NATIVE, size, arms, Company.SUPPORTED_BY_CROWN, at, _context(run))
+		Company.NATIVE, size * Population.THOUSAND, arms, Company.SUPPORTED_BY_CROWN, at, _context(run))
 
 
 ## The same, under a man who can decide to press the attack.
@@ -96,7 +97,7 @@ func test_a_town_computes_force_from_what_it_is() -> void:
 	var wall := TownCompany.of(town)
 	var parts := Force.breakdown(wall, run.map, true)
 
-	assert_eq(int(parts["size"]), 40, "the town did not fight with its people")
+	assert_eq(int(parts["size"]), 40_000, "the town did not fight with its people")
 	assert_true(float(parts["fortification"]) > 1.0,
 		"a town with no wall at all is not §9's town")
 	assert_true(float(parts["force"]) > 0.0)
@@ -106,7 +107,7 @@ func test_a_towns_experts_defend_it_too() -> void:
 	var run := _run()
 	var town := _town(run, 10)
 	town.add_experts(&"tobacco", 5)
-	assert_eq(TownCompany.of(town).size, 15,
+	assert_eq(TownCompany.of(town).size, 10_005,
 		"the experts stayed indoors while the town was stormed")
 
 
@@ -226,9 +227,15 @@ func test_a_siege_takes_months_without_anything_saying_so() -> void:
 	# as the town's force falls with its people.
 	var run := _run()
 	var town := _town(run, 40)
-	var raiders := _besieger(run, 12, town.at, {"guns": 12.0})
+	var raiders := _besieger(run, 30, town.at, {"guns": 30.0})
 
+	# **What one population used to be** (#426): at the people scale a man falls
+	# in the first month, and what takes months is the first thousand. And the
+	# grind accelerates only against a besieger that outguns the town: counted in
+	# people, a weaker one is worn down faster than it wears, which the old
+	# thousands hid by rounding everything below one to nobody.
 	var first_death := -1
+	var lost_so_far := 0
 	var early := 0
 	var late := 0
 	for month in range(1, 61):
@@ -238,7 +245,8 @@ func test_a_siege_takes_months_without_anything_saying_so() -> void:
 			break
 		Battle.resolve(raiders, TownCompany.of(town, raiders), run.map, _context(run))
 		var killed := before - town.population()
-		if killed > 0 and first_death < 0:
+		lost_so_far += killed
+		if lost_so_far >= Population.THOUSAND and first_death < 0:
 			first_death = month
 		if month <= 12:
 			early += killed
@@ -246,7 +254,7 @@ func test_a_siege_takes_months_without_anything_saying_so() -> void:
 			late += killed
 
 	assert_true(first_death > 1,
-		"the first man died in month %d, which is not a siege" % first_death)
+		"the first thousand died in month %d, which is not a siege" % first_death)
 	assert_true(late > early,
 		"the grind did not accelerate: %d in the first year, %d in the second"
 			% [early, late])
@@ -262,7 +270,8 @@ func test_the_fraction_owed_survives_the_month() -> void:
 	Battle.resolve(raiders, TownCompany.of(town, raiders), run.map, _context(run))
 	assert_true(town.battle_owed > 0.0,
 		"a month of fighting left the town owing nothing at all")
-	assert_eq(town.population(), 40, "six men took a fortified town of forty in a month")
+	assert_true(town.population() > 40_000 - Population.THOUSAND,
+		"six thousand men took a thousand from a fortified town of forty thousand in a month")
 
 
 # --- 🔒 Attacks depopulate fast, and famine does not ------------------------
@@ -275,8 +284,8 @@ func test_a_battle_can_take_several_in_one_month() -> void:
 
 	run.world.month = 1
 	Battle.resolve(host, TownCompany.of(town, host), run.map, _context(run))
-	assert_true(40 - town.population() > 1,
-		"six hundred men under arms took one life from a town of forty")
+	assert_true(40_000 - town.population() > Population.THOUSAND,
+		"six hundred thousand men under arms took barely a thousand from a town of forty thousand")
 
 
 func test_one_event_names_everybody_in_it() -> void:
@@ -288,13 +297,13 @@ func test_one_event_names_everybody_in_it() -> void:
 	Battle.resolve(host, TownCompany.of(town, host), run.map, _context(run))
 	var stormed := run.log.of_type(TownCompany.EVENT_STORMED)
 	assert_eq(stormed.size(), 1, "a storming emitted %d events" % stormed.size())
-	assert_eq(int(stormed[0].payload.get("lost", 0)), 40 - town.population(),
+	assert_eq(int(stormed[0].payload.get("lost", 0)), 40_000 - town.population(),
 		"the event does not say how many it took")
 
 
 func test_famine_still_cannot() -> void:
 	# 🔒 `CLAUDE.md`, and the exception must stay an exception: a famine takes its
-	# lives one at a time, each its own resolution and its own event.
+	# lives a thousand at a time (#426: what one was), each lot its own event.
 	var run := _run()
 	var town := _town(run, 40)
 	town.months_hungry = 12
@@ -305,11 +314,14 @@ func test_famine_still_cannot() -> void:
 	for month in range(1, 4):
 		run.world.month = month
 		ConsumePhase.new().run(town, ColonySnapshot.of(run.colony), _context(run))
-	var after := run.log.of_type(ConsumePhase.EVENT_FAMINE).size()
 	var died := head - town.population()
-
-	assert_eq(after - before, died,
-		"%d died of famine in %d events" % [died, after - before])
+	var counted := 0
+	var events := run.log.of_type(ConsumePhase.EVENT_FAMINE)
+	for index in range(before, events.size()):
+		var count := int(events[index].payload["count"])
+		assert_true(count <= Population.THOUSAND, "a famine event took %d at once" % count)
+		counted += count
+	assert_eq(counted, died, "%d died of famine and the events counted %d" % [died, counted])
 
 
 func test_a_town_keeps_its_stores_though_it_loses_its_people() -> void:
@@ -323,7 +335,7 @@ func test_a_town_keeps_its_stores_though_it_loses_its_people() -> void:
 
 	run.world.month = 1
 	Battle.resolve(host, TownCompany.of(town, host), run.map, _context(run))
-	assert_true(town.population() < 40, "nobody was lost, so this proves nothing")
+	assert_true(town.population() < 40_000, "nobody was lost, so this proves nothing")
 	assert_almost_eq(town.held(&"food"), 500.0, 0.0001, "the granary was sacked")
 	assert_almost_eq(town.held(&"guns"), 100.0, 0.0001, "the armoury was sacked")
 
@@ -345,7 +357,7 @@ func test_workers_are_lost_before_experts_under_arms() -> void:
 		if town.population() <= 0:
 			break
 		Battle.resolve(raiders, TownCompany.of(town, raiders), run.map, _context(run))
-		if town.workers < 20:
+		if town.workers < 20_000:
 			took_a_worker = true
 		if town.expert_count(&"tobacco") < 6:
 			assert_eq(town.workers, 0,
@@ -453,7 +465,7 @@ func test_the_colonys_own_militia_cannot_march_on_a_town() -> void:
 	var run := _run()
 	var town := _town(run, 40)
 	var militia := run.companies.raise_company(
-		Company.COLONIAL, 30, {}, town.id, town.at, _context(run))
+		Company.COLONIAL, 30_000, {}, town.id, town.at, _context(run))
 	assert_false(Battle.may_fight(militia, TownCompany.of(town, militia)))
 
 	town.rebelling = true
@@ -465,7 +477,7 @@ func test_crown_troops_may_take_a_rebel_town_and_not_a_loyal_one() -> void:
 	var run := _run()
 	var town := _town(run, 40)
 	var troops := run.companies.raise_company(
-		Company.CROWN, 30, {}, Company.SUPPORTED_BY_CROWN, town.at, _context(run))
+		Company.CROWN, 30_000, {}, Company.SUPPORTED_BY_CROWN, town.at, _context(run))
 	assert_false(Battle.may_fight(troops, TownCompany.of(town, troops)),
 		"Crown troops fired on a loyal town")
 
@@ -505,7 +517,7 @@ func test_a_company_cannot_stroll_past_a_defender_to_the_town_behind_it() -> voi
 	var run := _run()
 	var town := _town(run, 40)
 	var militia := run.companies.raise_company(
-		Company.COLONIAL, 20, {}, town.id, town.at, _context(run))
+		Company.COLONIAL, 20_000, {}, town.id, town.at, _context(run))
 
 	var driver := CompanyDriver.new()
 	driver.companies = run.companies
@@ -524,7 +536,7 @@ func test_a_company_cannot_stroll_past_a_defender_to_the_town_behind_it() -> voi
 	for event in fought:
 		assert_eq(String(event.payload.get("defender", "")), String(militia.id),
 			"the raiders went past the militia and struck the town")
-	assert_eq(town.population(), 40, "the town lost people with its militia intact")
+	assert_eq(town.population(), 40_000, "the town lost people with its militia intact")
 	assert_empty(run.log.of_type(TownCompany.EVENT_STORMED))
 
 

@@ -64,7 +64,7 @@ const INFLUENCE_MAX: int = 4
 
 ## People per tile of reach. A village presses outward because it has mouths to
 ## feed, not because it has decided to. Tuning.
-const MOUTHS_PER_REACH: float = 22.0
+const MOUTHS_PER_REACH: float = 22_000.0
 
 var id: StringName = &""
 var tribe: StringName = &""
@@ -148,7 +148,7 @@ func decide(its_tribe: Tribe, months_of_food: float, context: ColonyContext) -> 
 ## **They grow in place.** Nothing here founds anything, and there is nowhere in
 ## this file that could.
 func live(its_tribe: Tribe, context: ColonyContext) -> void:
-	var eaten := float(people) * ColonyNeeds.per_head(&"food")
+	var eaten := Population.of(ColonyNeeds.per_head(&"food"), float(people))
 	var held := float(stores.get("food", 0.0))
 	var months := held / maxf(0.0001, eaten)
 	decide(its_tribe, months, context)
@@ -181,15 +181,17 @@ func live(its_tribe: Tribe, context: ColonyContext) -> void:
 		# They go hungry and thin out, one at a time, as a town does — a village
 		# is a settled population going about its business and `CLAUDE.md`'s rule
 		# is exactly about that.
-		people = maxi(0, people - 1)
+		# In lots of a thousand, what one was (#426); a share is #427.
+		people = maxi(0, people - Population.THOUSAND)
 		return
 
 	var reach := influence()
 	growth_accrued += float(people) * _birth_rate(its_tribe) * minf(1.0, months / 3.0)
-	if growth_accrued < 1.0:
+	# Today's growth at the new scale (#426): at most a thousand a month.
+	if growth_accrued < float(Population.THOUSAND):
 		return
-	growth_accrued -= 1.0
-	people += 1
+	growth_accrued -= float(Population.THOUSAND)
+	people += Population.THOUSAND
 	context.log.emit(EVENT_GREW, id, context.state.month, {
 		"village": String(id),
 		"tribe": String(tribe),

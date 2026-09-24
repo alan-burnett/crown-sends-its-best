@@ -50,15 +50,16 @@ func _context(run: RunState) -> ColonyContext:
 func _arms(size: int, share: float = 1.0) -> Dictionary:
 	var out: Dictionary = {}
 	for resource in Company.armed_resources():
-		out[String(resource)] = Company.want_per_head(StringName(resource)) \
-			* float(size) * share
+		out[String(resource)] = Population.amount_for(StringName(resource),
+			Company.want_per_head(StringName(resource)), float(size * Population.THOUSAND)) * share
 	return out
 
 
 func _raise(run: RunState, size: int = 20, arms: Dictionary = {}) -> Company:
 	var town := run.colony.in_order()[0]
+	# Fixture sizes are in thousands (#426).
 	return run.companies.raise_company(
-		Company.COLONIAL, size, arms, town.id, town.at, _context(run))
+		Company.COLONIAL, size * Population.THOUSAND, arms, town.id, town.at, _context(run))
 
 
 ## A tile of known ground, so terrain is the test's and not the seed's.

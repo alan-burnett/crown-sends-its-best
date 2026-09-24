@@ -868,7 +868,7 @@ func test_it_does_not_touch_what_actually_happened_to_the_town() -> void:
 
 func _boom_town(quality: float = 0.9) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = 12
+	town.workers = 12_000
 	town.quality_of_life = quality
 	town.receive_gold(5_000.0)
 	return town
@@ -992,7 +992,7 @@ func _gathered(quirk: StringName) -> float:
 	village.id = &"village_test_0"
 	village.tribe = &"tribe_test"
 	village.at = Vector2i(10, 10)
-	village.people = 30
+	village.people = 30_000
 	village.stores = {"food": 400.0}
 
 	var context := ColonyContext.new(
@@ -1021,7 +1021,7 @@ func test_the_ground_itself_is_the_ground_the_colony_farms() -> void:
 
 
 func test_their_war_parties_are_more_numerous() -> void:
-	var people := 30
+	var people := 30_000
 	var plain := _marching(people)
 	_with_quirk(&"restless_country")
 	assert_true(_marching(people) > plain, "the same men marched out")
@@ -1034,7 +1034,7 @@ func test_a_village_still_keeps_enough_to_come_home_to() -> void:
 	_with_quirk(&"restless_country")
 	# **Small enough that the floor is what binds**, not the share. A village big
 	# enough to spare its share freely would satisfy this either way.
-	var people := 12
+	var people := 12_000
 	assert_true(_marching(people) > 0, "nobody marched at all, so this proves nothing")
 	assert_true(_marching(people) <= people - Muster.VILLAGE_KEEPS,
 		"the whole village marched and left nothing behind it")
@@ -1054,7 +1054,7 @@ func _marching(people: int) -> int:
 func test_their_agreements_move_more_of_the_winter() -> void:
 	var village := Village.new()
 	village.id = &"village_test_0"
-	village.people = 40
+	village.people = 40_000
 	var plain := TradeAgreement.kept_back_by(village)
 	assert_true(plain > 0.0, "they kept nothing back at all, so this proves nothing")
 
@@ -1069,7 +1069,7 @@ func test_what_they_keep_is_the_winter_and_not_a_musket() -> void:
 	# quantity of hides equal to two months of everyone's grain.
 	var village := Village.new()
 	village.id = &"village_test_0"
-	village.people = 40
+	village.people = 40_000
 	assert_true(TradeAgreement.kept_back_by(village) > 0.0,
 		"they will trade away the winter's food")
 	assert_almost_eq(TradeAgreement.kept_back_by(village, &"furs"), 0.0, 0.0001,

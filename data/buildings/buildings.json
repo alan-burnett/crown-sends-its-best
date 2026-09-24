@@ -331,7 +331,7 @@
 	},
 	"upkeep": 0,
 	"effects": {
-	  "pasture": 24
+	  "pasture": 24000
 	},
 	"requires": []
   },

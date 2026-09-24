@@ -202,7 +202,9 @@ static func attack_took_him(
 	# **His own stream**, derived per contact, so the same seed kills or spares
 	# him at the same moment however much else has happened elsewhere.
 	var rng := context.streams.contact_stream(String(contact.id))
-	if rng.randf() > 1.0 / float(new_population):
+	# **Today's odds at the new scale** (#426): one in what the town's population
+	# used to count. The share-of-the-loss roll is #427.
+	if rng.randf() > float(Population.THOUSAND) / float(new_population):
 		return false
 	_kill(contact, town, "attack", context)
 	return true

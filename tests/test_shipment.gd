@@ -36,7 +36,7 @@ func after_each() -> void:
 
 func _town(stock: Dictionary = {}) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = 20
+	town.workers = 20_000
 	town.governor_id = &"gov_ashmere"
 	town.store(&"food", 400.0)
 	for resource in stock:
@@ -94,7 +94,7 @@ func test_at_the_spare_tier_only_surplus_leaves() -> void:
 	var intent := _shipment(town, "food", kept_back, Shipment.TIER_SPARE)
 	_run_months(town, intent, 12)
 
-	var mouths := maxf(1.0, float(town.population()))
+	var mouths := town.mouths()
 	var floor_at := mouths * ColonyNeeds.per_head(&"food") \
 		* (1.0 + ColonyNeeds.reserve_months(&"food"))
 	assert_true(town.held(&"food") >= floor_at - 0.01,

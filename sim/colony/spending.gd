@@ -91,7 +91,8 @@ static func rounds() -> int:
 ## that puts that on the same scale as a sack of grain, so one ranked list can
 ## hold both.
 static func pleasure_worth(mouths: float) -> float:
-	return maxf(1.0, mouths) * _pleasure_gold_per_head
+	# `mouths` is thousands of people (#426); never less than one person's worth.
+	return maxf(Population.thousands(1.0), mouths) * _pleasure_gold_per_head
 
 
 ## The gold a town holds back against the months ahead (§4).
@@ -102,7 +103,7 @@ static func pleasure_worth(mouths: float) -> float:
 ## against next month while starving is not prudence. **The reserve gates
 ## comforts and the objective, never survival.**
 static func purse_reserve(town: Town, context: ColonyContext) -> float:
-	var mouths := maxf(1.0, float(town.population()))
+	var mouths := town.mouths()
 	var monthly := 0.0
 	for resource in ColonyNeeds.needed_resources():
 		var id := StringName(resource)

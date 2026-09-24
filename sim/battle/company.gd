@@ -328,7 +328,8 @@ func held(resource: StringName) -> float:
 ## A resource nobody wants reads as fully supplied, because a company that needs
 ## no horses is not short of horses.
 func armed_share(resource: StringName) -> float:
-	var want := wants_per_head(resource) * float(size)
+	# Per thousand men, and horses by the head (`Population.amount_for`).
+	var want := Population.amount_for(resource, wants_per_head(resource), float(size))
 	if want <= 0.0:
 		return 1.0
 	return clampf(held(resource) / want, 0.0, 1.0)
@@ -438,7 +439,7 @@ func stand_down(town: Town, context: ColonyContext) -> int:
 func victuals() -> Dictionary:
 	var out: Dictionary = {}
 	for resource in ColonyNeeds.needed_resources():
-		var amount := float(size) * ColonyNeeds.per_head(StringName(resource))
+		var amount := Population.of(ColonyNeeds.per_head(StringName(resource)), float(size))
 		if amount > 0.0:
 			out[String(resource)] = amount
 	return out

@@ -143,14 +143,10 @@ func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
 	if wanted <= 0:
 		return 0
 
-	var taken: Dictionary = {}
+	var taken := town.take_lives(wanted)
 	var lost := 0
-	for _each in wanted:
-		var who := town.take_one_life()
-		if who.is_empty():
-			break  # There is nobody left to lose.
-		taken[who] = int(taken.get(who, 0)) + 1
-		lost += 1
+	for who in taken:
+		lost += int(taken[who])
 	if lost <= 0:
 		return 0
 

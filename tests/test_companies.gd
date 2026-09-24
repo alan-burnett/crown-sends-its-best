@@ -64,9 +64,10 @@ func _raise(
 	support: StringName = &"",
 ) -> Company:
 	var town := run.colony.in_order()[0]
+	# Fixture sizes are in thousands (#426).
 	return run.companies.raise_company(
 		allegiance,
-		size,
+		size * Population.THOUSAND,
 		arms,
 		town.id if String(support).is_empty() else support,
 		town.at,
@@ -77,7 +78,8 @@ func _raise(
 func _horsed(size: int) -> Dictionary:
 	var out: Dictionary = {}
 	for resource in Company.armed_resources():
-		out[String(resource)] = Company.want_per_head(StringName(resource)) * float(size)
+		out[String(resource)] = Population.amount_for(StringName(resource),
+			Company.want_per_head(StringName(resource)), float(size * Population.THOUSAND))
 	return out
 
 
@@ -89,7 +91,7 @@ func test_a_company_carries_the_six_things_section_one_lists() -> void:
 	company.commander = &"commander_one"
 	company.order = &"hold_the_town"
 
-	assert_eq(company.size, 30)
+	assert_eq(company.size, 30_000)
 	assert_true(company.held(&"guns") > 0.0, "it launched with no guns")
 	assert_eq(company.support, run.colony.in_order()[0].id)
 	assert_eq(company.commander, &"commander_one")
@@ -183,7 +185,7 @@ func test_a_mauled_cavalry_company_is_still_cavalry() -> void:
 	var context := _context(run)
 	for round in 6:
 		mounted.lose(0.25, &"mauled", context)
-	assert_true(mounted.size < 40 and mounted.size > 0,
+	assert_true(mounted.size < 40_000 and mounted.size > 0,
 		"the company was not actually reduced: %d" % mounted.size)
 	assert_true(mounted.is_cavalry(),
 		"a mauled cavalry company dismounted: %d men, %f horsed"
@@ -200,7 +202,7 @@ func test_losses_take_the_same_share_of_everything_carried() -> void:
 	var share_before := company.armed_share(&"guns")
 
 	company.lose(0.5, &"mauled", _context(run))
-	assert_eq(company.size, 20, "half of forty is %d" % company.size)
+	assert_eq(company.size, 20_000, "half of forty thousand is %d" % company.size)
 	assert_true(company.held(&"guns") < guns_before,
 		"the men were lost and their muskets walked home by themselves")
 	assert_almost_eq(company.armed_share(&"guns"), share_before, 0.001,
@@ -211,7 +213,9 @@ func test_losses_take_the_same_share_of_everything_carried() -> void:
 func test_a_share_always_costs_at_least_one_man() -> void:
 	# A company of eight losing six per cent must not be immortal by rounding.
 	var run := _run()
+	# Eight men, not eight thousand: a share of so few rounds to nobody (#426).
 	var small := _raise(run, 8, _horsed(8))
+	small.size = 8
 	assert_eq(small.lose(Company.attrition(), &"unsupported", _context(run)), 1,
 		"a small company took no losses at all")
 
@@ -277,7 +281,7 @@ func test_a_town_that_cannot_cover_it_sends_nothing() -> void:
 	var company := _raise(run, 400, _horsed(400))
 	var town := _fed(run, {"food": 30.0, "clothing": 10.0})
 	var before := town.held(&"food")
-	var the_towns_own := float(town.population()) * ColonyNeeds.per_head(&"food")
+	var the_towns_own := Population.of(ColonyNeeds.per_head(&"food"), float(town.population()))
 
 	_colony_month(run)
 	assert_eq(company.supplied_month, -1, "a town covered a company it cannot feed")
@@ -294,7 +298,8 @@ func test_the_townspeople_eat_before_the_soldiers() -> void:
 	# is the order the phases run in that makes it true.
 	var run := _run()
 	var town := run.colony.in_order()[0]
-	var people := float(town.population())
+	# In thousands, the scale every per-head rate is written for (#426).
+	var people := town.mouths()
 	var men := 10
 	var company := _raise(run, men, _horsed(men))
 	var soldiers_eat := float(men) * ColonyNeeds.per_head(&"food")
@@ -355,7 +360,7 @@ func test_an_unsupported_company_loses_effectiveness_and_men() -> void:
 	_reckon(run)
 	assert_true(company.effectiveness() < 1.0,
 		"a company nobody fed is as good as one that ate")
-	assert_true(company.size < 40, "it went without and lost nobody")
+	assert_true(company.size < 40_000, "it went without and lost nobody")
 	assert_eq(run.log.of_type(Company.EVENT_UNSUPPORTED).size(), 1,
 		"it went hungry and nothing said so")
 
@@ -391,7 +396,7 @@ func test_a_company_that_ate_does_not_bleed() -> void:
 	var company := _raise(run, 40, _horsed(40))
 	company.was_supplied(run.world.month)
 	_reckon(run)
-	assert_eq(company.size, 40, "a fed company lost men")
+	assert_eq(company.size, 40_000, "a fed company lost men")
 	assert_empty(run.log.of_type(Company.EVENT_UNSUPPORTED))
 
 

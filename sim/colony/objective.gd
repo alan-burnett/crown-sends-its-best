@@ -362,7 +362,8 @@ static func build_capacity(town: Town) -> float:
 		var standing := Building.find(StringName(id))
 		if standing != null and Building.is_lit(town, StringName(id)):
 			speed += float(standing.effect("build_speed", 0.0))
-	return maxf(1.0, float(town.population())) * CAPACITY_PER_HEAD * (1.0 + maxf(0.0, speed))
+	# Per thousand people (#426): the figure did not move when the count did.
+	return town.mouths() * CAPACITY_PER_HEAD * (1.0 + maxf(0.0, speed))
 
 
 ## What a build costs altogether, in resources.

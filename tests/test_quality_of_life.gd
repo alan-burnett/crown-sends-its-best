@@ -172,7 +172,8 @@ func _map() -> WorldMap:
 
 func _town(stock: Dictionary = {}, gold: float = 400.0, workers: int = 12) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(4, 4))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426).
+	town.workers = workers * Population.THOUSAND
 	town.governor_id = &"governor_ashmere"
 	town.intent = GovernorIntent.ECONOMY
 	town.receive_gold(gold)
@@ -260,7 +261,7 @@ func test_livestock_count_towards_the_larder() -> void:
 	# otherwise go hungry eats them, so they are food that has not been eaten yet.
 	var bare := _town({"food": 40.0, "clothing": 40.0})
 	var herded := _town({"food": 40.0, "clothing": 40.0})
-	herded.add_livestock(&"cows", 12)
+	herded.add_livestock(&"cows", 12_000)
 
 	var harness := _harness(herded)
 	_run_month(_harness(bare))
@@ -397,9 +398,9 @@ func test_growth_is_slow_at_low_population_and_compounds() -> void:
 		_run_month(one)
 		_run_month(other)
 
-	var small_growth := float(small.population() - 10) / 10.0
-	var large_growth := float(large.population() - 400) / 400.0
-	assert_true(large.population() > 400, "a town of four hundred had no children in a year")
+	var small_growth := float(small.population() - 10_000) / 10_000.0
+	var large_growth := float(large.population() - 400_000) / 400_000.0
+	assert_true(large.population() > 400_000, "a town of four hundred thousand had no children in a year")
 	assert_true(large_growth > small_growth,
 		"growth did not compound: %f against %f" % [large_growth, small_growth])
 

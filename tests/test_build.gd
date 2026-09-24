@@ -39,7 +39,8 @@ func _map() -> WorldMap:
 
 func _town(objective: StringName, stock: Dictionary = {}, workers: int = 6) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(3, 3))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426): a worker-slot per thousand, as it was.
+	town.workers = workers * Population.THOUSAND
 	town.objective = objective
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
@@ -341,9 +342,9 @@ func test_build_capacity_comes_from_the_population() -> void:
 	# A large town raises a granary in a month; a small one takes an age over the
 	# same structure, and nothing had to be authored to say so.
 	var small := _town(&"granary", {})
-	small.workers = 4
+	small.workers = 4_000
 	var large := _town(&"granary", {})
-	large.workers = 40
+	large.workers = 40_000
 	assert_true(Objective.build_capacity(large) > Objective.build_capacity(small),
 		"forty people build no faster than four")
 

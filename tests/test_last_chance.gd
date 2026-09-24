@@ -175,7 +175,7 @@ func test_he_writes_as_the_colony_dwindles_and_again_as_it_worsens() -> void:
 
 	var wrote := 0
 	var month := 1
-	for people in [200, 38, 37, 24, 14, 7, 2]:
+	for people in [200_000, 38_000, 37_000, 24_000, 14_000, 7_000, 2_000]:
 		town.workers = people
 		_look(run, month)
 		if LastChance.newly_dire(run.log, month):
@@ -191,23 +191,23 @@ func test_and_never_twice_about_the_same_figure() -> void:
 	var town := run.colony.in_order()[0]
 	town.experts = {}
 
-	town.workers = 200
+	town.workers = 200_000
 	_look(run, 1)
-	town.workers = 20
+	town.workers = 20_000
 	_look(run, 2)
 	assert_true(LastChance.newly_dire(run.log, 2))
 
 	# It recovers a little and falls back to the same rung.
-	town.workers = 30
+	town.workers = 30_000
 	_look(run, 3)
-	town.workers = 20
+	town.workers = 20_000
 	_look(run, 4)
 	assert_false(LastChance.newly_dire(run.log, 4),
 		"a town that lost a man and took in another set him writing twice")
 
 
 func test_a_healthy_colony_is_on_no_rung_at_all() -> void:
-	assert_eq(LastChance.rung_for(10_000), -1)
+	assert_eq(LastChance.rung_for(10_000_000), -1)
 	assert_true(LastChance.rung_for(1) >= 0)
 
 

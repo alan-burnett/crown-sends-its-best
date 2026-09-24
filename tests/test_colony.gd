@@ -43,7 +43,7 @@ func test_population_types_are_distinct_not_one_number() -> void:
 
 
 func test_workers_decide_how_many_tiles_can_be_worked() -> void:
-	assert_eq(_town(&"a", 7).workable_tiles(), 7)
+	assert_eq(_town(&"a", 7_000).workable_tiles(), 7, "a tile per thousand workers (#426)")
 
 
 func test_the_stockpile_holds_resources() -> void:
@@ -277,7 +277,7 @@ func test_influence_is_derived_and_grows_with_the_town() -> void:
 	var town := run.colony.by_id(&"ashmere")
 
 	var small := Territory.compute(run.map, [town]).tiles_of(&"ashmere").size()
-	town.workers = 200
+	town.workers = 200_000
 	var large := Territory.compute(run.map, [town]).tiles_of(&"ashmere").size()
 
 	assert_true(large > small, "a bigger town works more ground")

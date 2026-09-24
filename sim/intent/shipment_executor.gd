@@ -102,7 +102,7 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 func _available(town: Town, intent: Intent, resource: StringName) -> float:
 	if StringName(intent.data.get("tier", Shipment.TIER_SPARE)) == Shipment.TIER_NEED:
 		return town.held(resource)
-	var mouths := maxf(1.0, float(town.population()))
+	var mouths := town.mouths()
 	var keep := mouths * ColonyNeeds.per_head(resource) \
 		* (1.0 + ColonyNeeds.reserve_months(resource))
 	return maxf(0.0, town.held(resource) - keep)

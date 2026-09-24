@@ -14,14 +14,14 @@ extends RefCounted
 ## Bumped whenever the shape of a save changes. **During development a save from
 ## an older version is refused rather than migrated** (`CLAUDE.md`), so this
 ## going up invalidates saves, deliberately.
-const SAVE_VERSION: int = 1
+const SAVE_VERSION: int = 2
 
 ## What the Crown hands over. How the initial grant is split between people, gold
 ## and resources is a starting decision in M3 (SPEC §6.1); these are the numbers
 ## until the player gets to choose.
 const FIRST_TOWN_ID: StringName = &"ashmere"
 const FIRST_TOWN_NAME: String = "Ashmere"
-const STARTING_WORKERS: int = 12
+const STARTING_WORKERS: int = 12_000
 const STARTING_FOOD: float = 90.0
 const STARTING_WOOD: float = 30.0
 const STARTING_TOOLS: float = 8.0

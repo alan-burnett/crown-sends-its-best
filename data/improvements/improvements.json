@@ -33,7 +33,7 @@
     "scale": {
       "*": 0.5
     },
-    "livestock_capacity": 4,
+    "livestock_capacity": 4000,
     "terrain_factor": {
       "grassland": 1.0,
       "plains": 0.6,

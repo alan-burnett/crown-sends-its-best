@@ -332,9 +332,9 @@ func _context(run: RunState) -> ColonyContext:
 ## ignoring the comfort entirely — caught by mutation, not by reading.
 func _besieged(run: RunState) -> Town:
 	var town := run.colony.in_order()[0]
-	town.workers = 20
+	town.workers = 20_000
 	run.companies.raise_company(
-		Company.NATIVE, 400, {"guns": 400.0, "tools": 400.0},
+		Company.NATIVE, 400_000, {"guns": 400.0, "tools": 400.0},
 		Company.SUPPORTED_BY_CROWN, town.at, _context(run))
 	return town
 
@@ -824,7 +824,7 @@ func test_nothing_in_the_peace_measure_can_name_an_aggressor() -> void:
 func _two_towns(run: RunState) -> Array:
 	var home := run.colony.in_order()[0]
 	var frontier := Town.new(&"gallows_end", "Gallows End", Vector2i(6, 6))
-	frontier.workers = 8
+	frontier.workers = 8_000
 	run.colony.add(frontier)
 	return [home, frontier]
 
@@ -1017,7 +1017,7 @@ func _frontier(run: RunState, id: StringName, _at: Vector2i = Vector2i.ZERO) -> 
 	var home := run.colony.in_order()[0]
 	var site := _land_away_from(run, home.at)
 	var town := Town.new(id, String(id).capitalize(), site)
-	town.workers = 10
+	town.workers = 10_000
 	run.colony.add(town)
 	return town
 
@@ -1392,7 +1392,7 @@ func test_the_measure_counts_the_stores_and_the_companies_both() -> void:
 	# mountain of muskets read the same. He wants the guns to exist.
 	var run := _run()
 	var town := run.colony.in_order()[0]
-	town.workers = 20
+	town.workers = 20_000
 	town.stockpile = {}
 	var bare := ColonyMeasures.armed_of(run)
 
@@ -1402,7 +1402,7 @@ func test_the_measure_counts_the_stores_and_the_companies_both() -> void:
 
 	town.take(&"guns", 10.0)
 	run.companies.raise_company(
-		Company.COLONIAL, 10, {"guns": 10.0}, town.id, town.at, _context(run))
+		Company.COLONIAL, 10_000, {"guns": 10.0}, town.id, town.at, _context(run))
 	var carried := ColonyMeasures.armed_of(run)
 	assert_true(carried > bare,
 		"ten muskets in a company's hands armed nobody")
@@ -1413,7 +1413,7 @@ func test_shipping_the_guns_away_is_the_opposite_of_being_armed() -> void:
 	# are needed; this is the brake.
 	var run := _run()
 	var town := run.colony.in_order()[0]
-	town.workers = 20
+	town.workers = 20_000
 	town.stockpile = {}
 	town.store(&"guns", 30.0)
 	var armed := ColonyMeasures.armed_of(run)
@@ -1428,7 +1428,7 @@ func test_a_colony_that_ships_its_guns_cools_the_man_who_signed_for_them() -> vo
 	# nothing reads would not cost him a thing.
 	var run := _run()
 	var town := _with(run, ["gunsmith"])
-	town.workers = 20
+	town.workers = 20_000
 	town.stockpile = {}
 	var man := _quartermaster(run, town)
 
@@ -1602,7 +1602,7 @@ func test_rehoming_moves_who_is_being_cultivated() -> void:
 	var first := _the_governor(run)
 
 	var other := Town.new(&"gallows_end", "Gallows End", Vector2i(6, 6))
-	other.workers = 10
+	other.workers = 10_000
 	run.colony.add(other)
 	var second := Governor.generate(other, run.streams)
 	other.governor_id = second.id

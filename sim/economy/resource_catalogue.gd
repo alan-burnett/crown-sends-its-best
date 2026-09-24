@@ -87,7 +87,17 @@ static func processed() -> PackedStringArray:
 ## What one unit trades for with the Crown, before tax.
 static func price_of(id: StringName) -> float:
 	var kind := get_kind(id)
-	return kind.price if kind != null else 1.0
+	return kind.price / per_unit(id) if kind != null else 1.0
+
+
+## 🔒 **How many of the sim's units one unit of the data stands for** (#426,
+## `population.md` §4). Livestock is counted in head on the people scale, and its
+## per-head figures — price, town worth, feed, slaughter yield — are authored per
+## thousand head, as people's rates are per thousand people. So a head is a
+## thousandth of the authored figure, and one here converts every one of them.
+## Everything else keeps its units.
+static func per_unit(id: StringName) -> float:
+	return float(Population.THOUSAND) if is_livestock(id) else 1.0
 
 
 ## How much a Crown at war wants this (#141). Nought for anything unauthored.
@@ -99,13 +109,13 @@ static func war_appetite(id: StringName) -> float:
 ## Food one head of this eats each month, off pasture.
 static func feed_of(id: StringName) -> float:
 	var kind := get_kind(id)
-	return kind.feed if kind != null else 0.0
+	return kind.feed / per_unit(id) if kind != null else 0.0
 
 
 ## Food one head yields when it is killed for the table.
 static func slaughter_yield_of(id: StringName) -> float:
 	var kind := get_kind(id)
-	return kind.slaughter_yield if kind != null else 0.0
+	return kind.slaughter_yield / per_unit(id) if kind != null else 0.0
 
 
 ## How much raw resource one unit of this takes to make.
@@ -129,7 +139,7 @@ static func requires_building(id: StringName) -> bool:
 ## What a colonial town thinks a unit is worth in itself (#135).
 static func town_base(id: StringName) -> float:
 	var kind := get_kind(id)
-	return 1.0 if kind == null else kind.town_base
+	return 1.0 if kind == null else kind.town_base / per_unit(id)
 
 
 ## What a tribe would give for it, as a multiple of the Crown's price

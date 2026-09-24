@@ -40,7 +40,8 @@ func after_each() -> void:
 func _context_for(people: int, land: int, water: int) -> DeliberationContext:
 	var run := RunState.new_run(SEED)
 	var town: Town = run.colony.in_order()[0]
-	town.workers = people
+	# Fixture sizes are in thousands (#426).
+	town.workers = people * Population.THOUSAND
 	town.experts = {}
 
 	# A reach built by hand, so the only thing under test is what is counted.
@@ -184,12 +185,12 @@ func test_a_poor_town_and_a_prosperous_one_send_out_different_expeditions() -> v
 	context.colony = run.colony
 
 	var poor: Town = run.colony.in_order()[0]
-	poor.workers = 60
+	poor.workers = 60_000
 	for resource in ResourceCatalogue.ids():
 		poor.store(StringName(resource), 0.0)
 
 	var rich := Town.new(&"rich", "Rich", Vector2i(12, 12))
-	rich.workers = 60
+	rich.workers = 60_000
 	for resource in ResourceCatalogue.ids():
 		rich.store(StringName(resource), 400.0)
 

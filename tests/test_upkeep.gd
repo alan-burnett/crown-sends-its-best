@@ -36,7 +36,7 @@ func _map() -> WorldMap:
 
 func _town(gold: float, buildings: Array = []) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(3, 3))
-	town.workers = 8
+	town.workers = 8_000
 	town.receive_gold(gold)
 	for id in buildings:
 		town.add_building(StringName(id))

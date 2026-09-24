@@ -32,7 +32,7 @@ func after_each() -> void:
 
 func _town(intent: StringName, stock: Dictionary = {}, gold: float = 4_000.0) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(0, 0))
-	town.workers = 10
+	town.workers = 10_000
 	town.intent = intent
 	town.receive_gold(gold)
 	for resource in stock:
@@ -110,7 +110,7 @@ func test_the_demand_grows_with_the_town() -> void:
 	# powder than a town of ten and neither figure has to be authored.
 	var small := _town(GovernorIntent.DEFENCE, {"food": 400.0, "clothing": 80.0})
 	var large := _town(GovernorIntent.DEFENCE, {"food": 400.0, "clothing": 80.0})
-	large.workers = 200
+	large.workers = 200_000
 
 	assert_true(_reckon(large).reserve_of(&"guns") > _reckon(small).reserve_of(&"guns"))
 
@@ -212,7 +212,7 @@ func test_the_baseline_is_still_what_the_data_says() -> void:
 	# food 2, clothing 1, everything else 0.5, with the modifiers on top.
 	var plain := _town(&"", {"food": 400.0, "clothing": 80.0})
 	var reckoning := _reckon(plain)
-	var mouths := float(plain.population())
+	var mouths := plain.mouths()
 
 	assert_almost_eq(
 		reckoning.reserve_of(&"food"),

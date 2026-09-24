@@ -40,7 +40,7 @@ const JOIN_ABOVE: float = 62.0
 const GIVE_ABOVE: float = 74.0
 
 ## How fast they come, per month, at the very top of the scale. Tuning.
-const JOIN_AT_BEST: float = 0.5
+const JOIN_AT_BEST: float = 500.0
 
 ## What share of a village's spare stores they will part with as a gift, per
 ## month, at the very top. Tuning.
@@ -86,25 +86,26 @@ static func join(
 	# immigration's pool meant a colony attractive enough to draw settlers spent
 	# this fraction on them, and the neighbours who actually walked in were logged
 	# as passengers off a ship.
+	# **Whole people, the fraction carried** (#426): hundreds a month now, in one
+	# event that says how many.
 	town.native_arrivals_accrued += JOIN_AT_BEST * eagerness
-	if town.native_arrivals_accrued < 1.0:
+	var joining := mini(int(floorf(town.native_arrivals_accrued)), maxi(0, village.people - 1))
+	if joining <= 0:
 		return 0
-	town.native_arrivals_accrued -= 1.0
-	town.workers += 1
-	# **And the village is one fewer**, because these are their people and not a
-	# fountain. A tribe that empties itself into a colony is a tribe the colony
-	# has absorbed, which is a different thing from a tribe that likes it.
-	village.people = maxi(1, village.people - 1)
+	town.native_arrivals_accrued -= float(joining)
+	town.workers += joining
+	# **And the village is that many fewer**, because these are their people and
+	# not a fountain. A tribe that empties itself into a colony is a tribe the
+	# colony has absorbed, which is a different thing from a tribe that likes it.
+	village.people = maxi(1, village.people - joining)
 
 	context.log.emit(EVENT_JOINED, town.id, context.state.month, {
 		"tribe": String(tribe.id),
 		"town": String(town.id),
 		"village": String(village.id),
-		# 🔒 **One.** Written out rather than carried as a figure, because there
-		# is no arrangement of this that could move two.
-		"people": 1,
+		"people": joining,
 	}, WorldPhase.ARRIVALS)
-	return 1
+	return joining
 
 
 ## And a month of them joining an expedition crossing their country (Seam A).
@@ -124,17 +125,22 @@ static func join_party(
 	# **A party is a handful of people walking**, so a guide who throws in with
 	# them is a whole person immediately rather than a fraction accrued over
 	# months they do not have.
-	if context.streams.stream("sim").randf() > JOIN_AT_BEST * warmth(tribe, JOIN_ABOVE):
+	# The chance is as it was; what joins is what one used to be (#426).
+	if context.streams.stream("sim").randf() \
+			> JOIN_AT_BEST / float(Population.THOUSAND) * warmth(tribe, JOIN_ABOVE):
 		return 0
 
-	party.people += 1
-	village.people = maxi(1, village.people - 1)
+	var joining := mini(Population.THOUSAND, village.people - 1)
+	if joining <= 0:
+		return 0
+	party.people += joining
+	village.people = maxi(1, village.people - joining)
 	context.log.emit(EVENT_JOINED, party.id, context.state.month, {
 		"tribe": String(tribe.id),
 		"expedition": String(party.id),
-		"people": 1,
+		"people": joining,
 	}, WorldPhase.ARRIVALS)
-	return 1
+	return joining
 
 
 ## A month of gifts: what they have, and who they have (Seam A).

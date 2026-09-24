@@ -57,8 +57,9 @@ func _raise(
 	run: RunState, size: int = 20, order: StringName = MARCH
 ) -> Company:
 	var town := run.colony.in_order()[0]
+	# Fixture sizes are in thousands (#426).
 	var company := run.companies.raise_company(
-		Company.COLONIAL, size, {}, town.id, town.at, _context(run), order)
+		Company.COLONIAL, size * Population.THOUSAND, {}, town.id, town.at, _context(run), order)
 	Commanders.take_command(company, town, run, _context(run))
 	return company
 
@@ -132,7 +133,7 @@ func _a_survivor(run: RunState) -> Contact:
 	# happens to him rather than about the flip.
 	for attempt in 40:
 		var company := _raise(run)
-		run.commanders.record(company.commander, 200.0)
+		run.commanders.record(company.commander, 200_000.0)
 		company.commander_level = run.commanders.level_of(company.commander)
 		_wipe_out(run, company)
 		var man := run.contact(company.commander)
@@ -190,7 +191,7 @@ func test_the_survivor_is_reported_so_a_letter_could_find_him() -> void:
 func _a_casualty(run: RunState) -> Contact:
 	for attempt in 40:
 		var company := _raise(run)
-		run.commanders.record(company.commander, 200.0)
+		run.commanders.record(company.commander, 200_000.0)
 		_wipe_out(run, company)
 		var man := run.contact(company.commander)
 		if man.is_dead:
@@ -272,7 +273,7 @@ func test_a_company_never_grows_however_its_commander_rises() -> void:
 	var company := _raise(run, 30)
 	var had := company.size
 	var held := company.held(&"guns")
-	run.commanders.record(company.commander, 1_000.0)
+	run.commanders.record(company.commander, 1_000_000.0)
 	company.commander_level = run.commanders.level_of(company.commander)
 
 	assert_eq(company.size, had, "a promotion put men in the ranks")

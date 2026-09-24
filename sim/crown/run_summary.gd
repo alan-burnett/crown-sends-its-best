@@ -68,7 +68,11 @@ static func of(run: RunState) -> Dictionary:
 	out["protests"] = log.of_type(TradeProtest.EVENT_DECLARED).size()
 	out["rebellions"] = log.of_type(Rebellion.EVENT_DECLARED).size()
 	out["returns"] = log.of_type(Rebellion.EVENT_RETURNED).size()
-	out["famines"] = log.of_type(ConsumePhase.EVENT_FAMINE).size()
+	# **People, not events** (#426): each famine event carries how many it took.
+	var starved := 0
+	for event in log.of_type(ConsumePhase.EVENT_FAMINE):
+		starved += int((event as SimEvent).payload.get("count", 1))
+	out["famines"] = starved
 	out["settlers"] = _settlers(log)
 	out["letters"] = log.of_type(TurnMachine.EVENT_POST_SENT).size()
 

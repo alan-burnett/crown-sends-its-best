@@ -275,7 +275,7 @@ static func combine(substance: float, pleasure: float) -> float:
 ## brings pastures, and it is why a town with cattle feels safer than its grain
 ## alone would suggest.
 static func health_of(town: Town, wellbeing: Dictionary) -> float:
-	var mouths := maxf(1.0, float(town.population()))
+	var mouths := town.mouths()
 	var monthly := mouths * ColonyNeeds.per_head(&"food")
 
 	var larder := town.held(&"food")

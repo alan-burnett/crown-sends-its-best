@@ -33,7 +33,8 @@ func after_each() -> void:
 
 func _town(id: StringName, workers: int, stock: Dictionary = {}) -> Town:
 	var town := Town.new(id, String(id), Vector2i(0, 0))
-	town.workers = workers
+	# Fixture sizes are in thousands (#426).
+	town.workers = workers * Population.THOUSAND
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
 	return town
