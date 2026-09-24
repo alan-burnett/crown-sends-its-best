@@ -206,67 +206,15 @@ func test_taking_their_land_names_the_tribe_the_town_and_how_many_fields() -> vo
 
 # --- 🔒 A governor's purpose, before anything is built ----------------------
 
-func test_a_governor_who_means_to_drive_them_off_is_seen_doing_it() -> void:
-	# 🔒 The acceptance: **visible before anything is built.** There is no hiding
-	# a purpose from people who live next door.
-	var natives := _natives([Vector2i(5, 5)])
-	var town := _town(Vector2i(5, 5))
-	town.intent = GovernorIntent.DRIVE_OFF
-	town.intent_since = 0
-	var context := _context(_map())
-
-	TribeStanding.hostile_intent(_colony(town), natives, context)
-
-	assert_true((natives.in_order()[0] as Tribe).trust() < 60.0 - 0.0001,
-		"a governor said he meant to be rid of them and they did not notice")
-	var seen: Array = context.log.of_type(TribeStanding.EVENT_HOSTILE_INTENT)
-	assert_eq(seen.size(), 1, "a town turned against them in silence")
-	assert_eq(String(seen[0].payload["town"]), "ashmere")
-
-
-func test_an_ordinary_governor_is_not_treated_as_a_threat() -> void:
-	var natives := _natives([Vector2i(5, 5)])
-	var town := _town(Vector2i(5, 5))
-	town.intent = GovernorIntent.ECONOMY
-	TribeStanding.hostile_intent(_colony(town), natives, _context(_map()))
-	assert_almost_eq((natives.in_order()[0] as Tribe).trust(), 60.0, 0.0001,
-		"a man minding his own trade was taken for an enemy")
-
-
-func test_a_governor_they_have_never_met_is_nothing_to_them() -> void:
-	var natives := _natives([Vector2i(19, 19)])
-	var town := _town(Vector2i(4, 4))
-	town.intent = GovernorIntent.DRIVE_OFF
-	TribeStanding.hostile_intent(_colony(town), natives, _context(_map()))
-	assert_almost_eq((natives.in_order()[0] as Tribe).trust(), 60.0, 0.0001,
-		"a people heard a man three weeks' walk away change his mind")
-
-
-func test_a_man_with_nobody_to_drive_off_cannot_want_to() -> void:
-	# 🔒 A filter and not a weight (`deliberation.md` §5). A governor four hundred
-	# miles from the nearest village adopting *drive them off* is not a close
-	# vote, it is nonsense.
-	var map := _map()
-	var town := _town(Vector2i(4, 4))
-	var colony := _colony(town)
-	var context := DeliberationContext.new(
-		DecisionKind.GOVERNOR_INTENT, WorldValues.initial_state(), EventLog.new())
-	context.data = {
-		"town": town,
-		"colony": colony,
-		"map": map,
-		"territory": Territory.compute(map, colony.in_order()),
-		"natives": _natives([Vector2i(19, 19)]),
-	}
-	var filter := IntentConsiderations.SomebodyToDriveOff.new()
-	assert_false(filter.permits(null, Candidate.new(GovernorIntent.DRIVE_OFF), context),
-		"a governor with no neighbours could intend to be rid of them")
-	assert_true(filter.permits(null, Candidate.new(GovernorIntent.ECONOMY), context),
-		"the filter turned down an intent that has nothing to do with it")
-
-	context.data["natives"] = _natives([Vector2i(5, 5)])
-	assert_true(filter.permits(null, Candidate.new(GovernorIntent.DRIVE_OFF), context),
-		"a governor with a village in his fields could not intend anything about it")
+func test_they_read_what_the_colony_does_and_never_what_a_governor_intends() -> void:
+	# 🔒 The Author's ruling on #424 (`natives.md` §11): **tribes react to what
+	# the colony does, not to what a governor intends.** Military names no enemy,
+	# so there is no intent for them to read — what they see is men in their
+	# fields. Asked of the code, because the plausible mistake is to put it back.
+	for path in ["res://sim/natives/tribe_standing.gd", "res://sim/natives/standing_driver.gd"]:
+		var code := FileAccess.get_file_as_string(path)
+		for token in [".intent", "GovernorIntent"]:
+			assert_false(code.contains(token), "%s reads a governor's intent: %s" % [path.get_file(), token])
 
 
 func test_the_pc_may_ask_for_it_and_the_governor_decides_what_it_means() -> void:
@@ -278,9 +226,10 @@ func test_the_pc_may_ask_for_it_and_the_governor_decides_what_it_means() -> void
 	# So the instrument exists, and it is an Order like every other: it reaches
 	# the governor through compliance, which is where a man may comply, delay,
 	# reinterpret, refuse, or do something else entirely.
-	assert_false(GovernorIntent.is_his_alone(GovernorIntent.DRIVE_OFF),
+	# *Be rid of them* is a second utterance of military (`reply-vocabulary.md` §8).
+	assert_true(GovernorIntent.pc_may_urge(GovernorIntent.MILITARY),
 		"the PC cannot ask a governor to be rid of the natives")
-	assert_true(GovernorIntent.is_his_alone(GovernorIntent.SEDITION),
+	assert_false(GovernorIntent.pc_may_urge(GovernorIntent.SEDITION),
 		"the PC can ask a governor to prepare a rebellion against the Crown")
 
 	var reachable: Dictionary = {}
@@ -293,7 +242,7 @@ func test_the_pc_may_ask_for_it_and_the_governor_decides_what_it_means() -> void
 				var effect: Dictionary = option.get("effect", {})
 				if effect.has("urge_intent"):
 					reachable[String(effect["urge_intent"].get("intent", ""))] = true
-	assert_true(reachable.has(String(GovernorIntent.DRIVE_OFF)),
+	assert_true(reachable.has(String(GovernorIntent.MILITARY)),
 		"there is no letter in which the PC says it")
 
 	# 🔒 And it is not an instruction that executes. It urges, like the rest —
@@ -316,7 +265,7 @@ func test_a_lifetime_of_intrusion_never_carries_them_over() -> void:
 	var map := _map()
 	var natives := _natives([Vector2i(5, 5)], 60.0)
 	var town := _town(Vector2i(5, 5))
-	town.intent = GovernorIntent.DRIVE_OFF
+	town.intent = GovernorIntent.MILITARY
 	var colony := _colony(town)
 	var territory := Territory.compute(map, colony.in_order())
 
@@ -324,7 +273,6 @@ func test_a_lifetime_of_intrusion_never_carries_them_over() -> void:
 		var context := _context(map)
 		TribeStanding.founding(town.at, natives, context)
 		TribeStanding.exploitation(colony, natives, territory, context)
-		TribeStanding.hostile_intent(colony, natives, context)
 
 	var tribe: Tribe = natives.in_order()[0]
 	assert_false(tribe.is_irreconcilable_with(Tribe.COLONY),

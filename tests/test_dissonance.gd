@@ -56,23 +56,23 @@ func test_an_intent_is_no_distance_from_itself() -> void:
 
 
 func test_opposites_are_further_apart_than_neighbours() -> void:
-	# Read off the table and nothing else, so "settling and surviving want
+	# Read off the table and nothing else, so "settling and rebelling want
 	# opposite things" falls out of the numbers rather than being written down
 	# where a later edit could contradict it.
 	var opposed := GovernorIntent.distance_between(
-		GovernorIntent.SETTLEMENT, GovernorIntent.SURVIVAL)
+		GovernorIntent.GO_WIDE, GovernorIntent.SEDITION)
 	var adjacent := GovernorIntent.distance_between(
-		GovernorIntent.ECONOMY, GovernorIntent.POPULATION)
+		GovernorIntent.GET_RICH, GovernorIntent.GO_TALL)
 	assert_true(opposed > adjacent,
-		"settling and surviving are no further apart than trading and growing")
+		"settling and rebelling are no further apart than trading and growing")
 	assert_true(opposed <= 1.0 and adjacent >= 0.0, "the figure left nought to one")
 
 
 func test_an_unknown_intent_is_no_distance_at_all() -> void:
 	assert_almost_eq(
-		GovernorIntent.distance_between(&"", GovernorIntent.ECONOMY), 0.0, 0.0001)
+		GovernorIntent.distance_between(&"", GovernorIntent.GET_RICH), 0.0, 0.0001)
 	assert_almost_eq(
-		GovernorIntent.distance_between(&"nonsense", GovernorIntent.ECONOMY), 0.0, 0.0001,
+		GovernorIntent.distance_between(&"nonsense", GovernorIntent.GET_RICH), 0.0, 0.0001,
 		"an intent nobody has heard of read as a disagreement")
 
 
@@ -81,7 +81,7 @@ func test_an_unknown_intent_is_no_distance_at_all() -> void:
 func test_it_is_silent_on_order_kinds_it_cannot_read() -> void:
 	# Exactly as harshness is zero for a mild letter. An order kind with no
 	# answer to "against his judgement" must not crash and must not invent one.
-	var town := _town(GovernorIntent.DEFENCE)
+	var town := _town(GovernorIntent.MILITARY)
 	for kind in [
 		M1Registrations.ORDER_PROMISE_GOLD,
 		M1Registrations.ORDER_EMBARGO,
@@ -95,21 +95,21 @@ func test_it_is_silent_on_order_kinds_it_cannot_read() -> void:
 
 func test_it_is_silent_when_there_is_no_town_to_disagree() -> void:
 	assert_almost_eq(
-		Compliance.dissonance_of(_urging(GovernorIntent.ECONOMY), null), 0.0, 0.0001,
+		Compliance.dissonance_of(_urging(GovernorIntent.GET_RICH), null), 0.0, 0.0001,
 		"a Crown officer with no town held an opinion about his town's intent")
 
 
 func test_urging_a_man_toward_what_he_already_wants_is_no_dissonance() -> void:
-	var town := _town(GovernorIntent.DEFENCE)
+	var town := _town(GovernorIntent.MILITARY)
 	assert_almost_eq(
-		Compliance.dissonance_of(_urging(GovernorIntent.DEFENCE), town), 0.0, 0.0001,
+		Compliance.dissonance_of(_urging(GovernorIntent.MILITARY), town), 0.0, 0.0001,
 		"a governor minded telling being told to do what he was already doing")
 
 
 func test_urging_a_man_against_himself_is_dissonance() -> void:
-	var town := _town(GovernorIntent.SURVIVAL)
-	assert_true(Compliance.dissonance_of(_urging(GovernorIntent.SETTLEMENT), town) > 0.0,
-		"a starving town told to found another one saw nothing to object to")
+	var town := _town(GovernorIntent.SEDITION)
+	assert_true(Compliance.dissonance_of(_urging(GovernorIntent.GO_WIDE), town) > 0.0,
+		"a town preparing to stand alone, told to found another, saw nothing to object to")
 
 
 # --- 🔒 It changes the manner, and never toward refusing --------------------
@@ -133,8 +133,8 @@ func test_it_pulls_toward_reinterpreting_and_away_from_complying() -> void:
 func test_two_governors_alike_but_for_their_situation_answer_differently() -> void:
 	# 🔒 The acceptance, and the whole point: **in manner, not merely in
 	# outcome.** The same man, the same letter, two towns.
-	var contented := _resolve(GovernorIntent.ECONOMY, GovernorIntent.ECONOMY)
-	var affronted := _resolve(GovernorIntent.ECONOMY, GovernorIntent.SURVIVAL)
+	var contented := _resolve(GovernorIntent.GET_RICH, GovernorIntent.GET_RICH)
+	var affronted := _resolve(GovernorIntent.GET_RICH, GovernorIntent.SEDITION)
 
 	assert_true(_scored(affronted, Compliance.REINTERPRET)
 			> _scored(contented, Compliance.REINTERPRET),
@@ -146,7 +146,7 @@ func test_two_governors_alike_but_for_their_situation_answer_differently() -> vo
 func test_a_contented_governor_still_complies_plainly() -> void:
 	# The other half. A consideration that made everybody evasive would have
 	# replaced one flat answer with another.
-	var contented := _resolve(GovernorIntent.ECONOMY, GovernorIntent.ECONOMY)
+	var contented := _resolve(GovernorIntent.GET_RICH, GovernorIntent.GET_RICH)
 	assert_almost_eq(
 		_scored(contented, Compliance.REINTERPRET), 0.0, 0.0001,
 		"a governor urged toward what he already wanted found something to read into it")
@@ -160,7 +160,7 @@ func test_the_trace_names_it_in_a_real_deliberation() -> void:
 	# Run through `Compliance.resolve` rather than by scoring the consideration
 	# by hand, because that also proves the thing is **wired** — a consideration
 	# registered and never reached is the failure this ticket is about.
-	var run := _resolved_for_real(GovernorIntent.ECONOMY, GovernorIntent.SURVIVAL)
+	var run := _resolved_for_real(GovernorIntent.GET_RICH, GovernorIntent.SEDITION)
 	var traces: Array = run["log"].of_type(Deliberation.TRACE_EVENT)
 	assert_not_empty(traces, "nobody deliberated at all")
 
@@ -178,9 +178,9 @@ func test_it_is_reached_in_a_real_deliberation_and_moves_the_scores() -> void:
 	# The inert-machinery check. A consideration that scores zero everywhere is a
 	# consideration nobody would notice was never called.
 	var affronted := _weight_of(_resolved_for_real(
-		GovernorIntent.ECONOMY, GovernorIntent.SURVIVAL), "against_his_judgement")
+		GovernorIntent.GET_RICH, GovernorIntent.SEDITION), "against_his_judgement")
 	var contented := _weight_of(_resolved_for_real(
-		GovernorIntent.ECONOMY, GovernorIntent.ECONOMY), "against_his_judgement")
+		GovernorIntent.GET_RICH, GovernorIntent.GET_RICH), "against_his_judgement")
 	assert_true(affronted > 0.0,
 		"the consideration was registered and scored nothing in a real disagreement")
 	assert_almost_eq(contented, 0.0, 0.0001,

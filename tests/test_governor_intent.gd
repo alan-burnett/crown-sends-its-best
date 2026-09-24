@@ -47,7 +47,7 @@ func _map() -> WorldMap:
 	return map
 
 
-func _town(intent: StringName = GovernorIntent.ECONOMY, stock: Dictionary = {}) -> Town:
+func _town(intent: StringName = GovernorIntent.GET_RICH, stock: Dictionary = {}) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(4, 4))
 	town.workers = 8_000
 	town.governor_id = &"governor_ashmere"
@@ -139,11 +139,11 @@ func test_two_governors_choose_differently_from_identical_state() -> void:
 	var harness := _harness(town)
 
 	var merchant := _governor(&"merchant", {
-		String(IntentConsiderations.REVENUE): 6.0,
+		String(IntentConsiderations.BASELINE): 6.0,
 		String(IntentConsiderations.ROOM): 0.0,
 	})
 	var pioneer := _governor(&"pioneer", {
-		String(IntentConsiderations.REVENUE): 0.0,
+		String(IntentConsiderations.BASELINE): 0.0,
 		String(IntentConsiderations.ROOM): 6.0,
 	})
 
@@ -157,7 +157,7 @@ func test_two_governors_choose_differently_from_identical_state() -> void:
 func test_the_same_governor_decides_the_same_way_twice() -> void:
 	var town := _town()
 	var harness := _harness(town)
-	var actor := _governor(&"governor_ashmere", {String(IntentConsiderations.REVENUE): 3.0})
+	var actor := _governor(&"governor_ashmere", {String(IntentConsiderations.BASELINE): 3.0})
 	assert_eq(
 		String(_decide(town, actor, harness).chosen_id()),
 		String(_decide(town, actor, harness).chosen_id()),
@@ -172,23 +172,25 @@ func test_the_mandate_pulls_early_and_fades() -> void:
 	var harness := _harness(town)
 	var actor := _governor(&"governor_ashmere", {
 		String(IntentConsiderations.MANDATE): 4.0,
-		String(IntentConsiderations.REVENUE): 1.0,
+		String(IntentConsiderations.BASELINE): 1.0,
 	})
 
 	harness["context"].state.month = 0
-	var early := _decide(town, actor, harness, GovernorIntent.DEFENCE)
-	assert_eq(String(early.chosen_id()), String(GovernorIntent.DEFENCE),
+	var early := _decide(town, actor, harness, GovernorIntent.MILITARY)
+	assert_eq(String(early.chosen_id()), String(GovernorIntent.MILITARY),
 		"the Crown's Mandate did not reach the governor at all")
 
 	harness["context"].state.month = 120
-	var late := _decide(town, actor, harness, GovernorIntent.DEFENCE)
-	assert_ne(String(late.chosen_id()), String(GovernorIntent.DEFENCE),
+	var late := _decide(town, actor, harness, GovernorIntent.MILITARY)
+	assert_ne(String(late.chosen_id()), String(GovernorIntent.MILITARY),
 		"ten years on he is still doing what he was appointed to do")
 
 
-func test_a_town_that_can_see_nowhere_to_settle_cannot_intend_to() -> void:
-	# A locked rule is a filter, never a weight — it must not be able to lose a
-	# close vote (`docs/mechanics/deliberation.md` §5).
+func test_going_wide_is_never_ruled_out_for_want_of_land() -> void:
+	# #428, `governor-agendas.md` §13: **go wide has no filter.** Its first move is
+	# a scouting company to *find* land, so a colony whose border covers all it
+	# can see may still intend to spread; an expedition still needs a site before
+	# it leaves (`founding-towns.md` §5).
 	var town := _town()
 	var harness := _harness(town)
 	# A colony whose border covers everything it can see has nowhere to go.
@@ -199,13 +201,9 @@ func test_a_town_that_can_see_nowhere_to_settle_cannot_intend_to() -> void:
 
 	var actor := _governor(&"expansionist", {String(IntentConsiderations.ROOM): 9.0})
 	var decision := _decide(town, actor, harness)
-
-	assert_ne(String(decision.chosen_id()), String(GovernorIntent.SETTLEMENT))
-	var filtered := false
 	for entry in decision.entries:
-		if String(entry.get("id", "")) == String(GovernorIntent.SETTLEMENT):
-			filtered = entry.has("filtered_by")
-	assert_true(filtered, "settling was scored down rather than ruled out")
+		if String(entry.get("id", "")) == String(GovernorIntent.GO_WIDE):
+			assert_false(entry.has("filtered_by"), "going wide was ruled out for want of land")
 
 
 # --- 🔒 Objective: competence decides ---------------------------------------
@@ -213,9 +211,9 @@ func test_a_town_that_can_see_nowhere_to_settle_cannot_intend_to() -> void:
 func test_objective_selection_is_deterministic() -> void:
 	var town := _town()
 	var harness := _harness(town)
-	var first := ObjectiveSelector.choose(town, GovernorIntent.ECONOMY, harness["context"])
+	var first := ObjectiveSelector.choose(town, GovernorIntent.GET_RICH, harness["context"])
 	for _attempt in 4:
-		var again := ObjectiveSelector.choose(town, GovernorIntent.ECONOMY, harness["context"])
+		var again := ObjectiveSelector.choose(town, GovernorIntent.GET_RICH, harness["context"])
 		assert_eq(String(again["id"]), String(first["id"]))
 		assert_eq(again["target"], first["target"])
 
@@ -228,7 +226,7 @@ func test_choosing_an_objective_draws_no_randomness() -> void:
 	var town := _town()
 	var harness := _harness(town)
 	var before := Canonical.hash_of(harness["streams"].to_dict())
-	ObjectiveSelector.choose(town, GovernorIntent.ECONOMY, harness["context"])
+	ObjectiveSelector.choose(town, GovernorIntent.GET_RICH, harness["context"])
 	assert_eq(Canonical.hash_of(harness["streams"].to_dict()), before,
 		"choosing an objective drew from an RNG stream")
 
@@ -254,7 +252,7 @@ func parked_test_a_defensive_intent_builds_defences() -> void:
 	# the scoring is.
 	var town := _town()
 	var harness := _harness(town)
-	var chosen := ObjectiveSelector.choose(town, GovernorIntent.DEFENCE, harness["context"])
+	var chosen := ObjectiveSelector.choose(town, GovernorIntent.MILITARY, harness["context"])
 	var building := Building.find(StringName(chosen["id"]))
 	assert_true(building != null and float(building.effect("defence", 0.0)) > 0.0,
 		"a governor set on defence chose '%s'" % chosen["id"])
@@ -267,7 +265,7 @@ func test_the_governor_chooses_the_tile() -> void:
 	var town := _town()
 	var harness := _harness(town)
 	var sited: Dictionary = {}
-	for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.POPULATION):
+	for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.GO_TALL):
 		if Objective.kind_of(StringName(candidate["id"])) == Objective.IMPROVEMENT:
 			sited = candidate
 			break
@@ -283,7 +281,7 @@ func test_the_tile_choice_is_deterministic() -> void:
 	var first: Variant = null
 	for _attempt in 3:
 		var harness := _harness(_town())
-		for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.POPULATION):
+		for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.GO_TALL):
 			if Objective.kind_of(StringName(candidate["id"])) != Objective.IMPROVEMENT:
 				continue
 			if first == null:
@@ -299,7 +297,7 @@ func test_an_unobtainable_project_is_never_chosen() -> void:
 	var town := _town()
 	town.spend_gold(500.0)
 	var harness := _harness(town)
-	for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.ECONOMY):
+	for candidate in ObjectiveSelector.candidates(town, harness["context"], GovernorIntent.GET_RICH):
 		for resource in Building.find(StringName(candidate["id"])).cost if Building.has(StringName(candidate["id"])) else {}:
 			assert_true(
 				ObjectiveSelector.can_obtain(town, StringName(resource), harness["context"]),
@@ -314,7 +312,7 @@ func test_an_unobtainable_project_is_never_chosen() -> void:
 ## this fails — rightly. It waits on the Author's rework of governor agendas and
 ## goes back to `test_` then. Renamed rather than deleted so the claim is kept.
 func parked_test_a_project_is_chosen_carried_and_completed() -> void:
-	var town := _town(GovernorIntent.ECONOMY, {"food": 200.0, "clothing": 50.0, "wood": 200.0, "stone": 200.0, "tools": 50.0})
+	var town := _town(GovernorIntent.GET_RICH, {"food": 200.0, "clothing": 50.0, "wood": 200.0, "stone": 200.0, "tools": 50.0})
 	var harness := _harness(town, [
 		ColonyMonth.RECKON, ColonyMonth.EXCHANGE, ColonyMonth.CONSUME,
 		ColonyMonth.BUILD, ColonyMonth.SETTLE,
@@ -352,30 +350,25 @@ func parked_test_something_other_than_a_building_can_win_the_board() -> void:
 	var harness := _harness(town)
 	assert_true(Expedition.may_launch(town), "the fixture town cannot mount an expedition")
 
-	var settling := ObjectiveSelector.choose(town, GovernorIntent.SETTLEMENT, harness["context"])
+	var settling := ObjectiveSelector.choose(town, GovernorIntent.GO_WIDE, harness["context"])
 	assert_false(Building.has(StringName(settling["id"])),
 		"a governor set on settling chose to build '%s'" % settling["id"])
 	assert_eq(settling["target"], Vector2i(-1, -1), "a project without a tile was given one")
-
-	var surviving := ObjectiveSelector.choose(town, GovernorIntent.SURVIVAL, harness["context"])
-	assert_true(Objective.is_posture(StringName(surviving["id"]))
-			or Building.has(StringName(surviving["id"])),
-		"a governor set on survival wanted '%s', which is neither" % surviving["id"])
 
 
 func test_a_posture_neither_completes_nor_stalls() -> void:
 	# It stands until the intent it serves changes, which is what makes it a
 	# posture rather than a project nobody finishes.
-	var town := _town(GovernorIntent.SURVIVAL)
+	var town := _town(GovernorIntent.GO_TALL)
 	town.objective = &"stockpile_food"
-	town.objective_intent = GovernorIntent.SURVIVAL
+	town.objective_intent = GovernorIntent.GO_TALL
 	town.objective_idle_months = 99
 	var harness := _harness(town)
 
 	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.NONE),
 		"a standing order was called stalled")
 
-	town.intent = GovernorIntent.DEFENCE
+	town.intent = GovernorIntent.MILITARY
 	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.INTENT_CHANGED),
 		"a standing order outlived the intent it stood for")
 
@@ -389,7 +382,7 @@ func test_a_town_does_not_oscillate() -> void:
 	# **Iron is a build cost since `buildings.md` §5.** Without it in the stores
 	# a town with "everything it needed" could not finish anything it chose, and
 	# this test would be measuring that instead of oscillation.
-	var town := _town(GovernorIntent.ECONOMY, {
+	var town := _town(GovernorIntent.GET_RICH, {
 		"food": 400.0, "clothing": 100.0, "wood": 400.0,
 		"stone": 400.0, "tools": 100.0, "iron": 100.0,
 	})
@@ -409,9 +402,9 @@ func test_gathering_is_not_a_stall() -> void:
 	# A town buying its tools a few at a time is getting somewhere. Counting
 	# those months would have it give up on everything expensive and then give up
 	# on the replacement for exactly the same reason, for ever.
-	var town := _town(GovernorIntent.ECONOMY)
+	var town := _town(GovernorIntent.GET_RICH)
 	town.objective = &"granary"
-	town.objective_intent = GovernorIntent.ECONOMY
+	town.objective_intent = GovernorIntent.GET_RICH
 	town.store(&"wood", 10.0)
 	var harness := _harness(town, [ColonyMonth.BUILD])
 
@@ -423,9 +416,9 @@ func test_gathering_is_not_a_stall() -> void:
 
 
 func test_a_town_that_is_really_going_nowhere_gives_up() -> void:
-	var town := _town(GovernorIntent.ECONOMY)
+	var town := _town(GovernorIntent.GET_RICH)
 	town.objective = &"church"
-	town.objective_intent = GovernorIntent.ECONOMY
+	town.objective_intent = GovernorIntent.GET_RICH
 	town.objective_idle_months = Reconsideration.SOFT_STALL_MONTHS
 	var harness := _harness(town)
 
@@ -442,9 +435,9 @@ func test_a_town_that_is_really_going_nowhere_gives_up() -> void:
 ## materials *are* the progress, so investing everything makes a finished build
 ## rather than a half-raised one.
 func _part_built(objective: StringName, share: float) -> Town:
-	var town := _town(GovernorIntent.ECONOMY)
+	var town := _town(GovernorIntent.GET_RICH)
 	town.objective = objective
-	town.objective_intent = GovernorIntent.ECONOMY
+	town.objective_intent = GovernorIntent.GET_RICH
 	var building := Building.find(objective)
 	for resource in building.costed_resources():
 		var cost := building.cost_of(StringName(resource))
@@ -459,30 +452,9 @@ func test_a_routine_change_of_intent_does_not_abandon_a_project_underway() -> vo
 	var harness := _harness(town)
 	assert_true(Objective.progress_fraction(town) > Reconsideration.ROUTINE_SUNK)
 
-	town.intent = GovernorIntent.POPULATION
+	town.intent = GovernorIntent.GO_TALL
 	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.NONE),
 		"a change of priorities threw away a project most of the way up")
-
-
-func test_a_crisis_overrides_substantial_sunk_progress() -> void:
-	# The natives are burning the outskirts. The town must not spend eleven more
-	# months on a dock.
-	var town := _part_built(&"granary", 0.5)
-	var harness := _harness(town)
-
-	town.intent = GovernorIntent.SURVIVAL
-	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.INTENT_CHANGED),
-		"a crisis could not shift a half-built granary")
-
-
-func test_even_a_crisis_finishes_what_is_nearly_done() -> void:
-	var town := _part_built(&"church", 0.9)  # nine parts in ten already raised
-	var harness := _harness(town)
-	assert_true(Objective.progress_fraction(town) >= Reconsideration.CRISIS_SUNK)
-
-	town.intent = GovernorIntent.SURVIVAL
-	assert_eq(String(Reconsideration.verdict(town, harness["context"])), String(Reconsideration.NONE),
-		"a church three-quarters raised was torn down for an emergency")
 
 
 func test_abandoning_forfeits_what_was_invested() -> void:
@@ -510,7 +482,7 @@ func test_urging_an_intent_does_not_set_it() -> void:
 	# SPEC §8.5: orders are requests. A governor who has been written to still
 	# weighs the letter against his own reading of his town, and may keep his own
 	# mind.
-	var town := _town(GovernorIntent.ECONOMY)
+	var town := _town(GovernorIntent.GET_RICH)
 	var colony := Colony.new()
 	colony.add(town)
 
@@ -518,29 +490,29 @@ func test_urging_an_intent_does_not_set_it() -> void:
 	executor.colony = colony
 	var intent := Intent.new(
 		&"", UrgeIntentExecutor.KIND, town.governor_id, town.governor_id, 1,
-		{"intent": String(GovernorIntent.DEFENCE)},
+		{"intent": String(GovernorIntent.MILITARY)},
 	)
 	var log := EventLog.new()
 	var state := WorldValues.initial_state()
 	state.month = 5
 
 	assert_eq(String(executor.execute(intent, state, log)), String(Intent.COMPLETED))
-	assert_eq(String(town.urging_by().target), String(GovernorIntent.DEFENCE))
+	assert_eq(String(town.urging_by().target), String(GovernorIntent.MILITARY))
 	assert_eq(town.urging_by().month, 5)
-	assert_eq(String(town.intent), String(GovernorIntent.ECONOMY),
+	assert_eq(String(town.intent), String(GovernorIntent.GET_RICH),
 		"a letter set the governor's intent outright")
 
 
 func test_what_the_pc_urged_reaches_the_deliberation() -> void:
-	var town := _town(GovernorIntent.ECONOMY)
-	town.urge(Urging.from_pc(GovernorIntent.DEFENCE, 0))
+	var town := _town(GovernorIntent.GET_RICH)
+	town.urge(Urging.from_pc(GovernorIntent.MILITARY, 0))
 	var harness := _harness(town)
 
 	var deaf := _governor(&"deaf", {String(IntentConsiderations.URGING): 0.0})
 	var dutiful := _governor(&"dutiful", {String(IntentConsiderations.URGING): 8.0})
 
-	assert_eq(String(_decide(town, dutiful, harness).chosen_id()), String(GovernorIntent.DEFENCE))
-	assert_ne(String(_decide(town, deaf, harness).chosen_id()), String(GovernorIntent.DEFENCE))
+	assert_eq(String(_decide(town, dutiful, harness).chosen_id()), String(GovernorIntent.MILITARY))
+	assert_ne(String(_decide(town, deaf, harness).chosen_id()), String(GovernorIntent.MILITARY))
 
 
 func test_an_urging_that_names_no_intent_comes_to_nothing_loudly() -> void:
@@ -562,18 +534,18 @@ func test_an_urging_that_names_no_intent_comes_to_nothing_loudly() -> void:
 
 func test_intent_and_objective_survive_save_and_reload() -> void:
 	var town := _part_built(&"granary", 0.5)
-	town.intent = GovernorIntent.DEFENCE
+	town.intent = GovernorIntent.MILITARY
 	town.intent_since = 7
-	town.urge(Urging.from_pc(GovernorIntent.POPULATION, 6))
+	town.urge(Urging.from_pc(GovernorIntent.GO_TALL, 6))
 	town.objective_target = Vector2i(3, 5)
 	town.objective_idle_months = 2
 
 	var restored := Town.from_dict(town.to_dict())
-	assert_eq(String(restored.intent), String(GovernorIntent.DEFENCE))
+	assert_eq(String(restored.intent), String(GovernorIntent.MILITARY))
 	assert_eq(restored.intent_since, 7)
-	assert_eq(String(restored.urging_by().target), String(GovernorIntent.POPULATION))
+	assert_eq(String(restored.urging_by().target), String(GovernorIntent.GO_TALL))
 	assert_eq(restored.urging_by().month, 6)
 	assert_eq(restored.objective_target, Vector2i(3, 5))
 	assert_eq(restored.objective_idle_months, 2)
-	assert_eq(String(restored.objective_intent), String(GovernorIntent.ECONOMY))
+	assert_eq(String(restored.objective_intent), String(GovernorIntent.GET_RICH))
 	assert_almost_eq(Objective.progress_fraction(restored), Objective.progress_fraction(town), 0.001)

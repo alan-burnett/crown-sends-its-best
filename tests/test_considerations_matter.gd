@@ -50,16 +50,16 @@ func after_each() -> void:
 ## What a consideration is *for* is tipping a vote the others left close. So the
 ## honest test is to compare a governor who weighs it against the same governor,
 ## in the same world, who does not.
-func _ordinary() -> Contact:
+func _ordinary(loyalty: float = 60.0) -> Contact:
 	var contact := Contact.new(&"gov_ashmere")
-	contact.relationship = Relationship.new(&"gov_ashmere", 60.0)
+	contact.relationship = Relationship.new(&"gov_ashmere", loyalty)
 	for id in IntentConsiderations.ALL:
 		contact.set_weight(StringName(id), 1.0)
 	return contact
 
 
-func _deaf_to(id: StringName) -> Contact:
-	var contact := _ordinary()
+func _deaf_to(id: StringName, loyalty: float = 60.0) -> Contact:
+	var contact := _ordinary(loyalty)
 	contact.set_weight(id, 0.0)
 	return contact
 
@@ -78,6 +78,9 @@ func _town() -> Town:
 	town.quality_of_life = 0.8
 	town.store(&"food", 400.0)
 	town.store(&"clothing", 60.0)
+	# **And comfortable** (#428): a town with an empty purse craves wealth so
+	# hard that get rich wins every vote and nothing else can be shown to tip one.
+	town.receive_gold(5_000.0)
 	return town
 
 
@@ -152,7 +155,7 @@ func _context(
 		"colony": colony,
 		"map": map,
 		"territory": Territory.compute(map, colony.in_order()),
-		"mandate": String(GovernorIntent.ECONOMY),
+		"mandate": String(GovernorIntent.GET_RICH),
 		"urgings": town.urgings,
 		"natives": natives if natives != null else _natives(),
 	}
@@ -177,7 +180,14 @@ func _wants(governor: Contact, context: DeliberationContext) -> String:
 ## world, so a difference in what they want is that consideration and nothing
 ## else.
 func _changes_the_answer(id: StringName, context: DeliberationContext) -> bool:
-	return _wants(_ordinary(), context) != _wants(_deaf_to(id), context)
+	# **Loyalty lives on the man, not the town** (#428), so a world that means to
+	# vary it says how loyal both governors are.
+	var loyalty := float(context.data.get(LOYAL, 60.0))
+	return _wants(_ordinary(loyalty), context) != _wants(_deaf_to(id, loyalty), context)
+
+
+## The key a world uses to say how loyal its governors are.
+const LOYAL: String = "test_loyalty"
 
 
 ## Whether it changes the answer in **any** of these worlds.
@@ -199,6 +209,12 @@ func _matters_somewhere(id: StringName, worlds: Array) -> bool:
 func _worlds_for(id: StringName) -> Array:
 	var worlds: Array = []
 	match id:
+		IntentConsiderations.BASELINE:
+			# **An untroubled town**, which is where the baseline speaks: every
+			# problem row reads nought, and the mandate fades across the months.
+			for month in MONTHS:
+				worlds.append(_context(_town(), {}, month))
+				worlds.append(_crowded_context(_town(), month))
 		IntentConsiderations.FOOD:
 			for held in [0.0, 200.0, 1_200.0, 6_000.0]:
 				for month in MONTHS:
@@ -211,29 +227,49 @@ func _worlds_for(id: StringName) -> Array:
 					var town := _town()
 					town.quality_of_life = quality
 					worlds.append(_context(town, {}, month))
-		IntentConsiderations.REVENUE:
-			for revenue in [0.0, 40.0, 400.0, 4_000.0]:
+		IntentConsiderations.WEALTH:
+			# **The town's own purse**, from nothing to more than comfortable.
+			for gold in [0.0, 300.0, 1_200.0, 6_000.0]:
 				for month in MONTHS:
-					worlds.append(_context(_town(), {WorldValues.REVENUE: revenue}, month))
+					var town := _town()
+					town.spend_share(1.0)
+					town.receive_gold(gold)
+					worlds.append(_context(town, {}, month))
+		IntentConsiderations.SAFETY:
+			# **How unsafe the town felt**, from untouched to overrun.
+			for safety in [1.0, 0.7, 0.3, 0.0]:
+				for month in MONTHS:
+					var town := _town()
+					town.safety = safety
+					worlds.append(_context(town, {}, month))
 		IntentConsiderations.ROOM:
-			# **Across revenues as well as months.** A colony returning well makes
-			# the economy so attractive that nothing else gets a hearing, and room
-			# is the quietest voice in the room — worth at most a third of a point
-			# to growing the population, since a one-town colony can never see
-			# enough unclaimed land for settling itself to score positive.
+			# Open country, and the same town with nothing left to claim.
 			for month in MONTHS:
-				for revenue in [0.0, 40.0, 400.0]:
-					worlds.append(_context(_town(), {WorldValues.REVENUE: revenue}, month))
-					worlds.append(_crowded_context(_town(), month, revenue))
+				worlds.append(_context(_town(), {}, month))
+				worlds.append(_crowded_context(_town(), month))
 		IntentConsiderations.CROWDING:
 			# **Mouths against workable ground**, so the worlds are towns of very
-			# different sizes on the same country. A town of twenty with room to
-			# work is not crowded; the same country with two hundred in it is.
+			# different sizes on the same country. A town of twenty thousand with
+			# room to work is not crowded; the same country with two hundred
+			# thousand in it is.
 			for people in [8_000, 20_000, 60_000, 200_000]:
 				for month in MONTHS:
 					var packed := _town()
 					packed.workers = people
 					worlds.append(_context(packed, {}, month))
+		IntentConsiderations.LOYALTY:
+			# **From a contented man to one who loathes the PC**, stopping short
+			# of the rebellion floor so the vote is between the ordinary intents.
+			# Across how safe the town feels too: loyalty pushes away from the
+			# Crown's purposes, and it tips a vote only where one is close.
+			for loyalty in [70.0, 50.0, 30.0, 15.0]:
+				for safety in [1.0, 0.6, 0.4]:
+					for month in MONTHS:
+						var town := _town()
+						town.safety = safety
+						var context := _crowded_context(town, month)
+						context.data[LOYAL] = loyalty
+						worlds.append(context)
 		IntentConsiderations.MANDATE:
 			for mandate in GovernorIntent.IN_ORDER:
 				for month in MONTHS:
@@ -243,25 +279,19 @@ func _worlds_for(id: StringName) -> Array:
 		IntentConsiderations.URGING:
 			for month in MONTHS:
 				worlds.append(_context(_town(), {}, month))
-				for urged in GovernorIntent.IN_ORDER:
+				for urged in GovernorIntent.PC_URGES:
 					var town := _town()
 					town.urge(Urging.from_pc(urged, month))
 					worlds.append(_context(town, {}, month))
-		IntentConsiderations.THREAT:
-			# **Across how dangerous the neighbours look**, which is what #204
-			# made a real figure. Before it, every world here read zero and the
-			# consideration was correctly inert.
-			for threat in [0.0, 0.3, 0.7, 1.0]:
-				for month in MONTHS:
-					worlds.append(_context(
-						_town(), {WorldValues.NATIVE_THREAT: threat}, month))
-		IntentConsiderations.NATIVE_LAND:
-			# **Across how much of the town's own ground is somebody else's**,
-			# from nobody within a day's walk to a village in the middle of it.
-			for where in [[], [Vector2i(18, 18)], [Vector2i(6, 4)], [Vector2i(4, 4)]]:
-				for month in MONTHS:
-					worlds.append(_context(_town(), {}, month, _natives(where)))
 	return worlds
+
+
+func test_the_baseline_can_decide() -> void:
+	# §13: **what an untroubled town wants.** Without it, tall and rich could win
+	# a quiet town only through the mandate or a letter.
+	assert_true(_matters_somewhere(IntentConsiderations.BASELINE,
+		_worlds_for(IntentConsiderations.BASELINE)),
+		"a governor who wants a quiet life of building and trade wanted what one who does not wanted")
 
 
 func test_food_security_can_decide() -> void:
@@ -283,42 +313,35 @@ func test_comfort_can_decide() -> void:
 		"caring how the people live never changed a governor's mind at any quality of life")
 
 
-func test_revenue_can_decide() -> void:
-	assert_true(_matters_somewhere(IntentConsiderations.REVENUE,
-		_worlds_for(IntentConsiderations.REVENUE)),
-		"caring about the returns never changed a governor's mind, rich or poor")
+func test_wealth_can_decide() -> void:
+	# **Get rich serves the town's own purse** (§13), so it is the town's gold
+	# that has to be able to move a man.
+	assert_true(_matters_somewhere(IntentConsiderations.WEALTH,
+		_worlds_for(IntentConsiderations.WEALTH)),
+		"caring about the town's purse never changed a governor's mind, rich or poor")
 
 
-func test_room_to_grow_cannot_decide_yet_and_here_is_why() -> void:
-	# **Recorded rather than engineered around**, because it is a finding.
-	#
-	# Room speaks through two candidates and neither can hear it yet. Settling is
-	# M4: a one-town colony never sees enough unclaimed land for `room * 2 - 1`
-	# to go positive — the most a single town's own border leaves unclaimed
-	# inside what it can see is about 0.44 — so settling scores negative in every
-	# world reachable today. That leaves `room * 0.3` on growing the population,
-	# about a tenth of a point, which is a third of what the quietest of the
-	# others manages.
-	#
-	# So it is not broken and it is not tunable into relevance: **it is waiting
-	# for a second town.** When M4 founds one this test will start failing, which
-	# is exactly when somebody should look at it again.
-	#
-	# **That moment has been looked at** (#175). The answer was not to tune this
-	# one into relevance but to add a second consideration beside it: `crowding`
-	# measures mouths against workable ground and has no such floor, so a
-	# pragmatic governor can settle before any frontier has been surveyed. Two
-	# considerations mean two weights and therefore two kinds of man — the
-	# ambitious one who goes because there is land, and the pragmatic one who
-	# goes because there are too many mouths — where a single blended term would
-	# have collapsed both into the same character.
-	#
-	# This case stays as it is until a second town exists, which is what it has
-	# been correctly saying all along.
-	assert_false(_matters_somewhere(IntentConsiderations.ROOM,
+func test_safety_can_decide() -> void:
+	# **Military is always available and safety is what drives it** (§2).
+	assert_true(_matters_somewhere(IntentConsiderations.SAFETY,
+		_worlds_for(IntentConsiderations.SAFETY)),
+		"caring how safe the town is never changed a governor's mind")
+
+
+func test_room_to_grow_can_decide() -> void:
+	# §13's one opportunity rather than problem: go wide's first move is a
+	# scouting company to find land, so there is no floor under it any more.
+	assert_true(_matters_somewhere(IntentConsiderations.ROOM,
 		_worlds_for(IntentConsiderations.ROOM)),
-		"room to grow can now change a governor's mind — M4 has arrived, so move "
-		+ "this case up with the others and give it a world where it decides")
+		"land the colony could see and had not claimed never changed a governor's mind")
+
+
+func test_loyalty_can_decide() -> void:
+	# **New** (§13): a man whose regard for the PC has fallen wants the Crown's
+	# purposes less, long before he wants to rebel.
+	assert_true(_matters_somewhere(IntentConsiderations.LOYALTY,
+		_worlds_for(IntentConsiderations.LOYALTY)),
+		"how far a governor's loyalty had fallen never changed what he wanted")
 
 
 func test_crowding_can_decide() -> void:
@@ -373,8 +396,8 @@ func test_crown_urging_can_decide() -> void:
 
 
 ## The same town with nothing left to settle, so `room` reads zero.
-func _crowded_context(town: Town, month: int = 6, revenue: float = 40.0) -> DeliberationContext:
-	var context := _context(town, {WorldValues.REVENUE: revenue}, month)
+func _crowded_context(town: Town, month: int = 6) -> DeliberationContext:
+	var context := _context(town, {}, month)
 	var map: WorldMap = context.get_value("map")
 	var colony: Colony = context.get_value("colony")
 	for y in map.height:
@@ -387,38 +410,15 @@ func _crowded_context(town: Town, month: int = 6, revenue: float = 40.0) -> Deli
 
 # --- 🔒 And the ones that cannot, and why -----------------------------------
 
-func test_native_threat_says_nothing_about_a_country_with_nobody_in_it() -> void:
-	# 🔒 `deliberation.md`: a consideration whose input has not moved reads as
-	# **no opinion** rather than as *no*. One quietly scoring against a candidate
-	# because nothing has happened yet would suppress intents for a reason nobody
-	# intended — which is what this asserted before #204, when it was true
-	# everywhere. It is now true only where the neighbours are content.
+func test_a_row_whose_problem_is_absent_says_nothing() -> void:
+	# 🔒 §13: a measure at nought **does nothing** — it does not push the other
+	# way. A safe town's safety row scores nought for every intent.
 	var town := _town()
+	town.safety = 1.0
 	for candidate in _candidates():
-		var score := IntentConsiderations.NativeThreat.new().score(
-			_ordinary(), candidate, _context(town)
-		)
+		var score := IntentConsiderations.Safety.new().score(_ordinary(), candidate, _context(town))
 		assert_almost_eq(score, 0.0, 0.0001,
-			"native threat has an opinion about %s with nothing to fear" % candidate.id)
-
-
-func test_native_threat_can_decide() -> void:
-	# **The milestone landed.** This test was `..._is_inert_and_that_is_correct`
-	# and the file said plainly that it would start failing when M5 arrived, and
-	# that somebody should look at it then. #204 is that moment: standing moves,
-	# so the threat a governor reads moves with it.
-	assert_true(_matters_somewhere(IntentConsiderations.THREAT,
-		_worlds_for(IntentConsiderations.THREAT)),
-		"caring how dangerous the neighbours are never changed a governor's mind")
-
-
-func test_native_land_can_decide() -> void:
-	# **The covetous man**, who is not the frightened one. The two are separate
-	# considerations so that two weights make two kinds of governor, and this is
-	# the half that has to be shown to carry a vote on its own.
-	assert_true(_matters_somewhere(IntentConsiderations.NATIVE_LAND,
-		_worlds_for(IntentConsiderations.NATIVE_LAND)),
-		"caring that their fields are in the way never changed a governor's mind")
+			"safety has an opinion about %s in a town nobody threatens" % candidate.id)
 
 
 # --- 🔒 The whole set is accounted for --------------------------------------
@@ -427,29 +427,17 @@ func test_every_registered_consideration_is_covered_here() -> void:
 	# **The gate.** A consideration added without a case in this file would be
 	# one nobody had asked whether it can decide anything — which is how the four
 	# on #90 got there.
-	# The two that cannot decide anything yet, each waiting on a milestone rather
-	# than on a tuning pass. **Anything else joining them is a bug**, and
-	# anything leaving them means its milestone has landed.
-	# **`native_threat` left this list in #204** and did not have to be tuned to
-	# do it: M5 gave it a figure that moves. That is what the note below always
-	# said would happen.
-	var waiting: PackedStringArray = [
-		IntentConsiderations.ROOM,    # a second town is M4
-	]
-	for id in waiting:
-		assert_false(_matters_somewhere(StringName(id), _worlds_for(StringName(id))),
-			"'%s' can decide something now, so it is no longer waiting on anything" % id)
-
 	var covered: PackedStringArray = [
+		IntentConsiderations.BASELINE,
 		IntentConsiderations.FOOD,
 		IntentConsiderations.COMFORT,
-		IntentConsiderations.REVENUE,
+		IntentConsiderations.WEALTH,
+		IntentConsiderations.SAFETY,
 		IntentConsiderations.ROOM,
 		IntentConsiderations.CROWDING,
+		IntentConsiderations.LOYALTY,
 		IntentConsiderations.MANDATE,
 		IntentConsiderations.URGING,
-		IntentConsiderations.THREAT,
-		IntentConsiderations.NATIVE_LAND,
 	]
 	for id in IntentConsiderations.ALL:
 		assert_true(covered.has(String(id)),

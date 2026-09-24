@@ -79,18 +79,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "increase_economic_output"
-              }
-            }
-          },
-          {
-            "id": "survival",
-            "label": "let it stand idle and see to your people",
-            "text": "Let it stand idle. Doors can be opened again; the people cannot, and I would rather you had them fed than had the thing running.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "secure_survival"
+                "intent": "get_rich"
               }
             }
           },
@@ -101,7 +90,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "grow_the_population"
+                "intent": "go_tall"
               }
             }
           }

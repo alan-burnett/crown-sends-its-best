@@ -93,7 +93,7 @@ static func size_for(town: Town) -> int:
 ## 🔒 **What the town can put in their hands, at §2's ratio** (§1).
 ##
 ## Capped by the stores, so a town that has been stockpiling guns under
-## `strengthen_defences` launches an armed company and one that has not launches
+## `military` launches an armed company and one that has not launches
 ## a mob. That is the whole of what the intent's stockpiling was for — and until
 ## now those guns were bought, held against the reserve, and never used.
 static func arms_for(town: Town, size: int) -> Dictionary:
@@ -114,16 +114,13 @@ static func arms_for(town: Town, size: int) -> Dictionary:
 ## 🔒 **The standing order comes from the intent that raised it** (§1), never
 ## from a separate choice.
 ##
-## | Intent | Order | Commander? |
-## | :--- | :--- | :--- |
-## | `strengthen_defences` | defend the town | **no** — it never leaves (§4) |
-## | `drive_them_off` | an order that leaves | **yes** |
-## | `prepare_for_rebellion` | defend the town | no — until the town declares |
-##
-## That is §4's test applied rather than restated: **leadership is needed the
-## moment the company has to *go* somewhere**, and `StandingOrder` answers it.
-static func order_for(intent: StringName) -> StringName:
-	return MARCH if intent == GovernorIntent.DRIVE_OFF else StandingOrder.DEFEND_THE_TOWN
+## **Every company defends its town for now** (#428). The intent that marched
+## men out — *drive them off* — is gone into *military*, which names no enemy,
+## and how a company picks an order that leaves is #432's (`commanders.md`,
+## the Author's ruling on #423). Until then a raised company holds the town,
+## which is what the other two intents that raised one always asked of it.
+static func order_for(_intent: StringName) -> StringName:
+	return StandingOrder.DEFEND_THE_TOWN
 
 
 ## The one order in the game that leaves the town. Named here because §1's table

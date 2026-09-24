@@ -257,7 +257,7 @@ func test_a_directing_letter_is_still_his_to_answer() -> void:
 	var answers: Dictionary = {}
 	for tone in Tone.ALL:
 		var tally := _outcomes_of(run, M1Registrations.ORDER_URGE_INTENT,
-			tone, {"intent": String(GovernorIntent.ECONOMY)})
+			tone, {"intent": String(GovernorIntent.GET_RICH)})
 		for outcome in tally:
 			if int(tally[outcome]) > 0:
 				answers[String(outcome)] = true
@@ -350,7 +350,7 @@ func test_the_same_letter_to_two_men_lands_differently() -> void:
 		var contact := run.contact(StringName(id))
 		var result := Compliance.resolve(
 			_an_order(M1Registrations.ORDER_URGE_INTENT, Tone.HATEFUL,
-				{"intent": String(GovernorIntent.ECONOMY)}),
+				{"intent": String(GovernorIntent.GET_RICH)}),
 			contact, run.intents, run.world, run.log, run.streams)
 		answers[id] = String(result["outcome"])
 

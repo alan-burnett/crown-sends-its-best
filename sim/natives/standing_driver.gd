@@ -64,8 +64,6 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	var territory: Territory = territory_driver.territory if territory_driver != null else null
 	for id in TribeStanding.exploitation(colony, natives, territory, context):
 		moved[String(id)] = true
-	for id in TribeStanding.hostile_intent(colony, natives, context):
-		moved[String(id)] = true
 
 	TribeStanding.left_alone(natives, moved, context)
 

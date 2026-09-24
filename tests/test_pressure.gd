@@ -181,7 +181,7 @@ func test_the_mandate_changing_does_not_crash_the_month() -> void:
 	var him := _man(["supply_situation"])
 	var odd := EventLog.new()
 	odd.emit(&"changed", &"world", 4, {"changes": {
-		"crown_mandate": {"from": "increase_economic_output", "to": "grow_the_population"},
+		"crown_mandate": {"from": "get_rich", "to": "go_tall"},
 		"a_new_key": {"from": null, "to": 3.0},
 	}})
 	var felt := Pressure.for_contact(him, {"supply_situation": 70.0}, odd, 5)

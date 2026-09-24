@@ -66,7 +66,7 @@ func _man(traits: Dictionary, loyalty: float = 55.0) -> Contact:
 ## drowning the one under test.
 func _letter(tone: StringName, harsh: bool = false) -> Order:
 	var order := Order.new(M1Registrations.ORDER_URGE_INTENT, &"him", {
-		"intent": String(GovernorIntent.ECONOMY),
+		"intent": String(GovernorIntent.GET_RICH),
 	})
 	order.id = &"order_test"
 	order.tone = tone

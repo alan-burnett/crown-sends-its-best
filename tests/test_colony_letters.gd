@@ -111,9 +111,9 @@ func test_every_intent_is_something_the_pc_can_actually_say() -> void:
 					reachable[String(effect["urge_intent"].get("intent", ""))] = true
 
 	for intent in GovernorIntent.IN_ORDER:
-		if GovernorIntent.is_his_alone(intent):
+		if not GovernorIntent.pc_may_urge(intent):
 			assert_false(reachable.has(String(intent)),
-				"a letter lets the PC ask a governor for '%s', which is his alone" % intent)
+				"a letter lets the PC ask a governor for '%s', which is not his to ask" % intent)
 			continue
 		assert_has(reachable, String(intent),
 			"no letter lets the PC argue for '%s'" % intent)
@@ -268,12 +268,12 @@ func test_the_governor_says_so_when_he_is_going_his_own_way() -> void:
 	var context := LetterContext.new(run.world, run.contact(town.governor_id), &"")
 	context.town = town
 
-	town.intent = GovernorIntent.ECONOMY
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 0))
+	town.intent = GovernorIntent.GET_RICH
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 0))
 	assert_false(ColonyConditions.town_disagrees_with_the_crown({}, context),
 		"he reported a disagreement he is not having")
 
-	town.urge(Urging.from_pc(GovernorIntent.SURVIVAL, 0))
+	town.urge(Urging.from_pc(GovernorIntent.GO_WIDE, 0))
 	assert_true(ColonyConditions.town_disagrees_with_the_crown({}, context),
 		"he was asked for one thing, is doing another, and says nothing")
 
@@ -281,13 +281,13 @@ func test_the_governor_says_so_when_he_is_going_his_own_way() -> void:
 # --- An intent is not vague --------------------------------------------------
 
 func test_urging_an_intent_is_a_specific_order() -> void:
-	# "Your people's survival must come first" is one of exactly five things the
-	# PC can say and there is nothing in it to misread. Judging it vague made
+	# "See that the town grows" is one of exactly four things the PC can say and
+	# there is nothing in it to misread. Judging it vague made
 	# every governor reinterpret or refuse every priority he was ever sent, which
 	# read as a man who could not follow plain English.
 	var order := Order.new(
 		M1Registrations.ORDER_URGE_INTENT, &"governor_ashmere",
-		{"to": "governor_ashmere", "intent": String(GovernorIntent.SURVIVAL)},
+		{"to": "governor_ashmere", "intent": String(GovernorIntent.GO_TALL)},
 	)
 	assert_almost_eq(Compliance.vagueness_of(order), 0.0, 0.001)
 
@@ -298,7 +298,7 @@ func test_being_told_what_matters_costs_a_governor_nothing() -> void:
 	# scored highest every month.
 	var order := Order.new(
 		M1Registrations.ORDER_URGE_INTENT, &"governor_ashmere",
-		{"to": "governor_ashmere", "intent": String(GovernorIntent.DEFENCE)},
+		{"to": "governor_ashmere", "intent": String(GovernorIntent.MILITARY)},
 	)
 	assert_almost_eq(Compliance.cost_of(order), 0.0, 0.001)
 	assert_almost_eq(Compliance.payment_ratio(order), 1.0, 0.001,

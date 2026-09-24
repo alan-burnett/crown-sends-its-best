@@ -412,7 +412,7 @@ func found_first_town() -> Town:
 	# **He starts on the Crown's Mandate** (SPEC §6.1). Nothing here sets the
 	# town's objective: the first Settle picks one to serve this, which is the
 	# only way an objective is ever chosen (#53).
-	town.intent = StringName(world.get_value(WorldValues.MANDATE, GovernorIntent.ECONOMY))
+	town.intent = StringName(world.get_value(WorldValues.MANDATE, GovernorIntent.GET_RICH))
 	# **A town founded last month has not lived a month yet**, and Settle has not
 	# run. Without a starting value its governor opens the run reporting his
 	# people as wretched, which is not true of anybody and is the first thing the

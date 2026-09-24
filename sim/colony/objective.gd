@@ -123,6 +123,9 @@ static func load_from(record: Dictionary) -> void:
 		}
 
 
+## The intents' prose and stockpiles, from `data/colony/agendas.json` (#428,
+## `governor-agendas.md` §11, §12) — where #429's menus will sit beside them.
+static func load_intents(record: Dictionary) -> void:
 	_intents = {}
 	for entry in record.get("intents", []):
 		var intent := String(entry.get("id", ""))
@@ -151,7 +154,8 @@ static func intent_pursuing(id: StringName) -> String:
 	return String(_intents.get(String(id), {}).get("pursuing", ""))
 
 
-## What a governor holding this intent wants kept on hand, per head.
+## What a governor holding this intent wants kept on hand, per thousand people
+## (`governor-agendas.md` §11).
 ##
 ## **The modifiers are the only thing that creates demand** for a resource a town
 ## does not eat (`docs/mechanics/town-economy.md` §3). Months of consumption is

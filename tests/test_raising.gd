@@ -59,7 +59,7 @@ func _town(run: RunState, workers: int = 40_000, guns: float = 0.0) -> Town:
 	town.stockpile = {}
 	if guns > 0.0:
 		town.store(&"guns", guns)
-	town.intent = GovernorIntent.DEFENCE
+	town.intent = GovernorIntent.MILITARY
 	return town
 
 
@@ -85,7 +85,7 @@ func test_a_governor_weighs_it_against_everything_else() -> void:
 	var town := _town(run, 40_000, 60.0)
 	var offered := PackedStringArray()
 	for candidate in ObjectiveSelector.candidates(
-			town, _context(run), GovernorIntent.DEFENCE):
+			town, _context(run), GovernorIntent.MILITARY):
 		offered.append(String(candidate["id"]))
 	assert_true(offered.has(String(_raising_id())),
 		"a governor bent on defence was never offered a company")
@@ -125,7 +125,7 @@ func test_a_town_at_the_floor_offers_it_at_all() -> void:
 
 	var offered := PackedStringArray()
 	for candidate in ObjectiveSelector.candidates(
-			town, _context(run), GovernorIntent.DEFENCE):
+			town, _context(run), GovernorIntent.MILITARY):
 		offered.append(String(candidate["id"]))
 	assert_false(offered.has(String(_raising_id())),
 		"it was offered to a town that cannot raise one")
@@ -240,7 +240,7 @@ func test_it_takes_no_more_than_a_head_wants() -> void:
 func test_defence_raises_a_militia_that_needs_nobody() -> void:
 	var run := _run()
 	var town := _town(run, 40_000)
-	town.intent = GovernorIntent.DEFENCE
+	town.intent = GovernorIntent.MILITARY
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
 	assert_eq(company.order, StandingOrder.DEFEND_THE_TOWN)
@@ -248,15 +248,18 @@ func test_defence_raises_a_militia_that_needs_nobody() -> void:
 		"a militia that never leaves was given a general")
 
 
-func test_driving_them_off_raises_one_that_leaves() -> void:
+func test_every_company_holds_its_town_until_it_chooses_its_own_order() -> void:
+	# #428: *drive them off* went into *military*, which names no enemy; how a
+	# company picks an order that leaves is #432's. Until then, every intent's
+	# company holds the town.
 	var run := _run()
-	var town := _town(run, 40_000)
-	town.intent = GovernorIntent.DRIVE_OFF
-	run.world.month = 5
-	var company := Raising.raise_from(town, _context(run))
-	assert_ne(company.order, StandingOrder.DEFEND_THE_TOWN)
-	assert_true(StandingOrder.needs_a_commander(company.order),
-		"a company sent to drive them off has nobody to decide where")
+	for intent in [GovernorIntent.MILITARY, GovernorIntent.SEDITION, GovernorIntent.GO_WIDE]:
+		var town := _town(run, 40_000)
+		town.intent = intent
+		run.world.month = 5
+		var company := Raising.raise_from(town, _context(run))
+		assert_eq(company.order, StandingOrder.DEFEND_THE_TOWN,
+			"a %s company was given an order nothing chose" % intent)
 
 
 func test_preparing_for_rebellion_raises_a_militia() -> void:
@@ -284,7 +287,7 @@ func test_finishing_the_objective_puts_men_under_arms() -> void:
 	var run := _run()
 	var town := _town(run, 40_000, 500.0)
 	town.objective = _raising_id()
-	town.objective_intent = GovernorIntent.DEFENCE
+	town.objective_intent = GovernorIntent.MILITARY
 	town.objective_since = 1
 	run.world.month = 9
 
@@ -305,9 +308,11 @@ func test_a_commander_is_found_when_it_is_time_to_move() -> void:
 	# they could go anywhere, and that is where a man is needed.
 	var run := _run()
 	var town := _town(run, 40_000, 500.0)
-	town.intent = GovernorIntent.DRIVE_OFF
+	town.intent = GovernorIntent.MILITARY
 	run.world.month = 5
 	var company := Raising.raise_from(town, _context(run))
+	# An order that leaves, as #432 will give one; nothing raises it yet (#428).
+	company.order = Raising.MARCH
 	assert_true(company.is_headless(), "he was commissioned in the colony month")
 
 	var driver := CompanyDriver.new()
@@ -327,7 +332,7 @@ func test_a_commander_is_found_when_it_is_time_to_move() -> void:
 func test_and_a_militia_is_never_given_one() -> void:
 	var run := _run()
 	var town := _town(run, 40_000)
-	town.intent = GovernorIntent.DEFENCE
+	town.intent = GovernorIntent.MILITARY
 	run.world.month = 5
 	var militia := Raising.raise_from(town, _context(run))
 

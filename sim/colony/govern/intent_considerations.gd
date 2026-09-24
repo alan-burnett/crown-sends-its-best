@@ -1,72 +1,101 @@
 class_name IntentConsiderations
 extends RefCounted
 
-## What a governor weighs when he decides what his town is for (#53).
+## What a governor weighs when he decides what his town is for (#53, #428,
+## `docs/mechanics/governor-agendas.md` §13).
 ##
-## **A milestone that adds a system ships that system's considerations with it**
-## (CLAUDE.md). These are the colony's: each looks at one aspect of the town and
-## says how well each candidate intent answers it. The governor's personality is
-## the weight vector over them, so a cautious man and a greedy man read the same
-## town and want different things — with **no code per personality**.
+## 🔒 **A table, and the table is data.** Each row measures **how much of a
+## problem** one thing is in his town, nought to one — nought is no problem, and
+## then the row does nothing. Its score for an intent is that measure times the
+## cell `data/colony/agendas.json` gives it: *when this is at its worst in my
+## town, how strongly does it push me toward this intent?* The Author sets the
+## cells; no row has a `match` on intents.
 ##
-## Every score is in `[-1, +1]` and neutral is `0.0`, so a consideration with
-## nothing to say about a situation contributes nothing rather than quietly
-## suppressing an intent. That matters most for the ones whose inputs do not
-## move yet: native threat is M5 and quality of life is #50, and both must read
-## as *no opinion* until then rather than as *no*.
+## The governor's personality is the weight vector over the rows, so a cautious
+## man and a greedy man read the same town and want different things — with **no
+## code per personality**. The mandate and the urging are not rows: each pulls
+## toward one named intent.
 ##
 ## Written as named subclasses rather than lambdas: a `Callable` living in a
 ## static registry segfaults Godot 4.7 on shutdown (CLAUDE.md).
 
+## **Always one.** What an untroubled town wants: tall and rich serve towns
+## without problems, and in a town with none every other row reads nought.
+const BASELINE: StringName = &"baseline"
+## Hunger: how far below four months of food the town holds.
 const FOOD: StringName = &"food_security"
+## How badly the town is living.
 const COMFORT: StringName = &"quality_of_life"
-const REVENUE: StringName = &"revenue"
-const THREAT: StringName = &"native_threat"
+## How far the town's wealth per thousand people falls short of comfortable.
+const WEALTH: StringName = &"wealth"
+## How unsafe the town is, from any foe.
+const SAFETY: StringName = &"safety"
+## Unclaimed land the colony can see — **the one row that is an opportunity, not
+## a problem.**
 const ROOM: StringName = &"room_to_grow"
 
-## **Too many mouths for the ground the town can work** (#175).
+## **Too many mouths for the ground the town can work** (#175): people per tile
+## of land, against 2,000 comfortable.
 ##
-## Deliberately a *second* consideration rather than a term folded into
-## `room_to_grow`, because `deliberation.md` makes personality a weight vector:
-## two considerations give two weights and therefore two kinds of governor —
-## **the ambitious man who settles because there is land, and the pragmatic one
-## who settles because there are too many mouths.** A single blended term
-## collapses both into the same character.
-##
-## `founding-towns.md` §2 needs both to exist, or only one of its two expedition
-## kinds ever launches: the grand one and the shed one have different motives,
-## not merely different cargo.
-##
-## It also has no floor where `room_to_grow` has one. A one-town colony can never
-## see enough unclaimed land for room to go positive, so settling was unreachable
-## by construction. **A town too full for its fields is too full whether or not
-## anyone has surveyed the frontier.**
+## Deliberately a *second* row rather than a term folded into `room_to_grow`,
+## because personality is a weight vector: two rows give two weights and
+## therefore two kinds of governor — **the ambitious man who settles because
+## there is land, and the pragmatic one who settles because there are too many
+## mouths.**
 const CROWDING: StringName = &"crowding"
 
-## **How much of the ground this town could work belongs to somebody else**
-## (#204).
-##
-## Deliberately separate from `native_threat`, and for the reason `crowding` is
-## separate from `room_to_grow`: two considerations give two weights and
-## therefore **two kinds of governor who want the natives gone** — the frightened
-## man, who weighs the threat, and the covetous one, who weighs the fields. A
-## single blended term would collapse a man who is afraid and a man who is greedy
-## into the same character, and they are not the same character at all.
-##
-## It argues for settling elsewhere just as readily as for driving them off,
-## which is what keeps it a measure of the situation rather than an argument for
-## one answer.
-const NATIVE_LAND: StringName = &"native_land"
+## **How far the governor's loyalty has fallen**: nought at neutral or above, one
+## at rock bottom.
+const LOYALTY: StringName = &"loyalty"
 
 const MANDATE: StringName = &"mandate"
 const URGING: StringName = &"crown_urging"
 
+## The rows of the table, in the order `governor-agendas.md` §13 lists them.
+const TABLE_ROWS: Array[StringName] = [
+	BASELINE, FOOD, COMFORT, WEALTH, SAFETY, ROOM, CROWDING, LOYALTY,
+]
+
 ## Consideration ids this system introduces, sorted. `Governor` gives each new
 ## governor a weight for every one of them.
 const ALL: PackedStringArray = [
-	"crowding", "crown_urging", "food_security", "mandate", "native_land",
-	"native_threat", "quality_of_life", "revenue", "room_to_grow",
+	"baseline", "crowding", "crown_urging", "food_security", "loyalty", "mandate",
+	"quality_of_life", "room_to_grow", "safety", "wealth",
 ]
+
+## Where the loyalty row reads nought: neutral, and anything above it.
+const LOYALTY_NEUTRAL: float = 50.0
+
+## 🔒 **Comfortable wealth: sixty gold per weighted thousand** (§13, a
+## placeholder: twice the purse quality of life calls comfortable).
+const COMFORTABLE_WEALTH: float = 60.0
+
+## The Author's cells, row -> intent -> push. Loaded from `agendas.json`.
+static var _table: Dictionary = {}
+
+
+static func load_table(record: Dictionary) -> void:
+	_table = {}
+	var rows: Variant = record.get("considerations", {})
+	if typeof(rows) != TYPE_DICTIONARY:
+		return
+	for row in rows:
+		var cells: Variant = rows[row]
+		if typeof(cells) == TYPE_DICTIONARY:
+			_table[String(row)] = (cells as Dictionary).duplicate()
+
+
+## The table as loaded, for the validator.
+static func table() -> Dictionary:
+	return _table
+
+
+## How strongly this row, at its worst, pushes toward this intent. Nought where
+## the table says nothing.
+static func cell(row: StringName, intent: StringName) -> float:
+	var cells: Dictionary = _table.get(String(row), {})
+	return clampf(float(cells.get(String(intent), 0.0)), -1.0, 1.0)
+
 
 ## How long the Crown's Mandate keeps half its pull. SPEC §6.1 says "especially
 ## in the early game" and nothing more, so this is tuning.
@@ -97,7 +126,7 @@ const URGING_HALF_LIFE: float = 12.0
 ## governor every run has. Weight times score is one product either way.
 ##
 ## 🔒 **It never overrides him.** `crown_urging` is still weighed against
-## eight other considerations and his own reading of his town, so this **wins close
+## every other consideration and his own reading of his town, so this **wins close
 ## arguments and loses hopeless ones**: the Crown's pressure, not the Crown's
 ## command. And because a fresh urging is already at the ceiling, what the perk
 ## really buys is that the letter is *still scoring* next spring when an
@@ -178,24 +207,20 @@ static func author_weight(_author: StringName) -> float:
 ## Months of food at which a town stops thinking about food at all.
 const COMFORTABLE_MONTHS: float = 4.0
 
-## What counts as a healthy month's duty for one town, for the revenue axis.
-const HEALTHY_REVENUE: float = 80.0
-
-
 static func register_all() -> void:
 	var kinds: Array = [DecisionKind.GOVERNOR_INTENT]
+	Deliberation.register_consideration(Baseline.new(), kinds)
 	Deliberation.register_consideration(FoodSecurity.new(), kinds)
 	Deliberation.register_consideration(Comfort.new(), kinds)
-	Deliberation.register_consideration(Revenue.new(), kinds)
-	Deliberation.register_consideration(NativeThreat.new(), kinds)
+	Deliberation.register_consideration(Wealth.new(), kinds)
+	Deliberation.register_consideration(Safety.new(), kinds)
 	Deliberation.register_consideration(RoomToGrow.new(), kinds)
 	Deliberation.register_consideration(Crowding.new(), kinds)
-	Deliberation.register_consideration(NativeLand.new(), kinds)
+	Deliberation.register_consideration(Loyalty.new(), kinds)
 	Deliberation.register_consideration(Mandate.new(), kinds)
 	Deliberation.register_consideration(CrownUrging.new(), kinds)
-	Deliberation.register_filter(RoomToSettle.new(), kinds)
 	Deliberation.register_filter(OnlyIfHeLoathesYou.new(), kinds)
-	Deliberation.register_filter(SomebodyToDriveOff.new(), kinds)
+	Deliberation.register_filter(OnlyWhenLearningIsUrged.new(), kinds)
 
 
 ## Halve every `half_life` months. Used for both decaying pulls.
@@ -205,155 +230,109 @@ static func decayed(months: float, half_life: float) -> float:
 	return pow(0.5, maxf(0.0, months) / half_life)
 
 
-# --- The considerations -----------------------------------------------------
+# --- The rows -----------------------------------------------------------------
 
-## How hungry the town is, and what that argues for.
+## A row of the table: a measure, nought to one, times the Author's cell.
 ##
-## **Hunger is the one that can flip an intent on its own.** A town with a month
-## of grain left has no business increasing economic output, and a governor who
-## thinks otherwise is the design working — his weight on this is low and his
-## town will hate him for it (`docs/mechanics/quality-of-life.md`, hope).
-class FoodSecurity extends Consideration:
+## @LOCK@ **No row ever pushes the other way on its own account.** A measure at
+## nought scores nought for every intent; only the cell's sign says which way a
+## problem pushes.
+class TableRow extends Consideration:
+	func score(actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+		var push := IntentConsiderations.cell(id, candidate.id)
+		if is_zero_approx(push):
+			return 0.0
+		return clampf(measure(actor, context), 0.0, 1.0) * push
+
+	## How much of a problem this is in his town, nought to one.
+	func measure(_actor: DeliberationActor, _context: DeliberationContext) -> float:
+		return 0.0
+
+
+class Baseline extends TableRow:
+	func _init() -> void:
+		super(IntentConsiderations.BASELINE)
+
+	func measure(_actor: DeliberationActor, _context: DeliberationContext) -> float:
+		return 1.0
+
+
+## Hunger: how far below four months of food the town holds.
+class FoodSecurity extends TableRow:
 	func _init() -> void:
 		super(IntentConsiderations.FOOD)
 
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+	func measure(_actor: DeliberationActor, context: DeliberationContext) -> float:
 		var town: Town = context.get_value("town")
 		if town == null:
 			return 0.0
-		var mouths := town.mouths()
-		var monthly := mouths * ColonyNeeds.per_head(&"food")
+		var monthly := town.mouths() * ColonyNeeds.per_head(&"food")
 		var months_held := town.held(&"food") / maxf(0.001, monthly)
-		var hunger := clampf(1.0 - months_held / IntentConsiderations.COMFORTABLE_MONTHS, 0.0, 1.0)
-
-		match candidate.id:
-			GovernorIntent.SURVIVAL:
-				# The only intent hunger actively argues *for*, and it argues
-				# against itself when the storehouses are full.
-				return hunger * 2.0 - 1.0
-			GovernorIntent.POPULATION:
-				return -hunger * 0.5
-			GovernorIntent.DEFENCE:
-				return -hunger * 0.5
-		return -hunger
+		return clampf(1.0 - months_held / IntentConsiderations.COMFORTABLE_MONTHS, 0.0, 1.0)
 
 
-## How well the town is living, and what that argues for.
-##
-## Reads `quality_of_life`, which Settle computes from
-## `docs/mechanics/quality-of-life.md`. It is already a `[0, 1]` value, so there
-## is no scale to apply here.
-class Comfort extends Consideration:
+## How badly the town is living: Settle's quality of life, turned round.
+class Comfort extends TableRow:
 	func _init() -> void:
 		super(IntentConsiderations.COMFORT)
 
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+	func measure(_actor: DeliberationActor, context: DeliberationContext) -> float:
 		var town: Town = context.get_value("town")
-		if town == null:
-			return 0.0
-		var lack := clampf(1.0 - town.quality_of_life, 0.0, 1.0)
-
-		match candidate.id:
-			GovernorIntent.POPULATION:
-				return lack
-			GovernorIntent.SURVIVAL:
-				return lack * 0.5
-			GovernorIntent.SETTLEMENT:
-				# A miserable town is in no condition to send its best men away.
-				return -lack
-		return 0.0
+		return 0.0 if town == null else clampf(1.0 - town.quality_of_life, 0.0, 1.0)
 
 
-## What the colony is returning to the Crown.
-class Revenue extends Consideration:
+## How far the town's own purse falls short of comfortable, per weighted
+## thousand (§13). **Its gold only**: stores are not wealth.
+class Wealth extends TableRow:
 	func _init() -> void:
-		super(IntentConsiderations.REVENUE)
+		super(IntentConsiderations.WEALTH)
 
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
-		if context.state == null:
-			return 0.0
-		var revenue := float(context.state.get_value(WorldValues.REVENUE, 0.0))
-		var poverty := clampf(1.0 - revenue / IntentConsiderations.HEALTHY_REVENUE, 0.0, 1.0)
-
-		match candidate.id:
-			GovernorIntent.ECONOMY:
-				return poverty
-			GovernorIntent.SETTLEMENT:
-				return poverty * 0.3
-		return 0.0
+	func measure(_actor: DeliberationActor, context: DeliberationContext) -> float:
+		var town: Town = context.get_value("town")
+		return 0.0 if town == null else town.wealth_craving(IntentConsiderations.COMFORTABLE_WEALTH)
 
 
-## Whether anybody is likely to come over the hill.
-##
-## **M5 gives this teeth.** It reads a world value nothing sets yet, and at zero
-## it scores zero for every candidate, so today it is a registered consideration
-## with no opinion — which is what lets M5 add natives without governors needing
-## a new decision path to feel them.
-class NativeThreat extends Consideration:
+## How unsafe the town is, from any foe — natives, a duke, Crown troops. Read
+## off the safety Settle stored, so the governor fears what his people fear.
+class Safety extends TableRow:
 	func _init() -> void:
-		super(IntentConsiderations.THREAT)
+		super(IntentConsiderations.SAFETY)
 
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
-		if context.state == null:
-			return 0.0
-		var threat := clampf(float(context.state.get_value("native_threat", 0.0)), 0.0, 1.0)
-
-		match candidate.id:
-			GovernorIntent.DEFENCE:
-				return threat
-			GovernorIntent.DRIVE_OFF:
-				# **The frightened man's answer.** A governor who reads the
-				# neighbours as dangerous and has a heavy weight here stops
-				# thinking about walls and starts thinking about the people
-				# behind them.
-				return threat
-			GovernorIntent.SURVIVAL:
-				return threat * 0.5
-			GovernorIntent.SETTLEMENT:
-				return -threat
-		return -threat * 0.3
+	func measure(_actor: DeliberationActor, context: DeliberationContext) -> float:
+		var town: Town = context.get_value("town")
+		return 0.0 if town == null else clampf(1.0 - town.safety, 0.0, 1.0)
 
 
-## Whether there is anywhere to go.
-class RoomToGrow extends Consideration:
+## The share of the land the colony has seen that no town has claimed.
+class RoomToGrow extends TableRow:
 	func _init() -> void:
 		super(IntentConsiderations.ROOM)
 
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
-		var room := IntentConsiderations.room_in_the_colony(context)
-		match candidate.id:
-			GovernorIntent.SETTLEMENT:
-				return room * 2.0 - 1.0
-			GovernorIntent.POPULATION:
-				return room * 0.3
-		return 0.0
+	func measure(_actor: DeliberationActor, context: DeliberationContext) -> float:
+		return IntentConsiderations.room_in_the_colony(context)
 
 
-## How many mouths the town has for the ground it can work.
-##
-## 🔒 **Against workable ground, not population alone.** A town of two hundred
-## with room to work is not crowded; a town of forty on six tiles is. That is
-## what makes the measure mean anything, and it has a consequence worth keeping:
-## **the expansion branch lowers crowding by raising influence**, so a town can
-## build its way out of needing to leave and guard towers become a real
-## alternative to a daughter town.
-class Crowding extends Consideration:
+## Too many mouths for the ground the town can work.
+class Crowding extends TableRow:
 	func _init() -> void:
 		super(IntentConsiderations.CROWDING)
 
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
-		var pressure := IntentConsiderations.crowding_of(context)
-		match candidate.id:
-			GovernorIntent.SETTLEMENT:
-				return pressure
-			GovernorIntent.POPULATION:
-				# A man watching his town outgrow its fields does not answer by
-				# sending for more people.
-				return -pressure
-			GovernorIntent.ECONOMY:
-				# More hands than ground is a reason to make more of the ground.
-				return pressure * 0.4
-		return 0.0
+	func measure(_actor: DeliberationActor, context: DeliberationContext) -> float:
+		return IntentConsiderations.crowding_of(context)
+
+
+## How far his loyalty has fallen: nought at neutral or above, one at nought.
+class Loyalty extends TableRow:
+	func _init() -> void:
+		super(IntentConsiderations.LOYALTY)
+
+	func measure(actor: DeliberationActor, _context: DeliberationContext) -> float:
+		var contact := actor as Contact
+		if contact == null:
+			return 0.0
+		return clampf(
+			(IntentConsiderations.LOYALTY_NEUTRAL - contact.loyalty()) / IntentConsiderations.LOYALTY_NEUTRAL,
+			0.0, 1.0)
 
 
 ## How many mouths there are for each tile the town can actually work.
@@ -487,14 +466,8 @@ class CrownUrging extends Consideration:
 		return minf(1.0, pull * IntentConsiderations.urging_weight())
 
 
-# --- The filter -------------------------------------------------------------
+# --- The filters ------------------------------------------------------------
 
-## **A town cannot intend to settle nowhere.**
-##
-## A hard rule rather than a weight (`docs/mechanics/deliberation.md` §5): no
-## governor, however expansionist, can send an expedition to land the colony has
-## never seen. Filters run before scoring, so this removes the candidate rather
-## than making it merely unattractive.
 ## Loyalty at or below which a governor will consider turning his town.
 ##
 ## **A filter and not a weight** (`deliberation.md` §5). A weight can lose a
@@ -517,83 +490,39 @@ class OnlyIfHeLoathesYou extends DeliberationFilter:
 			and contact.loyalty() <= IntentConsiderations.SEDITION_AT
 
 
-## How much of the ground this town could work is somebody else's.
+## 🔒 **Education only while the Provost or the scholar urges it** (§13).
 ##
-## **The covetous man's argument**, and the second route to wanting them gone.
-class NativeLand extends Consideration:
+## It has no cells, so without this it would score nought — and nought wins
+## whenever every other intent totals below it. **Stands** means still pulling:
+## at least an eighth of a fresh urging, three half-lives at its own strength.
+## Past that the Provost's letter is a memory, not an argument.
+class OnlyWhenLearningIsUrged extends DeliberationFilter:
 	func _init() -> void:
-		super(IntentConsiderations.NATIVE_LAND)
-
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
-		var pressed := IntentConsiderations.land_in_other_hands(context)
-		match candidate.id:
-			GovernorIntent.DRIVE_OFF:
-				return pressed
-			GovernorIntent.SETTLEMENT:
-				# The other answer to the same problem, and the cheap one: go
-				# somewhere nobody is.
-				return pressed * 0.6
-			GovernorIntent.ECONOMY:
-				# Fields he cannot work are fields that will not pay.
-				return -pressed * 0.4
-		return 0.0
-
-
-## 🔒 **A man cannot intend to drive off people he has never met** (#204).
-##
-## A filter and not a weight (`deliberation.md` §5): a weight can lose a close
-## vote, and a governor four hundred miles from the nearest village adopting
-## *drive them off* is not a close vote, it is nonsense. The intent is reachable
-## only where there is somebody in reach to mean it about.
-class SomebodyToDriveOff extends DeliberationFilter:
-	func _init() -> void:
-		super(&"somebody_to_drive_off")
+		super(&"only_when_learning_is_urged")
 
 	func permits(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> bool:
-		if candidate.id != GovernorIntent.DRIVE_OFF:
+		if candidate.id != GovernorIntent.EDUCATION:
 			return true
-		return IntentConsiderations.land_in_other_hands(context) > 0.0
+		for entry in context.get_value("urgings", []):
+			var urging: Urging = entry
+			if urging.target != GovernorIntent.EDUCATION:
+				continue
+			if not GovernorIntent.EDUCATION_URGED_BY.has(urging.author):
+				continue
+			if urging.pull(context.month, IntentConsiderations.URGING_HALF_LIFE) \
+					>= IntentConsiderations.LEARNING_STANDS:
+				return true
+		return false
 
 
-class RoomToSettle extends DeliberationFilter:
-	func _init() -> void:
-		super(&"somewhere_to_settle")
-
-	func permits(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> bool:
-		if candidate.id != GovernorIntent.SETTLEMENT:
-			return true
-		return IntentConsiderations.room_in_the_colony(context) > 0.0
-
-
-## The share of this town's own fields that a tribe holds, nought to one.
-##
-## Shared by the consideration and the filter so that "their land is in my way"
-## cannot come to mean two different things — the same arrangement `room_to_grow`
-## and its filter have, and for the same reason.
-##
-## 🔒 **It counts, it does not adjudicate.** `natives.md` §10 leaves who works a
-## contested tile to the Author; this says only how many of them there are.
-static func land_in_other_hands(context: DeliberationContext) -> float:
-	var town: Town = context.get_value("town")
-	var territory: Territory = context.get_value("territory")
-	var natives: Tribes = context.get_value("natives")
-	if town == null or territory == null or natives == null:
-		return 0.0
-
-	var tiles := territory.tiles_of(town.id)
-	if tiles.is_empty():
-		return 0.0
-	var theirs := 0
-	for tile in tiles:
-		if not String(natives.holder_of(tile)).is_empty():
-			theirs += 1
-	return clampf(float(theirs) / float(tiles.size()), 0.0, 1.0)
+## How much of a fresh urging toward learning must remain for it to stand.
+const LEARNING_STANDS: float = 0.125
 
 
 ## The share of the land the colony can see that no town has claimed.
 ##
-## Shared by the consideration and the filter so that "there is room" cannot come
-## to mean two different things.
+## Shared with anything else that asks, so "there is room" cannot come to mean
+## two different things.
 static func room_in_the_colony(context: DeliberationContext) -> float:
 	var map: WorldMap = context.get_value("map")
 	var territory: Territory = context.get_value("territory")

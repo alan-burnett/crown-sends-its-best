@@ -32,7 +32,6 @@ extends RefCounted
 
 const EVENT_FOUNDING: StringName = &"tribe_offended_by_founding"
 const EVENT_EXPLOITATION: StringName = &"tribe_lost_land_to_a_town"
-const EVENT_HOSTILE_INTENT: StringName = &"tribe_saw_a_governor_turn"
 const EVENT_AGGRESSION: StringName = &"tribe_attacked_by_colonists"
 const EVENT_LEFT_ALONE: StringName = &"tribe_left_alone"
 
@@ -52,13 +51,6 @@ const PER_WORKED_TILE: float = 0.22
 ## The most one town's fields can cost a tribe in a month, however many it works.
 ## A town cannot grind a people down faster by being enormous.
 const EXPLOITATION_CAP: float = 2.4
-
-## What a governor openly set on driving them off costs, every month he holds it.
-##
-## 🔒 **It is charged from the month he adopts it**, before anything is built —
-## there is no hiding an intent from people who live next door and can see the
-## militia drilling.
-const HOSTILE_INTENT: float = 3.2
 
 ## What the colony recovers in a month nobody did anything to them.
 ##
@@ -134,38 +126,6 @@ static func exploitation(
 				"fields": worked,
 			}, WorldPhase.RECKONING)
 	return taken
-
-
-## A governor said out loud what he means to do about them (Seam A).
-##
-## 🔒 **Visible before anything is built.** §11.3 locks that the intent is his to
-## judge: the PC can argue against it in a letter and cannot forbid it, so what
-## the tribe reacts to is the man's purpose rather than the colony's policy.
-static func hostile_intent(
-	colony: Colony,
-	natives: Tribes,
-	context: ColonyContext,
-) -> Dictionary:
-	var angered: Dictionary = {}
-	if colony == null or natives == null:
-		return angered
-
-	for town in colony.in_order():
-		if town.intent != GovernorIntent.DRIVE_OFF:
-			continue
-		for tribe in natives.in_order():
-			var depth := _depth_toward(town.at, tribe as Tribe, natives)
-			if depth <= 0.0001:
-				continue
-			(tribe as Tribe).move(
-				Tribe.COLONY, -HOSTILE_INTENT, "they mean to drive us off",
-				context, false)
-			angered[String((tribe as Tribe).id)] = true
-			context.log.emit(EVENT_HOSTILE_INTENT, (tribe as Tribe).id, context.state.month, {
-				"tribe": String((tribe as Tribe).id),
-				"town": String(town.id),
-			}, WorldPhase.RECKONING)
-	return angered
 
 
 ## Colonists attacked them (Seam A).

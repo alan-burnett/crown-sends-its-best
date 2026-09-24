@@ -34,11 +34,11 @@ func _pull_after(tone: StringName, months: int) -> float:
 	var context := DeliberationContext.new(
 		DecisionKind.GOVERNOR_INTENT, WorldValues.initial_state(), EventLog.new())
 	context.data = {
-		"urgings": [Urging.from_pc(GovernorIntent.ECONOMY, 0, tone)],
+		"urgings": [Urging.from_pc(GovernorIntent.GET_RICH, 0, tone)],
 	}
 	context.month = months
 	return IntentConsiderations.CrownUrging.new().score(
-		null, Candidate.new(GovernorIntent.ECONOMY), context)
+		null, Candidate.new(GovernorIntent.GET_RICH), context)
 
 
 # --- 🔒 Loyalty ------------------------------------------------------------
@@ -178,7 +178,7 @@ func test_the_letter_carries_its_manner_to_the_town() -> void:
 	var town := run.colony.in_order()[0]
 
 	var order := Order.new(M1Registrations.ORDER_URGE_INTENT, town.governor_id, {
-		"intent": String(GovernorIntent.DEFENCE),
+		"intent": String(GovernorIntent.MILITARY),
 	}, 0)
 	order.id = &"order_urge"
 	order.tone = Tone.DESPERATE
@@ -187,7 +187,7 @@ func test_the_letter_carries_its_manner_to_the_town() -> void:
 	executor.colony = run.colony
 	var intent := Intent.new(&"i", M1Registrations.ORDER_URGE_INTENT,
 		town.governor_id, town.governor_id, 1,
-		{"intent": String(GovernorIntent.DEFENCE), Compliance.URGED_TONE: String(Tone.DESPERATE)})
+		{"intent": String(GovernorIntent.MILITARY), Compliance.URGED_TONE: String(Tone.DESPERATE)})
 	assert_eq(executor.execute(intent, run.world, run.log), Intent.COMPLETED)
 	assert_eq(town.urging_by().tone, Tone.DESPERATE,
 		"the town did not learn how hard the letter had been written")
@@ -200,7 +200,7 @@ func test_a_man_acting_alone_wrote_nobody_a_letter() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var order := Order.new(M1Registrations.ORDER_URGE_INTENT, &"marshal", {
-		"intent": String(GovernorIntent.ECONOMY),
+		"intent": String(GovernorIntent.GET_RICH),
 	}, 0)
 	order.tone = Tone.HATEFUL
 
@@ -222,7 +222,7 @@ func test_the_town_remembers_it_across_a_save() -> void:
 	# moment the player closed the game.
 	var run := RunState.new_run(SEED)
 	var town := run.colony.in_order()[0]
-	town.urge(Urging.from_pc(GovernorIntent.DEFENCE, 4, Tone.DESPERATE))
+	town.urge(Urging.from_pc(GovernorIntent.MILITARY, 4, Tone.DESPERATE))
 
 	var restored := Town.from_dict(town.to_dict())
 	assert_eq(restored.urging_by().tone, Tone.DESPERATE,

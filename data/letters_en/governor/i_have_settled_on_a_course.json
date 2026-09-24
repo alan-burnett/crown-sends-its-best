@@ -61,7 +61,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "increase_economic_output"
+                "intent": "get_rich"
               }
             }
           },
@@ -72,7 +72,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "strengthen_defences"
+                "intent": "military"
               }
             }
           },
@@ -83,7 +83,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "grow_the_population"
+                "intent": "go_tall"
               }
             }
           }

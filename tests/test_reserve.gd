@@ -77,8 +77,8 @@ func _shop(town: Town) -> Dictionary:
 func test_a_military_intent_sends_the_town_shopping_for_guns() -> void:
 	# **The headline of the ticket.** A military intent does not protect the guns
 	# the town has; it creates demand for guns it does not.
-	var defended := _town(GovernorIntent.DEFENCE, {"food": 400.0, "clothing": 80.0})
-	var thrifty := _town(GovernorIntent.ECONOMY, {"food": 400.0, "clothing": 80.0})
+	var defended := _town(GovernorIntent.MILITARY, {"food": 400.0, "clothing": 80.0})
+	var thrifty := _town(GovernorIntent.GET_RICH, {"food": 400.0, "clothing": 80.0})
 
 	_shop(defended)
 	_shop(thrifty)
@@ -90,8 +90,8 @@ func test_a_military_intent_sends_the_town_shopping_for_guns() -> void:
 
 
 func test_the_intent_raises_the_reserve_on_what_it_wants_held() -> void:
-	var defended := _reckon(_town(GovernorIntent.DEFENCE, {"food": 400.0, "clothing": 80.0}))
-	var thrifty := _reckon(_town(GovernorIntent.ECONOMY, {"food": 400.0, "clothing": 80.0}))
+	var defended := _reckon(_town(GovernorIntent.MILITARY, {"food": 400.0, "clothing": 80.0}))
+	var thrifty := _reckon(_town(GovernorIntent.GET_RICH, {"food": 400.0, "clothing": 80.0}))
 
 	assert_true(defended.reserve_of(&"guns") > 0.0,
 		"a military intent left the reserve on guns at nothing")
@@ -108,8 +108,8 @@ func test_a_resource_nobody_eats_has_no_reserve_without_an_intent() -> void:
 func test_the_demand_grows_with_the_town() -> void:
 	# Per head rather than absolute, so a town of three hundred wants more
 	# powder than a town of ten and neither figure has to be authored.
-	var small := _town(GovernorIntent.DEFENCE, {"food": 400.0, "clothing": 80.0})
-	var large := _town(GovernorIntent.DEFENCE, {"food": 400.0, "clothing": 80.0})
+	var small := _town(GovernorIntent.MILITARY, {"food": 400.0, "clothing": 80.0})
+	var large := _town(GovernorIntent.MILITARY, {"food": 400.0, "clothing": 80.0})
 	large.workers = 200_000
 
 	assert_true(_reckon(large).reserve_of(&"guns") > _reckon(small).reserve_of(&"guns"))
@@ -146,7 +146,7 @@ func test_a_hoarding_posture_still_reserves_everything() -> void:
 func test_needs_draw_freely_through_the_reserve() -> void:
 	# Survival ignores it. The citizens meet their needs with the town's gold
 	# whatever the governor wants.
-	var hungry := _town(GovernorIntent.DEFENCE, {"clothing": 80.0})
+	var hungry := _town(GovernorIntent.MILITARY, {"clothing": 80.0})
 	_shop(hungry)
 	assert_true(hungry.held(&"food") > 0.0,
 		"a starving town bought powder and no grain")
@@ -188,7 +188,7 @@ func test_wants_are_bought_only_above_the_reserve() -> void:
 
 
 func test_sell_keeps_what_the_intent_asked_to_be_kept() -> void:
-	var armed := _town(GovernorIntent.DEFENCE, {"food": 400.0, "clothing": 80.0, "guns": 6.0}, 0.0)
+	var armed := _town(GovernorIntent.MILITARY, {"food": 400.0, "clothing": 80.0, "guns": 6.0}, 0.0)
 	var colony := Colony.new()
 	colony.add(armed)
 	var context := ColonyContext.new(

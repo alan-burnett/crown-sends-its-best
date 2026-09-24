@@ -134,44 +134,29 @@ func test_a_crowded_town_argues_for_settling_and_against_sending_for_more() -> v
 	var pressure := IntentConsiderations.crowding_of(context)
 	assert_true(pressure > 0.0, "the fixture is not crowded")
 
+	# The measure times the Author's cell (#428): toward going wide, away from
+	# going tall.
 	assert_almost_eq(
-		crowding.score(null, Candidate.new(GovernorIntent.SETTLEMENT), context),
-		pressure, 0.0001, "a crowded town does not argue for settling")
-	assert_almost_eq(
-		crowding.score(null, Candidate.new(GovernorIntent.POPULATION), context),
-		-pressure, 0.0001,
+		crowding.score(null, Candidate.new(GovernorIntent.GO_WIDE), context),
+		pressure * IntentConsiderations.cell(IntentConsiderations.CROWDING, GovernorIntent.GO_WIDE),
+		0.0001, "a crowded town does not argue for settling")
+	assert_true(crowding.score(null, Candidate.new(GovernorIntent.GO_WIDE), context) > 0.0,
+		"a crowded town does not argue for settling")
+	assert_true(crowding.score(null, Candidate.new(GovernorIntent.GO_TALL), context) < 0.0,
 		"a man watching his town outgrow its fields answered by sending for more people")
 
 
-func test_a_one_town_colony_can_want_to_settle_on_crowding_alone() -> void:
-	# 🔒 §2's chicken and egg: `room_to_grow` returns `room * 2 - 1` for settling,
-	# which is **negative** while a colony has seen little unclaimed land — so the
-	# first daughter town could never be founded on that motive. Crowding is the
-	# answer, and it can only answer if it is not nought.
+func test_a_one_town_colony_can_want_to_go_wide_on_crowding_alone() -> void:
+	# 🔒 Two rows, two kinds of governor (§13): the ambitious man who goes
+	# because there is land, and the pragmatic one who goes because there are too
+	# many mouths. **Crowding pushes toward going wide whatever the colony has
+	# seen**, and room is an opportunity that never pushes the other way.
 	var context := _context_for(90, 12, 0)
-	var settle := Candidate.new(GovernorIntent.SETTLEMENT)
-	var from_room := IntentConsiderations.RoomToGrow.new().score(null, settle, context)
-	var from_crowding := IntentConsiderations.Crowding.new().score(null, settle, context)
-
-	assert_true(from_crowding > 0.0,
-		"crowding says nothing about settling, so there is one motive and not two")
-	assert_true(from_room < 0.0,
-		"the fixture's colony has seen land, so room is not the floor this is about")
-
-	# 🔒 **The two are exactly matched at the extremes** — room bottoms at -1 and
-	# crowding tops at +1 — so raw they can only tie. **The weights are what
-	# decide**, which is the whole reason §2 wants two considerations rather than
-	# one blended term: two weights make **two kinds of governor**, the ambitious
-	# man who settles because there is land and the pragmatic one who settles
-	# because there are too many mouths.
-	var pragmatic := 1.5 * from_crowding + 0.5 * from_room
-	var ambitious := 0.5 * from_crowding + 1.5 * from_room
-	assert_true(pragmatic > 0.0,
-		"a governor who minds crowded fields still had no reason to send anybody out: "
-			+ "room %.2f, crowding %.2f" % [from_room, from_crowding])
-	assert_true(ambitious < 0.0,
-		"a governor who only wants elbow room wanted to settle in a colony "
-			+ "that has seen nowhere to go")
+	var wide := Candidate.new(GovernorIntent.GO_WIDE)
+	assert_true(IntentConsiderations.Crowding.new().score(null, wide, context) > 0.0,
+		"crowding says nothing about going wide, so there is one motive and not two")
+	assert_true(IntentConsiderations.RoomToGrow.new().score(null, wide, context) >= 0.0,
+		"room to grow argued against going wide")
 
 
 # --- 🔒 Two kinds of expedition ---------------------------------------------

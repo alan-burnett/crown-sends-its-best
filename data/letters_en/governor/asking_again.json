@@ -72,22 +72,6 @@
 		"prompt": "What the town is told",
 		"options": [
 		  {
-			"id": "urge",
-			"label": "tell him to put the town's own stores first",
-			"text": "Turn the town to filling its own stores before anything else{insert:edge}. I would rather you needed nothing from me at all.",
-			"insert": {
-			  "edge": {
-				"annoyed": ", and let us both be spared this correspondence"
-			  }
-			},
-			"effect": {
-			  "urge_intent": {
-				"to": "{governor}",
-				"intent": "secure_survival"
-			  }
-			}
-		  },
-		  {
 			"id": "refuse",
 			"label": "tell him there is nothing to send",
 			"text": "There is nothing to send. I will not pretend otherwise and I will not promise what I cannot deliver, which I hope counts for something.",

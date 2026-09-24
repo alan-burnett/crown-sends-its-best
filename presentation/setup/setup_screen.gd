@@ -25,15 +25,15 @@ extends Control
 signal begun(setup: RunSetup)
 
 const MANDATE_NAMES: Dictionary = {
-	GovernorIntent.ECONOMY: "Profit",
-	GovernorIntent.DEFENCE: "A foothold",
-	GovernorIntent.SETTLEMENT: "Settlement",
+	GovernorIntent.GET_RICH: "Profit",
+	GovernorIntent.MILITARY: "A foothold",
+	GovernorIntent.GO_WIDE: "Settlement",
 }
 
 const MANDATE_NOTES: Dictionary = {
-	GovernorIntent.ECONOMY: "The Crown wants a return, and wants it soon.",
-	GovernorIntent.DEFENCE: "Hold the coast. Whatever else happens, hold it.",
-	GovernorIntent.SETTLEMENT: "Put people in the ground and more towns after them.",
+	GovernorIntent.GET_RICH: "The Crown wants a return, and wants it soon.",
+	GovernorIntent.MILITARY: "Hold the coast. Whatever else happens, hold it.",
+	GovernorIntent.GO_WIDE: "Put people in the ground and more towns after them.",
 }
 
 const SPLIT_NAMES: Dictionary = {

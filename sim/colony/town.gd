@@ -442,6 +442,20 @@ func spend_share(fraction: float) -> float:
 	return spend_gold(_gold * clampf(fraction, 0.0, 1.0))
 
 
+## 🔒 **How much the town's people crave wealth**, nought to one (#428,
+## `governor-agendas.md` §13): how far its gold per weighted thousand falls short
+## of `comfortable`. **Its gold only**; stores are not wealth. A worker counts
+## one and **an expert a thousand** — a man of standing wants a great deal more
+## than a labourer — and livestock nothing. Here only; everywhere else an expert
+## is one person. Answered here because the gold has no getter.
+func wealth_craving(comfortable: float) -> float:
+	if comfortable <= 0.0:
+		return 0.0
+	var weighted := float(workers) + float(expert_total()) * float(Population.THOUSAND)
+	var per_thousand := _gold / maxf(Population.thousands(weighted), Population.thousands(1.0))
+	return clampf(1.0 - per_thousand / comfortable, 0.0, 1.0)
+
+
 ## Whether the town can afford something. A question, not a balance.
 func can_afford(amount: float) -> bool:
 	return _gold >= amount

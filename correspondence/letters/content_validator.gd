@@ -1093,6 +1093,86 @@ func check_commander_experience(content: ContentDatabase) -> void:
 
 ## Cross-check that every trigger names a letter that exists, and report letters
 ## nothing can ever fire.
+# --- 🔒 Agendas (#428, `governor-agendas.md` §2, §11, §13) -----------------
+
+## 🔒 **The six intents, and the table that moves a governor between them.**
+##
+## Every intent has its prose and a stockpile of resources that exist; the table
+## has a row for every consideration it names and no other, a column only for an
+## intent the table may push (education has none — only an urging reaches it),
+## and every cell is a push between -1 and +1. And **every letter that urges an
+## intent names one the PC may urge**: a removed intent, or education, or
+## rebellion, in a reply option is a hole the player can fall through.
+func check_agendas(content: ContentDatabase) -> void:
+	_file = "data/colony/agendas.json"
+	if not content.has_record("colony", "agendas"):
+		_problem("agendas", "there is no agendas record, so no intent has a stockpile or a table")
+		return
+	var record: Dictionary = content.record("colony", "agendas")
+
+	var seen: Dictionary = {}
+	for entry in record.get("intents", []):
+		var id := String(entry.get("id", ""))
+		var path := "intents.%s" % id
+		if not GovernorIntent.is_intent(StringName(id)):
+			_problem(path, "'%s' is not one of the intents" % id)
+			continue
+		seen[id] = true
+		for field in ["name", "pursuing"]:
+			if String(entry.get(field, "")).is_empty():
+				_problem(path, "has no %s" % field)
+		var stocks: Variant = entry.get("stocks", {})
+		if typeof(stocks) != TYPE_DICTIONARY:
+			_problem(path, "stocks must be an object of resource -> per thousand")
+			continue
+		for resource in stocks:
+			if not ResourceCatalogue.has(StringName(resource)):
+				_problem(path + ".stocks", "'%s' is not a resource" % resource)
+			elif float(stocks[resource]) < 0.0:
+				_problem(path + ".stocks", "'%s' is negative" % resource)
+	for intent in GovernorIntent.IN_ORDER:
+		if not seen.has(String(intent)):
+			_problem("intents", "'%s' has no entry" % intent)
+
+	var table: Variant = record.get("considerations", {})
+	if typeof(table) != TYPE_DICTIONARY:
+		_problem("considerations", "expected an object of row -> intent -> push")
+		return
+	for row in IntentConsiderations.TABLE_ROWS:
+		if not (table as Dictionary).has(String(row)):
+			_problem("considerations", "the table has no '%s' row" % row)
+	for row in table:
+		var path := "considerations.%s" % row
+		if not IntentConsiderations.TABLE_ROWS.has(StringName(row)):
+			_problem(path, "'%s' is not a row the governor weighs" % row)
+			continue
+		var cells: Variant = table[row]
+		if typeof(cells) != TYPE_DICTIONARY:
+			_problem(path, "expected an object of intent -> push")
+			continue
+		for intent in cells:
+			if not GovernorIntent.is_intent(StringName(intent)):
+				_problem(path, "'%s' is not an intent" % intent)
+			elif StringName(intent) == GovernorIntent.EDUCATION:
+				_problem(path, "education has no column: only an urging reaches it")
+			var push := float(cells[intent])
+			if push < -1.0 or push > 1.0:
+				_problem(path + "." + String(intent), "%s is outside -1 to +1" % push)
+
+	for id in content.ids("letters"):
+		var letter: Dictionary = content.collection("letters")[id]
+		_file = String(letter.get(JsonLoader.SOURCE_KEY, id))
+		for step in letter.get(LetterSchema.KEY_REPLY, {}).get(LetterSchema.KEY_STEPS, []):
+			for option in step.get(LetterSchema.KEY_OPTIONS, []):
+				var effect: Variant = option.get("effect", {})
+				if typeof(effect) != TYPE_DICTIONARY or not (effect as Dictionary).has("urge_intent"):
+					continue
+				var urged := StringName(effect["urge_intent"].get("intent", ""))
+				if not GovernorIntent.pc_may_urge(urged):
+					_problem("options.%s" % option.get("id", "?"),
+						"urges '%s', which the PC may not ask for" % urged)
+
+
 # --- 🔒 Cutscenes (#299, `cutscenes.md` §5) ------------------------------------
 
 ## A cutscene trigger's own shape: a kind, one registered condition with the

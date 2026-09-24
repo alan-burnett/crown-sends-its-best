@@ -9,7 +9,6 @@
 	  "raise",
 	  "accept",
 	  "settle",
-	  "survival",
       "profit"
 	],
 	"tone": "pleased",
@@ -31,12 +30,11 @@
   {
 	"id": "steady",
 	"name": "the steady hand",
-	"note": "Middling: pays part, holds rates, and keeps the governor pointed at survival.",
+	"note": "Middling: pays part, holds rates, and keeps the governor pointed at growth.",
 	"prefer": [
 	  "part",
 	  "half",
 	  "hold",
-	  "survival",
       "growth"
 	],
 	"tone": "dutiful",
@@ -58,7 +56,6 @@
 	  "part",
 	  "half",
 	  "hold",
-	  "survival",
       "growth"
 	],
 	"tone": "dutiful",
@@ -75,7 +72,6 @@
 	  "part",
 	  "half",
 	  "hold",
-	  "survival",
       "growth"
 	],
 	"tone": "dutiful",
@@ -92,7 +88,6 @@
 	  "part",
 	  "half",
 	  "hold",
-	  "survival",
       "growth"
 	],
 	"tone": "dutiful",
@@ -122,7 +117,6 @@
 	  "part",
 	  "half",
 	  "hold",
-	  "survival",
       "growth"
 	],
 	"answers": "all",
@@ -146,7 +140,6 @@
 	  "part",
 	  "half",
 	  "hold",
-	  "survival",
       "growth"
 	],
 	"answers": "all",
@@ -198,7 +191,6 @@
 	  "raise",
 	  "accept",
 	  "settle",
-	  "survival",
       "profit"
 	],
 	"answers": "all",

@@ -82,7 +82,7 @@
 			"effect": {
 			  "urge_intent": {
 				"to": "{governor}",
-				"intent": "increase_economic_output"
+				"intent": "get_rich"
 			  }
 			}
 		  },

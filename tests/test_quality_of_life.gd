@@ -175,7 +175,7 @@ func _town(stock: Dictionary = {}, gold: float = 400.0, workers: int = 12) -> To
 	# Fixture sizes are in thousands (#426).
 	town.workers = workers * Population.THOUSAND
 	town.governor_id = &"governor_ashmere"
-	town.intent = GovernorIntent.ECONOMY
+	town.intent = GovernorIntent.GET_RICH
 	town.receive_gold(gold)
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
@@ -317,7 +317,7 @@ func test_a_stalled_project_has_less_hope_than_an_advancing_one() -> void:
 	# month in at twenty.
 	var stuck := _town({"wood": 0.0})
 	stuck.objective = &"church"
-	stuck.objective_intent = GovernorIntent.ECONOMY
+	stuck.objective_intent = GovernorIntent.GET_RICH
 	stuck.objective_progress = 3
 	stuck.objective_idle_months = 4
 	for resource in Building.find(&"church").costed_resources():
@@ -326,7 +326,7 @@ func test_a_stalled_project_has_less_hope_than_an_advancing_one() -> void:
 
 	var moving := _town()
 	moving.objective = &"granary"
-	moving.objective_intent = GovernorIntent.ECONOMY
+	moving.objective_intent = GovernorIntent.GET_RICH
 	moving.store(&"wood", 12.0)
 	moving.invest(&"wood", 12.0)
 
@@ -356,9 +356,9 @@ func test_adopting_the_right_intent_raises_hope_before_anything_is_built() -> vo
 	# **The fastest lever the PC has.** Objective fitness responds the month a
 	# governor adopts a new goal, well before anything is finished.
 	var indifferent := _town({"clothing": 40.0})
-	indifferent.intent = GovernorIntent.ECONOMY
+	indifferent.intent = GovernorIntent.GET_RICH
 	var caring := _town({"clothing": 40.0})
-	caring.intent = GovernorIntent.SURVIVAL
+	caring.intent = GovernorIntent.GO_TALL
 
 	var one := _harness(indifferent)
 	var other := _harness(caring)
@@ -367,7 +367,7 @@ func test_adopting_the_right_intent_raises_hope_before_anything_is_built() -> vo
 
 	assert_true(
 		float(_lived(other)["hope"]) > float(_lived(one)["hope"]),
-		"a governor turning to his people's survival changed nothing about how they felt",
+		"a governor turning to his people changed nothing about how they felt",
 	)
 
 

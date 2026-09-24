@@ -74,7 +74,7 @@ func _proposed(equipped: String, context: ColonyContext) -> CrownFounding:
 		&"provost", equipped,
 		&"sugar" if equipped != "meanly" else &"",
 		&"granary",
-		GovernorIntent.ECONOMY if equipped != "meanly" else &"",
+		GovernorIntent.GET_RICH if equipped != "meanly" else &"",
 		context,
 	)
 
@@ -94,7 +94,7 @@ func test_a_handsome_founding_arrives_already_being_something() -> void:
 	assert_true(town != null, "the Crown's ships never put anybody down")
 	assert_eq(town.expert_count(&"sugar"), 1, "the botanist did not get off the boat")
 	assert_true(town.has_building(&"granary"), "the granary in the hold was never unloaded")
-	assert_eq(String(town.intent), String(GovernorIntent.ECONOMY),
+	assert_eq(String(town.intent), String(GovernorIntent.GET_RICH),
 		"a town founded for its sugar arrived with no idea what it was for")
 	# 🔒 **Asked of the arrival, not of the town.** `Town._gold` has no getter
 	# on purpose (SPEC §11.3 — a town's balance is invisible to the player), and

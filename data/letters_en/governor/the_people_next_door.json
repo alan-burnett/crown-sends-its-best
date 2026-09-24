@@ -90,7 +90,7 @@
 			"effect": {
 			  "urge_intent": {
 				"to": "{governor}",
-				"intent": "increase_economic_output"
+				"intent": "get_rich"
 			  }
 			}
 		  },
@@ -101,7 +101,7 @@
 			"effect": {
 			  "urge_intent": {
 				"to": "{governor}",
-				"intent": "strengthen_defences"
+				"intent": "military"
 			  }
 			}
 		  },
@@ -112,7 +112,7 @@
 			"effect": {
 			  "urge_intent": {
 				"to": "{governor}",
-				"intent": "settle_a_new_town"
+				"intent": "go_wide"
 			  }
 			}
 		  },
@@ -123,7 +123,7 @@
 			"effect": {
 			  "urge_intent": {
 				"to": "{governor}",
-				"intent": "drive_them_off"
+				"intent": "military"
 			  }
 			}
 		  }

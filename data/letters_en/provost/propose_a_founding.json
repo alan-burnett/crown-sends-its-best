@@ -56,7 +56,7 @@
                 "equipped": "handsomely",
                 "expert": "sugar",
                 "building": "granary",
-                "intent": "increase_economic_output"
+                "intent": "get_rich"
               },
               "promise_gold": {
                 "to": "provost",
@@ -74,7 +74,7 @@
                 "equipped": "adequately",
                 "expert": "sugar",
                 "building": "",
-                "intent": "increase_economic_output"
+                "intent": "get_rich"
               },
               "promise_gold": {
                 "to": "provost",

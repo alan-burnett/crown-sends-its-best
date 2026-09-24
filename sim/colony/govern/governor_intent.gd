@@ -5,8 +5,8 @@ extends RefCounted
 ##
 ## ## Two levels, and only one of them is personal
 ##
-## **Intent** is the standing goal — *increase economic output*, *grow the
-## population*, *strengthen our defences*. It may hold for twenty months. The
+## **Intent** is the standing goal — *get rich*, *go tall*, *military*. Six of
+## them (`docs/mechanics/governor-agendas.md` §2). It may hold for twenty months. The
 ## governor chooses it, through the deliberation kernel, with his personality as
 ## the weight vector.
 ##
@@ -41,20 +41,28 @@ extends RefCounted
 ## target and a progress and a resolution, executed over months. A governor's
 ## intent is a standing *wish*. The spec uses one word for both; the code cannot.
 
-## Get more out of the land and the trade.
-const ECONOMY: StringName = &"increase_economic_output"
+## **A few deep towns: people, experts, comfort** (`governor-agendas.md` §2).
+const GO_TALL: StringName = &"go_tall"
 
-## More people, better fed and better housed.
-const POPULATION: StringName = &"grow_the_population"
+## **Many towns, quickly.**
+const GO_WIDE: StringName = &"go_wide"
 
-## Walls, forts, powder.
-const DEFENCE: StringName = &"strengthen_defences"
+## **The most gold the town receives from the Crown** — the town's profit after
+## the PC's tax, not the Crown's revenue, so the PC's tax rates steer what a town
+## set on this builds.
+const GET_RICH: StringName = &"get_rich"
 
-## Put a second town in the ground. Founding is M4; gathering for it is not.
-const SETTLEMENT: StringName = &"settle_a_new_town"
+## **Defending and attacking, one tree.** Always available, and it names no
+## enemy: what drives it is safety, and a town that has never seen a native or a
+## duke reads as perfectly safe.
+const MILITARY: StringName = &"military"
 
-## **The crisis intent.** Everything else waits.
-const SURVIVAL: StringName = &"secure_survival"
+## **The library, the college, the printing press.**
+##
+## 🔒 **Not the PC's to ask for.** The Provost urges it, and possibly the
+## scholar (#405's urging per author); a filter makes their urging its only way
+## in (§13), and it has no column in the considerations table.
+const EDUCATION: StringName = &"education"
 
 ## **The one intent directed against the PC** (#128, SPEC §8.5, §12.3).
 ##
@@ -79,56 +87,32 @@ const SURVIVAL: StringName = &"secure_survival"
 ## won back stops preparing for a rebellion he no longer wants.
 const SEDITION: StringName = &"prepare_for_rebellion"
 
-## **The one intent directed against the people already here** (#204, SPEC
-## §11.3, §12.5; `natives.md` §3).
-##
-## A governor who has decided the tribe beside him is the problem, and means to
-## be rid of them. It is the clearest route to the point of no return — not
-## because the intent itself is unforgivable, but because a town set on this is a
-## town whose next act is the one that is.
-##
-## 🔒 **The PC can argue against it and cannot forbid it.** §11.3 locks that a
-## governor's intent is his to judge, so a determined man drives them off at his
-## people's expense while the PC writes letters about it. That is the whole of
-## why this is an intent rather than a policy.
-##
-## 🔒 **Visible to the tribe from the month he adopts it**, before anything is
-## built. There is no hiding a purpose from people who live next door.
-##
-## **And the PC may ask for it.** It is an intent like any other, so it reaches
-## the governor as an Order resolved by his own compliance — which means a man
-## who thinks it monstrous refuses it, a man who is minded that way was going to
-## get there anyway, and the PC never learns which of the two he has until the
-## letter comes back.
-##
-## **Reachable only by a governor who has somebody to drive off**, enforced as a
-## filter rather than a weight (`deliberation.md` §5): a man whose town has never
-## seen a native cannot want this, however warlike he is, and a weight can lose a
-## close vote where a filter cannot.
-const DRIVE_OFF: StringName = &"drive_them_off"
-
 const ALL: Array[StringName] = [
-	ECONOMY, POPULATION, DEFENCE, SETTLEMENT, SURVIVAL, SEDITION, DRIVE_OFF,
+	GO_TALL, GO_WIDE, GET_RICH, MILITARY, EDUCATION, SEDITION,
 ]
 
 ## Sorted for iteration, since the order intents are weighed in must not depend
 ## on the order they happen to be declared in.
 const IN_ORDER: Array[StringName] = [
-	DRIVE_OFF, ECONOMY, POPULATION, DEFENCE, SETTLEMENT, SEDITION, SURVIVAL,
+	EDUCATION, GET_RICH, GO_TALL, GO_WIDE, MILITARY, SEDITION,
 ]
+
+## 🔒 **What the PC may urge: four of the six** (`governor-agendas.md` §2,
+## `reply-vocabulary.md` §8). Education is the Provost's, and rebellion is
+## nobody's to ask for, so neither is a rung on his priority step.
+const PC_URGES: Array[StringName] = [GET_RICH, GO_TALL, GO_WIDE, MILITARY]
+
+## Who may urge education, by author (#405): the Provost, and possibly the
+## scholar.
+const EDUCATION_URGED_BY: Array[StringName] = [&"provost", &"scholar"]
+
+
+static func pc_may_urge(id: StringName) -> bool:
+	return PC_URGES.has(id)
 
 
 static func is_intent(id: StringName) -> bool:
 	return ALL.has(id)
-
-
-## Whether this intent is an emergency.
-##
-## **A crisis may override deep sunk progress** and a routine change may not
-## (mechanics §7). If natives are burning the outskirts, the town must not spend
-## eleven more months on a dock.
-static func is_crisis(id: StringName) -> bool:
-	return id == SURVIVAL
 
 
 ## Whether this intent is aimed at the Crown rather than at the town.
@@ -147,17 +131,9 @@ static func is_sedition(id: StringName) -> bool:
 ## is a consequence of how he has been treated rather than one more thing the PC
 ## decides.
 ##
-## 🔒 **Driving them off is not on this list, and that is the point** (#204,
-## Author). *Natives you say? Why simply exterminate them and farm me my sugar*
-## is exactly what an aristocrat who has never seen one says from three thousand
-## miles away, and the game is worse without his being able to say it. The man
-## who has to do it then interprets, as he interprets every other order — so the
-## PC can ask for a thing he has no conception of and watch a governor decide
-## what it actually means.
-##
-## `test_colony_letters` reads this: an intent outside it with no letter option
-## is a hole, and one inside it with a letter option is a different kind of
-## mistake.
+## `test_colony_letters` reads this with `pc_may_urge`: an intent the PC may
+## urge with no letter option is a hole, and one he may not with a letter option
+## is a different kind of mistake.
 static func is_his_alone(id: StringName) -> bool:
 	return id == SEDITION
 
@@ -169,21 +145,19 @@ static func is_his_alone(id: StringName) -> bool:
 ## adding an intent is adding a row, and adding an axis is teaching the selector
 ## to measure one more thing. Neither is a branch.
 const PROFILES: Dictionary = {
-	ECONOMY:    {"food": 0.2, "trade": 1.0, "defence": 0.0, "comfort": 0.2, "capacity": 0.3, "expansion": 0.0},
-	POPULATION: {"food": 1.0, "trade": 0.2, "defence": 0.1, "comfort": 0.9, "capacity": 0.5, "expansion": 0.0},
-	DEFENCE:    {"food": 0.3, "trade": 0.1, "defence": 1.0, "comfort": 0.1, "capacity": 0.4, "expansion": 0.0},
-	SETTLEMENT: {"food": 0.6, "trade": 0.3, "defence": 0.1, "comfort": 0.0, "capacity": 0.3, "expansion": 1.0},
-	SURVIVAL:   {"food": 1.0, "trade": 0.0, "defence": 0.4, "comfort": 0.3, "capacity": 0.8, "expansion": -1.0},
+	# **Until #429 walks menus instead**, the selector still scores on axes, so
+	# each of the six keeps a row: the old intent each one replaced, and a new
+	# row for education, which wants the learning the capacity axis counts.
+	GET_RICH:  {"food": 0.2, "trade": 1.0, "defence": 0.0, "comfort": 0.2, "capacity": 0.3, "expansion": 0.0},
+	GO_TALL:   {"food": 1.0, "trade": 0.2, "defence": 0.1, "comfort": 0.9, "capacity": 0.5, "expansion": 0.0},
+	MILITARY:  {"food": 0.3, "trade": 0.1, "defence": 1.0, "comfort": 0.1, "capacity": 0.4, "expansion": 0.0},
+	GO_WIDE:   {"food": 0.6, "trade": 0.3, "defence": 0.1, "comfort": 0.0, "capacity": 0.3, "expansion": 1.0},
+	EDUCATION: {"food": 0.2, "trade": 0.1, "defence": 0.0, "comfort": 0.4, "capacity": 1.0, "expansion": 0.0},
 	# **A town being made ready to stand alone.** Walls and powder, grain it will
 	# not have to buy, and nothing whatever for the Crown's trade — the one
 	# profile that wants the colony's commerce to *fall*, because every shilling
 	# of it is a thread back to London.
-	SEDITION:   {"food": 0.9, "trade": -0.8, "defence": 1.0, "comfort": 0.2, "capacity": 0.6, "expansion": -0.5},
-	# **Guns and land.** A governor set on driving them off wants his militia
-	# armed and his border pushed, and has no patience for anything that is not
-	# one of those two — least of all the trade with them that comfort would
-	# otherwise come from.
-	DRIVE_OFF:  {"food": 0.5, "trade": -0.2, "defence": 1.0, "comfort": 0.0, "capacity": 0.5, "expansion": 0.8},
+	SEDITION:  {"food": 0.9, "trade": -0.8, "defence": 1.0, "comfort": 0.2, "capacity": 0.6, "expansion": -0.5},
 }
 
 ## The axes, sorted. Iterating the profile dictionary directly would make the
@@ -195,7 +169,7 @@ const AXES: Array[String] = ["capacity", "comfort", "defence", "expansion", "foo
 ## How far apart two intents are, from nought to one (#213).
 ##
 ## **Measured off the profile table and nothing else.** The table already *is*
-## what an intent means, so "settling a new town and securing survival want
+## what an intent means, so "going wide and preparing for rebellion want
 ## opposite things" falls out of the numbers rather than being written down
 ## somewhere a later edit could contradict. Adding an intent adds a row and this
 ## keeps working.

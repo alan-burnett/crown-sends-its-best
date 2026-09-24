@@ -70,7 +70,7 @@ func _town(at: Vector2i = Vector2i(5, 5)) -> Town:
 	var town := Town.new(&"ashmere", "Ashmere", at)
 	town.workers = 40_000
 	town.governor_id = &"gov_ashmere"
-	town.intent = GovernorIntent.ECONOMY
+	town.intent = GovernorIntent.GET_RICH
 	town.store(&"guns", 200.0)
 	town.store(&"tools", 200.0)
 	town.store(&"food", 40.0)
@@ -349,7 +349,7 @@ func test_an_agreement_is_dropped_when_neither_side_has_anything_spare() -> void
 
 func test_a_governor_may_arm_the_people_beside_him() -> void:
 	var town := _town()
-	town.intent = GovernorIntent.ECONOMY
+	town.intent = GovernorIntent.GET_RICH
 	town.store(&"guns", 4_000.0)
 	var colony := _colony(town)
 
@@ -371,26 +371,13 @@ func test_and_a_governor_told_to_see_to_his_defences_will_not() -> void:
 	deal.they_give = &"food"
 	deal.we_give = &"guns"
 
-	town.intent = GovernorIntent.ECONOMY
+	town.intent = GovernorIntent.GET_RICH
 	assert_true(NativeTrade.would_accept(deal, town, _desired(town, colony)),
 		"the fixture's bargain was refused for some other reason")
 
-	town.intent = GovernorIntent.DEFENCE
+	town.intent = GovernorIntent.MILITARY
 	assert_false(NativeTrade.would_accept(deal, town, _desired(town, colony)),
 		"a governor seeing to his defences handed his guns to the neighbours")
-
-
-func test_a_governor_set_on_driving_them_off_does_not_deal_with_them_at_all() -> void:
-	var town := _town()
-	town.intent = GovernorIntent.DRIVE_OFF
-	town.store(&"tools", 4_000.0)
-	var colony := _colony(town)
-
-	var deal := TradeAgreement.new()
-	deal.they_give = &"food"
-	deal.we_give = &"tools"
-	assert_false(NativeTrade.would_accept(deal, town, _desired(town, colony)),
-		"a man who meant to be rid of them sat down to barter with them")
 
 
 func test_a_governor_refuses_a_bargain_that_does_not_pay() -> void:

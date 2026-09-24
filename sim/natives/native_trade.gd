@@ -21,8 +21,8 @@ extends RefCounted
 ## month, in a report, from a man who thought it a good bargain.
 ##
 ## Keying acceptance to the **intent** is what makes the PC's one instrument
-## real: a governor urged toward defence will not hand guns to anybody, and a
-## governor left to increase economic output will trade whatever pays. The PC
+## real: a governor urged toward military will not hand guns to anybody, and a
+## governor left to get rich will trade whatever pays. The PC
 ## cannot forbid the bargain; he can be the reason the man was in a different
 ## frame of mind a month earlier.
 
@@ -34,11 +34,8 @@ const EVENT_REFUSED: StringName = &"native_trade_refused"
 ## 🔒 **The PC's instrument, a month early.** Not a veto and not a policy: the
 ## man's own purpose, which the PC may have argued him into or out of.
 const WILL_NOT_PART_WITH: Dictionary = {
-	String(GovernorIntent.DEFENCE): ["guns", "horses", "iron"],
+	String(GovernorIntent.MILITARY): ["guns", "horses", "iron"],
 	String(GovernorIntent.SEDITION): ["guns", "horses", "iron", "tools"],
-	# A man set on driving them off does not trade with them at all, and the
-	# empty list would be the wrong shape for that — see `would_accept`.
-	String(GovernorIntent.SURVIVAL): ["food"],
 }
 
 
@@ -97,10 +94,6 @@ static func would_accept(
 	desired: DesiredStock,
 ) -> bool:
 	if deal == null or town == null or desired == null:
-		return false
-
-	# 🔒 A man set on driving them off does not sit down with them.
-	if town.intent == GovernorIntent.DRIVE_OFF:
 		return false
 
 	var barred: Array = WILL_NOT_PART_WITH.get(String(town.intent), [])

@@ -1,0 +1,126 @@
+{
+  "id": "agendas",
+  "note": "The six intents, what each keeps in store, and what moves a governor toward each (governor-agendas.md sections 2, 11, 13). Stocks are per thousand people; the considerations table is the Author's: a row measures how much of a problem one thing is in the town, nought to one, and a cell is how strongly that problem at its worst pushes toward an intent. Education has no cells, since only an urging reaches it. #429 adds each intent's menu.",
+  "intents": [
+    {
+      "id": "go_tall",
+      "name": "the growth of the town",
+      "pursuing": "seeing that the town grows, and its people amount to something",
+      "stocks": {
+        "wood": 1.5,
+        "stone": 1.0,
+        "clothing": 0.4
+      }
+    },
+    {
+      "id": "go_wide",
+      "name": "new settlements",
+      "pursuing": "gathering what a new settlement would need",
+      "stocks": {
+        "food": 2.0,
+        "wood": 1.0,
+        "tools": 0.6
+      }
+    },
+    {
+      "id": "get_rich",
+      "name": "the town's prosperity",
+      "pursuing": "seeing that the town prospers",
+      "stocks": {
+        "wood": 1.2,
+        "stone": 0.8,
+        "tools": 0.4
+      }
+    },
+    {
+      "id": "military",
+      "name": "our defences",
+      "pursuing": "seeing that we can hold what we have",
+      "stocks": {
+        "guns": 1.0,
+        "horses": 0.5,
+        "food": 1.8,
+        "stone": 1.5
+      }
+    },
+    {
+      "id": "education",
+      "name": "learning",
+      "pursuing": "seeing that the town learns",
+      "stocks": {
+        "wood": 1.5,
+        "stone": 1.0
+      }
+    },
+    {
+      "id": "prepare_for_rebellion",
+      "name": "what is coming",
+      "pursuing": "seeing that this town can stand on its own feet",
+      "stocks": {
+        "guns": 0.9,
+        "horses": 0.5,
+        "iron": 0.6,
+        "food": 2.5,
+        "stone": 1.2
+      }
+    }
+  ],
+  "considerations": {
+    "baseline": {
+      "go_tall": 0.4,
+      "go_wide": 0.0,
+      "get_rich": 0.3,
+      "military": 0.0,
+      "prepare_for_rebellion": 0.0
+    },
+    "food_security": {
+      "go_tall": -0.5,
+      "go_wide": 0.5,
+      "get_rich": -1.0,
+      "military": 0.2,
+      "prepare_for_rebellion": 1.0
+    },
+    "quality_of_life": {
+      "go_tall": 0.5,
+      "go_wide": 0.3,
+      "get_rich": -0.7,
+      "military": 0.0,
+      "prepare_for_rebellion": 1.0
+    },
+    "wealth": {
+      "go_tall": 0.0,
+      "go_wide": 0.0,
+      "get_rich": 1.0,
+      "military": 0.0,
+      "prepare_for_rebellion": 0.0
+    },
+    "safety": {
+      "go_tall": -0.2,
+      "go_wide": -0.3,
+      "get_rich": -1.0,
+      "military": 1.0,
+      "prepare_for_rebellion": 0.5
+    },
+    "room_to_grow": {
+      "go_tall": -0.2,
+      "go_wide": 1.0,
+      "get_rich": -0.4,
+      "military": -0.5,
+      "prepare_for_rebellion": 0.0
+    },
+    "crowding": {
+      "go_tall": -0.8,
+      "go_wide": 0.8,
+      "get_rich": 0.4,
+      "military": 0.6,
+      "prepare_for_rebellion": 1.0
+    },
+    "loyalty": {
+      "go_tall": -0.5,
+      "go_wide": 0.0,
+      "get_rich": -0.5,
+      "military": 0.0,
+      "prepare_for_rebellion": 1.0
+    }
+  }
+}

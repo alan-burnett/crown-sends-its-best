@@ -81,7 +81,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "increase_economic_output"
+                "intent": "get_rich"
               }
             }
           },
@@ -92,7 +92,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "grow_the_population"
+                "intent": "go_tall"
               }
             }
           },
@@ -103,7 +103,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "strengthen_defences"
+                "intent": "military"
               }
             }
           },
@@ -114,18 +114,7 @@
             "effect": {
               "urge_intent": {
                 "to": "{governor}",
-                "intent": "settle_a_new_town"
-              }
-            }
-          },
-          {
-            "id": "survival",
-            "label": "your people's survival must come first",
-            "text": "Your people's survival must come first. Everything else can wait on it, and I will hear no argument.",
-            "effect": {
-              "urge_intent": {
-                "to": "{governor}",
-                "intent": "secure_survival"
+                "intent": "go_wide"
               }
             }
           }

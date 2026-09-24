@@ -42,8 +42,8 @@ func _after_a_change(regard: float) -> RunState:
 	run.log.emit(GovernorDriver.EVENT_INTENT_SET, town.governor_id, run.world.month, {
 		"town": String(town.id),
 		"governor": String(town.governor_id),
-		"intent": String(GovernorIntent.DEFENCE),
-		"was": String(GovernorIntent.ECONOMY),
+		"intent": String(GovernorIntent.MILITARY),
+		"was": String(GovernorIntent.GET_RICH),
 		"crisis": false,
 	}, WorldPhase.INTENT)
 	return run
@@ -185,8 +185,8 @@ func test_he_reports_the_gap_between_what_was_asked_and_what_was_done() -> void:
 	var town := run.colony.in_order()[0]
 
 	# The PC urged one thing; the man settled on another afterwards.
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
-	town.intent = GovernorIntent.DEFENCE
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 2))
+	town.intent = GovernorIntent.MILITARY
 	town.intent_since = 4
 	run.world.month = 5
 
@@ -195,8 +195,8 @@ func test_he_reports_the_gap_between_what_was_asked_and_what_was_done() -> void:
 		"the Diplomat missed a governor doing the opposite of what he was asked")
 
 	var found := ColonyConditions.diverged({"within": 6}, context)
-	assert_eq(String(found["asked"]), String(GovernorIntent.ECONOMY))
-	assert_eq(String(found["did"]), String(GovernorIntent.DEFENCE))
+	assert_eq(String(found["asked"]), String(GovernorIntent.GET_RICH))
+	assert_eq(String(found["did"]), String(GovernorIntent.MILITARY))
 
 
 func test_he_names_the_thing_as_a_letter_would_name_it() -> void:
@@ -204,8 +204,8 @@ func test_he_names_the_thing_as_a_letter_would_name_it() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
-	town.intent = GovernorIntent.DEFENCE
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 2))
+	town.intent = GovernorIntent.MILITARY
 	town.intent_since = 4
 	run.world.month = 5
 
@@ -220,8 +220,8 @@ func test_a_man_who_has_not_answered_yet_has_not_refused() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 6))
-	town.intent = GovernorIntent.DEFENCE
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 6))
+	town.intent = GovernorIntent.MILITARY
 	# He settled on this *before* the PC wrote, so he has not yet answered.
 	town.intent_since = 3
 	run.world.month = 7
@@ -238,8 +238,8 @@ func test_an_old_urging_is_not_reported_for_ever() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
-	town.intent = GovernorIntent.DEFENCE
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 2))
+	town.intent = GovernorIntent.MILITARY
 	town.intent_since = 4
 
 	run.world.month = 2 + 6
@@ -257,8 +257,8 @@ func test_nothing_at_all_diverges_in_an_obedient_colony() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
-	town.intent = GovernorIntent.ECONOMY
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 2))
+	town.intent = GovernorIntent.GET_RICH
 	town.intent_since = 4
 	run.world.month = 5
 
@@ -272,8 +272,8 @@ func _after_a_silence(run: RunState) -> Town:
 	var town: Town = run.colony.in_order()[0]
 	run.contact(town.governor_id).relationship = Relationship.new(
 		town.governor_id, Relationship.MEDIUM_AT - 10.0)
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
-	town.intent = GovernorIntent.DEFENCE
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 2))
+	town.intent = GovernorIntent.MILITARY
 	town.intent_since = 4
 	run.world.month = 5
 	return town
@@ -321,7 +321,7 @@ func test_without_a_diplomat_the_silence_reaches_nobody() -> void:
 	run.log.emit(GovernorDriver.EVENT_INTENT_SET, town.governor_id, 4, {
 		"town": String(town.id),
 		"governor": String(town.governor_id),
-		"intent": String(GovernorIntent.DEFENCE),
+		"intent": String(GovernorIntent.MILITARY),
 	}, WorldPhase.INTENT)
 	run.contacts.erase("diplomat")
 

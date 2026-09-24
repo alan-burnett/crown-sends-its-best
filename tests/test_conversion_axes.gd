@@ -96,9 +96,9 @@ func test_a_governor_after_profit_prefers_the_chain_to_the_mine_alone() -> void:
 	# §5 claims the mineworks → foundry → toolworks chain pays for itself in
 	# construction. A governor can only act on that if the chain outscores the
 	# first link.
-	var mine := _worth_to(&"mineworks", GovernorIntent.ECONOMY)
+	var mine := _worth_to(&"mineworks", GovernorIntent.GET_RICH)
 	for id in [&"foundry", &"toolworks"]:
-		assert_true(_worth_to(id, GovernorIntent.ECONOMY) > mine,
+		assert_true(_worth_to(id, GovernorIntent.GET_RICH) > mine,
 			"%s is worth less to a governor after profit than the mine feeding it"
 				% id)
 
@@ -142,8 +142,8 @@ func test_one_building_can_score_on_more_than_one_axis() -> void:
 	var distillery := ObjectiveSelector.building_axes(&"distillery")
 	assert_true(float(distillery.get("trade", 0.0)) > 0.0, "rum is not sellable")
 	assert_true(float(distillery.get("comfort", 0.0)) > 0.0, "rum is no comfort")
-	assert_true(_worth_to(&"distillery", GovernorIntent.ECONOMY)
-			!= _worth_to(&"distillery", GovernorIntent.SURVIVAL),
+	assert_true(_worth_to(&"distillery", GovernorIntent.GET_RICH)
+			!= _worth_to(&"distillery", GovernorIntent.GO_TALL),
 		"two governors who want different things want a distillery equally")
 
 

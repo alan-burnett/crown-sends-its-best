@@ -84,7 +84,7 @@ static func initial_state() -> WorldState:
 		SUPPLY: 62.0,
 		FOOD: 1.1,
 		CAMPAIGN_MONTHS_LEFT: 0,
-		MANDATE: GovernorIntent.ECONOMY,
+		MANDATE: GovernorIntent.GET_RICH,
 		QUALITY_OF_LIFE: 0.5,
 		EDUCATION: 0.0,
 		NATIVE_THREAT: 0.0,

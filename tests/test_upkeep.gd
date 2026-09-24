@@ -138,7 +138,7 @@ func test_it_keeps_what_the_governor_values_and_lets_the_rest_go() -> void:
 		"the fixture's two buildings cost different amounts, so the purse decides and not the man")
 
 	var soldier := _town(wall, ["church", "palisade"])
-	soldier.intent = GovernorIntent.DEFENCE
+	soldier.intent = GovernorIntent.MILITARY
 	var harness := _harness(soldier)
 	_settle(harness)
 

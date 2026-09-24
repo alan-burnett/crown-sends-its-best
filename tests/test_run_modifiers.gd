@@ -774,10 +774,10 @@ func _urging_at(perk: StringName, months_later: int, raw: bool = false) -> float
 		DecisionKind.GOVERNOR_INTENT, run.world, EventLog.new())
 	context.month = months_later
 	context.data = {
-		"urgings": [Urging.from_pc(GovernorIntent.ECONOMY, 0, Tone.DUTIFUL)],
+		"urgings": [Urging.from_pc(GovernorIntent.GET_RICH, 0, Tone.DUTIFUL)],
 	}
 	var urging := IntentConsiderations.CrownUrging.new()
-	var candidate := Candidate.new(GovernorIntent.ECONOMY, {})
+	var candidate := Candidate.new(GovernorIntent.GET_RICH, {})
 	# `scored` is the kernel's own `[-1, +1]` guard, so asking it what the
 	# consideration is worth would hide a consideration that shouts. `raw` asks the
 	# consideration directly, which is the only way to see that.
@@ -806,13 +806,13 @@ func test_it_never_shouts_louder_than_the_contract_allows() -> void:
 		"a fresh urging under the perk scored outside the range every consideration shares")
 
 
-func test_it_is_one_consideration_among_nine_and_not_a_command() -> void:
+func test_it_is_one_consideration_among_the_rest_and_not_a_command() -> void:
 	# The other half of the same lock: a perk turns a knob, it does not add or
 	# remove something a governor weighs.
 	_applied(func(r: RunState) -> void: r.setup.perk = &"hard_to_say_no_to")
 	assert_true(IntentConsiderations.ALL.has("crown_urging"),
 		"the urging is no longer a consideration at all")
-	assert_eq(IntentConsiderations.ALL.size(), 9,
+	assert_eq(IntentConsiderations.ALL.size(), 10,
 		"the perk changed how many things a governor weighs")
 
 # --- 🔒 It could be worse: the curve flattens both ways ---------------------

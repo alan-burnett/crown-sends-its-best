@@ -142,7 +142,7 @@ func test_a_seditious_governor_drives_his_towns_sentiment_up() -> void:
 
 func test_a_loyal_town_is_not_charged_for_an_intent_it_does_not_hold() -> void:
 	var quiet := _town()
-	quiet.intent = GovernorIntent.ECONOMY
+	quiet.intent = GovernorIntent.GET_RICH
 	var contacts := {"gov_ashmere": _governor(80.0)}
 	assert_true(_sentiment(quiet, contacts) < RebelSentiment.SEDITIOUS_GOVERNOR,
 		"a town with a contented governor carried a seditious one's weight")
@@ -172,6 +172,6 @@ func test_he_writes_about_the_walls_without_saying_why() -> void:
 	assert_true(ColonyConditions.town_is_preparing_to_leave({}, context),
 		"a town being readied to leave the Crown had nothing to report about it")
 
-	town.intent = GovernorIntent.ECONOMY
+	town.intent = GovernorIntent.GET_RICH
 	assert_false(ColonyConditions.town_is_preparing_to_leave({}, context),
 		"a town minding its business was reported as preparing to leave")

@@ -73,18 +73,7 @@
 			"effect": {
 			  "urge_intent": {
 				"to": "{governor}",
-				"intent": "increase_economic_output"
-			  }
-			}
-		  },
-		  {
-			"id": "survive",
-			"label": "your people's survival must come first",
-			"text": "Your people's survival must come first. If the fields are short, feed them from whatever else there is and let the ledgers look how they look.",
-			"effect": {
-			  "urge_intent": {
-				"to": "{governor}",
-				"intent": "secure_survival"
+				"intent": "get_rich"
 			  }
 			}
 		  },
@@ -95,7 +84,7 @@
 			"effect": {
 			  "urge_intent": {
 				"to": "{governor}",
-				"intent": "strengthen_defences"
+				"intent": "military"
 			  }
 			}
 		  }

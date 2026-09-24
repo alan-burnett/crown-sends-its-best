@@ -35,13 +35,13 @@ func _score(urgings: Array, toward: StringName, month: int) -> float:
 
 func test_a_new_urging_replaces_its_authors_last_and_nobody_elses() -> void:
 	var town := _town()
-	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 1, Tone.DUTIFUL))
-	town.urge(Urging.make(PROVOST, GovernorIntent.POPULATION, 2))
-	town.urge(Urging.from_pc(GovernorIntent.DEFENCE, 3, Tone.DESPERATE))
+	town.urge(Urging.from_pc(GovernorIntent.GET_RICH, 1, Tone.DUTIFUL))
+	town.urge(Urging.make(PROVOST, GovernorIntent.GO_TALL, 2))
+	town.urge(Urging.from_pc(GovernorIntent.MILITARY, 3, Tone.DESPERATE))
 
 	assert_eq(town.urgings.size(), 2, "an author's second urging stood beside his first")
-	assert_eq(town.urging_by().target, GovernorIntent.DEFENCE, "the PC's new letter did not replace his last")
-	assert_eq(town.urging_by(PROVOST).target, GovernorIntent.POPULATION,
+	assert_eq(town.urging_by().target, GovernorIntent.MILITARY, "the PC's new letter did not replace his last")
+	assert_eq(town.urging_by(PROVOST).target, GovernorIntent.GO_TALL,
 		"the PC's letter erased the Provost's")
 	assert_eq(town.urging_by(PROVOST).month, 2)
 
@@ -59,19 +59,19 @@ func test_a_company_holds_them_the_same_way() -> void:
 func test_the_order_they_arrived_in_does_not_matter() -> void:
 	# Deterministic by construction: read in author order, not arrival order.
 	var one := _town()
-	one.urge(Urging.make(PROVOST, GovernorIntent.POPULATION, 2))
-	one.urge(Urging.from_pc(GovernorIntent.ECONOMY, 1))
+	one.urge(Urging.make(PROVOST, GovernorIntent.GO_TALL, 2))
+	one.urge(Urging.from_pc(GovernorIntent.GET_RICH, 1))
 	var two := _town()
-	two.urge(Urging.from_pc(GovernorIntent.ECONOMY, 1))
-	two.urge(Urging.make(PROVOST, GovernorIntent.POPULATION, 2))
+	two.urge(Urging.from_pc(GovernorIntent.GET_RICH, 1))
+	two.urge(Urging.make(PROVOST, GovernorIntent.GO_TALL, 2))
 	assert_eq(Urging.list_to_dicts(one.urgings), Urging.list_to_dicts(two.urgings))
 
 
 # --- 🔒 Each decays on its own, and several count ------------------------------------
 
 func test_each_urging_decays_on_its_own() -> void:
-	var early := Urging.from_pc(GovernorIntent.ECONOMY, 0)
-	var late := Urging.make(PROVOST, GovernorIntent.ECONOMY, 10)
+	var early := Urging.from_pc(GovernorIntent.GET_RICH, 0)
+	var late := Urging.make(PROVOST, GovernorIntent.GET_RICH, 10)
 	assert_true(late.pull(12, IntentConsiderations.URGING_HALF_LIFE)
 		> early.pull(12, IntentConsiderations.URGING_HALF_LIFE),
 		"an urging from ten months later had faded as far as the first")
@@ -79,12 +79,12 @@ func test_each_urging_decays_on_its_own() -> void:
 
 func test_two_urgings_toward_one_intent_both_count() -> void:
 	# Old enough that neither is at the ceiling, so the sum is visible.
-	var alone := _score([Urging.from_pc(GovernorIntent.ECONOMY, 0)], GovernorIntent.ECONOMY, 30)
+	var alone := _score([Urging.from_pc(GovernorIntent.GET_RICH, 0)], GovernorIntent.GET_RICH, 30)
 	assert_true(alone > 0.0 and alone < 0.5, "the fixture is at the ceiling: %f" % alone)
 	var together := _score([
-		Urging.from_pc(GovernorIntent.ECONOMY, 0),
-		Urging.make(PROVOST, GovernorIntent.ECONOMY, 0),
-	], GovernorIntent.ECONOMY, 30)
+		Urging.from_pc(GovernorIntent.GET_RICH, 0),
+		Urging.make(PROVOST, GovernorIntent.GET_RICH, 0),
+	], GovernorIntent.GET_RICH, 30)
 	assert_true(together > alone, "a second author's urging toward the same intent counted for nothing")
 
 
@@ -92,14 +92,14 @@ func test_another_authors_urging_pulls_without_erasing_the_pcs() -> void:
 	# The acceptance line: a non-PC urging moves a governor, and the PC's still
 	# pulls toward what he asked.
 	var urgings := [
-		Urging.from_pc(GovernorIntent.ECONOMY, 5),
-		Urging.make(PROVOST, GovernorIntent.POPULATION, 5),
+		Urging.from_pc(GovernorIntent.GET_RICH, 5),
+		Urging.make(PROVOST, GovernorIntent.GO_TALL, 5),
 	]
-	assert_true(_score(urgings, GovernorIntent.POPULATION, 6) > 0.0,
+	assert_true(_score(urgings, GovernorIntent.GO_TALL, 6) > 0.0,
 		"the Provost's urging pulled on nothing")
-	assert_true(_score(urgings, GovernorIntent.ECONOMY, 6) > 0.0,
+	assert_true(_score(urgings, GovernorIntent.GET_RICH, 6) > 0.0,
 		"the Provost's urging erased the PC's")
-	assert_almost_eq(_score(urgings, GovernorIntent.DEFENCE, 6), 0.0, 0.000001,
+	assert_almost_eq(_score(urgings, GovernorIntent.MILITARY, 6), 0.0, 0.000001,
 		"an intent nobody urged was pulled toward")
 
 
@@ -114,7 +114,7 @@ func test_the_pcs_urging_scores_exactly_as_the_single_slot_did() -> void:
 				IntentConsiderations.URGING_HALF_LIFE * IntentConsiderations.intensity_of(tone))
 			var expected := minf(1.0, then * IntentConsiderations.urging_weight())
 			assert_almost_eq(
-				_score([Urging.from_pc(GovernorIntent.ECONOMY, 0, tone)], GovernorIntent.ECONOMY, age),
+				_score([Urging.from_pc(GovernorIntent.GET_RICH, 0, tone)], GovernorIntent.GET_RICH, age),
 				expected, 0.000001, "tone %s at %d months scored differently" % [tone, age])
 
 
@@ -122,8 +122,8 @@ func test_the_pcs_urging_scores_exactly_as_the_single_slot_did() -> void:
 
 func test_the_list_survives_a_save() -> void:
 	var town := _town()
-	town.urge(Urging.from_pc(GovernorIntent.DEFENCE, 4, Tone.DESPERATE))
-	town.urge(Urging.make(PROVOST, GovernorIntent.POPULATION, 7, 1.5))
+	town.urge(Urging.from_pc(GovernorIntent.MILITARY, 4, Tone.DESPERATE))
+	town.urge(Urging.make(PROVOST, GovernorIntent.GO_TALL, 7, 1.5))
 	var restored := Town.from_dict(town.to_dict())
 	assert_eq(Urging.list_to_dicts(restored.urgings), Urging.list_to_dicts(town.urgings))
 
@@ -135,7 +135,7 @@ func test_an_old_single_slot_save_is_not_migrated() -> void:
 	assert_true(RunState.SAVE_VERSION >= 3)
 	var old := _town().to_dict()
 	old.erase("urgings")
-	old["urged_intent"] = String(GovernorIntent.DEFENCE)
+	old["urged_intent"] = String(GovernorIntent.MILITARY)
 	old["urged_month"] = 4
 	assert_empty(Town.from_dict(old).urgings)
 

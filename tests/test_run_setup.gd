@@ -155,7 +155,7 @@ func test_the_world_and_the_town_agree_about_it() -> void:
 	# **They must never disagree**, or a governor would be pulled towards a goal
 	# he was never given.
 	var setup := _setup()
-	setup.mandate = GovernorIntent.DEFENCE
+	setup.mandate = GovernorIntent.MILITARY
 	var run := _run(setup)
 	assert_eq(String(run.world.get_value(WorldValues.MANDATE, "")),
 		String(_first(run).intent),
@@ -238,7 +238,7 @@ func test_a_setup_from_an_older_build_still_lands_somewhere_real() -> void:
 func test_the_setup_survives_a_round_trip() -> void:
 	var setup := _setup()
 	setup.pc_name = "Marlborough-Vane"
-	setup.mandate = GovernorIntent.SETTLEMENT
+	setup.mandate = GovernorIntent.GO_WIDE
 	setup.split = RunSetup.SPLIT_GOLD
 	setup.request = SiteRequest.DEFENSIVE_POSITION
 

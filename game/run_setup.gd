@@ -44,9 +44,9 @@ const PERK_FIRST_DAY: StringName = &"its_my_first_day"
 ## what does the displacing, so this is a strong opening pull rather than a
 ## standing order.
 const MANDATES: Array[StringName] = [
-	GovernorIntent.ECONOMY,
-	GovernorIntent.DEFENCE,
-	GovernorIntent.SETTLEMENT,
+	GovernorIntent.GET_RICH,
+	GovernorIntent.MILITARY,
+	GovernorIntent.GO_WIDE,
 ]
 
 
@@ -98,7 +98,7 @@ var colour: Color = Color(0.42, 0.29, 0.20)
 var seed_value: int = 0
 var perk: StringName = PERK_FIRST_DAY
 var quirks: PackedStringArray = PackedStringArray()
-var mandate: StringName = GovernorIntent.ECONOMY
+var mandate: StringName = GovernorIntent.GET_RICH
 var split: StringName = SPLIT_STORES
 
 ## 🔒 **What the colony is for, not where it goes** (#273, `map.md` §4).
@@ -239,7 +239,7 @@ static func from_dict(data: Dictionary) -> RunSetup:
 	setup.seed_value = int(data.get("seed_value", 0))
 	setup.perk = StringName(data.get("perk", PERK_FIRST_DAY))
 	setup.quirks = PackedStringArray(data.get("quirks", []))
-	setup.mandate = StringName(data.get("mandate", GovernorIntent.ECONOMY))
+	setup.mandate = StringName(data.get("mandate", GovernorIntent.GET_RICH))
 	setup.split = StringName(data.get("split", SPLIT_STORES))
 	setup.request = StringName(data.get("request", SiteRequest.QUICK_GROWTH))
 	setup.proximity = StringName(data.get("proximity", Tribes.APART))

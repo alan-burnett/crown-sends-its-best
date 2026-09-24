@@ -41,9 +41,6 @@ const SOFT_STALL_MONTHS: int = 3
 ## How far along a project has to be to survive an ordinary change of intent.
 const ROUTINE_SUNK: float = 0.25
 
-## How far along it has to be to survive a crisis. Nearly finished, or it waits.
-const CRISIS_SUNK: float = 0.85
-
 # Why an objective was set aside. Named, because the governor's next letter says
 # which of these happened and a letter may not misrepresent it (SPEC §9.1).
 const NONE: StringName = &"none"
@@ -78,8 +75,8 @@ static func _intent_moved(town: Town) -> bool:
 
 ## Whether the sunk progress earns the project the right to be finished anyway.
 static func _worth_finishing(town: Town) -> bool:
-	var threshold := CRISIS_SUNK if GovernorIntent.is_crisis(town.intent) else ROUTINE_SUNK
-	return Objective.progress_fraction(town) >= threshold
+	# No intent is a crisis since survival went (#428); #429 retires the rule.
+	return Objective.progress_fraction(town) >= ROUTINE_SUNK
 
 
 ## **Hard stall** — a required input cannot be obtained at all.

@@ -107,5 +107,4 @@ func _decide(
 		"governor": String(town.governor_id),
 		"intent": String(chosen),
 		"was": String(held),
-		"crisis": GovernorIntent.is_crisis(chosen),
 	}, WorldPhase.INTENT)
