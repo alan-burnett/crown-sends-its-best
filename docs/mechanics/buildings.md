@@ -132,13 +132,20 @@ births count as food too, because a well-fed town is a growing one.
 
 | Building | Cost | Upkeep | Effect | Needs |
 | :--- | :--- | :--- | :--- | :--- |
-| **scouts** | 20 wood, 2 tools | low | Expeditions from this town are safer and start better supplied. **Town influence** | — |
+| **scouts** | 20 wood, 2 tools | low | Expeditions from this town leave with **double their stores, and 10 tools more** (`founding-towns.md` §2). **Town influence** | — |
 | **worker cabins** | 40 wood, 10 stone, 2 tools | medium | Improvements build faster and **cost no upkeep**. **Town influence** | scouts |
-| **fairgrounds** | 40 wood, 30 stone | medium | Immigration, local amusement, **town influence**, and quality of life **to every town that has none** | town pasture, stockade |
+| **fairgrounds** | 40 wood, 30 stone | medium | Immigration, local amusement, **town influence**, and **amusement to every town that has none** | town pasture, stockade |
 
 **Town influence is the expansion branch's signature** — every building on it
 grants more land to work — and guard towers quietly share it, so a governor
 building for defence gets an economy as a side effect.
+
+**A building's influence lifts the cap.** Author's ruling (#410). Population
+gives a town one ring per 12,000 people and stops at four
+(`Territory.MAX_INFLUENCE`); the rings a building grants are added on top. So a
+town past 36,000 can still build its way out of being crowded, rather than only
+by leaving. How many rings each grants, and how much further guard towers let a
+town see, are tuning (§10).
 
 ### Comfort
 
@@ -385,20 +392,42 @@ Neither costs upkeep, because the building is not the cost — **the habit is.**
 tea house makes a town need the very thing a duty on tea can take away, and an
 ale house sets its pleasure in direct competition with its supper.
 
-## 9. What is inert, and until when
+**How:** each makes a measure of its luxury serve more of the town
+(`quality-of-life.md` §4, *Pleasure*).
 
-| Works now | Small additions | M4 — population | M5 — safety | M6 — defence |
-| :--- | :--- | :--- | :--- | :--- |
-| stonecutters, sawmill, mineworks, town pasture, conversion buildings, gunsmith, granary *(reserve)*, tea house, ale house | dock, irrigation station, windmill, river mill, wharf, guard towers *(vision, influence)* | fairgrounds, theatre, printing press, library, college, scouts, worker cabins, granary *(growth)* | church, cathedral *(perceived safety)* | stockade, palisade, trenches, guard towers *(defence)* |
+## 9. What is live
 
-**Roughly two thirds of the tree does nothing yet**, which is fine but means an
-M3 playtest exercises the construction and trade branches only.
+Every effect in §4 was checked against `data/buildings/buildings.json` and what
+the code reads (#416). **All of them are live except these:**
+
+| Building | Missing | Ticket |
+| :--- | :--- | :--- |
+| dock | sea and ocean food | #409 |
+| irrigation station | grassland and plains food, doubled on farms | #409 |
+| windmill, river mill | farm yield | #409 |
+| wharf | +10% gold from Crown trade | #411 |
+| guard towers | vision, influence | #410 |
+| scouts | double stores and 10 tools for its expeditions; influence | #413, #410 |
+| worker cabins | faster improvements, no improvement upkeep; influence | #412, #410 |
+| fairgrounds | influence; amusement to every town without one | #410, #415 |
+| cathedral | safety and amusement to every town without a church | #415 |
+| printing press | amusement in every town | #415 |
+| tea house, ale house | a measure of tea or beer serving more of the town | #414 |
+
+**Since #429 a town builds these anyway.** Every building is on some intent's
+menu, and a menu takes a building for its place, not its effect — so until they
+land, a town can spend wood and stone on a dock that feeds nobody. Under the old
+axis model they scored nought and were never built, which is why nobody noticed.
+
+**The PO rewrites this section when #409–#415 close**, and it then says only
+what is live.
 
 ## 10. Tuning targets
 
 - The four upkeep tiers in gold.
 - Build capacity per thousand people.
-- Every effect magnitude — yields, amusement, influence, growth.
+- Every effect magnitude — yields, amusement, influence rings, vision, growth,
+  and how much further a tea house or ale house makes a measure go.
 - Whether a developed town can actually afford its own upkeep. Fifteen buildings
   at medium is a great deal of gold a month, and a large town browning out every
   winter is either the Squeeze working or a tuning failure.

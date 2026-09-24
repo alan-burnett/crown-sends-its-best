@@ -222,7 +222,8 @@ actors and there is no second "defender bonus" anywhere.
 | Plains | low |
 
 **A fort multiplies on top**: a medium boost to a company attacking *from* it, a
-very high boost to one defending *in* it.
+very high boost to one defending *in* it. **It serves whoever stands in it**, and
+it falls with its last defender (`tiles-and-improvements.md` §6).
 
 A stubborn rebel company in a fort on a mountain is close to unassailable, and is
 meant to be. The answer is not a better army — it is wearing them down over years,

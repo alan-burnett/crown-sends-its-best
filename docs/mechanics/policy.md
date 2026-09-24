@@ -163,9 +163,9 @@ reasons attached.
 
 ## 8. Policies move the world, including its prices
 
-A patron is generated with a **specialty**. One whose specialty is horses can be
-persuaded to have his Barony stop buying from its neighbour and buy from your
-colony instead.
+A patron is generated with a **specialty**, and it names one kind
+(`patrons.md` §3). One whose specialty is horses can be persuaded to have his
+Barony stop buying from its neighbour and buy from your colony instead.
 
 The game expresses that as **the Crown's price for horses going up.**
 

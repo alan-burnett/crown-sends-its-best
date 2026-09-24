@@ -129,6 +129,37 @@ In battle it is a heavy multiplier: a medium boost attacking *from* it, a very
 high one defending *in* it (`battles.md` §5). **A rebel company in a fort on a
 mountain is close to unassailable**, and is meant to be.
 
+### A fort has an owner
+
+**It records who built it** — a town, a Crown commander or a duke — so that its
+fall can say whose it was.
+
+**Its walls serve whoever stands in it.** Author's ruling (#419). The owner is
+who built it, not whom it shelters: an enemy company standing in an empty fort
+to raze it is defended by it for as long as it stands there.
+
+### How a fort falls
+
+Author's ruling (#419). Two ways, by whether anybody is in it.
+
+| | It falls |
+| :--- | :--- |
+| **Manned** | **with its last defender.** The moment the last company standing in it is destroyed in battle, the fort is destroyed with it. No month of razing follows |
+| **Empty** | **razed, like any improvement** (§7). An enemy company spends its month on it |
+
+**A fort is empty when nobody stands in it** — never garrisoned, marched out
+of, or its company disbanded or starved. A fort whose company marches away is
+not lost; it stands, empty, until somebody comes to raze it.
+
+**The last defender need not be the owner's.** The walls serve whoever is in
+them, so a company that destroys an enemy standing in its own fort destroys the
+fort with him.
+
+**Either way it is one event**, naming the fort's owner, its tile and the side
+that brought it down, and it is what *The Fort Falls* paints (`cutscenes.md`
+§6). A razed fort is a fort that fell, not a farm that burned, so it is never
+*They Burned It*.
+
 ## 7. They can be attacked, and that is the point
 
 **An improvement can be razed.** A company simply destroys it — world month

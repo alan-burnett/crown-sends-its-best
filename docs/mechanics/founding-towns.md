@@ -72,6 +72,20 @@ So founding drains the parent's purse in proportion to the drain on its
 population, and a rich town's expedition is rich for the same reason it is
 well supplied.
 
+### Scouts send it out better found
+
+Author's ruling (#413). **When an expedition leaves a town that has scouts, its
+stores are doubled, and then 10 tools are added.** The stores are the wood,
+stone, tools and food it carries. Its people and its share of the gold are
+unchanged.
+
+**The extra comes from the wild, not from the parent town.** People schooled by
+scouts make tools on the road and gather as they go, so the party arrives with
+more than was loaded, and the town is drained no further for it.
+
+Scouts make an expedition **better supplied, not safer**: a strike takes the same
+share either way (§7).
+
 ### Whether the PC asked makes no difference
 
 A governor moved by the PC's letter and one moved by his own judgement do the
@@ -225,6 +239,34 @@ home, the remaining stores come home, and the months are gone.
 separate case — an expedition small enough, hit hard enough, has nobody left to
 turn back.
 
+### How much a strike takes
+
+Author's ruling (#417). **The arithmetic of a battle, with one side that does
+not fight back** (`battles.md` §6):
+
+```
+share = LETHALITY × striker's force ÷ party's force
+```
+
+- **The party's force** is a company's (`battles.md` §5) with **no arms and no
+  commander**: its people, its supply, and the terrain it stands on. The guns in
+  its cargo are cargo.
+- **It inflicts nothing.** The striker loses nobody.
+- **The share is capped at the whole party**, and at that it is lost
+  completely.
+
+So a large war party can destroy a lean expedition in one blow, and a thick one
+shrugs off a small band. That is what *small enough, hit hard enough* means.
+
+### Who strikes one
+
+**Natives and dukes, and nobody else.**
+
+**Rebels never do.** SPEC §12.3 🔒: rebel towns *do not attack loyal towns or
+their people*, and an expedition is a loyal town's people. A rebel town founds
+none of its own (§1), and a Crown expedition never crosses the map (§3). So no
+expedition exists that a rebel could strike, or that Crown troops would.
+
 ### A share of the people, and the same share of the stores
 
 **Every loss of people is now a share** (`population.md` §6): famine, war and
@@ -265,7 +307,8 @@ Kept as a section because everything downstream depends on it: a daughter town i
 - Months to cross a tile, and the months a Crown founding takes to appear.
 - The chance of an expedition meeting something hostile, per month and per
   region.
-- The proportion of people and stores an attack takes.
+- Whether a strike wants a lethality of its own, rather than a battle's
+  `LETHALITY` (§7).
 - The fixed purse of a Crown-funded town.
 - How much an intrusion offends, against how good the ground is.
 

@@ -159,6 +159,17 @@ tea does. **A colony can build its way to part of what it would otherwise have t
 buy**, and tea competes on `served` and on price rather than on being
 irreplaceable. Author-confirmed as intended.
 
+**A tea house makes tea go further, and an ale house beer.** Author's ruling
+(#414). In a town with one, **each measure of that luxury serves more of the
+town** — twice as many, a placeholder — so the same measure adds more to
+`served` there than elsewhere. Nothing else changes: it is still one kind for
+variety, and the other luxuries are untouched.
+
+`marginal_pleasure()` reads the same `served`, so the buying side sees it too. A
+tea-house town values each measure of tea more, and loses more when a duty or a
+protest takes it away. That is `buildings.md` §8's trap, working through the one
+function.
+
 ### One draw, read by two phases
 
 `marginal_pleasure()` — what another measure of something would be worth — is the

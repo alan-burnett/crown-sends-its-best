@@ -195,14 +195,16 @@ minimum natives and rivals are different paintings.
 | **The Colony Grows** | town that grows of its own accord | 1 | SPEC §12.1 |
 | **The Land Improved** | improvement built | 1 | `tiles-and-improvements.md` |
 | **Blooded** | company gains a level | 1 | `commanders.md` |
-| **The Fort Falls** | fort destroyed by ground troops | 1 | `battles.md` |
+| **The Fort Falls** | a fort falls — with its last defender, or razed | 1 | `tiles-and-improvements.md` §6 |
 | **They Do Not Return** | expedition lost | 1 | `founding-towns.md` §7 |
 | **The Cost of It** | town loses people to an attack | 1 | `battles.md` |
 | **The Ground Is Taken** | rivals block tiles the colony would have worked | 1 | `rival-pressure.md` |
 | **They Burned It** | rivals destroy an improvement | 1 | `tiles-and-improvements.md` |
 
-**They Do Not Return needs variants** — rebels, natives and rivals are three
-different paintings, the same question Overrun asks.
+**They Do Not Return needs two variants**, natives and dukes. **Rebels never
+strike an expedition**: SPEC §12.3 🔒 has rebel towns never attacking loyal
+towns or their people, and a rebel town founds none of its own
+(`founding-towns.md` §7).
 
 ### Firsts of the run — from the desk
 

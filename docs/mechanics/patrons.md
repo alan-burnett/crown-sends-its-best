@@ -46,6 +46,18 @@ that is all the machinery it takes.
 construction. He has what you may not want and wants what you may not have, and
 the trade is only interesting because of the gap.
 
+### A category names one kind
+
+Author's ruling (#396). **A specialty or a need in resources, livestock or
+experts names one kind of it**, drawn at arrival with the category: a sugar man,
+a horse breeder, a patron who can find the colony a tobacco expert. His need is
+drawn the same way.
+
+So what he ships, what he wants, and which Crown price his Barony's market lifts
+(`policy.md` §8) are all fixed by the roll. The ruling covers the three
+categories that come in kinds; gold, troops and the rival specialty are
+unchanged.
+
 ## 4. Every offer is one object
 
 Four shapes that look different in prose are one thing with fields left empty:
