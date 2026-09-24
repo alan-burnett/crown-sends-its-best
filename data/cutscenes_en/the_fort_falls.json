@@ -1,6 +1,6 @@
 {
 	"id": "the_fort_falls",
-	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Nothing in the sim emits this moment yet, so no trigger shows it.",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. No trigger yet: dukes raise no forts and nothing brings one down (#419).",
 	"params": {
 		"date": "date",
 		"duke": "contact",

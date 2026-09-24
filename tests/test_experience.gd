@@ -427,3 +427,34 @@ func test_levels_that_run_backwards_are_refused() -> void:
 	validator.check_commander_experience(db)
 	assert_false(validator.ok(), "a level arriving before the one below it passed")
 	db.free()
+
+
+# --- 🔒 A man who rises says so (#299) -----------------------------------------
+
+func test_a_commander_who_rises_says_so_and_only_then() -> void:
+	# Seam A. The level was always refreshed after a battle; nothing downstream —
+	# a painting, a letter — could see it happen until it was an event. Asked
+	# battle by battle against fresh enemies, so it holds whatever the thresholds
+	# are tuned to.
+	var run := _run()
+	var home := run.colony.in_order()[0].at
+	var mine := _raise(run, Company.REBEL, 400, home)
+	var rose_at_all := false
+	for fight in 30:
+		var before := run.commanders.level_of(mine.commander)
+		var seen := run.log.of_type(Battle.EVENT_ROSE).size()
+		var theirs := _raise(run, Company.CROWN, 40, home + Vector2i(1, 0))
+		Battle.resolve(mine, theirs, run.map, _context(run))
+		var after := run.commanders.level_of(mine.commander)
+		var rose := run.log.of_type(Battle.EVENT_ROSE)
+		if after > before:
+			rose_at_all = true
+			assert_eq(rose.size(), seen + 1, "he rose and nobody heard")
+			var event: SimEvent = rose[rose.size() - 1]
+			assert_eq(String(event.payload["commander"]), String(mine.commander))
+			assert_eq(String(event.payload["rank"]), String(CommanderExperience.rank_of(after)))
+		else:
+			assert_eq(rose.size(), seen, "a battle that raised nobody said somebody rose")
+		if mine.is_empty() or after >= CommanderExperience.top_level():
+			break
+	assert_true(rose_at_all, "thirty battles and he never rose, so this proves nothing")

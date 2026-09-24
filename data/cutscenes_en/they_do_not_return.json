@@ -1,6 +1,6 @@
 {
 	"id": "they_do_not_return",
-	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Nothing attacks an expedition yet, so this never fires; the variants wait on the causes that attack will record.",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. For a cause no variant names. Nothing strikes an expedition yet (#417); when it does, cause is the attacker's allegiance.",
 	"params": {
 		"date": "date",
 		"town": "town",

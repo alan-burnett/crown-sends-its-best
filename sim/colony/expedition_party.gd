@@ -189,6 +189,9 @@ func advance(toward: Vector2i, context: ColonyContext) -> bool:
 ## count, and not the stores rounded separately — the wagons that were lost were
 ## carrying something.
 ##
+## `cause` is **the attacker's allegiance** — `native`, `rival`, `rebel` — which
+## is what the *They Do Not Return* paintings are chosen by (#299, #417).
+##
 ## Returns what it cost, so the attacker's own event can say.
 func attacked(share: float, cause: String, context: ColonyContext) -> Dictionary:
 	var taken := clampf(share, 0.0, 1.0)

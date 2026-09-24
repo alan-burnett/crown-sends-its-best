@@ -58,6 +58,11 @@ const RECORD: String = "resolution"
 
 const EVENT_FOUGHT: StringName = &"battle_fought"
 
+## A commander's tally crossed a level (#299). **Seam A**: the level was always
+## refreshed here, and a cutscene, a letter or a playback beat about a man who
+## has become someone could not see it happen until it said so.
+const EVENT_ROSE: StringName = &"commander_rose"
+
 ## How many men a battle at parity costs each side in a month. **Tuning**, and
 ## `battles.md` §12 names it first: *`LETHALITY`, and whether the curve should be
 ## steeper than linear in the ratio.*
@@ -237,8 +242,24 @@ static func _learn(company: Company, inflicted: float, context: ColonyContext) -
 		return
 	if context.commanders == null:
 		return
+	# **Read the book before and after**, not the company: a company's own level
+	# is only refreshed where a commander takes it over, so comparing against it
+	# would promote every new man on his first kill.
+	var was := context.commanders.level_of(company.commander)
 	context.commanders.record(company.commander, inflicted)
 	company.commander_level = context.commanders.level_of(company.commander)
+	if company.commander_level <= was:
+		return
+	# 🔒 **The rank, never the number, is what anybody downstream may say**
+	# (`commander_experience.gd`): the level is on the payload for the sim's own
+	# consumers, the rank id for anything the player reads.
+	context.log.emit(EVENT_ROSE, company.commander, context.state.month, {
+		"commander": String(company.commander),
+		"company": String(company.id),
+		"level": company.commander_level,
+		"rank": String(CommanderExperience.rank_of(company.commander_level)),
+		"inflicted": context.commanders.inflicted_by(company.commander),
+	}, WorldPhase.MOVEMENT)
 
 
 ## Fight every battle a month has, in §7's order.

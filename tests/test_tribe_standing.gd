@@ -485,3 +485,35 @@ func test_a_run_moves_the_neighbours_at_all() -> void:
 			moved += 1
 	assert_true(moved > 0,
 		"three years of colony and not one people changed its mind about it")
+
+
+# --- 🔒 The colony meets its neighbours, once (#299) ---------------------------
+
+func test_a_people_is_met_once_the_month_a_town_first_borders_it() -> void:
+	# Settled beside them, so the landing town borders a people from the start.
+	var run := RunState.new_run(SEED, Vector2i(-1, -1), &"", Tribes.NEAR)
+	ContactRoster.load_into(run, content)
+	var machine := TurnMachine.new(run)
+	machine.use_content(content)
+	machine.saves_on_send = false
+	for turn in 4:
+		machine.begin_turn()
+		for inbound in run.inbox:
+			inbound.status = InboundLetter.SET_ASIDE
+		machine.send_post()
+
+	var met := run.log.of_type(StandingDriver.EVENT_MET)
+	assert_not_empty(met, "settled beside a people and never met them")
+	var tribes: Dictionary = {}
+	for entry in met:
+		var event: SimEvent = entry
+		var id := String(event.payload["tribe"])
+		assert_false(tribes.has(id), "'%s' was met twice" % id)
+		tribes[id] = true
+		var tribe := run.tribes.find(StringName(id))
+		assert_eq(tribe.met_month, event.month, "the latch disagrees with the event")
+
+	# **Latched in the save**: a reload that forgot would meet them again.
+	for entry in run.tribes.in_order():
+		var tribe: Tribe = entry
+		assert_eq(Tribe.from_dict(tribe.to_dict()).met_month, tribe.met_month)

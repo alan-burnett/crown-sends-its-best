@@ -20,6 +20,10 @@ extends RefCounted
 
 const EVENT_THREAT: StringName = &"native_threat_read"
 
+## 🔒 **The colony and a people meet** (#299): the first month a town of the
+## colony borders a tribe's land, once a run for each tribe.
+const EVENT_MET: StringName = &"tribe_met"
+
 ## Event types that mean a town came into being. **Both paths**: the colony
 ## walking somewhere and the Crown putting people down on the coast.
 const FOUNDINGS: Array[StringName] = [
@@ -55,6 +59,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		for tribe in natives.in_order():
 			moved[String((tribe as Tribe).id)] = true
 
+	_meet(context)
+
 	var territory: Territory = territory_driver.territory if territory_driver != null else null
 	for id in TribeStanding.exploitation(colony, natives, territory, context):
 		moved[String(id)] = true
@@ -69,6 +75,31 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	state.apply(log, EVENT_THREAT, &"colony", {
 		WorldValues.NATIVE_THREAT: _threat(),
 	}, WorldPhase.RECKONING)
+
+
+## The first town to border each tribe, the month it first did.
+##
+## **Borders** is `Intrusion`'s answer, the same one standing is charged against
+## and the letters read (`ColonyMeasures.tribe_beside`), so a people is met the
+## month it could first be offended and not a month before. Asked after the
+## foundings, so a town put down beside a village this month meets it this month.
+func _meet(context: ColonyContext) -> void:
+	if colony == null:
+		return
+	for entry in colony.in_order():
+		var town: Town = entry
+		var nearest: Dictionary = Intrusion.at(town.at, natives)
+		if float(nearest["depth"]) <= 0.0:
+			continue
+		var tribe := natives.find(StringName(nearest["tribe"]))
+		if tribe == null or tribe.met_month >= 0:
+			continue
+		tribe.met_month = context.state.month
+		context.log.emit(EVENT_MET, tribe.id, context.state.month, {
+			"tribe": String(tribe.id),
+			"town": String(town.id),
+			"at": [town.at.x, town.at.y],
+		}, WorldPhase.RECKONING)
 
 
 ## How dangerous the neighbours look from inside the colony, nought to one.

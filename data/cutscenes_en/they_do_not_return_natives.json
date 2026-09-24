@@ -1,6 +1,6 @@
 {
 	"id": "they_do_not_return_natives",
-	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. No trigger: expedition_destroyed records a cause, but nothing attacks an expedition yet, so there are no causes to match.",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Waits on #417: nothing strikes an expedition yet.",
 	"params": {
 		"date": "date",
 		"town": "town",

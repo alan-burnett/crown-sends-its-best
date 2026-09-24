@@ -86,6 +86,11 @@ var standing: Dictionary = {}
 ## come out.
 var irreconcilable: Dictionary = {}
 
+## The month the colony first had a town beside this people, or -1 while it has
+## not (#299). **Latched**: a people is met once, and forgetting it on a reload
+## would meet it again.
+var met_month: int = -1
+
 
 ## What it thinks of a faction it may never have met.
 ##
@@ -170,6 +175,7 @@ func to_dict() -> Dictionary:
 		"weights": weights.duplicate(),
 		"standing": standing.duplicate(),
 		"irreconcilable": irreconcilable.duplicate(),
+		"met_month": met_month,
 	}
 
 
@@ -180,4 +186,5 @@ static func from_dict(data: Dictionary) -> Tribe:
 	tribe.weights = data.get("weights", {}).duplicate()
 	tribe.standing = data.get("standing", {}).duplicate()
 	tribe.irreconcilable = data.get("irreconcilable", {}).duplicate()
+	tribe.met_month = int(data.get("met_month", -1))
 	return tribe

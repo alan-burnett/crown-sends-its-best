@@ -230,6 +230,31 @@
 		}
 	},
 	{
+		"id": "trigger.cutscene.meeting_the_natives",
+		"cutscene": "meeting_the_natives",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "tribe_met"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"tribe": {
+				"from": "event",
+				"field": "tribe",
+				"as": "tribe"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			}
+		}
+	},
+	{
 		"id": "trigger.cutscene.the_first_works",
 		"cutscene": "the_first_works",
 		"kind": "first",
@@ -1018,12 +1043,101 @@
 		}
 	},
 	{
+		"id": "trigger.cutscene.blooded",
+		"cutscene": "blooded",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "commander_rose"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"commander": {
+				"from": "event",
+				"field": "commander",
+				"as": "contact"
+			},
+			"company": {
+				"from": "event",
+				"field": "company",
+				"as": "company"
+			},
+			"killed": {
+				"from": "event",
+				"field": "inflicted",
+				"as": "people"
+			}
+		}
+	},
+	{
 		"id": "trigger.cutscene.they_do_not_return",
 		"cutscene": "they_do_not_return",
 		"kind": "first",
 		"on": {
 			"event_happened": {
-				"event": "expedition_destroyed"
+				"event": "expedition_destroyed",
+				"where": {
+					"cause": ""
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.they_do_not_return_natives",
+		"cutscene": "they_do_not_return_natives",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "expedition_destroyed",
+				"where": {
+					"cause": "native"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"town": {
+				"from": "event",
+				"field": "town",
+				"as": "town"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.they_do_not_return_dukes",
+		"cutscene": "they_do_not_return_dukes",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "expedition_destroyed",
+				"where": {
+					"cause": "rival"
+				}
 			}
 		},
 		"params": {
