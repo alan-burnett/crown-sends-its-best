@@ -58,6 +58,14 @@ var book: IntentBook = null
 ## without the date redundancy ranks by (#255).
 var run: RunState = null
 
+## 🔒 **What the colony knows of the map** (#434, SPEC §11.2): what an exploring
+## company walks toward, and what it reveals. Null in a fixture, and then nobody
+## explores.
+var knowledge: MapKnowledge = null
+
+## So an explorer that walks past a village learns of it (`natives.md`).
+var natives: Tribes = null
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if companies == null:
@@ -67,6 +75,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.companies = companies
 	context.commanders = commanders
 	context.contacts = contacts
+	context.knowledge = knowledge
+	context.natives = natives
 
 	match phase:
 		WorldPhase.MOVEMENT:
@@ -142,11 +152,12 @@ func _march(context: ColonyContext) -> void:
 ## march, withdraw and disband and takes the best, so refusing is attack scoring
 ## below retreat.
 func _take_the_month(company: Company, context: ColonyContext) -> void:
-	# 🔒 **A leaderless militia defends its town, and that is the whole of what it
-	# can ever do** (`battles.md` §4). It has nobody to deliberate for it, so it
-	# holds the posture it was raised with — and being attacked is not a decision
-	# and needs none.
+	# 🔒 **A leaderless company follows its order and does nothing else**
+	# (`battles.md` §4, `commanders.md` §3). It has nobody to deliberate for it,
+	# so it never chooses and never reconsiders — but an order that leaves the
+	# town takes it out (#434), because leadership no longer comes from the order.
 	if company.is_headless():
+		_follow_the_order(company, context)
 		return
 
 	var from := company.at
@@ -169,6 +180,11 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 				if moves <= 0:
 					break
 				company.step_toward(company.destination)
+				moves -= 1
+			CommanderConsiderations.EXPLORE:
+				if moves <= 0:
+					break
+				_explore_a_step(company, context)
 				moves -= 1
 			CommanderConsiderations.ATTACK:
 				if attacks <= 0:
@@ -198,6 +214,65 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 		company.report_march(from, context)
 
 
+## 🔒 **A leaderless company's month: its order, and only its order** (#434,
+## `commanders.md` §3). Nobody deliberates; the order says where it goes.
+##
+## | Order | Each month |
+## | :--- | :--- |
+## | defend the town | nothing: it stands, and fights what attacks it |
+## | explore | a move a tile toward the nearest unexplored land, revealing it; it seeks no battle |
+## | guard the border | toward the edge of its town's ground that faces the nearest threat |
+## | march on a foe | toward its foe, and it attacks whatever it may fight in front of it |
+func _follow_the_order(company: Company, context: ColonyContext) -> void:
+	var from := company.at
+	var moves := company.tiles_this_month()
+	var attacks := company.attacks_this_month()
+	match StandingOrder.of(company.order):
+		StandingOrder.EXPLORE:
+			for _step in moves:
+				if not _explore_a_step(company, context):
+					break
+		StandingOrder.GUARD_THE_BORDER:
+			var post := OrderRule.border_post(_home_of(company), context)
+			for _step in moves:
+				if post == Company.NOWHERE or company.step_toward(post):
+					break
+		StandingOrder.MARCH_ON_A_FOE:
+			var foe := OrderRule.foe_of(company, _home_of(company), context)
+			while moves > 0 or attacks > 0:
+				var enemy := _in_contact_with(company)
+				if enemy != null and attacks > 0:
+					_engage(company, enemy, context)
+					attacks -= 1
+				elif enemy == null and foe != null and not foe.is_empty() and moves > 0:
+					company.step_toward(foe.at)
+					moves -= 1
+				else:
+					break
+				if company.is_empty():
+					break
+	if company.at != from and not company.is_empty():
+		company.report_march(from, context)
+
+
+## One move toward the nearest land the colony has never seen, and what it sees
+## there (#434, §3 *Explore*). Returns whether it moved: with nowhere left, it
+## holds where it stands (⚠ assumed there).
+func _explore_a_step(company: Company, context: ColonyContext) -> bool:
+	var toward := OrderRule.nearest_unexplored(company.at, map, knowledge)
+	if toward == Company.NOWHERE:
+		return false
+	company.step_toward(toward)
+	var revealed := knowledge.reveal_around(map, company.at, context.state.month, natives)
+	if revealed > 0:
+		context.log.emit(Company.EVENT_EXPLORED, company.id, context.state.month, {
+			"company": String(company.id),
+			"at": [company.at.x, company.at.y],
+			"revealed": revealed,
+		}, WorldPhase.MOVEMENT)
+	return true
+
+
 ## What his commander decides, this step.
 ##
 ## 🔒 **Asked afresh for every step**, because cavalry's second move happens on a
@@ -220,7 +295,8 @@ func _what_he_decides(
 		CommanderConsiderations.options_for(
 			company,
 			enemy,
-			company.destination != Company.NOWHERE and company.at != company.destination),
+			company.destination != Company.NOWHERE and company.at != company.destination,
+			OrderRule.nearest_unexplored(company.at, map, knowledge) != Company.NOWHERE),
 		deliberation)
 	return decision.chosen_id() if decision.has_choice() else CommanderConsiderations.HOLD
 

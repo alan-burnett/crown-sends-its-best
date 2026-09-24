@@ -59,7 +59,8 @@ func _raise(
 	var town := run.colony.in_order()[0]
 	# Fixture sizes are in thousands (#426).
 	var company := run.companies.raise_company(
-		Company.COLONIAL, size * Population.THOUSAND, {}, town.id, town.at, _context(run), order)
+		Company.COLONIAL, size * Population.THOUSAND, {}, town.id, town.at, _context(run), order,
+		Company.COMMANDED if StandingOrder.leaves_the_town(order) else Company.MILITIA)
 	Commanders.take_command(company, town, run, _context(run))
 	return company
 

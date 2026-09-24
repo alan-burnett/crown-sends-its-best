@@ -59,7 +59,7 @@ func _raise(
 ) -> Company:
 	var town := run.colony.in_order()[0]
 	var company := run.companies.raise_company(
-		allegiance, size, {"guns": float(size)}, town.id, at, _context(run), MARCH)
+		allegiance, size, {"guns": float(size)}, town.id, at, _context(run), MARCH, Company.COMMANDED)
 	Commanders.take_command(company, town, run, _context(run))
 	return company
 

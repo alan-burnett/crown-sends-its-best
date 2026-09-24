@@ -231,7 +231,9 @@ func test_nothing_gates_him_but_the_band() -> void:
 	# `run.demands` is not a gate — `arrived_in` answers *has this duke turned up
 	# in the run yet*, which is whether he exists to act, not whether he is
 	# willing to. Everything that could be a second state machine is forbidden.
-	var code := _code_of("res://sim/battle/muster.gd")
+	# `StandingOrder` is the order a landing marches under, not a tribe's
+	# standing, so the class name is not what this is looking for.
+	var code := _code_of("res://sim/battle/muster.gd").replace("StandingOrder", "")
 	var found := PackedStringArray()
 	for token in ["tribute", "promise", "standing", "prestige", "loyalty"]:
 		if code.to_lower().contains(token):

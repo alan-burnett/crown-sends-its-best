@@ -75,8 +75,8 @@ static func waiting_in(town: Town, run: RunState) -> Array:
 	return out
 
 
-## Give this company a commander, if it wants one: as its raising settled it
-## (#432), or else as its order asks (§2).
+## Give this company a commander, if its raising settled that it has one (#432,
+## #434).
 ##
 ## Returns the man who took it, or null for a headless militia. **Called at the
 ## raising and nowhere else**, because §3's order is given once and a company
@@ -86,11 +86,8 @@ static func take_command(
 ) -> Contact:
 	if company == null or run == null:
 		return null
-	# 🔒 **Settled at the raising** (#432): a scouting party is a militia and a
-	# big company from a sizeable town has a man. For a company nobody settled it
-	# for, **the order, not the size** (§2): a hundred men behind a stockade need
-	# nobody; twelve men marching on a village need someone to decide whether to
-	# press on when they find it defended.
+	# 🔒 **Settled at the raising** (#432, #434): a scouting party is a militia
+	# and a big company from a sizeable town has a man, whatever its order.
 	if not company.wants_a_commander():
 		return null
 

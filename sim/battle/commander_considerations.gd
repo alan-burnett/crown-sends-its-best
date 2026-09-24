@@ -118,7 +118,7 @@ static func register_all() -> void:
 
 # --- What a commander may do -----------------------------------------------
 
-## The five options §5 names, and no sixth.
+## The six options §5 names, and no seventh.
 ##
 ## 🔒 **Withdrawing and disbanding are ordinary candidates**, scored alongside
 ## attacking rather than reached by a branch when things go badly. That is the
@@ -129,8 +129,12 @@ const HOLD: StringName = &"hold"
 const MARCH: StringName = &"march"
 const WITHDRAW: StringName = &"withdraw"
 const DISBAND: StringName = &"disband"
+## 🔒 **A move toward the nearest land the colony has never seen** (#434,
+## `commanders.md` §3, §5). A commander told to explore starts there, and from
+## then on it is one option among the six.
+const EXPLORE: StringName = &"explore"
 
-const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, WITHDRAW, DISBAND]
+const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, WITHDRAW, DISBAND]
 
 
 ## Everything this commander could do this month.
@@ -142,7 +146,7 @@ const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, WITHDRAW, DISBAND]
 ## `data` carries what the considerations read: the company, and the enemy in
 ## front of it when there is one.
 static func options_for(
-	company: Company, enemy: Company, has_somewhere_to_go: bool
+	company: Company, enemy: Company, has_somewhere_to_go: bool, has_land_to_find: bool = false
 ) -> Array:
 	var out: Array = []
 	var board := {"company": company, "enemy": enemy}
@@ -156,6 +160,10 @@ static func options_for(
 	# around every enemy he met, which is neither a refusal nor a battle.
 	if has_somewhere_to_go and enemy == null:
 		out.append(Candidate.new(MARCH, board))
+	# **Exploring is not how you leave a fight either**, and there has to be
+	# something left to find.
+	if has_land_to_find and enemy == null:
+		out.append(Candidate.new(EXPLORE, board))
 	out.append(Candidate.new(WITHDRAW, board))
 	out.append(Candidate.new(DISBAND, board))
 	return out
@@ -221,7 +229,7 @@ class StayingAliveConsideration:
 				return clampf(
 					(0.5 - CommanderConsiderations._odds(candidate, context)) * 2.0,
 					0.0, 1.0)
-			CommanderConsiderations.MARCH:
+			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE:
 				return 0.0
 			_:
 				# Holding in front of an enemy is not safety; holding alone is.
@@ -280,12 +288,17 @@ class OrdersConsideration:
 	) -> float:
 		var company := CommanderConsiderations._company_of(candidate)
 		var sent := company != null and StandingOrder.leaves_the_town(company.order)
+		var exploring := company != null and StandingOrder.of(company.order) == StandingOrder.EXPLORE
 		var asked := 0.0
 		match candidate.id:
 			CommanderConsiderations.ATTACK:
 				asked = 0.8 if sent else 0.2
 			CommanderConsiderations.MARCH:
-				asked = 1.0 if sent else -0.2
+				asked = 1.0 if sent and not exploring else -0.2
+			CommanderConsiderations.EXPLORE:
+				# **What he was told, if he was told to find land** (§3); an order
+				# to go somewhere else says little for wandering off.
+				asked = 1.0 if exploring else -0.2
 			CommanderConsiderations.HOLD:
 				asked = -0.2 if sent else 1.0
 			CommanderConsiderations.WITHDRAW:

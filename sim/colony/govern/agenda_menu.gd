@@ -188,16 +188,20 @@ static func holds(condition: Dictionary, town: Town, context: ColonyContext) -> 
 
 
 ## Unexplored territory lies within `n` tiles (Chebyshev, the influence ring) of
-## the town: a land tile the colony has never seen.
+## the town: a tile the colony has **never seen** (`MapKnowledge`, #434), so a
+## scouting party that has walked the country closes the gate behind it. With
+## no knowledge to hand, what is visible now stands in.
 static func _unexplored_within(town: Town, n: int, context: ColonyContext) -> bool:
-	if context.map == null or context.territory == null:
+	if context.map == null or (context.knowledge == null and context.territory == null):
 		return false
 	for dy in range(-n, n + 1):
 		for dx in range(-n, n + 1):
 			var at := town.at + Vector2i(dx, dy)
 			if not context.map.in_bounds(at.x, at.y):
 				continue
-			if not context.territory.visible.has(at):
+			var seen := context.knowledge.is_explored(at) if context.knowledge != null \
+				else context.territory.visible.has(at)
+			if not seen:
 				return true
 	return false
 

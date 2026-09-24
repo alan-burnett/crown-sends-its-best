@@ -84,7 +84,7 @@ func _raise(
 	var town := run.colony.in_order()[0]
 	return run.companies.raise_company(
 		allegiance, size, {}, town.id,
-		town.at if at == Company.NOWHERE else at, _context(run), MARCH_ON_THEM)
+		town.at if at == Company.NOWHERE else at, _context(run), MARCH_ON_THEM, Company.COMMANDED)
 
 
 ## A commander with the weights this test wants, and nothing else different.
@@ -374,7 +374,7 @@ func test_a_commander_is_rolled_a_weight_for_each_of_them() -> void:
 	var run := _run()
 	var town := run.colony.in_order()[0]
 	var company := run.companies.raise_company(
-		Company.COLONIAL, 20, {}, town.id, town.at, _context(run), MARCH_ON_THEM)
+		Company.COLONIAL, 20, {}, town.id, town.at, _context(run), MARCH_ON_THEM, Company.COMMANDED)
 	var man := Commanders.take_command(company, town, run, _context(run))
 
 	for id in CommanderConsiderations.ALL:

@@ -1,8 +1,8 @@
 class_name StandingOrder
 extends RefCounted
 
-## What a company was raised to do, and whether that needs a man (#220,
-## `docs/mechanics/commanders.md` §2, §3; `battles.md` §4).
+## What a company was raised to do (#220, #434, `docs/mechanics/commanders.md`
+## §3; `battles.md` §4).
 ##
 ## ## 🔒 Orders are not objectives
 ##
@@ -22,35 +22,37 @@ extends RefCounted
 ## docs. A *commanded* company is the opposite: its commander deliberates afresh
 ## every month, and his intent can change.
 ##
-## ## 🔒 The order decides whether a commander is needed, and it is not a size
-## check
+## ## The four orders (§3, the Author's ruling on #423)
 ##
-## `battles.md` §4 fixes the important half: a company with no commander has
-## nobody to deliberate for it, so it can only hold a posture.
-##
-## | The standing order | Needs a commander? |
+## | Order | What the company does each month |
 ## | :--- | :--- |
-## | **Defend the town** | **No.** It never leaves, never chooses, never reconsiders |
-## | Anything that leaves the town | **Yes.** Somebody has to decide where, and when to stop |
+## | **Defend the town** | stays in its town and fights whatever attacks it |
+## | **Explore** | moves toward the nearest unexplored tile, revealing the land it passes |
+## | **Guard the border** | holds the tile of its town's influence facing the nearest threat |
+## | **March on a foe** | moves on its foe and attacks it |
 ##
-## **You do not need a general to man a palisade.** You need one the moment the
-## company has to *go* somewhere, because going somewhere is a decision. So a
-## hundred men behind a stockade need nobody, and twelve men marching on a
-## village need someone to decide whether to press on when they find it defended.
+## `OrderRule` chooses one when the company is raised.
+##
+## ## 🔒 The order no longer decides who leads it
+##
+## The rule that anything which leaves the town needs a commander is **retired**
+## (#434). Leadership comes from the company's size (#432, `Company.led_by`), so
+## a militia may explore — and a militia that explores still has nobody deciding
+## for it: it follows its order, and a commander deliberates.
 
-## The one order the docs name, and the only one that stays at home.
+## Stays at home, and the only order that does.
 const DEFEND_THE_TOWN: StringName = &"defend_the_town"
 
-## 🔒 **Orders that never leave the town.**
-##
-## **Adding to this list is a design decision, not a tuning one.** Every entry
-## here is a company that can be raised with no commander at all, which means one
-## the PC can never write to and that will never reconsider anything — so a new
-## defensive order is a new way for a town to put men under arms outside the
-## correspondence, and belongs in `commanders.md` §2's table before it belongs
-## here.
-##
-## Everything not in it leaves, and therefore needs a man.
+## The nearest unexplored tile, a move a month, revealing what it passes.
+const EXPLORE: StringName = &"explore"
+
+## The edge of its town's influence, facing the nearest threat.
+const GUARD_THE_BORDER: StringName = &"guard_the_border"
+
+## Its foe (`OrderRule.foe_of`), and fight it.
+const MARCH_ON_A_FOE: StringName = &"march_on_a_foe"
+
+## 🔒 **Orders that never leave the town.** Everything else goes somewhere.
 const DEFENSIVE: Array[StringName] = [DEFEND_THE_TOWN]
 
 
@@ -68,15 +70,6 @@ static func is_defensive(order: StringName) -> bool:
 	return DEFENSIVE.has(of(order))
 
 
-## 🔒 **The test, and it is not a size check** (§2).
-static func needs_a_commander(order: StringName) -> bool:
-	return not is_defensive(order)
-
-
 ## Whether a company under this order ever moves off its tile.
-##
-## The same question `needs_a_commander` asks, named the other way round because
-## the movement driver asks it about a march and the raising asks it about a man,
-## and one definition is what keeps the two from disagreeing.
 static func leaves_the_town(order: StringName) -> bool:
 	return not is_defensive(order)

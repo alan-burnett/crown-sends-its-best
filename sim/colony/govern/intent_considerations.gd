@@ -519,19 +519,24 @@ class OnlyWhenLearningIsUrged extends DeliberationFilter:
 const LEARNING_STANDS: float = 0.125
 
 
-## The share of the land the colony can see that no town has claimed.
+## The share of the land the colony **has seen** that no town has claimed
+## (`governor-agendas.md` §13): scouting raises it by revealing land, founding
+## lowers it by claiming land (#434). With no knowledge to hand, what is visible
+## now stands in.
 ##
 ## Shared with anything else that asks, so "there is room" cannot come to mean
 ## two different things.
 static func room_in_the_colony(context: DeliberationContext) -> float:
 	var map: WorldMap = context.get_value("map")
 	var territory: Territory = context.get_value("territory")
+	var knowledge: MapKnowledge = context.get_value("knowledge")
 	if map == null or territory == null:
 		return 0.0
 
 	var seen := 0
 	var free := 0
-	for at in territory.visible:
+	var looked_at: Array = knowledge.explored() if knowledge != null else territory.visible.keys()
+	for at in looked_at:
 		if not map.is_land(at.x, at.y):
 			continue
 		seen += 1

@@ -81,6 +81,8 @@ func _decide(
 		"colony": colony,
 		"map": map,
 		"territory": territory,
+		# What the colony has ever seen, for room to grow (#434).
+		"knowledge": territory_driver.knowledge if territory_driver != null else null,
 		"natives": natives,
 		"mandate": String(state.get_value(WorldValues.MANDATE, "")),
 		"urgings": town.urgings,

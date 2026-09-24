@@ -78,7 +78,8 @@ func _raise(
 	# Fixture sizes are in thousands (#426): a company of `40` is 40,000 men.
 	var company := run.companies.raise_company(
 		allegiance, size * Population.THOUSAND, arms, town.id,
-		town.at if at == Company.NOWHERE else at, _context(run), order)
+		town.at if at == Company.NOWHERE else at, _context(run), order,
+		Company.COMMANDED if StandingOrder.leaves_the_town(order) else Company.MILITIA)
 	Commanders.take_command(company, town, run, _context(run))
 	return company
 

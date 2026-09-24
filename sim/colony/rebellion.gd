@@ -55,6 +55,7 @@ const EVENT_RETURNED: StringName = &"town_returned_to_the_crown"
 static func resolve(town: Town, context: ColonyContext) -> StringName:
 	if not town.rebelling and town.rebel_sentiment >= DECLARES_AT:
 		town.rebelling = true
+		_turn_its_companies(town, Company.REBEL, context)
 		context.log.emit(EVENT_DECLARED, town.id, context.state.month, {
 			"town": String(town.id),
 			"population": town.population(),
@@ -67,6 +68,7 @@ static func resolve(town: Town, context: ColonyContext) -> StringName:
 
 	if town.rebelling and town.rebel_sentiment <= RETURNS_AT:
 		town.rebelling = false
+		_turn_its_companies(town, Company.COLONIAL, context)
 		context.log.emit(EVENT_RETURNED, town.id, context.state.month, {
 			"town": String(town.id),
 			"population": town.population(),
@@ -77,3 +79,25 @@ static func resolve(town: Town, context: ColonyContext) -> StringName:
 		return EVENT_RETURNED
 
 	return &""
+
+
+## 🔒 **Its companies take its side** (#434, `commanders.md` §3). A town's
+## companies are its people under arms, so when it declares they are rebels,
+## and when it returns they are the Crown's colonists again — which is what
+## lets a company raised to prepare for rebellion march on the Crown's troops
+## the month its town declares, and forbids it before.
+static func _turn_its_companies(town: Town, side: StringName, context: ColonyContext) -> void:
+	if context.companies == null:
+		return
+	for entry in context.companies.supported_by(town.id):
+		var company: Company = entry
+		if company.allegiance == side:
+			continue
+		var was := company.allegiance
+		company.allegiance = side
+		context.log.emit(Company.EVENT_TURNED, company.id, context.state.month, {
+			"company": String(company.id),
+			"town": String(town.id),
+			"from": String(was),
+			"to": String(side),
+		}, WorldPhase.COLONY_MONTH)

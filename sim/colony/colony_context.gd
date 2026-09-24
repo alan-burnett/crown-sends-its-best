@@ -38,6 +38,11 @@ var parties: Array = []
 ## them above the objective, which is a decision the Colony Month makes.
 var companies: Companies = null
 
+## What the colony has ever seen (#434, SPEC §11.2): the unexplored land a
+## scouting party is raised to find. Null where nothing supplies it, and the
+## visible ground stands in.
+var knowledge: MapKnowledge = null
+
 ## What each commander has learned (#223). Here because a battle is where it is
 ## earned, and a battle happens in a context.
 var commanders: CommanderBook = null

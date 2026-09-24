@@ -84,6 +84,7 @@ func _besieger(
 ## The same, under a man who can decide to press the attack.
 func _under_a_commander(run: RunState, company: Company) -> Company:
 	company.order = &"march_on_them"
+	company.led_by = Company.COMMANDED
 	Commanders.take_command(company, run.colony.in_order()[0], run, _context(run))
 	company.destination = company.at
 	return company

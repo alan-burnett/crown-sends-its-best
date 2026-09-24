@@ -74,6 +74,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.denied = denied
 	if territory_driver != null:
 		context.territory = territory_driver.territory
+		context.knowledge = territory_driver.knowledge
 
 	month.run(colony, context)
 

@@ -217,39 +217,7 @@ func test_it_takes_no_more_than_a_head_wants() -> void:
 		"the company marched out with the whole warehouse")
 
 
-# --- 🔒 The order comes from the intent -------------------------------------
-
-func test_defence_raises_a_militia_that_needs_nobody() -> void:
-	var run := _run()
-	var town := _town(run, 40_000)
-	town.intent = GovernorIntent.MILITARY
-	run.world.month = 5
-	var company := Raising.raise_from(town, _context(run))
-	assert_eq(company.order, StandingOrder.DEFEND_THE_TOWN)
-
-
-func test_every_company_holds_its_town_until_it_chooses_its_own_order() -> void:
-	# #428: *drive them off* went into *military*, which names no enemy; how a
-	# company picks an order that leaves is #434's. Until then, every intent's
-	# company holds the town.
-	var run := _run()
-	for intent in [GovernorIntent.MILITARY, GovernorIntent.SEDITION, GovernorIntent.GO_WIDE]:
-		var town := _town(run, 40_000)
-		town.intent = intent
-		run.world.month = 5
-		var company := Raising.raise_from(town, _context(run))
-		assert_eq(company.order, StandingOrder.DEFEND_THE_TOWN,
-			"a %s company was given an order nothing chose" % intent)
-
-
-func test_preparing_for_rebellion_raises_a_militia() -> void:
-	var run := _run()
-	var town := _town(run, 40_000)
-	town.intent = GovernorIntent.SEDITION
-	run.world.month = 5
-	assert_eq(Raising.raise_from(town, _context(run)).order,
-		StandingOrder.DEFEND_THE_TOWN)
-
+# --- 🔒 The order comes from the rule (#434, `test_standing_orders`) -----------
 
 func test_the_order_is_not_a_separate_choice() -> void:
 	# 🔒 §4's test applied rather than restated. Nothing anywhere asks the
@@ -319,7 +287,7 @@ func test_and_a_militia_is_never_given_one() -> void:
 	town.objective = &"scouting_company"
 	run.world.month = 5
 	var militia := Raising.raise_from(town, _context(run))
-	militia.order = Raising.MARCH
+	militia.order = StandingOrder.EXPLORE
 
 	var driver := CompanyDriver.new()
 	driver.companies = run.companies

@@ -126,21 +126,6 @@ static func arms_for(town: Town, size: int) -> Dictionary:
 	return out
 
 
-## 🔒 **The standing order comes from the intent that raised it** (§1), never
-## from a separate choice.
-##
-## **Every company defends its town for now** (#428, #432). How a company
-## picks an order that leaves is #434's (`commanders.md` §3, the Author's
-## ruling on #423). Until then a raised company holds the town.
-static func order_for(_intent: StringName) -> StringName:
-	return StandingOrder.DEFEND_THE_TOWN
-
-
-## The one order in the game that leaves the town. Named here because §1's table
-## names it and `StandingOrder` deliberately holds only the defensive list.
-const MARCH: StringName = &"march_on_them"
-
-
 ## 🔒 **Who leads a company of this kind** raised from a town of `people`
 ## (#432, `governor-agendas.md` §6): a scouting party is always a militia, and a
 ## big company has a commander **unless its town held 5,000 or fewer**. This
@@ -176,9 +161,13 @@ static func raise_from(town: Town, context: ColonyContext) -> Company:
 	# 🔒 **Out of workers, all at once, and never out of experts.**
 	town.workers -= size
 
+	# 🔒 **The standing order comes from the rule** (#434, `commanders.md` §3):
+	# the intent that raised it and whether a threat is near, never a separate
+	# choice.
 	var company := context.companies.raise_company(
 		Company.COLONIAL, size, arms, town.id, town.at, context,
-		order_for(town.intent), led_by)
+		OrderRule.order_for(town, town.intent, context), led_by)
+	company.raised_under = town.intent
 
 	context.log.emit(EVENT_RAISED, town.id, context.state.month, {
 		"town": String(town.id),

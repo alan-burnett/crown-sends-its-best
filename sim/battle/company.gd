@@ -99,6 +99,12 @@ const EVENT_COMMANDED: StringName = &"company_commanded"
 const EVENT_DESTROYED: StringName = &"company_destroyed"
 const EVENT_DISBANDED: StringName = &"company_disbanded"
 
+## Land seen for the first time by a company exploring (#434, Seam A).
+const EVENT_EXPLORED: StringName = &"company_explored"
+
+## A company whose town declared, or returned, and took its side (#434).
+const EVENT_TURNED: StringName = &"company_turned"
+
 ## How long a leaderless militia stands before it goes home (`battles.md` §4).
 ## Tuning, and §9 of `commanders.md` says so.
 static var _militia_months: int = 6
@@ -244,25 +250,24 @@ var order: StringName = StandingOrder.DEFEND_THE_TOWN
 
 ## 🔒 **Who leads it, settled when it is raised** (#432, `governor-agendas.md`
 ## §6). A scouting party is always a militia; a big company has a commander
-## unless its town was small. **This replaces the order deciding it**
-## (`commanders.md` §2) for a town's companies, so a scouting party sent to
-## explore stays a militia however far it goes. Empty for companies nobody
-## settled it for — a muster, a landing — which the order still decides.
+## unless its town was small; a war party or a duke's landing has one. **The
+## order no longer decides it** (#434), so a scouting party sent to explore
+## stays a militia however far it goes. Empty is a militia.
 var led_by: StringName = &""
+
+## The intent of the governor who raised it (#434, `commanders.md` §3): what the
+## rule read for its order, and — for a company raised to prepare for rebellion
+## — what makes its foe only ever the Crown's.
+var raised_under: StringName = &""
 
 const MILITIA: StringName = &"militia"
 const COMMANDED: StringName = &"commander"
 
 
-## Whether anybody will be deciding for it: its leadership where the raising
-## settled it, and otherwise its order (`commanders.md` §2).
+## Whether anybody will be deciding for it: its leadership as the raising
+## settled it, and nobody where nothing did.
 func wants_a_commander() -> bool:
-	match led_by:
-		MILITIA:
-			return false
-		COMMANDED:
-			return true
-	return StandingOrder.needs_a_commander(order)
+	return led_by == COMMANDED
 
 var at: Vector2i = NOWHERE
 
@@ -707,6 +712,7 @@ func to_dict() -> Dictionary:
 		"commander_level": commander_level,
 		"order": String(order),
 		"led_by": String(led_by),
+		"raised_under": String(raised_under),
 		"at": [at.x, at.y],
 		"destination": [destination.x, destination.y],
 		"raised_month": raised_month,
@@ -730,6 +736,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.commander_level = int(data.get("commander_level", 0))
 	company.order = StandingOrder.of(StringName(data.get("order", "")))
 	company.led_by = StringName(data.get("led_by", ""))
+	company.raised_under = StringName(data.get("raised_under", ""))
 	company.at = _vector(data.get("at", []))
 	company.destination = _vector(data.get("destination", []))
 	company.raised_month = int(data.get("raised_month", 0))

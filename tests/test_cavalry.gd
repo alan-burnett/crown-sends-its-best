@@ -70,9 +70,11 @@ func _raise(
 	var town := run.colony.in_order()[0]
 	var company := run.companies.raise_company(
 		allegiance, size, arms, town.id,
-		town.at if at == Company.NOWHERE else at, _context(run), order)
-	# A commander, when the order calls for one — a headless militia never
-	# initiates, and most of this file is about companies that do.
+		town.at if at == Company.NOWHERE else at, _context(run), order,
+		Company.COMMANDED if StandingOrder.leaves_the_town(order) else Company.MILITIA)
+	# A commander for a company sent somewhere — a headless militia never
+	# initiates, and most of this file is about companies that do. Leadership is
+	# the raising's to settle (#434); this fixture settles it by the order.
 	Commanders.take_command(company, town, run, _context(run))
 	return company
 

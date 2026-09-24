@@ -83,6 +83,34 @@ func observe(
 				villages[(village as Village).at] = _tribe_name(natives, (village as Village).tribe)
 
 
+## What a company on the march sees as it passes (#434, `commanders.md` §3
+## *Explore*): the tile it stands on and those around it. **Explored for good**;
+## once it moves on they are remembered, as last seen. A tile the colony already
+## knows keeps what it knew and is dated this month. Returns how many were new.
+func reveal_around(map: WorldMap, at: Vector2i, month: int, natives: Tribes = null, radius: int = 1) -> int:
+	var fresh := 0
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
+			var tile := at + Vector2i(dx, dy)
+			if not map.in_bounds(tile.x, tile.y):
+				continue
+			var record: Dictionary = seen.get(tile, {})
+			if record.is_empty():
+				fresh += 1
+				record = {"border": false, "worked_by": "", "denied_by": ""}
+			record["terrain"] = String(map.terrain_at(tile.x, tile.y))
+			record["improvement"] = String(map.improvement_at(tile.x, tile.y))
+			record["month"] = month
+			record["native"] = _native_name(natives, tile)
+			seen[tile] = record
+	if natives != null:
+		for village in natives.villages_in_order():
+			var place := (village as Village).at
+			if maxi(absi(place.x - at.x), absi(place.y - at.y)) <= radius:
+				villages[place] = _tribe_name(natives, (village as Village).tribe)
+	return fresh
+
+
 ## Whichever tribe works this tile, by name, or empty.
 static func _native_name(natives: Tribes, at: Vector2i) -> String:
 	if natives == null:

@@ -53,17 +53,22 @@ func _context(run: RunState) -> ColonyContext:
 	return context
 
 
-## Raise a company under an order, and give it whoever the order calls for.
+## Raise a company under an order, led as the raising settles it: by default a
+## commander for a company sent somewhere and nobody for one that stays (#434
+## makes that the raising's business, not the order's).
 func _raise(
 	run: RunState,
 	order: StringName = StandingOrder.DEFEND_THE_TOWN,
 	allegiance: StringName = Company.COLONIAL,
 	size: int = 20,
+	led_by: StringName = &"",
 ) -> Company:
 	var town := run.colony.in_order()[0]
 	var context := _context(run)
+	if String(led_by).is_empty():
+		led_by = Company.COMMANDED if StandingOrder.leaves_the_town(order) else Company.MILITIA
 	var company := run.companies.raise_company(
-		allegiance, size, {}, town.id, town.at, context, order)
+		allegiance, size, {}, town.id, town.at, context, order, led_by)
 	Commanders.take_command(company, town, run, context)
 	return company
 
@@ -76,46 +81,38 @@ func _reckon(run: RunState) -> void:
 	driver.on_phase(WorldPhase.RECKONING, run.world, run.log, run.streams)
 
 
-# --- 🔒 The order decides, and it is not a size check ----------------------
+# --- 🔒 The raising decides who leads it, not the order (#432, #434) ----------
 
-func test_a_defensive_order_produces_no_commander() -> void:
+func test_a_militia_is_given_nobody_whatever_its_order() -> void:
+	# The rule that anything which leaves the town needs a man is retired (#434):
+	# a militia sent to explore still has nobody deciding for it.
 	var run := _run()
-	var militia := _raise(run, StandingOrder.DEFEND_THE_TOWN, Company.COLONIAL, 100)
-	assert_true(militia.is_headless(),
-		"a hundred men behind a stockade were given a general")
+	var scouts := _raise(run, StandingOrder.EXPLORE, Company.COLONIAL, 12, Company.MILITIA)
+	assert_true(scouts.is_headless(), "a militia sent to explore was given a general")
 	assert_empty(Commanders.all_in(run), "a commander was made for nobody to lead")
 
 
-func test_any_order_that_leaves_the_town_produces_one() -> void:
+func test_a_commanded_company_is_given_a_man_whatever_its_order() -> void:
 	var run := _run()
-	var marching := _raise(run, MARCH, Company.COLONIAL, 12)
-	assert_false(marching.is_headless(),
-		"twelve men marching on a village had nobody to decide anything")
+	var garrison := _raise(run, StandingOrder.DEFEND_THE_TOWN, Company.COLONIAL, 100, Company.COMMANDED)
+	assert_false(garrison.is_headless(),
+		"a company raised to be commanded stayed behind its stockade with nobody")
 	assert_eq(Commanders.all_in(run).size(), 1)
 
 
-func test_it_is_not_a_size_check() -> void:
-	# 🔒 §2, stated directly: the hundred need nobody and the twelve need a man.
+func test_nobody_settled_it_and_nobody_leads_it() -> void:
+	# A company raised with no leadership said is a militia, whatever its order.
 	var run := _run()
-	var many := _raise(run, StandingOrder.DEFEND_THE_TOWN, Company.COLONIAL, 100)
-	var few := _raise(run, MARCH, Company.COLONIAL, 12)
-	assert_true(many.is_headless() and not few.is_headless(),
-		"the bigger company got the general: %d headless, %d headless"
-			% [many.size, few.size])
-
-
-func test_an_order_nobody_wrote_down_still_needs_a_man() -> void:
-	# **Everything that is not defensive leaves**, so a new order is safe by
-	# default: the failure is a company that marches with nobody to decide, not
-	# one that is given an officer it did not need.
-	assert_true(StandingOrder.needs_a_commander(&"an_order_nobody_has_written"))
-	assert_false(StandingOrder.needs_a_commander(StandingOrder.DEFEND_THE_TOWN))
+	var town := run.colony.in_order()[0]
+	var company := run.companies.raise_company(
+		Company.COLONIAL, 12, {}, town.id, town.at, _context(run), StandingOrder.MARCH_ON_A_FOE)
+	assert_false(company.wants_a_commander())
+	assert_eq(Commanders.take_command(company, town, run, _context(run)), null)
 
 
 func test_no_order_at_all_is_the_posture() -> void:
 	# `battles.md` §4: a standing posture from whoever raised it and nothing else.
 	assert_eq(StandingOrder.of(&""), StandingOrder.DEFEND_THE_TOWN)
-	assert_false(StandingOrder.needs_a_commander(&""))
 
 	var run := _run()
 	var town := run.colony.in_order()[0]

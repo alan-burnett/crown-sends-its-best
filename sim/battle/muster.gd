@@ -98,14 +98,14 @@ const LANDS_ARMED: Dictionary = {"guns": 45.0, "tools": 20.0}
 ## 🔒 **The order they march under**, and it is not `defend_the_town`.
 ##
 ## They came to attack, so they need a man to decide where and when to stop
-## (`StandingOrder.needs_a_commander`). Which leans on an open item —
+## (`Company.COMMANDED`, #434). Which leans on an open item —
 ## `battles.md` §13 asks *whether a native company's leadership works as anybody
 ## else's, or whether a tribe's war party answers to the village rather than to a
 ## man*. It is left open in the doc and it is **not settled here**: what this
 ## does is take the uniform path, because §1's *one structure, one resolver,
 ## whoever is holding the musket* is the standing rule and a headless war party
 ## could never leave its village.
-const TO_WAR: StringName = &"march_on_them"
+const TO_WAR: StringName = StandingOrder.MARCH_ON_A_FOE
 
 
 ## Raise everything that is going to be raised this month.
@@ -178,7 +178,7 @@ static func _war_party(
 
 	var party := context.companies.raise_company(
 		Company.NATIVE, going, carried, Company.SUPPORTED_ABROAD,
-		village.at, context, TO_WAR)
+		village.at, context, TO_WAR, Company.COMMANDED)
 	party.raised_by = village.id
 	Commanders.take_command(party, null, run, context)
 
@@ -224,7 +224,7 @@ static func _land(
 
 	var landed := context.companies.raise_company(
 		Company.RIVAL, LANDS_WITH, LANDS_ARMED.duplicate(),
-		Company.SUPPORTED_ABROAD, ashore, context, TO_WAR)
+		Company.SUPPORTED_ABROAD, ashore, context, TO_WAR, Company.COMMANDED)
 	landed.raised_by = duke.id
 	Commanders.take_command(landed, null, run, context)
 
