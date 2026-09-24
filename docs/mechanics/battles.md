@@ -88,8 +88,8 @@ itself further than a comfortable one.
 
 **The company chooses it when it is raised**, from the map and the raising
 governor's intent (`commanders.md` §2). Who leads it — militia or commander —
-depends on its size and its town's, not its order. How the choice is made is
-#423.
+depends on its size and its town's, not its order. The orders, and the rule
+that chooses among them, are `commanders.md` §3.
 
 ## 2. Support and arms are different things
 
@@ -180,10 +180,10 @@ So a company with no commander has nobody to deliberate for it.
 | **Without one** | the standing order it took when it was raised, and nothing else |
 
 **A militia keeps the order it was raised with** — defend the town, explore,
-and so on (`commanders.md` §2; how it is chosen is #423). It cannot be sent
+guard the border or march on a foe (`commanders.md` §3). It cannot be sent
 elsewhere, and nobody can write to it.
 
-**And it disbands after 12 months**, survivors returning to the town. Which gives
+**And it disbands after 12 months**, on the spot, survivors rejoining the town. Which gives
 defence a **running cost**: a militia eats for every month it stands, so a town
 under sustained threat must keep re-raising and keep re-feeding. That is the
 Squeeze arriving in a system it has not touched before.

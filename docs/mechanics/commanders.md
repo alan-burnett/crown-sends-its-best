@@ -30,13 +30,12 @@ rebel town and never names for its soldiers.
 | **Big company** | a **commander** — or a militia if its town had **5,000 or fewer** people |
 
 **A militia may leave the town.** It is not a garrison. It serves **12 months**,
-then disbands, and its people go home to the town that raised it.
+then disbands where it stands, and its people rejoin the town that raised it
+(§3).
 
 **Every company chooses its own standing order when it is raised** — from the
-state of the map and the intent of the governor who raised it. A company raised
-under go wide that sees no threat nearby sets itself to *explore*. **How a
-militia and a commander each choose is not yet designed** (#423), and this doc
-will carry it when it is.
+state of the map and the intent of the governor who raised it (§3, Author's
+ruling, #423).
 
 ### Three outcomes at raising
 
@@ -60,6 +59,80 @@ there has misread both docs.
 
 A **commanded** company is the opposite: its commander deliberates afresh every
 month, and his intent can change.
+
+### The orders
+
+Author's ruling (#423). Four, for every colonial and rebel company:
+
+| Order | What the company does each month |
+| :--- | :--- |
+| **Defend the town** | stays in its town and fights whatever attacks it |
+| **Explore** | moves toward the nearest unexplored tile, revealing the land it passes |
+| **Guard the border** | holds the tile of its town's influence area that faces the nearest threat, or the town if none is known |
+| **March on a foe** | moves on its foe (below) and attacks it |
+
+### How the order is chosen
+
+**By one fixed rule, the same for a militia and a commander.** No personality,
+no weights and no dice — like choosing an objective (`governor-agendas.md` §1).
+The same town, intent and map give the same order.
+
+It reads **the intent the company was raised under**, and **whether a threat is
+known within 8 tiles of its town**:
+
+| Raised under | Threat within 8 | No threat |
+| :--- | :--- | :--- |
+| **Go wide, go tall** (the scouting company) | defend the town | **explore** |
+| **Military** (a big company) | march on a foe | guard the border |
+| **Prepare for rebellion** | defend the town; **march on Crown troops** once the town has declared | the same |
+
+A threat is anything that makes the town unsafe: a foe as defined below.
+
+- **A militia keeps its order** until its term ends or it is destroyed.
+- **A commander starts with it**, and from the next month deliberates afresh
+  (§4, §5). The rule gives him his first order; after that the order is his.
+
+### Its foe
+
+**Whoever makes its town unsafe.** Author's ruling. The foe is the faction that
+contributes most to the town's **safety** (`quality-of-life.md`,
+`governor-agendas.md` §13) — a tribe, a duke, Crown troops — and its nearest
+village, town or company to the raising town.
+
+This includes a tribe that has struck no blow, if its standing has fallen far
+enough to make the town afraid. **A colony can start the war.**
+
+The filters still bind before anything is chosen (`battles.md` §1):
+**colonists never fight colonists**, and a rebel company's foe is always Crown
+troops.
+
+⚠ assumed: *the nearest* is measured from the raising town, in tiles, with ties
+broken on the target's id.
+
+### Explore
+
+**Each month, one move toward the nearest unexplored tile**, measured from the
+company, with ties broken on the tile's coordinates. What it passes becomes
+explored, and stays **last seen** once it leaves (SPEC §11.2).
+
+- **It has no radius.** It goes on to the next nearest tile however far from
+  home that takes it.
+- **It does not seek battle.** It fights only when attacked.
+- **A militia explores until its term ends.** A commander explores until he
+  chooses another order.
+- ⚠ assumed: if nothing unexplored is left anywhere it can reach, it holds where
+  it stands.
+
+**Its ground offends.** A company on a tribe's land is one of the acts a tribe
+notices (`natives.md` §11). A party sent to find land usually finds somebody on
+it.
+
+### The end of a militia's term
+
+**It disbands on the spot**, the month its 12 months are up. Author's ruling.
+Its surviving people rejoin the town that raised it that month, wherever the
+company stood. It does not walk home. ⚠ assumed: whatever arms it still
+carries go back into the town's stores.
 
 ## 4. Coordination, without a general staff
 
@@ -97,8 +170,8 @@ symptom by scripting behaviour into particular commanders.
 
 **There is no "will he obey" check anywhere.**
 
-A commander scores every option open to him — attack, hold, march, withdraw to the
-town and disband — and takes the best. *Refusing to attack* is simply **attack
+A commander scores every option open to him — attack, hold, march, explore,
+withdraw to the town and disband — and takes the best. *Refusing to attack* is simply **attack
 scoring below retreat**, and it needs no code of its own.
 
 **Keeping his army alive is one of his considerations**, weighted by personality.

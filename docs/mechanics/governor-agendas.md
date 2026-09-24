@@ -203,10 +203,31 @@ like.
 **An improvement is a candidate here only while the town holds fewer than one
 improvement per thousand people**, or the slot would cover every tile in farms.
 
-⚠ **Deferred to an authored session: how a pasture is measured** (#421). It
-yields no crop — it carries livestock — so *what it would have added to this
-month's harvest* has no obvious answer yet. **Until it is ruled, improve yield
-does not offer a pasture.**
+### A pasture
+
+Author's ruling (#421). A pasture yields no crop. It carries livestock, which
+then stop eating food and breed faster (SPEC §12.2). So what it would have
+added is **the food it saves and the head it breeds**:
+
+```
+worth = (feed saved + breeding gained − yield lost) / its resource cost
+```
+
+- **Feed saved** — the head of livestock that went **unsupported** last month,
+  up to the pasture's capacity, times what they ate.
+- **Breeding gained** — the extra head those same livestock would bear in a
+  month on pasture, against off it.
+- **Yield lost** — what the tile harvested last month, less what it would yield
+  under a pasture.
+
+All three are valued at town prices, like every other candidate.
+
+**A town with no unsupported livestock is offered no pasture**, because its
+worth comes out at nought or below.
+
+⚠ assumed: when several kinds are unsupported, the capacity is filled kind by
+kind in id order. The tile is the one with the highest worth that a pasture may
+stand on.
 
 ## 6. Expeditions and companies
 
@@ -244,13 +265,12 @@ exploring rather than fighting: **10% of the town**.
 **Both may leave the town.** A militia is not a garrison.
 
 **Every company chooses its own standing order when it is raised**, from **the
-state of the map** and **the intent of the governor who raised it**. A company
-raised under go wide that sees no threat nearby sets itself to *explore*; others
-might *attack Crown troops*, and so on. **`commanders.md` defines this, for a
-militia and a commander alike** — a deep design pass of its own, still to come.
+state of the map** and **the intent of the governor who raised it**: explore,
+defend the town, guard the border or march on a foe. The orders, the rule that
+chooses among them and what *explore* does are `commanders.md` §3 (#423).
 
-**A militia serves a set number of months**, then disbands and **its people
-return to the town that raised it**: **12 months**.
+**A militia serves a set number of months**, then disbands where it stands and
+**its people rejoin the town that raised it**: **12 months**.
 
 **The town feeds its companies** in the field, every month they are out.
 
@@ -428,9 +448,8 @@ stockade. No improvements, expeditions or companies.
 
 ## 8. What each improvement scoring looks for
 
-⚠ **Deferred to an authored session** (#422), with the tile-and-site pass
-(§14). These stand as placeholders until then. Each is a `choose` scorer in the
-registry.
+Each is a `choose` scorer in the registry. ⚠ **The table is still the PO's
+draft**; the Author has ruled only on native land (below).
 
 | Scorer | Considers | Picks the tile with |
 | :--- | :--- | :--- |
@@ -438,6 +457,27 @@ registry.
 | *tall* | farm, pasture, mine | the largest gain in food, then ore (the early slot; *improve yield* covers the rest) |
 | *worth* (get rich) | plantations, mine, farm | the highest §5 worth, after tax |
 | *military* | fort | the border tile facing the nearest threat |
+
+### Native land
+
+Author's ruling (#422). **Every scorer discounts native land by the intent's
+aversion to it**:
+
+```
+worth on the tile × (1 − intrusion depth × aversion)
+```
+
+*Intrusion depth* is `Intrusion`'s figure, nought to one, margin included — the
+same one founding and worked land are charged by (`natives.md` §3).
+
+| Intent | Aversion | So |
+| :--- | --: | :--- |
+| Go tall | 1.0 | keeps off their land. A tile deep in it is worth nothing to him |
+| Get rich | 0.5 | will farm their land if it pays twice as well |
+| Go wide | 0.3 | wants the ground and mostly takes it |
+| Military | 0 | builds its fort where the threat is, whoever's ground it is |
+
+Education and rebellion build no improvements.
 
 ## 9. Get rich — what it chooses between
 
@@ -640,15 +680,12 @@ signs are the same for every governor; personality only scales them.
 His **temperament** — mettle, pity, vanity — is separate. It shapes how he takes
 the PC's orders (compliance), not which intent he holds.
 
-## 14. 📌 Pinned
+## 14. Settled since
 
-**Tribes react to what the colony does near them**: land worked, improvements
-built, companies on their ground. They should **write to the governor**, who
-may write to the PC, before they decide what to do. That is a tribes design pass
-of its own, not this doc's.
+Both items pinned during the agenda session now have homes:
 
-**Choosing a tile for an improvement, and a site for an expedition.** Both need
-their own pass: which tiles are best by each intent's lights (§8), and where a
-new town should go. **Native land comes into play here** — ground a tribe holds
-is weighed when choosing where to build and where to settle — which is why it is
-no longer a consideration on intent (§13).
+- **Tribes react to what the colony does near them**, and write to the governor
+  first: `natives.md` §11 (#424).
+- **Tile choice and site choice**, and how native land is weighed in both: §8
+  above and `founding-towns.md` §5 (#422). That is why native land is no longer
+  a consideration on intent (§13).

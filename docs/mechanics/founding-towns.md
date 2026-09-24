@@ -166,6 +166,40 @@ It also gives *away from the tribes* a real price. §11.4 says founding near or
 beyond native land offends the nearby tribes **in proportion to the intrusion**,
 and the best ground is usually ground somebody already lives on.
 
+### What makes a site good
+
+Author's ruling (#422). Each candidate site scores:
+
+```
+site = ( 2 × total yield of the tiles within 1
+         + total yield of the other tiles within 3 )
+       × closeness
+```
+
+| Nearest existing town | Closeness |
+| :--- | --: |
+| within 3 tiles | 0.2 |
+| within 4 tiles | 0.75 |
+| further | 1.0 |
+
+*Within n* is the ring distance the influence area uses (Chebyshev), so the
+first term is the site and the eight tiles around it, and the second the forty
+beyond them. Lean and thick expeditions score sites the same way.
+
+This is the **ground merit** that `SitePreference` weighs the PC's preference
+against. The PC's letter still bends the pick within the region as it does now.
+
+⚠ assumed, for the Author to strike:
+
+- **Total yield** is the tile's unimproved yield on the none / low / medium /
+  high scale (`tiles-and-improvements.md` §1), summed over every resource.
+- **Native land** is discounted per tile by the sending intent's aversion, as
+  for improvements (`governor-agendas.md` §8): go wide 0.3 for a lean
+  expedition, go tall 1.0 for a thick one.
+- **Existing town** means towns only, not expeditions on their way.
+- Candidates are explored land tiles outside every town's influence. The
+  region is centred on the best of them.
+
 ## 6. Travel
 
 A town-launched expedition behaves as a **unit on the map**, crossing to its

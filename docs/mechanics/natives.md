@@ -67,7 +67,7 @@ Downward, per §12.5 and §11.4:
   of no return.
 - A **military** governor whose company marches on them (§11.3) — the clearest
   route to that point, and one the PC can argue against but not forbid. What a
-  tribe notices of the colony's acts, and how it answers, is #424.
+  tribe notices of the colony's acts, and how it answers, is §11.
 
 Upward:
 
@@ -180,10 +180,15 @@ change in what a tribe wants.** No letter says a tribe has gone to war. The
 player notices that a trade dried up, hears a governor mention something, or sees
 movement on the map — and only if he is paying attention.
 
-The one place native affairs reach the desk directly is §12.5's last line: a tribe
-asks a governor for resources for its own war, and **the governor asks the PC how
-to answer.** That is the single native decision he is ever handed, and he makes it
-knowing almost nothing.
+Native affairs reach the desk directly in two places, both through a governor:
+
+- §12.5's last line: a tribe asks a governor for resources for its own war, and
+  **the governor asks the PC how to answer.**
+- **A tribe's grievance** (§11), which a loyal governor passes on before he
+  answers it.
+
+Either way the PC decides knowing almost nothing, about people he has only
+heard of from the man asking.
 
 ## 9. Tuning targets
 
@@ -219,3 +224,107 @@ knowing almost nothing.
 - Whether standing toward the **Crown's troops** can differ enough from standing
   toward the colony to matter — a tribe that tolerates its neighbours and hates
   the soldiers garrisoned among them.
+
+## 11. They write first
+
+Author's ruling (#424). **Tribes react to what the colony does, not to what a
+governor intends.** Military is always available and names no enemy
+(`governor-agendas.md` §2), so there is no intent for them to read. What they
+see is men in their fields.
+
+### What a tribe notices
+
+Four acts, each on ground that lies **in its land or within `Intrusion`'s
+margin** of it. How much each offends is `Intrusion`'s depth, as founding
+already is (§3).
+
+| Act | Noticed |
+| :--- | :--- |
+| **Land worked** | the first month a town works the tile |
+| **An improvement built** | the month it is completed |
+| **A company on its ground** | the first month a colonial or Crown company stands there — an exploring party included (`commanders.md` §3) |
+| **A town founded** | the month it is founded, as today |
+
+Each is read from the event log (Seam A), as `StandingDriver` already reads
+foundings. ⚠ assumed: the same act on the same tile is noticed once, until it
+stops and starts again.
+
+### 🔒 They always write first
+
+**Before a tribe acts against the colony, it writes to the governor.** No
+exceptions. Not for a raid, a razing, a taken tile or a war party — and **not
+even when it has been attacked**. A tribe that has been struck writes to say so
+before it strikes back.
+
+This is announce-then-act (`world-month.md`) given to the tribe. It gives them
+a voice of their own (SPEC §3.2): they say what they object to before they do
+anything about it. And it means a war with a tribe always comes after a letter
+the colony could have answered.
+
+**§1 still holds.** The letter goes to the **governor** of the town the act
+belongs to: the town that worked the tile, built the improvement, founded the
+town or raised the company. A tribe never writes to the PC. ⚠ assumed: for a
+Crown company, the governor of the nearest town.
+
+The letter names the act and asks for it to stop: leave the field, take the men
+off our ground.
+
+### The governor's answer
+
+He chooses one of four. It is a decision point, so it goes through the kernel
+(`deliberation.md`), scored on his intent, his personality, the town's safety,
+and what yielding would cost the town.
+
+| Answer | What happens |
+| :--- | :--- |
+| **Yield** | the town stops working the tile, or recalls the company. An improvement is left standing but unused |
+| **Gift** | he sends the tribe resources to smooth it over |
+| **Refuse** | the town carries on |
+| **Threaten** | he tells them what the town will do if they push it |
+
+What the tribe then does:
+
+- **Yield or gift** wins back some of the standing the act cost.
+- **Refuse** costs more standing. If the act goes on, the tribe may take a
+  hostile objective (§4) — and writes again first, saying what it will do.
+- **Threaten** depends on who is stronger. ⚠ assumed: a tribe whose villages
+  near the town field less than half the town's force backs down, and the act
+  costs it no further standing. A stronger one takes it as a refusal and loses
+  more standing than a plain refusal would cost.
+
+⚠ assumed: a gift is worth one month of the tile's yield at town prices, paid
+in what the tribe values most (§5).
+
+### Whether he asks the PC first
+
+**It depends on his loyalty.** Author's ruling.
+
+| His loyalty | He |
+| :--- | :--- |
+| at or above neutral (50) | writes to the PC asking how to answer, and waits a month for the reply |
+| below neutral | decides, and tells the PC afterwards in his next letter |
+| at or below the loyalty floor | decides, and says nothing |
+
+⚠ assumed: the thresholds are the ones the `loyalty` consideration already uses
+(`governor-agendas.md` §13).
+
+The PC's reply is an **Order** to the governor, resolved by compliance into his
+answer (SPEC §8.5). It moves which answer he gives. It never changes what the
+tribe does.
+
+So a loyal governor costs the tribe a month of waiting. A disloyal one answers
+at once, and the PC may learn of it only when the war starts.
+
+### Timing
+
+⚠ assumed. A tribe writes in month N. The governor answers in N+1, or in N+2 if
+he waited for the PC. The tribe acts on his answer the month after it arrives.
+If no answer comes within two months, the tribe takes that as a refusal.
+
+### What is still open
+
+- The standing figures: what each act costs, and what yielding, a gift or a
+  refusal wins back or loses. Tuning.
+- Whether a threat that works counts toward the point of no return (§2).
+- The prose. Tribes' letters to governors are never read directly, but the
+  governor quotes them when he passes one on.

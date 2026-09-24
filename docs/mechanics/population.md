@@ -168,8 +168,29 @@ and changes to:
   holds.
 - Two event params are printed raw today — `expedition_attacked.lost_people`,
   `expedition_turned_back.souls` — and are **already right** after the change.
-- How large figures read (*4,000*, *some four thousand*) is the presentation's
-  business and the Author's.
+### How large figures read
+
+Author's ruling (#425). **It depends on who is writing.**
+
+| Who | Reads as |
+| :--- | :--- |
+| **The town's own governor**, about his town, and **the Steward** | counted heads, rounded to the nearest ten: *3,930* |
+| **Everyone else** — dukes, Crown officers, patrons, commanders, a governor about another town | an estimate in words: *nearly four thousand*, *some forty-five thousand souls* |
+| **Cutscene captions** | words |
+| **The run summary** | exact: *3,933* |
+
+**Rounding is not perception.** A rounded figure is still the true figure,
+rounded. It is a `{param:}` printed in the sender's way of counting, not a
+`{perception:}` bent by his bias (CLAUDE.md, *Content pipeline*). How each
+sender counts is a whitelisted contact field.
+
+⚠ assumed, for the Author to strike:
+
+- Figures below a hundred print exact, whoever writes.
+- An estimate rounds to one significant figure below ten thousand and two
+  above: *four thousand*, *forty-five thousand*.
+- The hedge is *nearly* when the true figure is below the rounded one, and
+  *some* when it is at or above it.
 
 ## 8. Saves and tests
 
@@ -187,4 +208,4 @@ units. Landing this first means every gate is authored once.
 
 ## 10. Open items
 
-- How large figures read to the player.
+None. How large figures read is §7 (#425).
