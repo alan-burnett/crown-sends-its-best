@@ -106,8 +106,7 @@ func _decide(town: Town, actor: DeliberationActor, harness: Dictionary, mandate:
 		"map": context.map,
 		"territory": context.territory,
 		"mandate": mandate,
-		"urged": String(town.urged_intent),
-		"urged_month": town.urged_month,
+		"urgings": town.urgings,
 	}
 	var candidates: Array = []
 	for intent in GovernorIntent.IN_ORDER:
@@ -526,16 +525,15 @@ func test_urging_an_intent_does_not_set_it() -> void:
 	state.month = 5
 
 	assert_eq(String(executor.execute(intent, state, log)), String(Intent.COMPLETED))
-	assert_eq(String(town.urged_intent), String(GovernorIntent.DEFENCE))
-	assert_eq(town.urged_month, 5)
+	assert_eq(String(town.urging_by().target), String(GovernorIntent.DEFENCE))
+	assert_eq(town.urging_by().month, 5)
 	assert_eq(String(town.intent), String(GovernorIntent.ECONOMY),
 		"a letter set the governor's intent outright")
 
 
 func test_what_the_pc_urged_reaches_the_deliberation() -> void:
 	var town := _town(GovernorIntent.ECONOMY)
-	town.urged_intent = GovernorIntent.DEFENCE
-	town.urged_month = 0
+	town.urge(Urging.from_pc(GovernorIntent.DEFENCE, 0))
 	var harness := _harness(town)
 
 	var deaf := _governor(&"deaf", {String(IntentConsiderations.URGING): 0.0})
@@ -566,16 +564,15 @@ func test_intent_and_objective_survive_save_and_reload() -> void:
 	var town := _part_built(&"granary", 0.5)
 	town.intent = GovernorIntent.DEFENCE
 	town.intent_since = 7
-	town.urged_intent = GovernorIntent.POPULATION
-	town.urged_month = 6
+	town.urge(Urging.from_pc(GovernorIntent.POPULATION, 6))
 	town.objective_target = Vector2i(3, 5)
 	town.objective_idle_months = 2
 
 	var restored := Town.from_dict(town.to_dict())
 	assert_eq(String(restored.intent), String(GovernorIntent.DEFENCE))
 	assert_eq(restored.intent_since, 7)
-	assert_eq(String(restored.urged_intent), String(GovernorIntent.POPULATION))
-	assert_eq(restored.urged_month, 6)
+	assert_eq(String(restored.urging_by().target), String(GovernorIntent.POPULATION))
+	assert_eq(restored.urging_by().month, 6)
 	assert_eq(restored.objective_target, Vector2i(3, 5))
 	assert_eq(restored.objective_idle_months, 2)
 	assert_eq(String(restored.objective_intent), String(GovernorIntent.ECONOMY))

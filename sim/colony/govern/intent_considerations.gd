@@ -165,6 +165,16 @@ const URGING_INTENSITY: Dictionary = {
 static func intensity_of(tone: StringName) -> float:
 	return float(URGING_INTENSITY.get(tone, 1.0))
 
+
+## 🔒 **How much an author's urging counts, against the PC's** (#405).
+##
+## One for everybody, which is the PC's weight today and so changes nothing
+## while only the PC urges. **Not decided here** — `governor-objectives.md` §4
+## leaves it to the first act that urges on someone else's behalf, and this is
+## the one place that act will change.
+static func author_weight(_author: StringName) -> float:
+	return 1.0
+
 ## Months of food at which a town stops thinking about food at all.
 const COMFORTABLE_MONTHS: float = 4.0
 
@@ -441,11 +451,11 @@ class CrownUrging extends Consideration:
 		super(IntentConsiderations.URGING)
 
 	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
-		var urged := StringName(context.get_value("urged", ""))
-		if String(urged).is_empty():
-			return 0.0
-		if candidate.id != urged:
-			return 0.0
+		# 🔒 **Every live urging toward this candidate, whoever wrote it**
+		# (#405). Two toward the same intent both count; urgings toward different
+		# intents pull different ways and the kernel weighs them as it weighs
+		# everything else.
+		var urgings: Array = context.get_value("urgings", [])
 		# 🔒 **Both knobs, from one factor, and the factor is the half-life**
 		# (#262, §4). How hard it pulls and how long it lasts are the same question
 		# — how much he took the letter to mean — and a letter read as the Crown
@@ -460,11 +470,15 @@ class CrownUrging extends Consideration:
 		# Measured at any month after that, this is both: a desperate urging
 		# scores higher than a dutiful one **and** is still scoring when the
 		# dutiful one has gone.
-		var intensity := IntentConsiderations.intensity_of(
-			StringName(context.get_value("urged_tone", "")))
-		var age := float(context.month - int(context.get_value("urged_month", 0)))
-		var pull := IntentConsiderations.decayed(
-			age, IntentConsiderations.URGING_HALF_LIFE * intensity)
+		var pull := 0.0
+		for entry in urgings:
+			var urging: Urging = entry
+			if urging.target != candidate.id:
+				continue
+			pull += urging.pull(context.month, IntentConsiderations.URGING_HALF_LIFE) \
+				* IntentConsiderations.author_weight(urging.author)
+		if pull <= 0.0:
+			return 0.0
 		# 🔒 **Clamped here, not left to the kernel's guard.** `scored()` treats a
 		# score outside `[-1, +1]` as a bug and says so, which is right — a
 		# consideration that shouts drowns out the weight vector and personality

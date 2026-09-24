@@ -326,8 +326,12 @@ class UrgingConsideration:
 
 	func applies_to(candidate: Candidate) -> bool:
 		var company := CommanderConsiderations._company_of(candidate)
-		return company != null and not String(company.urged).is_empty() \
-			and candidate.id == company.urged
+		if company == null:
+			return false
+		for urging in company.urgings:
+			if (urging as Urging).target == candidate.id:
+				return true
+		return false
 
 	func score(
 		actor: DeliberationActor, candidate: Candidate, context: DeliberationContext
@@ -339,11 +343,17 @@ class UrgingConsideration:
 		# (#262, `tone.md` §4): a consideration is clamped to one, so a fresh
 		# letter is already at the ceiling and what a stronger tone buys is that
 		# it is still pulling months later.
-		var intensity := IntentConsiderations.intensity_of(company.urged_tone)
-		var age := float(context.month - company.urged_month)
-		return IntentConsiderations.decayed(
-			age, CommanderConsiderations.URGING_HALF_LIFE * intensity
-		) * CommanderConsiderations.regard_of(actor)
+		#
+		# **Every author's, summed and capped at one** (#405), then weighed
+		# against what he thinks of the PC as it always was.
+		var pull := 0.0
+		for entry in company.urgings:
+			var urging: Urging = entry
+			if urging.target != candidate.id:
+				continue
+			pull += urging.pull(context.month, CommanderConsiderations.URGING_HALF_LIFE) \
+				* IntentConsiderations.author_weight(urging.author)
+		return minf(1.0, pull) * CommanderConsiderations.regard_of(actor)
 
 
 ## A company doing nothing, in a war that is costing its town every month.

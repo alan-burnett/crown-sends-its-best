@@ -510,9 +510,10 @@ func test_the_urging_survives_the_save() -> void:
 	company.urge(CommanderConsiderations.ATTACK, Tone.DESPERATE, 7)
 
 	var back := Companies.from_dict(run.companies.to_dict()).find(company.id)
-	assert_eq(back.urged, company.urged)
-	assert_eq(back.urged_tone, company.urged_tone)
-	assert_eq(back.urged_month, company.urged_month)
+	assert_eq(back.urging_by().target, company.urging_by().target)
+	assert_eq(back.urging_by().tone, company.urging_by().tone)
+	assert_eq(back.urging_by().month, company.urging_by().month)
+	assert_almost_eq(back.urging_by().strength, company.urging_by().strength)
 
 
 func _pull(run: RunState, man: Contact, board: Dictionary) -> float:

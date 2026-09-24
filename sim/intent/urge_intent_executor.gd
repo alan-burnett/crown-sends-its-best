@@ -54,19 +54,19 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	if town == null:
 		return Intent.STALLED
 
-	town.urged_intent = wanted
-	town.urged_month = state.month
 	# **And how hard it was said** (#262, `tone.md` §4). Carried from the letter
 	# rather than read off the man, because the urging outlives the month it
-	# arrived in and it is the letter that was emphatic, not the reader.
-	town.urged_tone = StringName(intent.data.get(Compliance.URGED_TONE, ""))
+	# arrived in and it is the letter that was emphatic, not the reader. **The
+	# PC's**, replacing his last and nobody else's (#405).
+	var tone := StringName(intent.data.get(Compliance.URGED_TONE, ""))
+	town.urge(Urging.from_pc(wanted, state.month, tone))
 
 	log.emit(EVENT_URGED, intent.source, state.month, {
 		"intent": String(intent.id),
 		"town": String(town.id),
 		"governor": String(town.governor_id),
 		"urged": String(wanted),
-		"tone": String(town.urged_tone),
+		"tone": String(tone),
 		"held": String(town.intent),
 		"already_agreed": town.intent == wanted,
 	}, WorldPhase.MOVEMENT)

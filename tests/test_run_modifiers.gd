@@ -774,9 +774,7 @@ func _urging_at(perk: StringName, months_later: int, raw: bool = false) -> float
 		DecisionKind.GOVERNOR_INTENT, run.world, EventLog.new())
 	context.month = months_later
 	context.data = {
-		"urged": String(GovernorIntent.ECONOMY),
-		"urged_tone": String(Tone.DUTIFUL),
-		"urged_month": 0,
+		"urgings": [Urging.from_pc(GovernorIntent.ECONOMY, 0, Tone.DUTIFUL)],
 	}
 	var urging := IntentConsiderations.CrownUrging.new()
 	var candidate := Candidate.new(GovernorIntent.ECONOMY, {})

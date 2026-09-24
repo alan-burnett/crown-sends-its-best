@@ -893,9 +893,10 @@ static func town_intent_is(args: Dictionary, context: LetterContext) -> bool:
 ## outcome code.
 static func town_disagrees_with_the_crown(_args: Dictionary, context: LetterContext) -> bool:
 	var town := context.town
-	if town == null or String(town.urged_intent).is_empty():
+	var asked: Urging = null if town == null else town.urging_by(Urging.PC)
+	if asked == null:
 		return false
-	return town.urged_intent != town.intent
+	return asked.target != town.intent
 
 
 ## Whether the Chancellor's warning is owed this month.
@@ -1139,13 +1140,15 @@ static func diverged(args: Dictionary, context: LetterContext) -> Dictionary:
 	var latest: Dictionary = {}
 	var when := -1
 	for town in context.colony.in_order():
-		if String(town.urged_intent).is_empty():
+		# The PC's urging: this is what *he* asked, and whom the letter answers.
+		var asked: Urging = town.urging_by(Urging.PC)
+		if asked == null:
 			continue
-		if context.month - town.urged_month > within:
+		if context.month - asked.month > within:
 			continue
-		if town.intent == town.urged_intent:
+		if town.intent == asked.target:
 			continue
-		if town.intent_since < town.urged_month:
+		if town.intent_since < asked.month:
 			# He has not answered yet; a man who has not moved has not refused.
 			continue
 		if town.intent_since >= when:
@@ -1153,7 +1156,7 @@ static func diverged(args: Dictionary, context: LetterContext) -> Dictionary:
 			latest = {
 				"governor": String(town.governor_id),
 				"town": String(town.id),
-				"asked": String(town.urged_intent),
+				"asked": String(asked.target),
 				"did": String(town.intent),
 			}
 	return latest

@@ -34,9 +34,7 @@ func _pull_after(tone: StringName, months: int) -> float:
 	var context := DeliberationContext.new(
 		DecisionKind.GOVERNOR_INTENT, WorldValues.initial_state(), EventLog.new())
 	context.data = {
-		"urged": String(GovernorIntent.ECONOMY),
-		"urged_month": 0,
-		"urged_tone": String(tone),
+		"urgings": [Urging.from_pc(GovernorIntent.ECONOMY, 0, tone)],
 	}
 	context.month = months
 	return IntentConsiderations.CrownUrging.new().score(
@@ -191,7 +189,7 @@ func test_the_letter_carries_its_manner_to_the_town() -> void:
 		town.governor_id, town.governor_id, 1,
 		{"intent": String(GovernorIntent.DEFENCE), Compliance.URGED_TONE: String(Tone.DESPERATE)})
 	assert_eq(executor.execute(intent, run.world, run.log), Intent.COMPLETED)
-	assert_eq(town.urged_tone, Tone.DESPERATE,
+	assert_eq(town.urging_by().tone, Tone.DESPERATE,
 		"the town did not learn how hard the letter had been written")
 
 
@@ -224,10 +222,8 @@ func test_the_town_remembers_it_across_a_save() -> void:
 	# moment the player closed the game.
 	var run := RunState.new_run(SEED)
 	var town := run.colony.in_order()[0]
-	town.urged_intent = GovernorIntent.DEFENCE
-	town.urged_month = 4
-	town.urged_tone = Tone.DESPERATE
+	town.urge(Urging.from_pc(GovernorIntent.DEFENCE, 4, Tone.DESPERATE))
 
 	var restored := Town.from_dict(town.to_dict())
-	assert_eq(restored.urged_tone, Tone.DESPERATE,
+	assert_eq(restored.urging_by().tone, Tone.DESPERATE,
 		"the manner of the urging did not survive the save")

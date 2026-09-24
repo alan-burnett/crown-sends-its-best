@@ -153,8 +153,7 @@ func _context(
 		"map": map,
 		"territory": Territory.compute(map, colony.in_order()),
 		"mandate": String(GovernorIntent.ECONOMY),
-		"urged": String(town.urged_intent),
-		"urged_month": town.urged_month,
+		"urgings": town.urgings,
 		"natives": natives if natives != null else _natives(),
 	}
 	return context
@@ -246,8 +245,7 @@ func _worlds_for(id: StringName) -> Array:
 				worlds.append(_context(_town(), {}, month))
 				for urged in GovernorIntent.IN_ORDER:
 					var town := _town()
-					town.urged_intent = urged
-					town.urged_month = month
+					town.urge(Urging.from_pc(urged, month))
 					worlds.append(_context(town, {}, month))
 		IntentConsiderations.THREAT:
 			# **Across how dangerous the neighbours look**, which is what #204

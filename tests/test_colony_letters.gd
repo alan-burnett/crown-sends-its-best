@@ -269,11 +269,11 @@ func test_the_governor_says_so_when_he_is_going_his_own_way() -> void:
 	context.town = town
 
 	town.intent = GovernorIntent.ECONOMY
-	town.urged_intent = GovernorIntent.ECONOMY
+	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 0))
 	assert_false(ColonyConditions.town_disagrees_with_the_crown({}, context),
 		"he reported a disagreement he is not having")
 
-	town.urged_intent = GovernorIntent.SURVIVAL
+	town.urge(Urging.from_pc(GovernorIntent.SURVIVAL, 0))
 	assert_true(ColonyConditions.town_disagrees_with_the_crown({}, context),
 		"he was asked for one thing, is doing another, and says nothing")
 

@@ -208,7 +208,7 @@ var support: StringName = &""
 ##
 ## A village that sent a war party, or a duke who landed a company. It is not
 ## `support` — that says who feeds them and both of these feed their own — and it
-## is emphatically not `urged`, which is the PC's letter reaching a commander and
+## is emphatically not an urging, which is a letter reaching a commander and
 ## has no business carrying a faction's name.
 ##
 ## What reads it is `Muster`, to know how many a village already has out, so a
@@ -267,15 +267,13 @@ var supplied_month: int = -1
 ##
 ## So this names one of the five things a commander may decide — press the
 ## attack, hold, go on, come home, stand down — and never a place. It is the
-## same shape a governor's `urged_intent` takes, for the same reason: **a letter
-## is not a standing order.** He remembers it, it fades, and how fast depends on
-## how much he took it to mean.
+## same shape a governor's urgings take, for the same reason: **a letter is not a
+## standing order.** He remembers it, it fades, and how fast depends on how much
+## he took it to mean. **One standing urging per author** (#405).
 ##
 ## 🔒 **And it is weighed against his regard, not obeyed.** A man who despises
 ## the PC has had the letter too.
-var urged: StringName = &""
-var urged_month: int = 0
-var urged_tone: StringName = &""
+var urgings: Array[Urging] = []
 
 ## 🔒 **Casualties owed but not yet taken** (#216, `battles.md` §6).
 ##
@@ -607,13 +605,22 @@ func advance(toward: Vector2i, context: ColonyContext) -> bool:
 ## commander weighs it next time he deliberates, against his regard for the man
 ## who wrote it.
 ##
-## **The latest letter is the one he is thinking about.** A second letter
-## replaces the first rather than stacking with it, because a man does not hold
-## two opinions about what the Crown wants.
+## **The latest letter is the one he is thinking about.** A second letter from
+## the PC replaces his first rather than stacking with it, because a man does not
+## hold two opinions about what the Crown wants; another author's stands beside it
+## (#405).
 func urge(toward: StringName, tone: StringName, month: int) -> void:
-	urged = toward
-	urged_tone = tone
-	urged_month = month
+	stand(Urging.from_pc(toward, month, tone))
+
+
+## Stand any author's urging, replacing that author's last (#405).
+func stand(urging: Urging) -> void:
+	Urging.stand(urgings, urging)
+
+
+## This author's standing urging, or null. The PC's by default.
+func urging_by(author: StringName = Urging.PC) -> Urging:
+	return Urging.by(urgings, author)
 
 
 ## Say where a month's marching took it (Seam A).
@@ -673,9 +680,7 @@ func to_dict() -> Dictionary:
 		"unsupported_months": unsupported_months,
 		"sabotaged": sabotaged,
 		"casualties_owed": casualties_owed,
-		"urged": String(urged),
-		"urged_month": urged_month,
-		"urged_tone": String(urged_tone),
+		"urgings": Urging.list_to_dicts(urgings),
 	}
 
 
@@ -697,9 +702,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.unsupported_months = int(data.get("unsupported_months", 0))
 	company.sabotaged = bool(data.get("sabotaged", false))
 	company.casualties_owed = float(data.get("casualties_owed", 0.0))
-	company.urged = StringName(data.get("urged", ""))
-	company.urged_month = int(data.get("urged_month", 0))
-	company.urged_tone = StringName(data.get("urged_tone", ""))
+	company.urgings = Urging.list_from_dicts(data.get("urgings", []))
 	return company
 
 

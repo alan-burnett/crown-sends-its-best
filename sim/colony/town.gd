@@ -156,24 +156,20 @@ var intent: StringName = &""
 ## say how long he has been at this.
 var intent_since: int = 0
 
-## What the PC last wrote that the town was *for*, and when.
+## What the town has been argued to be *for*, **one standing urging per author**
+## (#405, `governor-objectives.md` §4): the PC's letter, and in time the
+## Provost's or a patron's. A new one from an author replaces that author's
+## last; the rest stand.
 ##
-## **🔒 An order reaches the governor's intent, never the town's objective**
+## **🔒 An urging reaches the governor's intent, never the town's objective**
 ## (SPEC §8.5). This is the only thing a letter can move, and a consideration —
 ## not a rule — decides what he does about it.
-var urged_intent: StringName = &""
-var urged_month: int = 0
-
-## The manner the PC wrote it in (#262, `tone.md` §4).
 ##
-## 🔒 **Intensity is the axis, not warmth.** A letter read as *the Crown is truly
-## angry we have not built the second town* still pulls next spring; one that was
-## flowery, or merely peevish, is easy to roll one's eyes at and get on with
-## one's own life — the out-of-touch aristocrat being out of touch again.
-##
-## Empty where the urging predates the field or came from nowhere in particular,
-## which reads as the plain register.
-var urged_tone: StringName = &""
+## 🔒 **Intensity is the axis, not warmth** (#262, `tone.md` §4): each carries
+## how hard it was said, as a factor on how long it lasts. A letter read as *the
+## Crown is truly angry we have not built the second town* still pulls next
+## spring; one that was flowery, or merely peevish, is easy to roll one's eyes at.
+var urgings: Array[Urging] = []
 
 ## What the town is working towards. **The town chooses it, deterministically,
 ## to serve the intent** — a building, an improvement, or a standing posture.
@@ -292,6 +288,16 @@ func _init(p_id: StringName = &"", p_name: String = "", p_at: Vector2i = Vector2
 ## How many tiles the town can work at once.
 ## 🔒 **One tile, or one worker-slot, per thousand workers, floored** (#426,
 ## `population.md` §3). A town of 1,999 works one.
+## Stand an urging, replacing its author's last (#405).
+func urge(urging: Urging) -> void:
+	Urging.stand(urgings, urging)
+
+
+## This author's standing urging, or null. The PC's by default.
+func urging_by(author: StringName = Urging.PC) -> Urging:
+	return Urging.by(urgings, author)
+
+
 func workable_tiles() -> int:
 	return Population.slots_for(workers)
 
@@ -521,9 +527,7 @@ func to_dict() -> Dictionary:
 		"last_completed_month": last_completed_month,
 		"intent": String(intent),
 		"intent_since": intent_since,
-		"urged_intent": String(urged_intent),
-		"urged_month": urged_month,
-		"urged_tone": String(urged_tone),
+		"urgings": Urging.list_to_dicts(urgings),
 		"objective": String(objective),
 		"objective_target": objective_target,
 		"objective_intent": String(objective_intent),
@@ -574,9 +578,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.last_completed_month = int(data.get("last_completed_month", -1))
 	town.intent = StringName(data.get("intent", ""))
 	town.intent_since = int(data.get("intent_since", 0))
-	town.urged_intent = StringName(data.get("urged_intent", ""))
-	town.urged_month = int(data.get("urged_month", 0))
-	town.urged_tone = StringName(data.get("urged_tone", ""))
+	town.urgings = Urging.list_from_dicts(data.get("urgings", []))
 	town.objective = StringName(data.get("objective", ""))
 	town.objective_target = data.get("objective_target", Vector2i(-1, -1))
 	town.objective_intent = StringName(data.get("objective_intent", ""))

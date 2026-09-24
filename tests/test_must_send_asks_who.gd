@@ -185,8 +185,7 @@ func test_he_reports_the_gap_between_what_was_asked_and_what_was_done() -> void:
 	var town := run.colony.in_order()[0]
 
 	# The PC urged one thing; the man settled on another afterwards.
-	town.urged_intent = GovernorIntent.ECONOMY
-	town.urged_month = 2
+	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
 	town.intent = GovernorIntent.DEFENCE
 	town.intent_since = 4
 	run.world.month = 5
@@ -205,8 +204,7 @@ func test_he_names_the_thing_as_a_letter_would_name_it() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urged_intent = GovernorIntent.ECONOMY
-	town.urged_month = 2
+	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
 	town.intent = GovernorIntent.DEFENCE
 	town.intent_since = 4
 	run.world.month = 5
@@ -222,8 +220,7 @@ func test_a_man_who_has_not_answered_yet_has_not_refused() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urged_intent = GovernorIntent.ECONOMY
-	town.urged_month = 6
+	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 6))
 	town.intent = GovernorIntent.DEFENCE
 	# He settled on this *before* the PC wrote, so he has not yet answered.
 	town.intent_since = 3
@@ -235,14 +232,13 @@ func test_a_man_who_has_not_answered_yet_has_not_refused() -> void:
 
 
 func test_an_old_urging_is_not_reported_for_ever() -> void:
-	# `urged_intent` is never cleared, so without a window the Diplomat would
+	# The PC's urging is never cleared, so without a window the Diplomat would
 	# report the same four-year-old disobedience every five months until the run
 	# ended. He is reporting news, not keeping a grudge.
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urged_intent = GovernorIntent.ECONOMY
-	town.urged_month = 2
+	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
 	town.intent = GovernorIntent.DEFENCE
 	town.intent_since = 4
 
@@ -261,8 +257,7 @@ func test_nothing_at_all_diverges_in_an_obedient_colony() -> void:
 	var run := RunState.new_run(SEED)
 	ContactRoster.load_into(run, content)
 	var town := run.colony.in_order()[0]
-	town.urged_intent = GovernorIntent.ECONOMY
-	town.urged_month = 2
+	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
 	town.intent = GovernorIntent.ECONOMY
 	town.intent_since = 4
 	run.world.month = 5
@@ -277,8 +272,7 @@ func _after_a_silence(run: RunState) -> Town:
 	var town: Town = run.colony.in_order()[0]
 	run.contact(town.governor_id).relationship = Relationship.new(
 		town.governor_id, Relationship.MEDIUM_AT - 10.0)
-	town.urged_intent = GovernorIntent.ECONOMY
-	town.urged_month = 2
+	town.urge(Urging.from_pc(GovernorIntent.ECONOMY, 2))
 	town.intent = GovernorIntent.DEFENCE
 	town.intent_since = 4
 	run.world.month = 5
