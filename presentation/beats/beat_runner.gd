@@ -52,17 +52,26 @@ var _showing: Beat = null
 
 
 func _ready() -> void:
-	_timer = Timer.new()
-	_timer.one_shot = true
-	_timer.timeout.connect(_next)
-	add_child(_timer)
+	_make_nodes()
 
-	_player = AudioStreamPlayer.new()
-	add_child(_player)
+
+## The timer and the player, made on first need. **Before `_ready` as well**: a
+## caller that adds this and plays it in one breath would otherwise find no timer
+## and play the whole month in a single frame.
+func _make_nodes() -> void:
+	if _timer == null:
+		_timer = Timer.new()
+		_timer.one_shot = true
+		_timer.timeout.connect(_next)
+		add_child(_timer)
+	if _player == null:
+		_player = AudioStreamPlayer.new()
+		add_child(_player)
 
 
 ## Start playing. An empty queue finishes at once.
 func play(p_queue: BeatQueue) -> void:
+	_make_nodes()
 	queue = p_queue
 	_over = false
 	if queue == null or queue.is_done():

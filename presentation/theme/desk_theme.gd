@@ -44,6 +44,10 @@ const MAP_CONTESTED: Color = Color(0.95, 0.58, 0.25, 0.9)
 const MAP_DENIED: Color = Color(0.58, 0.55, 0.62, 0.75)
 ## Remembered ground is hatched, so it reads as stale even in one colour.
 const MAP_STALE: Color = Color(0.0, 0.0, 0.0, 0.35)
+## Where something happened this month (#296): the ring map playback leaves on
+## a tile, and the brighter one on the beat being shown.
+const MAP_BEAT: Color = Color(0.98, 0.93, 0.70, 0.55)
+const MAP_BEAT_NOW: Color = Color(1.0, 0.97, 0.80, 0.95)
 
 ## The Ledger. In and out are separate colours rather than one net line,
 ## because a net line hides whether a bad month was a collapse in trade or a

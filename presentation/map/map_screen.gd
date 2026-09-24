@@ -6,7 +6,8 @@ extends Control
 ## ## 🔒 Read-only, and only what the colony knows
 ##
 ## **Only the desk has decisions** (SPEC §7), so nothing here changes anything.
-## There is one control on the screen and it closes the screen.
+## One control closes the screen; the only other, while a month plays back,
+## skips to its end — which changes nothing either (#296).
 ##
 ## **The map shows what the colony knows** (SPEC §11.2), which is why this reads
 ## `MapKnowledge` and nothing else. `tools/lint.gd` fails if anything under
@@ -22,10 +23,15 @@ extends Control
 ##   out of date and the player should feel that.
 ## - **In sight** — full colour. What is shown is true this month.
 ##
-## ## Static, not playback
+## ## Playback (#296, `beats.md` §6)
 ##
-## M2 needs the player to be able to look. Map playback arrives in M4, when
-## expeditions and armies give it something worth watching.
+## At the start of a turn the map plays back the month: the beats
+## `MonthPlayback` chose, in the order they happened, each leaving a ring on its
+## tile while the view eases to it. **The map underneath is already the
+## month-end map** — every beat's outcome is only a mark on it — so skipping at
+## any point settles the rest at once and lands on exactly the map watching to
+## the end would have (§3). Opened from the desk's button it is a map to look at,
+## with no playback at all.
 
 ## How large a tile is at rest, in pixels.
 const TILE: float = 28.0
@@ -49,6 +55,77 @@ var _dragging: bool = false
 var _canvas: Control = null
 var _caption: Label = null
 var _closed: Callable = Callable()
+
+## The month being played back, and the rings its beats have left.
+var _runner: BeatRunner = null
+var _skip: Button = null
+var _marks: Array[Beat] = []
+var _showing: Beat = null
+var _easing: Tween = null
+
+
+## Play back a month's beats over the map (#296). Call after `begin`.
+##
+## An empty list plays nothing; the map is simply there to look at.
+func play(beats: Array[Beat], assets: AssetRegistry = null) -> void:
+	if beats.is_empty():
+		return
+	_runner = BeatRunner.new()
+	_runner.assets = assets
+	add_child(_runner)
+	_runner.beat_shown.connect(_on_beat_shown)
+	_runner.finished.connect(_on_played)
+	if _skip != null:
+		_skip.visible = true
+	var queue := BeatQueue.new(self)
+	queue.push_all(beats)
+	_runner.play(queue)
+
+
+## 🔒 **A map beat's outcome: a ring on its tile** (`MonthPlayback.SETTLES`).
+##
+## Called by the queue *before* the beat is shown, and all at once by a skip, so
+## the rings are the same however the month was watched.
+func mark_beat(beat: Beat) -> void:
+	_marks.append(beat)
+	_redraw()
+
+
+func _on_beat_shown(beat: Beat) -> void:
+	_showing = beat
+	_ease_to(beat.place)
+	_redraw()
+
+
+## 🔒 **Watched or skipped, it ends on the same map**, framed on the colony.
+func _on_played() -> void:
+	_showing = null
+	if _easing != null:
+		_easing.kill()
+	if _skip != null:
+		_skip.visible = false
+	_frame_the_colony()
+
+
+func _skip_playback() -> void:
+	if _runner != null:
+		_runner.skip()
+
+
+func _ease_to(at: Vector2i) -> void:
+	if at == Beat.NOWHERE or size == Vector2.ZERO:
+		return
+	var goal := size * 0.5 - (Vector2(at) + Vector2(0.5, 0.5)) * TILE * _zoom
+	if _easing != null:
+		_easing.kill()
+	_easing = create_tween()
+	_easing.tween_method(_set_offset, _offset, goal, 0.35) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+
+
+func _set_offset(to: Vector2) -> void:
+	_offset = to
+	_redraw()
 
 
 ## Show the map. `on_closed` is called when the player is done with it.
@@ -101,6 +178,13 @@ func _build() -> void:
 	column.add_child(_caption)
 
 	column.add_child(_spacer_that_grows())
+
+	# **Skip settles; it never cancels** (`beats.md` §3). Only shown while a
+	# month is playing back.
+	_skip = DeskTheme.button("Skip")
+	_skip.visible = false
+	_skip.pressed.connect(_skip_playback)
+	column.add_child(_skip)
 
 	# **One control, and it leaves.** Nothing on this screen may change anything.
 	var back := DeskTheme.button("Back to the desk")
@@ -195,6 +279,15 @@ func _draw_map() -> void:
 		var centre := (Vector2(at) + Vector2(0.5, 0.5)) * side + _offset
 		_canvas.draw_circle(centre, maxf(3.0, side * 0.3), DeskTheme.MAP_TOWN)
 
+	# What happened this month (#296). A ring per beat, sized by how much it
+	# mattered, and the one being shown brighter.
+	for beat in _marks:
+		var middle := (Vector2(beat.place) + Vector2(0.5, 0.5)) * side + _offset
+		var now := beat == _showing
+		_canvas.draw_arc(middle, side * lerpf(0.45, 0.8, beat.magnitude), 0.0, TAU, 24,
+			DeskTheme.MAP_BEAT_NOW if now else DeskTheme.MAP_BEAT,
+			maxf(1.5, side * (0.12 if now else 0.06)))
+
 	# **A different shape, not a smaller circle.** There is nobody in a village
 	# the PC could write to, and a marker that read as a settlement of his own
 	# would be the map making a promise the correspondence cannot keep.
@@ -275,6 +368,10 @@ func _on_key(event: InputEventKey) -> void:
 		KEY_EQUAL, KEY_PLUS, KEY_KP_ADD: _zoom_about(size * 0.5, ZOOM_STEP)
 		KEY_MINUS, KEY_KP_SUBTRACT: _zoom_about(size * 0.5, 1.0 / ZOOM_STEP)
 		KEY_HOME: _frame_the_colony()
+		KEY_SPACE, KEY_ENTER:
+			if _skip == null or not _skip.visible:
+				return
+			_skip_playback()
 		KEY_ESCAPE: _close()
 		_: return
 	accept_event()

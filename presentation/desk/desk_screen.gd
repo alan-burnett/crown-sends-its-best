@@ -437,8 +437,36 @@ func _open_the_summary() -> void:
 ## **Sending commits every decision in it and saves the game. There is no going
 ## back.** Cancelling changes nothing at all.
 func _send_the_post() -> void:
+	# Where the month about to be run begins in the log, so what it emitted is
+	# exactly what the map plays back.
+	var mark := run.log.next_seq()
 	if not machine.send_post():
 		refresh()
 		return
 	machine.begin_turn()
 	refresh()
+	_play_back_the_month(run.log.since(mark))
+
+
+## 🔒 **The map plays back the month at the start of a turn** (#296,
+## `beats.md` §6), over the desk, and hands the desk back when it closes.
+##
+## A month in which nothing the colony could see happened plays nothing, and the
+## player goes straight to his post.
+func _play_back_the_month(events: Array[SimEvent]) -> void:
+	if machine.is_over() or run.knowledge == null:
+		return
+	var towns: Dictionary = {}
+	for town in run.colony.in_order():
+		towns[String((town as Town).id)] = (town as Town).at
+	var villages: Dictionary = {}
+	if run.tribes != null:
+		for village in run.tribes.villages_in_order():
+			villages[String(village.id)] = village.at
+	var beats := MonthPlayback.select(events, run.log, run.knowledge, towns, villages)
+	if beats.is_empty():
+		return
+	var screen := MapScreen.new()
+	add_child(screen)
+	screen.begin(run.knowledge, refresh)
+	screen.play(beats, get_node_or_null(^"/root/Assets") as AssetRegistry)

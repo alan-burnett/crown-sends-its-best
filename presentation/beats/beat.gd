@@ -54,6 +54,12 @@ var magnitude: float = 1.0
 ## destination is and nothing about how to get there.
 var outcome: Dictionary = {}
 
+## How long to hold it, in seconds, when a producer has paced it; below nought
+## means its kind's own time. Map playback paces a thin month out toward its
+## target (#296, `beats.md` §6) — a quiet month and a violent one should take
+## about as long to watch.
+var hold: float = -1.0
+
 
 func _init(
 	p_kind: StringName = &"",
@@ -79,6 +85,8 @@ func has_a_place() -> bool:
 ## rather than count: a queue is trimmed by what it costs in seconds, and a beat
 ## that could not say how long it takes could not be budgeted for.
 func seconds() -> float:
+	if hold >= 0.0:
+		return hold
 	return BeatKinds.seconds_of(kind) * lerpf(BeatKinds.QUIETEST, 1.0, magnitude)
 
 
