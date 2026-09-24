@@ -233,6 +233,38 @@ func is_complete() -> bool:
 ## resolves against the chosen tone, so inserts fill, `only_tones` lines appear
 ## or vanish, and per-line overrides swap.
 func assemble(context: LetterContext) -> String:
+	var parts := _drafted(context)
+
+	# 🔒 **One sentence, and nothing else about the letter changes** (#263,
+	# §9). Before the closing, because it is the last thing he says rather than
+	# how he signs off — and keyed by the tone, which is what makes harsh a second
+	# axis instead of a sixth entry in the first.
+	if outgoing.harsh:
+		var clause := HarshClause.sentence(outgoing.tone)
+		if not clause.is_empty():
+			parts.append(renderer.resolve_slots(clause, {}, letter, context))
+
+	var closing := renderer.render_lines(letter.closing(), letter, context)
+	if not closing.is_empty():
+		parts.append(closing)
+
+	return LetterRenderer.tidy(" ".join(parts))
+
+
+## 🔒 **The letter as far as it has been written** (#295, `beats.md` §5): the
+## tone line and every step answered so far, in step order — `assemble` without
+## the harsh sentence and the closing, which are how a letter *ends*.
+##
+## What the drafting hand draws. **It only ever grows as the player chooses**,
+## because tone is step one and resolves every line before any is drawn, and the
+## steps are asked in the order they are written — so each choice appends a
+## sentence and never rewrites one. `assemble` is this and then its ending, so
+## the letter the hand finishes is the letter that is sent.
+func draft(context: LetterContext) -> String:
+	return LetterRenderer.tidy(" ".join(_drafted(context)))
+
+
+func _drafted(context: LetterContext) -> PackedStringArray:
 	context.tone = outgoing.tone
 	var parts: PackedStringArray = PackedStringArray()
 
@@ -250,21 +282,7 @@ func assemble(context: LetterContext) -> String:
 		var text := renderer.render_line(option, letter, context)
 		if not text.is_empty():
 			parts.append(text)
-
-	# 🔒 **One sentence, and nothing else about the letter changes** (#263,
-	# §9). Before the closing, because it is the last thing he says rather than
-	# how he signs off — and keyed by the tone, which is what makes harsh a second
-	# axis instead of a sixth entry in the first.
-	if outgoing.harsh:
-		var clause := HarshClause.sentence(outgoing.tone)
-		if not clause.is_empty():
-			parts.append(renderer.resolve_slots(clause, {}, letter, context))
-
-	var closing := renderer.render_lines(letter.closing(), letter, context)
-	if not closing.is_empty():
-		parts.append(closing)
-
-	return LetterRenderer.tidy(" ".join(parts))
+	return parts
 
 
 ## The opening, with the chosen wording dropped into the letter's own phrasing.

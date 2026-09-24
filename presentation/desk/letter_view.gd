@@ -37,6 +37,22 @@ var _options_box: VBoxContainer = null
 var _reading_margins: MarginContainer = null
 var _was_portrait: bool = true
 
+## 🔒 **The drafting hand** (#295, `beats.md` §5). The sheet it writes on, the
+## hand that queues each sentence, and the runner that plays them at the
+## letter's pace rather than the player's.
+var _sheet_panel: PanelContainer = null
+var _sheet: RichTextLabel = null
+var _hand: DraftingHand = null
+var _runner: BeatRunner = null
+var _reveal: Tween = null
+var _folding: bool = false
+
+## How long the finished letter is held, readable, before it folds — the only
+## moment the player sees what he actually wrote, so it is not skippable. And how
+## long the fold takes. Tuning (`beats.md` §9).
+const READ_SECONDS: float = 1.6
+const FOLD_SECONDS: float = 0.3
+
 
 func open(p_inbound: InboundLetter, p_letter: Letter, p_context: LetterContext, p_wizard: ReplyWizard) -> void:
 	inbound = p_inbound
@@ -44,6 +60,12 @@ func open(p_inbound: InboundLetter, p_letter: Letter, p_context: LetterContext, 
 	context = p_context
 	wizard = p_wizard
 	_build()
+	if wizard != null:
+		_hand = DraftingHand.new(self)
+		_runner = BeatRunner.new()
+		_runner.assets = get_node_or_null(^"/root/Assets") as AssetRegistry
+		add_child(_runner)
+		_runner.beat_shown.connect(_on_line_shown)
 	_refresh()
 
 
@@ -143,10 +165,29 @@ func _build_options() -> PanelContainer:
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	panel.add_child(scroll)
 
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", DeskTheme.GAP)
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(column)
+
+	# The reply, as the hand writes it. Hidden until there is something on it.
+	_sheet_panel = PanelContainer.new()
+	_sheet_panel.add_theme_stylebox_override("panel", DeskTheme.panel(DeskTheme.PAPER))
+	_sheet_panel.visible = false
+	column.add_child(_sheet_panel)
+	_sheet = RichTextLabel.new()
+	_sheet.bbcode_enabled = false
+	_sheet.fit_content = true
+	_sheet.scroll_active = false
+	_sheet.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sheet.add_theme_font_size_override("normal_font_size", DeskTheme.SIZE_LABEL)
+	_sheet.add_theme_color_override("default_color", DeskTheme.INK)
+	_sheet_panel.add_child(_sheet)
+
 	_options_box = VBoxContainer.new()
 	_options_box.add_theme_constant_override("separation", DeskTheme.GAP)
 	_options_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(_options_box)
+	column.add_child(_options_box)
 
 	return panel
 
@@ -229,6 +270,14 @@ func _apply_measure(portrait: bool) -> void:
 
 func _refresh() -> void:
 	_body_label.text = _renderer.render_body(letter, context)
+	# **A letter reopened from the post is on the sheet already**, written — the
+	# hand does not perform it twice. Rewriting it starts a clean sheet.
+	if _hand != null:
+		var so_far := wizard.draft(context)
+		_hand.written = so_far
+		_sheet.text = so_far
+		_sheet.visible_characters = -1
+		_sheet_panel.visible = not so_far.is_empty()
 	_show_step()
 
 
@@ -246,6 +295,7 @@ func _show_step() -> void:
 			var tone: StringName = option["tone"]
 			_add_option(String(option["text"]), func() -> void:
 				wizard.choose_tone(tone)
+				_write()
 				_show_step())
 		_add_set_aside("Set aside without replying")
 		return
@@ -271,6 +321,7 @@ func _show_step() -> void:
 			var option_id := String(option["id"])
 			_add_option(String(option["label"]), func() -> void:
 				wizard.choose(step_id, option_id)
+				_write()
 				_show_step())
 		_add_set_aside("Set aside without replying")
 		return
@@ -278,31 +329,97 @@ func _show_step() -> void:
 	_show_assembled()
 
 
-## **The assembled reply is shown to the player before it joins the post.**
+## Every choice has been made. **Sign it, or write it again.**
+##
+## The hand may still be writing — a player who knows what he wants is ahead of
+## it — and that is fine: signing catches it up.
 func _show_assembled() -> void:
-	_add_prompt("You write:")
+	_add_prompt("Sign it, and it goes with the post.")
 
-	var quoted := PanelContainer.new()
-	quoted.add_theme_stylebox_override("panel", DeskTheme.panel(DeskTheme.PAPER))
-	_options_box.add_child(quoted)
-	var written := DeskTheme.label(wizard.assemble(context), DeskTheme.SIZE_LABEL)
-	quoted.add_child(written)
-
-	var send := DeskTheme.button("Add to the post")
-	send.pressed.connect(func() -> void:
-		inbound.status = InboundLetter.ANSWERED
-		answered.emit(wizard.outgoing)
-		closed.emit())
+	var send := DeskTheme.button("Sign, and add it to the post")
+	send.pressed.connect(_sign_and_post)
 	_options_box.add_child(send)
 	send.grab_focus()
 
 	var rewrite := DeskTheme.button("Write it again")
-	rewrite.pressed.connect(func() -> void:
-		wizard.outgoing.tone = &""
-		wizard.outgoing.harsh = false
-		wizard.outgoing.choices.clear()
-		_show_step())
+	rewrite.pressed.connect(_write_it_again)
 	_options_box.add_child(rewrite)
+
+
+## 🔒 **Sign and post** (`beats.md` §5). The hand fast-forwards — one sound,
+## not a scratch per sentence still queued — the whole letter is on the page with
+## its ending, it is held there long enough to read and cannot be hurried, and
+## then it folds and goes to the post.
+func _sign_and_post() -> void:
+	if _folding:
+		return
+	_folding = true
+	for child in _options_box.get_children():
+		if child is Button:
+			(child as Button).disabled = true
+
+	if _hand != null:
+		_hand.sign()
+	if _runner != null:
+		_runner.skip()
+	if _reveal != null:
+		_reveal.kill()
+	_sheet_panel.visible = true
+	_sheet.text = wizard.assemble(context)
+	_sheet.visible_characters = -1
+
+	await get_tree().create_timer(READ_SECONDS).timeout
+	var fold := create_tween()
+	fold.tween_property(_sheet_panel, "modulate:a", 0.0, FOLD_SECONDS)
+	await fold.finished
+
+	inbound.status = InboundLetter.ANSWERED
+	answered.emit(wizard.outgoing)
+	closed.emit()
+
+
+## **Rewriting is a reopen, not an edit.** A clean sheet, and the hand starts
+## again from the tone.
+func _write_it_again() -> void:
+	wizard.outgoing.tone = &""
+	wizard.outgoing.harsh = false
+	wizard.outgoing.choices.clear()
+	if _hand != null:
+		_hand.restart()
+	if _reveal != null:
+		_reveal.kill()
+	_sheet.text = ""
+	_sheet_panel.visible = false
+	_show_step()
+
+
+## The player chose; give the hand the letter as it now stands.
+func _write() -> void:
+	if _hand == null or _runner == null:
+		return
+	if _hand.wrote(wizard.draft(context)) != null and not _runner.is_playing():
+		_runner.play(_hand.queue)
+
+
+## 🔒 **The settle: the sheet holds the draft before the hand draws it**
+## (`beats.md` §3). What is visible stays where it was, so the reveal carries on
+## from there rather than flashing the new sentence whole.
+func write_draft(beat: Beat) -> void:
+	var shown := _sheet.visible_characters
+	if shown < 0:
+		shown = _sheet.get_total_character_count()
+	_sheet.text = String(beat.outcome.get("text", ""))
+	_sheet.visible_characters = mini(shown, _sheet.get_total_character_count())
+	_sheet_panel.visible = true
+
+
+## The hand draws the new sentence, at the letter's pace.
+func _on_line_shown(beat: Beat) -> void:
+	if _reveal != null:
+		_reveal.kill()
+	_reveal = create_tween()
+	_reveal.tween_property(_sheet, "visible_characters",
+		_sheet.get_total_character_count(), beat.seconds())
 
 
 func _add_prompt(text: String) -> void:

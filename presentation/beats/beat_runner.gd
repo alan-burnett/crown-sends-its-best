@@ -102,6 +102,12 @@ func showing() -> Beat:
 	return _showing
 
 
+## Whether a beat is being shown now. A producer that pushes while the runner is
+## idle has to start it again; one that pushes while it is busy need not.
+func is_playing() -> bool:
+	return _timer != null and not _timer.is_stopped()
+
+
 func _next() -> void:
 	if queue == null or queue.is_done():
 		_showing = null
