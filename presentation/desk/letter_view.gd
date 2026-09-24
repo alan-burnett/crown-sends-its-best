@@ -250,6 +250,19 @@ func _show_step() -> void:
 		_add_set_aside("Set aside without replying")
 		return
 
+	# 🔒 **The second axis, asked after the tone** (#263, `tone.md` §9). The
+	# wizard has asked it since #263, and no screen did — so a player could never
+	# lean on anybody, and a letter was sent with the question unanswered.
+	if wizard.harsh_is_pending():
+		_add_prompt(wizard.harsh_prompt())
+		for option in wizard.harsh_options():
+			var harsh: bool = option["harsh"]
+			_add_option(String(option["label"]), func() -> void:
+				wizard.choose_harsh(harsh)
+				_show_step())
+		_add_set_aside("Set aside without replying")
+		return
+
 	var index := wizard.next_step_index()
 	if index >= 0:
 		_add_prompt(wizard.step_prompt(index, context))
@@ -286,6 +299,7 @@ func _show_assembled() -> void:
 	var rewrite := DeskTheme.button("Write it again")
 	rewrite.pressed.connect(func() -> void:
 		wizard.outgoing.tone = &""
+		wizard.outgoing.harsh = false
 		wizard.outgoing.choices.clear()
 		_show_step())
 	_options_box.add_child(rewrite)
