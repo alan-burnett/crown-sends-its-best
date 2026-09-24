@@ -1,8 +1,8 @@
 # Mechanics — Population
 
-> **Owner:** PO. **Draft, in progress with the Author.** Nothing here is built.
-> Devs implement from this once it is marked settled; devs do not edit it. If
-> this doc ever contradicts SPEC.md, the spec wins.
+> **Owner:** PO. Settled with the Author; **built by #426 and #427** in M8.
+> Devs implement from this; devs do not edit it. If this doc ever contradicts
+> SPEC.md, the spec wins.
 >
 > **Serves:** SPEC §12.1 (growth), §12.2 (workers, experts, livestock), §11.3.
 >

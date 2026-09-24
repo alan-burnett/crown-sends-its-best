@@ -28,52 +28,40 @@ leaves the colony untouched and is paid for out of standing.
 
 ## 2. Town-launched
 
-### The objective sets the ambition
+### Lean and thick
 
-The governor takes **an expedition** as his town's objective — one of the project
-kinds in `governor-objectives.md`. When he takes it, he sets its **target cargo
-by what he can spare**: stockpile above needs, above the current objective, above
-reserve.
+**An expedition is one of two objectives**, and the intent decides which
+(`governor-agendas.md` §6):
 
-The town then gathers toward that target over months exactly as it would toward a
-building, and **launches when it is met**.
+| | Taken by | Gathers for | Takes |
+| :--- | :--- | --: | --: |
+| **Lean** | go wide | 2 months | 20% of the town |
+| **Thick** | go tall | 5 months | 40% of the town |
 
-**This one rule produces both kinds of expedition.** A prosperous town sets a
-grand target and sends a colony that will leap ahead of its parent. A crowded,
-poor town shedding mouths it cannot feed — the overflow case in
-`immigration.md` §10 — sets a target of almost nothing and sends people with what
-they can carry.
+- **While it gathers**, the town raises its reserve of **wood, stone, tools and
+  food**.
+- **When it leaves**, it takes everything of those four **above the town's
+  normal reserve**.
+- **Resources only, never buildings.** A town-launched expedition founds a town
+  with what it carries.
 
-Same objective, same machinery, opposite outcomes.
+**This replaces the old cargo rule**, under which the governor set a target by
+what he could spare and launched when it was met. The difference between a
+grand expedition and a thin one is now **which intent sent it**: a go-wide
+governor sends lean parties early and often, a go-tall governor sends a thick
+one late, from a town that has grown to it.
 
-### But two motives, and therefore two considerations
+### When a town sends one
 
-The cargo rule handles the difference. **The intent does not**, and it must, or
-only one kind of expedition ever launches.
+**The menu's gate decides**, not a consideration. Go wide sends a lean
+expedition while `(population ÷ 1000 − 2) × 2` exceeds the colony's towns plus
+the expeditions already on their way; go tall sends a thick one from 8,000
+people (`governor-agendas.md` §7).
 
-A governor adopts the settlement intent for one of two unrelated reasons:
-
-| Consideration | Measures | The expedition it produces |
-| :--- | :--- | :--- |
-| **`room_to_grow`** | unclaimed land worth taking | the grand one — opportunity |
-| **`crowding`** | people the town's ground cannot carry | the thin one — pressure |
-
-**These must not be merged into one number.** `deliberation.md` makes personality
-a weight vector over considerations, so two considerations give two weights and
-therefore two kinds of governor: the ambitious man who settles because there is
-land, and the pragmatic one who settles because there are too many mouths. A
-single blended term collapses both into the same character.
-
-It also fixes a chicken and egg. `room_to_grow` alone **cannot fire in a one-town
-colony**, because one town never sees enough unclaimed land to justify leaving —
-so the first daughter town can never be founded and the measure never rises.
-Crowding has no such floor: a town too full for its fields is too full whether or
-not anybody has surveyed the frontier.
-
-**Crowding is population against workable ground**, not population alone. A town
-of two hundred with room to work is not crowded; a town of forty on six tiles is.
-Which means the expansion branch of the building tree (`buildings.md` §4) lowers
-crowding by raising influence — a town can build its way out of needing to leave.
+**Crowding and room to grow still matter, one step earlier.** They are
+considerations on **intent** (`governor-agendas.md` §13): room to grow pushes a
+governor toward going wide, crowding pushes him out rather than up. They decide
+whether he goes wide at all; the gate decides when he sends.
 
 ### It takes its share of the purse
 
@@ -203,21 +191,13 @@ home, the remaining stores come home, and the months are gone.
 separate case — an expedition small enough, hit hard enough, has nobody left to
 turn back.
 
-### A deliberate exception to the one-at-a-time rule
+### A share of the people, and the same share of the stores
 
-`CLAUDE.md` holds that **no event of hardship costs a town more than one
-population** — famine, shortage, a bad winter, all one at a time.
-
-**A body of people in the open is not a town.** An expedition loses a share, and
-so does a company under arms (`battles.md`); armed attack on a town is the third
-case. What unites them is that the rule protects a settled population going
-about its business, and none of these three is that.
-
-The reason is that the rule exists to keep per-population consequences uniform
-and legible inside a settled town. An expedition is a single body of people in the
-open with no walls and nobody to call on, and an ambush that takes a quarter of
-them is the correct fiction. **A dev should not "fix" this to match the town
-rule.**
+**Every loss of people is now a share** (`population.md` §6): famine, war and
+ambush alike. What stays particular to a body of people in the open is that
+**it loses the same share of its stores** — a quarter of the people lost is a
+quarter of the cargo lost with them — which is why a well-found expedition stays
+well found in proportion however badly it is mauled.
 
 ## 8. Arrival
 
@@ -246,7 +226,8 @@ Kept as a section because everything downstream depends on it: a daughter town i
 
 ## 10. Tuning targets
 
-- How the governor sizes his target cargo against what he can spare.
+- The gathering months and shares of lean and thick expeditions
+  (`governor-agendas.md` §6).
 - Months to cross a tile, and the months a Crown founding takes to appear.
 - The chance of an expedition meeting something hostile, per month and per
   region.

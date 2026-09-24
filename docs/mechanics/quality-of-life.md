@@ -123,8 +123,9 @@ hope = FITNESS_SHARE * fitness + PROGRESS_SHARE * progress
 
   **Idle months divide rather than merely failing to add**: progress is the
   completed fraction over `1 + idle months`, so standing still actively erodes
-  hope instead of holding it. A **standing posture** has no fraction to report
-  and sits at 0.5 — it is neither advancing nor stuck, the town simply does it.
+  hope instead of holding it. ***No building*** has no fraction to report and sits
+  at 0.5 — it is neither advancing nor stuck, the town simply works its land
+  (`governor-agendas.md` §3).
 
 **Fitness weighs more than progress.** A town forgives slow work on the right
 problem far more readily than fast work on the wrong one. This is where the

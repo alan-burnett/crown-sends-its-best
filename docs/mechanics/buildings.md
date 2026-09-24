@@ -9,21 +9,21 @@
 
 ---
 
-## 1. The branches are the intent axes
+## 1. The branches are a map, not a rule
 
-The tree has seven branches — **food, trade, defence, expansion, comfort,
-education, construction** — and those are exactly the axes a governor's intent
-weights in `governor-objectives.md` §5.
+The tree is drawn in seven branches — **food, trade, defence, expansion,
+comfort, education, construction** — so a reader can find a building.
 
-There was a sixth called *capacity*, and it held a granary, three mills and a
-college. **It was dissolved with the axis it mirrored** (Author's ruling): no
-governor is trying to do "capacity", so no branch should be named for it. Its
-buildings went to the branch whose axis they actually score on.
+**They no longer decide what a governor builds.** Each intent has its own
+ordered menu of objectives (`governor-agendas.md` §7), and a building is wanted
+by whichever menus list it, at whatever place. The dock and the granary are on
+both go wide's and go tall's; the metal tree is on go tall's, get rich's and
+rebellion's; the trade conversions are get rich's alone.
 
-So a branch is not a label. **It is the intent that will pursue it.** A governor
-set on defence walks the stockade line; one set on growing his population wants
-food and comfort; one set on educating his people wants the library. The tree and the deliberation kernel speak the same
-language by construction, and that should survive any later reshuffle.
+There was once a rule that the branches **were** the axes a governor's intent
+weighted. The axis model is retired, and the rule with it. **Every building is
+on at least one menu** — the content validator checks that, and that every
+building sits below its prerequisites on each menu that lists it.
 
 ## 2. The town hall
 
@@ -158,8 +158,9 @@ building for defence gets an economy as a side effect.
 | **library** | 30 wood, 10 stone | medium | Amusement. **Turns resident experts into education**, so experts here generate more experts. Brings the **scholar**, who moves experts between towns | theatre |
 | **college** | 50 wood, 30 stone, 20 iron, 15 tools | **high** | Extends the **scholar**. **Experts elsewhere count here** — three tobacco experts in three towns make this town work as though it held all three, education included | library |
 
-**The branch the Provost argues for** (#401), and the one *educate the people*
-walks.
+**The branch the Provost argues for** (#401). The **education** intent builds
+theatre, library, college and printing press, in that order
+(`governor-agendas.md` §7).
 
 ### Construction
 
@@ -169,10 +170,11 @@ walks.
 | **sawmill** | 20 stone, 20 iron, 15 tools | medium | More wood | — |
 | **mineworks** | 20 wood, 20 stone, 15 tools | medium | More ore | — |
 
-**What the tree is built from.** Every one of these yields a resource that appears
-in some building's cost, which is what puts it on the construction axis — derived,
-not listed. The conversion buildings that turn ore into iron and iron into tools
-score here too, by §6's rule, though they stay in §6.
+**What the tree is built from.** Every one of these yields a resource that
+appears in some building's cost. On go tall's and get rich's menus they are
+weighed in **improve yield**, against the mills, irrigation, farms and mines, by
+what each would have added to this month's harvest for its cost
+(`governor-agendas.md` §5).
 
 Stonecutters and sawmill each cost the resource the other produces, which makes
 them a natural pair rather than a choice.
@@ -317,31 +319,20 @@ own throughput with it and the two columns cannot drift apart.
 **There is no second tier.** One building per conversion, and that is the whole
 improvement available.
 
-### 🔒 What a conversion building is worth to a governor
+### What a conversion building is worth to a governor
 
-A governor scores a building on axes (`governor-objectives.md`). A conversion
-building's worth is **the margin it adds**, and it adds it twice: a better ratio
-means less input per unit, and doubled throughput means more units a worker-month.
+**The trade conversions** — furriers, weaving shed, rolling house, distillery,
+brewhouse — **are get rich's alone**. It weighs them against plantations by what
+each would add for its cost, after the PC's tax, and **never considers one whose
+input it did not harvest last month** (`governor-agendas.md` §9).
 
-**The axis follows the output, and the output already knows what it is.** Nothing
-here names a resource:
+**The metal chain** — foundry, toolworks, gunsmith, armoury — sits on go tall's,
+get rich's and rebellion's menus, gated on ore or iron harvested. **Military does
+not smelt**: it buys its guns (§10 of that doc).
 
-| The output | Axis | Because |
-| :--- | :--- | :--- |
-| anything | **trade** | it is sellable, weighted by price exactly as a yield bonus is |
-| appears in a building's cost | **construction** | the chain feeds construction — iron and tools, and this is §5's argument |
-| `luxury` in `processed.json` | **comfort** | the town drinks it rather than shipping it |
-
-A building can score on more than one. Rum is a luxury and a cash crop, and a
-distillery should be wanted for both reasons by governors who want different
-things.
-
-**The construction row is the one that matters**, and it is the one that was
-missing. §5 claims the mineworks → foundry → toolworks chain *pays for itself in
-construction*. A governor can only act on that if a toolworks reads as
-construction to him, and it does because tools appear in the cost of half the
-tree — which is derived, not asserted.
-
+The old rule, that a conversion was worth its margin on trade, construction and
+comfort axes, went with the axes. It existed because the old scorer could not
+see a conversion at all (#311); a menu cannot miss one.
 
 **The worst conversions improve most.** Ore to iron and sugar to rum quadruple
 their output; the 3:1 chains merely triple theirs. That falls out of the rule
@@ -406,7 +397,7 @@ M3 playtest exercises the construction and trade branches only.
 ## 10. Tuning targets
 
 - The four upkeep tiers in gold.
-- Build capacity per head of population.
+- Build capacity per thousand people.
 - Every effect magnitude — yields, amusement, influence, growth.
 - Whether a developed town can actually afford its own upkeep. Fifteen buildings
   at medium is a great deal of gold a month, and a large town browning out every
@@ -414,22 +405,6 @@ M3 playtest exercises the construction and trade branches only.
 
 ## 11. Open items
 
-- **No governor has ever wanted a conversion building**, and that is now the
-  tree's real problem rather than any price in §5. Measured: thirteen buildings
-  raised in five years and not one foundry, toolworks, brewhouse, distillery,
-  rolling house, furrier's, weaving shed or armoury — all of which §9 says work
-  today.
-
-  The cause is not cost and not the objective weights. `_building_axes()` in
-  `objective_selector.gd` reads yields, defence, quality of life, amusement,
-  reserves, education, immigration, pasture, growth and build speed. **It has no
-  term for `conversions`**, so a foundry's entire purpose is invisible and it
-  scores only for the two months of ore it shelters — a governor can want it as
-  a shed and for nothing else.
-
-  §5's design argument depends on this chain being walked: *the construction
-  branch pays for itself in construction*. It is not being walked. Ticketed separately;
-  **do not reprice anything in §5 to compensate.**
 - **The wharf looks underpriced.** A permanent **+10% on all Crown trade for no
   upkeep** partly offsets the duty forever, and at 50 wood and 20 stone it is an
   automatic build for any town that trades. Worth watching in the harness.

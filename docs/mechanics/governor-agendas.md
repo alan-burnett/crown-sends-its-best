@@ -1,12 +1,11 @@
 # Mechanics — Governor Agendas
 
-> **Owner:** PO. **Draft, in progress with the Author.** Nothing here is built.
-> When it is settled it replaces `governor-objectives.md` §4–§5 and the axis
-> model, and that doc will point here. Until then **`governor-objectives.md`
-> describes the shipping code, and this describes where it is going.**
+> **Owner:** PO. Settled with the Author; **built by #426–#432** in M8. Until
+> those land, the shipping code still runs the old axis model — this doc is the
+> target, and `governor-objectives.md` now points here.
 >
-> Devs implement from this once it is marked settled; devs do not edit it. If
-> this doc ever contradicts SPEC.md, the spec wins.
+> Devs implement from this; devs do not edit it. If this doc ever contradicts
+> SPEC.md, the spec wins.
 >
 > **Serves:** SPEC §8.2 (Intent), §8.5 (orders reach intent, never objective),
 > §11.3 (towns run themselves), §6.1 (Mandate).

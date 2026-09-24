@@ -19,48 +19,44 @@ corresponding with the Crown about terms is the mechanism working, not a special
 case — which is the channel §12.3 implies when it says the PC keeps writing to a
 rebel town and never names for its soldiers.
 
-## 2. Leadership is agency, so the order decides whether one is needed
+## 2. Who leads a company
 
-`battles.md` §4 fixes the important half: a company with no commander has nobody
-to deliberate for it, so it can only hold a standing posture.
+**The size of the town that raised it decides**, not its order. Author's ruling
+(`governor-agendas.md` §6):
 
-**That is the test.** When a town sheds population and resources to raise a
-company, ask what the company is *for*:
-
-| The standing order | Needs a commander? |
+| | Led by |
 | :--- | :--- |
-| **Defend the town** | **No.** It never leaves, never chooses, never reconsiders |
-| Anything that leaves the town | **Yes.** Somebody has to decide where, and when to stop |
+| **Small company** | always a **militia** |
+| **Big company** | a **commander** — or a militia if its town had **5,000 or fewer** people |
 
-You do not need a general to man a palisade. You need one the moment the company
-has to *go* somewhere, because going somewhere is a decision and a headless
-company cannot make one.
+**A militia may leave the town.** It is not a garrison. It serves **12 months**,
+then disbands, and its people go home to the town that raised it.
 
-**So it is not a size check.** A hundred men sitting behind a stockade need
-nobody; twelve men marching on a village need someone to decide whether to press
-on when they find it defended.
+**Every company chooses its own standing order when it is raised** — from the
+state of the map and the intent of the governor who raised it. A company raised
+under go wide that sees no threat nearby sets itself to *explore*. **How a
+militia and a commander each choose is not yet designed** (#423), and this doc
+will carry it when it is.
 
 ### Three outcomes at raising
 
-1. **A veteran is waiting in this town** (§7) — he takes the command, at the level
-   he left at.
-2. **No veteran, and the order needs one** — a new commander is generated, at
-   level zero.
-3. **The order is defensive** — no commander, a headless militia, and it disbands
-   on its timer (`battles.md` §4).
+1. **A big company, and a veteran is waiting in this town** (§7) — he takes the
+   command, at the level he left at.
+2. **A big company, no veteran** — a new commander is generated, at level zero.
+3. **A small company, or a big one from a small town** — a militia, with no
+   commander, and it disbands at the end of its term.
 
 ## 3. Orders are not objectives
 
 Worth being exact, because the words carry weight elsewhere.
 
-A town has an **objective** that it reconsiders every Settle — complete, stalled,
-or superseded (`governor-objectives.md` §7). A militia has none of that. It has a
-**standing order** given once by whoever raised it, and every map move executes
-against it until the company disbands or dies.
+A town has an **objective** that it holds until complete or until its
+governor's intent changes (`governor-objectives.md` §7). A militia has none of
+that. It has a **standing order**, chosen once when it is raised (§2), and every
+map move executes against it until the company disbands or dies.
 
-*Defend the town* is never complete and never stalls. **No reconsideration
-machinery applies to a headless company**, and a dev who wires it there has
-misread both docs.
+**No reconsideration machinery applies to a militia**, and a dev who wires it
+there has misread both docs.
 
 A **commanded** company is the opposite: its commander deliberates afresh every
 month, and his intent can change.

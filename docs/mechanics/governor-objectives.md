@@ -6,13 +6,18 @@
 >
 > **Serves:** SPEC §11.3 (towns run themselves, the Colony Month), §6.1
 > (Mandate), §8.5 (orders are requests), §12.1, and the satire in §3.2.
+>
+> **The intents, their menus and the considerations live in
+> `governor-agendas.md`.** This doc keeps the frame around them: the two levels,
+> the cycle, the tiers, urging and the mandate, and why the PC cannot name a
+> project.
 
 ---
 
 ## 1. Two levels, and only one of them is personal
 
-**Intent** is what the governor wants for his town. *Increase economic output.
-Grow the population. Strengthen our defences. Settle a new town.* It is a
+**Intent** is what the governor wants for his town. *Get rich. Go tall. Go wide.
+See to our defences.* It is a
 standing goal and it may hold for twenty months or more.
 
 **Objective** is the concrete project the town is working on. *Build a church.
@@ -80,25 +85,15 @@ keeps *wants* deliberately. It is one word and it is his.
 
 ### The set
 
-Starting set, to grow:
+**Six intents**, each with its own menu of objectives — `governor-agendas.md` §2:
+go tall, go wide, get rich, military, education, and prepare for rebellion.
 
-- Increase economic output
-- Grow the population
-- Strengthen defences
-- Settle a new town
-- Secure the town's survival (the crisis intent)
-- **Prepare the town for rebellion** — reachable only at very low loyalty
-- **Drive them off** — reachable only where a tribe is actually on the town's
-  ground, which is a filter rather than a weight (`deliberation.md` §5)
-- **Educate the people** — a town that wants its people to amount to something.
-  Weights the education axis above all others (below). **The PC may urge it**, as
-  he may any other, and so may the Provost (§4, *An urging has an author*).
-
-That last one is the only intent directed **against** the PC, and it is what
-`contacts.md` §4 means when it says an order at the bottom of the loyalty scale
-does not merely fail but can become the reason for what happens next. A governor
-holding it is a resident contact with heavy influence deliberately driving rebel
-sentiment upward, and his town's objectives now serve that.
+**Prepare for rebellion** is the only intent directed **against** the PC, and it
+is what `contacts.md` §4 means when it says an order at the bottom of the
+loyalty scale does not merely fail but can become the reason for what happens
+next. A governor holding it is a resident contact with heavy influence
+deliberately driving rebel sentiment upward, and his town's objectives now serve
+that.
 
 It does not replace SPEC §12.3's threshold — a town still rebels when sentiment
 crosses it. The two work together: the governor accelerates, sentiment crosses,
@@ -108,35 +103,14 @@ and gives the player something he can see coming.
 ### How it is chosen
 
 Through the **deliberation kernel**, in world phase 8. Candidates are the intents
-available; considerations score them; the governor's personality is the weight
-vector. `choose()` emits its trace, which is what lets his letter state his
-reasoning truthfully.
+the filters allow; considerations score them; the governor's personality is the
+weight vector. `choose()` emits its trace, which is what lets his letter state
+his reasoning truthfully.
 
-**Nine considerations**, and a governor carries a weight for every one:
-
-| | Reads |
-| :--- | :--- |
-| `food_security` | months of food in hand |
-| `quality_of_life` | how the town is living |
-| `revenue` | what it is earning the Crown |
-| `native_threat` | the tribes on its border |
-| `room_to_grow` | unclaimed land worth taking |
-| `crowding` | people against workable ground (§6 of `founding-towns.md`) |
-| `mandate` | what the Crown appointed him to do |
-| `native_land` | tribes sitting on ground the town would work |
-| `crown_urging` | **what the PC last told him the town was for** |
-
-**Three filters, applied before scoring** — locked rules, never weights
-(`deliberation.md` §5):
-
-- **A town cannot intend to settle nowhere.** No governor, however expansionist,
-  sends an expedition to country the colony has never seen.
-- **Nobody drives off a tribe that is not there.** A man whose town has never
-  seen a native cannot want it, however warlike he is.
-- **Sedition is unreachable above a loyalty floor.** A weight can lose a close
-  vote and then win one; this must be impossible for a man who does not loathe
-  the PC, whatever else his temperament says. It is also what makes recovery
-  work — raise him back over the line and the candidate stops existing for him.
+**The considerations, their table and the filters are in
+`governor-agendas.md` §13.** Each consideration measures how much of a problem
+one thing is in his town, and a table says how hard that pushes toward each
+intent. A `baseline` row speaks for the untroubled intents in a quiet town.
 
 ### 🔒 The PC's letter fades, and it only ever pulls
 
@@ -204,69 +178,20 @@ changes.
 ### What an objective is
 
 A thing that takes time and resources, which the town cooperates to achieve under
-the governor's direction. Mechanically it is three things:
+the governor's direction: a building, an improvement on a named tile, an
+expedition, a company.
 
-- a **resource requirement** list
-- a **labour bias** for the Work phase
-- a **completion condition**
-
-Two kinds exist, and both must work or governors only ever write about
-construction:
-
-- **Projects** that complete — a building, an improvement on a named tile,
-  amassing an expedition's supplies.
-- **Standing postures** that do not — stockpiling food, harvesting a resource,
-  fortifying.
+**When there is nothing worth doing, the objective is *no building*** — the
+shared fallback that replaced the old standing postures, giving +10% yield on
+every worked tile (`governor-agendas.md` §3).
 
 ### How it is chosen
 
-**Deterministically.** Every candidate — a building, an improvement on a named
-tile, a standing posture — is measured on **the same seven axes**, and the intent
-says what each axis is worth. Take the best.
-
-### 🔒 The seven axes
-
-**Each names something a governor is actually trying to do.** That is the test an
-axis has to pass, and it is the one the old *capacity* axis failed.
-
-| Axis | What it measures | What feeds it |
-| :--- | :--- | :--- |
-| **food** | keeping people fed, now and through a lean month | food yields, food held in reserve, livestock, births |
-| **trade** | what the town can sell | yields and outputs weighted by price |
-| **defence** | keeping the town safe | walls, towers, companies |
-| **comfort** | how pleasant life is | quality of life, amusement, luxuries |
-| **expansion** | a second town | immigration drawn, experts drawn |
-| **education** | people who amount to something | experts turned into education |
-| **construction** | the means to build more | anything that appears in a building's cost: stone, wood, ore, iron, tools |
-
-**Construction is derived, not listed.** A yield or an output scores on it when
-its resource appears in some building's cost — so stonecutters, a sawmill and a
-toolworks all read as construction without any code naming a resource. A thing
-may score on several axes: wood is sellable *and* builds the tree.
-
-### Why there is no capacity axis
-
-There was one, and it was defined nowhere — a sum of six unrelated things:
-learning, build speed, reserves, pasture, births, and whether a building's output
-fed construction. **No governor is trying to do "capacity."** Dissolved by the
-Author's ruling and rehomed:
-
-| Was in capacity | Now |
-| :--- | :--- |
-| learning | **education** |
-| build speed | gone with the crane (#327) |
-| food held in reserve, pasture, births | **food** |
-| a reserve of anything else | dropped — the conversion's own output scoring (`buildings.md` §6) already values it, and counting both was a double count |
-| feeds construction | **construction** |
-
-**Every intent's profile loses its capacity weight and gains two.** Construction
-starts at the intent's old capacity weight, so a toolworks is wanted exactly as
-much as #311 made it; education starts small everywhere except *educate the
-people*. Calibrating both is #377's.
-
-That structure is what keeps it extensible without branching: **adding an intent
-is adding a row**, and adding a kind of objective is teaching the scorer to
-measure one more thing. Neither is an `if` on which intent it is.
+**Deterministically, by walking the intent's menu** — `governor-agendas.md`
+§3–§7. Each intent has an ordered list of objectives with a gate on each; the
+town takes the first that is wanted, reachable and placeable. Where a slot needs
+a choice — which tile, which yield building, which plantation — it is scored,
+also deterministically (§5 of that doc).
 
 **Ties break on a hash of the run seed with the town and the candidate** — fixed
 by the seed as required, but deliberately **not drawn from an RNG stream**, so a
@@ -299,13 +224,14 @@ an intent:
 
 | What the PC writes | Intent |
 | :--- | :--- |
-| attend to the colony's profit | increase economic output |
-| see that the town grows | grow the population |
-| see to your defences | strengthen defences |
-| plant a new settlement | settle a new town |
-| your people's survival must come first | secure survival |
-| be rid of them | drive them off |
-| see that the people are educated | educate the people |
+| *see that the town grows, and its people amount to something* | go tall |
+| *plant new settlements* | go wide |
+| *see that the town prospers* | get rich |
+| *see to your defences* / *be rid of them* | military |
+
+Placeholder prose; the Author writes the lines. **Education is urged by the
+Provost, not the PC**, and nobody asks a governor to prepare a rebellion
+(`governor-agendas.md` §2).
 
 ### Why the lock is right
 
@@ -331,9 +257,9 @@ A dev who adds one has broken a locked invariant.
 ### What the PC does instead
 
 Everything he might have wanted from naming a project, he gets by arguing about
-priority. He cannot say *build a granary*; he can say *your people's survival
-must come first*, and a governor who takes that to heart will build the granary
-himself, on a better tile than the PC would have picked.
+priority. He cannot say *build a granary*; he can say *see that the town grows*,
+and a governor who takes that to heart will build the granary himself, on a
+better tile than the PC would have picked.
 
 ### The Mandate is an intent-level instruction
 
@@ -343,37 +269,17 @@ mechanism, not two.
 
 ## 7. Reconsideration
 
-Every Settle, the town runs a **reconsider step**. It is deterministic — no
-personality, no dice. It asks three questions:
+**An objective is held until it is complete, or the governor's intent changes.**
+Nothing else ends it (`governor-agendas.md` §3). Author's ruling.
 
-1. **Is the objective complete?**
-2. **Has it stalled?**
-3. **Has the intent changed since this objective was chosen?**
-
-If none hold, the town sticks to what it is doing. **Stickiness is not a tuned
-switching margin; it falls out of these three tests.** A town that is making
-progress on a sensible project simply carries on.
-
-### Stall detection
-
-Two kinds, both deterministic:
-
-- **Hard stall** — a required input cannot be obtained at all. The militia needs
-  guns, guns need iron, the town produces no ore and cannot buy any. The
-  objective is unreachable and no amount of patience fixes it.
-- **Soft stall** — progress has been below a threshold for some months. The work
-  is technically possible and is going nowhere.
-
-### Intent change, and sunk progress
-
-An intent change makes the objective **eligible** for reconsideration; it does
-not automatically abandon it. Sunk progress is weighed deterministically: a dock
-three weeks from completion gets finished, a dock barely begun does not.
-
-**This matters most in an emergency.** If natives are burning the outskirts and
-the governor's intent turns to defence, the town must not spend eleven more
-months on a dock. The crisis intent should be able to override deep sunk
-progress, and that is the case to tune against.
+- **No stall detection.** Buildings do not compete with tile yields, and needs
+  are paid before the objective, so a town that goes broke keeps its objective
+  and makes no progress — too bad. It resumes when it can afford to.
+- **No crisis override.** There is no crisis intent any more: a starving town
+  turns its tiles to food through the needs tier, which outranks any objective.
+- ***No building* never holds.** It never completes, so the menu is walked again
+  every Settle while it stands, and the first month a gate opens the town takes
+  that item.
 
 ## 8. How this feeds Quality of Life
 
@@ -384,8 +290,8 @@ a smaller term.
 The two systems meet exactly here, and the interaction is the point:
 
 **A governor whose intent is wrong for his town's situation tanks its morale, no
-matter how well he executes.** A starving town whose governor is pursuing
-economic output will get an excellent plantation and a hopeless population. The
+matter how well he executes.** A starving town whose governor is set on
+getting rich will get an excellent plantation and a hopeless population. The
 citizens still eat, because needs are tier 1 and outrank him. They simply have no
 faith that anyone is solving the actual problem.
 
@@ -402,7 +308,6 @@ month's intent reads this month's QoL. One month apart, never within a month.
 | Honour, delay, negotiate or discard an order | **yes** — compliance, M1 |
 | Choose an intent | **yes** — deliberation |
 | Choose an objective serving that intent | **no** — deterministic |
-| Detect a stall | **no** — deterministic |
 | Choose a tile for an improvement | **no** — deterministic |
 
 A dev adding a personality weight to any row marked *no* has broken the design.
@@ -411,15 +316,11 @@ rather than as character.
 
 ## 10. Open items
 
-- The full intent set, and whether "serve the Crown" belongs in it as distinct
-  from economic output.
 - The mandate decay curve. §6.1 says "especially in the early game" and nothing
   more.
-- Soft stall thresholds — how many months of how little progress.
-- How hard a crisis intent should override sunk progress.
 - Whether an intent, once abandoned, should be less attractive for a while, so a
   governor does not oscillate between two intents on alternate months.
 - **How fast the PC's urging should fade**, and whether a repeated letter should
   refresh it or compound it. Currently it refreshes.
 - Whether a town whose governor is missing should keep its intent, as it does
-  now, or fall to survival.
+  now, or fall to *no building*.

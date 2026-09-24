@@ -34,14 +34,15 @@ field and nothing else.
 
 ### 🔒 Raising one is an objective, like any other
 
-**Author's ruling (#342).** A governor under a military intent may take *raise a
-company* as his objective, **scored through the deliberation kernel against every
-building and improvement he could choose instead.**
+**Author's ruling (#342).** Raising a company is an objective on an intent's
+menu, like a building (`governor-agendas.md` §7): **small and big companies**,
+each with its own gate. Go wide, go tall, military and prepare for rebellion
+raise them; get rich and education do not.
 
-Not a second path that bypasses the objective system. A town weighs a company
-against a granary on the same axes, which is the only way a governor can decline
-to raise one because the harvest matters more — and that refusal is the thing
-that makes raising one mean something.
+Not a second path that bypasses the objective system. Where a company sits on a
+menu, and what its gate asks, is how a governor declines to raise one because
+something else comes first — and that refusal is what makes raising one mean
+something.
 
 It also keeps §11 true. The PC's instrument is *raising companies through a
 governor's intent*: he shifts the weights by letter and the governor decides, the
@@ -85,16 +86,10 @@ itself further than a comfortable one.
 
 ### Which standing order it gets
 
-**From the intent that raised it**, not from a separate choice:
-
-| Intent | Standing order | Commander? |
-| :--- | :--- | :--- |
-| `strengthen_defences` | defend the town | **no** — it never leaves (§4) |
-| `drive_them_off` | an order that leaves the town | **yes** |
-| `prepare_for_rebellion` | defend the town | no — until the town declares |
-
-That is §4's test applied rather than restated: leadership is needed the moment
-the company has to *go* somewhere.
+**The company chooses it when it is raised**, from the map and the raising
+governor's intent (`commanders.md` §2). Who leads it — militia or commander —
+depends on its size and its town's, not its order. How the choice is made is
+#423.
 
 ## 2. Support and arms are different things
 
@@ -182,11 +177,13 @@ So a company with no commander has nobody to deliberate for it.
 | | |
 | :--- | :--- |
 | **With a commander** | can be sent, can besiege, can be **written to** |
-| **Without one** | a standing posture from whoever raised it, and nothing else |
+| **Without one** | the standing order it took when it was raised, and nothing else |
 
-A leaderless militia defends its town. That is the whole of what it can ever do.
+**A militia keeps the order it was raised with** — defend the town, explore,
+and so on (`commanders.md` §2; how it is chosen is #423). It cannot be sent
+elsewhere, and nobody can write to it.
 
-**And it disbands on a timer**, survivors returning to the town. Which gives
+**And it disbands after 12 months**, survivors returning to the town. Which gives
 defence a **running cost**: a militia eats for every month it stands, so a town
 under sustained threat must keep re-raising and keep re-feeding. That is the
 Squeeze arriving in a system it has not touched before.
@@ -332,14 +329,11 @@ computes force exactly as a company does.
 So there is **no siege subsystem.** *A siege takes months* falls out of a hard
 target being worn down by §6's curve, and needs no machinery of its own.
 
-### Attacks depopulate fast, and that is the exception
+### Attacks depopulate fast
 
-`CLAUDE.md` holds that no event of hardship costs a town more than one
-population — famine, shortage, a bad winter, all one at a time.
-
-**Armed attack is the deliberate exception.** Overwhelming force takes a share,
-and a town facing it loses people quickly. A rule that metered a massacre out one
-man a month would make it read as a bad harvest.
+**Every loss of people is a share** (`population.md` §6), and overwhelming force
+takes a large one: a town facing it loses people quickly. That is the point of
+overwhelming force.
 
 ## 10. What a battle reaches beyond the map
 

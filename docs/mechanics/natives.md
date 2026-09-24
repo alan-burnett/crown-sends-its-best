@@ -65,8 +65,9 @@ Downward, per §12.5 and §11.4:
 - **Working land they hold** — the exploitation §12.5 names.
 - **Aggression by any colonist**, which is the only thing that reaches the point
   of no return.
-- A governor whose **intent is to drive them off** (§11.3) — the clearest route
-  to that point, and one the PC can argue against but not forbid.
+- A **military** governor whose company marches on them (§11.3) — the clearest
+  route to that point, and one the PC can argue against but not forbid. What a
+  tribe notices of the colony's acts, and how it answers, is #424.
 
 Upward:
 
