@@ -169,7 +169,8 @@ func test_growing_reach_brings_the_marshal_in() -> void:
 		var demands := DemandBook.new()
 		var streams := RngStreams.new(seed_value)
 		for month in 40:
-			if demands.advance(month, _grown(), streams, null) 					and demands.kind == DemandBook.KIND_RESOURCE:
+			if demands.advance(month, _grown(), streams, null) \
+					and demands.kind == DemandBook.KIND_RESOURCE:
 				asked = true
 				demands.answer()
 	assert_true(asked, "reach grew and the Marshal still never asked for anything")

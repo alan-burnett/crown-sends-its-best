@@ -253,7 +253,8 @@ func test_the_two_considerations_are_not_the_same_number_twice() -> void:
 		if String((entry as Dictionary).get("id", "")) != String(CommanderConsiderations.ATTACK):
 			continue
 		for one in (entry as Dictionary).get("considerations", []):
-			scored[String((one as Dictionary).get("id", ""))] = 				float((one as Dictionary).get("raw", 0.0))
+			scored[String((one as Dictionary).get("id", ""))] = \
+				float((one as Dictionary).get("raw", 0.0))
 
 	var alive := float(scored.get("keeping_my_army_alive", 0.0))
 	var prize := float(scored.get("the_prize_in_front_of_me", 0.0))

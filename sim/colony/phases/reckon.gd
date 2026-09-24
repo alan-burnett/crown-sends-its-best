@@ -95,7 +95,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	for resource in ColonyNeeds.needed_resources():
 		var monthly := mouths * ColonyNeeds.per_head(StringName(resource))
 		var extra_months := Building.reserve_months_for(town, StringName(resource))
-		reckoning.reserve[resource] = monthly 			* (ColonyNeeds.reserve_months(StringName(resource)) + extra_months)
+		reckoning.reserve[resource] = monthly \
+			* (ColonyNeeds.reserve_months(StringName(resource)) + extra_months)
 
 	# **What the town's buildings want laid in, by name** (#148). A weavers' loom
 	# is a reason to hold cotton back from Sell; a granary is a reason to hold

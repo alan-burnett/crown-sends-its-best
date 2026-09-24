@@ -211,7 +211,8 @@ func test_the_tea_rule_survives_a_war_and_a_shortage_together() -> void:
 	run.world.values[WorldValues.WAR] = CrownAffairs.WAR_MAX
 	for id in ResourceCatalogue.ids():
 		if not ResourceCatalogue.is_luxury(StringName(id)):
-			run.world.values[CrownPrices.key_for(StringName(id))] = 				CrownPrices.SHORTAGE_LIFT
+			run.world.values[CrownPrices.key_for(StringName(id))] = \
+				CrownPrices.SHORTAGE_LIFT
 
 	assert_eq(_luxuries_by_price(run), quiet,
 		"a war and a shortage reordered the pleasures")

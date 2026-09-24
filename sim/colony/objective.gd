@@ -312,7 +312,8 @@ static func cost_of(town: Town, resource: StringName) -> float:
 ## Whether this is a thing that finishes at all.
 static func completes(id: StringName) -> bool:
 	var kind := kind_of(id)
-	return kind == CONSTRUCTION or kind == IMPROVEMENT or kind == EXPEDITION 		or kind == COMPANY
+	return kind == CONSTRUCTION or kind == IMPROVEMENT or kind == EXPEDITION \
+		or kind == COMPANY
 
 
 ## What the build still needs that the town does not already have to hand.

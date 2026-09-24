@@ -119,7 +119,8 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 
 		projected[String(resource)] = float(projected.get(String(resource), 0.0)) + got
 		if ResourceCatalogue.is_luxury(resource):
-			on_comfort += got * Valuation.crown(resource, context.state) 				* (1.0 + context.tax_rate(resource))
+			on_comfort += got * Valuation.crown(resource, context.state) \
+				* (1.0 + context.tax_rate(resource))
 			continue
 		var entry: Dictionary = outstanding.get(key, {})
 		var left := float(entry.get("left", 0.0)) - got
@@ -155,7 +156,8 @@ func _wanted(town: Town, before: ColonySnapshot, reckoning: Reckoning) -> Dictio
 	# wrote down, over what the town already has — the same shape a need takes,
 	# because it is the same food.
 	for resource in reckoning.companies:
-		var rations := reckoning.company_of(StringName(resource)) 			- before.held(town.id, StringName(resource))
+		var rations := reckoning.company_of(StringName(resource)) \
+			- before.held(town.id, StringName(resource))
 		if rations > 0.0:
 			out[String(resource) + "|" + String(Spending.COMPANY)] = _portioned(rations)
 	for resource in reckoning.objective:

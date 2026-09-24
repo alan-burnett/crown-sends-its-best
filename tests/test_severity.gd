@@ -283,7 +283,8 @@ func test_a_contented_man_does_not_reach_for_a_strong_letter() -> void:
 	var reached_too_far: PackedStringArray = PackedStringArray()
 	for inbound in machine.director.compose_inbox(run):
 		var record: Dictionary = content.record("letters", inbound.letter_id)
-		if bool(record.get("skippable", true)) 				and Severity.of(record) > Severity.MILDEST:
+		if bool(record.get("skippable", true)) \
+				and Severity.of(record) > Severity.MILDEST:
 			reached_too_far.append(inbound.letter_id)
 
 	assert_eq(reached_too_far, PackedStringArray(),

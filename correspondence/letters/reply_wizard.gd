@@ -52,7 +52,8 @@ func tone_prompt(context: LetterContext) -> String:
 	if not has_tone_step():
 		return ""
 	var block: Dictionary = letter.reply[LetterSchema.KEY_TONE]
-	return _rendered(String(block.get(LetterSchema.KEY_TEXT, "")), {}, context) 		.replace(LetterSchema.CHOICE_TOKEN, BLANK)
+	return _rendered(String(block.get(LetterSchema.KEY_TEXT, "")), {}, context) \
+		.replace(LetterSchema.CHOICE_TOKEN, BLANK)
 
 
 ## `[{tone, text}]` in the order the letter offers them.
@@ -67,7 +68,8 @@ func tone_options(context: LetterContext = null) -> Array[Dictionary]:
 	for option in letter.reply[LetterSchema.KEY_TONE].get(LetterSchema.KEY_OPTIONS, []):
 		out.append({
 			"tone": StringName(option.get(LetterSchema.KEY_TONE, "")),
-			"text": String(option.get(LetterSchema.KEY_TEXT, "")) if context == null 				else _rendered(String(option.get(LetterSchema.KEY_TEXT, "")), option, context),
+			"text": String(option.get(LetterSchema.KEY_TEXT, "")) if context == null \
+				else _rendered(String(option.get(LetterSchema.KEY_TEXT, "")), option, context),
 		})
 	return out
 

@@ -558,7 +558,8 @@ func send_post() -> bool:
 	# is what closes it — either answer will do, since declining plainly is an
 	# answer and the Marshal would rather have it than silence.
 	for order in issued_orders:
-		if order.kind == M1Registrations.ORDER_PROMISE_SHIPMENT 				or order.kind == M1Registrations.ORDER_DECLINE_DEMAND:
+		if order.kind == M1Registrations.ORDER_PROMISE_SHIPMENT \
+				or order.kind == M1Registrations.ORDER_DECLINE_DEMAND:
 			run.demand_book.answer()
 	# The post goes aboard. It is read next month, in phase 7.
 	for order in issued_orders:

@@ -100,7 +100,8 @@ func test_it_does_not_fire_on_later_growth() -> void:
 	var streams := RngStreams.new(SEED)
 	var later := 0
 	for month in 11 * MONTHS:
-		if String(growth.advance(month / MONTHS + 1, streams, null, month)) != "" 				and growth.history.size() > 1:
+		if String(growth.advance(month / MONTHS + 1, streams, null, month)) != "" \
+				and growth.history.size() > 1:
 			later += 1
 			assert_false(_fires(growth, month),
 				"the Chancellor announced it all over again in month %d" % month)

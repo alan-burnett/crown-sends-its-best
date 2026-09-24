@@ -115,7 +115,8 @@ static func due(town: Town, context: ColonyContext) -> Dictionary:
 	# because a policy that added a flat number would send the same wave to a
 	# wretched town as to a thriving one — and §4's whole point is that the
 	# colony has to be worth coming to first.
-	var appeal := (pull_of(town) + _from_buildings(town)) 		* (1.0 + _knob(context, PolicyEffects.VOLUME_KEY))
+	var appeal := (pull_of(town) + _from_buildings(town)) \
+		* (1.0 + _knob(context, PolicyEffects.VOLUME_KEY))
 	var arriving := maxf(0.0, flow * appeal)
 
 	# **Education gates natural growth, not arrivals** (`the-provost.md` §3). A
@@ -125,7 +126,9 @@ static func due(town: Town, context: ColonyContext) -> Dictionary:
 	# The expert knob rides alongside the buildings that draw scholars, so a
 	# printing press and the Provost's policy compound rather than one shadowing
 	# the other.
-	var scholars := arriving 		* (EXPERT_SHARE + _knob(context, PolicyEffects.EXPERTS_KEY)) 		* (1.0 + _draws_experts(town))
+	var scholars := arriving \
+		* (EXPERT_SHARE + _knob(context, PolicyEffects.EXPERTS_KEY)) \
+		* (1.0 + _draws_experts(town))
 	return {
 		"workers": maxf(0.0, arriving - scholars),
 		"experts": scholars,
@@ -190,7 +193,8 @@ static func arrive(town: Town, context: ColonyContext) -> void:
 	var trade: StringName = appeared["specialism"]
 	# **Provision** (#173): how well supplied they come. A settler lands with his
 	# own coin either way; the Provost's knob decides how much of it there is.
-	var purse := float(landed + scholars) * PURSE_PER_HEAD 		* (1.0 + _knob(context, PolicyEffects.PROVISION_KEY))
+	var purse := float(landed + scholars) * PURSE_PER_HEAD \
+		* (1.0 + _knob(context, PolicyEffects.PROVISION_KEY))
 	town.receive_gold(purse)
 	var beasts := _livestock_with_them(town, landed + scholars, context)
 
@@ -228,7 +232,8 @@ static func _livestock_with_them(town: Town, people: int, context: ColonyContext
 	var knob := _knob(context, PolicyEffects.LIVESTOCK_KEY)
 	if knob <= 0.0 or people <= 0:
 		return 0
-	var owed := float(town.livestock_accrued.get("arriving", 0.0)) 		+ float(people) * knob * BEASTS_PER_HEAD
+	var owed := float(town.livestock_accrued.get("arriving", 0.0)) \
+		+ float(people) * knob * BEASTS_PER_HEAD
 	var landed := int(floorf(owed))
 	town.livestock_accrued["arriving"] = owed - float(landed)
 	if landed <= 0:

@@ -326,7 +326,8 @@ class UrgingConsideration:
 
 	func applies_to(candidate: Candidate) -> bool:
 		var company := CommanderConsiderations._company_of(candidate)
-		return company != null and not String(company.urged).is_empty() 			and candidate.id == company.urged
+		return company != null and not String(company.urged).is_empty() \
+			and candidate.id == company.urged
 
 	func score(
 		actor: DeliberationActor, candidate: Candidate, context: DeliberationContext

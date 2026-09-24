@@ -197,7 +197,8 @@ func test_desert_is_the_lowest_valued_terrain_there_is() -> void:
 			if not map.is_land(x, y):
 				continue
 			var terrain := String(map.terrain_at(x, y))
-			var worth := map.yield_at(x, y, &"food") * 2.0 				+ map.yield_at(x, y, &"wood") + map.yield_at(x, y, &"stone") * 0.5
+			var worth := map.yield_at(x, y, &"food") * 2.0 \
+				+ map.yield_at(x, y, &"wood") + map.yield_at(x, y, &"stone") * 0.5
 			by_terrain[terrain] = minf(float(by_terrain.get(terrain, 1.0e30)), worth)
 	assert_true(by_terrain.has("desert"), "this seed has no desert to judge")
 	for terrain in by_terrain:

@@ -490,7 +490,8 @@ func _allocate(
 		var best_score := 0.0
 		for i in work.size():
 			var score := _score(town, before, context, work[i], worth, yields)
-			if best < 0 or score > best_score + 0.000001 					or (absf(score - best_score) <= 0.000001 and _before(work[i], work[best])):
+			if best < 0 or score > best_score + 0.000001 \
+					or (absf(score - best_score) <= 0.000001 and _before(work[i], work[best])):
 				best = i
 				best_score = score
 		if best < 0:

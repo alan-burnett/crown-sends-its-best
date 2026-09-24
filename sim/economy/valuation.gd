@@ -135,7 +135,8 @@ static func town(resource: StringName, desired: DesiredStock, held: float) -> fl
 	# was wanted" and reads the same for forty lumber as for four horses. A town
 	# that wants none of a thing is measured against a single unit, so holding any
 	# of it at all is a surplus.
-	var shortfall := 1.0 if desired.leans_toward(resource) 		else clampf((wanted - held) / maxf(wanted, 1.0), -1.0, 1.0)
+	var shortfall := 1.0 if desired.leans_toward(resource) \
+		else clampf((wanted - held) / maxf(wanted, 1.0), -1.0, 1.0)
 	var need := base * desired.reach_of(resource) * shortfall
 	return maxf(SURPLUS_FLOOR, base + need)
 
