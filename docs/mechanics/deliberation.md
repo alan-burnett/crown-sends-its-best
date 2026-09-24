@@ -22,6 +22,7 @@ The spec asks an actor to weigh a situation and choose in at least six places:
 | The director decides who writes to the PC and about what | §9.6 |
 | A town decides to hold a trade protest | §10.2 |
 | A tribe decides its diplomacy; a rival decides to demand or attack | §12.5, §8.4 |
+| A governor answers a tribe's grievance (`natives.md` §11) | §12.5 |
 
 These are one mechanism. Building it once means a system added later extends
 every decision point at the same time, instead of each one growing a branch.
