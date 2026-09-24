@@ -204,7 +204,7 @@ like.
 **An improvement is a candidate here only while the town holds fewer than one
 improvement per thousand people**, or the slot would cover every tile in farms.
 
-⚠ **Deferred to an authored session: how a pasture is measured** (#PASTURE). It
+⚠ **Deferred to an authored session: how a pasture is measured** (#421). It
 yields no crop — it carries livestock — so *what it would have added to this
 month's harvest* has no obvious answer yet. **Until it is ruled, improve yield
 does not offer a pasture.**
@@ -429,7 +429,7 @@ stockade. No improvements, expeditions or companies.
 
 ## 8. What each improvement scoring looks for
 
-⚠ **Deferred to an authored session** (#TILES), with the tile-and-site pass
+⚠ **Deferred to an authored session** (#422), with the tile-and-site pass
 (§14). These stand as placeholders until then. Each is a `choose` scorer in the
 registry.
 
