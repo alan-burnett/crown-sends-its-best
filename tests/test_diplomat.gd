@@ -334,18 +334,38 @@ func test_a_well_liked_diplomat_holds_his_town_back() -> void:
 		"a Diplomat the PC has kept happy did nothing for the town he lives in")
 
 
+func test_a_storming_that_takes_a_fifth_kills_him_about_one_time_in_five() -> void:
+	# 🔒 #427, `population.md` §6: **he dies as any man in the town might**, at
+	# `people lost / the town before`, whatever the scale of the town.
+	var died := 0
+	var tries := 400
+	for seed_value in tries:
+		var town := _town(&"ashmere")
+		var context := ColonyContext.new(
+			WorldValues.initial_state(), EventLog.new(), RngStreams.new(seed_value), null
+		)
+		context.colony = _colony([town])
+		var him := _him(town, 90.0)
+		if Diplomat.attack_took_him(him, town, 40_000, 200_000, context):
+			died += 1
+	var share := float(died) / float(tries)
+	assert_true(share > 0.13 and share < 0.27,
+		"a fifth of the town fell and he died %d times in %d" % [died, tries])
+
+
 func test_a_town_reduced_to_nothing_takes_him_with_it() -> void:
 	var town := _town(&"ashmere")
 	var context := _context(_colony([town]))
 	var him := _him(town, 90.0)
-	assert_true(Diplomat.attack_took_him(him, town, 0, context),
+	var everybody := town.population()
+	assert_true(Diplomat.attack_took_him(him, town, everybody, everybody, context),
 		"a town with nobody left in it still had a Diplomat in it")
 	assert_true(him.is_dead)
 
 
 func test_an_attack_that_leaves_a_crowd_is_survivable() -> void:
-	# `1 / new_population`: ten to nine is a long shot. Not a balance assertion —
-	# the claim is that the roll exists and does not always kill.
+	# A tenth of the town lost is a tenth's chance. Not a balance assertion — the
+	# claim is that the roll exists and does not always kill.
 	var survived := 0
 	for seed_value in 40:
 		var town := _town(&"ashmere")
@@ -354,7 +374,7 @@ func test_an_attack_that_leaves_a_crowd_is_survivable() -> void:
 		)
 		context.colony = _colony([town])
 		var him := _him(town, 90.0)
-		if not Diplomat.attack_took_him(him, town, 200_000, context):
+		if not Diplomat.attack_took_him(him, town, 20_000, 200_000, context):
 			survived += 1
 	assert_true(survived > 0, "an attack on a town of two hundred killed him every time")
 

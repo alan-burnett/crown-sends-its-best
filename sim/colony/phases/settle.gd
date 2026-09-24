@@ -297,19 +297,20 @@ func _breed(town: Town, context: ColonyContext) -> void:
 		var head := float(town.livestock_head(kind))
 		var grazing := minf(head, room)
 		room -= grazing
-		# **Today's herd at the new scale** (#426): a head was a thousand head, so
-		# the herd breeds in lots of a thousand and at most one a month. The cap
-		# goes in #427.
-		if grazing < float(Population.THOUSAND):
+		if grazing < 1.0:
 			continue
+		# **Whole head land, the fraction carries, and nothing caps it** (#427,
+		# `population.md` §6): a herd of thousands calves by the dozen.
 		town.livestock_accrued[id] = float(town.livestock_accrued.get(id, 0.0)) + grazing * rate
-		if float(town.livestock_accrued[id]) < float(Population.THOUSAND):
+		var calves := int(floorf(float(town.livestock_accrued[id])))
+		if calves <= 0:
 			continue
-		town.livestock_accrued[id] = float(town.livestock_accrued[id]) - float(Population.THOUSAND)
-		town.add_livestock(kind, Population.THOUSAND)
+		town.livestock_accrued[id] = float(town.livestock_accrued[id]) - float(calves)
+		town.add_livestock(kind, calves)
 		context.log.emit(EVENT_CALVED, town.id, context.state.month, {
 			"town": String(town.id),
 			"kind": id,
+			"born": calves,
 			"head": town.livestock_head(kind),
 		}, WorldPhase.COLONY_MONTH)
 

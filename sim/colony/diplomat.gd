@@ -173,10 +173,10 @@ static func rebellion_took_him(contact: Contact, town: Town, context: ColonyCont
 	return true
 
 
-## An enemy attack may kill him, at `1 / new_population` (§6).
-##
-## Ten to nine is a long shot; two to one is certain; **a town reduced to nothing
-## takes him with it.**
+## 🔒 **An enemy attack may kill him, as it might any man in the town** (#427,
+## `population.md` §6): at the chance `people lost / the town before the loss`.
+## A storming that takes a fifth of the town kills him one time in five, whatever
+## the scale of the town, and **a town reduced to nothing takes him with it.**
 ##
 ## 🔒 **Famine never endangers him. Only enemies do.** The distinction is the
 ## whole point of the rule, and it is enforced by this being the only path — the
@@ -188,23 +188,24 @@ static func rebellion_took_him(contact: Contact, town: Town, context: ColonyCont
 static func attack_took_him(
 	contact: Contact,
 	town: Town,
-	new_population: int,
+	lost: int,
+	before: int,
 	context: ColonyContext,
 ) -> bool:
 	if contact == null or town == null or contact.is_dead:
 		return false
 	if contact.town != town.display_name:
 		return false
-	if new_population <= 0:
+	if before - lost <= 0:
 		_kill(contact, town, "attack", context)
 		return true
+	if lost <= 0:
+		return false
 
 	# **His own stream**, derived per contact, so the same seed kills or spares
 	# him at the same moment however much else has happened elsewhere.
 	var rng := context.streams.contact_stream(String(contact.id))
-	# **Today's odds at the new scale** (#426): one in what the town's population
-	# used to count. The share-of-the-loss roll is #427.
-	if rng.randf() > float(Population.THOUSAND) / float(new_population):
+	if rng.randf() >= float(lost) / float(before):
 		return false
 	_kill(contact, town, "attack", context)
 	return true

@@ -166,26 +166,21 @@ func test_a_brief_shortfall_kills_nobody() -> void:
 	assert_empty(harness["context"].log.of_type(ConsumePhase.EVENT_FAMINE))
 
 
-func test_a_famine_takes_lives_in_lots_of_a_thousand() -> void:
-	# **What one population was** (#426): a famine month takes its toll a
-	# thousand at a time, each lot its own event carrying how many it took, so the
-	# counts add up to the dead. One event for the whole toll is #427.
+func test_a_famine_month_is_one_event_that_says_how_many() -> void:
+	# 🔒 **Hardship takes a share, in one event** (#427, `population.md` §6):
+	# the toll is removed in one step and the event's count is the dead.
 	var town := _town(60)
 	var harness := _harness(town)
-	var before := town.population()
-	for _month in ConsumePhase.FAMINE_MONTHS:
+	for _month in ConsumePhase.FAMINE_MONTHS - 1:
 		_eat(harness)
+	var before := town.population()
+	_eat(harness)
 
 	var deaths: Array = harness["context"].log.of_type(ConsumePhase.EVENT_FAMINE)
-	assert_not_empty(deaths, "sixty thousand starved for three months and nobody died")
-	var counted := 0
-	for event in deaths:
-		var count := int(event.payload["count"])
-		assert_true(count > 0 and count <= Population.THOUSAND,
-			"a famine event took %d at once" % count)
-		counted += count
-	assert_eq(counted, before - town.population(),
-		"%d died and the events counted %d" % [before - town.population(), counted])
+	assert_eq(deaths.size(), 1, "a famine month was reported %d times" % deaths.size())
+	assert_true(int(deaths[0].payload["count"]) > 1, "a famine month took one life")
+	assert_eq(int(deaths[0].payload["count"]), before - town.population(),
+		"%d died and the event said %d" % [before - town.population(), deaths[0].payload["count"]])
 
 
 func test_a_famine_never_takes_more_than_the_town_has() -> void:

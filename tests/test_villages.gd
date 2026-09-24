@@ -191,11 +191,10 @@ func test_influence_follows_the_people_and_nothing_else() -> void:
 func test_growing_past_a_ring_is_on_the_record() -> void:
 	# 🔒 Seam A. The event the map reads to draw the contest — a village that
 	# spread and emitted nothing would leave the map drawing last month's border.
-	# A lot short of the next ring, and a lot owed (#426: a village grows a
-	# thousand at a time, as it grew one).
+	# One short of the next ring, and a child owed.
 	var village := _village()
 	village.people = int(Village.MOUTHS_PER_REACH) - 1
-	village.growth_accrued = float(Population.THOUSAND) - 0.001
+	village.growth_accrued = 0.999
 	village.stores = {"food": 9_000.0}
 	var context := _context()
 	village.live(_tribe(), context)
@@ -211,7 +210,7 @@ func test_growing_past_a_ring_is_on_the_record() -> void:
 
 func test_a_village_that_has_not_crossed_a_ring_says_nothing_about_ground() -> void:
 	var village := _village(2)
-	village.growth_accrued = float(Population.THOUSAND) - 0.001
+	village.growth_accrued = 0.999
 	village.stores = {"food": 9_000.0}
 	var context := _context()
 	village.live(_tribe(), context)
@@ -222,14 +221,19 @@ func test_a_village_that_has_not_crossed_a_ring_says_nothing_about_ground() -> v
 		"one more child moved the border")
 
 
-func test_a_village_with_nothing_to_eat_loses_one_person_and_only_one() -> void:
-	# `CLAUDE.md`: no single event ever costs a settlement more than one
-	# population. A village is a settled population going about its business and
-	# the rule is exactly about that.
+func test_a_village_with_nothing_to_eat_loses_a_share_in_one_event() -> void:
+	# 🔒 #427: a hungry village loses the share a town's famine takes — never
+	# all of them, and never one at a time.
 	var village := _village(40)
 	village.stores = {"food": 0.0}
-	village.live(_tribe(), _context())
-	assert_eq(village.people, 40_000 - Population.THOUSAND, "a hungry month emptied the place")
+	var context := _context()
+	village.live(_tribe(), context)
+	var starved := context.log.of_type(Village.EVENT_STARVED)
+	assert_eq(starved.size(), 1, "a hungry month was reported %d times" % starved.size())
+	var lost := int(starved[0].payload["lost"])
+	assert_eq(village.people, 40_000 - lost)
+	assert_true(lost > 1, "a hungry village of forty thousand lost one person")
+	assert_true(village.people > 0, "a hungry month emptied the place")
 
 
 # --- 🔒 Objectives, and no layer a town has ---------------------------------

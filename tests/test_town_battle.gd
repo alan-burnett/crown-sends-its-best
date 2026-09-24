@@ -302,8 +302,8 @@ func test_one_event_names_everybody_in_it() -> void:
 
 
 func test_famine_still_cannot() -> void:
-	# 🔒 `CLAUDE.md`, and the exception must stay an exception: a famine takes its
-	# lives a thousand at a time (#426: what one was), each lot its own event.
+	# 🔒 `CLAUDE.md`: famine and war take a share the same way (#427) — one
+	# event a month, saying how many. What differs is how many, never the shape.
 	var run := _run()
 	var town := _town(run, 40)
 	town.months_hungry = 12
@@ -317,10 +317,9 @@ func test_famine_still_cannot() -> void:
 	var died := head - town.population()
 	var counted := 0
 	var events := run.log.of_type(ConsumePhase.EVENT_FAMINE)
+	assert_eq(events.size() - before, 3, "three famine months were not three events")
 	for index in range(before, events.size()):
-		var count := int(events[index].payload["count"])
-		assert_true(count <= Population.THOUSAND, "a famine event took %d at once" % count)
-		counted += count
+		counted += int(events[index].payload["count"])
 	assert_eq(counted, died, "%d died of famine and the events counted %d" % [died, counted])
 
 

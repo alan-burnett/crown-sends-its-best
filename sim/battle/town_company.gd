@@ -125,17 +125,12 @@ func take_casualties(men: float, reason: StringName, context: ColonyContext) -> 
 	return lost
 
 
-## 🔒 **Armed attack takes a share, and that is the deliberate exception**
-## (`CLAUDE.md`, §9).
+## 🔒 **Armed attack takes a share** (`CLAUDE.md`, `population.md` §6), in one
+## event that names everybody in it — the same shape famine has.
 ##
-## No event of *hardship* ever costs a town more than one population — not a
-## famine month, not a shortage, not a bad winter. Overwhelming force is the one
-## thing that does not queue, because **a rule that metered a massacre out one
-## man a month would make it read as a bad harvest.**
-##
-## 🔒 **Workers still go before experts**, through `Town.take_one_life` — the
-## same call famine makes, so a sack cannot eat the schoolmasters first. What
-## differs between a famine and a storming is how many, never whose.
+## 🔒 **Workers still go before experts**, through `Town.take_lives` — the same
+## call famine makes, so a sack cannot eat the schoolmasters first. What differs
+## between a famine and a storming is how many, never whose.
 func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
 	if town == null:
 		return 0
@@ -143,6 +138,7 @@ func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
 	if wanted <= 0:
 		return 0
 
+	var before := town.population()
 	var taken := town.take_lives(wanted)
 	var lost := 0
 	for who in taken:
@@ -171,7 +167,7 @@ func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
 		"at": [town.at.x, town.at.y],
 	}, WorldPhase.MOVEMENT)
 
-	_the_crowns_man(context)
+	_the_crowns_man(context, lost, before)
 	_the_town_may_be_lost(context)
 	return lost
 
@@ -179,16 +175,15 @@ func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
 ## 🔒 **Only enemies endanger the Diplomat** (`the-diplomat.md` §6), and this is
 ## the path that was reserved for it.
 ##
-## **One roll for the attack, not one per head**, which is what
-## `attack_took_him`'s own signature asks for — it takes the population *after*
-## the losses and prices his danger at `1 / new_population`, so the roll already
-## knows how bad the month was. A roll per head would price the same month twice
-## and make any real assault certain to kill him.
+## **One roll for the attack, not one per head**: he is one of the town, and the
+## chance he was among the dead is the share of the town that died (#427). A roll
+## per head would price the same month twice and make any real assault certain
+## to kill him.
 ##
 ## `battles.md` §13 holds this open; **this ticket answers it** and the PR says
 ## so, because an open item that nothing implements and an open item something
 ## quietly decided are different kinds of risk.
-func _the_crowns_man(context: ColonyContext) -> void:
+func _the_crowns_man(context: ColonyContext, lost: int, before: int) -> void:
 	if context.contacts == null or context.streams == null:
 		return
 	var ids: PackedStringArray = PackedStringArray(context.contacts.keys())
@@ -196,7 +191,7 @@ func _the_crowns_man(context: ColonyContext) -> void:
 	for id in ids:
 		var contact: Contact = context.contacts[id]
 		if contact != null and contact.role == Contact.ROLE_DIPLOMAT:
-			Diplomat.attack_took_him(contact, town, town.population(), context)
+			Diplomat.attack_took_him(contact, town, lost, before, context)
 
 
 ## 🔒 **A town reduced to nothing leaves the colony** (SPEC §12.3).

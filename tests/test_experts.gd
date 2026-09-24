@@ -310,6 +310,17 @@ func test_a_pastured_herd_breeds() -> void:
 		"ten cows with a pasture to graze on produced no calf in a decade")
 
 
+func test_a_herd_of_thousands_calves_by_the_dozen() -> void:
+	# #427: whole head land each month and nothing caps them. A cap of one a
+	# month was a rule about a herd of ten, and a herd of ten thousand under it
+	# would never grow.
+	var town := _town(&"ashmere", 40, ["town_pasture"])
+	town.add_livestock(&"cows", 10_000)
+	_years_of_growth(town, 1)
+	assert_true(town.livestock_head(&"cows") > 10_001,
+		"ten thousand cows on pasture calved at most one in a month")
+
+
 func test_a_herd_with_nowhere_to_graze_does_not() -> void:
 	# 🔒 **Pasture is the ceiling.** Beasts over capacity are the ones Consume is
 	# buying grain for; they are a cost, not a herd with a future.

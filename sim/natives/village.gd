@@ -34,6 +34,9 @@ extends RefCounted
 ## what steers a village is the tribe's standings and nothing else.
 
 const EVENT_GREW: StringName = &"village_grew"
+## A hungry month thinned them (#427). Seam A: a village's people falling is an
+## event like a town's, so nothing downstream has to notice it by subtraction.
+const EVENT_STARVED: StringName = &"village_starved"
 const EVENT_SPREAD: StringName = &"village_influence_spread"
 const EVENT_OBJECTIVE: StringName = &"village_objective"
 
@@ -174,27 +177,37 @@ func live(its_tribe: Tribe, context: ColonyContext) -> void:
 				stores[String(resource)] = float(
 					stores.get(String(resource), 0.0)) + gathered * working
 
+	# How short the month left them, before the stores are drawn down.
+	var unmet := 0.0 if eaten <= 0.0 else clampf((eaten - held) / eaten, 0.0, 1.0)
 	held = maxf(0.0, held - eaten)
 	stores["food"] = held
 
 	if held <= 0.0:
-		# They go hungry and thin out, one at a time, as a town does — a village
-		# is a settled population going about its business and `CLAUDE.md`'s rule
-		# is exactly about that.
-		# In lots of a thousand, what one was (#426); a share is #427.
-		people = maxi(0, people - Population.THOUSAND)
+		# 🔒 **A hungry village loses a share** (#427, `population.md` §6), the
+		# same share a town's famine takes, in one event that says how many.
+		var lost := mini(people, maxi(1, int(round(
+			float(people) * unmet * ConsumePhase.FAMINE_DEATH_RATE))))
+		people -= lost
+		context.log.emit(EVENT_STARVED, id, context.state.month, {
+			"village": String(id),
+			"tribe": String(tribe),
+			"lost": lost,
+			"people": people,
+		}, WorldPhase.COLONY_MONTH)
 		return
 
 	var reach := influence()
 	growth_accrued += float(people) * _birth_rate(its_tribe) * minf(1.0, months / 3.0)
-	# Today's growth at the new scale (#426): at most a thousand a month.
-	if growth_accrued < float(Population.THOUSAND):
+	# **Whole people land, the fraction carries** (#427), in one event.
+	var born := int(floorf(growth_accrued))
+	if born <= 0:
 		return
-	growth_accrued -= float(Population.THOUSAND)
-	people += Population.THOUSAND
+	growth_accrued -= float(born)
+	people += born
 	context.log.emit(EVENT_GREW, id, context.state.month, {
 		"village": String(id),
 		"tribe": String(tribe),
+		"born": born,
 		"people": people,
 	}, WorldPhase.COLONY_MONTH)
 

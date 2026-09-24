@@ -251,42 +251,34 @@ func _slaughter(town: Town, short_by: float, context: ColonyContext) -> void:
 ## The severe end. Rare in M2 given a sensible objective, and it should read as
 ## a disaster when it happens rather than as a number ticking down.
 ##
-## ## 🔒 One at a time
+## ## 🔒 A share, in one event
 ##
-## **No single event ever costs a town more than one population** (CLAUDE.md). A
-## bad month may take several, but it takes them **one at a time, each its own
-## resolution and its own event** — never one event saying three died.
+## **Hardship takes a share** (`CLAUDE.md`, `population.md` §6): the toll is the
+## town's people times how short it went times the famine rate, removed **in one
+## step and reported in one event** that says how many and whose. The same shape
+## a battle has — a town of thousands does not lose them one at a time.
 ##
-## That is what keeps per-population consequences uniform: the Diplomat's death
-## roll, quality of life and the letters that name what happened all hang off a
-## single loss, and a bulk-casualty path here would be one the rest of the game
-## does not expect.
+## 🔒 **Workers before experts, always**, through `Town.take_lives`. And **famine
+## never rolls for the Diplomat**: only enemies endanger him.
 func _starve(town: Town, unmet: float, context: ColonyContext) -> void:
 	if town.months_hungry < FAMINE_MONTHS or unmet <= 0.0:
 		return
 
-	# **Today's famine at the new scale** (#426): the toll in people, taken in
-	# lots of a thousand — what one population was — each its own event, so a
-	# famine month reads exactly as it did. One event for the whole toll is #427.
-	var toll := maxi(Population.THOUSAND,
-		int(round(float(town.population()) * unmet * FAMINE_DEATH_RATE)))
-	while toll > 0:
-		var taken := town.take_lives(mini(toll, Population.THOUSAND))
-		if taken.is_empty():
-			break  # There is nobody left to lose.
-		var count := 0
-		for who in taken:
-			count += int(taken[who])
-		toll -= count
-		context.log.emit(EVENT_FAMINE, town.id, context.state.month, {
-			"town": String(town.id),
-			"lost": "worker" if taken.has("worker") else String(taken.keys()[0]),
-			"count": count,
-			"taken": taken,
-			"remaining": town.population(),
-			"months_hungry": town.months_hungry,
-			"severity": String(Shortage.grade_of(unmet)),
-		}, WorldPhase.COLONY_MONTH)
+	var toll := maxi(1, int(round(float(town.population()) * unmet * FAMINE_DEATH_RATE)))
+	var taken := town.take_lives(toll)
+	if taken.is_empty():
+		return  # There is nobody left to lose.
+	var count := 0
+	for who in taken:
+		count += int(taken[who])
+	context.log.emit(EVENT_FAMINE, town.id, context.state.month, {
+		"town": String(town.id),
+		"count": count,
+		"taken": taken,
+		"remaining": town.population(),
+		"months_hungry": town.months_hungry,
+		"severity": String(Shortage.grade_of(unmet)),
+	}, WorldPhase.COLONY_MONTH)
 
 
 ## Livestock kinds, cheapest first, then by name.
