@@ -225,6 +225,15 @@ var at_sea: Array[InboundLetter] = []
 ## in the save: a corrupt save is a lost run, and an Order that did not survive a
 ## load is an instruction the PC gave and nobody received.
 var orders_at_sea: Array[Order] = []
+
+## 🔒 **The firsts of the run already shown** (#298), cutscene id -> the turn it
+## fired in. In the save, because a first fires once a run and a reload that
+## forgot one would paint it again.
+var cutscenes_seen: Dictionary = {}
+
+## The cutscenes this turn earned, in the order they happened — worked out when
+## the month resolved, so the save holds them, and shown after the playback.
+var cutscenes_due: PackedStringArray = PackedStringArray()
 var post: Post = null
 
 # --- The turn --------------------------------------------------------------
@@ -528,6 +537,8 @@ func to_dict() -> Dictionary:
 		"at_sea": at_sea_entries,
 		"orders_at_sea": orders_at_sea_entries,
 		"letters_sent": letters_sent.duplicate(),
+		"cutscenes_seen": cutscenes_seen.duplicate(),
+		"cutscenes_due": Array(cutscenes_due),
 		"writings": writings.to_dict(),
 		"post": post.to_dict(),
 	}
@@ -572,6 +583,11 @@ static func from_dict(data: Dictionary) -> RunState:
 	run.setup = RunSetup.from_dict(data.get("setup", {}))
 	run.post = Post.from_dict(data.get("post", {}))
 	run.letters_sent = data.get("letters_sent", {}).duplicate()
+	run.cutscenes_seen = {}
+	var seen: Dictionary = data.get("cutscenes_seen", {})
+	for id in seen:
+		run.cutscenes_seen[String(id)] = int(seen[id])
+	run.cutscenes_due = PackedStringArray(data.get("cutscenes_due", []))
 	run.writings = WritingBook.from_dict(data.get("writings", {}))
 
 	var saved_contacts: Dictionary = data.get("contacts", {})

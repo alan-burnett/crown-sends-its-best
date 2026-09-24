@@ -454,7 +454,10 @@ func _send_the_post() -> void:
 ## A month in which nothing the colony could see happened plays nothing, and the
 ## player goes straight to his post.
 func _play_back_the_month(events: Array[SimEvent]) -> void:
-	if machine.is_over() or run.knowledge == null:
+	if machine.is_over():
+		return
+	if run.knowledge == null:
+		_show_the_cutscenes()
 		return
 	var towns: Dictionary = {}
 	for town in run.colony.in_order():
@@ -465,8 +468,40 @@ func _play_back_the_month(events: Array[SimEvent]) -> void:
 			villages[String(village.id)] = village.at
 	var beats := MonthPlayback.select(events, run.log, run.knowledge, towns, villages)
 	if beats.is_empty():
+		_show_the_cutscenes()
 		return
 	var screen := MapScreen.new()
 	add_child(screen)
-	screen.begin(run.knowledge, refresh)
+	screen.begin(run.knowledge, _after_the_map)
 	screen.play(beats, get_node_or_null(^"/root/Assets") as AssetRegistry)
+
+
+func _after_the_map() -> void:
+	refresh()
+	_show_the_cutscenes()
+
+
+## 🔒 **Then the month's cutscenes, then the desk** (#298, `cutscenes.md` §4).
+##
+## Every one the month earned, one after another in the order it happened. The
+## paintings are punctuation on the month rather than title cards for it: shown
+## after the map, they are what the player is left holding when he sits down to
+## his post. One whose panels have not been written yet is passed over.
+func _show_the_cutscenes(from: int = 0) -> void:
+	for index in range(from, run.cutscenes_due.size()):
+		var id := run.cutscenes_due[index]
+		if content == null or not content.has_record(Cutscene.COLLECTION, id):
+			continue
+		var cutscene := Cutscene.from_data(content.record(Cutscene.COLLECTION, id))
+		if cutscene.is_empty():
+			continue
+		var screen := CutsceneScreen.new()
+		add_child(screen)
+		screen.finished.connect(func() -> void:
+			screen.queue_free()
+			_show_the_cutscenes(index + 1))
+		screen.assets = get_node_or_null(^"/root/Assets") as AssetRegistry
+		screen.sound = get_node_or_null(SoundEngine.AUTOLOAD_PATH) as SoundEngine
+		screen.begin(cutscene, screen.assets)
+		return
+	refresh()

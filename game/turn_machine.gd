@@ -43,6 +43,10 @@ const EVENT_ORDER_ISSUED: StringName = &"order_issued"
 
 var run: RunState = null
 var month_runner: WorldMonth = null
+
+## Every trigger in the content that names a cutscene (#298). Read once, with the
+## content; a test may hand it its own.
+var cutscene_triggers: Array = []
 var prestige: PrestigeDriver = null
 var run_end: RunEndDriver = null
 var expeditions: ExpeditionDriver = null
@@ -436,6 +440,7 @@ func use_content(p_content: ContentDatabase) -> void:
 	content = p_content
 	silence.content = p_content
 	director = Director.new(p_content)
+	cutscene_triggers = CutsceneTriggers.from_content(p_content)
 	# 🔒 **The run's perk and quirks turn their knobs here** (#286,
 	# `perks-and-quirks.md` §2), once, because a modifier is a fact about the run
 	# rather than a thing that happens in it — and here rather than in
@@ -545,6 +550,9 @@ func send_post() -> bool:
 		return false
 
 	run.phase = SENDING
+	# Where this post's month begins in the log, so the cutscenes it earns are
+	# worked out from exactly what it did — the desk's own refusals included.
+	var month_began := run.log.next_seq()
 
 	# Whatever the player set aside travels with the post as silence, and is read
 	# next month in the same phase a reply would have been.
@@ -598,6 +606,17 @@ func send_post() -> bool:
 		run.phase = phase
 		if phase == RESOLUTION:
 			_resolve()
+
+	# 🔒 **The cutscenes the month earned, decided before the save** (#298,
+	# `cutscenes.md` §3). Every one it triggered, in the order it happened; a
+	# first is remembered here and not when it is shown, so a player who quits
+	# before seeing it cannot have it fire as a first again. Shown after the map
+	# plays the month back — SPEC §7 lets cutscenes *follow* the playback, and
+	# `cutscenes.md` §4 says they should, so `OPENING_CUTSCENES` stays the
+	# spec's slot in `ORDER` and is still stubbed.
+	var due := CutsceneTriggers.fired(cutscene_triggers, run.log.since(month_began), run.cutscenes_seen)
+	CutsceneTriggers.record(due, run.cutscenes_seen, run.turn)
+	run.cutscenes_due = CutsceneTriggers.ids_of(due)
 
 	# **The save happens as part of sending**, not on a timer and not on quit.
 	#
