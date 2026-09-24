@@ -166,6 +166,16 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 				reckoning.reserve[resource] = reckoning.reserve_of(
 					StringName(resource)) + wanted
 
+	# **An expedition gathering raises the reserve of what it will carry** (#431,
+	# `founding-towns.md` §2): the town holds back all of it, so Relief and Sell
+	# find none spare, and remembers what it would have kept anyway — which is
+	# what stays behind when the expedition leaves.
+	if Objective.kind_of(town.objective) == Objective.EXPEDITION:
+		for resource in Expedition.GATHERS:
+			var id := StringName(resource)
+			reckoning.normal_reserve[resource] = reckoning.reserve_of(id)
+			reckoning.reserve[resource] = maxf(reckoning.reserve_of(id), before.held(town.id, id))
+
 	# Spare and shortfall fall out of the above, from the town's stores as the
 	# phase began.
 	for resource in ResourceCatalogue.ids():

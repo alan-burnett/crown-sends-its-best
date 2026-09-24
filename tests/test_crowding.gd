@@ -157,37 +157,3 @@ func test_a_one_town_colony_can_want_to_go_wide_on_crowding_alone() -> void:
 		"crowding says nothing about going wide, so there is one motive and not two")
 	assert_true(IntentConsiderations.RoomToGrow.new().score(null, wide, context) >= 0.0,
 		"room to grow argued against going wide")
-
-
-# --- 🔒 Two kinds of expedition ---------------------------------------------
-
-func test_a_poor_town_and_a_prosperous_one_send_out_different_expeditions() -> void:
-	# §2: one objective produces both kinds — a prosperous town sets a grand
-	# target and a crowded poor one sets almost nothing. The people are a share of
-	# the town either way; **what differs is what they carry.**
-	var run := RunState.new_run(SEED)
-	var context := ColonyContext.new(run.world, run.log, run.streams, run.map)
-	context.colony = run.colony
-
-	var poor: Town = run.colony.in_order()[0]
-	poor.workers = 60_000
-	for resource in ResourceCatalogue.ids():
-		poor.store(StringName(resource), 0.0)
-
-	var rich := Town.new(&"rich", "Rich", Vector2i(12, 12))
-	rich.workers = 60_000
-	for resource in ResourceCatalogue.ids():
-		rich.store(StringName(resource), 400.0)
-
-	assert_eq(Expedition.people_for(poor), Expedition.people_for(rich),
-		"the two fixtures differ in their people as well as their stores")
-
-	var thin := Expedition.cargo_for(poor, context)
-	var grand := Expedition.cargo_for(rich, context)
-	var carried := 0.0
-	for resource in grand:
-		carried += float(grand[resource])
-	assert_true(carried > 0.0, "the prosperous town sent its people out with nothing")
-	assert_true(thin.size() < grand.size(),
-		"a town with empty stores outfitted its expedition as well as a full one: "
-			+ "%d kinds against %d" % [thin.size(), grand.size()])

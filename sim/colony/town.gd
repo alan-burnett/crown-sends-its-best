@@ -208,14 +208,6 @@ var expeditions_launched: int = 0
 ## Months of labour already put in. Only construction advances it.
 var objective_progress: int = 0
 
-## What the governor decided this expedition would carry (#175).
-##
-## **Written when he takes the objective and not recomputed.** The target is his
-## answer to "what can we spare" on the day he decided; letting it move with the
-## stores would mean a town that had a good month could never finish gathering,
-## because the bar would rise with every harvest.
-var objective_cargo: Dictionary = {}
-
 ## Resource id -> how much has gone into the build.
 ##
 ## **Invested is spent.** It has left the stockpile, so it cannot be eaten, sold
@@ -513,7 +505,6 @@ func clear_objective() -> void:
 	objective_progress = 0
 	objective_idle_months = 0
 	objective_invested = {}
-	objective_cargo = {}
 
 
 # --- Buildings -------------------------------------------------------------
@@ -567,7 +558,6 @@ func to_dict() -> Dictionary:
 		"expeditions_launched": expeditions_launched,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
-		"objective_cargo": objective_cargo.duplicate(),
 		"months_hungry": months_hungry,
 		"battle_owed": battle_owed,
 		"relief_balance": relief_balance,
@@ -621,7 +611,6 @@ static func from_dict(data: Dictionary) -> Town:
 	town.expeditions_launched = int(data.get("expeditions_launched", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
-	town.objective_cargo = data.get("objective_cargo", {}).duplicate()
 	town.months_hungry = int(data.get("months_hungry", 0))
 	town.battle_owed = float(data.get("battle_owed", 0.0))
 	town.relief_balance = float(data.get("relief_balance", 0.0))

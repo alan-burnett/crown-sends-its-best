@@ -411,7 +411,10 @@ func test_the_governor_chooses_the_tile() -> void:
 	# writes a town's objective or its target. Here: an improvement objective
 	# arrives with a tile already chosen, and it is one the town can reach.
 	# **A month's work first**, because a tile is judged by what it gave (#430).
+	# Two expeditions already sent, so going tall's thick expedition (#431) is
+	# not what the walk reaches first.
 	var town := _town()
+	town.expeditions_launched = 2
 	var harness := _harness(town, [ColonyMonth.WORK])
 	_run_month(harness)
 	var sited := ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])
@@ -426,6 +429,7 @@ func test_the_tile_choice_is_deterministic() -> void:
 	var first: Variant = null
 	for _attempt in 3:
 		var town := _town(GovernorIntent.GO_TALL)
+		town.expeditions_launched = 2
 		var harness := _harness(town, [ColonyMonth.WORK])
 		_run_month(harness)
 		var sited := ObjectiveSelector.choose(town, GovernorIntent.GO_TALL, harness["context"])

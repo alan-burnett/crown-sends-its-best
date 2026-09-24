@@ -105,9 +105,7 @@ static func walk(town: Town, intent: StringName, context: ColonyContext) -> Dict
 		if not wanted(entry, town, context):
 			continue
 		if is_slot(id):
-			# Which tile, which one: scored (#430). Expeditions and companies
-			# are not placeable until #431 and #432.
-			var placed := SlotScorers.place(town, intent, entry, context)
+			var placed := _place(town, intent, entry, context)
 			if placed.is_empty():
 				continue
 			return placed
@@ -115,6 +113,18 @@ static func walk(town: Town, intent: StringName, context: ColonyContext) -> Dict
 			continue
 		return {"id": id, "target": Vector2i(-1, -1)}
 	return {"id": NO_BUILDING, "target": Vector2i(-1, -1)}
+
+
+## Fill a slot. **An expedition is placed or it is not** (#431): a rebel town
+## never founds one (SPEC §11.4) and a town with nobody to send cannot. Which
+## tile and which one are scored (#430). Companies are not placeable until #432.
+static func _place(town: Town, intent: StringName, entry: Dictionary, context: ColonyContext) -> Dictionary:
+	var id := StringName(entry.get("objective", ""))
+	if Objective.is_expedition(id):
+		if not Expedition.may_launch(town, id):
+			return {}
+		return {"id": id, "target": Vector2i(-1, -1)}
+	return SlotScorers.place(town, intent, entry, context)
 
 
 ## Whether every `when` of this entry holds.

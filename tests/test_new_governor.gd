@@ -45,7 +45,7 @@ func _town(id: StringName = &"ashmere") -> Town:
 	var town := Town.new(id, String(id).capitalize(), Vector2i(9, 7))
 	town.workers = 40_000
 	town.governor_id = StringName("governor_%s" % id)
-	town.objective_cargo = {"food": 60.0}
+	town.objective = &"lean_expedition"
 	town.store(&"food", 400.0)
 	town.receive_gold(900.0)
 	return town
@@ -206,7 +206,7 @@ func test_the_run_actually_keeps_him() -> void:
 
 	var town := run.colony.in_order()[0]
 	town.workers = 60_000
-	town.objective_cargo = {"food": 40.0}
+	town.objective = &"lean_expedition"
 	town.store(&"food", 400.0)
 	town.receive_gold(900.0)
 

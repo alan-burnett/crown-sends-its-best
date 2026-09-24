@@ -1,14 +1,13 @@
 extends TestCase
 
-## A town setting out to found another (#175, `docs/mechanics/founding-towns.md`
-## §2).
+## Lean and thick expeditions (#431, `docs/mechanics/founding-towns.md` §2,
+## `governor-agendas.md` §6).
 ##
-## 🔒 **One rule produces both kinds of expedition.** The governor sets his
-## target cargo by what he can spare, and the town gathers toward it exactly as
-## toward a building. A prosperous town therefore sends a colony that will leap
-## ahead of its parent; a crowded, poor town shedding mouths it cannot feed sends
-## people with what they can carry. Same objective, same machinery, opposite
-## outcomes — and no branch anywhere asking which sort of town this is.
+## 🔒 **Which intent sent it is the whole difference.** Go wide gathers for two
+## months and sends a fifth of the town; go tall gathers for five and sends two
+## fifths. While it gathers, the town holds back its wood, stone, tools and
+## food; when it leaves, it takes all of them above the normal reserve, and
+## never a building.
 
 const SEED: int = 5507
 
@@ -28,10 +27,10 @@ func after_each() -> void:
 	content.free()
 
 
-func _town(id: StringName = &"ashmere", workers: int = 40, stock: Dictionary = {}) -> Town:
-	var town := Town.new(id, String(id).capitalize(), Vector2i(3, 3))
-	# Fixture sizes are in thousands (#426).
-	town.workers = workers * Population.THOUSAND
+func _town(id: StringName = &"ashmere", people: int = 10_000, stock: Dictionary = {},
+		at: Vector2i = Vector2i(3, 3)) -> Town:
+	var town := Town.new(id, String(id).capitalize(), at)
+	town.workers = people
 	town.receive_gold(1_000.0)
 	for resource in stock:
 		town.store(StringName(resource), float(stock[resource]))
@@ -42,9 +41,9 @@ func _context(towns: Array) -> ColonyContext:
 	var colony := Colony.new()
 	for town in towns:
 		colony.add(town)
-	var map := WorldMap.new(9, 9, &"ocean")
-	for y in range(1, 8):
-		for x in range(1, 8):
+	var map := WorldMap.new(21, 21, &"ocean")
+	for y in range(1, 20):
+		for x in range(1, 20):
 			map.set_terrain(x, y, &"plains")
 	var context := ColonyContext.new(
 		WorldValues.initial_state(), EventLog.new(), RngStreams.new(SEED), map
@@ -55,134 +54,190 @@ func _context(towns: Array) -> ColonyContext:
 	return context
 
 
-## Reckon, so the town knows what it can spare, then size the cargo.
-func _cargo(town: Town) -> Dictionary:
-	var context := _context([town])
+## Reckon then Build, which is all an expedition's gathering and leaving touch.
+func _month(context: ColonyContext) -> void:
 	var month := ColonyMonth.new()
 	month.set_handler(ColonyMonth.RECKON, ReckonPhase.new())
+	month.set_handler(ColonyMonth.BUILD, BuildPhase.new())
 	month.run(context.colony, context)
-	return Expedition.cargo_for(town, context)
+	context.state.month += 1
 
 
-func _total(cargo: Dictionary) -> float:
-	var total := 0.0
-	for resource in cargo:
-		total += float(cargo[resource])
-	return total
+func _launched(context: ColonyContext) -> Array:
+	return context.log.of_type(Expedition.EVENT_LAUNCHED)
 
 
-# --- 🔒 The target is derived, never authored -------------------------------
-
-func test_a_rich_town_and_a_destitute_one_both_launch_with_different_cargo() -> void:
-	var rich := _cargo(_town(&"ashmere", 40, {
-		"food": 900.0, "wood": 400.0, "tools": 60.0, "clothing": 200.0,
-	}))
-	var shedding := _cargo(_town(&"bellhaven", 40, {"food": 30.0}))
-
-	assert_true(_total(rich) > 0.0, "a prosperous town could spare nothing at all")
-	assert_true(_total(rich) > _total(shedding),
-		"a town with nine hundred grain sent no more than one with thirty")
+func _lean_entry() -> Dictionary:
+	for entry in AgendaMenu.menu_of(GovernorIntent.GO_WIDE):
+		if String(entry.get("objective", "")) == "lean_expedition":
+			return entry
+	return {}
 
 
-func test_nothing_about_the_cargo_is_authored() -> void:
-	# The same objective id produces different cargo in different towns, which is
-	# the whole of "derived from what the town can spare".
-	var one := _cargo(_town(&"ashmere", 40, {"food": 900.0, "wood": 400.0}))
-	var two := _cargo(_town(&"bellhaven", 40, {"food": 900.0, "wood": 40.0}))
-	assert_ne(_total(one), _total(two),
-		"two very different towns sized the same expedition identically")
+# --- 🔒 Lean and thick -------------------------------------------------------
 
-
-func test_the_target_does_not_move_once_he_has_set_it() -> void:
-	# **Written down when he takes it.** Letting it track the stores would mean a
-	# town that had a good month while gathering watched the bar rise with every
-	# harvest and gathered for ever.
-	var town := _town(&"ashmere", 40, {"food": 400.0, "wood": 200.0})
-	town.objective = &"amass_expedition"
-	town.objective_cargo = _cargo(town)
-	var settled := _total(town.objective_cargo)
-
-	town.store(&"food", 5_000.0)
-	assert_almost_eq(_total(town.objective_cargo), settled, 0.0001,
-		"a windfall raised the target the town was gathering toward")
-
-
-# --- 🔒 It is an ordinary objective -----------------------------------------
-
-func test_it_completes_like_a_building() -> void:
-	var town := _town(&"ashmere", 40, {"food": 900.0, "wood": 400.0, "clothing": 200.0})
-	town.objective = &"amass_expedition"
-	town.objective_cargo = _cargo(town)
-	assert_true(Objective.completes(town.objective), "an expedition never finishes")
-	assert_true(not Objective.costed_resources(town).is_empty(),
-		"an expedition costs nothing, so there is nothing to gather")
-
+func test_a_lean_expedition_leaves_two_months_after_it_is_chosen_with_a_fifth() -> void:
+	var town := _town(&"ashmere", 10_000, {"food": 900.0, "wood": 400.0})
 	var context := _context([town])
-	var build := BuildPhase.new()
-	for month in 12:
-		if town.objective.is_empty():
-			break
-		build.run(town, ColonySnapshot.of(context.colony), context)
+	town.objective = &"lean_expedition"
 
-	assert_eq(context.log.of_type(Expedition.EVENT_LAUNCHED).size(), 1,
-		"the town gathered for a year and never set out")
-
-
-# --- 🔒 The parent pays in people and coin ----------------------------------
-
-func test_the_parent_loses_people_and_the_matching_share_of_gold() -> void:
-	var town := _town(&"ashmere", 40, {"food": 900.0, "clothing": 200.0})
-	town.objective = &"amass_expedition"
-	town.objective_cargo = _cargo(town)
-
-	var before := town.population()
-	var going := Expedition.people_for(town)
-	var context := _context([town])
-	Expedition.launch(town, context)
-
-	assert_eq(town.population(), before - going,
-		"the expedition set out and everybody stayed at home")
-
-	var event: SimEvent = context.log.of_type(Expedition.EVENT_LAUNCHED)[0]
-	var share := float(going) / float(before)
-	assert_almost_eq(float(event.payload["gold"]), 1_000.0 * share, 1.0,
+	_month(context)
+	assert_empty(_launched(context), "a lean expedition left after one month")
+	_month(context)
+	var launched := _launched(context)
+	assert_eq(launched.size(), 1, "a lean expedition had not left after two months")
+	assert_eq(int(launched[0].payload["people"]), 2_000)
+	assert_almost_eq(float(launched[0].payload["gold"]), 200.0, 0.01,
 		"a fifth of the people left with something other than a fifth of the coin")
+	assert_eq(town.population(), 8_000)
+	assert_eq(String(town.objective), "", "the town went on gathering after it had gone")
 
 
-func test_what_it_carries_leaves_the_parent() -> void:
-	var town := _town(&"ashmere", 40, {"food": 900.0, "clothing": 200.0})
-	town.objective = &"amass_expedition"
-	town.objective_cargo = _cargo(town)
-	var before := town.held(&"food")
+func test_a_thick_expedition_gathers_five_months_and_takes_two_fifths() -> void:
+	var town := _town(&"ashmere", 10_000, {"food": 900.0, "wood": 400.0})
+	var context := _context([town])
+	town.objective = &"thick_expedition"
+	for _month_index in 4:
+		_month(context)
+	assert_empty(_launched(context), "a thick expedition left before its fifth month")
+	assert_almost_eq(Objective.progress_fraction(town), 0.8, 0.0001)
+	_month(context)
+	assert_eq(_launched(context).size(), 1)
+	assert_eq(int(_launched(context)[0].payload["people"]), 4_000)
+	assert_almost_eq(float(_launched(context)[0].payload["gold"]), 400.0, 0.01)
 
-	Expedition.launch(town, _context([town]))
-	assert_true(town.held(&"food") < before,
-		"the expedition carried grain that never left the warehouse")
+
+# --- 🔒 What it gathers and what it takes --------------------------------------
+
+func test_while_it_gathers_the_town_holds_back_what_it_will_carry() -> void:
+	var gathering := _town(&"ashmere", 10_000, {"food": 900.0, "wood": 400.0, "clothing": 200.0})
+	gathering.objective = &"thick_expedition"
+	var idle := _town(&"ashmere", 10_000, {"food": 900.0, "wood": 400.0, "clothing": 200.0})
+	var one := _context([gathering])
+	var other := _context([idle])
+	_month(one)
+	_month(other)
+	var held: Reckoning = one.reckonings["ashmere"]
+	var usual: Reckoning = other.reckonings["ashmere"]
+
+	assert_true(usual.spare_of(&"wood") > 0.0, "the fixture has no timber to spare, so this compares nothing")
+	assert_almost_eq(held.spare_of(&"wood"), 0.0, 0.0001, "a town gathering an expedition sold its timber")
+	assert_almost_eq(float(held.normal_reserve.get("wood", -1.0)), usual.reserve_of(&"wood"), 0.0001,
+		"the reserve the expedition leaves behind is not the one the town keeps anyway")
+	assert_almost_eq(held.spare_of(&"clothing"), usual.spare_of(&"clothing"), 0.0001,
+		"gathering held back something an expedition never carries")
+
+
+func test_when_it_leaves_it_takes_everything_of_the_four_above_the_normal_reserve() -> void:
+	var town := _town(&"ashmere", 10_000, {
+		"food": 900.0, "wood": 400.0, "stone": 80.0, "tools": 50.0, "clothing": 200.0,
+	})
+	var context := _context([town])
+	town.objective = &"lean_expedition"
+	_month(context)
+	_month(context)
+
+	var cargo: Dictionary = _launched(context)[0].payload["cargo"]
+	var reckoning: Reckoning = context.reckonings["ashmere"]
+	for resource in cargo:
+		assert_true(Expedition.GATHERS.has(String(resource)), "it carried %s" % resource)
+	var before := {"food": 900.0, "wood": 400.0, "stone": 80.0, "tools": 50.0}
+	for resource in before:
+		var keep := float(reckoning.normal_reserve.get(resource, 0.0))
+		assert_almost_eq(town.held(StringName(resource)), minf(float(before[resource]), keep), 0.001,
+			"the town kept something other than its normal reserve of %s" % resource)
+	assert_true(float(cargo.get("wood", 0.0)) > 0.0, "four hundred timber and it took none")
+	assert_almost_eq(town.held(&"clothing"), 200.0, 0.001, "it took clothing, which it never gathers")
+
+
+func test_a_new_town_starts_with_nothing_built_but_its_hall() -> void:
+	# Resources only, never buildings (§2). The parent's church stays home.
+	var town := _town(&"ashmere", 10_000, {"food": 900.0, "wood": 400.0})
+	town.add_building(&"church")
+	var context := _context([town])
+	town.objective = &"lean_expedition"
+	_month(context)
+	_month(context)
+
+	var party: ExpeditionParty = context.parties[0]
+	party.at = Vector2i(12, 12)
+	var founded := party.found(&"newhaven", "Newhaven", context)
+	assert_true(founded != null, "the party founded nothing")
+	assert_eq(Array(founded.buildings), [String(Building.BASE)],
+		"a new town began with more than its hall: %s" % [founded.buildings])
+
+
+# --- 🔒 When go wide sends one (§7) ---------------------------------------------
+
+func test_going_wide_sends_one_while_the_town_outgrows_the_colony() -> void:
+	# `(population ÷ 1000 − 2) × 2 > towns + expeditions on their way`, and no
+	# per-town cap. A town of 3,000 alone: 2 > 1.
+	var entry := _lean_entry()
+	assert_false(entry.is_empty(), "go wide's menu names no lean expedition")
+	var alone := _town(&"ashmere", 3_000, {"food": 200.0})
+	var context := _context([alone])
+	assert_true(AgendaMenu.wanted(entry, alone, context), "a town of three thousand, alone, sent nobody")
+	assert_true(Expedition.may_launch(alone, &"lean_expedition"))
+	alone.objective = &"lean_expedition"
+	_month(context)
+	_month(context)
+	assert_eq(_launched(context).size(), 1)
+	assert_eq(int(_launched(context)[0].payload["people"]), 600)
+
+	# Six towns and one expedition out: 7. A town of 5,000 makes 6; of 6,000, 8.
+	for pair in [[5_000, false], [6_000, true]]:
+		var towns: Array = [_town(&"ashmere", int(pair[0]))]
+		for index in 5:
+			towns.append(_town(StringName("other_%d" % index), 1_000, {}, Vector2i(4 + index * 3, 15)))
+		var crowded := _context(towns)
+		crowded.parties.append(ExpeditionParty.new())
+		assert_eq(AgendaMenu.wanted(entry, towns[0], crowded), bool(pair[1]),
+			"a town of %d among six, one expedition out" % pair[0])
+
+
+## A colony that has seen every tile, so no scouting party is ever wanted.
+func _explored(towns: Array) -> ColonyContext:
+	var context := _context(towns)
+	for y in context.map.height:
+		for x in context.map.width:
+			context.territory.visible[Vector2i(x, y)] = true
+	return context
+
+
+func test_the_walk_takes_the_expedition_its_intent_sends() -> void:
+	# Lean for go wide, thick for go tall (§6), each through its menu. The
+	# country is all explored, so no scouting party comes first.
+	var wide := _town(&"ashmere", 3_000, {"food": 200.0})
+	var context := _explored([wide])
+	assert_eq(String(ObjectiveSelector.choose(wide, GovernorIntent.GO_WIDE, context)["id"]), "lean_expedition")
+
+	var tall := _town(&"ashmere", 8_000, {"food": 200.0})
+	var grown := _explored([tall])
+	assert_eq(String(ObjectiveSelector.choose(tall, GovernorIntent.GO_TALL, grown)["id"]), "thick_expedition")
+	tall.expeditions_launched = 2
+	assert_ne(String(ObjectiveSelector.choose(tall, GovernorIntent.GO_TALL, grown)["id"]), "thick_expedition",
+		"a town that had sent two thick expeditions sent a third")
 
 
 # --- 🔒 Rebel towns never found towns ---------------------------------------
 
-func test_a_rebel_town_never_takes_the_objective() -> void:
+func test_a_rebel_town_never_takes_it() -> void:
 	# SPEC §11.4, and a filter rather than a weight — a very expansionist rebel
 	# governor must not be able to outvote it.
-	var rebel := _town(&"ashmere", 40, {"food": 900.0})
+	var rebel := _town(&"ashmere", 40_000, {"food": 900.0})
 	rebel.rebelling = true
-	assert_false(Expedition.may_launch(rebel), "a town at war with the Crown went colonising")
-
-	var chosen := ObjectiveSelector.choose(rebel, GovernorIntent.GO_WIDE, _context([rebel]))
-	assert_false(Objective.is_expedition(StringName(chosen["id"])),
-		"a rebel town took an expedition")
-
-
-func test_a_town_too_small_to_spare_anybody_does_not_launch() -> void:
-	assert_false(Expedition.may_launch(_town(&"ashmere", 8)),
-		"a town of eight sent four people away and called the rest a town")
+	for id in Objective.expedition_ids():
+		assert_false(Expedition.may_launch(rebel, StringName(id)), "a town at war with the Crown went colonising")
+	for intent in [GovernorIntent.GO_WIDE, GovernorIntent.GO_TALL]:
+		var chosen := ObjectiveSelector.choose(rebel, intent, _context([rebel]))
+		assert_false(Objective.is_expedition(StringName(chosen["id"])), "a rebel town took an expedition")
 
 
-func test_the_cargo_survives_save_and_reload() -> void:
-	var town := _town(&"ashmere", 40, {"food": 900.0, "wood": 400.0})
-	town.objective = &"amass_expedition"
-	town.objective_cargo = _cargo(town)
+func test_the_gathering_survives_save_and_reload() -> void:
+	var town := _town(&"ashmere", 10_000)
+	town.objective = &"thick_expedition"
+	town.objective_progress = 3
 	var restored := Town.from_dict(town.to_dict())
-	assert_almost_eq(_total(restored.objective_cargo), _total(town.objective_cargo), 0.0001,
-		"a reloaded town forgot what it was gathering for")
+	assert_eq(String(restored.objective), "thick_expedition")
+	assert_almost_eq(Objective.progress_fraction(restored), 0.6, 0.0001,
+		"a reloaded town forgot how long it had been gathering")

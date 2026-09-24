@@ -73,7 +73,7 @@ func _party(parent: StringName = &"ashmere", at: Vector2i = Vector2i(2, 2)) -> E
 
 func test_launching_puts_a_party_on_the_map() -> void:
 	var town := _town()
-	town.objective_cargo = {"food": 100.0}
+	town.objective = &"lean_expedition"
 	town.store(&"food", 400.0)
 	town.receive_gold(900.0)
 	var context := _context(_colony([town]))

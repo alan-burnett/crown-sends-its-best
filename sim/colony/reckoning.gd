@@ -64,6 +64,11 @@ var comfort_budget: float = 0.0
 ## Held back before anything is sold. Months of need, per the data.
 var reserve: Dictionary = {}
 
+## While an expedition gathers, what the town would have kept of each thing it
+## will carry had it not been gathering (#431). **What stays behind** when it
+## leaves: everything above this goes.
+var normal_reserve: Dictionary = {}
+
 ## What is left once needs and reserve are covered. What Relief may give away
 ## and Sell may sell.
 var spare: Dictionary = {}
@@ -145,6 +150,7 @@ func to_dict() -> Dictionary:
 		"wants": wants.duplicate(),
 		"comfort_budget": comfort_budget,
 		"reserve": reserve.duplicate(),
+		"normal_reserve": normal_reserve.duplicate(),
 		"spare": spare.duplicate(),
 		"shortfall": shortfall.duplicate(),
 	}

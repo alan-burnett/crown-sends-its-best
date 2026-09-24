@@ -80,7 +80,8 @@ func test_a_share_of_thousands_loses_nobody_to_rounding() -> void:
 	# §1's example: a share of an odd number of people is a number of people,
 	# not a number of thousands rounded down.
 	var town := _town(39_999)
-	assert_eq(Expedition.people_for(town), int(floorf(39_999.0 * Expedition.SHARE_OF_PEOPLE)))
+	assert_eq(Expedition.people_for(town, &"lean_expedition"),
+		int(floorf(39_999.0 * Objective.share_of_people(&"lean_expedition"))))
 
 
 # --- 🔒 Experts stay rare ------------------------------------------------------------------

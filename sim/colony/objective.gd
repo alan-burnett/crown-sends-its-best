@@ -40,19 +40,14 @@ const IMPROVEMENT: StringName = &"improvement"
 ## Nothing on the menu was taken (#429). No cost, no completion.
 const NO_BUILDING: StringName = &"no_building"
 
-## **Amassing an expedition's supplies** (#175, `founding-towns.md` §2).
+## **A lean or a thick expedition** (#431, `founding-towns.md` §2,
+## `governor-agendas.md` §6).
 ##
-## A project like a building, and deliberately so: the town gathers toward a
-## target over months and launches when it is met, through the same
-## gather-and-complete path Build already runs.
-##
-## What is different is that **the target is not authored**. The governor sets it
-## when he takes the objective, from what his town can spare — and that one rule
-## produces both kinds of expedition. A prosperous town sets a grand target and
-## sends a colony that will leap ahead of its parent; a crowded, poor town
-## shedding mouths it cannot feed sets a target of almost nothing and sends
-## people with what they can carry. Same objective, same machinery, opposite
-## outcomes.
+## It gathers for **months, not materials** — lean two, thick five — while
+## Reckon holds back everything of the four things it will carry, and the month
+## it is done it leaves with its share of the people and the purse and whatever
+## of the four stands above the town's normal reserve. **The difference between
+## a grand expedition and a thin one is which intent sent it.**
 const EXPEDITION: StringName = &"expedition"
 
 ## 🔒 **Raising a company is an objective like any other** (#342,
@@ -104,7 +99,11 @@ static func load_from(record: Dictionary) -> void:
 	for entry in record.get("expeditions", []):
 		var expedition := String(entry.get("id", ""))
 		if not expedition.is_empty():
-			_expeditions[expedition] = {"name": String(entry.get("name", expedition))}
+			_expeditions[expedition] = {
+				"name": String(entry.get("name", expedition)),
+				"months": maxi(1, int(entry.get("gathers_months", 1))),
+				"share": clampf(float(entry.get("takes_share", 0.0)), 0.0, 1.0),
+			}
 
 	_no_building_name = String(record.get("no_building", {}).get("name", _no_building_name))
 
@@ -168,6 +167,16 @@ static func expedition_ids() -> PackedStringArray:
 
 static func is_expedition(id: StringName) -> bool:
 	return _expeditions.has(String(id))
+
+
+## How many months this expedition gathers before it leaves.
+static func gathering_months(id: StringName) -> int:
+	return int(_expeditions.get(String(id), {}).get("months", 1))
+
+
+## What share of the town's people, and of its gold, it takes.
+static func share_of_people(id: StringName) -> float:
+	return float(_expeditions.get(String(id), {}).get("share", 0.0))
 
 
 static func company_ids() -> PackedStringArray:
@@ -236,10 +245,7 @@ static func costed_resources(town: Town) -> PackedStringArray:
 			return Building.find(town.objective).costed_resources()
 		IMPROVEMENT:
 			return Improvement.find(town.objective).costed_resources()
-		EXPEDITION:
-			var named: PackedStringArray = PackedStringArray(town.objective_cargo.keys())
-			named.sort()
-			return named
+	# An expedition costs nothing: it gathers for months (#431).
 	return PackedStringArray()
 
 
@@ -249,12 +255,6 @@ static func cost_of(town: Town, resource: StringName) -> float:
 			return Building.find(town.objective).cost_of(resource)
 		IMPROVEMENT:
 			return Improvement.find(town.objective).cost_of(resource)
-		EXPEDITION:
-			# **Derived when he took it, never authored.** The cargo is this
-			# town's answer to "what can we spare", written down at the moment
-			# the governor decided, so the target does not move under the town
-			# as its stores do.
-			return float(town.objective_cargo.get(String(resource), 0.0))
 	return 0.0
 
 
@@ -339,6 +339,8 @@ static func total_cost(town: Town) -> float:
 static func months_required(town: Town) -> int:
 	if not completes(town.objective):
 		return 0
+	if kind_of(town.objective) == EXPEDITION:
+		return gathering_months(town.objective)
 	return maxi(1, int(ceil(total_cost(town) / maxf(0.001, build_capacity(town)))))
 
 
@@ -351,6 +353,8 @@ static func months_required(town: Town) -> int:
 static func progress_fraction(town: Town) -> float:
 	if not completes(town.objective):
 		return 0.0
+	if kind_of(town.objective) == EXPEDITION:
+		return clampf(float(town.objective_progress) / float(gathering_months(town.objective)), 0.0, 1.0)
 
 	var required := 0.0
 	var invested := 0.0

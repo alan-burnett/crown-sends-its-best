@@ -308,7 +308,7 @@ func test_going_wide_of_the_tribes_is_not_free() -> void:
 func test_a_launched_party_sets_out_for_a_region_and_not_a_tile() -> void:
 	var town := Town.new(&"ashmere", "Ashmere", Vector2i(11, 7))
 	town.workers = 40_000
-	town.objective_cargo = {"food": 50.0}
+	town.objective = &"lean_expedition"
 	town.store(&"food", 300.0)
 	town.receive_gold(500.0)
 	var colony := Colony.new()

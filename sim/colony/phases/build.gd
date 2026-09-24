@@ -50,6 +50,25 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 	if not Objective.completes(town.objective):
 		return
 
+	# **An expedition gathers for months, not materials** (#431,
+	# `founding-towns.md` §2): lean two, thick five. Reckon holds back what it
+	# will carry meanwhile; the month the gathering is done, it leaves.
+	if Objective.kind_of(town.objective) == Objective.EXPEDITION \
+			and town.objective_progress + 1 < Objective.gathering_months(town.objective):
+		town.objective_progress += 1
+		town.objective_idle_months = 0
+		context.log.emit(EVENT_ADVANCED, town.id, context.state.month, {
+			"town": String(town.id),
+			"objective": String(town.objective),
+			"name": Objective.display_name(town.objective),
+			"invested": {},
+			"still_needed": {},
+			"progress": Objective.progress_fraction(town),
+			"months_done": town.objective_progress,
+			"months_required": Objective.months_required(town),
+		}, WorldPhase.COLONY_MONTH)
+		return
+
 	# **Only what a month's hands can raise.** Sorted, so which resource goes into
 	# the frame first is the colony's rather than the iteration order's.
 	var capacity := Objective.build_capacity(town)
@@ -112,8 +131,8 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 	}
 
 	if kind == Objective.EXPEDITION:
-		# **It leaves.** The people, the cargo and the matching share of the
-		# purse go with it; where it goes is #176's business.
+		# **It leaves.** Its share of the people and the purse, and what it
+		# gathered; where it goes is #176's business.
 		Expedition.launch(town, context)
 	elif kind == Objective.COMPANY:
 		# **Men under arms** (#342). The same shape one tier up: a body of people

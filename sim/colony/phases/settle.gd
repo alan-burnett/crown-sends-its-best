@@ -347,13 +347,6 @@ func _reconsider(town: Town, context: ColonyContext) -> void:
 	town.objective_progress = 0
 	town.objective_idle_months = 0
 	town.objective_invested = {}
-	# **The governor sizes the cargo when he takes it** (#175), from what his
-	# town can spare that month. Written down rather than recomputed, so a town
-	# that has a good month while gathering does not watch the bar rise with
-	# every harvest and gather for ever.
-	town.objective_cargo = {}
-	if Objective.kind_of(town.objective) == Objective.EXPEDITION:
-		town.objective_cargo = Expedition.cargo_for(town, context)
 
 	context.log.emit(ObjectiveSelector.EVENT_CHOSEN, town.id, context.state.month, {
 		"town": String(town.id),

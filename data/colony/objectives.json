@@ -12,8 +12,18 @@
   ],
   "expeditions": [
     {
-      "id": "amass_expedition",
-      "name": "gathering an expedition's supplies"
+      "id": "lean_expedition",
+      "name": "gathering a lean expedition",
+      "note": "Go wide's (founding-towns.md section 2, governor-agendas.md section 6). Gathers for gathers_months, then takes takes_share of the people and of the gold, and everything of wood, stone, tools and food above the town's normal reserve.",
+      "gathers_months": 2,
+      "takes_share": 0.2
+    },
+    {
+      "id": "thick_expedition",
+      "name": "gathering a thick expedition",
+      "note": "Go tall's. The same, later and larger.",
+      "gathers_months": 5,
+      "takes_share": 0.4
     }
   ]
 }
