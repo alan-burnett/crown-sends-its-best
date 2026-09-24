@@ -87,7 +87,7 @@ func _resolve(slot: Dictionary, line: Dictionary, letter: Letter, context: Lette
 	var name: String = slot["name"]
 	match StringName(slot["kind"]):
 		LetterSchema.SLOT_PARAM:
-			return _param(name, context)
+			return _param(name, letter, context)
 		LetterSchema.SLOT_PERCEPTION:
 			return _perception(name, letter, context)
 		LetterSchema.SLOT_SENDER:
@@ -101,11 +101,14 @@ func _resolve(slot: Dictionary, line: Dictionary, letter: Letter, context: Lette
 ## An exact value. Whole numbers render without a decimal point: Godot's JSON
 ## parser hands back every number as a float, and "200.0" in front of a player is
 ## the mistake the whole typed-params contract exists to prevent.
-func _param(name: String, context: LetterContext) -> String:
+func _param(name: String, letter: Letter, context: LetterContext) -> String:
 	if not context.has_param(name):
 		push_error("No value supplied for {param:%s}." % name)
 		return ""
 	var value: Variant = context.param(name)
+	# A head count reads as the souls it stands for (`Figures.people`).
+	if letter != null and String(letter.params.get(name, "")) == "people":
+		return Figures.people(float(value))
 	if JsonTypes.is_int_like(value) and typeof(value) != TYPE_STRING:
 		return str(JsonTypes.to_int(value, name))
 	return str(value)

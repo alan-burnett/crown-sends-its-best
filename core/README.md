@@ -16,3 +16,4 @@ is recorded as an assumption on #1.
 | `content/json_types.gd` | — | Typed reads, because JSON gives every number back as a float |
 | `content/content_db.gd` | `Content` | The loaded `data/` tree, by collection |
 | `assets/asset_registry.gd` | `Assets` | `id` -> `res://` path, with a placeholder fallback |
+| `text/figures.gd` | — | Numbers as the player reads them: thousands, and head counts at `Config`'s scale |

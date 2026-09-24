@@ -1,0 +1,19 @@
+{
+	"id": "ending_starved",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. The colony was not taken: the last soul it lost starved (fell_to, run_end_driver.gd).",
+	"params": {
+		"date": "date",
+		"people": "people",
+		"towns": "number"
+	},
+	"panels": [
+		{
+			"image": "cutscene.ending_starved.1",
+			"text": "The Colony Starved, {param:date}. The last of its people died of hunger."
+		},
+		{
+			"image": "cutscene.ending_starved.2",
+			"text": "{param:towns} towns stand empty."
+		}
+	]
+}

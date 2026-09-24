@@ -1,6 +1,6 @@
 {
 	"id": "ending_retired",
-	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's.",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Shown at the end of every run, after its own ending: the post is never taken from you, you retire (Author, #299).",
 	"params": {
 		"date": "date",
 		"years": "number",

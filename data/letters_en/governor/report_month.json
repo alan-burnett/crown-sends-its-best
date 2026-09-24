@@ -6,7 +6,7 @@
   "speaks_to": 0,
   "params": {
     "town": "town",
-    "people": "integer",
+    "people": "people",
     "trade": "gold",
     "pursuing": "intent",
     "governor": "contact"

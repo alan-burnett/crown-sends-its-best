@@ -1,6 +1,6 @@
 {
 	"id": "ending_overrun",
-	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Shown when no town was ever lost to anyone; the variants name who took the last one.",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Shown when nothing in the log says what finished the colony; the variants name it.",
 	"params": {
 		"date": "date",
 		"people": "people",

@@ -4,7 +4,7 @@
 	"type": "warning",
 	"skippable": false,
 	"params": {
-		"people": "integer"
+		"people": "people"
 	},
 	"body": [
 		{

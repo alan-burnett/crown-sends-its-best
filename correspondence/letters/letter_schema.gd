@@ -68,6 +68,12 @@ const PARAM_TYPES: Array[StringName] = [
 	# `data/clauses_en/independence.json` and the validator asks whether every
 	# condition the sim knows about has a phrase there.
 	&"conditions",
+	# 🔒 **A head count** (#299). The value stays the sim's population, exact,
+	# so a condition or an effect can still read it; only the rendering scales it
+	# to the souls it stands for (`Config.PEOPLE_PER_POPULATION`), the same scale
+	# the cutscenes and the summary print. An `integer` here would print the
+	# sim's unit at the player and disagree with every painting.
+	&"people",
 ]
 
 ## Param types that are whole numbers.

@@ -9,7 +9,7 @@
 	"panels": [
 		{
 			"image": "cutscene.ending_overrun_by_rebels.1",
-			"text": "The Colony is Overrun, {param:date}. The last town fell to the rebels."
+			"text": "The Colony is Overrun, {param:date}. The last of it fell to the rebels."
 		},
 		{
 			"image": "cutscene.ending_overrun_by_rebels.2",

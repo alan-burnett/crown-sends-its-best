@@ -62,6 +62,18 @@ func test_a_whole_number_renders_without_a_decimal_point() -> void:
 	assert_eq(renderer.render_body(letter, context), "200 bushels.")
 
 
+func test_a_head_count_reads_as_the_souls_it_stands_for() -> void:
+	# 🔒 #299. One scale, set in `Config`, for letters and cutscenes alike: the
+	# governor's census and the painting of the same town cannot disagree.
+	var letter := _letter([{"text": "{param:people} souls."}],
+		{"params": {"people": "people"}})
+	var context := _context()
+	context.params = {"people": 3}
+	assert_eq(renderer.render_body(letter, context), "%s souls." % Figures.people(3))
+	assert_eq(Figures.people(3), CutsceneParams.written(3, "people", null),
+		"a letter and a cutscene counted the same town differently")
+
+
 func test_perception_resolves_through_the_senders_lean() -> void:
 	# The Marshal leans -0.18 on food. The truth is "hungry"; he says "starving".
 	var letter := _letter([{"text": "The men are {perception:larder}."}])

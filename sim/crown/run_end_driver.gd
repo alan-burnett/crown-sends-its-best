@@ -60,9 +60,9 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 	# is what the summary and the epitaph read.
 	log.emit(EVENT_LOST, &"crown", state.month, {
 		"how": String(reason),
-		# **Who took the last town** (#299): the allegiance a storming records,
-		# so an Overrun can be painted by who overran it (SPEC §13.1).
-		"last_lost_to": _last_lost_to(log),
+		# **What took the last of them** (#299), so the ending can be painted by
+		# it (SPEC §13.1: *the ending names who overran it*).
+		"fell_to": fell_to(log),
 		"people": RunEndCheck.people_in(run.colony, run.parties),
 		"towns": 0 if run.colony == null else run.colony.in_order().size(),
 	}, WorldPhase.RUN_END_CHECK)
@@ -71,11 +71,28 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 	run.ending.how = reason
 
 
-static func _last_lost_to(log: EventLog) -> String:
-	var lost := log.of_type(Colony.EVENT_LOST)
-	if lost.is_empty():
-		return ""
-	return String((lost[lost.size() - 1] as SimEvent).payload.get("to", ""))
+## 🔒 **What finished the colony: the last thing that cost it people.**
+##
+## The allegiance that took its last town or stormed it last — `native`, `rival`,
+## `rebel` — or `hunger`, when the last soul it lost starved. Read from the
+## *latest* such event, never from the last town lost: a colony that lost a town
+## to the natives in its fifth year and starved in its ninth was not overrun by
+## the natives. Empty when nothing in the log ever cost a town a life.
+static func fell_to(log: EventLog) -> String:
+	var events := log.all()
+	for index in range(events.size() - 1, -1, -1):
+		var event: SimEvent = events[index]
+		if event.type == Colony.EVENT_LOST:
+			return String(event.payload.get("to", ""))
+		if event.type == TownCompany.EVENT_STORMED:
+			return String(event.payload.get("by", ""))
+		if event.type == ConsumePhase.EVENT_FAMINE:
+			return FELL_TO_HUNGER
+	return ""
+
+
+## What `fell_to` says of a colony that starved.
+const FELL_TO_HUNGER: String = "hunger"
 
 
 ## How the colony was lost, for the summary to read. Distinct from

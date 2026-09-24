@@ -8,7 +8,7 @@
 				"event": "colony_was_lost",
 				"where": {
 					"how": "colony_overrun",
-					"last_lost_to": ""
+					"fell_to": ""
 				}
 			}
 		},
@@ -37,7 +37,7 @@
 				"event": "colony_was_lost",
 				"where": {
 					"how": "colony_overrun",
-					"last_lost_to": "native"
+					"fell_to": "native"
 				}
 			}
 		},
@@ -66,7 +66,7 @@
 				"event": "colony_was_lost",
 				"where": {
 					"how": "colony_overrun",
-					"last_lost_to": "rival"
+					"fell_to": "rival"
 				}
 			}
 		},
@@ -95,7 +95,36 @@
 				"event": "colony_was_lost",
 				"where": {
 					"how": "colony_overrun",
-					"last_lost_to": "rebel"
+					"fell_to": "rebel"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"people": {
+				"from": "event",
+				"field": "people",
+				"as": "people"
+			},
+			"towns": {
+				"from": "event",
+				"field": "towns",
+				"as": "number"
+			}
+		}
+	},
+	{
+		"id": "trigger.cutscene.ending_starved",
+		"cutscene": "ending_starved",
+		"kind": "bookend",
+		"on": {
+			"event_happened": {
+				"event": "colony_was_lost",
+				"where": {
+					"how": "colony_overrun",
+					"fell_to": "hunger"
 				}
 			}
 		},
@@ -149,41 +178,7 @@
 		"kind": "bookend",
 		"on": {
 			"event_happened": {
-				"event": "run_ended",
-				"where": {
-					"reason": "retired"
-				}
-			}
-		},
-		"params": {
-			"date": {
-				"from": "date"
-			},
-			"years": {
-				"from": "event",
-				"field": "years",
-				"as": "number"
-			},
-			"people": {
-				"from": "colony",
-				"measure": "people"
-			},
-			"towns": {
-				"from": "colony",
-				"measure": "towns"
-			}
-		}
-	},
-	{
-		"id": "trigger.cutscene.ending_term_expired",
-		"cutscene": "ending_term_expired",
-		"kind": "bookend",
-		"on": {
-			"event_happened": {
-				"event": "run_ended",
-				"where": {
-					"reason": "term_expired"
-				}
+				"event": "run_ended"
 			}
 		},
 		"params": {

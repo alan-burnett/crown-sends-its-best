@@ -159,15 +159,17 @@ func _the_colony(facts: Dictionary) -> PackedStringArray:
 	# "between them" of a single town is the kind of seam a player notices and a
 	# test never will.
 	out.append("%s, holding %s%s." % [
-		_count(towns, "town"), _count(people, "soul"), "" if towns == 1 else " between them"])
+		_count(towns, "town"), _count(Figures.headcount(people), "soul"), "" if towns == 1 else " between them"])
 
 	var settlers := int(facts.get("settlers", 0))
 	if settlers > 0:
-		out.append("%s crossed the ocean to come here in your time." % [_count(settlers, "settler")])
+		out.append("%s crossed the ocean to come here in your time." % [
+			_count(Figures.headcount(settlers), "settler")])
 
 	var famines := int(facts.get("famines", 0))
 	if famines > 0:
-		out.append("%s died of hunger." % [_count(famines, "person", "people")])
+		# Each famine death is one unit of population, so as many souls as that.
+		out.append("%s died of hunger." % [_count(Figures.headcount(famines), "person", "people")])
 
 	var protests := int(facts.get("protests", 0))
 	if protests > 0:
@@ -261,7 +263,7 @@ func _count(
 	var words: PackedStringArray = PackedStringArray([
 		"No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten",
 	])
-	var number := words[amount] if amount >= 0 and amount < words.size() else str(amount)
+	var number := words[amount] if amount >= 0 and amount < words.size() else Figures.with_thousands(amount)
 	return "%s %s%s" % [number, word, verb]
 
 

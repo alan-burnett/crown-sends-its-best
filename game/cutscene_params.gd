@@ -31,12 +31,6 @@ extends RefCounted
 ## allegiance, and says *a duke* where the code says *rival* (`CLAUDE.md`). A `place` is a tile — `[x, y]` or
 ## a `Vector2i` — or a town's id, read as the ground the town stands on.
 
-## 🔒 **How many souls one unit of population stands for**, when a cutscene
-## writes a head count. The Author's figure: a company of 2.4 is 2,400 men.
-## Letters still print the unscaled figure as *souls*; one of the two will have
-## to give way, and this is the one place the cutscenes' half of that lives.
-const PEOPLE_PER_POPULATION: float = 1000.0
-
 ## What a value that could not be found reads as. **Visible on purpose**: a
 ## placeholder caption with a hole in it is a hole somebody should see.
 const UNKNOWN: String = "[unknown]"
@@ -96,9 +90,10 @@ static func written(value: Variant, kind: String, run: RunState) -> String:
 		return UNKNOWN
 	match kind:
 		"number", "gold":
-			return with_thousands(int(roundf(float(value))))
+			return Figures.with_thousands(int(roundf(float(value))))
 		"people":
-			return with_thousands(int(roundf(float(value) * PEOPLE_PER_POPULATION)))
+			# The one scale letters and the summary use too (`Config`).
+			return Figures.people(float(value))
 		"percent":
 			return "%d%%" % int(roundf(float(value) * 100.0))
 		"town":
@@ -129,16 +124,6 @@ static func written(value: Variant, kind: String, run: RunState) -> String:
 		"side":
 			return String(SIDES.get(String(value), value))
 	return String(value)
-
-
-## `1234567` -> `1,234,567`.
-static func with_thousands(value: int) -> String:
-	var digits := str(absi(value))
-	var out := ""
-	while digits.length() > 3:
-		out = "," + digits.substr(digits.length() - 3) + out
-		digits = digits.substr(0, digits.length() - 3)
-	return ("-" if value < 0 else "") + digits + out
 
 
 static func _field(payload: Dictionary, path: String) -> Variant:
@@ -204,10 +189,10 @@ static func _colony(measure: String, run: RunState) -> String:
 		return UNKNOWN
 	match measure:
 		"towns":
-			return with_thousands(run.colony.in_order().size())
+			return Figures.with_thousands(run.colony.in_order().size())
 		"people":
 			var people := 0
 			for town in run.colony.in_order():
 				people += (town as Town).population()
-			return with_thousands(int(roundf(float(people) * PEOPLE_PER_POPULATION)))
+			return Figures.people(float(people))
 	return UNKNOWN

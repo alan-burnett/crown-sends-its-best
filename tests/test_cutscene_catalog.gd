@@ -67,17 +67,19 @@ func _trigger_problems(extra: Dictionary) -> ContentValidator:
 # --- 🔒 The numbers are the engine's, written out --------------------------------
 
 func test_a_head_count_is_written_as_the_people_it_stands_for() -> void:
-	# The Author's figure: a company of 2.4 is 2,400 men.
-	assert_eq(CutsceneParams.written(2.4, "people", null), "2,400")
-	assert_eq(CutsceneParams.written(3, "people", null), "3,000")
+	# The Author's figure, set once in `Config`: a company of 2.4 is 2,400 men
+	# while it is a thousand.
+	assert_eq(Figures.headcount(2.4), roundi(2.4 * Config.PEOPLE_PER_POPULATION))
+	assert_eq(CutsceneParams.written(2.4, "people", null), Figures.people(2.4))
+	assert_eq(Figures.people(3), Figures.with_thousands(3 * Config.PEOPLE_PER_POPULATION))
 
 
 func test_a_number_carries_its_thousands() -> void:
-	assert_eq(CutsceneParams.with_thousands(0), "0")
-	assert_eq(CutsceneParams.with_thousands(999), "999")
-	assert_eq(CutsceneParams.with_thousands(1000), "1,000")
-	assert_eq(CutsceneParams.with_thousands(1234567), "1,234,567")
-	assert_eq(CutsceneParams.with_thousands(-2400), "-2,400")
+	assert_eq(Figures.with_thousands(0), "0")
+	assert_eq(Figures.with_thousands(999), "999")
+	assert_eq(Figures.with_thousands(1000), "1,000")
+	assert_eq(Figures.with_thousands(1234567), "1,234,567")
+	assert_eq(Figures.with_thousands(-2400), "-2,400")
 	assert_eq(CutsceneParams.written(1250.4, "gold", null), "1,250")
 
 
@@ -127,7 +129,7 @@ func test_a_trigger_supplies_every_param_it_declares() -> void:
 		"men": {"from": "event", "field": "attacker_men", "as": "people"},
 		"when": {"from": "date"},
 	}, _event("battle_fought", {"attacker_men": 2}, 26), null)
-	assert_eq(supplied, {"men": "2,000", "when": "year 3, month 3"})
+	assert_eq(supplied, {"men": Figures.people(2), "when": "year 3, month 3"})
 
 
 func test_a_caption_says_what_it_was_told_and_shows_what_it_was_not() -> void:
@@ -199,6 +201,57 @@ func test_a_cutscene_trigger_is_refused_for_each_way_it_can_be_wrong() -> void:
 	}
 	for why in wrong:
 		assert_false(_trigger_problems(wrong[why]).ok(), "passed with %s" % why)
+
+
+# --- 🔒 Every run ends in retirement ---------------------------------------------
+
+## The shipped bookends, over these events, as the ids they show.
+func _endings(events: Array) -> PackedStringArray:
+	var triggers := CutsceneTriggers.from_content(content)
+	var log := EventLog.new()
+	for entry in events:
+		log.emit(StringName(entry[0]), &"crown", 30, entry[1])
+	return CutsceneTriggers.ids_of(CutsceneTriggers.fired(triggers, log.all(), {}))
+
+
+func test_every_ending_ends_on_the_retirement() -> void:
+	# The Author: the post is never taken from you. However the colony ended,
+	# and at fifty years as at any other time, the man retires — so every run
+	# ends on the same painting, after its own.
+	for reason in ["retired", "term_expired", "failed"]:
+		var shown := _endings([["run_ended", {"reason": reason, "years": 3}]])
+		assert_eq(shown, PackedStringArray(["ending_retired"]),
+			"a run that ended '%s' showed %s" % [reason, shown])
+	var starved := _endings([
+		["colony_was_lost", {"how": "colony_overrun", "fell_to": "hunger", "people": 0, "towns": 2}],
+		["run_ended", {"reason": "failed", "years": 9}],
+	])
+	assert_eq(starved, PackedStringArray(["ending_starved", "ending_retired"]))
+
+
+func test_a_colony_is_painted_by_what_finished_it() -> void:
+	# SPEC §13.1: the ending names who overran it — and a colony that starved
+	# was overrun by nobody.
+	var shown := {}
+	for fell_to in ["native", "rival", "rebel", "hunger", ""]:
+		var ids := _endings([["colony_was_lost", {"how": "colony_overrun", "fell_to": fell_to}]])
+		assert_eq(ids.size(), 1, "'%s' showed %s" % [fell_to, ids])
+		shown[ids[0]] = true
+	assert_eq(shown.size(), 5, "two ways of falling shared one painting: %s" % [shown.keys()])
+
+
+func test_what_finished_the_colony_is_the_last_thing_that_cost_it_people() -> void:
+	# A town lost to the natives in year five does not make year nine's famine
+	# an overrun by the natives.
+	var log := EventLog.new()
+	log.emit(Colony.EVENT_LOST, &"ashmere", 60, {"to": "native"})
+	log.emit(ConsumePhase.EVENT_FAMINE, &"brill", 108, {})
+	assert_eq(RunEndDriver.fell_to(log), RunEndDriver.FELL_TO_HUNGER)
+	log.emit(TownCompany.EVENT_STORMED, &"brill", 109, {"by": "rebel"})
+	assert_eq(RunEndDriver.fell_to(log), "rebel")
+	log.emit(Colony.EVENT_LOST, &"brill", 109, {"to": "rival"})
+	assert_eq(RunEndDriver.fell_to(log), "rival")
+	assert_eq(RunEndDriver.fell_to(EventLog.new()), "")
 
 
 # --- 🔒 The machine hands the painting its facts ---------------------------------
