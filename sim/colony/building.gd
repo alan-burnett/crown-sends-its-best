@@ -543,6 +543,32 @@ static func pasture_capacity_for(town: Town) -> int:
 ## stored food is what carries a household through a winter and a herd through a
 ## lean spring. A building that sped children but not calves would be two
 ## mechanics wearing one name.
+## How an expedition leaving this town is outfitted beyond what it takes from
+## it (#413, `founding-towns.md` §2): its stores **multiplied, then added to**.
+## Scouts double them and add ten tools.
+##
+## **From the wild, not from the town.** People schooled by scouts make tools on
+## the road and gather as they go; the parent has already given all it gives.
+## Every lit building's factor multiplies and its additions sum, in id order.
+static func expedition_outfitting_for(town: Town) -> Dictionary:
+	var multiply := 1.0
+	var add: Dictionary = {}
+	var held := town.buildings.duplicate()
+	held.sort()
+	for id in held:
+		var building := find(StringName(id))
+		if building == null or not is_lit(town, StringName(id)):
+			continue
+		var outfits: Dictionary = building.effect("expedition_stores", {})
+		if outfits.is_empty():
+			continue
+		multiply *= float(outfits.get("multiply", 1.0))
+		var extra: Dictionary = outfits.get("add", {})
+		for resource in extra:
+			add[resource] = float(add.get(resource, 0.0)) + float(extra[resource])
+	return {"multiply": multiply, "add": add}
+
+
 static func growth_bonus_for(town: Town) -> float:
 	var total := 0.0
 	for id in town.buildings:

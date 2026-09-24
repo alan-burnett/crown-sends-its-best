@@ -167,6 +167,62 @@ func test_a_new_town_starts_with_nothing_built_but_its_hall() -> void:
 		"a new town began with more than its hall: %s" % [founded.buildings])
 
 
+# --- 🔒 Scouts send it out better found (#413) --------------------------
+
+## Launch a lean expedition from a town alike in every way but its scouts.
+func _launch_from(with_scouts: bool) -> Dictionary:
+	var town := _town(&"ashmere", 10_000, {"food": 900.0, "wood": 400.0, "stone": 80.0, "tools": 50.0})
+	if with_scouts:
+		town.add_building(&"scouts")
+	var context := _context([town])
+	town.objective = &"lean_expedition"
+	_month(context)
+	_month(context)
+	return {"payload": _launched(context)[0].payload, "town": town}
+
+
+func test_scouts_double_the_stores_and_add_ten_tools() -> void:
+	# `founding-towns.md` §2, Author's ruling on #413. Lean and thick alike.
+	var bare := _launch_from(false)
+	var scouted := _launch_from(true)
+	var plain: Dictionary = bare["payload"]
+	var found: Dictionary = scouted["payload"]
+	var without: Dictionary = plain["cargo"]
+	var with: Dictionary = found["cargo"]
+	assert_false(without.is_empty(), "the fixture sent nothing, so this compares nothing")
+	for resource in Expedition.GATHERS:
+		var expected := 2.0 * float(without.get(resource, 0.0)) + (10.0 if resource == "tools" else 0.0)
+		assert_almost_eq(float(with.get(resource, 0.0)), expected, 0.001,
+			"%s: scouts sent %s where %s was due" % [resource, with.get(resource, 0.0), expected])
+	assert_eq(int(found["people"]), int(plain["people"]), "scouts changed who went")
+	# **The same share of the purse.** Not the same sum: the scouts' post has
+	# upkeep of its own, so the purse it takes a share of is smaller.
+	for pair in [[plain, bare["town"]], [found, scouted["town"]]]:
+		var took := float(pair[0]["gold"])
+		var left: float = (pair[1] as Town).spend_share(1.0)
+		assert_almost_eq(took / (took + left), 0.2, 0.0001, "scouts changed the share of the purse it took")
+
+
+func test_the_extra_comes_from_the_wild_and_not_from_the_town() -> void:
+	var plain: Town = _launch_from(false)["town"]
+	var scouted: Town = _launch_from(true)["town"]
+	for resource in Expedition.GATHERS:
+		assert_almost_eq(scouted.held(StringName(resource)), plain.held(StringName(resource)), 0.001,
+			"a town with scouts gave more %s than one without" % resource)
+
+
+func test_the_validator_refuses_outfitting_it_cannot_read() -> void:
+	# A misspelt resource would add nothing, and nothing would say so.
+	var validator := ContentValidator.new()
+	validator.check_expedition_outfitting(content)
+	assert_true(validator.ok(), "the shipped scouts do not validate")
+	var effects: Dictionary = content.collection("buildings")["scouts"]["effects"]
+	effects["expedition_stores"]["add"] = {"muskets": 10}
+	validator = ContentValidator.new()
+	validator.check_expedition_outfitting(content)
+	assert_false(validator.ok(), "an expedition was outfitted with something it never carries")
+
+
 # --- 🔒 When go wide sends one (§7) ---------------------------------------------
 
 func test_going_wide_sends_one_while_the_town_outgrows_the_colony() -> void:

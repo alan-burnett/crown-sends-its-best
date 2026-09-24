@@ -107,12 +107,22 @@ static func launch(town: Town, context: ColonyContext) -> ExpeditionParty:
 	var share := clampf(float(going) / maxf(1.0, float(town.population())), 0.0, 1.0)
 	var purse := town.spend_share(share)
 
-	var carried: Dictionary = {}
+	var taken_from_town: Dictionary = {}
 	var cargo := cargo_for(town, context)
 	for resource in cargo:
 		var taken := town.take(StringName(resource), float(cargo[resource]))
 		if taken > 0.0:
-			carried[resource] = taken
+			taken_from_town[resource] = taken
+
+	# 🔒 **Scouts send it out better found** (#413, §2): its stores doubled, then
+	# ten tools more — **from the wild**, so the town is drained no further than
+	# by what it gave above. Its people and its gold are unchanged.
+	var outfitting := Building.expedition_outfitting_for(town)
+	var carried: Dictionary = {}
+	for resource in taken_from_town:
+		carried[resource] = float(taken_from_town[resource]) * float(outfitting["multiply"])
+	for resource in outfitting["add"]:
+		carried[resource] = float(carried.get(resource, 0.0)) + float(outfitting["add"][resource])
 
 	# Workers first, because the experts a town has are the last thing it parts
 	# with — and a shed expedition is mouths rather than talent.
@@ -152,5 +162,6 @@ static func launch(town: Town, context: ColonyContext) -> ExpeditionParty:
 		"people": going,
 		"gold": purse,
 		"cargo": carried,
+		"from_the_town": taken_from_town,
 	}, WorldPhase.COLONY_MONTH)
 	return party

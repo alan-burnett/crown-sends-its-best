@@ -637,6 +637,32 @@ func check_building_reserves(content: ContentDatabase) -> void:
 					_problem("effects.reserve_months", "names '%s', which is not a resource" % resource)
 
 
+## 🔒 **What outfits an expedition is a factor and resources** (#413): a
+## misspelt resource would add nothing, and nothing would say so.
+func check_expedition_outfitting(content: ContentDatabase) -> void:
+	for id in content.ids("buildings"):
+		_file = "buildings/%s" % id
+		var effects: Dictionary = content.collection("buildings")[id].get("effects", {})
+		if not effects.has("expedition_stores"):
+			continue
+		var outfits: Variant = effects["expedition_stores"]
+		if typeof(outfits) != TYPE_DICTIONARY:
+			_problem("effects.expedition_stores", "expected {multiply, add}")
+			continue
+		for key in outfits:
+			if not ["multiply", "add"].has(String(key)):
+				_problem("effects.expedition_stores", "has no '%s'" % key)
+		if typeof(outfits.get("multiply", 1)) not in [TYPE_INT, TYPE_FLOAT] or float(outfits.get("multiply", 1)) < 0.0:
+			_problem("effects.expedition_stores.multiply", "must be a number, nought or more")
+		var add: Variant = outfits.get("add", {})
+		if typeof(add) != TYPE_DICTIONARY:
+			_problem("effects.expedition_stores.add", "expected resource -> amount")
+			continue
+		for resource in add:
+			if not Expedition.GATHERS.has(String(resource)):
+				_problem("effects.expedition_stores.add", "'%s' is not a store an expedition carries" % resource)
+
+
 ## 🔒 **A building authors its cost and not its duration** (#148).
 ##
 ## Time is the cost divided by what the town can put into construction in a

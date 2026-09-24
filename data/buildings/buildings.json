@@ -190,7 +190,9 @@
 	  "tools": 2
 	},
 	"upkeep": 2,
-	"effects": {},
+	"effects": {
+	  "expedition_stores": { "multiply": 2, "add": { "tools": 10 } }
+	},
 	"requires": []
   },
   {
