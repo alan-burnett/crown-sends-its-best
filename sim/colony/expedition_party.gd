@@ -80,6 +80,11 @@ var region: Vector2i = Vector2i(-1, -1)
 ## What he has been asked to look for. A **name**, never a coordinate.
 var preference: StringName = SitePreference.GOOD_GROUND
 
+## How much the intent that sent it minds native land, nought to one (#433,
+## `founding-towns.md` §5): go wide 0.3 for a lean expedition, go tall 1.0 for
+## a thick one. Every site it weighs is discounted by it.
+var aversion: float = 0.0
+
 ## Where it is going this month.
 ##
 ## **Derived, never assigned from a letter.** While it is crossing it heads for
@@ -129,7 +134,7 @@ func settle_destination(
 	if region == Vector2i(-1, -1):
 		destination = Vector2i(-1, -1)
 		return destination
-	var site := SitePreference.site_in(region, preference, map, colony, natives)
+	var site := SitePreference.site_in(region, preference, map, colony, natives, aversion)
 	destination = site if site != Vector2i(-1, -1) else region
 	return destination
 
@@ -390,6 +395,7 @@ func to_dict() -> Dictionary:
 		"destination": [destination.x, destination.y],
 		"region": [region.x, region.y],
 		"preference": String(preference),
+		"aversion": aversion,
 		"buildings": buildings.duplicate(),
 		"launched_month": launched_month,
 		"attacks": attacks,
@@ -411,6 +417,7 @@ static func from_dict(data: Dictionary) -> ExpeditionParty:
 	party.region = _point(data.get("region", [-1, -1]))
 	party.preference = StringName(
 		data.get("preference", String(SitePreference.GOOD_GROUND)))
+	party.aversion = float(data.get("aversion", 0.0))
 	party.buildings = data.get("buildings", []).duplicate()
 	party.launched_month = int(data.get("launched_month", 0))
 	party.attacks = int(data.get("attacks", 0))

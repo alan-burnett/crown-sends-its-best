@@ -150,16 +150,35 @@ func test_he_keeps_clear_of_the_towns_already_there() -> void:
 
 # --- 🔒 A preference moves the answer ---------------------------------------
 
+## A village on the ground he would pick with no preference at all.
+func _village_on_the_best_ground(map: WorldMap) -> Tribes:
+	var natives := Tribes.new()
+	var tribe := Tribe.new()
+	tribe.id = &"tribe_test"
+	natives.all.append(tribe)
+	var village := Village.new()
+	village.id = &"village_test_0"
+	village.tribe = tribe.id
+	village.at = SitePreference.site_in(Vector2i(9, 7), SitePreference.GOOD_GROUND, map)
+	village.people = 30
+	natives.villages.append(village)
+	return natives
+
+
 func test_each_preference_can_pick_different_ground() -> void:
 	# **A preference shades the answer; it does not replace it.** He still wants
 	# ground a town can live on — he is simply weighing one thing more.
+	#
+	# Against #433's site score, where the ground is comparable. The score counts
+	# water as poor ground, so *the coast* moves the pick only where coastal
+	# ground is nearly as good as inland (reported on #433); a village on the
+	# best field shows the preference bending the pick.
 	var map := _map()
-	var chosen: Dictionary = {}
+	var natives := _village_on_the_best_ground(map)
+	var distinct: Dictionary = {}
 	for preference in SitePreference.ALL:
-		chosen[String(preference)] = SitePreference.site_in(Vector2i(9, 7), preference, map)
-	assert_true(chosen[String(SitePreference.THE_COAST)]
-			!= chosen[String(SitePreference.THE_ORE)],
-		"the coast and the ore sent him to the same field")
+		distinct[SitePreference.site_in(Vector2i(9, 7), preference, map, null, natives)] = true
+	assert_true(distinct.size() > 1, "every preference sent him to the same field")
 
 
 func test_the_coast_puts_him_nearer_the_water() -> void:
@@ -176,12 +195,13 @@ func test_a_preference_letter_changes_where_he_ends_up() -> void:
 	# 🔒 The whole of §5. If the site were fixed at launch this test could not be
 	# written, because there would be nothing left to change.
 	var context := _context()
+	var natives := _village_on_the_best_ground(context.map)
 	var party := _party(Vector2i(9, 7))
-	party.settle_destination(context.map)
+	party.settle_destination(context.map, null, natives)
 	var was := party.destination
 
-	assert_true(party.prefer(SitePreference.THE_ORE, context), "he did not hear the letter")
-	party.settle_destination(context.map)
+	assert_true(party.prefer(SitePreference.AWAY_FROM_TRIBES, context), "he did not hear the letter")
+	party.settle_destination(context.map, null, natives)
 	assert_true(party.destination != was,
 		"the PC wrote while he was still on the road and it changed nothing")
 	assert_not_empty(context.log.of_type(ExpeditionParty.EVENT_PREFERENCE))

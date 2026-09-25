@@ -69,17 +69,33 @@ static func cargo_for(town: Town, context: ColonyContext) -> Dictionary:
 	return cargo
 
 
-## The area the governor sets out for (#177).
+## The area the governor sets out for (#177, #433).
 ##
-## **Far enough to be a journey and near enough to be his colony's.** Nothing
-## clever: a step outward from the parent town, away from the middle of the map,
-## which gives a region without needing a survey the colony has not done.
+## **The best site the colony has seen** (`founding-towns.md` §5, ⚠ assumed
+## there): of the explored land outside every town's influence, the tile with
+## the highest site score for the intent that sends it, ties north-west first.
+## The PC's preference then bends the pick within the region as it travels.
+##
+## With no knowledge to hand, a step outward from the parent town, away from the
+## middle of the map.
 ##
 ## 🔒 Deterministic. The same town on the same map sets out for the same country,
 ## so a save reloaded at the gate goes to the same place.
-static func region_for(town: Town, context: ColonyContext) -> Vector2i:
+static func region_for(town: Town, context: ColonyContext, aversion: float = 0.0) -> Vector2i:
 	if context.map == null or town.at == Vector2i(-1, -1):
 		return Vector2i(-1, -1)
+	if context.knowledge != null:
+		var best := Vector2i(-1, -1)
+		var most := -1.0
+		for at in context.knowledge.explored():
+			if not context.map.is_land(at.x, at.y) or SitePreference.inside_a_town(at, context.colony):
+				continue
+			var score := SitePreference.site_score(at, context.map, context.colony, context.natives, aversion)
+			if score > most + 0.0001:
+				best = at
+				most = score
+		if best != Vector2i(-1, -1):
+			return best
 	var middle := Vector2i(context.map.width / 2, context.map.height / 2)
 	var outward := town.at - middle
 	if outward == Vector2i.ZERO:
@@ -140,7 +156,11 @@ static func launch(town: Town, context: ColonyContext) -> ExpeditionParty:
 	# toward an area with his own idea of what he is looking for; the PC's
 	# preferences arrive in his reply to the governor's first letter and shift him
 	# while he travels. A site fixed here would make that letter a month too late.
-	party.region = region_for(town, context)
+	# **How much the intent that sent it minds native land** (#433), carried
+	# with it, because every site it weighs on the way is discounted by it.
+	var sent_by := town.objective_intent if not String(town.objective_intent).is_empty() else town.intent
+	party.aversion = AgendaMenu.aversion_of(sent_by)
+	party.region = region_for(town, context, party.aversion)
 	party.preference = SitePreference.GOOD_GROUND
 
 	# 🔒 **Elected the month it launches, not the month it arrives** (#178, §4).

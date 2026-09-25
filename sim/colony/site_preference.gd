@@ -75,6 +75,7 @@ static func site_in(
 	map: WorldMap,
 	colony: Colony = null,
 	natives: Tribes = null,
+	aversion: float = 0.0,
 ) -> Vector2i:
 	if map == null or region == Vector2i(-1, -1):
 		return Vector2i(-1, -1)
@@ -93,9 +94,9 @@ static func site_in(
 			var at := region + Vector2i(dx, dy)
 			if not map.in_bounds(at.x, at.y) or not map.is_land(at.x, at.y):
 				continue
-			if _too_near_a_town(at, colony):
+			if inside_a_town(at, colony):
 				continue
-			var merit := _ground_merit(at, map)
+			var merit := site_score(at, map, colony, natives, aversion)
 			candidates.append({
 				"at": at, "merit": merit, "want": _wanted(at, preference, map, natives),
 			})
@@ -143,15 +144,68 @@ static func _wanted(
 			return 0.0
 
 
-## How good the ground is, on its own terms: food first, then everything else.
-static func _ground_merit(at: Vector2i, map: WorldMap) -> float:
-	var merit := map.yield_around(at.x, at.y, &"food") * 1.5
-	for resource in ResourceCatalogue.ids():
-		var id := StringName(resource)
-		if id == &"food" or ResourceCatalogue.is_livestock(id):
-			continue
-		merit += map.yield_around(at.x, at.y, id) * 0.25
-	return merit
+## 🔒 **What makes a site good** (#433, `founding-towns.md` §5, the Author's
+## ruling on #422):
+##
+##     site = ( 2 × total yield of the tiles within 1
+##              + total yield of the other tiles within 3 ) × closeness
+##
+## *Within n* is the influence area's ring distance (Chebyshev), so the first
+## term is the site and the eight around it and the second the forty beyond.
+## **Every tile's yield is discounted for native land** by the sending intent's
+## aversion, as for improvements (`governor-agendas.md` §8): a thick expedition
+## from go tall keeps off their land, a lean one from go wide mostly takes it.
+static func site_score(
+	at: Vector2i, map: WorldMap, colony: Colony = null, natives: Tribes = null, aversion: float = 0.0
+) -> float:
+	var near := 0.0
+	var beyond := 0.0
+	for dy in range(-3, 4):
+		for dx in range(-3, 4):
+			var tile := at + Vector2i(dx, dy)
+			if not map.in_bounds(tile.x, tile.y):
+				continue
+			var ground := total_yield(tile, map) \
+				* clampf(1.0 - Intrusion.depth_at(tile, natives) * aversion, 0.0, 1.0)
+			if maxi(absi(dx), absi(dy)) <= 1:
+				near += ground
+			else:
+				beyond += ground
+	return (2.0 * near + beyond) * closeness(at, colony)
+
+
+## A tile's unimproved yield on the none / low / medium / high scale, summed
+## over every resource it gives (§5, ⚠ assumed there).
+static func total_yield(tile: Vector2i, map: WorldMap) -> float:
+	var terrain := Terrain.find(map.terrain_at(tile.x, tile.y))
+	if terrain == null:
+		return 0.0
+	var gives: Array = terrain.yields.keys()
+	gives.sort()
+	var total := 0.0
+	for resource in gives:
+		total += Terrain.level_value(String(terrain.yields[resource]))
+	return total
+
+
+## How much a town's nearness spoils a site (§5): within 3 tiles of the nearest
+## town, a fifth; within 4, three quarters; further, nothing. **Towns only**, not
+## expeditions on their way (⚠ assumed there).
+static func closeness(at: Vector2i, colony: Colony) -> float:
+	if colony == null:
+		return 1.0
+	var nearest := -1
+	for town in colony.in_order():
+		var away := maxi(absi(town.at.x - at.x), absi(town.at.y - at.y))
+		if nearest < 0 or away < nearest:
+			nearest = away
+	if nearest < 0:
+		return 1.0
+	if nearest <= 3:
+		return 0.2
+	if nearest <= 4:
+		return 0.75
+	return 1.0
 
 
 ## How much settling here would intrude on somebody, from nought to one.
@@ -167,12 +221,14 @@ static func intrusion_at(at: Vector2i, _map: WorldMap, natives: Tribes = null) -
 	return Intrusion.depth_at(at, natives)
 
 
-## Whether a site sits on somebody else's doorstep.
-static func _too_near_a_town(at: Vector2i, colony: Colony) -> bool:
+## Whether a site lies inside a town's influence (§5: candidates are land
+## outside every town's). Ring distance to its reach, as the influence area is
+## drawn.
+static func inside_a_town(at: Vector2i, colony: Colony) -> bool:
 	if colony == null:
 		return false
 	for town in colony.in_order():
-		if town.at.distance_squared_to(at) <= 4:
+		if maxi(absi(town.at.x - at.x), absi(town.at.y - at.y)) <= Territory.reach_of(town):
 			return true
 	return false
 
