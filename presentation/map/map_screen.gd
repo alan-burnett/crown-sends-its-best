@@ -58,6 +58,12 @@ const SHOWS_TOWN_DETAIL: bool = true
 const DETAIL_FONT_SIZE: int = 12
 const DETAIL_PAD: float = 4.0
 const DETAIL_BACK: Color = Color(0.05, 0.05, 0.07, 0.82)
+## A tile a town's hands worked last month, and the tile it is building on.
+const DETAIL_WORKED: Color = Color(1.0, 0.86, 0.25, 0.95)
+const DETAIL_BUILDING: Color = Color(0.55, 0.85, 1.0, 0.95)
+## Improvement names are drawn only once a tile is large enough to hold one.
+const DETAIL_LABEL_FROM: float = 20.0
+const DETAIL_LABEL_SIZE: int = 9
 
 ## The colony's towns, for the text boxes above. Null draws none.
 var colony: Colony = null
@@ -291,6 +297,9 @@ func _draw_map() -> void:
 		if remembered:
 			_canvas.draw_line(where, where + Vector2(side, side), DeskTheme.MAP_STALE, 1.0)
 
+	if SHOWS_TOWN_DETAIL:
+		_draw_town_ground(side)
+
 	for at in knowledge.towns:
 		var centre := (Vector2(at) + Vector2(0.5, 0.5)) * side + _offset
 		_canvas.draw_circle(centre, maxf(3.0, side * 0.3), DeskTheme.MAP_TOWN)
@@ -349,7 +358,8 @@ func _draw_town_details(side: float) -> void:
 
 
 ## What the text box says about a town: its name and people, what it is
-## building, and what its governor intends.
+## building, what its governor intends, and what its worked tiles gave last
+## month.
 static func details_of(town: Town) -> PackedStringArray:
 	var building := "nothing" if String(town.objective).is_empty() \
 		else Objective.display_name(town.objective)
@@ -359,7 +369,90 @@ static func details_of(town: Town) -> PackedStringArray:
 		"%s · %s people" % [town.display_name, Figures.with_thousands(town.population())],
 		"Building: %s" % building,
 		"Intent: %s" % intent,
+		"Harvest: %s" % harvest_of(town),
 	])
+
+
+## What the town's worked tiles gave last month, largest first, or "nothing".
+static func harvest_of(town: Town) -> String:
+	var kinds: Array = []
+	for resource in town.harvested:
+		if float(town.harvested[resource]) >= 0.05:
+			kinds.append(String(resource))
+	if kinds.is_empty():
+		return "nothing"
+	kinds.sort_custom(func(a: String, b: String) -> bool:
+		var left := float(town.harvested[a])
+		var right := float(town.harvested[b])
+		return left > right if not is_equal_approx(left, right) else a < b)
+	var parts := PackedStringArray()
+	for resource in kinds:
+		parts.append("%s %s" % [_amount(float(town.harvested[resource])), resource])
+	return ", ".join(parts)
+
+
+static func _amount(value: float) -> String:
+	return "%.1f" % value if value < 10.0 else Figures.with_thousands(int(roundf(value)))
+
+
+## 🔧 The ground under the content-testing boxes: an outline on every tile a town
+## worked last month, a second on the tile it is building an improvement on, and
+## the name of every improvement standing on a known tile.
+func _draw_town_ground(side: float) -> void:
+	var font := ThemeDB.fallback_font
+	var inset := maxf(1.0, side * 0.08)
+	if colony != null:
+		for entry in colony.in_order():
+			var town: Town = entry
+			for key in town.harvested_at:
+				var at := _tile_of(String(key))
+				if knowledge.seen.has(at):
+					_canvas.draw_rect(_tile_rect(at, side).grow(-inset), DETAIL_WORKED, false,
+						maxf(1.0, side * 0.07))
+			if Objective.kind_of(town.objective) == Objective.IMPROVEMENT \
+					and knowledge.seen.has(town.objective_target):
+				var target := town.objective_target
+				_canvas.draw_rect(_tile_rect(target, side).grow(-inset * 2.0), DETAIL_BUILDING, false,
+					maxf(1.0, side * 0.07))
+				if side >= DETAIL_LABEL_FROM:
+					_tile_label(font, target, side, "(%s)" % _short_name_of(town.objective), DETAIL_BUILDING)
+	if side < DETAIL_LABEL_FROM:
+		return
+	for at in knowledge.explored():
+		var improvement := knowledge.improvement_at(at)
+		if not String(improvement).is_empty():
+			_tile_label(font, at, side, _short_name_of(improvement), DeskTheme.PAPER)
+
+
+func _tile_rect(at: Vector2i, side: float) -> Rect2:
+	return Rect2(Vector2(at) * side + _offset, Vector2(side, side))
+
+
+## A short name on a strip along the foot of a tile.
+func _tile_label(font: Font, at: Vector2i, side: float, text: String, colour: Color) -> void:
+	var rect := _tile_rect(at, side)
+	var height := font.get_height(DETAIL_LABEL_SIZE)
+	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, DETAIL_LABEL_SIZE).x
+	var strip := Rect2(Vector2(rect.get_center().x - width * 0.5 - 2.0, rect.end.y - height - 1.0),
+		Vector2(width + 4.0, height))
+	_canvas.draw_rect(strip, DETAIL_BACK)
+	_canvas.draw_string(font, Vector2(strip.position.x + 2.0, strip.position.y + font.get_ascent(DETAIL_LABEL_SIZE)),
+		text, HORIZONTAL_ALIGNMENT_LEFT, -1, DETAIL_LABEL_SIZE, colour)
+
+
+## "farm", "sugar", "mine": an improvement's name without its article, first
+## word only, so it fits a tile.
+static func _short_name_of(id: StringName) -> String:
+	var improvement := Improvement.find(id)
+	var name := improvement.display_name if improvement != null else String(id)
+	for article in ["a ", "an "]:
+		if name.begins_with(article):
+			name = name.substr(article.length())
+	return name.get_slice(" ", 0)
+
+
+static func _tile_of(key: String) -> Vector2i:
+	return Vector2i(int(key.get_slice(",", 0)), int(key.get_slice(",", 1)))
 
 
 func _redraw() -> void:
