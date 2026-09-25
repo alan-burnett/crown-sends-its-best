@@ -133,6 +133,12 @@ static func _depart(
 		# What is banked is on the credit event, which is the Crown's book.
 	}, WorldPhase.RECKONING)
 
+	# 🔒 **What he put his name to stays** (#440, §4). A policy of his still
+	# standing is the colony's for good, with no charge and no one to drain; one
+	# that ended while he was here has already gone, and nothing brings it back.
+	if run.policies != null:
+		run.policies.outlive(patron.id, log, month)
+
 	# 🔒 **He is gone from the correspondence, and he counts for ever.**
 	# `Prestige` sums the banks out of the log, so nothing has to keep a record of
 	# a man who is no longer here.

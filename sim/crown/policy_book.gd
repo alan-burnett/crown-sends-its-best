@@ -28,6 +28,7 @@ const EVENT_BILLED: StringName = &"policy_billed"
 const EVENT_ENDED: StringName = &"policy_ended"
 const EVENT_RENEGOTIATING: StringName = &"policy_renegotiating"
 const EVENT_WARNED: StringName = &"policy_warned"
+const EVENT_MADE_PERMANENT: StringName = &"policy_made_permanent"
 
 ## How long a man carries what the PC is not paying before he says something.
 ##
@@ -90,6 +91,10 @@ func held_by(enactor: StringName) -> Array[Policy]:
 func bill(contacts: Dictionary, log: EventLog, month: int) -> float:
 	var paid := 0.0
 	for policy in _policies:
+		# 🔒 **A policy that outlived its enactor is billed to nobody** (#440):
+		# no charge, no drain, and nothing on the Crown's books to say otherwise.
+		if policy.permanent:
+			continue
 		var crown := policy.crown_pays()
 		paid += crown
 
@@ -128,6 +133,8 @@ func take_stock(log: EventLog, month: int) -> Dictionary:
 	var ended: Array[Policy] = []
 
 	for policy in _policies.duplicate():
+		if policy.permanent:
+			continue
 		if policy.is_warning():
 			if month >= policy.ends_month:
 				ended.append(policy)
@@ -198,6 +205,31 @@ func crown_stopped_paying(
 				"months": 0 if covering else GRACE,
 			}, WorldPhase.CROWNS_MONTH)
 	return shaken
+
+
+## 🔒 **Every policy this man holds outlives him** (#440, `patrons.md` §4,
+## `policy.md` §8). Called when a patron goes home: the charge and the drain end,
+## any warning he had given goes with him, and the effect stays for the run.
+##
+## Returns what was made permanent, so the caller can say so.
+func outlive(enactor: StringName, log: EventLog, month: int) -> Array[Policy]:
+	var kept: Array[Policy] = []
+	for policy in held_by(enactor):
+		if policy.permanent:
+			continue
+		policy.permanent = true
+		policy.carried_months = 0
+		policy.warned_month = -1
+		policy.ends_month = -1
+		policy.renegotiating = false
+		kept.append(policy)
+		if log != null:
+			log.emit(EVENT_MADE_PERMANENT, enactor, month, {
+				"policy": String(policy.id),
+				"effect": String(policy.effect),
+				"enactor": String(enactor),
+			}, WorldPhase.RECKONING)
+	return kept
 
 
 ## The PC calls one off. **It costs loyalty** (§6).

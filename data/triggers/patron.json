@@ -98,5 +98,30 @@
         "he_could_trouble_a_duke": {}
       }
     ]
+  },
+  {
+    "id": "trigger.patron.policy_lapsing",
+    "letter": "patron.policy_lapsing",
+    "urgency": 0.95,
+    "cooldown": 4,
+    "note": "Issue 440, patrons.md section 4, policy.md section 4. The Steward's renegotiation, from a patron: a policy of his that the PC is not paying for has run past his patience, and he names the month he lets it go. Urgency and cooldown as the Steward's, because it is the same warning and the ending it warns of is sooner than most.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "cost": {
+        "from": "policy",
+        "field": "cost"
+      },
+      "months": {
+        "from": "policy",
+        "field": "months"
+      }
+    },
+    "conditions": [
+      {
+        "will_not_carry_it_further": {}
+      }
+    ]
   }
 ]

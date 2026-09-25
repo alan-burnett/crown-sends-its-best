@@ -104,6 +104,12 @@ var carried_months: int = 0
 var warned_month: int = -1
 var ends_month: int = -1
 
+## 🔒 **It outlived the man who put his name to it** (#440, `patrons.md` §4,
+## `policy.md` §8). A patron's policy still standing when he goes home is the
+## colony's for good: **the charge and the drain end, and the effect stays for
+## the run.** Nobody is left to carry it, to warn, or to be written to.
+var permanent: bool = false
+
 
 ## Whether he has said he will not go on.
 func is_warning() -> bool:
@@ -139,11 +145,15 @@ func _init(
 
 ## What the Crown pays towards it this month.
 func crown_pays() -> float:
+	if permanent:
+		return 0.0
 	return cost * (1.0 - float(UNPAID_SHARE.get(split, 1.0)))
 
 
 ## What carrying the rest costs the enactor in regard this month.
 func drains() -> float:
+	if permanent:
+		return 0.0
 	return float(DRAIN.get(split, 0.0))
 
 
@@ -153,7 +163,7 @@ func drains() -> float:
 ## written to the enactor saying he would now pay nothing — which is a
 ## renegotiation, and the enactor decides for himself.
 func crown_stopped_paying() -> bool:
-	if split == NONE:
+	if split == NONE or permanent:
 		return false
 	split = NONE
 	renegotiating = true
@@ -173,6 +183,7 @@ func to_dict() -> Dictionary:
 		"carried_months": carried_months,
 		"warned_month": warned_month,
 		"ends_month": ends_month,
+		"permanent": permanent,
 	}
 
 
@@ -190,4 +201,5 @@ static func from_dict(data: Dictionary) -> Policy:
 	restored.carried_months = int(data.get("carried_months", 0))
 	restored.warned_month = int(data.get("warned_month", -1))
 	restored.ends_month = int(data.get("ends_month", -1))
+	restored.permanent = bool(data.get("permanent", false))
 	return restored

@@ -3,7 +3,7 @@
   "sender": "patron",
   "type": "offer",
   "skippable": true,
-  "note": "Issue 396, policy.md sections 7 and 8, patrons.md sections 3 and 10. A patron whose specialty is resources or livestock names one kind of it, and he can have his Barony buy that kind from the colony rather than from its neighbour: the Crown's price for it goes up while the policy stands. He writes; the PC answers (section 10 lock). The charge and who bears it are policy.md's; 90 a month is a placeholder (section 9). Placeholder prose: the Author writes the real lines.",
+  "note": "Issue 396, policy.md sections 3, 7 and 8, patrons.md sections 3, 4 and 10. #440: the PC answers with a share of the charge - all, half or none (policy.md section 3) - and a policy of his still standing when he goes home becomes the colony's for good (patrons.md section 4). A patron whose specialty is resources or livestock names one kind of it, and he can have his Barony buy that kind from the colony rather than from its neighbour: the Crown's price for it goes up while the policy stands. He writes; the PC answers (section 10 lock). The charge and who bears it are policy.md's; 90 a month is a placeholder (section 9). Placeholder prose: the Author writes the real lines.",
   "params": {
     "patron": "contact",
     "resource": "resource"
@@ -78,6 +78,20 @@
                 "effect": "favour_our_market",
                 "cost": 90,
                 "split": "half",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "none",
+            "label": "accept, and leave the charge to him",
+            "text": "Do it, and I must leave the charge of it with you. The Crown has nothing to put towards it this year, and I would rather say so than pretend.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "favour_our_market",
+                "cost": 90,
+                "split": "none",
                 "resource": "{resource}"
               }
             }

@@ -1,0 +1,122 @@
+{
+  "id": "patron.policy_lapsing",
+  "sender": "patron",
+  "type": "warning",
+  "skippable": false,
+  "note": "Issue 440, patrons.md section 4 (He will not carry a policy further), policy.md section 4. The Steward's renegotiation, in a patron's voice: a policy of his that the PC is not paying for has drained him long enough, and he names the month he lets it go. The warning always comes before the ending, so it is unskippable, as the Steward's is. The PC answers it by bearing more of the charge, with a sum on top if he likes, or by letting it lapse - a lapse, not a cancellation, since it is the patron who will not go on. A policy of his still standing when he sails becomes the colony's for good (section 4), which is why this letter matters more from him than from an officer. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "months": "integer",
+    "cost": "gold"
+  },
+  "body": [
+    {
+      "text": "I shall be plain, since I have been patient and it has not answered. The arrangement we made costs {param:cost} a month, and you have left me to meet rather more of it than a friend would."
+    },
+    {
+      "text": "I will carry it {param:months} months more. After that I shall let it go, and I should be sorry to, because I had meant it to outlast me."
+    },
+    {
+      "text": "I do not say this to wound you. I say it because I would rather you heard it from me than from my man of business.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "You will forgive me if I observe that I am not the Treasury, whatever the Treasury may have told you.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and am ashamed it took a letter"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having read yours with care"
+        },
+        {
+          "tone": "desperate",
+          "text": "and must tell you how little there is"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and note the tone of it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "purse",
+        "prompt": "What the Crown will bear from here",
+        "options": [
+          {
+            "id": "all",
+            "label": "take the whole charge onto the Crown",
+            "text": "The whole of it falls on the Crown from this month{insert:warmth}. You should not have had to ask.",
+            "insert": {
+              "warmth": {
+                "pleased": ", with my thanks for carrying it this long"
+              }
+            },
+            "effect": {
+              "fund_policy": {
+                "to": "{patron}",
+                "split": "all",
+                "bonus": 0
+              }
+            }
+          },
+          {
+            "id": "half_and_purse",
+            "label": "take half, and send something for the trouble",
+            "text": "Half the charge from this month, and {param:cost} besides for what you have already carried. I would rather square the account than argue it.",
+            "effect": {
+              "fund_policy": {
+                "to": "{patron}",
+                "split": "half",
+                "bonus": "{cost}"
+              }
+            }
+          },
+          {
+            "id": "half",
+            "label": "take half, and say plainly there is no more",
+            "text": "Half, and not because it is fair. It is what there is, and I would rather tell you so than promise the rest and fail you.",
+            "effect": {
+              "fund_policy": {
+                "to": "{patron}",
+                "split": "half",
+                "bonus": 0
+              }
+            }
+          },
+          {
+            "id": "lapse",
+            "label": "let it lapse, and thank him",
+            "text": "Let it lapse. You have carried it longer than I had any right to ask, and I will not have you out of pocket for the colony's sake.",
+            "effect": {
+              "end_policy": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}
