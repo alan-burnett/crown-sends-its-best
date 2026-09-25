@@ -173,7 +173,10 @@ static func sell(town: Town, resource: StringName, quantity: float, context: Col
 	var rate := context.tax_rate(resource)
 	var gross := sold * price
 	var tax := gross * rate
-	var earned := gross - tax
+	# 🔒 **A wharf sells better, and the Crown's duty is untouched** (#411): the
+	# town receives more for what it has already been taxed on.
+	var better := (gross - tax) * Building.crown_sale_bonus_for(town)
+	var earned := gross - tax + better
 
 	town.receive_gold(earned)
 	town.traded_value += gross
@@ -189,6 +192,8 @@ static func sell(town: Town, resource: StringName, quantity: float, context: Col
 		"gross": gross,
 		"tax": tax,
 		"earned": earned,
+		# What a wharf added, so a letter can say the trade paid better.
+		"better_sold": better,
 	}, WorldPhase.COLONY_MONTH)
 
 	return {"sold": sold, "earned": earned, "tax": tax, "rate": rate}

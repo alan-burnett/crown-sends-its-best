@@ -496,6 +496,19 @@ static func tile_yield_bonus(
 	return bonus
 
 
+## How much more a town receives when it sells to the Crown's merchants (#411,
+## `buildings.md` §4 *Trade*): the wharf's tenth. **What it receives, never the
+## Crown's duty** — the duty is taken as before, and the town simply sells
+## better. Every lit building's share adds.
+static func crown_sale_bonus_for(town: Town) -> float:
+	var bonus := 0.0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building != null and is_lit(town, StringName(id)):
+			bonus += maxf(0.0, float(building.effect("crown_sale_bonus", 0.0)))
+	return bonus
+
+
 ## How much this town's production of a resource is raised by what it has built.
 static func yield_bonus_for(town: Town, resource: StringName) -> float:
 	var bonus := 0.0
