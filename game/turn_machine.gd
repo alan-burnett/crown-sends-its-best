@@ -112,6 +112,10 @@ func _init(p_run: RunState) -> void:
 	# A patron working against a duke, because the PC accepted (#395).
 	var sabotage_by_letter := SabotageExecutor.new()
 	sabotage_by_letter.contacts = run.contacts
+	# A patron's expert and his gold, because the PC accepted (#443).
+	var expert_gifts := ExpertGiftExecutor.new()
+	expert_gifts.colony = run.colony
+	var gold_gifts := GoldGiftExecutor.new()
 	# What a governor's answer to a tribe does, the month after (#435).
 	var tribe_answers := TribeAnswerExecutor.new()
 	tribe_answers.run = run
@@ -368,7 +372,7 @@ func _init(p_run: RunState) -> void:
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, company_urging, sabotage_by_letter, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
+		urging, company_urging, sabotage_by_letter, expert_gifts, gold_gifts, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
 		diplomat_moves, executor,
 	]
 
@@ -460,6 +464,9 @@ static func order_effects() -> Dictionary:
 		String(M1Registrations.ORDER_URGE_COMPANY): {"target": ""},
 		# Landed by `SabotageExecutor` through `SabotageDriver.arrange` (#395).
 		String(M1Registrations.ORDER_TROUBLE_A_DUKE): {"target": ""},
+		# Landed by `ExpertGiftExecutor` and `GoldGiftExecutor` (#443).
+		String(M1Registrations.ORDER_SEND_AN_EXPERT): {"target": ""},
+		String(M1Registrations.ORDER_GIVE_THE_CROWN_GOLD): {"target": ""},
 		# **Taken at compliance**, as a policy is (#436): the urging sits on the
 		# letter he asked about, and nothing is left for the month after.
 		String(M1Registrations.ORDER_ANSWER_THE_TRIBE): {"target": ""},

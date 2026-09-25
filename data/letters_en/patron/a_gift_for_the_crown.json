@@ -1,0 +1,87 @@
+{
+  "id": "patron.a_gift_for_the_crown",
+  "sender": "patron",
+  "type": "offer",
+  "skippable": true,
+  "note": "Issue 443, patrons.md section 4. A patron whose specialty is gold offers a sum to the Crown, once he thinks well enough of the PC. Accepting is an Order to the patron; compliance decides whether he goes through with it, and GoldGiftExecutor lands it the month after on the Crown's books, where the Ledger shows it. It is not duty, so no revenue target is met by it. A one-off: he may offer again while his regard holds. The sum is sized as his gold ask is, a placeholder. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "amount": "gold"
+  },
+  "body": [
+    {
+      "text": "I find myself with {param:amount} I have no particular use for, which is a pleasant problem and not one I expect to have for long."
+    },
+    {
+      "text": "I should like the Crown to have it, on your colony's account. The Treasury will know where it came from, and so will the people who matter."
+    },
+    {
+      "text": "You need not thank me at length. A short letter would do very well.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I expect you will find a way to be ungracious about it. Try not to.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with real gratitude"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your offer"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and with some reservations"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "gold",
+        "prompt": "His {param:amount}",
+        "options": [
+          {
+            "id": "accept",
+            "label": "accept it for the Crown",
+            "text": "The Crown accepts it, and so do I, with more gratitude than a short letter can hold.",
+            "effect": {
+              "give_the_crown_gold": {
+                "to": "{patron}",
+                "amount": "{amount}"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "decline, with thanks",
+            "text": "I cannot take it. The colony should stand on its own, and I would rather it were seen to.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

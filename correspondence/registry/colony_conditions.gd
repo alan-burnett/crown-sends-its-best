@@ -89,6 +89,14 @@ static func register_all() -> void:
 	)
 	# A patron who would write asking for his need (#441).
 	ContentRegistry.register_condition("he_has_a_need", {}, ColonyConditions.he_has_a_need)
+	# A patron's expert, his gold and his men, offered (#443).
+	ContentRegistry.register_condition(
+		"he_could_send_an_expert", {}, ColonyConditions.he_could_send_an_expert
+	)
+	ContentRegistry.register_condition("he_could_give_gold", {}, ColonyConditions.he_could_give_gold)
+	ContentRegistry.register_condition(
+		"he_could_send_troops", {}, ColonyConditions.he_could_send_troops
+	)
 	# A patron who could bring the colony more of his kind (#442).
 	ContentRegistry.register_condition(
 		"he_could_bring_more", {"of": "string"}, ColonyConditions.he_could_bring_more
@@ -769,11 +777,48 @@ static func _his_event(type: StringName, args: Dictionary, context: LetterContex
 
 ## Whether this patron could make a duke's year difficult (#395, `patrons.md`
 ## §5): his specialty is the rivals, and some duke is here to be troubled.
+##
+## 🔒 **Only once he thinks well enough of the PC** (#443, §4): he offers his
+## specialty at `Patron.OFFERS_AT`, whatever it is.
 static func he_could_trouble_a_duke(_args: Dictionary, context: LetterContext) -> bool:
-	var him := context.sender
-	if him == null or not Patron.is_patron(him) or him.specialty != "rivals":
+	if not _he_would_offer(context, "rivals"):
 		return false
 	return the_duke_to_trouble(context) != null
+
+
+## Whether this patron's specialty is `specialty` and he thinks well enough of
+## the PC to offer it (#443, `patrons.md` §4). **He offers; the PC cannot ask.**
+static func _he_would_offer(context: LetterContext, specialty: String) -> bool:
+	var him := context.sender
+	return him != null and Patron.would_offer(him) and him.specialty == specialty
+
+
+## Whether this patron would offer an expert of his kind (#443, `patrons.md`
+## §4): **only while some town has a library** to receive him. It repeats, like
+## every one-off, while his regard holds.
+static func he_could_send_an_expert(_args: Dictionary, context: LetterContext) -> bool:
+	if not _he_would_offer(context, "experts") or context.sender.specialty_kind.is_empty():
+		return false
+	return ExpertGiftExecutor.town_for(context.colony, StringName(context.sender.specialty_kind)) != null
+
+
+## Whether this patron would offer the Crown gold (#443, `patrons.md` §4). It
+## needs nothing, and repeats while his regard holds.
+static func he_could_give_gold(_args: Dictionary, context: LetterContext) -> bool:
+	return _he_would_offer(context, "gold")
+
+
+## Whether this patron would offer a company the Crown feeds (#443,
+## `patrons.md` §4): it needs nothing, and **not while he already has one
+## here** — his men are a policy, and a policy stands until it ends.
+static func he_could_send_troops(_args: Dictionary, context: LetterContext) -> bool:
+	if not _he_would_offer(context, "troops"):
+		return false
+	if context.policies != null:
+		for policy in context.policies.held_by(context.sender.id):
+			if policy.effect == PolicyEffects.CROWN_TROOPS:
+				return false
+	return true
 
 
 ## 🔒 **The duke a patron offers to trouble** (#395): of the dukes who have

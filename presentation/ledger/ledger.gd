@@ -118,6 +118,10 @@ static func of(log: EventLog) -> Ledger:
 					continue
 				ledger._add(event.month, OUT, float(event.payload.get("terms", {}).get("amount", 0.0)),
 					"honoured to %s" % String(event.payload.get("to", "a contact")))
+			GoldGiftExecutor.EVENT_GIVEN:
+				# **A patron's gold, shown where the Crown's money is** (#443).
+				ledger._add(event.month, IN, float(event.payload.get("amount", 0.0)),
+					"a gift from %s" % String(event.payload.get("from", "a patron")))
 	return ledger
 
 

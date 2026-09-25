@@ -236,10 +236,11 @@ static func _deed_of(order: Order) -> StringName:
 		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
 		M1Registrations.ORDER_GRANT_FAVOR:
 			return Relationship.GRANTED
-		M1Registrations.ORDER_TROUBLE_A_DUKE:
-			# **Taking up his offer is the favour he wanted** (#395): a patron who
-			# offers a kindness and has it accepted says so at court, as one who
-			# is refused says the other thing (`patrons.md` §4).
+		M1Registrations.ORDER_TROUBLE_A_DUKE, M1Registrations.ORDER_SEND_AN_EXPERT, \
+		M1Registrations.ORDER_GIVE_THE_CROWN_GOLD:
+			# **Taking up his offer is the favour he wanted** (#395, #443): a
+			# patron who offers a kindness and has it accepted says so at court,
+			# as one who is refused says the other thing (`patrons.md` §4).
 			return Relationship.GRANTED
 		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
 			return Relationship.REFUSED
@@ -404,9 +405,11 @@ static func _priced(order: Order) -> Variant:
 			var unpaid: float = Policy.UNPAID_SHARE.get(
 				StringName(order.get_param("split", "none")), 1.0)
 			return monthly * unpaid * POLICY_HORIZON
-		M1Registrations.ORDER_TROUBLE_A_DUKE:
-			# **It is his specialty and his pleasure** (#395, `patrons.md` §5): he
-			# offered it, so being taken up on it costs him nothing he minds.
+		M1Registrations.ORDER_TROUBLE_A_DUKE, M1Registrations.ORDER_SEND_AN_EXPERT, \
+		M1Registrations.ORDER_GIVE_THE_CROWN_GOLD:
+			# **It is his specialty and his pleasure** (#395, #443, `patrons.md`
+			# §4, §5): he offered it, so being taken up on it costs him nothing he
+			# minds.
 			return 0.0
 		M1Registrations.ORDER_ANSWER_THE_TRIBE:
 			# **He asked** (#436). Being told what to say to the tribe costs him

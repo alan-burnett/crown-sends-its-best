@@ -80,6 +80,11 @@ const ORDER_URGE_COMPANY: StringName = &"urge_company"
 ## 🔒 **A patron works against a duke** (#395, `patrons.md` §5). The same kind as
 ## the Intent `SabotageExecutor` lands.
 const ORDER_TROUBLE_A_DUKE: StringName = &"trouble_a_duke"
+## 🔒 **A patron's one-off favours, accepted** (#443, `patrons.md` §4): an
+## expert to the library with fewest of his kind, and gold to the Crown. The same
+## kinds as the Intents `ExpertGiftExecutor` and `GoldGiftExecutor` land.
+const ORDER_SEND_AN_EXPERT: StringName = &"send_an_expert"
+const ORDER_GIVE_THE_CROWN_GOLD: StringName = &"give_the_crown_gold"
 ## 🔒 **How the PC would have a governor answer a tribe** (#436, `natives.md`
 ## §11). Resolved by compliance into an urging on the letter he asked about; it
 ## never touches the tribe.
@@ -413,6 +418,14 @@ static func register_effects() -> void:
 	# with it. Nothing reaches the duke's regard.
 	ContentRegistry.register_effect(
 		"trouble_a_duke", {"to": "contact", "duke": "rival"}, ORDER_TROUBLE_A_DUKE
+	)
+	# 🔒 **His expert and his gold, accepted** (#443): Orders to the patron, and
+	# compliance decides whether he goes through with them.
+	ContentRegistry.register_effect(
+		"send_an_expert", {"to": "contact", "resource": "resource"}, ORDER_SEND_AN_EXPERT
+	)
+	ContentRegistry.register_effect(
+		"give_the_crown_gold", {"to": "contact", "amount": "gold"}, ORDER_GIVE_THE_CROWN_GOLD
 	)
 	ContentRegistry.register_effect(
 		"answer_the_tribe", {"to": "contact", "answer": "string"}, ORDER_ANSWER_THE_TRIBE

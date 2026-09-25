@@ -79,7 +79,7 @@
     "letter": "patron.a_word_against_the_duke",
     "urgency": 0.5,
     "cooldown": 12,
-    "note": "Issue 395, patrons.md section 5. A patron whose specialty is the rivals offers to trouble the duke nearest to war who can still be troubled. Cooldown 12: the trouble lasts a year, and a man who offered it again while it ran would be offering nothing.",
+    "note": "Issue 395, patrons.md section 5. A patron whose specialty is the rivals offers to trouble the duke nearest to war who can still be troubled. Cooldown 12: the trouble lasts a year, and a man who offered it again while it ran would be offering nothing. #443: only once his regard reaches Patron.OFFERS_AT, as every specialty is (patrons.md section 4); a one-off, so it repeats while his regard holds.",
     "params": {
       "patron": {
         "from": "sender_id"
@@ -194,6 +194,63 @@
         "he_could_bring_more": {
           "of": "livestock"
         }
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.an_expert_for_you",
+    "letter": "patron.an_expert_for_you",
+    "urgency": 0.45,
+    "cooldown": 12,
+    "note": "Issue 443, patrons.md section 4. A patron whose specialty is experts offers one of his kind, once his regard reaches Patron.OFFERS_AT and while some loyal town has a library to receive him. A one-off: cooldown 12, and it repeats while his regard holds.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "his_specialty_kind"
+      }
+    },
+    "conditions": [
+      {
+        "he_could_send_an_expert": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.a_gift_for_the_crown",
+    "letter": "patron.a_gift_for_the_crown",
+    "urgency": 0.45,
+    "cooldown": 12,
+    "note": "Issue 443, patrons.md section 4. A patron whose specialty is gold offers the Crown a sum, once his regard reaches Patron.OFFERS_AT. Sized as his gold ask is (patron_ask), a placeholder. A one-off: cooldown 12, and it repeats while his regard holds.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "amount": {
+        "from": "patron_ask"
+      }
+    },
+    "conditions": [
+      {
+        "he_could_give_gold": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.his_men_for_you",
+    "letter": "patron.his_men_for_you",
+    "urgency": 0.45,
+    "cooldown": 24,
+    "note": "Issue 443, patrons.md section 4. A patron whose specialty is troops offers a company the Crown feeds, once his regard reaches Patron.OFFERS_AT and not while he already has men here. A policy, not a one-off: cooldown 24, as his other policy offers are.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "he_could_send_troops": {}
       }
     ]
   }

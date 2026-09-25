@@ -1,0 +1,87 @@
+{
+  "id": "patron.an_expert_for_you",
+  "sender": "patron",
+  "type": "offer",
+  "skippable": true,
+  "note": "Issue 443, patrons.md section 4. A patron whose specialty is experts offers one of his kind, once he thinks well enough of the PC and while some town has a library to receive him. Accepting is an Order to the patron; compliance decides whether he goes through with it, and ExpertGiftExecutor lands the man the month after in the library town holding fewest of that kind (ties to town order). A one-off: he may offer again while his regard holds. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "I have a man who knows more about {param:resource} than anybody has a right to, and nothing to occupy him."
+    },
+    {
+      "text": "He would go out to you if I asked it. He likes a library, and I gather you have one; he would settle wherever there were fewest of his kind to argue with."
+    },
+    {
+      "text": "It would cost you nothing. I should simply like to think of him being useful.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "It would cost you nothing, which I mention because I know how you are placed.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with real gratitude"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your offer"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and with some reservations"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "expert",
+        "prompt": "His man, who knows {param:resource}",
+        "options": [
+          {
+            "id": "accept",
+            "label": "send him, and thank the man",
+            "text": "Send him, and gladly. The colony has more use for a man who knows {param:resource} than for almost anything else you could have offered.",
+            "effect": {
+              "send_an_expert": {
+                "to": "{patron}",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "decline, with thanks",
+            "text": "I would rather not take him from you. Keep him, with my thanks.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

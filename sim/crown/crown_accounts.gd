@@ -21,6 +21,9 @@ extends RefCounted
 ## - **In** is duty, on every purchase and every sale (§10.2, both directions).
 ## - **Out** is gold the Crown itself paid to honour the PC's word (§9.5), and
 ##   the monthly charge on every policy he is funding (#80).
+## - **Given** is gold a patron gave the Crown (#443, `patrons.md` §4). It is
+##   the Crown's money and moves `net_position`, and it is **not duty**, so a
+##   revenue target judged on `received_in` is judged on trade alone.
 ##
 ## So **revenue is never negative**, and a month only goes badly through the
 ## PC's spending, rates too low to collect, or a colony that has stopped
@@ -30,7 +33,7 @@ extends RefCounted
 ## money and is not counted. A governor sending resources to a neighbour does
 ## not move the Crown's books.
 
-## Month -> `{received, paid}`.
+## Month -> `{received, paid, given}`.
 var months: Dictionary = {}
 
 
@@ -54,6 +57,8 @@ static func of(log: EventLog) -> CrownAccounts:
 					event.month, 0.0,
 					float(event.payload.get("terms", {}).get("amount", 0.0)),
 				)
+			GoldGiftExecutor.EVENT_GIVEN:
+				accounts._add(event.month, 0.0, 0.0, float(event.payload.get("amount", 0.0)))
 	return accounts
 
 
@@ -65,11 +70,12 @@ static func _is_the_crowns_money(payload: Dictionary) -> bool:
 	)
 
 
-func _add(month: int, received: float, paid: float) -> void:
+func _add(month: int, received: float, paid: float, given: float = 0.0) -> void:
 	if not months.has(month):
-		months[month] = {"received": 0.0, "paid": 0.0}
+		months[month] = {"received": 0.0, "paid": 0.0, "given": 0.0}
 	months[month]["received"] = float(months[month]["received"]) + maxf(0.0, received)
 	months[month]["paid"] = float(months[month]["paid"]) + maxf(0.0, paid)
+	months[month]["given"] = float(months[month]["given"]) + maxf(0.0, given)
 
 
 # --- Reading ----------------------------------------------------------------
@@ -80,6 +86,11 @@ func received_in(month: int) -> float:
 
 func paid_in(month: int) -> float:
 	return float(months.get(month, {}).get("paid", 0.0))
+
+
+## What patrons gave the Crown this month (#443). Never duty.
+func given_in(month: int) -> float:
+	return float(months.get(month, {}).get("given", 0.0))
 
 
 ## 🔒 **What the Treasury paid out on the PC's word in the calendar year
@@ -102,7 +113,7 @@ func paid_in_year_of(month: int) -> float:
 ## **This month's revenue minus this month's spending**, which is the figure the
 ## Crown's accountants actually react to.
 func net_in(month: int) -> float:
-	return received_in(month) - paid_in(month)
+	return received_in(month) + given_in(month) - paid_in(month)
 
 
 ## Every month with anything on it, in order.
@@ -137,7 +148,7 @@ func net_position() -> float:
 func margin() -> float:
 	var moved := 0.0
 	for month in months:
-		moved += received_in(month) + paid_in(month)
+		moved += received_in(month) + given_in(month) + paid_in(month)
 	if moved <= 0.0:
 		return 0.0
 	return clampf(net_position() / moved, -1.0, 1.0)

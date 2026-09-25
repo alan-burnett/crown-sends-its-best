@@ -1,0 +1,117 @@
+{
+  "id": "patron.his_men_for_you",
+  "sender": "patron",
+  "type": "offer",
+  "skippable": true,
+  "note": "Issue 443, patrons.md section 4. A patron whose specialty is troops offers a company the Crown feeds, as the Marshal's are: a crown_troops policy with the patron as its enactor, landed by CrownTroops. Offered once he thinks well enough of the PC, and not while he already has men here. The PC answers with a share of its charge, all, half or none (policy.md section 3). A troops policy of his still standing when he sails is permanent: his company stays, fed by the Crown, at no charge. A garrison holding the towns at 150 a month mirrors the Marshal's smallest offer; both are placeholders. Placeholder prose.",
+  "params": {
+    "patron": "contact"
+  },
+  "body": [
+    {
+      "text": "I keep more men under arms than a man in my position strictly needs, and they are eating their heads off."
+    },
+    {
+      "text": "I could send a company out to you. The Crown would victual them, as it does its own, and they would sit in your towns and discourage anybody who thought them undefended."
+    },
+    {
+      "text": "Their pay I should like the Crown to meet. I am fond of them, but not that fond.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "Their pay I should like the Crown to meet. I do not suppose that will surprise you.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with real gratitude"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your offer"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered the charge"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "men",
+        "prompt": "His company, to hold the towns",
+        "options": [
+          {
+            "id": "all",
+            "label": "accept, and the Crown bears their pay",
+            "text": "Send them, and let the Crown bear the whole of their pay. The towns will sleep the better for it.",
+            "effect": {
+              "station_troops": {
+                "to": "{patron}",
+                "strength": "a_garrison",
+                "posture": "hold_the_towns",
+                "cost": 150,
+                "split": "all"
+              }
+            }
+          },
+          {
+            "id": "half",
+            "label": "accept, and the Crown bears half",
+            "text": "Send them, and the Crown will meet half their pay. I will not pretend that is generous.",
+            "effect": {
+              "station_troops": {
+                "to": "{patron}",
+                "strength": "a_garrison",
+                "posture": "hold_the_towns",
+                "cost": 150,
+                "split": "half"
+              }
+            }
+          },
+          {
+            "id": "none",
+            "label": "accept, and leave their pay to him",
+            "text": "Send them, and I must leave their pay with you. The Crown has nothing to put towards it this year, and I would rather say so than pretend.",
+            "effect": {
+              "station_troops": {
+                "to": "{patron}",
+                "strength": "a_garrison",
+                "posture": "hold_the_towns",
+                "cost": 150,
+                "split": "none"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "decline, with thanks",
+            "text": "I must decline, and I am sorry to. Keep them; they will be happier at home.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

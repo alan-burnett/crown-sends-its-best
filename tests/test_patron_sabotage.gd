@@ -137,3 +137,12 @@ func test_the_turn_loop_lands_it() -> void:
 	for executor in machine.month_runner.executors:
 		found = found or executor is SabotageExecutor
 	assert_true(found, "nothing in the month lands a patron's trouble")
+
+
+func test_a_patron_who_thinks_too_little_of_the_pc_offers_nothing() -> void:
+	# 🔒 #443, `patrons.md` §4: he offers his specialty once his regard is high
+	# enough, whatever it is.
+	_dukes(1)
+	var patron := _patron()
+	patron.relationship.loyalty = Patron.OFFERS_AT - 1.0
+	assert_false(_true_for(patron), "a patron who thinks little of the PC offered to trouble a duke")
