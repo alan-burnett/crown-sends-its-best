@@ -226,7 +226,10 @@
 	  "tools": 2
 	},
 	"upkeep": 5,
-	"effects": {}
+	"effects": {
+	  "improvement_build_speed": 1.0,
+	  "carries_improvement_upkeep": true
+	}
   },
   {
 	"id": "fairgrounds",

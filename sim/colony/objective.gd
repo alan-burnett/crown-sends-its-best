@@ -328,10 +328,16 @@ const CAPACITY_PER_HEAD: float = 2.0
 
 static func build_capacity(town: Town) -> float:
 	var speed := 0.0
+	# 🔒 **Worker cabins speed improvements and nothing else** (#412,
+	# `tiles-and-improvements.md` §4): nothing that speeds buildings speeds
+	# improvements, and the cabins do not speed buildings.
+	var improving := kind_of(town.objective) == IMPROVEMENT
 	for id in town.buildings:
 		var standing := Building.find(StringName(id))
 		if standing != null and Building.is_lit(town, StringName(id)):
 			speed += float(standing.effect("build_speed", 0.0))
+			if improving:
+				speed += float(standing.effect("improvement_build_speed", 0.0))
 	# Per thousand people (#426): the figure did not move when the count did.
 	return town.mouths() * CAPACITY_PER_HEAD * (1.0 + maxf(0.0, speed))
 

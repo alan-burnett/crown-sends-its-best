@@ -55,6 +55,17 @@ static func settle(town: Town, context: ColonyContext) -> float:
 			return float(a["worth"]) > float(b["worth"])
 		return String(a["key"]) < String(b["key"]))
 
+	# 🔒 **Worker cabins carry the improvements' upkeep** (#412,
+	# `tiles-and-improvements.md` §5) — while the cabins themselves are paid for.
+	# Settled this month, not last: a trial run of the same order says whether
+	# the cabins would be paid with the improvements billed in full, and if they
+	# would, the improvements are billed nothing. Billing less before them can
+	# only help the cabins, so the answer holds.
+	if _cabins_are_paid(town, items):
+		for item in items:
+			if String(item["kind"]) == "improvement":
+				item["upkeep"] = 0.0
+
 	town.dark_buildings = PackedStringArray()
 	var paid := 0.0
 	var dark: PackedStringArray = PackedStringArray()
@@ -81,6 +92,24 @@ static func settle(town: Town, context: ColonyContext) -> float:
 			"dark": dark,
 		}, WorldPhase.COLONY_MONTH)
 	return paid
+
+
+## Whether a building that carries improvement upkeep would be paid for this
+## month, paying in `items`' order out of what the town has.
+static func _cabins_are_paid(town: Town, items: Array) -> bool:
+	var owed := 0.0
+	var carried := false
+	for item in items:
+		var due := float(item["upkeep"])
+		var paid := due <= 0.0 or town.can_afford(owed + due)
+		if paid:
+			owed += maxf(0.0, due)
+		if String(item["kind"]) != "building":
+			continue
+		var building := Building.find(StringName(item["key"]))
+		if building != null and bool(building.effect("carries_improvement_upkeep", false)) and paid:
+			carried = true
+	return carried
 
 
 ## Everything the town is billed for, with what its governor thinks of it.
