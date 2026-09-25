@@ -67,7 +67,7 @@ func test_every_reportable_event_is_one_the_sim_emits() -> void:
 		ExpeditionParty.EVENT_FOUNDED, ExpeditionParty.EVENT_ATTACKED,
 		ExpeditionParty.EVENT_TURNED_BACK, RivalBook.EVENT_LATCHED,
 		OpticsRegister.EVENT_TRIBUTE_PAID, Company.EVENT_DESTROYED,
-		UrgeIntentExecutor.EVENT_PRESSED,
+		UrgeIntentExecutor.EVENT_PRESSED, BackRebellionExecutor.EVENT_BACKED,
 	]
 	var names := PackedStringArray()
 	for event in emitted:

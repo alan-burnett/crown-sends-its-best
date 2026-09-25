@@ -1,0 +1,39 @@
+{
+  "id": "diplomat.a_duke_backs_the_rebels",
+  "sender": "diplomat",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 403, rival-pressure.md section 8. A duke has backed a rebel town: gold, food and guns into it, and a company of his own men under a rebel commander, fed by him. His letter went to the town's governor, not the PC, so this is how the PC hears of it. Every figure is the event's. The town is not lost by it, and nothing here asks the PC to do anything: he fights a backed rebellion as he fights any other. Placeholder prose.",
+  "params": {
+    "duke": "rival",
+    "town": "town",
+    "men": "integer",
+    "gold": "gold"
+  },
+  "body": [
+    {
+      "text": "Your Grace should know that {param:duke} has taken an interest in {param:town}, and it is not a friendly one."
+    },
+    {
+      "text": "He has written to the governor there, not to you, and sent more than letters: {param:gold} in coin, grain and powder besides, and {param:men} of his own men under an officer who answers to the rebellion."
+    },
+    {
+      "text": "He feeds them himself, so the town is none the poorer for having them. I would not expect it to come back to the Crown quickly now."
+    },
+    {
+      "text": "I do not think he means to take the place. I think he means to keep it from you, which from where he sits is almost as good.",
+      "only_tones": [
+        "pleased",
+        "dutiful",
+        "annoyed"
+      ]
+    },
+    {
+      "text": "He will not trouble to hide it. He wants you to know, and now you do.",
+      "only_tones": [
+        "desperate",
+        "hateful"
+      ]
+    }
+  ]
+}

@@ -74,6 +74,13 @@ const TABLE: Dictionary = {
 		"man": "author",
 		"fields": {"town": "town", "author": "contact"},
 	},
+	# 🔒 **A duke backed a rebel town** (#403, `rival-pressure.md` §8). His
+	# letter went to the town's governor; this is how the PC hears of it.
+	"rebellion_backed": {
+		"town": "town",
+		"man": "duke",
+		"fields": {"town": "town", "duke": "rival", "men": "integer", "gold": "gold"},
+	},
 }
 
 

@@ -315,6 +315,11 @@ var vice: StringName = &""
 ## a book because it saves and loads with him and departs with him.
 var leaves_month: int = -1
 
+## 🔒 **The rebel town a duke has backed, once in his life** (#403,
+## `rival-pressure.md` §8), or empty. Set the month his backing lands; a duke who
+## has backed a rebellion never rolls again. Empty on everybody who is not a duke.
+var backed_rebellion: String = ""
+
 var relationship: Relationship = null
 
 
@@ -386,6 +391,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.specialty_bonus = String(record.get("specialty_bonus", ""))
 	contact.vice = StringName(record.get("vice", ""))
 	contact.leaves_month = int(record.get("leaves_month", -1))
+	contact.backed_rebellion = String(record.get("backed_rebellion", ""))
 	contact.known_since = int(record.get("known_since", 0))
 	contact.relationship = Relationship.new(
 		contact.id,
@@ -489,6 +495,7 @@ func to_dict() -> Dictionary:
 		"specialty_bonus": specialty_bonus,
 		"vice": String(vice),
 		"leaves_month": leaves_month,
+		"backed_rebellion": backed_rebellion,
 		"known_since": known_since,
 		"relationship": relationship.to_dict(),
 	}

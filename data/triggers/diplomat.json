@@ -171,5 +171,56 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.diplomat.a_duke_backs_the_rebels",
+    "letter": "diplomat.a_duke_backs_the_rebels",
+    "urgency": 0.9,
+    "cooldown": 2,
+    "note": "Issue 403, rival-pressure.md section 8. A duke has backed a rebel town, and his letter went to its governor, not the PC. If the Diplomat is in the colony he explains what happened: which duke, which town, and what he gave. Unskippable: it is the one way the PC learns of it short of seeing the new company on the map.",
+    "params": {
+      "duke": {
+        "from": "what_happened",
+        "event": "rebellion_backed",
+        "within": 2,
+        "concerning": "the_colony",
+        "field": "duke"
+      },
+      "town": {
+        "from": "what_happened",
+        "event": "rebellion_backed",
+        "within": 2,
+        "concerning": "the_colony",
+        "field": "town"
+      },
+      "men": {
+        "from": "what_happened",
+        "event": "rebellion_backed",
+        "within": 2,
+        "concerning": "the_colony",
+        "field": "men"
+      },
+      "gold": {
+        "from": "what_happened",
+        "event": "rebellion_backed",
+        "within": 2,
+        "concerning": "the_colony",
+        "field": "gold"
+      }
+    },
+    "conditions": [
+      {
+        "he_still_writes": {
+          "about": "colony"
+        }
+      },
+      {
+        "it_happened": {
+          "event": "rebellion_backed",
+          "within": 2,
+          "concerning": "the_colony"
+        }
+      }
+    ]
   }
 ]

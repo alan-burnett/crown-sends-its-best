@@ -116,6 +116,9 @@ func _init(p_run: RunState) -> void:
 	var expert_gifts := ExpertGiftExecutor.new()
 	expert_gifts.colony = run.colony
 	var gold_gifts := GoldGiftExecutor.new()
+	# A duke backs a rebel town, the month after he decides to (#403).
+	var rebel_backings := BackRebellionExecutor.new()
+	rebel_backings.run = run
 	# What a governor's answer to a tribe does, the month after (#435).
 	var tribe_answers := TribeAnswerExecutor.new()
 	tribe_answers.run = run
@@ -231,6 +234,9 @@ func _init(p_run: RunState) -> void:
 	var grievances := GrievanceDriver.new(run.colony, run.grievances)
 	# Phase 7. What a contact did for the PC, once it has happened (#397).
 	var favours := FavourDriver.new(run)
+	# Phase 8. Dukes roll to back a rebellion, and a backed town's men go home
+	# when it comes back to the Crown (#403).
+	var backing := RebelBacking.new(run)
 
 	# Phase 1. Settlers land before the colony works its month, so the people who
 	# arrived are counted in it — and they are drawn by the quality of life last
@@ -369,12 +375,12 @@ func _init(p_run: RunState) -> void:
 		expert_travel, cultivation, sabotage,
 		companies,
 		orders, silence, provost, governors,
-		grievances, favours,
+		grievances, favours, backing,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, company_urging, sabotage_by_letter, expert_gifts, gold_gifts, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
+		urging, company_urging, sabotage_by_letter, expert_gifts, gold_gifts, rebel_backings, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
 		diplomat_moves, executor,
 	]
 
