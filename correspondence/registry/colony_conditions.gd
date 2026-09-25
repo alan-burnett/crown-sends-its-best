@@ -58,6 +58,22 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"he_sends_the_troops", {}, ColonyConditions.he_sends_the_troops
 	)
+	# 🔒 **A commander writes from his own company's situation** (#394).
+	ContentRegistry.register_condition(
+		"my_company_is_in_the_field", {}, ColonyConditions.my_company_is_in_the_field
+	)
+	ContentRegistry.register_condition(
+		"my_company_faces_an_enemy", {}, ColonyConditions.my_company_faces_an_enemy
+	)
+	ContentRegistry.register_condition(
+		"my_company_fought", {"within": "integer"}, ColonyConditions.my_company_fought
+	)
+	ContentRegistry.register_condition(
+		"my_company_is_unsupported", {"within": "integer"}, ColonyConditions.my_company_is_unsupported
+	)
+	ContentRegistry.register_condition(
+		"i_have_no_command", {}, ColonyConditions.i_have_no_command
+	)
 	# A patron whose Barony has a market to turn the colony's way (#396).
 	ContentRegistry.register_condition(
 		"his_barony_has_a_market", {}, ColonyConditions.his_barony_has_a_market
@@ -720,6 +736,76 @@ static func his_barony_has_a_market(_args: Dictionary, context: LetterContext) -
 			if policy.effect == PolicyEffects.FAVOUR_OUR_MARKET:
 				return false
 	return true
+
+
+## His own company, alive, or null (#394).
+##
+## 🔒 **Only a company of the colony's, the Crown's or a rebel town's.** A duke's
+## officer never writes — the duke is the PC's only contact with his empire
+## (`rival-pressure.md` §8) — and no tribe has heard of the PC (`natives.md` §1).
+static func _my_company(context: LetterContext) -> Company:
+	if context.sender == null:
+		return null
+	var company := UrgeCompanyExecutor.commanded_by(context.companies, context.sender.id)
+	if company == null or not [Company.COLONIAL, Company.CROWN, Company.REBEL].has(company.allegiance):
+		return null
+	return company
+
+
+## Whether his company is out of its town (#394): alive, and standing on no
+## town's tile.
+static func my_company_is_in_the_field(_args: Dictionary, context: LetterContext) -> bool:
+	var company := _my_company(context)
+	if company == null or company.at == Company.NOWHERE:
+		return false
+	if context.colony != null:
+		for town in context.colony.in_order():
+			if town.at == company.at:
+				return false
+	return true
+
+
+## Whether anybody who may fight his company is within reach of it (#394) —
+## *I stand before Ashmere: do I storm it?*
+static func my_company_faces_an_enemy(_args: Dictionary, context: LetterContext) -> bool:
+	return ColonyParamSources.enemies_near(_my_company(context), context) > 0
+
+
+## Whether his company fought, as attacker or defender, within the window (#394).
+static func my_company_fought(args: Dictionary, context: LetterContext) -> bool:
+	var company := _my_company(context)
+	if company == null or context.log == null:
+		return false
+	var within := maxi(1, int(args.get("within", 1)))
+	for event in context.log.of_type(Battle.EVENT_FOUGHT):
+		if context.month - event.month >= within:
+			continue
+		var id := String(company.id)
+		if String(event.payload.get("attacker", "")) == id or String(event.payload.get("defender", "")) == id:
+			return true
+	return false
+
+
+## Whether his company went unfed within the window (#394). `company_unsupported`
+## was emitted and read by nothing.
+static func my_company_is_unsupported(args: Dictionary, context: LetterContext) -> bool:
+	var company := _my_company(context)
+	if company == null or context.log == null:
+		return false
+	var within := maxi(1, int(args.get("within", 1)))
+	for event in context.log.of_type(Company.EVENT_UNSUPPORTED):
+		if context.month - event.month < within and String(event.payload.get("company", "")) == String(company.id):
+			return true
+	return false
+
+
+## Whether this man is a commander with nothing to command (#394, §7's waiting
+## veteran).
+static func i_have_no_command(_args: Dictionary, context: LetterContext) -> bool:
+	var man := context.sender
+	if man == null or man.is_dead or man.role != Contact.ROLE_COMMANDER:
+		return false
+	return UrgeCompanyExecutor.commanded_by(context.companies, man.id) == null
 
 
 ## Whether any town of the colony is in open rebellion (#420): the only time

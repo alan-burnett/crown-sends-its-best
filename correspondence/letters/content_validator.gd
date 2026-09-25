@@ -1273,6 +1273,23 @@ func check_agendas(content: ContentDatabase) -> void:
 						"urges '%s', which the PC may not ask for" % urged)
 
 
+## 🔒 **A commander is argued at about something he weighs** (#394): every
+## `urge_company` names one of `CommanderConsiderations.OPTIONS`.
+func check_company_urgings(content: ContentDatabase) -> void:
+	for id in content.ids("letters"):
+		var letter: Dictionary = content.collection("letters")[id]
+		_file = String(letter.get(JsonLoader.SOURCE_KEY, id))
+		for step in letter.get(LetterSchema.KEY_REPLY, {}).get(LetterSchema.KEY_STEPS, []):
+			for option in step.get(LetterSchema.KEY_OPTIONS, []):
+				var effect: Variant = option.get("effect", {})
+				if typeof(effect) != TYPE_DICTIONARY or not (effect as Dictionary).has("urge_company"):
+					continue
+				var order := String(effect["urge_company"].get("order", ""))
+				if not order.begins_with("{") and not CommanderConsiderations.OPTIONS.has(StringName(order)):
+					_problem("options.%s.urge_company" % option.get("id", "?"),
+						"'%s' is nothing a commander weighs" % order)
+
+
 ## 🔒 **A policy's target is one it reads** (#396, `policy.md` §8): every
 ## `enact_policy_on` names a policy aimed at a resource, and a resource the
 ## catalogue has; every `enact_policy` names one that is not. A slot is the

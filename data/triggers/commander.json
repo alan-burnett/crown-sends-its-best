@@ -1,0 +1,56 @@
+[
+  {
+    "id": "trigger.commander.at_the_front",
+    "letter": "commander.at_the_front",
+    "urgency": 0.7,
+    "cooldown": 3,
+    "note": "Issue 394. A commander in the field with an enemy in reach. Cooldown 3: a standing campaign produces a letter a season, not a letter a month, and the reply lasts - an urging pulls for months.",
+    "params": {
+      "commander": {
+        "from": "sender_id"
+      },
+      "men": {
+        "from": "my_company_men"
+      },
+      "near": {
+        "from": "my_company_near"
+      },
+      "enemies": {
+        "from": "enemies_near_my_company"
+      }
+    },
+    "conditions": [
+      {
+        "my_company_is_in_the_field": {}
+      },
+      {
+        "my_company_faces_an_enemy": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.commander.after_the_battle",
+    "letter": "commander.after_the_battle",
+    "urgency": 0.8,
+    "cooldown": 1,
+    "note": "Issue 394. His company fought this month and is still in being. Cooldown 1: a battle a month is a battle a letter.",
+    "params": {
+      "commander": {
+        "from": "sender_id"
+      },
+      "men": {
+        "from": "my_company_men"
+      },
+      "near": {
+        "from": "my_company_near"
+      }
+    },
+    "conditions": [
+      {
+        "my_company_fought": {
+          "within": 1
+        }
+      }
+    ]
+  }
+]

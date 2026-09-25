@@ -394,8 +394,10 @@ static func _priced(order: Order) -> Variant:
 			var unpaid: float = Policy.UNPAID_SHARE.get(
 				StringName(order.get_param("split", "none")), 1.0)
 			return monthly * unpaid * POLICY_HORIZON
-		M1Registrations.ORDER_URGE_INTENT:
+		M1Registrations.ORDER_URGE_INTENT, M1Registrations.ORDER_URGE_COMPANY:
 			# **Being told what matters costs a governor nothing to carry out.**
+			# Nor a commander what his men should do (#394): he is commanding
+			# either way, and what it costs him is his own judgement.
 			# He is governing either way, and the town pays for its own projects
 			# out of its own stores.
 			#
@@ -496,7 +498,8 @@ static func _cut_below_his_rate(order: Order, state: WorldState) -> float:
 
 
 static func vagueness_of(order: Order) -> float:
-	if order.kind == M1Registrations.ORDER_URGE_INTENT:
+	# One of a handful of things the PC can say, with nothing in it to misread.
+	if order.kind == M1Registrations.ORDER_URGE_INTENT or order.kind == M1Registrations.ORDER_URGE_COMPANY:
 		return 0.0
 	for key in order.params:
 		if key == "to":

@@ -73,6 +73,19 @@ func _a_patron(run: RunState) -> Contact:
 	return patron
 
 
+## A commander, who arrives with a company and is therefore never in a fresh run
+## (#394).
+func _a_commander(run: RunState) -> Contact:
+	var town: Town = run.colony.in_order()[0]
+	var context := ColonyContext.new(run.world, run.log, run.streams, run.map)
+	context.colony = run.colony
+	context.companies = run.companies
+	var company := run.companies.raise_company(
+		Company.COLONIAL, 5_000, {}, town.id, town.at, context,
+		StandingOrder.MARCH_ON_A_FOE, Company.COMMANDED)
+	return Commanders.take_command(company, town, run, context)
+
+
 func _letter(id: String) -> Letter:
 	return Letter.from_record(content.record("letters", id))
 
@@ -190,6 +203,7 @@ func test_every_letter_that_ships_has_somebody_who_could_send_it() -> void:
 	var run := _run()
 	_a_patron(run)
 	_a_clergyman(run)
+	_a_commander(run)
 	var orphaned := PackedStringArray()
 	for id in content.ids("letters"):
 		var letter := _letter(String(id))

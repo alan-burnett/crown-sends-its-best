@@ -35,6 +35,12 @@ static func register_all() -> void:
 		ReportableEvents.what_happened,
 	)
 	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
+	# What a commander's letter says of his company (#394).
+	ContentRegistry.register_param_source("my_company_men", {}, ColonyParamSources.my_company_men)
+	ContentRegistry.register_param_source("my_company_near", {}, ColonyParamSources.my_company_near)
+	ContentRegistry.register_param_source(
+		"enemies_near_my_company", {}, ColonyParamSources.enemies_near_my_company
+	)
 	# The one kind a patron's specialty names (#396, `patrons.md` §3).
 	ContentRegistry.register_param_source(
 		"his_specialty_kind", {}, ColonyParamSources.his_specialty_kind
@@ -224,6 +230,52 @@ static func patron_who_spoke(args: Dictionary, context: LetterContext) -> Varian
 
 static func sender_id(_args: Dictionary, context: LetterContext) -> Variant:
 	return String(context.sender.id) if context.sender != null else ""
+
+
+## How many men his company has (#394). Nought for a man with no command.
+static func my_company_men(_args: Dictionary, context: LetterContext) -> Variant:
+	var company := UrgeCompanyExecutor.commanded_by(context.companies, context.sender.id) \
+		if context.sender != null else null
+	return company.size if company != null else 0
+
+
+## The town his company stands nearest, by name (#394): where a letter says he
+## is. Ties go to the first town in id order.
+static func my_company_near(_args: Dictionary, context: LetterContext) -> Variant:
+	var company := UrgeCompanyExecutor.commanded_by(context.companies, context.sender.id) \
+		if context.sender != null else null
+	if company == null or context.colony == null or company.at == Company.NOWHERE:
+		return "the colony"
+	var nearest: Town = null
+	var closest := 0
+	for town in context.colony.in_order():
+		var away := maxi(absi(town.at.x - company.at.x), absi(town.at.y - company.at.y))
+		if nearest == null or away < closest:
+			nearest = town
+			closest = away
+	return nearest.display_name if nearest != null else "the colony"
+
+
+## How many companies that may fight his stand within reach of it (#394).
+static func enemies_near_my_company(_args: Dictionary, context: LetterContext) -> Variant:
+	var company := UrgeCompanyExecutor.commanded_by(context.companies, context.sender.id) \
+		if context.sender != null else null
+	return enemies_near(company, context)
+
+
+## Companies `Battle.may_fight` lets fight this one, within `OrderRule.THREAT_WITHIN`.
+static func enemies_near(company: Company, context: LetterContext) -> int:
+	if company == null or context.companies == null or company.at == Company.NOWHERE:
+		return 0
+	var count := 0
+	for entry in context.companies.in_resolution_order():
+		var other: Company = entry
+		if other.is_empty() or other.at == Company.NOWHERE or not Battle.may_fight(company, other):
+			continue
+		var away := maxi(absi(other.at.x - company.at.x), absi(other.at.y - company.at.y))
+		if away <= OrderRule.THREAT_WITHIN:
+			count += 1
+	return count
 
 
 ## The one kind his specialty names (#396): *horses*, *sugar*. Empty for a

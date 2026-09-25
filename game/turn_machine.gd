@@ -106,6 +106,9 @@ func _init(p_run: RunState) -> void:
 	# The one Order that reaches a town rather than a world value. It needs the
 	# colony, so it cannot live in the table above.
 	var urging := UrgeIntentExecutor.new()
+	# And the commander's: what his company should do, argued (#394).
+	var company_urging := UrgeCompanyExecutor.new()
+	company_urging.companies = run.companies
 	# Goods leave a town over months, so a letter can still reach them (#69).
 	var shipments := ShipmentExecutor.new()
 	shipments.colony = run.colony
@@ -352,7 +355,7 @@ func _init(p_run: RunState) -> void:
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, shipments, embargoes, tribute, deflection, preferences, foundings,
+		urging, company_urging, shipments, embargoes, tribute, deflection, preferences, foundings,
 		diplomat_moves, executor,
 	]
 
@@ -440,6 +443,8 @@ static func order_effects() -> Dictionary:
 		# `UrgeIntentExecutor` handles it. Listed here so that every Order kind is
 		# still accounted for in one place.
 		String(M1Registrations.ORDER_URGE_INTENT): {"target": ""},
+		# Landed by `UrgeCompanyExecutor` on the company (#394), never a world value.
+		String(M1Registrations.ORDER_URGE_COMPANY): {"target": ""},
 	}
 
 

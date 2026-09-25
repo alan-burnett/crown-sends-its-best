@@ -105,6 +105,9 @@ var contacts: Dictionary = {}
 ## so he is the only sender who needs more than his own. Nothing else reads it.
 var colony: Colony = null
 
+## The companies in the field (#394), so a commander's letter can read his own.
+var companies: Companies = null
+
 ## The peoples already here (#208, `natives.md` §1).
 ##
 ## 🔒 **Nothing about a tribe reaches the PC except through his own people.**

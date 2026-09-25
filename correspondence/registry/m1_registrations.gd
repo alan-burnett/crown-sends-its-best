@@ -74,6 +74,9 @@ const ORDER_WAIVE_DUTY: StringName = &"waive_duty"
 ## **The only order that reaches a town** (SPEC §8.5, #53). It argues for a goal
 ## and names no project, no tile and no month. The letters that use it are #54.
 const ORDER_URGE_INTENT: StringName = &"urge_intent"
+## 🔒 **Argue with a commander, never move his company** (#394, `commanders.md`
+## §8). The same kind as the Intent it becomes and the executor that lands it.
+const ORDER_URGE_COMPANY: StringName = &"urge_company"
 
 
 ## Populate the resource catalogue and the terrain table from loaded content.
@@ -388,6 +391,13 @@ static func register_effects() -> void:
 	# governor addressed speaks for.
 	ContentRegistry.register_effect(
 		"urge_intent", {"to": "contact", "intent": "string"}, ORDER_URGE_INTENT
+	)
+	# 🔒 **What a commander's company should do, argued and never ordered**
+	# (#394, `commanders.md` §8, SPEC §12.6): one of the options he weighs each
+	# month. The letter moves the weights; `UrgeCompanyExecutor` writes only what
+	# was argued for.
+	ContentRegistry.register_effect(
+		"urge_company", {"to": "contact", "order": "string"}, ORDER_URGE_COMPANY
 	)
 	# **The player never sets a rate directly** (SPEC §10.2). It is always a
 	# letter to the Steward, resolved through compliance like any other Order —

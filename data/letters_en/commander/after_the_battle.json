@@ -1,0 +1,85 @@
+{
+  "id": "commander.after_the_battle",
+  "sender": "commander",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 394, commanders.md section 8. The after-battle report: his company fought this month and is still in being. Unskippable for the same reason as at_the_front: a battle is not a grievance. The figure is the men he has now, never the men he lost, which the payload knows and this letter does not claim. Placeholder prose.",
+  "params": {
+    "commander": "contact",
+    "men": "people",
+    "near": "town"
+  },
+  "body": [
+    {
+      "text": "We have fought near {param:near}. I have {param:men} men standing, and I will not pretend to you that it went as I would have liked or that it did not."
+    },
+    {
+      "text": "Tell me what the Crown wants of the men I have left."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I have your report {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and am glad you are still in the field"
+        },
+        {
+          "tone": "dutiful",
+          "text": "and my answer is short"
+        },
+        {
+          "tone": "desperate",
+          "text": "and a great deal rests on what you do next"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "orders",
+        "prompt": "What the Crown would have him do",
+        "options": [
+          {
+            "id": "attack",
+            "label": "press on",
+            "text": "Press on while they are still reeling.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "attack"
+              }
+            }
+          },
+          {
+            "id": "hold",
+            "label": "hold and recover",
+            "text": "Hold where you are and let the men recover.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "hold"
+              }
+            }
+          },
+          {
+            "id": "withdraw",
+            "label": "fall back",
+            "text": "Fall back to the town that feeds you. You have done enough for one season.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "withdraw"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,"
+      }
+    ]
+  }
+}

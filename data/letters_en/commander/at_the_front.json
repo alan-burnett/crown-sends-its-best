@@ -1,0 +1,105 @@
+{
+  "id": "commander.at_the_front",
+  "sender": "commander",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 394, commanders.md section 8, SPEC section 8.6: I stand before the enemy - do I press on? A commander in the field with an enemy in reach asks what the PC wants, and the reply argues with him: it moves the weights of his next deliberation and never his company (Seam B). Unskippable by the director's own example (the-director.md section 2): a man in the field facing an enemy wants orders, and there is no deliberation about whether to trouble the Crown with that. Commanders care about no measures today, so a skippable letter from one would never clear his threshold. Placeholder prose.",
+  "params": {
+    "commander": "contact",
+    "men": "people",
+    "near": "town",
+    "enemies": "integer"
+  },
+  "body": [
+    {
+      "text": "We are in the field near {param:near}, {param:men} of us, and there are {param:enemies} bodies of men within a few days' march who would fight us if they could."
+    },
+    {
+      "text": "I shall do what I judge best, as I must. I should rather do it knowing what you want."
+    },
+    {
+      "text": "Your letter will be a month on the road. Whatever you write, write it plainly.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I have your report {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and my answer is short"
+        },
+        {
+          "tone": "desperate",
+          "text": "and a great deal rests on what you do"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and I had hoped for better news"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "orders",
+        "prompt": "What the Crown would have him do",
+        "options": [
+          {
+            "id": "attack",
+            "label": "press on and fall on them",
+            "text": "Press on. Fall on them before they have the chance to choose the ground.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "attack"
+              }
+            }
+          },
+          {
+            "id": "hold",
+            "label": "hold where he stands",
+            "text": "Hold where you are and let them come to you.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "hold"
+              }
+            }
+          },
+          {
+            "id": "withdraw",
+            "label": "fall back to the town that feeds him",
+            "text": "Fall back to the town that feeds you. I would rather have your men than the ground.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "withdraw"
+              }
+            }
+          },
+          {
+            "id": "disband",
+            "label": "stand the men down",
+            "text": "Stand the men down and send them home. This is not a fight worth their lives.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "disband"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,"
+      }
+    ]
+  }
+}

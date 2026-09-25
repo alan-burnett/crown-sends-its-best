@@ -53,6 +53,7 @@ func _init() -> void:
 	validator.check_agendas(content)
 	validator.check_troop_requests(content)
 	validator.check_policy_targets(content)
+	validator.check_company_urgings(content)
 	print(validator.report())
 
 	var ok := validator.ok()
