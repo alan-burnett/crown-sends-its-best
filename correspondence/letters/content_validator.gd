@@ -637,6 +637,37 @@ func check_building_reserves(content: ContentDatabase) -> void:
 					_problem("effects.reserve_months", "names '%s', which is not a resource" % resource)
 
 
+## 🔒 **A yield bonus on particular ground names real ground** (#409): a
+## misspelt terrain or improvement would raise nothing, and nothing would say so.
+func check_tile_yield_bonuses(content: ContentDatabase) -> void:
+	for id in content.ids("buildings"):
+		_file = "buildings/%s" % id
+		var effects: Dictionary = content.collection("buildings")[id].get("effects", {})
+		if not effects.has("tile_yield_bonus"):
+			continue
+		var rules: Variant = effects["tile_yield_bonus"]
+		if typeof(rules) != TYPE_ARRAY:
+			_problem("effects.tile_yield_bonus", "expected a list of {resource, terrain, improvement, bonus}")
+			continue
+		for rule in rules:
+			if typeof(rule) != TYPE_DICTIONARY:
+				_problem("effects.tile_yield_bonus", "expected {resource, terrain, improvement, bonus}")
+				continue
+			for key in rule:
+				if not ["resource", "terrain", "improvement", "bonus"].has(String(key)):
+					_problem("effects.tile_yield_bonus", "has no '%s'" % key)
+			if not ResourceCatalogue.has(StringName(rule.get("resource", ""))):
+				_problem("effects.tile_yield_bonus", "'%s' is not a resource" % rule.get("resource", ""))
+			if typeof(rule.get("bonus", null)) not in [TYPE_INT, TYPE_FLOAT]:
+				_problem("effects.tile_yield_bonus", "a rule has no bonus")
+			for terrain in rule.get("terrain", []):
+				if Terrain.find(StringName(terrain)) == null:
+					_problem("effects.tile_yield_bonus", "'%s' is not a terrain" % terrain)
+			for improvement in rule.get("improvement", []):
+				if not Improvement.has(StringName(improvement)):
+					_problem("effects.tile_yield_bonus", "'%s' is not an improvement" % improvement)
+
+
 ## 🔒 **What outfits an expedition is a factor and resources** (#413): a
 ## misspelt resource would add nothing, and nothing would say so.
 func check_expedition_outfitting(content: ContentDatabase) -> void:

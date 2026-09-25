@@ -395,8 +395,9 @@ func _yield_of(context: ColonyContext, town: Town, at: Vector2i, resource: Strin
 	var amount := context.map.yield_at(at.x, at.y, resource)
 	if amount <= 0.0 or town == null:
 		return amount
+	var ground := _ground_bonus(Building.tile_yield_rules(town), context.map, at, resource)
 	return amount * expert_multiplier(town, resource) \
-		* (1.0 + Building.yield_bonus_for(town, resource)) * _fallback(town)
+		* (1.0 + Building.yield_bonus_for(town, resource) + ground) * _fallback(town)
 
 
 ## What every tile of this town would yield a hand, this month (#351).
@@ -421,14 +422,33 @@ func _yields_for(town: Town, context: ColonyContext, tiles: Array) -> Dictionary
 	var out: Dictionary = {}
 	if context.map == null:
 		return out
+	# **And what its buildings add on particular ground** (#409). A tile they
+	# say nothing about takes the town-wide multiplier exactly as before.
+	var rules := Building.tile_yield_rules(town)
 	for at in tiles:
 		var here: Dictionary = {}
 		for resource in ResourceCatalogue.ids():
-			var amount := context.map.yield_at(at.x, at.y, StringName(resource))
-			if amount > 0.0:
+			var id := StringName(resource)
+			var amount := context.map.yield_at(at.x, at.y, id)
+			if amount <= 0.0:
+				continue
+			var ground := _ground_bonus(rules, context.map, at, id)
+			if ground == 0.0:
 				here[resource] = amount * float(multiplier[resource])
+			else:
+				here[resource] = amount * expert_multiplier(town, id) \
+					* (1.0 + Building.yield_bonus_for(town, id) + ground) * _fallback(town)
 		out[_tile_key(at)] = here
 	return out
+
+
+## What the town's buildings add to this resource on this tile's ground (#409):
+## its terrain, and the improvement working on it.
+static func _ground_bonus(rules: Array, map: WorldMap, at: Vector2i, resource: StringName) -> float:
+	if rules.is_empty() or map == null:
+		return 0.0
+	var improvement := &"" if map.is_idle(at.x, at.y) else map.improvement_at(at.x, at.y)
+	return Building.tile_yield_bonus(rules, resource, map.terrain_at(at.x, at.y), improvement)
 
 
 ## 🔒 **No building works every tile a tenth harder** (#429,

@@ -40,7 +40,11 @@
 	  "wood": 30
 	},
 	"upkeep": 2,
-	"effects": {},
+	"effects": {
+	  "tile_yield_bonus": [
+		{ "resource": "food", "terrain": ["sea", "ocean"], "bonus": 1.0 }
+	  ]
+	},
 	"requires": []
   },
   {
@@ -52,7 +56,12 @@
 	  "tools": 4
 	},
 	"upkeep": 5,
-	"effects": {},
+	"effects": {
+	  "tile_yield_bonus": [
+		{ "resource": "food", "terrain": ["grassland", "plains"], "bonus": 0.25 },
+		{ "resource": "food", "terrain": ["grassland", "plains"], "improvement": ["farm"], "bonus": 0.25 }
+	  ]
+	},
 	"requires": []
   },
   {
@@ -67,7 +76,11 @@
 	  "tools": 8
 	},
 	"upkeep": 5,
-	"effects": {}
+	"effects": {
+	  "tile_yield_bonus": [
+		{ "resource": "food", "improvement": ["farm"], "bonus": 0.25 }
+	  ]
+	}
   },
   {
 	"id": "river_mill",
@@ -81,7 +94,11 @@
 	  "tools": 8
 	},
 	"upkeep": 5,
-	"effects": {}
+	"effects": {
+	  "tile_yield_bonus": [
+		{ "resource": "food", "improvement": ["farm"], "bonus": 0.25 }
+	  ]
+	}
   },
   {
 	"id": "wharf",

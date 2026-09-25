@@ -457,6 +457,45 @@ static func perceived_safety_for(town: Town, contacts: Dictionary) -> float:
 	return comfort
 
 
+## 🔒 **Yield bonuses scoped to the ground** (#409, `buildings.md` §4 *Food*,
+## `map.md` §7). A dock raises what sea and ocean give; an irrigation station
+## what grassland and plains give, doubled where a farm stands; the mills what
+## farms give. Each rule names a resource and, optionally, the terrains and the
+## improvements it applies to; every lit building's matching rules add, and add
+## to the town-wide `yield_bonus`.
+##
+## Collected once per town per month, because Work asks it of every tile.
+static func tile_yield_rules(town: Town) -> Array:
+	var rules: Array = []
+	var held := town.buildings.duplicate()
+	held.sort()
+	for id in held:
+		var building := find(StringName(id))
+		if building == null or not is_lit(town, StringName(id)):
+			continue
+		for rule in building.effect("tile_yield_bonus", []):
+			rules.append(rule)
+	return rules
+
+
+## What the rules add to one resource on one tile's ground.
+static func tile_yield_bonus(
+	rules: Array, resource: StringName, terrain: StringName, improvement: StringName
+) -> float:
+	var bonus := 0.0
+	for rule in rules:
+		if String(rule.get("resource", "")) != String(resource):
+			continue
+		var terrains: Array = rule.get("terrain", [])
+		if not terrains.is_empty() and not terrains.has(String(terrain)):
+			continue
+		var improvements: Array = rule.get("improvement", [])
+		if not improvements.is_empty() and not improvements.has(String(improvement)):
+			continue
+		bonus += float(rule.get("bonus", 0.0))
+	return bonus
+
+
 ## How much this town's production of a resource is raised by what it has built.
 static func yield_bonus_for(town: Town, resource: StringName) -> float:
 	var bonus := 0.0

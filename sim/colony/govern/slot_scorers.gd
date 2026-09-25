@@ -185,11 +185,16 @@ static func added_by(town: Town, improvement: Improvement, at: Vector2i, context
 	var terrain := Terrain.find(context.map.terrain_at(at.x, at.y))
 	if terrain == null:
 		return out
+	# **What the ground's buildings add counts on both sides** (#409): a farm
+	# under an irrigation station yields more than the same farm without one.
+	var rules := Building.tile_yield_rules(town)
+	var now := &"" if context.map.is_idle(at.x, at.y) else context.map.improvement_at(at.x, at.y)
 	for resource in ResourceCatalogue.ids():
 		var id := StringName(resource)
-		var change := improvement.yield_of(terrain, id) - context.map.yield_at(at.x, at.y, id)
-		if absf(change) > EPSILON:
-			out[resource] = change * _multiplier(town, id)
+		var after := improvement.yield_of(terrain, id) * _multiplier(town, id, rules, terrain.id, improvement.id)
+		var before := context.map.yield_at(at.x, at.y, id) * _multiplier(town, id, rules, terrain.id, now)
+		if absf(after - before) > EPSILON:
+			out[resource] = after - before
 	return out
 
 
@@ -227,7 +232,8 @@ static func _pasture_on(
 	var lost_value := 0.0
 	var gave: Dictionary = town.harvested_at.get(_key(at), {})
 	for resource in _sorted_keys(gave):
-		var under := pasture.yield_of(terrain, StringName(resource)) * _multiplier(town, StringName(resource))
+		var under := pasture.yield_of(terrain, StringName(resource)) \
+			* _multiplier(town, StringName(resource), Building.tile_yield_rules(town), terrain.id, pasture.id)
 		var lost := maxf(0.0, float(gave[resource]) - under)
 		lost_value += lost * float(prices.get(resource, 0.0))
 		if resource == "food":
@@ -278,6 +284,7 @@ static func _improve_yield(town: Town, intent: StringName, context: ColonyContex
 			var already := 1.0 + Building.yield_bonus_for(town, StringName(resource))
 			added += float(town.harvested.get(resource, 0.0)) * float(bonuses[resource]) / already \
 				* float(prices.get(resource, 0.0))
+		added += _ground_added(town, building, context, prices)
 		var worth := added / _cost_of(building.cost, prices)
 		if worth > best_worth + EPSILON:
 			best = {"id": id, "target": Vector2i(-1, -1)}
@@ -388,9 +395,41 @@ static func _native_discount(at: Vector2i, intent: StringName, context: ColonyCo
 	return clampf(1.0 - depth * AgendaMenu.aversion_of(intent), 0.0, 1.0)
 
 
-## The same factors Work puts on a tile's yield, less the fallback's.
-static func _multiplier(town: Town, resource: StringName) -> float:
-	return WorkPhase.expert_multiplier(town, resource) * (1.0 + Building.yield_bonus_for(town, resource))
+## The same factors Work puts on a tile's yield, less the fallback's: the
+## town's experts, its buildings, and what they add on this ground (#409).
+static func _multiplier(
+	town: Town, resource: StringName, rules: Array = [], terrain: StringName = &"", improvement: StringName = &""
+) -> float:
+	return WorkPhase.expert_multiplier(town, resource) * (1.0 + Building.yield_bonus_for(town, resource)
+		+ Building.tile_yield_bonus(rules, resource, terrain, improvement))
+
+
+## What a building's ground-scoped bonuses (#409) would have added to this
+## month's harvest, tile by tile, valued at `prices`: each worked tile's yield
+## of a resource times the building's own bonus there, over what the tile's
+## multiplier already was.
+static func _ground_added(town: Town, building: Building, context: ColonyContext, prices: Dictionary) -> float:
+	var own: Array = building.effect("tile_yield_bonus", [])
+	if own.is_empty() or context.map == null:
+		return 0.0
+	var rules := Building.tile_yield_rules(town)
+	var added := 0.0
+	for key in _sorted_keys(town.harvested_at):
+		var parts := String(key).split(",")
+		var at := Vector2i(int(parts[0]), int(parts[1]))
+		if not context.map.in_bounds(at.x, at.y):
+			continue
+		var terrain := context.map.terrain_at(at.x, at.y)
+		var improvement := &"" if context.map.is_idle(at.x, at.y) else context.map.improvement_at(at.x, at.y)
+		var gave: Dictionary = town.harvested_at[key]
+		for resource in _sorted_keys(gave):
+			var id := StringName(resource)
+			var extra := Building.tile_yield_bonus(own, id, terrain, improvement)
+			if extra <= 0.0:
+				continue
+			var already := 1.0 + Building.yield_bonus_for(town, id) + Building.tile_yield_bonus(rules, id, terrain, improvement)
+			added += float(gave[resource]) * extra / already * float(prices.get(resource, 0.0))
+	return added
 
 
 static func _tiles_in_order(town: Town, context: ColonyContext) -> Array[Vector2i]:

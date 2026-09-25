@@ -38,6 +38,7 @@ func _init() -> void:
 	validator.check_effects_are_reachable(content)
 	validator.check_building_reserves(content)
 	validator.check_expedition_outfitting(content)
+	validator.check_tile_yield_bonuses(content)
 	validator.check_no_authored_durations(content)
 	validator.check_severity(content)
 	validator.check_epitaphs(content)

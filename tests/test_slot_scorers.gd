@@ -180,8 +180,10 @@ func test_improve_yield_stops_offering_improvements_at_one_per_thousand() -> voi
 	assert_eq(String(_place(town, GovernorIntent.GO_TALL, {"objective": "improve_yield"}, context).get("id", "")), "farm")
 	context.map.build(8, 5, &"farm")
 	context.map.build(9, 5, &"farm")
-	assert_true(_place(town, GovernorIntent.GO_TALL, {"objective": "improve_yield"}, context).is_empty(),
-		"a town of two thousand with two farms was offered a third")
+	# A building may still be worth it (an irrigation station, #409); an
+	# improvement may not.
+	var offered := StringName(_place(town, GovernorIntent.GO_TALL, {"objective": "improve_yield"}, context).get("id", ""))
+	assert_false(Improvement.has(offered), "a town of two thousand with two farms was offered a third")
 
 
 func test_going_tall_looks_to_ore_where_no_tile_gains_food() -> void:
