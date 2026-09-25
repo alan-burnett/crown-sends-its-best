@@ -353,8 +353,16 @@ static func register_effects() -> void:
 	)
 	# The payment level is chosen in the letter. It drives the loyalty cost and
 	# then the refusal probability (SPEC §8.5, §12.6, #16).
+	# 🔒 **Troops are a standing policy** (#420, `the-marshal.md` §2): strength and
+	# posture are its two knobs, and it is the same Order kind as any policy, so
+	# the charge, the split, the drain and the renegotiation are `policy.md`'s.
+	# The placeholder `request_troops` it replaces fed the soldiers from the
+	# colony's stores, which §3 locks they never are.
 	ContentRegistry.register_effect(
-		"request_troops", {"to": "contact", "payment": "gold"}, ORDER_REQUEST_TROOPS
+		"station_troops",
+		{"to": "contact", "strength": "string", "posture": "string", "cost": "gold", "split": "string"},
+		ORDER_ENACT_POLICY,
+		M1Registrations.build_troops_order,
 	)
 	ContentRegistry.register_effect(
 		"adjust_loyalty", {"to": "contact", "amount": "number"}, ORDER_ADJUST_LOYALTY
@@ -416,6 +424,16 @@ static func build_tax_order(args: Dictionary, context: LetterContext) -> Order:
 		params,
 		context.month,
 	)
+
+
+## The Marshal's troops policy (#420): the policy it is, with its two knobs in
+## its params. **Which strengths and postures a letter may name is the content
+## validator's** (`check_troop_requests`), so a bad one is refused when the data
+## loads rather than when the player sends it.
+static func build_troops_order(args: Dictionary, context: LetterContext) -> Order:
+	var params := args.duplicate()
+	params["effect"] = String(PolicyEffects.CROWN_TROOPS)
+	return Order.new(ORDER_ENACT_POLICY, StringName(args.get("to", "")), params, context.month)
 
 
 ## A policy, refused when it and its target do not match (#396).

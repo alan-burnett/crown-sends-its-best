@@ -1273,6 +1273,29 @@ func check_agendas(content: ContentDatabase) -> void:
 						"urges '%s', which the PC may not ask for" % urged)
 
 
+## 🔒 **Troops a letter asks for are troops the Marshal has** (#420,
+## `the-marshal.md` §2): every `station_troops` names one of §2's strengths —
+## never *none* — and one of its postures. A slot is the letter's to fill and is
+## not checked here.
+func check_troop_requests(content: ContentDatabase) -> void:
+	for id in content.ids("letters"):
+		var letter: Dictionary = content.collection("letters")[id]
+		_file = String(letter.get(JsonLoader.SOURCE_KEY, id))
+		for step in letter.get(LetterSchema.KEY_REPLY, {}).get(LetterSchema.KEY_STEPS, []):
+			for option in step.get(LetterSchema.KEY_OPTIONS, []):
+				var effect: Variant = option.get("effect", {})
+				if typeof(effect) != TYPE_DICTIONARY or not (effect as Dictionary).has("station_troops"):
+					continue
+				var args: Dictionary = effect["station_troops"]
+				var path := "options.%s.station_troops" % option.get("id", "?")
+				var strength := String(args.get("strength", ""))
+				if not strength.begins_with("{") and not CrownTroops.is_a_strength(StringName(strength)):
+					_problem(path, "'%s' is not a strength the Marshal sends" % strength)
+				var posture := String(args.get("posture", ""))
+				if not posture.begins_with("{") and not CrownTroops.is_a_posture(StringName(posture)):
+					_problem(path, "'%s' is not a posture" % posture)
+
+
 ## 🔒 **A menu the walk can read** (#429, `governor-agendas.md` §12): every
 ## objective is a building or a slot the registry knows, every condition is
 ## registered and its params typed, a slot's own params are its own, and **every

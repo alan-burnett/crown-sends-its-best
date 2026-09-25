@@ -188,5 +188,30 @@
     "conditions": [
       { "remembers_a_broken_word": {} }
     ]
+  },
+  {
+    "id": "trigger.marshal.calling_them_home",
+    "letter": "marshal.calling_them_home",
+    "urgency": 0.95,
+    "cooldown": 4,
+    "note": "Issue 420, the-marshal.md section 6: he writes first, then the soldiers sail. The warning months of a troops policy he will carry no further.",
+    "params": {
+      "sender_id": {
+        "from": "sender_id"
+      },
+      "cost": {
+        "from": "policy",
+        "field": "cost"
+      },
+      "months": {
+        "from": "policy",
+        "field": "months"
+      }
+    },
+    "conditions": [
+      {
+        "his_troops_are_going_home": {}
+      }
+    ]
   }
 ]

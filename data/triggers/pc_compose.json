@@ -5,6 +5,9 @@
     "offers_composition": true,
     "conditions": [
       {
+        "he_sends_the_troops": {}
+      },
+      {
         "loyalty_above": {
           "value": 20
         }

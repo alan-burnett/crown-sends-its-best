@@ -1073,6 +1073,26 @@
 		}
 	},
 	{
+		"id": "trigger.cutscene.the_marshal_withdraws",
+		"cutscene": "the_marshal_withdraws",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "crown_troops_sailed"
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"men": {
+				"from": "event",
+				"field": "men",
+				"as": "people"
+			}
+		}
+	},
+	{
 		"id": "trigger.cutscene.the_fort_falls",
 		"cutscene": "the_fort_falls",
 		"kind": "first",

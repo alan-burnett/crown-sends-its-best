@@ -269,6 +269,10 @@ func _init(p_run: RunState) -> void:
 	# the map a month before it reaches anybody.
 	var muster := MusterDriver.new(run)
 
+	# Phase 1. The Marshal's troops land while their policy stands and sail the
+	# month it does not (#420). Before the marching, like any other landing.
+	var crown_troops := CrownTroops.new(run)
+
 	# Phases 2, 7 and 8. They march where expeditions march, a company nobody fed
 	# goes without after the Colony Month has had its chance (#211), and their
 	# commanders settle where they are going in the Intent phase (#222).
@@ -335,7 +339,7 @@ func _init(p_run: RunState) -> void:
 	colony_month.denied = run.denied
 
 	month_runner.drivers = [
-		muster,
+		muster, crown_troops,
 		immigration, native_help, crown_foundings, expeditions, crown_affairs, territory,
 		rival_tiles,
 		colony_month, villages, promise_driver, standings, native_trade,
@@ -384,9 +388,6 @@ static func order_effects() -> Dictionary:
 		# Undertaking goods moves nothing either. What moves is the shipment the
 		# PC then has to persuade a governor to make.
 		String(M1Registrations.ORDER_PROMISE_SHIPMENT): {"target": ""},
-		# Troops arrive and are fed and armed out of the colony's stores.
-		String(M1Registrations.ORDER_REQUEST_TROOPS):
-			{"target": WorldValues.SUPPLY, "per_month": 6.0},
 		# These land on the Relationship rather than on the world. The stub has no
 		# tax model, and inventing one here would be M3's work done badly.
 		# A tax change names the world value it moves, because which rate it is

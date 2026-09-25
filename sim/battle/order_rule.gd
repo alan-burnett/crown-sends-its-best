@@ -86,6 +86,10 @@ static func foe_of(company: Company, home: Town, context: ColonyContext) -> Comp
 	var from := home.at if home != null else company.at
 	var crown_only := company.allegiance == Company.REBEL \
 		or company.raised_under == GovernorIntent.SEDITION
+	# 🔒 **Men sent to put down the rebellion march on rebels** (#420,
+	# `the-marshal.md` §2), and on nobody else.
+	var rebels_only := company.allegiance == Company.CROWN \
+		and company.raised_under == CrownTroops.PUT_DOWN_THE_REBELLION
 
 	var strength: Dictionary = {}
 	var nearest_of: Dictionary = {}
@@ -97,6 +101,8 @@ static func foe_of(company: Company, home: Town, context: ColonyContext) -> Comp
 		if not Battle.may_fight(company, other):
 			continue
 		if crown_only and other.allegiance != Company.CROWN:
+			continue
+		if rebels_only and other.allegiance != Company.REBEL:
 			continue
 		var faction := faction_of(other, context)
 		var away := _apart(from, other.at)

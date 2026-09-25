@@ -27,7 +27,7 @@ class SelfInterestConsideration:
 		"promise_gold": 1.0,
 		"promise_resource": 0.8,
 		"grant_favor": 0.7,
-		"request_troops": -0.4,
+		"station_troops": -0.4,
 		"adjust_loyalty": 0.2,
 		"set_policy": 0.0,
 		"refuse": -1.0,

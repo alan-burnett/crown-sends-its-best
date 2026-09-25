@@ -34,7 +34,7 @@ func test_an_effect_produces_an_order() -> void:
 
 func test_every_m1_effect_is_registered() -> void:
 	for id in ["promise_gold", "promise_resource", "refuse", "grant_favor",
-			"set_policy", "request_troops", "adjust_loyalty"]:
+			"set_policy", "station_troops", "adjust_loyalty"]:
 		assert_true(ContentRegistry.has_effect(id), "missing effect '%s'" % id)
 
 
@@ -46,7 +46,7 @@ func test_every_m1_effect_produces_an_order() -> void:
 		"refuse": {"to": "marshal"},
 		"grant_favor": {"to": "marshal", "favor": "a commission for his nephew"},
 		"set_policy": {"policy": "tax.tea", "value": "lower"},
-		"request_troops": {"to": "marshal", "payment": 500},
+		"station_troops": {"to": "marshal", "strength": "a_force", "posture": "hold_the_towns", "cost": 350, "split": "all"},
 		"adjust_loyalty": {"to": "marshal", "amount": 5},
 	}
 	for id in calls:

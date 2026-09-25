@@ -1,0 +1,44 @@
+{
+  "id": "marshal.calling_them_home",
+  "sender": "marshal",
+  "type": "warning",
+  "skippable": false,
+  "note": "Issue 420, the-marshal.md section 6 and policy.md section 5. He writes first, then the soldiers sail: this is the warning months of a troops policy he will carry no further. Unskippable by issue 366's proposed rule, as the Steward's policy_lapsing is: the Crown's soldiers leaving is a formal warning the PC would be wronged by missing. Placeholder prose.",
+  "params": { "sender_id": "contact", "months": "integer", "cost": "gold" },
+  "body": [
+    { "text": "I have been paying for your soldiers out of an account that was meant for mine. It is {param:cost} a month, and every month of it is powder I do not have in a war I am actually fighting." },
+    { "text": "I will keep them with you {param:months} months more. After that they come home, and I will not send them back on a promise." },
+    { "text": "I did not want to send them. I will not pretend to be sorry to have them back.", "only_tones": ["annoyed", "hateful"] },
+    { "text": "I would rather they stayed. I would rather a great many things.", "only_tones": ["dutiful", "pleased", "desperate"] }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        { "tone": "dutiful", "text": "and should have written first" },
+        { "tone": "desperate", "text": "and can only tell you how little there is" },
+        { "tone": "annoyed", "text": "and note the tone of it" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "purse",
+        "prompt": "What the Crown will bear from here",
+        "options": [
+          { "id": "all", "label": "take the whole charge onto the Crown",
+            "text": "The whole of it falls on the Crown from this month. Keep them here.",
+            "effect": { "fund_policy": { "to": "{sender_id}", "split": "all", "bonus": 0 } } },
+          { "id": "half", "label": "take half, and ask him to keep them",
+            "text": "Half, and not because it is fair. It is what there is. I would ask you to keep them on it.",
+            "effect": { "fund_policy": { "to": "{sender_id}", "split": "half", "bonus": 0 } } },
+          { "id": "home", "label": "let them go home",
+            "text": "Take them home. You have carried them longer than I had any right to ask.",
+            "effect": { "end_policy": { "to": "{sender_id}" } } }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant,", "tone": { "annoyed": "I remain, sir," } }
+    ]
+  }
+}

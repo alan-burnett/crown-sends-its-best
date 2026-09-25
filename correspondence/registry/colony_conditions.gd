@@ -47,6 +47,17 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"town_intent_is", {"intent": "string"}, ColonyConditions.town_intent_is
 	)
+	# The Marshal's troops (#420): he is about to call them home, and whether
+	# there is a rebellion for them to put down.
+	ContentRegistry.register_condition(
+		"his_troops_are_going_home", {}, ColonyConditions.his_troops_are_going_home
+	)
+	ContentRegistry.register_condition(
+		"a_town_is_in_rebellion", {}, ColonyConditions.a_town_is_in_rebellion
+	)
+	ContentRegistry.register_condition(
+		"he_sends_the_troops", {}, ColonyConditions.he_sends_the_troops
+	)
 	ContentRegistry.register_condition(
 		"town_disagrees_with_the_crown", {}, ColonyConditions.town_disagrees_with_the_crown
 	)
@@ -667,6 +678,37 @@ static func will_not_carry_it_further(_args: Dictionary, context: LetterContext)
 		return false
 	for policy in context.policies.held_by(context.sender.id):
 		if policy.is_warning():
+			return true
+	return false
+
+
+## Whether this man has said he will call his troops home (#420,
+## `the-marshal.md` §6): a troops policy of his in its warning months.
+##
+## 🔒 **He writes first, then the soldiers sail** — this is the letter that puts
+## the leaving on the desk while there is still time to answer it.
+static func his_troops_are_going_home(_args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.policies == null:
+		return false
+	for policy in context.policies.held_by(context.sender.id):
+		if policy.effect == PolicyEffects.CROWN_TROOPS and policy.is_warning():
+			return true
+	return false
+
+
+## Whether this is the man who sends the Crown's troops (#420): the Marshal, and
+## nobody else holds the troops policy (`the-marshal.md` §2).
+static func he_sends_the_troops(_args: Dictionary, context: LetterContext) -> bool:
+	return context.sender != null and context.sender.id == CrownTroops.MARSHAL
+
+
+## Whether any town of the colony is in open rebellion (#420): the only time
+## there is a rebellion for the Crown's troops to put down (`the-marshal.md` §2).
+static func a_town_is_in_rebellion(_args: Dictionary, context: LetterContext) -> bool:
+	if context.colony == null:
+		return false
+	for town in context.colony.in_order():
+		if town.rebelling:
 			return true
 	return false
 

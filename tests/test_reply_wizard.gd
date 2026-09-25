@@ -340,7 +340,7 @@ func test_composing_uses_the_same_wizard_as_replying() -> void:
 	assert_true(wizard is ReplyWizard)
 	assert_true(wizard.has_tone_step())
 	wizard.choose_tone(Tone.DUTIFUL)
-	wizard.choose("payment", "full")
+	wizard.choose("troops", "garrison")
 	# Asking for troops is an asking letter, so the wizard also puts the harsh
 	# question (#263, `tone.md` §9) — and *not yet asked* is not *declined*.
 	assert_false(wizard.is_complete(), "the letter finished without putting the question")
@@ -349,9 +349,9 @@ func test_composing_uses_the_same_wizard_as_replying() -> void:
 
 
 func test_a_composed_letter_takes_its_values_at_the_moment_of_writing() -> void:
-	var wizard := composer.begin(run, "pc.request_troops", &"marshal")
-	assert_true(wizard.outgoing.params.has("payment"))
-	assert_eq(typeof(wizard.outgoing.params["payment"]), TYPE_INT,
+	var wizard := composer.begin(run, "pc.ask_for_a_policy", &"marshal")
+	assert_true(wizard.outgoing.params.has("cost"))
+	assert_eq(typeof(wizard.outgoing.params["cost"]), TYPE_INT,
 		"a declared gold param must be a whole number")
 	assert_eq(wizard.outgoing.params["to"], "marshal")
 
@@ -360,9 +360,9 @@ func test_a_composed_letter_joins_the_post_and_can_be_rewritten_or_discarded() -
 	var wizard := composer.begin(run, "pc.request_troops", &"marshal")
 	assert_eq(run.post.size(), 1)
 
-	wizard.choose("payment", "full")
-	wizard.choose("payment", "nothing")
-	assert_eq(wizard.outgoing.chosen_for("payment"), "nothing")
+	wizard.choose("troops", "garrison")
+	wizard.choose("troops", "nothing")
+	assert_eq(wizard.outgoing.chosen_for("troops"), "nothing")
 
 	assert_true(run.post.discard(wizard.outgoing.id))
 	assert_true(run.post.is_empty())
@@ -376,7 +376,7 @@ func test_a_composed_letter_answers_nothing() -> void:
 func test_a_composed_letter_assembles_like_any_other() -> void:
 	var wizard := composer.begin(run, "pc.request_troops", &"marshal")
 	wizard.choose_tone(Tone.DESPERATE)
-	wizard.choose("payment", "full")
+	wizard.choose("troops", "garrison")
 
 	var context := _context(&"marshal", wizard.outgoing.params)
 	var text := wizard.assemble(context)
@@ -389,7 +389,7 @@ func test_an_unprompted_letter_reaches_the_contact_it_was_addressed_to() -> void
 	# with the Order being addressed to the right person.
 	var wizard := composer.begin(run, "pc.request_troops", &"marshal")
 	wizard.choose_tone(Tone.DUTIFUL)
-	wizard.choose("payment", "full")
+	wizard.choose("troops", "garrison")
 
 	var machine := TurnMachine.new(run)
 	machine.use_content(content)
@@ -401,6 +401,8 @@ func test_an_unprompted_letter_reaches_the_contact_it_was_addressed_to() -> void
 
 	assert_not_empty(machine.issued_orders)
 	var order: Order = machine.issued_orders[0]
-	assert_eq(order.kind, M1Registrations.ORDER_REQUEST_TROOPS)
+	# 🔒 **Troops are a standing policy** (#420): the letter enacts one.
+	assert_eq(order.kind, M1Registrations.ORDER_ENACT_POLICY)
+	assert_eq(String(order.get_param("effect", "")), String(PolicyEffects.CROWN_TROOPS))
 	assert_eq(order.addressed_to, &"marshal")
-	assert_true(int(order.get_param("payment", 0)) > 0)
+	assert_true(int(order.get_param("cost", 0)) > 0)

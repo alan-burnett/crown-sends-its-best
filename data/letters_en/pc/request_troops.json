@@ -1,12 +1,10 @@
 {
   "id": "pc.request_troops",
   "type": "request",
-  "purpose": "Ask for Crown troops",
+  "purpose": "Ask the Marshal for Crown troops",
   "to_roles": ["crown_officer"],
-  "params": { "to": "contact", "payment": "gold" },
-  "compose_defaults": {
-    "payment": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.5, "minimum": 100, "maximum": 2000 }
-  },
+  "note": "Issue 420, the-marshal.md section 2. Troops are a standing policy with two knobs, strength and posture; the monthly charge and who bears it are policy.md's. Placeholder prose and placeholder charges (section 10 tunes them). A reply's options cannot combine choices from two steps into one Order, so the knobs are offered as pairings; the effect takes any strength with any posture.",
+  "params": { "to": "contact" },
   "reply": {
     "tone": {
       "text": "I write to you {choice}.",
@@ -18,16 +16,23 @@
     },
     "steps": [
       {
-        "id": "payment",
-        "prompt": "The purse",
+        "id": "troops",
+        "prompt": "What the Crown should send, and who bears it",
         "options": [
-          { "id": "full", "label": "pay the full {param:payment}",
-            "text": "You shall have {param:payment} for the trouble, and gladly{insert:warmth}.",
+          { "id": "garrison", "label": "a garrison to hold the towns, at 150 a month",
+            "text": "Send a garrison to hold the towns. The Crown will bear the charge of it, 150 a month{insert:warmth}.",
             "insert": { "warmth": { "dutiful": ", as is only proper" } },
-            "effect": { "request_troops": { "to": "{to}", "payment": "{payment}" } } },
-          { "id": "nothing", "label": "offer nothing",
-            "text": "I trust the Crown's own interest is payment enough.",
-            "effect": { "request_troops": { "to": "{to}", "payment": 0 } } }
+            "effect": { "station_troops": { "to": "{to}", "strength": "a_garrison", "posture": "hold_the_towns", "cost": 150, "split": "all" } } },
+          { "id": "force", "label": "a force to patrol the country, at 350 a month",
+            "text": "Send a force to patrol the country and meet whatever comes before it reaches a town. The Crown will bear the charge, 350 a month.",
+            "effect": { "station_troops": { "to": "{to}", "strength": "a_force", "posture": "patrol_the_country", "cost": 350, "split": "all" } } },
+          { "id": "army", "label": "an army to put down the rebellion, at 700 a month",
+            "text": "Send an army and put down the rebellion. Nothing else here will fight them, and I will not pretend otherwise. The Crown will bear the charge, 700 a month.",
+            "conditions": [ { "a_town_is_in_rebellion": {} } ],
+            "effect": { "station_troops": { "to": "{to}", "strength": "an_army", "posture": "put_down_the_rebellion", "cost": 700, "split": "all" } } },
+          { "id": "nothing", "label": "a garrison, and nothing from the Crown for it",
+            "text": "Send a garrison to hold the towns. I trust the Crown's own interest is payment enough.",
+            "effect": { "station_troops": { "to": "{to}", "strength": "a_garrison", "posture": "hold_the_towns", "cost": 150, "split": "none" } } }
         ]
       }
     ],

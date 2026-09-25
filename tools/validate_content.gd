@@ -51,6 +51,7 @@ func _init() -> void:
 	validator.check_commander_experience(content)
 	validator.check_cutscenes(content)
 	validator.check_agendas(content)
+	validator.check_troop_requests(content)
 	print(validator.report())
 
 	var ok := validator.ok()

@@ -96,6 +96,11 @@ const GUN_CONTRACT: StringName = &"gun_contract"
 ## and the two pulls are opposite and both legitimate.
 const CULTIVATE_GOVERNOR: StringName = &"cultivate_governor"
 
+## 🔒 **The Marshal's troops** (#420, `the-marshal.md` §2): a standing policy
+## with two knobs, strength and posture, carried in its params. It presses on no
+## world value; what it does is put a company ashore (`CrownTroops`).
+const CROWN_TROOPS: StringName = &"crown_troops"
+
 ## 🔒 **The policies aimed at a resource** (#396, `policy.md` §8).
 ##
 ## *A patron whose specialty is horses* moves the Crown's price for **horses**,
@@ -107,7 +112,7 @@ const AIMED_AT_A_RESOURCE: Array[StringName] = [FAVOUR_OUR_MARKET]
 const ALL: Array[StringName] = [
 	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK,
 	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT, TRAVELLING_EXPERTS,
-	GUN_CONTRACT, CULTIVATE_GOVERNOR,
+	GUN_CONTRACT, CULTIVATE_GOVERNOR, CROWN_TROOPS,
 ]
 
 ## What each knob is set to. **Four settings and no numbers**, because the PC is

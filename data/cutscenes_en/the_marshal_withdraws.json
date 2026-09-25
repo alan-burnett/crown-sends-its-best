@@ -1,6 +1,6 @@
 {
 	"id": "the_marshal_withdraws",
-	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. No trigger yet: no Crown troops are ever landed, so none can be called home (#420).",
+	"note": "Placeholder captions (#299): facts only, taken from the event that earned the painting. The prose is the Author's. Shown the first time the Crown's troops sail home (#420).",
 	"params": {
 		"date": "date",
 		"men": "people"

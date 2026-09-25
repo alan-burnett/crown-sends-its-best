@@ -261,8 +261,14 @@ var led_by: StringName = &""
 
 ## The intent of the governor who raised it (#434, `commanders.md` §3): what the
 ## rule read for its order, and — for a company raised to prepare for rebellion
-## — what makes its foe only ever the Crown's.
+## — what makes its foe only ever the Crown's. **For the Crown's troops, the
+## posture they were sent under** (#420, `the-marshal.md` §2), which is what
+## makes the foe of men sent to put down the rebellion only ever a rebel.
 var raised_under: StringName = &""
+
+## 🔒 **The standing policy these men serve under** (#420), or empty. The Crown's
+## troops are here while it stands and sail the month it does not.
+var policy: StringName = &""
 
 const MILITIA: StringName = &"militia"
 const COMMANDED: StringName = &"commander"
@@ -717,6 +723,7 @@ func to_dict() -> Dictionary:
 		"order": String(order),
 		"led_by": String(led_by),
 		"raised_under": String(raised_under),
+		"policy": String(policy),
 		"at": [at.x, at.y],
 		"destination": [destination.x, destination.y],
 		"raised_month": raised_month,
@@ -741,6 +748,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.order = StandingOrder.of(StringName(data.get("order", "")))
 	company.led_by = StringName(data.get("led_by", ""))
 	company.raised_under = StringName(data.get("raised_under", ""))
+	company.policy = StringName(data.get("policy", ""))
 	company.at = _vector(data.get("at", []))
 	company.destination = _vector(data.get("destination", []))
 	company.raised_month = int(data.get("raised_month", 0))
