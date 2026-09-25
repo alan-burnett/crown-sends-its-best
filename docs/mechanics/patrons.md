@@ -25,63 +25,105 @@ things.
 
 | | |
 | :--- | :--- |
-| **Specialty** | something he can supply or arrange |
-| **Need** | something that has particular value to him, never the same as his specialty |
+| **Specialty** | what he will do for the colony once he thinks well enough of it |
+| **Need** | a resource or livestock he wants shipped to him, never his specialty's kind |
 | **Vice** | what makes him difficult |
 
 **Vice, not personality.** `contacts.md` §1 reserves *personality* for the weight
 vector over considerations, which every contact has including this one. A vice is
 a named bundle of mechanical behaviour on top, and the two words must not merge.
 
-## 3. Specialty and need are drawn from one catalogue
+## 3. Specialty and need
 
-Resources, troops, gold, experts, livestock — and **rivals**, which is a different
-kind of thing (§5).
+Author's rulings (#395), replacing the shipment model: **a patron never ships
+the colony anything.** What he has to give changes the colony as a whole, or
+arrives as a favour; what he wants, the colony ships to him.
 
-Everything except rivals is a **shipment**: it arrives, or the PC sends it. A
-patron with his own means is wealthy enough to move goods across an ocean, and
-that is all the machinery it takes.
+### His specialty
 
-**Specialty and need are never the same**, so every patron is a mismatch by
-construction. He has what you may not want and wants what you may not have, and
-the trade is only interesting because of the gap.
+Drawn from **resources, livestock, experts, troops, gold and the rivals**. A
+specialty in resources, livestock or experts **names one kind**, drawn at
+arrival (#396): a sugar man, a horse breeder, a patron who can find the colony a
+tobacco expert.
 
-### A category names one kind
+**Tea is never a specialty.** The colony can neither grow it nor sell it, so
+nothing he could do for it would matter.
 
-Author's ruling (#396). **A specialty or a need in resources, livestock or
-experts names one kind of it**, drawn at arrival with the category: a sugar man,
-a horse breeder, a patron who can find the colony a tobacco expert. His need is
-drawn the same way.
+### His need
 
-So what he ships, what he wants, and which Crown price his Barony's market lifts
-(`policy.md` §8) are all fixed by the roll. The ruling covers the three
-categories that come in kinds; gold, troops and the rival specialty are
-unchanged.
+**Only a resource or a livestock kind**, something the colony can ship him (§4).
+**A patron never asks the colony for its people**, so no need is experts or
+troops, and gold is not a need because every patron asks for gold anyway.
 
-## 4. Every offer is one object
+**Never his specialty's kind.** Every patron is a mismatch by construction: he
+has what you may not want and wants what you may not have, and the trade is only
+interesting because of the gap. A sugar man may want timber or horses, never
+sugar.
 
-Four shapes that look different in prose are one thing with fields left empty:
+### Two patrons to a kind, then none
 
-```
-offer = { gives:  specialty | gold | nothing
-          wants:  his need  | gold | nothing }
-```
+A resource or livestock specialty offers one of two **permanent** bonuses,
+**rolled with him** (§4): a higher Crown price for his kind, or more of it across
+the colony.
 
-| gives → wants | Reads as |
+- **The second patron of a kind offers the other bonus.**
+- **There is never a third.** Once two patrons have held a kind, it is not
+  rolled again: both bonuses have been on offer, and the book on it is closed.
+
+The limit exists only because those bonuses last for ever. **Experts, troops,
+gold and the rivals have no limit**, and their favours repeat.
+
+## 4. His letters
+
+A patron writes four kinds of letter, and **the PC only ever answers them**
+(§10).
+
+| He writes | The PC's answer does |
 | :--- | :--- |
-| specialty → nothing | **a gift** |
-| nothing → his need | **a request** |
-| specialty → his need | **a barter** |
-| specialty → gold | **a sale** |
-| gold → his need | **a purchase** |
+| **He asks for his need** | Agreeing is a shipment of his need's kind, which the PC must then persuade a governor to prepare, exactly as the Marshal's are (`crown-demands.md` §4, *The shipment letter*). The governor raises his reserve of it ahead of the shipment |
+| **He asks for gold** | Every patron has this letter. Agreeing is a promise of gold |
+| **He offers his specialty** | Accepting takes it. For a policy, the PC says what share of its cost the Crown will bear (`policy.md` §3) |
+| **He will not carry a policy further** | `policy.md` §4's renegotiation, in his own voice: a policy of his is not being paid for |
 
-**One letter family, one resolution path.** Loyalty shifts which combinations he
-will propose — gifts belong to high regard and bare requests to low — but nothing
-branches on the shape of the offer.
+**The first two are how the PC earns his regard.** Meeting his need or granting
+his gold is a deed that banks (§9), and regard is what brings the third.
 
-The PC may also **ask** for a specialty rather than waiting to be offered one.
-That is an ordinary letter resolved by ordinary compliance (§8.5): a well-regarded
-patron obliges, a slighted one finds reasons.
+**He offers his specialty when his regard is high enough and its prerequisite
+exists.** The PC cannot ask for it.
+
+### What his specialty does
+
+| Specialty | He offers | Form | The colony must have, somewhere |
+| :--- | :--- | :--- | :--- |
+| a resource | **a higher Crown price** for his kind, or **more of it**, whichever he was rolled with | policy | a sugar, tobacco or cotton plantation for those; a mine for ore; a farm for food; the conversion building for rum, cigars, clothing, beer, iron, tools or guns; **nothing** for wood, stone or furs |
+| a livestock kind | **a higher Crown price** for it, or **faster breeding** across the colony | policy | a pasture, or a town pasture |
+| experts | **an expert of his kind**, arriving in the town with a library that holds the fewest experts of that kind, ties to town order | one-off | a town with a library |
+| troops | **a company the Crown feeds**, as the Marshal's are | policy | nothing |
+| gold | **gold to the Crown** | one-off | nothing |
+| the rivals | **sabotage, and the third door** (§5) | one-off | a duke who can still be troubled |
+
+**One is enough.** A single sugar plantation anywhere in the colony meets a sugar
+man's condition, and the bonus then reaches every town.
+
+**More of it** is every town's yield of his kind, and for a processed kind what
+its conversions make.
+
+### A policy of his outlives him
+
+**If he leaves while a policy of his stands, it becomes permanent.** The
+payments end and the effect stays for the rest of the run, troops included: his
+company stays, fed by the Crown, at no charge to the PC.
+
+**If it ends while he is still here, the effect ends with it.** The PC cancelling
+costs his regard, as cancelling any policy does (`policy.md` §6), and a policy
+he stops carrying for want of payment simply lapses (`policy.md` §4).
+
+So the prize for a patron well handled is a policy kept standing until he goes.
+
+### The one-offs repeat
+
+An expert, a sum of gold, a word against a duke: **he may offer any of them
+again** while his regard stays high enough.
 
 ## 5. The rival specialty, and the third door
 
@@ -256,9 +298,12 @@ stops being live.
 
 ## 10. What the PC can do
 
-- **Grant or refuse a request**, which is a deed and banks.
-- **Ask for a specialty**, resolved by compliance.
-- **Meet a need**, which is the surest way to lift regard.
+- **Meet his need, or grant his gold.** Each is a deed and banks, and it is
+  how his regard is earned.
+- **Accept his specialty when he offers it**, and decide what share of a
+  policy's cost to bear.
+- **Keep a policy of his standing until he leaves**, and it is the colony's for
+  good (§4).
 - **Time the rival specialty** against where that duke already stands (§5).
 - **Spend the last six months well** (§8).
 
@@ -268,8 +313,8 @@ stops being live.
 duke's model exactly: you read what he sends and you answer it, and there is no
 letter you may decide to send him.
 
-So *ask for a specialty* is **a reply option on a letter he wrote**, not a
-composed letter. A patron who has not written cannot be asked.
+So there is no asking for his specialty. **He offers it**, when he thinks well
+enough of the PC and the colony has what it needs (§4).
 
 **That is the whole shape of the relationship.** He is a man who takes an
 interest in you; the correspondence is his, and the PC's power in it is the
@@ -294,7 +339,10 @@ That is why §7's arrival has to produce a letter, not merely a contact.
 - How far a specialty's worth exceeds what a need costs, and whether *net drain*
   holds across a run at every loyalty.
 - The sabotage magnitude, and its one-year term.
-- Loyalty bands: where gifts start and where bare requests begin.
+- The regard at which he offers his specialty.
+- The size of each specialty: the price lift, the yield, the company, the gold.
+- The size of a need's shipment, and the monthly cost of each of his policies.
+- How soon a one-off may be offered again.
 - The contagion's size, and how many officers hear it.
 - Whether two years, zero-to-two, and six months are the right three numbers.
 

@@ -167,7 +167,11 @@ A patron is generated with a **specialty**, and it names one kind
 (`patrons.md` §3). One whose specialty is horses can be persuaded to have his
 Barony stop buying from its neighbour and buy from your colony instead.
 
-The game expresses that as **the Crown's price for horses going up.**
+The game expresses that as **the Crown's price for horses going up.** His other
+possible bonus is more of his kind across the colony (`patrons.md` §4).
+
+**A patron's policy outlives him.** If he leaves while it stands, the payments
+end and the effect stays for the rest of the run (`patrons.md` §4).
 
 Which is why `town-economy.md` §1 makes every faction's valuations a *function*
 rather than a constant table. That shape was built for harvest failures; **policy
