@@ -87,6 +87,8 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"he_could_trouble_a_duke", {}, ColonyConditions.he_could_trouble_a_duke
 	)
+	# A patron who would write asking for his need (#441).
+	ContentRegistry.register_condition("he_has_a_need", {}, ColonyConditions.he_has_a_need)
 	# A patron whose Barony has a market to turn the colony's way (#396).
 	ContentRegistry.register_condition(
 		"his_barony_has_a_market", {}, ColonyConditions.his_barony_has_a_market
@@ -787,6 +789,16 @@ static func the_duke_to_trouble(context: LetterContext) -> Contact:
 		if chosen == null or duke.loyalty() < chosen.loyalty():
 			chosen = duke
 	return chosen
+
+
+## Whether this patron would write asking for his need (#441, `patrons.md` §4):
+## he names a kind, and **nothing the PC promised him is still outstanding**. A
+## man waiting on a ship does not write for another.
+static func he_has_a_need(_args: Dictionary, context: LetterContext) -> bool:
+	var him := context.sender
+	if him == null or not Patron.is_patron(him) or him.need_kind.is_empty():
+		return false
+	return him.relationship == null or him.relationship.outstanding_promises.is_empty()
 
 
 ## Whether this patron's Barony has a market he could turn the colony's way

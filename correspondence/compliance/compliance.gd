@@ -210,7 +210,12 @@ static func resolve(
 	# (`prestige.md` §5). Returns at once for everybody who is not a patron, so
 	# this is one guard in one place rather than a rule the next call site has to
 	# remember.
-	PatronCredit.bank(contact, _deed_of(order), log, state.month)
+	#
+	# 🔒 **Except an undertaking to ship** (#441, `patrons.md` §4): the goods
+	# arriving are the deed, so `PromiseBook` banks it when the promise is kept
+	# or broken, and a promise alone is nothing the court has seen.
+	if order.kind != M1Registrations.ORDER_PROMISE_SHIPMENT:
+		PatronCredit.bank(contact, _deed_of(order), log, state.month)
 
 	var intent: Intent = null
 	if outcome != REFUSE:

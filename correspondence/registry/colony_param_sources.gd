@@ -59,6 +59,10 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"patron_ask", {}, ColonyParamSources.patron_ask
 	)
+	# What a patron wants shipped to him: its kind, how much, how soon (#441).
+	ContentRegistry.register_param_source(
+		"his_need", {"field": "string"}, ColonyParamSources.his_need
+	)
 	# What the priest asks a festival for (#278). The resource that sold the
 	# most gold this month, which is the Author's first ruling.
 	ContentRegistry.register_param_source(
@@ -811,6 +815,28 @@ static func best_selling_resource(args: Dictionary, context: LetterContext) -> V
 
 static func patron_ask(_args: Dictionary, context: LetterContext) -> Variant:
 	return maxf(1.0, DemandSchedule.gold_target(context.demands) * PATRON_ASK_SHARE)
+
+
+## 🔒 **What a patron wants shipped to him** (#441, `patrons.md` §4): his need's
+## kind (`resource`), how much of it (`amount`), and inside how many months
+## (`months`).
+##
+## **As heavy as his gold ask, in goods**: the gold `patron_ask` would name, at
+## the Crown's price for the kind — the Marshal's requisition is sized the same
+## way. A placeholder, since §11 lists the size of a need's shipment as tuning;
+## the term is the requisition's.
+static func his_need(args: Dictionary, context: LetterContext) -> Variant:
+	var him := context.sender if context != null else null
+	match String(args.get("field", "resource")):
+		"amount":
+			if him == null or him.need_kind.is_empty():
+				return 0
+			var price := maxf(0.5, ResourceCatalogue.price_of(StringName(him.need_kind)))
+			return int(maxf(1.0, roundf(float(patron_ask({}, context)) / price)))
+		"months":
+			return DemandSchedule.term_months()
+		_:
+			return him.need_kind if him != null else ""
 
 
 ## How many months until this patron goes (#388, `patrons.md` §8).

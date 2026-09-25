@@ -181,6 +181,12 @@ func _keep(promise: Promise, contact: Contact, log: EventLog, month: int) -> voi
 			String(promise.terms.get("resource", "")),
 		)
 	log.emit(EVENT_KEPT, promise.to, month, promise.to_dict(), WorldPhase.CROWNS_MONTH)
+	# 🔒 **Goods delivered to a patron are the deed the court hears of** (#441,
+	# `patrons.md` §4, §10). Agreeing to ship banked nothing (`Compliance`);
+	# the goods leaving the colony do. Returns at once for anybody who is not a
+	# patron.
+	if promise.kind == Promise.KIND_SHIPMENT:
+		PatronCredit.bank(contact, Relationship.DELIVERED, log, month)
 
 
 func _break(
@@ -211,6 +217,11 @@ func _break(
 	var payload := promise.to_dict()
 	payload["reason"] = reason
 	log.emit(EVENT_BROKEN, promise.to, month, payload, WorldPhase.CROWNS_MONTH)
+	# 🔒 **And goods promised and never sent are a slight at court** (#441).
+	# Otherwise agreeing and not delivering would cost the PC less there than
+	# declining plainly, which compliance banks as a refusal.
+	if promise.kind == Promise.KIND_SHIPMENT:
+		PatronCredit.bank(contact, Relationship.PROMISE_BROKEN, log, month)
 
 
 # --- Reading ---------------------------------------------------------------

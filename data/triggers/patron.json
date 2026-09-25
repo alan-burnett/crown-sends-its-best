@@ -123,5 +123,34 @@
         "will_not_carry_it_further": {}
       }
     ]
+  },
+  {
+    "id": "trigger.patron.his_need",
+    "letter": "patron.his_need",
+    "urgency": 0.55,
+    "cooldown": 12,
+    "note": "Issue 441, patrons.md section 4. Every patron asks for his need, a resource or livestock kind that is never his specialty's. Not while anything the PC promised him is still outstanding: a man waiting on a ship does not write for another. Cooldown 12: a year's shipment is a year's favour, and asked for more often it would be a levy. Urgency just under his gold letter's, because a need met through two letters is the slower favour.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "his_need",
+        "field": "resource"
+      },
+      "amount": {
+        "from": "his_need",
+        "field": "amount"
+      },
+      "months": {
+        "from": "his_need",
+        "field": "months"
+      }
+    },
+    "conditions": [
+      {
+        "he_has_a_need": {}
+      }
+    ]
   }
 ]

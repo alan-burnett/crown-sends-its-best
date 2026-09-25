@@ -585,6 +585,19 @@ func _close_the_book() -> void:
 	Records.remember(run, content)
 
 
+## Whether this Order answers the demand the Crown is waiting on (#69).
+##
+## **Only an answer to the man who asked** (#441). Undertaking a patron's need
+## is a promise of goods too, and it leaves the Marshal's requisition standing.
+static func answers_the_demand(order: Order, demands: DemandBook) -> bool:
+	if order == null or demands == null:
+		return false
+	if order.kind != M1Registrations.ORDER_PROMISE_SHIPMENT \
+			and order.kind != M1Registrations.ORDER_DECLINE_DEMAND:
+		return false
+	return order.addressed_to == demands.asker
+
+
 ## Whether the post may be sent.
 ##
 ## Blocked while any incoming letter is still unread, **with a reason**, because
@@ -627,8 +640,7 @@ func send_post() -> bool:
 	# is what closes it — either answer will do, since declining plainly is an
 	# answer and the Marshal would rather have it than silence.
 	for order in issued_orders:
-		if order.kind == M1Registrations.ORDER_PROMISE_SHIPMENT \
-				or order.kind == M1Registrations.ORDER_DECLINE_DEMAND:
+		if answers_the_demand(order, run.demand_book):
 			run.demand_book.answer()
 	# The post goes aboard. It is read next month, in phase 7.
 	for order in issued_orders:

@@ -1,0 +1,95 @@
+{
+  "id": "patron.his_need",
+  "sender": "patron",
+  "type": "request",
+  "skippable": false,
+  "note": "Issue 441, patrons.md section 4 (He asks for his need), crown-demands.md section 5. The one thing he wants that the colony can ship him, never his specialty's kind. Agreeing is a promise of a shipment addressed to him, which the PC makes good only by persuading a governor to prepare it (pc.request_shipment) - the Marshal's two letters, with a patron at the far end. The promise is kept on goods that actually left a town inside the term, and keeping it is the deed that banks with the court; agreeing alone banks nothing, and breaking it costs what a refusal would. Unskippable, as his gold letter is: every patron has both. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "resource": "resource",
+    "amount": "integer",
+    "months": "integer"
+  },
+  "body": [
+    {
+      "text": "I find I am in want of {param:resource}, and I am told your colony has it, or could."
+    },
+    {
+      "text": "{param:amount} of it, inside {param:months} months, would answer. I should not ask for it from anybody else, because I should not be sure of getting it."
+    },
+    {
+      "text": "I do not know how these things are managed on your side of the water. I imagine you have to ask somebody, and that he has to be persuaded. I leave that to you.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I do not suppose it will be convenient. Very little that I ask of you seems to be.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and am glad to be of use"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your letter"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered what you ask"
+        },
+        {
+          "tone": "desperate",
+          "text": "and must be honest about the colony's state"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "need",
+        "prompt": "His {param:resource}",
+        "options": [
+          {
+            "id": "agree",
+            "label": "undertake to ship {param:amount} of {param:resource}",
+            "text": "You shall have {param:amount} of {param:resource} inside {param:months} months. I shall write to the town that holds it this week.",
+            "effect": {
+              "promise_shipment": {
+                "to": "{patron}",
+                "resource": "{resource}",
+                "amount": "{amount}",
+                "months": "{months}"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "tell him the colony cannot spare it",
+            "text": "The colony cannot spare it this season. I would rather tell you so now than have you wait for a ship that is not coming.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}
