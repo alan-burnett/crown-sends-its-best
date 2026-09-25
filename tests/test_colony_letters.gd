@@ -51,7 +51,11 @@ func test_no_governor_reply_names_a_project_a_tile_or_a_month() -> void:
 	# `answer_the_tribe` (#436) is the same kind of thing: it argues how he
 	# should answer a tribe's letter, names no project, tile or month, and is
 	# weighed rather than obeyed (`natives.md` §11).
-	var allowed: PackedStringArray = ["urge_intent", "refuse", "answer_the_tribe"]
+	#
+	# `promise_gold_to_town` (#397) is the Crown's gold into his town's purse
+	# (#400's path), asked for on the strength of what his town sent. It names
+	# no project, tile or month, and the town spends it as it decides.
+	var allowed: PackedStringArray = ["urge_intent", "refuse", "answer_the_tribe", "promise_gold_to_town"]
 	var letters := _governor_letters()
 	assert_not_empty(letters, "there are no governor letters to check")
 

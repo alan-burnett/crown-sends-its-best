@@ -38,17 +38,25 @@ var magnitude: float = 0.0
 ## Empty when the deed had no subject, which a letter has to be able to handle.
 var subject: String = ""
 
+## 🔒 **What it was worth, in gold** (#397). A favour **he** did the PC is
+## compared across kinds (two hundred iron against a year of his men), so it is
+## valued in one unit; `magnitude` stays what a letter names. For the PC's own
+## deeds it is the magnitude, and nothing reads it.
+var worth: float = 0.0
+
 
 func _init(
 	p_kind: StringName = &"",
 	p_month: int = 0,
 	p_magnitude: float = 0.0,
 	p_subject: String = "",
+	p_worth: float = -1.0,
 ) -> void:
 	kind = p_kind
 	month = p_month
 	magnitude = p_magnitude
 	subject = p_subject
+	worth = p_magnitude if p_worth < 0.0 else p_worth
 
 
 ## Whether this is something the PC did *for* him.
@@ -87,6 +95,7 @@ func to_dict() -> Dictionary:
 		"month": month,
 		"magnitude": magnitude,
 		"subject": subject,
+		"worth": worth,
 	}
 
 
@@ -96,4 +105,5 @@ static func from_dict(data: Dictionary) -> Recollection:
 		int(data.get("month", 0)),
 		float(data.get("magnitude", 0.0)),
 		String(data.get("subject", "")),
+		float(data.get("worth", data.get("magnitude", 0.0))),
 	)

@@ -1,0 +1,99 @@
+{
+  "id": "governor.remember_what_i_sent",
+  "sender": "governor",
+  "type": "request",
+  "skippable": true,
+  "note": "Issue 397, contacts.md sections 6 and 7 and the Author's ruling on the ticket: a contact remembers what HE did for the PC, and asks something back on the strength of it. This governor reaches for the most valuable thing he did - goods his town shipped on the PC's order, as it weighs now, halving every 24 months - and asks for a quarter of that in gold for his town's purse (#400's path). Both figures are true: the amount and resource are what actually left his town. Skippable: a man choosing to ask. Placeholder prose.",
+  "params": {
+    "governor": "contact",
+    "sent_amount": "integer",
+    "sent_resource": "resource",
+    "months_ago": "integer",
+    "ask": "gold",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "You will recall that {param:months_ago} months ago this town sent the Crown {param:sent_amount} of {param:sent_resource}, when you asked it of us."
+    },
+    {
+      "text": "We did not ask what it cost us, and I will not tell you now. I will only say that {param:town} has not had an easy year since, and that {param:ask} would go a long way here."
+    },
+    {
+      "text": "I ask it as one who has done his part, and I hope that is how it is read.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I would not have to remind you if the Crown remembered its friends as well as it remembers its debtors.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and have not forgotten what your town did"
+        },
+        {
+          "tone": "dutiful",
+          "text": "and have looked into the matter"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and note you have kept a careful account"
+        },
+        {
+          "tone": "desperate",
+          "text": "and wish I had better to send than words"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "answer",
+        "prompt": "What {param:town} is sent",
+        "options": [
+          {
+            "id": "grant",
+            "label": "send the town {param:ask}",
+            "text": "The Crown will send {param:ask} to {param:town}. It is owed, and I would rather pay it than be reminded twice.",
+            "effect": {
+              "promise_gold_to_town": {
+                "to": "{governor}",
+                "town": "{town}",
+                "amount": "{ask}"
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "tell him there is nothing to send",
+            "text": "There is nothing to send. I remember what your town did, and I am sorry that remembering is all I can do for it.",
+            "effect": {
+              "refuse": {
+                "to": "{governor}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,",
+        "tone": {
+          "hateful": "Kindly keep your accounts to yourself in future."
+        }
+      }
+    ]
+  }
+}

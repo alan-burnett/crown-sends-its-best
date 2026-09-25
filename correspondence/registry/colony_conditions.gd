@@ -157,6 +157,10 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"remembers_a_slight", {}, ColonyConditions.remembers_a_slight
 	)
+	# What he did for the PC, and can name (#397).
+	ContentRegistry.register_condition(
+		"remembers_his_kindness", {}, ColonyConditions.remembers_his_kindness
+	)
 	# **Something happened that a letter may report** (#398). Any event in
 	# `ReportableEvents`, concerning the sender, his town or the colony.
 	ContentRegistry.register_condition(
@@ -646,6 +650,17 @@ static func remembers_a_kindness(_args: Dictionary, context: LetterContext) -> b
 	if context.sender == null or context.sender.relationship == null:
 		return false
 	return nameable(context.sender.relationship.most_generous())
+
+
+## 🔒 **Whether he remembers a favour he did the PC, by name** (#397).
+##
+## Asked of **the same memory `recalled {reach: his_kindness}` reads** — the most
+## valuable thing he did, as it weighs this month — so the gate and the slot
+## cannot disagree. *"Remember the iron I sent you"* needs iron to name.
+static func remembers_his_kindness(_args: Dictionary, context: LetterContext) -> bool:
+	if context.sender == null or context.sender.relationship == null:
+		return false
+	return nameable(context.sender.relationship.most_valuable_favour(context.month))
 
 
 ## 🔒 **Whether he remembers being refused, by name** (#391, `contacts.md` §7).

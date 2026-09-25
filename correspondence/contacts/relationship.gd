@@ -207,6 +207,32 @@ var last_written_month: int = -1
 ## get those right. The bias is in *which* one he reaches for.
 var history: Array[Recollection] = []
 
+## 🔒 **What he did for the PC**, the other direction from `history` (#397,
+## `contacts.md` §6, §7; the Author's ruling is on the ticket).
+##
+## Three kinds, each valued in gold (`Recollection.worth`) so they can be
+## weighed against one another:
+##
+## | Kind | What | Worth |
+## | :--- | :--- | :--- |
+## | `complied` | he complied, in whole or part, with a PC order that cost him | what compliance prices the order at, times the share he did |
+## | `shipped` | goods left his town on the PC's order | what they were worth to the Crown |
+## | `gave` | a patron's expert, gold or men arrived | `FavourDriver`'s figures |
+##
+## **A list of its own**, so a governor's shipments never crowd the PC's
+## kindnesses and slights out of `history`, and nothing here moves loyalty: his
+## own deed is not a thing the PC did to him.
+var favours: Array[Recollection] = []
+
+const FAVOUR_COMPLIED: StringName = &"complied"
+const FAVOUR_SHIPPED: StringName = &"shipped"
+const FAVOUR_GAVE: StringName = &"gave"
+
+## 🔒 **A favour weighs half as much every this many months** (#397). The Author
+## asked for falloff: a man reaches for the great kindness of last spring before
+## a slightly greater one of five years ago. A placeholder.
+const FAVOUR_HALF_LIFE: float = 24.0
+
 
 func _init(p_contact_id: StringName = &"", p_loyalty: float = NEUTRAL_LOYALTY) -> void:
 	contact_id = p_contact_id
@@ -257,6 +283,52 @@ func _forget_the_middle() -> void:
 		history.append(entry)
 	for entry in recent:
 		history.append(entry)
+
+
+# --- What he did for the PC (#397) -----------------------------------------
+
+## Remember something he did for the PC.
+func remember_favour(
+	kind: StringName, month: int, magnitude: float, subject: String, worth: float
+) -> void:
+	favours.append(Recollection.new(kind, month, magnitude, subject, worth))
+	if favours.size() <= MEMORY_LIMIT:
+		return
+	# The same shape as `history`: the most recent are kept for being recent, and
+	# of the rest the most valuable, ties to the more recent.
+	var recent := favours.slice(maxi(0, favours.size() - MEMORY_RECENT))
+	var older := favours.slice(0, maxi(0, favours.size() - MEMORY_RECENT))
+	older.sort_custom(func(a: Recollection, b: Recollection) -> bool:
+		if not is_equal_approx(a.worth, b.worth):
+			return a.worth > b.worth
+		return a.month > b.month)
+	var kept := older.slice(0, maxi(0, MEMORY_LIMIT - recent.size()))
+	kept.sort_custom(func(a: Recollection, b: Recollection) -> bool: return a.month < b.month)
+	favours.clear()
+	for entry in kept:
+		favours.append(entry)
+	for entry in recent:
+		favours.append(entry)
+
+
+## What a favour weighs `month`, after its falloff.
+static func worth_now(favour: Recollection, month: int) -> float:
+	var age := maxf(0.0, float(month - favour.month))
+	return favour.worth * pow(0.5, age / FAVOUR_HALF_LIFE)
+
+
+## 🔒 **The most valuable thing he did for the PC, as it weighs now**, ties to
+## the more recent; or null (#397).
+func most_valuable_favour(month: int) -> Recollection:
+	var found: Recollection = null
+	var best := 0.0
+	for entry in favours:
+		var now := worth_now(entry, month)
+		var tied := absf(now - best) <= 0.0001 and found != null and entry.month > found.month
+		if found == null or now > best + 0.0001 or tied:
+			found = entry
+			best = now
+	return found
 
 
 # --- What he reaches for ----------------------------------------------------
@@ -462,7 +534,15 @@ func to_dict() -> Dictionary:
 		"deed_scale": deed_scale.duplicate(),
 		"last_written_month": last_written_month,
 		"history": _history_to_dicts(),
+		"favours": _favours_to_dicts(),
 	}
+
+
+func _favours_to_dicts() -> Array:
+	var out: Array = []
+	for entry in favours:
+		out.append(entry.to_dict())
+	return out
 
 
 func _history_to_dicts() -> Array:
@@ -487,4 +567,6 @@ static func from_dict(data: Dictionary) -> Relationship:
 	relationship.last_promise_broken_month = int(data.get("last_promise_broken_month", -1))
 	for entry in data.get("history", []):
 		relationship.history.append(Recollection.from_dict(entry))
+	for entry in data.get("favours", []):
+		relationship.favours.append(Recollection.from_dict(entry))
 	return relationship

@@ -679,5 +679,46 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.governor.remember_what_i_sent",
+    "letter": "governor.remember_what_i_sent",
+    "urgency": 0.5,
+    "cooldown": 24,
+    "note": "Issue 397. A governor reaches for the most valuable thing he did for the PC, as it weighs now, and asks a share of it back in gold for his town. Gated on remembers_his_kindness, asked of the same memory the params read, so the favour he names is real. Cooldown 24: a man who reminded the PC of the same shipment every year would be dunning him, not asking a favour.",
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "sent_amount": {
+        "from": "recalled",
+        "reach": "his_kindness",
+        "field": "amount"
+      },
+      "sent_resource": {
+        "from": "recalled",
+        "reach": "his_kindness",
+        "field": "resource"
+      },
+      "months_ago": {
+        "from": "recalled",
+        "reach": "his_kindness",
+        "field": "months_ago"
+      },
+      "ask": {
+        "from": "recalled",
+        "reach": "his_kindness",
+        "field": "ask"
+      },
+      "town": {
+        "from": "his_town",
+        "field": "name"
+      }
+    },
+    "conditions": [
+      {
+        "remembers_his_kindness": {}
+      }
+    ]
   }
 ]

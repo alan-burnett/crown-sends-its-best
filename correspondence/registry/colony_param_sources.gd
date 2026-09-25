@@ -495,6 +495,10 @@ static func recalled(args: Dictionary, context: LetterContext) -> Variant:
 			memory = context.sender.relationship.last_broken_word()
 		"in_character":
 			memory = context.sender.relationship.recalled(sourness_of(context.sender))
+		"his_kindness":
+			# 🔒 **What he did for the PC** (#397): the most valuable, as it
+			# weighs now.
+			memory = context.sender.relationship.most_valuable_favour(context.month)
 
 	if memory == null:
 		return 0 if field != "resource" else ""
@@ -505,7 +509,15 @@ static func recalled(args: Dictionary, context: LetterContext) -> Variant:
 			return memory.subject
 		"months_ago":
 			return maxi(0, context.month - memory.month)
+		"ask":
+			# **What he asks back** (#397): a share of what the favour is worth
+			# now. A placeholder.
+			return int(maxf(1.0, roundf(Relationship.worth_now(memory, context.month) * FAVOUR_ASK_SHARE)))
 	return 0
+
+
+## What share of a remembered favour's worth he asks back (#397). Tuning.
+const FAVOUR_ASK_SHARE: float = 0.25
 
 
 ## How sourly this contact remembers things.

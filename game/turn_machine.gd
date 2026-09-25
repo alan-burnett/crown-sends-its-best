@@ -229,6 +229,8 @@ func _init(p_run: RunState) -> void:
 	# Phase 7. What the month did to the colony's patience, after promises have
 	# settled and orders have resolved (#71).
 	var grievances := GrievanceDriver.new(run.colony, run.grievances)
+	# Phase 7. What a contact did for the PC, once it has happened (#397).
+	var favours := FavourDriver.new(run)
 
 	# Phase 1. Settlers land before the colony works its month, so the people who
 	# arrived are counted in it — and they are drawn by the quality of life last
@@ -367,7 +369,7 @@ func _init(p_run: RunState) -> void:
 		expert_travel, cultivation, sabotage,
 		companies,
 		orders, silence, provost, governors,
-		grievances,
+		grievances, favours,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.

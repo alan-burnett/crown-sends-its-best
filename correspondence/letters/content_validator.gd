@@ -480,6 +480,8 @@ const RECALL_GATES: Dictionary = {
 	"slight": "remembers_a_slight",
 	"broken_word": "remembers_a_broken_word",
 	"in_character": "remembers_in_character",
+	# What he did for the PC (#397).
+	"his_kindness": "remembers_his_kindness",
 }
 
 

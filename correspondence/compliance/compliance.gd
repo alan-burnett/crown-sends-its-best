@@ -206,6 +206,8 @@ static func resolve(
 	contact.relationship.remember(
 		_deed_of(order), state.month, _size_of(order), _about(order)
 	)
+	# 🔒 **And what he did for the PC, if it cost him** (#397).
+	_remember_his_favour(order, contact, outcome, state.month)
 	# **And the court hears of it, if he is the sort the court listens to**
 	# (`prestige.md` §5). Returns at once for everybody who is not a patron, so
 	# this is one guard in one place rather than a rule the next call site has to
@@ -248,6 +250,32 @@ static func _deed_of(order: Order) -> StringName:
 			return Relationship.GRANTED if float(order.get_param("amount", 0.0)) >= 0.0 \
 				else Relationship.REFUSED
 	return Relationship.DELIVERED
+
+
+## 🔒 **He did the PC a favour: he complied with an order that cost him** (#397,
+## the Author's ruling on the ticket). In whole or in part, and worth what this
+## file prices the order at, times the share he did. An order he was paid in full
+## for, or one that costs nobody anything, is duty and no favour.
+##
+## Two are remembered elsewhere, when the thing has actually happened: goods he
+## ships (`FavourDriver`, when the shipment ends), and a patron's men (when they
+## land). Remembering them here as well would count one kindness twice.
+static func _remember_his_favour(
+	order: Order, contact: Contact, outcome: StringName, month: int
+) -> void:
+	if outcome != COMPLY and outcome != PARTIAL:
+		return
+	if _deed_of(order) != Relationship.DELIVERED or order.kind == M1Registrations.ORDER_SHIP_RESOURCE:
+		return
+	if Patron.is_patron(contact) and order.kind == M1Registrations.ORDER_ENACT_POLICY \
+			and StringName(order.get_param("effect", "")) == PolicyEffects.CROWN_TROOPS:
+		return
+	var priced: Variant = _priced(order)
+	if priced == null or float(priced) <= 0.0:
+		return
+	var share := 1.0 if outcome == COMPLY else partial_share(order)
+	contact.relationship.remember_favour(Relationship.FAVOUR_COMPLIED, month,
+		_size_of(order) * share, _about(order), float(priced) * share)
 
 
 ## 🔒 **What a refusal was a refusal of** (#391, `contacts.md` §7).
