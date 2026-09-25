@@ -1073,6 +1073,39 @@
 		}
 	},
 	{
+		"id": "trigger.cutscene.they_burned_it",
+		"cutscene": "they_burned_it",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "improvement_razed",
+				"where": {
+					"allegiance": "rival"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"duke": {
+				"from": "event",
+				"field": "raised_by",
+				"as": "contact"
+			},
+			"improvement": {
+				"from": "event",
+				"field": "improvement",
+				"as": "improvement"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			}
+		}
+	},
+	{
 		"id": "trigger.cutscene.they_do_not_return",
 		"cutscene": "they_do_not_return",
 		"kind": "first",

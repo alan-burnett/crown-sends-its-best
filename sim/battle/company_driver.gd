@@ -170,6 +170,7 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 	var attacks := company.attacks_this_month()
 
 	while moves > 0 or attacks > 0:
+		var to_burn := _something_to_burn(company)
 		# **Asked once and used twice.** What is in front of him decides both what
 		# he may choose and what he swings at, and one of the two things it can be
 		# — a town — is a view built on the spot, so looking twice would build two
@@ -186,6 +187,11 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 					break
 				_explore_a_step(company, context)
 				moves -= 1
+			CommanderConsiderations.RAZE:
+				# 🔒 **It takes his month** (§7): what limits harassment is that a
+				# company spends its month doing it, and only ever dwindles.
+				_raze(company, to_burn, context)
+				break
 			CommanderConsiderations.ATTACK:
 				if attacks <= 0:
 					break
@@ -255,6 +261,70 @@ func _follow_the_order(company: Company, context: ColonyContext) -> void:
 		company.report_march(from, context)
 
 
+## 🔒 **An improvement he could burn** (#418): on his tile or beside it, not a
+## road (roads come of trade), and on the ground of a town he may fight. The
+## nearest, then north-west first; `Company.NOWHERE` if there is none.
+func _something_to_burn(company: Company) -> Vector2i:
+	if map == null or colony == null or company.at == Company.NOWHERE:
+		return Company.NOWHERE
+	var best := Company.NOWHERE
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var at := company.at + Vector2i(dx, dy)
+			if not map.in_bounds(at.x, at.y):
+				continue
+			var improvement := Improvement.find(map.improvement_at(at.x, at.y))
+			if improvement == null or improvement.natural:
+				continue
+			var owner := _ground_of(at)
+			if owner == null or not Battle.may_fight(company, TownCompany.of(owner, company)):
+				continue
+			if best == Company.NOWHERE or _nearer(at, best, company.at):
+				best = at
+	return best
+
+
+## Whose ground a tile is: the first town by id whose reach covers it, as
+## `Territory.compute` settles a contested tile.
+func _ground_of(at: Vector2i) -> Town:
+	for town in colony.in_order():
+		if maxi(absi(town.at.x - at.x), absi(town.at.y - at.y)) <= Territory.reach_of(town):
+			return town
+	return null
+
+
+func _nearer(a: Vector2i, b: Vector2i, from: Vector2i) -> bool:
+	var da := maxi(absi(a.x - from.x), absi(a.y - from.y))
+	var db := maxi(absi(b.x - from.x), absi(b.y - from.y))
+	if da != db:
+		return da < db
+	return a.y < b.y or (a.y == b.y and a.x < b.x)
+
+
+## Burn it (#418, §7). The tile reverts to its unimproved yield and the town
+## must rebuild at full cost and time. **It is harassment, not war**: no town
+## changes hands and no company is lost, so nothing here is an optic.
+func _raze(company: Company, at: Vector2i, context: ColonyContext) -> void:
+	if at == Company.NOWHERE:
+		return
+	var burnt := map.improvement_at(at.x, at.y)
+	var owner := _ground_of(at)
+	map.clear_improvement(at.x, at.y)
+	map.set_idle(at.x, at.y, false)
+	context.log.emit(Company.EVENT_RAZED, company.id, context.state.month, {
+		"improvement": String(burnt),
+		"at": [at.x, at.y],
+		"town": String(owner.id) if owner != null else "",
+		"company": String(company.id),
+		"allegiance": String(company.allegiance),
+		# **Who did it**, for the painting and for the record. A governor's
+		# letter reports the burnt farm; whether he knows who burnt it is not
+		# this event's to say.
+		"raised_by": String(company.raised_by),
+		"commander": String(company.commander),
+	}, WorldPhase.MOVEMENT)
+
+
 ## One move toward the nearest land the colony has never seen, and what it sees
 ## there (#434, §3 *Explore*). Returns whether it moved: with nowhere left, it
 ## holds where it stands (⚠ assumed there).
@@ -296,7 +366,8 @@ func _what_he_decides(
 			company,
 			enemy,
 			company.destination != Company.NOWHERE and company.at != company.destination,
-			OrderRule.nearest_unexplored(company.at, map, knowledge) != Company.NOWHERE),
+			OrderRule.nearest_unexplored(company.at, map, knowledge) != Company.NOWHERE,
+			_something_to_burn(company) != Company.NOWHERE),
 		deliberation)
 	return decision.chosen_id() if decision.has_choice() else CommanderConsiderations.HOLD
 

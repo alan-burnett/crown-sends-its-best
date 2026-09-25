@@ -199,6 +199,11 @@ const IGNORED: Dictionary = {
 	# let him.
 	"famine_deaths": "the court does not care how the colonists fared (SPEC 14.1)",
 
+	# 🔒 **Harassment, not war** (#418, `tiles-and-improvements.md` §7): no town
+	# changes hands and no company is lost, so nothing the court counts has
+	# happened. That is the whole point of the mechanic.
+	"improvement_razed": "harassment, not war: no town changes hands and no company is lost",
+
 	# 🔒 **There is still no such thing as losing a battle.** `battles.md` §6
 	# has no rout and no surrender, so the discrete defeat the court hears about is
 	# annihilation — not a bad month.

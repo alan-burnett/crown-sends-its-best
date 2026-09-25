@@ -105,6 +105,10 @@ const EVENT_EXPLORED: StringName = &"company_explored"
 ## A company whose town declared, or returned, and took its side (#434).
 const EVENT_TURNED: StringName = &"company_turned"
 
+## An improvement burnt (#418, `tiles-and-improvements.md` §7, Seam A). **The
+## payload knows the culprit; a letter must not assume the PC does.**
+const EVENT_RAZED: StringName = &"improvement_razed"
+
 ## How long a leaderless militia stands before it goes home (`battles.md` §4).
 ## Tuning, and §9 of `commanders.md` says so.
 static var _militia_months: int = 6

@@ -118,7 +118,7 @@ static func register_all() -> void:
 
 # --- What a commander may do -----------------------------------------------
 
-## The six options §5 names, and no seventh.
+## The options §5 names, with razing (#418) beside them.
 ##
 ## 🔒 **Withdrawing and disbanding are ordinary candidates**, scored alongside
 ## attacking rather than reached by a branch when things go badly. That is the
@@ -133,8 +133,11 @@ const DISBAND: StringName = &"disband"
 ## `commanders.md` §3, §5). A commander told to explore starts there, and from
 ## then on it is one option among the six.
 const EXPLORE: StringName = &"explore"
+## 🔒 **Burn an improvement beside him** (#418, `tiles-and-improvements.md` §7):
+## harassment, not war, and it takes his month.
+const RAZE: StringName = &"raze"
 
-const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, WITHDRAW, DISBAND]
+const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, WITHDRAW, DISBAND]
 
 
 ## Everything this commander could do this month.
@@ -146,7 +149,8 @@ const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, WITHDRAW, DISB
 ## `data` carries what the considerations read: the company, and the enemy in
 ## front of it when there is one.
 static func options_for(
-	company: Company, enemy: Company, has_somewhere_to_go: bool, has_land_to_find: bool = false
+	company: Company, enemy: Company, has_somewhere_to_go: bool, has_land_to_find: bool = false,
+	has_something_to_burn: bool = false,
 ) -> Array:
 	var out: Array = []
 	var board := {"company": company, "enemy": enemy}
@@ -164,6 +168,11 @@ static func options_for(
 	# something left to find.
 	if has_land_to_find and enemy == null:
 		out.append(Candidate.new(EXPLORE, board))
+	# **Razing is on offer whenever there is a farm of theirs within reach of
+	# his hand**, in contact or not: burning the fields round a town he will not
+	# storm is exactly the choice `tiles-and-improvements.md` §7 is about.
+	if has_something_to_burn:
+		out.append(Candidate.new(RAZE, board))
 	out.append(Candidate.new(WITHDRAW, board))
 	out.append(Candidate.new(DISBAND, board))
 	return out
@@ -229,7 +238,7 @@ class StayingAliveConsideration:
 				return clampf(
 					(0.5 - CommanderConsiderations._odds(candidate, context)) * 2.0,
 					0.0, 1.0)
-			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE:
+			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE, CommanderConsiderations.RAZE:
 				return 0.0
 			_:
 				# Holding in front of an enemy is not safety; holding alone is.
@@ -299,6 +308,12 @@ class OrdersConsideration:
 				# **What he was told, if he was told to find land** (§3); an order
 				# to go somewhere else says little for wandering off.
 				asked = 1.0 if exploring else -0.2
+			CommanderConsiderations.RAZE:
+				# **Harassment is what a man sent against them does when he is not
+				# marching or fighting** (#418): less than pressing on, more than
+				# standing about. A man told to hold his town has no business burning
+				# anybody's fields.
+				asked = 0.6 if sent and not exploring else -0.2
 			CommanderConsiderations.HOLD:
 				asked = -0.2 if sent else 1.0
 			CommanderConsiderations.WITHDRAW:
