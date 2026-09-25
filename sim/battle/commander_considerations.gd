@@ -136,8 +136,11 @@ const EXPLORE: StringName = &"explore"
 ## 🔒 **Burn an improvement beside him** (#418, `tiles-and-improvements.md` §7):
 ## harassment, not war, and it takes his month.
 const RAZE: StringName = &"raze"
+## 🔒 **Fall on an expedition in the open** (#417, `founding-towns.md` §7): it
+## does not fight back, so he loses nobody.
+const STRIKE: StringName = &"strike"
 
-const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, WITHDRAW, DISBAND]
+const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, STRIKE, WITHDRAW, DISBAND]
 
 
 ## Everything this commander could do this month.
@@ -150,7 +153,7 @@ const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, WITHDRAW
 ## front of it when there is one.
 static func options_for(
 	company: Company, enemy: Company, has_somewhere_to_go: bool, has_land_to_find: bool = false,
-	has_something_to_burn: bool = false,
+	has_something_to_burn: bool = false, has_a_party_in_reach: bool = false,
 ) -> Array:
 	var out: Array = []
 	var board := {"company": company, "enemy": enemy}
@@ -173,6 +176,8 @@ static func options_for(
 	# storm is exactly the choice `tiles-and-improvements.md` §7 is about.
 	if has_something_to_burn:
 		out.append(Candidate.new(RAZE, board))
+	if has_a_party_in_reach:
+		out.append(Candidate.new(STRIKE, board))
 	out.append(Candidate.new(WITHDRAW, board))
 	out.append(Candidate.new(DISBAND, board))
 	return out
@@ -240,6 +245,10 @@ class StayingAliveConsideration:
 					0.0, 1.0)
 			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE, CommanderConsiderations.RAZE:
 				return 0.0
+			CommanderConsiderations.STRIKE:
+				# **It inflicts nothing** (§7): a strike costs him no men, so it is
+				# as safe as falling on anybody gets.
+				return 0.5
 			_:
 				# Holding in front of an enemy is not safety; holding alone is.
 				return -0.3 if CommanderConsiderations._enemy_of(candidate) != null \
@@ -308,6 +317,9 @@ class OrdersConsideration:
 				# **What he was told, if he was told to find land** (§3); an order
 				# to go somewhere else says little for wandering off.
 				asked = 1.0 if exploring else -0.2
+			CommanderConsiderations.STRIKE:
+				# The same as an attack: what a man sent against them is for.
+				asked = 0.8 if sent else 0.2
 			CommanderConsiderations.RAZE:
 				# **Harassment is what a man sent against them does when he is not
 				# marching or fighting** (#418): less than pressing on, more than

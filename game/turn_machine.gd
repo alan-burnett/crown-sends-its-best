@@ -277,6 +277,8 @@ func _init(p_run: RunState) -> void:
 	# What an exploring company reveals, it reveals to the colony (#434).
 	companies.knowledge = run.knowledge
 	companies.natives = run.tribes
+	# The expeditions a war party may fall on (#417).
+	companies.parties = run.parties
 
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and

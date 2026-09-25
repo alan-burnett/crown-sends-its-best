@@ -66,6 +66,9 @@ var knowledge: MapKnowledge = null
 ## So an explorer that walks past a village learns of it (`natives.md`).
 var natives: Tribes = null
 
+## The expeditions on the map (#417), so a war party can fall on one.
+var parties: Array = []
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if companies == null:
@@ -171,6 +174,7 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 
 	while moves > 0 or attacks > 0:
 		var to_burn := _something_to_burn(company)
+		var prey := _party_in_reach(company)
 		# **Asked once and used twice.** What is in front of him decides both what
 		# he may choose and what he swings at, and one of the two things it can be
 		# — a town — is a view built on the spot, so looking twice would build two
@@ -192,6 +196,11 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 				# company spends its month doing it, and only ever dwindles.
 				_raze(company, to_burn, context)
 				break
+			CommanderConsiderations.STRIKE:
+				if attacks <= 0 or prey == null:
+					break
+				_strike(company, prey, context)
+				attacks -= 1
 			CommanderConsiderations.ATTACK:
 				if attacks <= 0:
 					break
@@ -284,6 +293,43 @@ func _something_to_burn(company: Company) -> Vector2i:
 	return best
 
 
+## 🔒 **An expedition he could fall on** (#417, `founding-towns.md` §7 *Who
+## strikes one*): in contact, and **only for natives and dukes**. Rebels never
+## strike one (SPEC §12.3: an expedition is a loyal town's people), and nobody
+## else is in the business.
+func _party_in_reach(company: Company) -> ExpeditionParty:
+	if company.allegiance != Company.NATIVE and company.allegiance != Company.RIVAL:
+		return null
+	for entry in parties:
+		var party: ExpeditionParty = entry
+		if party.is_empty() or party.at == Vector2i(-1, -1):
+			continue
+		if Battle.tiles_in_contact(company.at, party.at):
+			return party
+	return null
+
+
+## 🔒 **The arithmetic of a battle, with one side that does not fight back**
+## (#417, the Author's ruling, `founding-towns.md` §7):
+##
+##     share = LETHALITY × striker's force ÷ party's force
+##
+## The party's force is a company's with **no arms and no commander**: its
+## people, its supply and the ground it stands on. It inflicts nothing, and the
+## share is capped at the whole party — at which it is lost completely.
+func _strike(company: Company, party: ExpeditionParty, context: ColonyContext) -> void:
+	var standing := Company.new(StringName(party.id), 0)
+	standing.size = party.souls()
+	standing.at = party.at
+	standing.allegiance = Company.COLONIAL
+	var theirs := Force.of(standing, map, true, company)
+	var mine := Force.of(company, map, false, standing)
+	if theirs <= 0.0 or mine <= 0.0:
+		return
+	var share := minf(1.0, Battle.lethality() * mine / theirs)
+	party.attacked(share, "native" if company.allegiance == Company.NATIVE else "rival", context)
+
+
 ## Whose ground a tile is: the first town by id whose reach covers it, as
 ## `Territory.compute` settles a contested tile.
 func _ground_of(at: Vector2i) -> Town:
@@ -367,7 +413,8 @@ func _what_he_decides(
 			enemy,
 			company.destination != Company.NOWHERE and company.at != company.destination,
 			OrderRule.nearest_unexplored(company.at, map, knowledge) != Company.NOWHERE,
-			_something_to_burn(company) != Company.NOWHERE),
+			_something_to_burn(company) != Company.NOWHERE,
+			_party_in_reach(company) != null),
 		deliberation)
 	return decision.chosen_id() if decision.has_choice() else CommanderConsiderations.HOLD
 
