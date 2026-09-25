@@ -36,7 +36,8 @@ monthly_net    this month's revenue minus this month's spending
 ```
 
 Revenue is tax income from colony trade (§10.2, both buying and selling).
-Spending is what the Crown pays to honor the PC's promises (§9.5).
+Spending is what the Crown pays to honor the PC's promises (§9.5), gold
+promised to a town included (`town-economy.md` §4).
 
 ### The derived one
 

@@ -93,6 +93,16 @@ that will not be fooled by it.
 - **A tax holiday**, in one of two shapes — below.
 - **An expedition of pilgrims** — below.
 
+#### Gold, for charity
+
+Author's ruling (#400). **He writes when his town lives badly**: its quality of
+life below a threshold, a placeholder, whatever the cause.
+
+He asks a sum for the poor of **his church's town** (100 gold, a placeholder).
+If the PC agrees, it is **a promise of gold to that town** (`town-economy.md`
+§4): the Crown pays it into the town's purse, so the charity reaches the people
+it was asked for.
+
 #### The tax holiday, two shapes
 
 Both are **time-limited rate changes**, which nothing in §10.2 can currently

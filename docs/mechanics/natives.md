@@ -32,10 +32,12 @@ never see.
 
 ## 2. Standing, and the point of no return
 
-A tribe holds a **standing** toward every faction it can tell apart, and it can
-tell them all apart: **the colony**, each **rival**, each **other tribe**, and the
-**Crown's troops** — which it distinguishes from the colonists those troops are
-supposedly protecting.
+A tribe holds a **standing** toward **the colony** and toward **the Crown's
+troops**, which it distinguishes from the colonists those troops are supposedly
+protecting.
+
+**It holds none toward the dukes or the other tribes.** Author's ruling (#402):
+a tribe is neutral with both, and its diplomacy is with the colony alone (§7).
 
 **Trust** is specifically its standing toward the colony (§12.5).
 
@@ -53,9 +55,8 @@ behaviour," and it is a better rule than a trigger: **it is not one massacre, it
 is a pattern that finally convinces them.** A tribe reaches a conclusion about
 what the colony is for, and once it has, there is nothing left to discuss.
 
-It is held **per faction**, so a tribe may believe the colony means its
-destruction while still dealing civilly with a rival — and then deal with that
-rival *about* the colony.
+It is held **per faction**, so a tribe may conclude that the Crown's soldiers
+mean it destroyed while still dealing with the colonists, or the reverse.
 
 ## 3. What moves it
 
@@ -166,9 +167,16 @@ is one of the two roads to **Colony Overrun** (§13.1).
 Being beaten by them costs **prestige** through optics (§14.1). The court does
 not care why.
 
-And they have their own diplomacy (§12.5). A tribe that has decided the colony
-means its destruction is a tribe with something to offer a rival — or a rebel
-town, which §12.3 already lets rivals court.
+### Their diplomacy is with the colony alone
+
+Author's ruling (#402). **A tribe is neutral with the dukes and with the other
+tribes: no trade, no combat.** A native war party and a duke's company pass each
+other by, and two tribes never fight. Whatever a tribe has decided about the
+colony, it settles with the colony.
+
+SPEC §12.5's diplomacy with rivals and between tribes, with tribes at war with
+one another and asking governors to help their war effort, is **deferred past
+M8**, as a consideration for a future feature.
 
 ## 8. The player sees almost none of it
 

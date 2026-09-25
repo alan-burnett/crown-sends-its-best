@@ -137,9 +137,9 @@ Iron at nothing and tools at everything says the same thing from the other end:
 **the value is in the making, not the material.**
 
 **And it moves with their circumstances.** A tribe at war wants guns and horses
-far more than a tribe at peace, and §12.5 gives tribes their own diplomacy to be
-at war over. The native dictionary is not a fixed table with a hostility gate on
-top; the valuations themselves move.
+far more than a tribe at peace, and the only war a tribe can be at is with the
+colony (`natives.md` §7). The native dictionary is not a fixed table with a
+hostility gate on top; the valuations themselves move.
 
 Two consequences worth seeing now, because they shape M5 rather than decorate it:
 
@@ -305,6 +305,26 @@ state the month begins with**, Work assigns labour against it, and Reckon then
 works out what is *still* short after production. No phase reordering.
 
 ## 4. The purse
+
+### The Crown can put gold in it
+
+Author's ruling (#400). A town earns by selling to the Crown (SPEC §10.2), and
+**the Crown can also give it gold**: a promise of gold (SPEC §9.5) may name a town,
+and when the Crown honours it the sum lands in that town's purse. The town is
+that much richer, and spends it as it spends everything else.
+
+- **It is a promise like any other.** It is paid while the Crown honours
+  payments and broken when it refuses them (SPEC §10.3), and what the Crown pays
+  is spending in `net_position` (`crown-standing.md` §2). So it moves standing
+  and prestige exactly as any promise of the same gold does.
+- **Nothing else is triggered by the town receiving it.** No standing, prestige
+  or loyalty change attaches to a purse growing. Whatever a reply option carries,
+  such as a clergyman's regard for being answered, belongs to that option.
+- **The Ledger shows it as a Crown-side transaction** (SPEC §10.4). Once it is
+  the town's, it is hidden like the rest of the purse (SPEC §10.2).
+
+The first letter to use it is the clergyman's request for charity
+(`institutional-contacts.md` §3). The quartermaster's broken machines are #438.
 
 ### How much it spends
 
