@@ -328,13 +328,16 @@ const BASE: StringName = &"town_hall"
 ## **The counterweight is upkeep.** A town too poor to pay watches its amusements
 ## go dark in the same month its larder empties, which is why this reads through
 ## `is_lit` like every other effect.
-static func amusement_for(town: Town) -> Dictionary:
+static func amusement_for(town: Town, colony: Colony = null) -> Dictionary:
 	var served := 0.0
 	for id in town.buildings:
 		var building := find(StringName(id))
 		if building == null or not is_lit(town, StringName(id)):
 			continue
 		served += maxf(0.0, float(building.effect("amusement", 0.0)))
+	# **And what reaches it from the colony's other towns** (#415): the same
+	# `served`, and the same one kind.
+	served += from_the_colony(town, colony, "amusement")
 	# 🔒 **One kind, however much of it there is** (`buildings.md` §7). A second
 	# amusement building adds only to `served`: amusement is already being
 	# consumed, and more of it is deeper rather than wider.
@@ -444,8 +447,8 @@ static func regard_scale(
 ## Summed like amusement and read through `is_lit` like every other effect, so a
 ## town too poor to pay its upkeep loses the comfort in the month it can least
 ## afford to.
-static func perceived_safety_for(town: Town, contacts: Dictionary) -> float:
-	var comfort := 0.0
+static func perceived_safety_for(town: Town, contacts: Dictionary, colony: Colony = null) -> float:
+	var comfort := from_the_colony(town, colony, "perceived_safety")
 	for id in town.buildings:
 		var building := find(StringName(id))
 		if building == null or not is_lit(town, StringName(id)):
@@ -507,6 +510,44 @@ static func crown_sale_bonus_for(town: Town) -> float:
 		if building != null and is_lit(town, StringName(id)):
 			bonus += maxf(0.0, float(building.effect("crown_sale_bonus", 0.0)))
 	return bonus
+
+
+## 🔒 **What reaches this town from buildings in the colony's other towns**
+## (#415, `buildings.md` §3: *there is no nearby*, *colony-wide effects do not
+## stack*). A building's `reaches_colony` carries amusement or perceived safety
+## to **every town without** a named building — its own kind, by default, so a
+## printing press reaches every town that has none, and a cathedral every town
+## without a church.
+##
+## - **Each town receives each colony-wide effect at most once**, however many
+##   of that building stand: two printing presses are one press to everybody else.
+## - **A town that has the building has its own**, locally, and nothing more.
+## - **Read through the granting building's own `is_lit`**, so a cathedral that
+##   goes dark stops comforting other towns the same month.
+static func from_the_colony(town: Town, colony: Colony, effect: String) -> float:
+	if town == null or colony == null:
+		return 0.0
+	var granted: Dictionary = {}
+	var total := 0.0
+	for other in colony.in_order():
+		if other.id == town.id:
+			continue
+		var held := other.buildings.duplicate()
+		held.sort()
+		for id in held:
+			if granted.has(String(id)):
+				continue
+			var building := find(StringName(id))
+			if building == null or not is_lit(other, StringName(id)):
+				continue
+			var reach: Dictionary = building.effect("reaches_colony", {})
+			if not reach.has(effect):
+				continue
+			if town.has_building(StringName(reach.get("towns_without", id))):
+				continue
+			granted[String(id)] = true
+			total += maxf(0.0, float(reach[effect]))
+	return total
 
 
 ## How many of the town each measure of a luxury serves (#414,

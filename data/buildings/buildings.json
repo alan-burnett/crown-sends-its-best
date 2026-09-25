@@ -248,6 +248,7 @@
 	},
 	"upkeep": 5,
 	"effects": {
+	  "reaches_colony": {"towns_without": "fairgrounds", "amusement": 0.2},
 	  "influence": 1,
 	  "amusement": 0.4,
 	  "immigration": 1.5
@@ -280,6 +281,7 @@
 	},
 	"upkeep": 10,
 	"effects": {
+	  "reaches_colony": {"towns_without": "church", "amusement": 0.15, "perceived_safety": 0.2},
 	  "amusement": 0.3,
 	  "perceived_safety": 0.45
 	},
@@ -352,6 +354,7 @@
 	},
 	"upkeep": 10,
 	"effects": {
+	  "reaches_colony": {"amusement": 0.15},
 	  "amusement": 0.3,
 	  "education": 3.0,
 	  "draws_experts": 1.0

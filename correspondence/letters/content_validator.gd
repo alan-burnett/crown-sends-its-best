@@ -668,6 +668,26 @@ func check_tile_yield_bonuses(content: ContentDatabase) -> void:
 					_problem("effects.tile_yield_bonus", "'%s' is not an improvement" % improvement)
 
 
+## 🔒 **What reaches the colony names a building and what it brings** (#415).
+func check_colony_reach(content: ContentDatabase) -> void:
+	for id in content.ids("buildings"):
+		_file = "buildings/%s" % id
+		var effects: Dictionary = content.collection("buildings")[id].get("effects", {})
+		if not effects.has("reaches_colony"):
+			continue
+		var reach: Variant = effects["reaches_colony"]
+		if typeof(reach) != TYPE_DICTIONARY:
+			_problem("effects.reaches_colony", "expected {towns_without, amusement, perceived_safety}")
+			continue
+		for key in reach:
+			if not ["towns_without", "amusement", "perceived_safety"].has(String(key)):
+				_problem("effects.reaches_colony", "has no '%s'" % key)
+			elif String(key) != "towns_without" and typeof(reach[key]) not in [TYPE_INT, TYPE_FLOAT]:
+				_problem("effects.reaches_colony.%s" % key, "must be a number")
+		if reach.has("towns_without") and not content.collection("buildings").has(String(reach["towns_without"])):
+			_problem("effects.reaches_colony.towns_without", "'%s' is not a building" % reach["towns_without"])
+
+
 ## 🔒 **What outfits an expedition is a factor and resources** (#413): a
 ## misspelt resource would add nothing, and nothing would say so.
 func check_expedition_outfitting(content: ContentDatabase) -> void:

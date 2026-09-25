@@ -58,7 +58,7 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 	# order is enforced by the order these run in rather than by a rule anybody
 	# has to remember.
 	record["companies_fed"] = _victual(town, context)
-	_enjoy(town, mouths, record)
+	_enjoy(town, mouths, record, context.colony)
 
 	context.wellbeing[String(town.id)] = record
 
@@ -165,9 +165,10 @@ func _wear(town: Town, mouths: float, record: Dictionary) -> void:
 ## **The draw itself lives in `QualityOfLife`**, because Exchange needs to know
 ## what a cellar will be worth *before* buying it (`town-economy.md` §2). One
 ## function, used from both sides, is the only way the two cannot drift apart.
-func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
-	# **What the town can amuse itself with, whatever the ships do** (#153).
-	var amusement := Building.amusement_for(town)
+func _enjoy(town: Town, mouths: float, record: Dictionary, colony: Colony = null) -> void:
+	# **What the town can amuse itself with, whatever the ships do** (#153), and
+	# what the colony's other towns' buildings bring it (#415).
+	var amusement := Building.amusement_for(town, colony)
 	var cap := mouths * ColonyNeeds.luxury_per_head()
 	if cap <= 0.0:
 		record["luxury"] = float(amusement["served"])

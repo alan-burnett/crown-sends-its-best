@@ -322,7 +322,8 @@ static func health_of(town: Town, wellbeing: Dictionary) -> float:
 static func safety_of(town: Town, context: ColonyContext) -> float:
 	var material := float(Threat.to(town, context).get("safety", 1.0))
 	var comfort := clampf(
-		Building.perceived_safety_for(town, context.contacts if context != null else {}),
+		Building.perceived_safety_for(town, context.contacts if context != null else {},
+			context.colony if context != null else null),
 		0.0, 1.0)
 	return clampf(material + comfort * (1.0 - material), 0.0, 1.0)
 

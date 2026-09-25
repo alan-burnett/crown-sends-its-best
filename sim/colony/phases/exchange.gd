@@ -296,7 +296,7 @@ func _best_comfort(
 		# **And against how far each measure goes here** (#414): a tea-house town
 		# values tea more, with no second theory of what a cellar is worth.
 		var pleasure := QualityOfLife.marginal_pleasure(
-			mouths, cellar, resource, step, Building.amusement_for(town),
+			mouths, cellar, resource, step, Building.amusement_for(town, context.colony),
 			Building.luxury_serves_for(town)
 		)
 		if pleasure <= 0.0:
