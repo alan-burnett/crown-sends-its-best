@@ -246,6 +246,21 @@ static func register_effects() -> void:
 		ORDER_ENACT_POLICY,
 		M1Registrations.build_policy_order,
 	)
+	# 🔒 **A policy aimed at a resource** (#396, `policy.md` §8). Its own effect
+	# rather than `enact_policy` with an optional field, for the reason the
+	# Provost's knobs are: effect params are all required, and a different shape
+	# is a different effect. It produces the same Order kind, because it is the
+	# same act — the charge, the split and the renegotiation are all `policy.md`'s.
+	# The target is a resource or a kind of livestock: both have a Crown price.
+	ContentRegistry.register_effect(
+		"enact_policy_on",
+		{
+			"to": "contact", "effect": "string", "cost": "gold", "split": "string",
+			"resource": "resource",
+		},
+		ORDER_ENACT_POLICY,
+		M1Registrations.build_policy_order,
+	)
 	# **The Provost's knobs are a different shape** (#173, `the-provost.md` §2),
 	# so they are a different effect rather than `enact_policy` with an optional
 	# field. His five run nothing / a little / a lot / a great deal: the letter
@@ -436,22 +451,18 @@ static func build_troops_order(args: Dictionary, context: LetterContext) -> Orde
 	return Order.new(ORDER_ENACT_POLICY, StringName(args.get("to", "")), params, context.month)
 
 
-## A policy, refused when it and its target do not match (#396).
+## A policy, refused when it needs a market and has none (#396).
 ##
 ## 🔒 **A market policy needs its market.** `enact_policy` naming
 ## `favour_our_market` produced a policy that pressed on no price and charged the
-## Crown every month for it, because `enact_policy` has no resource to give it.
-## Refused here rather than enacted and ignored. The effect that can name one
-## waits for a letter to carry it (#396).
+## Crown every month for it; it is refused here rather than enacted and ignored.
+## The other half — `enact_policy_on` naming a policy that reads no resource — is
+## refused when the data loads (`ContentValidator.check_policy_targets`), where
+## the letter that says it can be named.
 static func build_policy_order(args: Dictionary, context: LetterContext) -> Order:
 	var effect := StringName(args.get("effect", ""))
-	var needs_one := PolicyEffects.is_aimed_at_a_resource(effect)
-	if needs_one != args.has("resource"):
-		push_error("'%s' %s; use %s." % [
-			effect,
-			"needs a resource" if needs_one else "takes no resource",
-			"a letter that names one" if needs_one else "enact_policy",
-		])
+	if PolicyEffects.is_aimed_at_a_resource(effect) and not args.has("resource"):
+		push_error("'%s' needs a resource; use enact_policy_on." % effect)
 		return null
 	return Order.new(
 		ORDER_ENACT_POLICY,

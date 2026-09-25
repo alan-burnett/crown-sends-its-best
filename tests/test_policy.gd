@@ -190,6 +190,56 @@ func test_a_market_policy_with_no_market_is_refused() -> void:
 	}), "an ordinary policy stopped being enactable")
 
 
+func test_a_letter_can_turn_the_crowns_market_toward_a_resource() -> void:
+	# The acceptance, end to end: an option names the resource, he agrees in
+	# Reckoning, and the Crown's price for it rises while the policy stands.
+	var order := _proposed("enact_policy_on", {
+		"to": "steward", "effect": "favour_our_market", "cost": 80, "split": "all",
+		"resource": "horses",
+	})
+	assert_true(order != null, "no letter can propose a market policy")
+	if order == null:
+		return
+	var driver := OrderDriver.new(IntentBook.new(), PromiseBook.new())
+	driver.contacts = _contacts()
+	driver.policies = book
+	driver.carry(order)
+	var state := _state(3)
+	driver.on_phase(WorldPhase.RECKONING, state, log, RngStreams.new(SEED))
+	assert_eq(book.active().size(), 1, "he agreed and nothing was enacted, so this proves nothing")
+
+	var before := Valuation.crown(&"horses", state)
+	for key in PolicyEffects.pressure(book):
+		state.values[key] = float(PolicyEffects.pressure(book)[key])
+	assert_true(Valuation.crown(&"horses", state) > before,
+		"the letter named horses and the Crown's price for them did not move")
+
+
+func test_a_policy_that_reads_no_resource_takes_none() -> void:
+	# Refused when the data loads, where the letter that says it can be named.
+	var validator := ContentValidator.new()
+	validator.check_policy_targets(content)
+	assert_true(validator.ok(), "the shipped policy targets do not validate")
+	var letter: Dictionary = content.collection("letters")["patron.his_barony_would_buy"]
+	var option: Dictionary = letter["reply"]["steps"][0]["options"][0]
+	option["effect"]["enact_policy_on"]["effect"] = "encourage_immigration"
+	validator = ContentValidator.new()
+	validator.check_policy_targets(content)
+	assert_false(validator.ok(), "a target was accepted by a policy that honours none")
+	option["effect"]["enact_policy_on"]["effect"] = "favour_our_market"
+	option["effect"]["enact_policy_on"]["resource"] = "unicorns"
+	validator = ContentValidator.new()
+	validator.check_policy_targets(content)
+	assert_false(validator.ok(), "a market for unicorns passed")
+
+
+func test_the_target_is_typed_like_every_other_param() -> void:
+	assert_not_empty(ContentRegistry.check_effect_call("enact_policy_on", {
+		"to": "steward", "effect": "favour_our_market", "cost": 80, "split": "all",
+		"resource": 7,
+	}), "a number was accepted as a resource")
+
+
 func test_the_target_survives_a_save() -> void:
 	book.enact(Policy.new(&"steward", PolicyEffects.FAVOUR_OUR_MARKET, 80.0,
 		Policy.ALL, {"resource": "horses"}), log, 3)

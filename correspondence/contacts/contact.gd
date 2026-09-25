@@ -283,6 +283,13 @@ var known_since: int = 0
 var specialty: String = ""
 var need: String = ""
 
+## 🔒 **Which one** (#396, `patrons.md` §3 *A category names one kind*): a
+## resources, livestock or experts specialty or need names one kind of it, drawn
+## at arrival with the category — a sugar man, a horse breeder. Empty for gold,
+## troops and rivals, and on everybody who is not a patron.
+var specialty_kind: String = ""
+var need_kind: String = ""
+
 ## 🔒 **What makes him difficult** (#282, `patrons.md` §6).
 ##
 ## **Vice, not personality.** `contacts.md` §1 reserves *personality* for the
@@ -369,6 +376,8 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.writes_in = StringName(record.get("writes_in", ""))
 	contact.specialty = String(record.get("specialty", ""))
 	contact.need = String(record.get("need", ""))
+	contact.specialty_kind = String(record.get("specialty_kind", ""))
+	contact.need_kind = String(record.get("need_kind", ""))
 	contact.vice = StringName(record.get("vice", ""))
 	contact.leaves_month = int(record.get("leaves_month", -1))
 	contact.known_since = int(record.get("known_since", 0))
@@ -469,6 +478,8 @@ func to_dict() -> Dictionary:
 		"writes_in": String(writes_in),
 		"specialty": specialty,
 		"need": need,
+		"specialty_kind": specialty_kind,
+		"need_kind": need_kind,
 		"vice": String(vice),
 		"leaves_month": leaves_month,
 		"known_since": known_since,

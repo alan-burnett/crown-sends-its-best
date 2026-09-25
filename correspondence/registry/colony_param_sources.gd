@@ -35,6 +35,10 @@ static func register_all() -> void:
 		ReportableEvents.what_happened,
 	)
 	ContentRegistry.register_param_source("sender_id", {}, ColonyParamSources.sender_id)
+	# The one kind a patron's specialty names (#396, `patrons.md` §3).
+	ContentRegistry.register_param_source(
+		"his_specialty_kind", {}, ColonyParamSources.his_specialty_kind
+	)
 	ContentRegistry.register_param_source(
 		"patron_who_spoke", {"fallback": "string"}, ColonyParamSources.patron_who_spoke
 	)
@@ -220,6 +224,12 @@ static func patron_who_spoke(args: Dictionary, context: LetterContext) -> Varian
 
 static func sender_id(_args: Dictionary, context: LetterContext) -> Variant:
 	return String(context.sender.id) if context.sender != null else ""
+
+
+## The one kind his specialty names (#396): *horses*, *sugar*. Empty for a
+## category that comes in no kinds.
+static func his_specialty_kind(_args: Dictionary, context: LetterContext) -> Variant:
+	return context.sender.specialty_kind if context.sender != null else ""
 
 
 ## What a town has had to shut, by name (#151).

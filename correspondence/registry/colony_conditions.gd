@@ -58,6 +58,10 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"he_sends_the_troops", {}, ColonyConditions.he_sends_the_troops
 	)
+	# A patron whose Barony has a market to turn the colony's way (#396).
+	ContentRegistry.register_condition(
+		"his_barony_has_a_market", {}, ColonyConditions.his_barony_has_a_market
+	)
 	ContentRegistry.register_condition(
 		"town_disagrees_with_the_crown", {}, ColonyConditions.town_disagrees_with_the_crown
 	)
@@ -700,6 +704,22 @@ static func his_troops_are_going_home(_args: Dictionary, context: LetterContext)
 ## nobody else holds the troops policy (`the-marshal.md` §2).
 static func he_sends_the_troops(_args: Dictionary, context: LetterContext) -> bool:
 	return context.sender != null and context.sender.id == CrownTroops.MARSHAL
+
+
+## Whether this patron's Barony has a market he could turn the colony's way
+## (#396, `policy.md` §8): his specialty is resources or livestock, it names a
+## kind, and he is not already carrying a market policy for the PC.
+static func his_barony_has_a_market(_args: Dictionary, context: LetterContext) -> bool:
+	var him := context.sender
+	if him == null or not Patron.is_patron(him) or him.specialty_kind.is_empty():
+		return false
+	if not ["resources", "livestock"].has(him.specialty):
+		return false
+	if context.policies != null:
+		for policy in context.policies.held_by(him.id):
+			if policy.effect == PolicyEffects.FAVOUR_OUR_MARKET:
+				return false
+	return true
 
 
 ## Whether any town of the colony is in open rebellion (#420): the only time

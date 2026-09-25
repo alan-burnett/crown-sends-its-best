@@ -1,0 +1,104 @@
+{
+  "id": "patron.his_barony_would_buy",
+  "sender": "patron",
+  "type": "offer",
+  "skippable": true,
+  "note": "Issue 396, policy.md sections 7 and 8, patrons.md sections 3 and 10. A patron whose specialty is resources or livestock names one kind of it, and he can have his Barony buy that kind from the colony rather than from its neighbour: the Crown's price for it goes up while the policy stands. He writes; the PC answers (section 10 lock). The charge and who bears it are policy.md's; 90 a month is a placeholder (section 9). Placeholder prose: the Author writes the real lines.",
+  "params": {
+    "patron": "contact",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "My people at home buy a great deal of {param:resource}, and they buy it from a neighbour of ours whom I have never much cared for."
+    },
+    {
+      "text": "I could have them buy yours instead. It would take some arranging, and some expense, and the Crown would find it was paying rather more for {param:resource} than it is used to. Your colony would not complain."
+    },
+    {
+      "text": "I should want the Crown to meet the charge of it. I am generous, but I am not a charity.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I should want the Crown to meet the charge of it. I do not suppose that will surprise you.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with real gratitude"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your proposal"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered the charge"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "market",
+        "prompt": "His Barony's market for {param:resource}",
+        "options": [
+          {
+            "id": "all",
+            "label": "accept, and the Crown bears the charge",
+            "text": "Do it, and let the Crown bear the whole of the charge. I would not have you out of pocket for a kindness to my colony.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "favour_our_market",
+                "cost": 90,
+                "split": "all",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "half",
+            "label": "accept, and the Crown bears half",
+            "text": "Do it, and the Crown will meet half the charge. I will not pretend that is generous.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "favour_our_market",
+                "cost": 90,
+                "split": "half",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "decline, with thanks",
+            "text": "I must decline, and I am sorry to. The Crown has no room for another charge this year.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

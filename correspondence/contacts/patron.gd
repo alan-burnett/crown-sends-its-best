@@ -99,6 +99,32 @@ static func catalogue_ids() -> PackedStringArray:
 	return out
 
 
+## 🔒 **What a category names one of** (#396, `patrons.md` §3). A resource is
+## anything the Crown prices that is not livestock; livestock is its own; an
+## expert is expert in something the colony can make. Gold, troops and the rival
+## specialty come in no kinds. Sorted, so the draw reads the same list every time.
+static func kinds_of(category: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	match category:
+		"resources":
+			out = ResourceCatalogue.staples() + ResourceCatalogue.luxuries()
+		"livestock":
+			out = ResourceCatalogue.livestock()
+		"experts":
+			for id in ResourceCatalogue.staples() + ResourceCatalogue.luxuries():
+				var kind := ResourceCatalogue.get_kind(StringName(id))
+				if kind != null and kind.producible:
+					out.append(id)
+	out.sort()
+	return out
+
+
+static func _one_of(kinds: PackedStringArray, rng: RandomNumberGenerator) -> String:
+	if kinds.is_empty():
+		return ""
+	return kinds[rng.randi_range(0, kinds.size() - 1)]
+
+
 ## What kind of thing a catalogue entry is: a shipment, or rivals (§3).
 static func kind_of(id: String) -> String:
 	for entry in _catalogue:
@@ -162,7 +188,8 @@ static func all_in(run: RunState) -> Array:
 ## 🔒 **The order of the draws is the order of the fields**, and it must not
 ## change: the same seed has to keep giving the same man however much is added
 ## around him. Specialty, then need from the catalogue with the specialty taken
-## out, then vice.
+## out, then vice — **then the kind of each** (#396), appended so every man
+## rolled before the kinds existed is still the man he was.
 ##
 ## `Contact.generate` has already drawn his personality, his name and his
 ## temperament from the same stream, so these three continue that sequence
@@ -188,5 +215,9 @@ static func generate(
 	var vices := PatronVices.ids()
 	if not vices.is_empty():
 		contact.vice = StringName(vices[rng.randi_range(0, vices.size() - 1)])
+	# 🔒 **A category names one kind** (#396, §3): what he ships, what he wants,
+	# and which Crown price his Barony's market lifts are all fixed here.
+	contact.specialty_kind = _one_of(kinds_of(contact.specialty), rng)
+	contact.need_kind = _one_of(kinds_of(contact.need), rng)
 	PatronVices.apply_to(contact)
 	return contact

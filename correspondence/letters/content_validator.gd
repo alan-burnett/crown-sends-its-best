@@ -1273,6 +1273,37 @@ func check_agendas(content: ContentDatabase) -> void:
 						"urges '%s', which the PC may not ask for" % urged)
 
 
+## 🔒 **A policy's target is one it reads** (#396, `policy.md` §8): every
+## `enact_policy_on` names a policy aimed at a resource, and a resource the
+## catalogue has; every `enact_policy` names one that is not. A slot is the
+## letter's to fill and is not checked here.
+func check_policy_targets(content: ContentDatabase) -> void:
+	for id in content.ids("letters"):
+		var letter: Dictionary = content.collection("letters")[id]
+		_file = String(letter.get(JsonLoader.SOURCE_KEY, id))
+		for step in letter.get(LetterSchema.KEY_REPLY, {}).get(LetterSchema.KEY_STEPS, []):
+			for option in step.get(LetterSchema.KEY_OPTIONS, []):
+				var effects: Variant = option.get("effect", {})
+				if typeof(effects) != TYPE_DICTIONARY:
+					continue
+				for effect_id in ["enact_policy", "enact_policy_on"]:
+					if not (effects as Dictionary).has(effect_id):
+						continue
+					var args: Dictionary = effects[effect_id]
+					var path := "options.%s.%s" % [option.get("id", "?"), effect_id]
+					var policy := String(args.get("effect", ""))
+					if policy.begins_with("{"):
+						continue
+					var aimed := PolicyEffects.is_aimed_at_a_resource(StringName(policy))
+					if effect_id == "enact_policy_on" and not aimed:
+						_problem(path, "'%s' reads no resource, so it can take no target" % policy)
+					elif effect_id == "enact_policy" and aimed:
+						_problem(path, "'%s' needs a resource; use enact_policy_on" % policy)
+					var target := String(args.get("resource", ""))
+					if effect_id == "enact_policy_on" and not target.begins_with("{") 							and not ResourceCatalogue.ids().has(target):
+						_problem(path, "'%s' is not a resource" % target)
+
+
 ## 🔒 **Troops a letter asks for are troops the Marshal has** (#420,
 ## `the-marshal.md` §2): every `station_troops` names one of §2's strengths —
 ## never *none* — and one of its postures. A slot is the letter's to fill and is

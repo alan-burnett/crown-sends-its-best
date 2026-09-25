@@ -59,5 +59,25 @@
         "he_is_taking_his_leave": {}
       }
     ]
+  },
+  {
+    "id": "trigger.patron.his_barony_would_buy",
+    "letter": "patron.his_barony_would_buy",
+    "urgency": 0.45,
+    "cooldown": 24,
+    "note": "Issue 396, policy.md section 8. A patron whose specialty is resources or livestock offers to turn his Barony's market toward the colony for that kind: the Crown's price for it rises while the policy stands. Not while he already carries one. Cooldown 24: a second offer inside two years would be a standing discount rather than a favour.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "his_specialty_kind"
+      }
+    },
+    "conditions": [
+      {
+        "his_barony_has_a_market": {}
+      }
+    ]
   }
 ]
