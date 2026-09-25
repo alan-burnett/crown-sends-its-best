@@ -668,6 +668,19 @@ func check_tile_yield_bonuses(content: ContentDatabase) -> void:
 					_problem("effects.tile_yield_bonus", "'%s' is not an improvement" % improvement)
 
 
+## 🔒 **Every building does something** (#416). Thirteen buildings once sat in
+## the tree with `"effects": {}` and nothing failed, because an empty effect
+## passes every other check; since #429 a town builds whatever its menu lists,
+## so a building that does nothing is wood and stone spent on nothing. This one
+## line would have caught seven of them at the first data change.
+func check_buildings_do_something(content: ContentDatabase) -> void:
+	for id in content.ids("buildings"):
+		_file = "buildings/%s" % id
+		var effects: Variant = content.collection("buildings")[id].get("effects", {})
+		if typeof(effects) != TYPE_DICTIONARY or (effects as Dictionary).is_empty():
+			_problem("effects", "'%s' has no effects at all, so a town that builds it gets nothing" % id)
+
+
 ## 🔒 **What reaches the colony names a building and what it brings** (#415).
 func check_colony_reach(content: ContentDatabase) -> void:
 	for id in content.ids("buildings"):
