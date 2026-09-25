@@ -20,6 +20,9 @@ extends RefCounted
 
 const EVENT_PRESSED: StringName = &"policy_pressure"
 
+## What every world value a policy presses on is named under.
+const POLICY_PREFIX: String = "policy."
+
 var book: PolicyBook = null
 var contacts: Dictionary = {}
 
@@ -54,10 +57,15 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 ## Cleared before this month's are written, so a lapsed policy leaves nothing
 ## behind. Reading the state for them rather than keeping a list means the same
 ## thing cannot be true in two places.
+##
+## **Every `policy.` value, not only the prices** (#442). This read the price
+## prefix and immigration alone, so the journalist's press, the Provost's knobs,
+## the scholar's travel and the Diplomat's dinners went on pressing at their last
+## figure after the policy behind them had ended.
 func _keys_to_clear(state: WorldState) -> PackedStringArray:
 	var keys: PackedStringArray = PackedStringArray()
 	for key in state.value_keys():
-		if String(key).begins_with(PolicyEffects.PRICE_PREFIX) \
+		if String(key).begins_with(POLICY_PREFIX) \
 				or String(key) == WorldValues.IMMIGRATION:
 			keys.append(String(key))
 	keys.sort()

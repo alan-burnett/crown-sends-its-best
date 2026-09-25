@@ -107,7 +107,7 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 	# outlived either would be reading one town's experts through another town's
 	# buildings, which is why it is a local here rather than anything stored.
 	#
-	# Exactly equivalent: the same three factors in the same order, so the
+	# Exactly equivalent: the same four factors in the same order, so the
 	# product is the identical double rather than a close one.
 	var yields := _yields_for(town, context, tiles)
 
@@ -397,7 +397,8 @@ func _yield_of(context: ColonyContext, town: Town, at: Vector2i, resource: Strin
 		return amount
 	var ground := _ground_bonus(Building.tile_yield_rules(town), context.map, at, resource)
 	return amount * expert_multiplier(town, resource) \
-		* (1.0 + Building.yield_bonus_for(town, resource) + ground) * _fallback(town)
+		* (1.0 + Building.yield_bonus_for(town, resource) + ground) * _fallback(town) \
+		* _more(context, resource)
 
 
 ## What every tile of this town would yield a hand, this month (#351).
@@ -410,14 +411,14 @@ func _yield_of(context: ColonyContext, town: Town, at: Vector2i, resource: Strin
 ## walks the town's experts and `Building.yield_bonus_for` walks its buildings,
 ## and neither answer can change between two hands of one phase.
 ##
-## 🔒 **Exactly equivalent, not an approximation.** The same three factors in the
+## 🔒 **Exactly equivalent, not an approximation.** The same four factors in the
 ## same order, so the product is the identical double rather than a close one.
 func _yields_for(town: Town, context: ColonyContext, tiles: Array) -> Dictionary:
 	var multiplier: Dictionary = {}
 	for resource in ResourceCatalogue.ids():
 		var id := StringName(resource)
 		multiplier[resource] = expert_multiplier(town, id) \
-			* (1.0 + Building.yield_bonus_for(town, id)) * _fallback(town)
+			* (1.0 + Building.yield_bonus_for(town, id)) * _fallback(town) * _more(context, id)
 
 	var out: Dictionary = {}
 	if context.map == null:
@@ -437,9 +438,18 @@ func _yields_for(town: Town, context: ColonyContext, tiles: Array) -> Dictionary
 				here[resource] = amount * float(multiplier[resource])
 			else:
 				here[resource] = amount * expert_multiplier(town, id) \
-					* (1.0 + Building.yield_bonus_for(town, id) + ground) * _fallback(town)
+					* (1.0 + Building.yield_bonus_for(town, id) + ground) * _fallback(town) \
+					* _more(context, id)
 		out[_tile_key(at)] = here
 	return out
+
+
+## 🔒 **More of a patron's kind, in every town** (#442, `patrons.md` §4): the
+## share a standing policy of his adds, read off the world rather than the book.
+## Last of the factors everywhere it is applied, so the product stays the
+## identical double.
+static func _more(context: ColonyContext, resource: StringName) -> float:
+	return 1.0 + PolicyEffects.more_of(context.state if context != null else null, resource)
 
 
 ## What the town's buildings add to this resource on this tile's ground (#409):

@@ -173,7 +173,7 @@ func test_and_the_business_continues_as_normal() -> void:
 	var run := _run()
 	var patron := _patron(run, 0, 80.0)
 	patron.specialty = "resources"
-	patron.specialty_kind = "sugar"
+	patron.specialty_kind = "wood"
 	patron.specialty_bonus = Patron.BONUS_PRICE
 	patron.leaves_month = 60
 	var context := _context_for(run, patron, 56)

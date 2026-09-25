@@ -96,7 +96,18 @@ func test_the_kinds_survive_a_save() -> void:
 
 # --- 🔒 His Barony's market --------------------------------------------------------------
 
+## What a horse breeder's and a sugar man's offers need somewhere in the colony
+## (#442): a town pasture, and a sugar plantation on ground a town holds.
+func _prerequisites() -> void:
+	var town: Town = run.colony.in_order()[0]
+	town.buildings.append("town_pasture")
+	machine.territory.on_phase(WorldPhase.TERRITORY, run.world, run.log, run.streams)
+	var at: Vector2i = run.territory_now().tiles_of(town.id)[0]
+	run.map.improvements[run.map.index_of(at.x, at.y)] = "plantation_sugar"
+
+
 func test_a_horse_breeder_offers_his_market_and_a_gold_man_does_not() -> void:
+	_prerequisites()
 	assert_true(_true_for(_patron("livestock", "horses")), "a horse breeder had no market to offer")
 	assert_true(_true_for(_patron("resources", "sugar")), "a sugar man had no market to offer")
 	assert_false(_true_for(_patron("gold", "")), "a patron dealing in gold offered a market")
@@ -106,6 +117,7 @@ func test_a_horse_breeder_offers_his_market_and_a_gold_man_does_not() -> void:
 func test_only_the_price_bonus_offers_a_market() -> void:
 	# 🔒 #439, `patrons.md` §3: the second patron of a kind offers the other
 	# bonus, so a man rolled with *more of it* has no Crown price to lift.
+	_prerequisites()
 	assert_false(_true_for(_patron("resources", "sugar", Patron.BONUS_MORE)),
 		"a sugar man rolled with more sugar offered his market")
 	assert_false(_true_for(_patron("livestock", "horses", Patron.BONUS_MORE)),

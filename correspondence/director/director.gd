@@ -392,6 +392,8 @@ func _context(run: RunState, contact: Contact) -> LetterContext:
 	context.log = run.log
 	context.pc = run.setup
 	context.policies = run.policies
+	context.map = run.map
+	context.territory = run.territory_now()
 	return context
 
 

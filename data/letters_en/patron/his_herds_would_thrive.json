@@ -1,0 +1,118 @@
+{
+  "id": "patron.his_herds_would_thrive",
+  "sender": "patron",
+  "type": "offer",
+  "skippable": true,
+  "note": "Issue 442, patrons.md sections 3 and 4, policy.md sections 3 and 8. A patron whose livestock specialty was rolled with the other bonus - faster breeding - offers it once he thinks well enough of the PC and a pasture or town pasture stands somewhere in the colony. Accepted, it is a policy: every herd of his kind breeds faster, in every town. The PC answers with a share of its charge, all, half or none; a policy of his still standing when he sails is the colony's for good. 90 a month is a placeholder. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "I breed {param:resource}, and I breed them better than anybody I know, which I say because it is true and not because it is modest."
+    },
+    {
+      "text": "I could send you my stockmen and a few of my best. Every herd of {param:resource} in your colony would come on faster for it, in every town that keeps them."
+    },
+    {
+      "text": "The men would want their keep while they are about it. I should like the Crown to meet that.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "The men would want their keep. I say so now so that you cannot say later I did not.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with real gratitude"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your proposal"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered the charge"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "herds",
+        "prompt": "His stockmen, and the colony's {param:resource}",
+        "options": [
+          {
+            "id": "all",
+            "label": "accept, and the Crown bears the charge",
+            "text": "Send them, and let the Crown bear the whole of the charge. I would not have you out of pocket for a kindness to my colony.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "more_of_his_kind",
+                "cost": 90,
+                "split": "all",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "half",
+            "label": "accept, and the Crown bears half",
+            "text": "Send them, and the Crown will meet half the charge. I will not pretend that is generous.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "more_of_his_kind",
+                "cost": 90,
+                "split": "half",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "none",
+            "label": "accept, and leave the charge to him",
+            "text": "Send them, and I must leave their keep with you. The Crown has nothing to put towards it this year, and I would rather say so than pretend.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "more_of_his_kind",
+                "cost": 90,
+                "split": "none",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "decline, with thanks",
+            "text": "I must decline, and I am sorry to. The Crown has no room for another charge this year.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

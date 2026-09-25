@@ -117,6 +117,11 @@ var companies: Companies = null
 ## not go at all.
 var natives: Tribes = null
 
+## The ground the colony holds and what stands on it (#442), so a patron can ask
+## whether a sugar plantation stands anywhere before he offers his sugar market.
+var map: WorldMap = null
+var territory: Territory = null
+
 
 func _init(p_state: WorldState = null, p_sender: Contact = null, p_tone: StringName = &"") -> void:
 	state = p_state

@@ -101,18 +101,25 @@ const CULTIVATE_GOVERNOR: StringName = &"cultivate_governor"
 ## world value; what it does is put a company ashore (`CrownTroops`).
 const CROWN_TROOPS: StringName = &"crown_troops"
 
+## 🔒 **A patron's other bonus: more of his kind across the colony** (#442,
+## `patrons.md` §3, §4). Every town yields more of it and, for a processed kind,
+## its conversions make more; for livestock, every herd breeds faster. One
+## effect, read by kind, so the Work, Convert and Settle phases each ask for the
+## kind they are handling and none of them knows a patron exists.
+const MORE_OF_HIS_KIND: StringName = &"more_of_his_kind"
+
 ## 🔒 **The policies aimed at a resource** (#396, `policy.md` §8).
 ##
 ## *A patron whose specialty is horses* moves the Crown's price for **horses**,
 ## so the policy is nothing without the resource it names. Asked by the effect
 ## that proposes one, so a letter cannot enact a market policy with no market —
 ## which it could, and which did nothing.
-const AIMED_AT_A_RESOURCE: Array[StringName] = [FAVOUR_OUR_MARKET]
+const AIMED_AT_A_RESOURCE: Array[StringName] = [FAVOUR_OUR_MARKET, MORE_OF_HIS_KIND]
 
 const ALL: Array[StringName] = [
 	IMMIGRATION, FAVOUR_OUR_MARKET, VOLUME, PROVISION, EXPERTS, LIVESTOCK,
 	CURRICULUM, PUBLIC_RELATIONS, CROWN_SENTIMENT, TRAVELLING_EXPERTS,
-	GUN_CONTRACT, CULTIVATE_GOVERNOR, CROWN_TROOPS,
+	GUN_CONTRACT, CULTIVATE_GOVERNOR, CROWN_TROOPS, MORE_OF_HIS_KIND,
 ]
 
 ## What each knob is set to. **Four settings and no numbers**, because the PC is
@@ -178,6 +185,13 @@ const PRICE_PREFIX: String = "policy.price."
 ## to favour. Tuning.
 const MARKET_LIFT: float = 0.35
 
+## World value prefix for how much more of a kind the colony makes (#442).
+const MORE_PREFIX: String = "policy.more."
+
+## How much more: a share on every town's yield, every conversion's output, or
+## every herd's breeding. Tuning (`patrons.md` §11, *the size of each specialty*).
+const MORE_LIFT: float = 0.25
+
 ## How much faster people come to a colony the Crown is subsidising. Tuning.
 const IMMIGRATION_LIFT: float = 0.5
 
@@ -239,10 +253,16 @@ static func is_aimed_at_a_resource(id: StringName) -> bool:
 
 ## The world value one policy moves, or empty for the ones that do not.
 static func world_key(policy: Policy) -> String:
-	if policy.effect != FAVOUR_OUR_MARKET:
-		return ""
+	var prefix := ""
+	match policy.effect:
+		FAVOUR_OUR_MARKET:
+			prefix = PRICE_PREFIX
+		MORE_OF_HIS_KIND:
+			prefix = MORE_PREFIX
+		_:
+			return ""
 	var resource := String(policy.params.get("resource", ""))
-	return "" if resource.is_empty() else PRICE_PREFIX + resource
+	return "" if resource.is_empty() else prefix + resource
 
 
 ## Everything the standing policies press on, as world values.
@@ -261,6 +281,10 @@ static func pressure(book: PolicyBook) -> Dictionary:
 				var key := world_key(policy)
 				if not key.is_empty():
 					values[key] = float(values.get(key, 0.0)) + MARKET_LIFT
+			MORE_OF_HIS_KIND:
+				var key := world_key(policy)
+				if not key.is_empty():
+					values[key] = float(values.get(key, 0.0)) + MORE_LIFT
 			IMMIGRATION:
 				values[WorldValues.IMMIGRATION] = \
 					float(values.get(WorldValues.IMMIGRATION, 0.0)) + IMMIGRATION_LIFT
@@ -331,6 +355,14 @@ static func monthly_for(effect: StringName, setting: StringName) -> float:
 ## Whether this effect is one of the Provost's, for a letter or a test to ask.
 static func is_a_knob(effect: StringName) -> bool:
 	return PROVOST_KNOBS.has(effect)
+
+
+## How much more of a kind the colony makes than it otherwise would (#442): a
+## share, nought when no policy presses on it. Asked by the phases that make it.
+static func more_of(state: WorldState, resource: StringName) -> float:
+	if state == null:
+		return 0.0
+	return maxf(0.0, float(state.get_value(MORE_PREFIX + String(resource), 0.0)))
 
 
 ## What the Crown pays for a resource, after whatever its officers have been

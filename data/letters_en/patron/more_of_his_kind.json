@@ -1,0 +1,118 @@
+{
+  "id": "patron.more_of_his_kind",
+  "sender": "patron",
+  "type": "offer",
+  "skippable": true,
+  "note": "Issue 442, patrons.md sections 3 and 4, policy.md sections 3 and 8. A patron whose resource specialty was rolled with the other bonus - more of his kind - offers it once he thinks well enough of the PC and something that makes the kind stands somewhere in the colony (a plantation for sugar, a distillery for rum, nothing for wood). Accepted, it is a policy: every town yields more of the kind, and for a processed kind its conversions make more. The PC answers with a share of its charge, all, half or none; a policy of his still standing when he sails is the colony's for good. 90 a month is a placeholder. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "I know a good deal about {param:resource}, rather more than a gentleman is supposed to. I have men who know more still."
+    },
+    {
+      "text": "I could send them out to you. Every town of yours that makes {param:resource} would make more of it, and the methods would stay after the men had gone home."
+    },
+    {
+      "text": "It would want paying for, month by month, while they are about it. I should like the Crown to meet that.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "It would want paying for. I say so now so that you cannot say later I did not.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with real gratitude"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your proposal"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered the charge"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "more",
+        "prompt": "His men, and the colony's {param:resource}",
+        "options": [
+          {
+            "id": "all",
+            "label": "accept, and the Crown bears the charge",
+            "text": "Send them, and let the Crown bear the whole of the charge. I would not have you out of pocket for a kindness to my colony.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "more_of_his_kind",
+                "cost": 90,
+                "split": "all",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "half",
+            "label": "accept, and the Crown bears half",
+            "text": "Send them, and the Crown will meet half the charge. I will not pretend that is generous.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "more_of_his_kind",
+                "cost": 90,
+                "split": "half",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "none",
+            "label": "accept, and leave the charge to him",
+            "text": "Send them, and I must leave the charge of it with you. The Crown has nothing to put towards it this year, and I would rather say so than pretend.",
+            "effect": {
+              "enact_policy_on": {
+                "to": "{patron}",
+                "effect": "more_of_his_kind",
+                "cost": 90,
+                "split": "none",
+                "resource": "{resource}"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "decline, with thanks",
+            "text": "I must decline, and I am sorry to. The Crown has no room for another charge this year.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

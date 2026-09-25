@@ -59,7 +59,7 @@
     "letter": "patron.his_barony_would_buy",
     "urgency": 0.45,
     "cooldown": 24,
-    "note": "Issue 396, policy.md section 8. A patron whose specialty is resources or livestock offers to turn his Barony's market toward the colony for that kind: the Crown's price for it rises while the policy stands. Not while he already carries one. Cooldown 24: a second offer inside two years would be a standing discount rather than a favour.",
+    "note": "Issue 396, policy.md section 8. A patron whose specialty is resources or livestock offers to turn his Barony's market toward the colony for that kind: the Crown's price for it rises while the policy stands. Not while he already carries one. Cooldown 24: a second offer inside two years would be a standing discount rather than a favour. #442: only once his regard reaches Patron.OFFERS_AT and something that makes his kind stands somewhere in the colony (patrons.md section 4) - a sugar plantation for a sugar man, a distillery for rum, a pasture for horses, nothing for wood.",
     "params": {
       "patron": {
         "from": "sender_id"
@@ -150,6 +150,50 @@
     "conditions": [
       {
         "he_has_a_need": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.more_of_his_kind",
+    "letter": "patron.more_of_his_kind",
+    "urgency": 0.45,
+    "cooldown": 24,
+    "note": "Issue 442, patrons.md section 4. A resource patron rolled with the other bonus offers more of his kind across the colony, once his regard reaches Patron.OFFERS_AT and something that makes the kind stands somewhere in the colony. Not while he already carries one. Urgency and cooldown as his market offer's, which is the same favour in the other bonus.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "his_specialty_kind"
+      }
+    },
+    "conditions": [
+      {
+        "he_could_bring_more": {
+          "of": "resources"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.his_herds_would_thrive",
+    "letter": "patron.his_herds_would_thrive",
+    "urgency": 0.45,
+    "cooldown": 24,
+    "note": "Issue 442, patrons.md section 4. A livestock patron rolled with the other bonus offers faster breeding of his kind in every town, once his regard reaches Patron.OFFERS_AT and a pasture or town pasture stands somewhere in the colony. Not while he already carries one.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "his_specialty_kind"
+      }
+    },
+    "conditions": [
+      {
+        "he_could_bring_more": {
+          "of": "livestock"
+        }
       }
     ]
   }

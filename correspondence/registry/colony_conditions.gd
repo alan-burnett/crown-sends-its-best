@@ -89,6 +89,10 @@ static func register_all() -> void:
 	)
 	# A patron who would write asking for his need (#441).
 	ContentRegistry.register_condition("he_has_a_need", {}, ColonyConditions.he_has_a_need)
+	# A patron who could bring the colony more of his kind (#442).
+	ContentRegistry.register_condition(
+		"he_could_bring_more", {"of": "string"}, ColonyConditions.he_could_bring_more
+	)
 	# A patron whose Barony has a market to turn the colony's way (#396).
 	ContentRegistry.register_condition(
 		"his_barony_has_a_market", {}, ColonyConditions.his_barony_has_a_market
@@ -809,14 +813,40 @@ static func he_has_a_need(_args: Dictionary, context: LetterContext) -> bool:
 ## second patron of a kind offers the other bonus, so one rolled with *more of
 ## it* has no market to offer.
 static func his_barony_has_a_market(_args: Dictionary, context: LetterContext) -> bool:
+	return _he_would_offer_his_bonus(context, "", Patron.BONUS_PRICE, PolicyEffects.FAVOUR_OUR_MARKET)
+
+
+## Whether this patron would offer the colony more of his kind (#442,
+## `patrons.md` §4): the other bonus, for a resource (`of: resources`, every
+## town yields more) or a livestock kind (`of: livestock`, every herd breeds
+## faster). Two letters because the prose differs; one rule.
+static func he_could_bring_more(args: Dictionary, context: LetterContext) -> bool:
+	return _he_would_offer_his_bonus(
+		context, String(args.get("of", "")), Patron.BONUS_MORE, PolicyEffects.MORE_OF_HIS_KIND)
+
+
+## 🔒 **He offers his specialty when his regard is high enough and its
+## prerequisite exists** (#442, `patrons.md` §4). The PC cannot ask for it.
+##
+## His specialty names a kind of `category` (any, if empty), he was rolled with
+## `bonus`, he thinks well enough of the PC, **something that meets the kind's
+## prerequisite stands anywhere in the colony**, and he is not already carrying
+## that policy for the PC.
+static func _he_would_offer_his_bonus(
+	context: LetterContext, category: String, bonus: String, effect: StringName
+) -> bool:
 	var him := context.sender
-	if him == null or not Patron.is_patron(him) or him.specialty_kind.is_empty():
+	if him == null or not Patron.would_offer(him) or him.specialty_kind.is_empty():
 		return false
-	if not Patron.WITH_A_BONUS.has(him.specialty) or him.specialty_bonus != Patron.BONUS_PRICE:
+	if not Patron.WITH_A_BONUS.has(him.specialty) or him.specialty_bonus != bonus:
+		return false
+	if not category.is_empty() and him.specialty != category:
+		return false
+	if not Patron.colony_has_prerequisite(him.specialty_kind, context.colony, context.territory, context.map):
 		return false
 	if context.policies != null:
 		for policy in context.policies.held_by(him.id):
-			if policy.effect == PolicyEffects.FAVOUR_OUR_MARKET:
+			if policy.effect == effect:
 				return false
 	return true
 

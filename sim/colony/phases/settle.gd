@@ -301,7 +301,9 @@ func _breed(town: Town, context: ColonyContext) -> void:
 			continue
 		# **Whole head land, the fraction carries, and nothing caps it** (#427,
 		# `population.md` §6): a herd of thousands calves by the dozen.
-		town.livestock_accrued[id] = float(town.livestock_accrued.get(id, 0.0)) + grazing * rate
+		# 🔒 **Faster breeding of a patron's kind** (#442, `patrons.md` §4).
+		var breeds := rate * (1.0 + PolicyEffects.more_of(context.state, kind))
+		town.livestock_accrued[id] = float(town.livestock_accrued.get(id, 0.0)) + grazing * breeds
 		var calves := int(floorf(float(town.livestock_accrued[id])))
 		if calves <= 0:
 			continue

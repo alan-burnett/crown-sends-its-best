@@ -218,6 +218,101 @@ static func is_patron(contact: Contact) -> bool:
 	return contact != null and contact.role == ROLE
 
 
+# --- 🔒 When he offers his specialty (#442, §4) -------------------------------
+
+## The regard at which he offers his specialty. **He offers; the PC cannot
+## ask** (§10). A placeholder: §11 lists it as tuning.
+const OFFERS_AT: float = 60.0
+
+
+## Whether he thinks well enough of the PC to offer what he has.
+static func would_offer(contact: Contact) -> bool:
+	return is_patron(contact) and contact.loyalty() >= OFFERS_AT
+
+
+## What would meet a kind's prerequisite anywhere in the colony (§4, *What his
+## specialty does*): `{"buildings": [...], "improvements": [...]}`, both sorted,
+## both empty when nothing is needed.
+##
+## **Read off the building tree and the improvements rather than listed**, so a
+## new rum-making building meets a rum man's condition without anybody
+## remembering to add it here:
+##
+## | Kind | Met by |
+## | :--- | :--- |
+## | livestock | a building that pastures, or an improvement that grazes |
+## | processed | a building that makes it, **never the town hall** |
+## | raw | an improvement whose principal yield it is: a farm, a plantation, a mine. Nothing for wood, stone or furs, which no improvement is built for |
+static func prerequisite_of(kind: String) -> Dictionary:
+	var buildings := PackedStringArray()
+	var improvements := PackedStringArray()
+	var resource := ResourceCatalogue.get_kind(StringName(kind))
+	if resource != null and resource.livestock:
+		for id in Building.ids():
+			if int(Building.find(StringName(id)).effect("pasture", 0)) > 0:
+				buildings.append(id)
+		for id in Improvement.ids():
+			if Improvement.find(StringName(id)).livestock_capacity > 0:
+				improvements.append(id)
+	elif resource != null and resource.is_processed():
+		for id in Building.ids():
+			if StringName(id) == Building.BASE:
+				continue
+			for recipe in (Building.find(StringName(id)).effect("conversions", {}) as Dictionary):
+				if String(recipe).begins_with(kind + "<-"):
+					buildings.append(id)
+					break
+	elif resource != null:
+		for id in Improvement.ids():
+			if _principal_yield_of(Improvement.find(StringName(id))) == kind:
+				improvements.append(id)
+	buildings.sort()
+	improvements.sort()
+	return {"buildings": buildings, "improvements": improvements}
+
+
+## What an improvement is built for: the resource it adds most of. A mine adds a
+## little stone and a great deal of ore, and it is a mine for ore.
+static func _principal_yield_of(improvement: Improvement) -> String:
+	var best := ""
+	var most := 0.0
+	var ids: Array = improvement.adds.keys()
+	ids.sort()
+	for id in ids:
+		var value := Terrain.level_value(String(improvement.adds[id]))
+		if value > most:
+			most = value
+			best = String(id)
+	return best
+
+
+## 🔒 **One is enough** (§4): whether anything that meets `kind`'s prerequisite
+## stands anywhere in the colony — a building in any town, or an improvement on
+## any tile a town of it holds. A single sugar plantation meets a sugar man's
+## condition, and the bonus then reaches every town.
+static func colony_has_prerequisite(
+	kind: String, colony: Colony, territory: Territory, map: WorldMap
+) -> bool:
+	var needed := prerequisite_of(kind)
+	var buildings: PackedStringArray = needed["buildings"]
+	var improvements: PackedStringArray = needed["improvements"]
+	if buildings.is_empty() and improvements.is_empty():
+		return true
+	if colony == null:
+		return false
+	for entry in colony.in_order():
+		var town: Town = entry
+		for id in buildings:
+			if town.buildings.has(id):
+				return true
+		if improvements.is_empty() or territory == null or map == null:
+			continue
+		for at in territory.tiles_of(town.id):
+			if improvements.has(String(map.improvement_at(at.x, at.y))):
+				return true
+	return false
+
+
 # --- Arrival ----------------------------------------------------------------
 
 ## How many patrons the Squeeze has produced (§7).

@@ -71,7 +71,7 @@ func run(town: Town, _before: ColonySnapshot, context: ColonyContext) -> void:
 	var hands := 0
 	for entry in assigned:
 		var recipe: Conversion = entry
-		if _run_recipe(town, recipe, available, made):
+		if _run_recipe(town, recipe, available, made, PolicyEffects.more_of(context.state, recipe.output)):
 			hands += 1
 
 	_report_what_it_cannot_make(town, context)
@@ -121,6 +121,7 @@ func _run_recipe(
 	recipe: Conversion,
 	available: Dictionary,
 	into: Dictionary,
+	more: float = 0.0,
 ) -> bool:
 	var takes := recipe.consumes_for(town)
 	if takes <= 0.0:
@@ -134,7 +135,9 @@ func _run_recipe(
 	# A part-supplied worker does part of the work rather than none of it.
 	var share := clampf(on_hand / takes, 0.0, 1.0)
 	var used := takes * share
-	var output := recipe.made_by(town) * share
+	# 🔒 **More of a patron's kind** (#442, `patrons.md` §4): a processed kind's
+	# conversions make more, from the same input.
+	var output := recipe.made_by(town) * share * (1.0 + more)
 	if output <= 0.0:
 		return false
 
