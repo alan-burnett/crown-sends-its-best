@@ -7,8 +7,17 @@ extends RefCounted
 ## and that phase must precede phase 7: a contact cannot acknowledge a promise
 ## the Crown has not yet broken.
 
+## 🔒 **The Crown's gold reaches a town** (#400, `town-economy.md` §4): one
+## event, naming the town and the sum. Nothing else is triggered by the purse
+## growing — no standing, prestige or loyalty — since the promise already moved
+## the Crown's books as any promise of gold does.
+const EVENT_GRANTED: StringName = &"town_granted"
+
 var promises: PromiseBook = null
 var contacts: Dictionary = {}
+
+## Where a promise that names a town is paid. Supplied by the turn loop.
+var colony: Colony = null
 
 ## The seam crown standing (M3) plugs into. For M1 the Crown always pays, and
 ## nothing here assumes a formula for when it would not.
@@ -22,7 +31,30 @@ func _init(p_promises: PromiseBook = null) -> void:
 func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: RngStreams) -> void:
 	if phase != WorldPhase.CROWNS_MONTH or promises == null:
 		return
-	promises.settle_due(contacts, log, state.month, can_crown_pay, _wagers_won(log, state.month))
+	var settled := promises.settle_due(contacts, log, state.month, can_crown_pay, _wagers_won(log, state.month))
+	_pay_the_towns(settled, log, state.month)
+
+
+## Put the gold the Crown has just paid into the towns it was promised to (#400).
+##
+## **Only what it paid.** A promise the Crown refused was broken in `settle_due`
+## and never reaches here as kept, so the town receives nothing. A town that has
+## gone while the promise waited receives nothing either: the Crown paid, and there
+## was nobody to hand it to.
+func _pay_the_towns(settled: Array[Promise], log: EventLog, month: int) -> void:
+	for promise in settled:
+		if promise.status != Promise.KEPT or promise.kind != &"gold" or promise.payer != Promise.PAYER_CROWN:
+			continue
+		var town := DiplomatMoveExecutor.town_named(colony, String(promise.terms.get("town", "")))
+		if town == null:
+			continue
+		town.receive_gold(promise.amount())
+		log.emit(EVENT_GRANTED, town.id, month, {
+			"town": String(town.id),
+			"amount": promise.amount(),
+			"promise": String(promise.id),
+			"to": String(promise.to),
+		}, WorldPhase.CROWNS_MONTH)
 
 
 ## Which revenue targets the colony actually reached (#69).

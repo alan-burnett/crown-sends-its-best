@@ -1,0 +1,96 @@
+{
+  "id": "clergyman.charity",
+  "sender": "clergyman",
+  "type": "request",
+  "skippable": true,
+  "note": "Issue 400, institutional-contacts.md section 3 'Gold, for charity'. Placeholder prose: the Author writes the real lines. He writes when his town lives badly, whatever the cause, and asks a sum for its poor. Agreeing is a promise of gold to the TOWN (town-economy.md section 4): when the Crown pays, the town's purse holds it; while the Crown refuses payments the promise breaks and the town receives nothing. No figure in the prose but the sum he asks, which the trigger supplies.",
+  "params": {
+    "clergyman": "contact",
+    "town": "town",
+    "amount": "gold"
+  },
+  "perception": {
+    "people": {
+      "measure": "quality_of_life",
+      "ladder": [
+        "miserable",
+        "poor",
+        "tolerable",
+        "comfortable"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "The people of {param:town} are {perception:people}, and I do not think it will mend of itself."
+    },
+    {
+      "text": "I am asking {param:amount} for the poor of this parish: blankets, bread, and the rent of families who will otherwise be on the road before the spring."
+    },
+    {
+      "text": "It is to go to the town, not to me. I should not know what to do with a purse, and the people who would are the reason I am asking."
+    },
+    {
+      "text": "I know what the Crown is asked for, and by whom. I would only say that this is the one request in the pile that will be spent entirely on people who cannot write to you.",
+      "only_tones": [
+        "desperate",
+        "annoyed",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — as to the poor of {param:town}, I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "gladly"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered the figure"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "charity",
+        "prompt": "The poor of {param:town}",
+        "options": [
+          {
+            "id": "give",
+            "label": "the Crown will pay it",
+            "text": "The Crown will send it, to the town and for the purpose you name.",
+            "effect": {
+              "promise_gold_to_town": {
+                "to": "{clergyman}",
+                "town": "{town}",
+                "amount": "{amount}"
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "the Crown cannot spare it",
+            "text": "The Crown cannot spare it this year. I am sorry for it, and I know that is worth very little to a family on the road.",
+            "effect": {
+              "refuse": {
+                "to": "{clergyman}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

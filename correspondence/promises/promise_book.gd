@@ -52,9 +52,16 @@ static func from_order(order: Order, month: int) -> Promise:
 			# (`rival-pressure.md` §4) — and a Crown that has closed its purse
 			# breaks it, which costs the PC the duke's regard at the worst
 			# possible moment. None of that needs a second mechanism.
-			return Promise.new(order.addressed_to, &"gold", {
+			var gold := Promise.new(order.addressed_to, &"gold", {
 				"amount": order.get_param("amount", 0),
 			}, month, 0)
+			# 🔒 **And it may name a town** (#400): the Crown pays it into that
+			# town's purse. Kept as the letter wrote it, a name or an id, and saved
+			# with the rest of the terms.
+			var town := String(order.get_param("town", ""))
+			if not town.is_empty():
+				gold.terms["town"] = town
+			return gold
 		M1Registrations.ORDER_PROMISE_RESOURCE:
 			# The colony sends this from its own stockpiles, so the Crown cannot
 			# refuse it.

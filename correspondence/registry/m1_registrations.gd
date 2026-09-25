@@ -206,6 +206,14 @@ static func register_effects() -> void:
 	ContentRegistry.register_effect(
 		"promise_gold", {"to": "contact", "amount": "gold"}, ORDER_PROMISE_GOLD
 	)
+	# 🔒 **A promise of gold that names a town** (#400, `town-economy.md` §4).
+	# The same Order as any promise of gold, so it is paid, broken and counted on
+	# the Crown's books exactly as one is; the only difference is that when the
+	# Crown pays, the town's purse receives it.
+	ContentRegistry.register_effect(
+		"promise_gold_to_town", {"to": "contact", "town": "town", "amount": "gold"},
+		ORDER_PROMISE_GOLD,
+	)
 	ContentRegistry.register_effect(
 		"promise_resource",
 		{"to": "contact", "resource": "resource", "amount": "integer"},

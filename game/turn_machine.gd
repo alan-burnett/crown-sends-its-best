@@ -97,6 +97,8 @@ func _init(p_run: RunState) -> void:
 	orders.pending = run.orders_at_sea
 	promise_driver = PromiseDriver.new(run.promises)
 	promise_driver.contacts = run.contacts
+	# A promise of gold may name a town, and it is paid into its purse (#400).
+	promise_driver.colony = run.colony
 
 	var executor := WorldValueExecutor.new()
 	executor.table = order_effects()
