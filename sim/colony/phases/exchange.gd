@@ -293,8 +293,11 @@ func _best_comfort(
 		# with a theatre gets less from its next measure of rum and should buy
 		# accordingly, or the buying side and the drinking side are back on two
 		# theories of what a month of pleasure is worth.
+		# **And against how far each measure goes here** (#414): a tea-house town
+		# values tea more, with no second theory of what a cellar is worth.
 		var pleasure := QualityOfLife.marginal_pleasure(
-			mouths, cellar, resource, step, Building.amusement_for(town)
+			mouths, cellar, resource, step, Building.amusement_for(town),
+			Building.luxury_serves_for(town)
 		)
 		if pleasure <= 0.0:
 			continue

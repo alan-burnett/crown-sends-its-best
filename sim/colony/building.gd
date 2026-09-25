@@ -509,6 +509,23 @@ static func crown_sale_bonus_for(town: Town) -> float:
 	return bonus
 
 
+## How many of the town each measure of a luxury serves (#414,
+## `quality-of-life.md` §4, the Author's ruling): twice as many where a tea house
+## stands, for tea, and where an ale house stands, for beer. Luxury id -> how
+## many measures' worth one measure serves; a luxury nobody names serves one.
+## The largest any lit building says, not their product.
+static func luxury_serves_for(town: Town) -> Dictionary:
+	var serves: Dictionary = {}
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building == null or not is_lit(town, StringName(id)):
+			continue
+		var more: Dictionary = building.effect("serves_more", {})
+		for luxury in more:
+			serves[luxury] = maxf(float(serves.get(luxury, 1.0)), float(more[luxury]))
+	return serves
+
+
 ## How much this town's production of a resource is raised by what it has built.
 static func yield_bonus_for(town: Town, resource: StringName) -> float:
 	var bonus := 0.0

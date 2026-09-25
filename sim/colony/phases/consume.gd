@@ -178,7 +178,9 @@ func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
 	for id in ResourceCatalogue.luxuries():
 		held[String(id)] = town.held(StringName(id))
 
-	var drawn := QualityOfLife.draw_from(mouths, held)
+	# **A tea house makes tea go further** (#414): what each measure serves.
+	var serves := Building.luxury_serves_for(town)
+	var drawn := QualityOfLife.draw_from(mouths, held, serves)
 	var ids: PackedStringArray = PackedStringArray(drawn.keys())
 	ids.sort()
 	var taken := 0.0
@@ -187,7 +189,7 @@ func _enjoy(town: Town, mouths: float, record: Dictionary) -> void:
 		var drunk := town.take(StringName(id), float(drawn[id]))
 		if drunk > 0.0:
 			kinds += 1
-		taken += drunk
+		taken += drunk * maxf(1.0, float(serves.get(id, 1.0)))
 
 	record["luxury"] = clampf(taken / cap, 0.0, 1.0) + float(amusement["served"])
 	# **Variety is worth something of its own**: beer alone is worth less than

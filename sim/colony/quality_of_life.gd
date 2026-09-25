@@ -416,7 +416,12 @@ static func pleasure_of(wellbeing: Dictionary) -> float:
 ## Water-filling: every kind takes an equal share of the month, and what a thin
 ## cellar cannot cover is shared out again over the rest. Ordered by id, so the
 ## result does not depend on how the catalogue is walked.
-static func draw_from(mouths: float, held: Dictionary) -> Dictionary:
+##
+## **A measure that serves more fills more of the month** (#414): in a tea-house
+## town each measure of tea serves twice the people, so the town drinks half as
+## much of it for the same share. The shares are in people served; what comes
+## back is measures drunk.
+static func draw_from(mouths: float, held: Dictionary, serves: Dictionary = {}) -> Dictionary:
 	var drawn: Dictionary = {}
 	var left := mouths * ColonyNeeds.luxury_per_head()
 	if left <= 0.0:
@@ -433,11 +438,12 @@ static func draw_from(mouths: float, held: Dictionary) -> Dictionary:
 		var thirsty: PackedStringArray = PackedStringArray()
 		var round_took := 0.0
 		for id in pool:
+			var goes := maxf(1.0, float(serves.get(id, 1.0)))
 			var spare := float(held.get(id, 0.0)) - float(drawn.get(id, 0.0))
-			var drunk := minf(share, spare)
+			var drunk := minf(share / goes, spare)
 			if drunk > 0.0:
 				drawn[id] = float(drawn.get(id, 0.0)) + drunk
-				round_took += drunk
+				round_took += drunk * goes
 			if spare - drunk > 0.000001:
 				thirsty.append(id)
 		if round_took <= 0.000001:
@@ -458,15 +464,14 @@ static func pleasure_from(
 	mouths: float,
 	held: Dictionary,
 	amusement: Dictionary = {},
+	serves: Dictionary = {},
 ) -> float:
 	var cap := mouths * ColonyNeeds.luxury_per_head()
 	if cap <= 0.0:
 		return 0.0
 
-	var drawn := draw_from(mouths, held)
-	var taken := 0.0
-	for id in drawn:
-		taken += float(drawn[id])
+	var drawn := draw_from(mouths, held, serves)
+	var taken := served_by(drawn, serves)
 	# **Amusement joins the same two numbers** (#153), so Exchange's marginal
 	# scoring sees it too: a town with a theatre gets less from its next measure
 	# of rum, and buys accordingly. Passing it only to Consume would put the
@@ -490,12 +495,24 @@ static func marginal_pleasure(
 	resource: StringName,
 	amount: float,
 	amusement: Dictionary = {},
+	serves: Dictionary = {},
 ) -> float:
 	if amount <= 0.0:
 		return 0.0
 	var after := held.duplicate()
 	after[String(resource)] = float(after.get(String(resource), 0.0)) + amount
-	return pleasure_from(mouths, after, amusement) - pleasure_from(mouths, held, amusement)
+	return pleasure_from(mouths, after, amusement, serves) - pleasure_from(mouths, held, amusement, serves)
+
+
+## How many of the town what was drunk served (#414): each measure counts for
+## as many as it serves. In id order, so the sum is the same double every time.
+static func served_by(drawn: Dictionary, serves: Dictionary = {}) -> float:
+	var ids: PackedStringArray = PackedStringArray(drawn.keys())
+	ids.sort()
+	var served := 0.0
+	for id in ids:
+		served += float(drawn[id]) * maxf(1.0, float(serves.get(id, 1.0)))
+	return served
 
 
 # --- Who is addressing what -------------------------------------------------

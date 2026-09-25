@@ -307,6 +307,9 @@
 	"effects": {
 	  "reserve_months": {
 		"tea": 2
+	  },
+	  "serves_more": {
+		"tea": 2.0
 	  }
 	},
 	"requires": []
@@ -322,6 +325,9 @@
 	"effects": {
 	  "reserve_months": {
 		"beer": 2
+	  },
+	  "serves_more": {
+		"beer": 2.0
 	  }
 	},
 	"requires": []
