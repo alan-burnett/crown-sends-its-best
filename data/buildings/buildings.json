@@ -183,6 +183,8 @@
 	},
 	"upkeep": 5,
 	"effects": {
+	  "influence": 1,
+	  "vision": 2,
 	  "defence": 3
 	}
   },
@@ -210,6 +212,7 @@
 	},
 	"upkeep": 2,
 	"effects": {
+	  "influence": 1,
 	  "expedition_stores": { "multiply": 2, "add": { "tools": 10 } }
 	},
 	"requires": []
@@ -227,6 +230,7 @@
 	},
 	"upkeep": 5,
 	"effects": {
+	  "influence": 1,
 	  "improvement_build_speed": 1.0,
 	  "carries_improvement_upkeep": true
 	}
@@ -244,6 +248,7 @@
 	},
 	"upkeep": 5,
 	"effects": {
+	  "influence": 1,
 	  "amusement": 0.4,
 	  "immigration": 1.5
 	}

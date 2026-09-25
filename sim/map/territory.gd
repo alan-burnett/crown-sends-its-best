@@ -32,10 +32,14 @@ var visible: Dictionary = {}    ## Vector2i -> true
 
 
 ## How far this town's influence reaches. **Derived from the town**, so it grows
-## as the town does.
+## as the town does — and as it builds.
+##
+## 🔒 **A building's influence lifts the cap** (#410, the Author's ruling):
+## `MAX_INFLUENCE` bounds the rings the population earns, and the rings its
+## buildings add sit on top.
 static func reach_of(town: Town) -> int:
 	var rings := BASE_INFLUENCE + int(town.population() / POPULATION_PER_RING)
-	return clampi(rings, BASE_INFLUENCE, MAX_INFLUENCE)
+	return clampi(rings, BASE_INFLUENCE, MAX_INFLUENCE) + Building.influence_for(town)
 
 
 ## Recompute everything from the colony's towns.
@@ -62,6 +66,17 @@ static func compute(map: WorldMap, towns: Array) -> Territory:
 
 	for at in territory.border:
 		for seen in _within(map, at, VISION_MARGIN):
+			territory.visible[seen] = true
+
+	# **And further, from a town that has built to see** (#410): guard towers
+	# carry the town's sight past the common margin, from its own ground.
+	for town in towns:
+		var further := Building.vision_for(town)
+		if further <= 0:
+			continue
+		# The squares of sight round every tile of its square of ground (its
+		# reach and the ring beyond) are one larger square.
+		for seen in _within(map, town.at, reach_of(town) + 1 + VISION_MARGIN + further):
 			territory.visible[seen] = true
 
 	return territory

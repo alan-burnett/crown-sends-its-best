@@ -526,6 +526,27 @@ static func luxury_serves_for(town: Town) -> Dictionary:
 	return serves
 
 
+## 🔒 **Rings of influence a town's buildings add** (#410, `buildings.md` §4
+## *Expansion*: *town influence is the expansion branch's signature*). Every lit
+## building's rings add, and they sit **on top of** the population's cap.
+static func influence_for(town: Town) -> int:
+	return _rings(town, "influence")
+
+
+## And how much further the town sees past its border (#410: guard towers).
+static func vision_for(town: Town) -> int:
+	return _rings(town, "vision")
+
+
+static func _rings(town: Town, effect: String) -> int:
+	var rings := 0
+	for id in town.buildings:
+		var building := find(StringName(id))
+		if building != null and is_lit(town, StringName(id)):
+			rings += maxi(0, int(building.effect(effect, 0)))
+	return rings
+
+
 ## How much this town's production of a resource is raised by what it has built.
 static func yield_bonus_for(town: Town, resource: StringName) -> float:
 	var bonus := 0.0
