@@ -174,7 +174,7 @@ func _fits_a_phone(dialog: ConfirmationDialog) -> void:
 func _open_map() -> void:
 	var screen := MapScreen.new()
 	add_child(screen)
-	screen.begin(run.knowledge, refresh)
+	screen.begin(run.knowledge, refresh, run.colony)
 
 
 ## Open the Ledger over the desk, and put the desk back when it closes.
@@ -479,7 +479,7 @@ func _play_back_the_month(events: Array[SimEvent]) -> void:
 		return
 	var screen := MapScreen.new()
 	add_child(screen)
-	screen.begin(run.knowledge, _after_the_map)
+	screen.begin(run.knowledge, _after_the_map, run.colony)
 	screen.play(beats, get_node_or_null(^"/root/Assets") as AssetRegistry)
 
 

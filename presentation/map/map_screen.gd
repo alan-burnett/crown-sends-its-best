@@ -47,6 +47,21 @@ const REMEMBERED_DIM: float = 0.45
 
 var knowledge: MapKnowledge = null
 
+## 🔧 **A content-testing aid, not the design** (the Author, 2026-09-25): a text
+## box under each of the colony's towns with its people, what it is building and
+## what its governor intends, so letters can be checked against the towns they
+## are about. The presentation pass replaces it.
+##
+## **It shows what the player is otherwise only told in letters**, a governor
+## preparing for rebellion among it, so switch it off before anything ships.
+const SHOWS_TOWN_DETAIL: bool = true
+const DETAIL_FONT_SIZE: int = 12
+const DETAIL_PAD: float = 4.0
+const DETAIL_BACK: Color = Color(0.05, 0.05, 0.07, 0.82)
+
+## The colony's towns, for the text boxes above. Null draws none.
+var colony: Colony = null
+
 ## What the player is looking at. Neither of these is game state.
 var _zoom: float = 1.0
 var _offset: Vector2 = Vector2.ZERO
@@ -129,8 +144,9 @@ func _set_offset(to: Vector2) -> void:
 
 
 ## Show the map. `on_closed` is called when the player is done with it.
-func begin(p_knowledge: MapKnowledge, on_closed: Callable = Callable()) -> void:
+func begin(p_knowledge: MapKnowledge, on_closed: Callable = Callable(), p_colony: Colony = null) -> void:
 	knowledge = p_knowledge
+	colony = p_colony
 	_closed = on_closed
 	_build()
 	_frame_the_colony()
@@ -279,6 +295,9 @@ func _draw_map() -> void:
 		var centre := (Vector2(at) + Vector2(0.5, 0.5)) * side + _offset
 		_canvas.draw_circle(centre, maxf(3.0, side * 0.3), DeskTheme.MAP_TOWN)
 
+	if SHOWS_TOWN_DETAIL:
+		_draw_town_details(side)
+
 	# What happened this month (#296). A ring per beat, sized by how much it
 	# mattered, and the one being shown brighter.
 	for beat in _marks:
@@ -300,6 +319,47 @@ func _draw_map() -> void:
 			middle + Vector2(span * 0.5, span * 0.4),
 			middle + Vector2(-span * 0.5, span * 0.4),
 		]), DeskTheme.MAP_VILLAGE)
+
+
+## 🔧 The content-testing text box under each known town (see `SHOWS_TOWN_DETAIL`).
+## A fixed type size whatever the zoom, so it stays readable.
+func _draw_town_details(side: float) -> void:
+	if colony == null:
+		return
+	var font := ThemeDB.fallback_font
+	var line_height := font.get_height(DETAIL_FONT_SIZE)
+	var ascent := font.get_ascent(DETAIL_FONT_SIZE)
+	for entry in colony.in_order():
+		var town: Town = entry
+		if not knowledge.towns.has(town.at):
+			continue
+		var lines := details_of(town)
+		var width := 0.0
+		for line in lines:
+			width = maxf(width, font.get_string_size(
+				line, HORIZONTAL_ALIGNMENT_LEFT, -1, DETAIL_FONT_SIZE).x)
+		var box := Vector2(width, line_height * lines.size()) + Vector2(DETAIL_PAD, DETAIL_PAD) * 2.0
+		var centre := (Vector2(town.at) + Vector2(0.5, 0.5)) * side + _offset
+		var corner := Vector2(centre.x - box.x * 0.5, centre.y + maxf(3.0, side * 0.3) + 4.0)
+		_canvas.draw_rect(Rect2(corner, box), DETAIL_BACK)
+		for index in lines.size():
+			var baseline := corner + Vector2(DETAIL_PAD, DETAIL_PAD + ascent + line_height * index)
+			_canvas.draw_string(font, baseline, lines[index], HORIZONTAL_ALIGNMENT_LEFT, -1,
+				DETAIL_FONT_SIZE, DeskTheme.PAPER)
+
+
+## What the text box says about a town: its name and people, what it is
+## building, and what its governor intends.
+static func details_of(town: Town) -> PackedStringArray:
+	var building := "nothing" if String(town.objective).is_empty() \
+		else Objective.display_name(town.objective)
+	var intent := "none" if String(town.intent).is_empty() \
+		else Objective.intent_name(town.intent)
+	return PackedStringArray([
+		"%s · %s people" % [town.display_name, Figures.with_thousands(town.population())],
+		"Building: %s" % building,
+		"Intent: %s" % intent,
+	])
 
 
 func _redraw() -> void:
