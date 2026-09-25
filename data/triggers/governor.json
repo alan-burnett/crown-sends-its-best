@@ -530,5 +530,37 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.governor.i_have_been_pressed",
+    "letter": "governor.i_have_been_pressed",
+    "urgency": 0.5,
+    "cooldown": 12,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "who": {
+        "from": "what_happened",
+        "event": "town_pressed",
+        "within": 2,
+        "concerning": "his_town",
+        "field": "author"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "town_pressed",
+          "within": 2,
+          "concerning": "his_town"
+        }
+      },
+      {
+        "town_intent_is": {
+          "intent": "education"
+        }
+      }
+    ]
   }
 ]

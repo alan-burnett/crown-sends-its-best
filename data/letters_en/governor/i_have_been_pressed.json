@@ -1,0 +1,46 @@
+{
+  "id": "governor.i_have_been_pressed",
+  "sender": "governor",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "town": "town",
+    "who": "contact"
+  },
+  "body": [
+    {
+      "text": "{param:who} has been at me about the schooling of {param:town}, by every post and at a length I would not have thought the Crown could afford."
+    },
+    {
+      "text": "I have given way. The town is to see to its learning, and you will hear of the building when there is a building to hear of."
+    },
+    {
+      "text": "I tell you because it was not your letter that moved me, and I would not have you think it was."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the schooling of {param:town}, I am {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "glad of it, whoever moved you"
+        },
+        {
+          "tone": "dutiful",
+          "text": "obliged for the notice"
+        },
+        {
+          "tone": "annoyed",
+          "text": "sorry you did not write to me first"
+        }
+      ]
+    },
+    "steps": [],
+    "closing": [
+      {
+        "text": "I remain your servant,"
+      }
+    ]
+  }
+}

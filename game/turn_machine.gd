@@ -253,6 +253,10 @@ func _init(p_run: RunState) -> void:
 	# reach, and the only policy that buys another contact's regard.
 	var cultivation := CultivationDriver.new(run)
 
+	# Phase 8. The Provost at low regard pressing a town toward learning (#401):
+	# his will, committed beside the governors', lands the month after.
+	var provost := ProvostDriver.new(run)
+
 	# Phase 1, before anybody moves. A patron's rival specialty (#284): it marks
 	# the duke whose year a patron has arranged to ruin, so the men he raises
 	# this month are already in disarray.
@@ -336,7 +340,7 @@ func _init(p_run: RunState) -> void:
 		policies, crown_standing, run_end, prestige, drift, rivals, patron_driver,
 		expert_travel, cultivation, sabotage,
 		companies,
-		orders, silence, governors,
+		orders, silence, provost, governors,
 		grievances,
 	]
 	# The specific executor is asked first; the table-driven one answers for

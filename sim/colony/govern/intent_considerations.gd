@@ -197,10 +197,11 @@ static func intensity_of(tone: StringName) -> float:
 
 ## 🔒 **How much an author's urging counts, against the PC's** (#405).
 ##
-## One for everybody, which is the PC's weight today and so changes nothing
-## while only the PC urges. **Not decided here** — `governor-objectives.md` §4
-## leaves it to the first act that urges on someone else's behalf, and this is
-## the one place that act will change.
+## **One for everybody.** `governor-objectives.md` §4 left it to the first act
+## that urges on someone else's behalf, and that act — the Provost pressing a
+## town toward learning (#401) — **weighs his as the PC's, for now**. Whether a
+## governor who defers to the Crown should defer as much to its officers is
+## #377's to settle, and this is the one place it will change.
 static func author_weight(_author: StringName) -> float:
 	return 1.0
 

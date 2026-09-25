@@ -57,5 +57,29 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.provost.i_went_round_you",
+    "letter": "provost.i_went_round_you",
+    "urgency": 0.6,
+    "cooldown": 12,
+    "params": {
+      "town": {
+        "from": "what_happened",
+        "event": "town_pressed",
+        "within": 2,
+        "concerning": "him",
+        "field": "town"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "town_pressed",
+          "within": 2,
+          "concerning": "him"
+        }
+      }
+    ]
   }
 ]

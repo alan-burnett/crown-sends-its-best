@@ -30,6 +30,18 @@ const KIND: StringName = &"urge_intent"
 
 const EVENT_URGED: StringName = &"intent_urged"
 
+## 🔒 **Somebody went round the PC** (#401): the same landing, from another hand.
+## A different event because it is different news — the PC urging his own
+## governor is not the Provost pressing one — and the letters tell them apart.
+const EVENT_PRESSED: StringName = &"town_pressed"
+
+## An urging from anyone but the PC names its author, its town and its strength
+## in the Intent's data (#401). The PC's is found through the governor who
+## complied, and its strength is his letter's tone.
+const AUTHOR: String = "author"
+const TOWN: String = "town"
+const STRENGTH: String = "strength"
+
 ## The colony the Intent names a town in. Supplied by the turn loop, which is the
 ## only place that can see both the Order kinds and the colony.
 var colony: Colony = null
@@ -47,22 +59,33 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 		# month's post can report that it came to nothing.
 		return Intent.STALLED
 
-	# Through the man, not through a town id in the letter. A letter is addressed
-	# to a person; that he governs Ashmere is the world's knowledge, not the
-	# player's instruction.
-	var town: Town = colony.governed_by(intent.source) if colony != null else null
+	var author := StringName(intent.data.get(AUTHOR, String(Urging.PC)))
+	var town: Town = null
+	if colony != null:
+		# The PC's through the man, not through a town id in the letter. A letter
+		# is addressed to a person; that he governs Ashmere is the world's
+		# knowledge, not the player's instruction. **Anybody else's names the town
+		# he pressed** (#401): he went to it, not to a man answering him.
+		town = colony.governed_by(intent.source) if author == Urging.PC \
+			else colony.by_id(StringName(intent.data.get(TOWN, "")))
 	if town == null:
 		return Intent.STALLED
 
-	# **And how hard it was said** (#262, `tone.md` §4). Carried from the letter
-	# rather than read off the man, because the urging outlives the month it
-	# arrived in and it is the letter that was emphatic, not the reader. **The
-	# PC's**, replacing his last and nobody else's (#405).
 	var tone := StringName(intent.data.get(Compliance.URGED_TONE, ""))
-	town.urge(Urging.from_pc(wanted, state.month, tone))
+	if author == Urging.PC:
+		# **And how hard it was said** (#262, `tone.md` §4). Carried from the
+		# letter rather than read off the man, because the urging outlives the
+		# month it arrived in and it is the letter that was emphatic, not the
+		# reader. **The PC's**, replacing his last and nobody else's (#405).
+		town.urge(Urging.from_pc(wanted, state.month, tone))
+	else:
+		# **Another hand's, as hard as his act was** (#401), replacing his own
+		# last and nobody else's.
+		town.urge(Urging.make(author, wanted, state.month, float(intent.data.get(STRENGTH, 1.0))))
 
-	log.emit(EVENT_URGED, intent.source, state.month, {
+	log.emit(EVENT_URGED if author == Urging.PC else EVENT_PRESSED, intent.source, state.month, {
 		"intent": String(intent.id),
+		"author": String(author),
 		"town": String(town.id),
 		"governor": String(town.governor_id),
 		"urged": String(wanted),

@@ -1,0 +1,71 @@
+{
+  "id": "provost.i_went_round_you",
+  "sender": "provost",
+  "type": "report",
+  "skippable": true,
+  "params": {
+    "town": "town"
+  },
+  "perception": {
+    "schools": {
+      "measure": "colony_education",
+      "ladder": [
+        "wretched",
+        "thin",
+        "adequate",
+        "creditable"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "I have written to the governor at {param:town} about the schooling of his people, and I did not wait for your leave to do it."
+    },
+    {
+      "text": "The schools are {perception:schools}. I have told you so before, in several registers, and I have now told somebody who can lay a stone."
+    },
+    {
+      "text": "I have put it to him that the town's learning is his first business. What he builds for it is his affair. I should be astonished if it were not a library, there being none anywhere in the colony — which I mention in case it had escaped you."
+    },
+    {
+      "text": "I have not spent a shilling of the Crown's on it. I have spent a good deal of my patience, which the Crown does not pay for either.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I have not spent a shilling of the Crown's on it, and I do not ask you to. I ask only that you do not write to him telling him to stop.",
+      "only_tones": [
+        "dutiful",
+        "pleased",
+        "desperate"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "Dr Meakin — as to what you have done at {param:town}, I am {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "glad somebody has"
+        },
+        {
+          "tone": "dutiful",
+          "text": "obliged to be told"
+        },
+        {
+          "tone": "annoyed",
+          "text": "not pleased to be told afterwards"
+        }
+      ]
+    },
+    "steps": [],
+    "closing": [
+      {
+        "text": "I am, sir, your obedient servant,"
+      }
+    ]
+  }
+}

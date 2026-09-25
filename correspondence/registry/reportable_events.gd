@@ -67,6 +67,13 @@ const TABLE: Dictionary = {
 		"man": "commander",
 		"fields": {"commander": "contact"},
 	},
+	# 🔒 **Somebody went round the PC** (#401): an urging from another hand
+	# landed on a town. *Him* is whoever pressed it.
+	"town_pressed": {
+		"town": "town",
+		"man": "author",
+		"fields": {"town": "town", "author": "contact"},
+	},
 }
 
 
