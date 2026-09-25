@@ -513,7 +513,7 @@ That is how **military and rebellion keep guns and horses in hand**, and buy
 them, even when no company is being armed.
 
 Placeholders, per thousand people, carried over from the old intents and tuned
-in M8:
+in M9:
 
 | Intent | Reserve per thousand | From |
 | :--- | :--- | :--- |

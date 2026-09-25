@@ -267,7 +267,7 @@ and then can add optics freely without anyone having to guess what a rebellion i
 worth relative to a lost town — the question is asked once, with all the answers
 visible.
 
-M8 then tunes the numbers against the harness. M7 decides what the numbers *are
+M9 then tunes the numbers against the harness. M7 decides what the numbers *are
 for*.
 
 ## 12. Tuning targets

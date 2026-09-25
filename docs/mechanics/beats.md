@@ -202,7 +202,7 @@ in length. A month that is ten short beats and a month that is four long ones
 should take about as long.
 
 **Target: about 20 seconds for a month, and it is always skippable.** Both
-numbers are tuning targets for M8.
+numbers are tuning targets for M9.
 
 ### 🔒 A beat that didn't play is not an event that didn't happen
 

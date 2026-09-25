@@ -145,7 +145,7 @@ with no code change at all. That recurring work does not disappear; it becomes
 weight tuning in data, guided by traces and the balance harness, rather than
 rewriting a method.
 
-Budget a small weights pass after each playtest, and one holistic pass in M8.
+Budget a small weights pass after each playtest, and one holistic pass in M9.
 
 ## 9. Open items
 

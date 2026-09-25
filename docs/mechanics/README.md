@@ -46,7 +46,7 @@ being rewritten every iteration.
 | [the-diplomat.md](the-diplomat.md) | The PC's only resident eyes, and his price | M3 |
 | [the-steward.md](the-steward.md) | The one officer asked to do what he already wants | M8 |
 | [names.md](names.md) | Who is named, who is not, and the letterhead a letter arrives under | M7 |
-| [reply-vocabulary.md](reply-vocabulary.md) | What a player can actually say, and the personalities that lean | M8 |
+| [reply-vocabulary.md](reply-vocabulary.md) | What a player can actually say, and the personalities that lean | M9 |
 | [the-advisor.md](the-advisor.md) | The tutorial, and the only voice that is not somebody's opinion | M10 |
 | [beats.md](beats.md) | One queue for animation and sound, and what a skip must never change | M8 |
 | [cutscenes.md](cutscenes.md) | Paintings with a line of text, and the one a turn that earns the slot | M8 |
