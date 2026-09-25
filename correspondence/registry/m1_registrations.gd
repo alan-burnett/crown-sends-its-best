@@ -77,6 +77,9 @@ const ORDER_URGE_INTENT: StringName = &"urge_intent"
 ## 🔒 **Argue with a commander, never move his company** (#394, `commanders.md`
 ## §8). The same kind as the Intent it becomes and the executor that lands it.
 const ORDER_URGE_COMPANY: StringName = &"urge_company"
+## 🔒 **A patron works against a duke** (#395, `patrons.md` §5). The same kind as
+## the Intent `SabotageExecutor` lands.
+const ORDER_TROUBLE_A_DUKE: StringName = &"trouble_a_duke"
 
 
 ## Populate the resource catalogue and the terrain table from loaded content.
@@ -398,6 +401,12 @@ static func register_effects() -> void:
 	# was argued for.
 	ContentRegistry.register_effect(
 		"urge_company", {"to": "contact", "order": "string"}, ORDER_URGE_COMPANY
+	)
+	# 🔒 **The rival specialty, accepted** (#395, `patrons.md` §5): an Order to
+	# the patron naming the duke, and compliance decides whether he goes through
+	# with it. Nothing reaches the duke's regard.
+	ContentRegistry.register_effect(
+		"trouble_a_duke", {"to": "contact", "duke": "rival"}, ORDER_TROUBLE_A_DUKE
 	)
 	# **The player never sets a rate directly** (SPEC §10.2). It is always a
 	# letter to the Steward, resolved through compliance like any other Order —

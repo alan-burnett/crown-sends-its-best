@@ -79,5 +79,30 @@
         "his_barony_has_a_market": {}
       }
     ]
+  },
+  {
+    "id": "trigger.patron.a_word_against_the_duke",
+    "letter": "patron.a_word_against_the_duke",
+    "urgency": 0.5,
+    "cooldown": 12,
+    "note": "Issue 395, patrons.md section 5. A patron whose specialty is the rivals offers to trouble the duke nearest to war who can still be troubled. Cooldown 12: the trouble lasts a year, and a man who offered it again while it ran would be offering nothing.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "duke": {
+        "from": "the_duke_to_trouble",
+        "field": "id"
+      },
+      "duke_name": {
+        "from": "the_duke_to_trouble",
+        "field": "name"
+      }
+    },
+    "conditions": [
+      {
+        "he_could_trouble_a_duke": {}
+      }
+    ]
   }
 ]

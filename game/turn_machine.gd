@@ -109,6 +109,9 @@ func _init(p_run: RunState) -> void:
 	# And the commander's: what his company should do, argued (#394).
 	var company_urging := UrgeCompanyExecutor.new()
 	company_urging.companies = run.companies
+	# A patron working against a duke, because the PC accepted (#395).
+	var sabotage_by_letter := SabotageExecutor.new()
+	sabotage_by_letter.contacts = run.contacts
 	# Goods leave a town over months, so a letter can still reach them (#69).
 	var shipments := ShipmentExecutor.new()
 	shipments.colony = run.colony
@@ -355,7 +358,7 @@ func _init(p_run: RunState) -> void:
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, company_urging, shipments, embargoes, tribute, deflection, preferences, foundings,
+		urging, company_urging, sabotage_by_letter, shipments, embargoes, tribute, deflection, preferences, foundings,
 		diplomat_moves, executor,
 	]
 
@@ -445,6 +448,8 @@ static func order_effects() -> Dictionary:
 		String(M1Registrations.ORDER_URGE_INTENT): {"target": ""},
 		# Landed by `UrgeCompanyExecutor` on the company (#394), never a world value.
 		String(M1Registrations.ORDER_URGE_COMPANY): {"target": ""},
+		# Landed by `SabotageExecutor` through `SabotageDriver.arrange` (#395).
+		String(M1Registrations.ORDER_TROUBLE_A_DUKE): {"target": ""},
 	}
 
 

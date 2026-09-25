@@ -74,6 +74,10 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"i_have_no_command", {}, ColonyConditions.i_have_no_command
 	)
+	# A patron who could make a duke's year difficult (#395).
+	ContentRegistry.register_condition(
+		"he_could_trouble_a_duke", {}, ColonyConditions.he_could_trouble_a_duke
+	)
 	# A patron whose Barony has a market to turn the colony's way (#396).
 	ContentRegistry.register_condition(
 		"his_barony_has_a_market", {}, ColonyConditions.his_barony_has_a_market
@@ -720,6 +724,34 @@ static func his_troops_are_going_home(_args: Dictionary, context: LetterContext)
 ## nobody else holds the troops policy (`the-marshal.md` §2).
 static func he_sends_the_troops(_args: Dictionary, context: LetterContext) -> bool:
 	return context.sender != null and context.sender.id == CrownTroops.MARSHAL
+
+
+## Whether this patron could make a duke's year difficult (#395, `patrons.md`
+## §5): his specialty is the rivals, and some duke is here to be troubled.
+static func he_could_trouble_a_duke(_args: Dictionary, context: LetterContext) -> bool:
+	var him := context.sender
+	if him == null or not Patron.is_patron(him) or him.specialty != "rivals":
+		return false
+	return the_duke_to_trouble(context) != null
+
+
+## 🔒 **The duke a patron offers to trouble** (#395): of the dukes who have
+## arrived, the one nearest to war — the lowest regard — who is not already
+## troubled and not at minimum, whom `SabotageDriver.arrange` refuses outright
+## (§5: it cannot undo the latch). Ties go to the first in id order.
+static func the_duke_to_trouble(context: LetterContext) -> Contact:
+	if context == null or context.contacts.is_empty():
+		return null
+	var chosen: Contact = null
+	for entry in RivalDuke.arrived_among(context.contacts, context.demands):
+		var duke: Contact = entry
+		if duke.is_dead or RivalDuke.band_of(duke.loyalty()) == RivalDuke.MINIMUM:
+			continue
+		if context.state != null and SabotageDriver.is_sabotaged(context.state, duke.id, context.state.month):
+			continue
+		if chosen == null or duke.loyalty() < chosen.loyalty():
+			chosen = duke
+	return chosen
 
 
 ## Whether this patron's Barony has a market he could turn the colony's way

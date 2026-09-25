@@ -1,0 +1,88 @@
+{
+  "id": "patron.a_word_against_the_duke",
+  "sender": "patron",
+  "type": "offer",
+  "skippable": true,
+  "note": "Issue 395, patrons.md section 5. A patron whose specialty is the rivals offers to work against one duke: the one nearest to war who can still be troubled (a duke at minimum cannot be, section 5's lock). Accepting is an Order to the patron; compliance decides whether he goes through with it, and SabotageExecutor lands SabotageDriver.arrange the month after - a year of that duke's companies fighting at a disadvantage, and the third door open on his tribute letters. It costs nothing with the duke, who never puts it together. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "duke": "contact",
+    "duke_name": "rival"
+  },
+  "body": [
+    {
+      "text": "I have been hearing about {param:duke_name}. I have been hearing, in fact, rather more than he would like anybody to hear."
+    },
+    {
+      "text": "I could make his year a difficult one. His powder would be damp and his pay would be late, and he would never know whom to thank for it. Nor would it occur to him to look at you."
+    },
+    {
+      "text": "Say the word. I should enjoy it more than is quite respectable.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "Say the word, or do not. I have other uses for my friends.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with real gratitude"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered your proposal"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and with some reservations"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "duke",
+        "prompt": "What to do about {param:duke_name}",
+        "options": [
+          {
+            "id": "accept",
+            "label": "let him make the duke's year difficult",
+            "text": "Do it. I should be glad to see him occupied with his own affairs for a season.",
+            "effect": {
+              "trouble_a_duke": {
+                "to": "{patron}",
+                "duke": "{duke}"
+              }
+            }
+          },
+          {
+            "id": "decline",
+            "label": "decline, with thanks",
+            "text": "I would rather not. Leave him to me.",
+            "effect": {
+              "refuse": {
+                "to": "{patron}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

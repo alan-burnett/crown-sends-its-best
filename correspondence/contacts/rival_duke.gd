@@ -163,12 +163,21 @@ static func how_many_arrived(growth: DemandGrowth) -> int:
 ## Ordered by id, which is the same tie-break every other ordered thing in the
 ## game uses, so the same run always meets the same duke first.
 static func arrived_in(run: RunState, growth: DemandGrowth) -> Array:
+	return arrived_among(run.contacts if run != null else {}, growth)
+
+
+## The same, from a roster rather than a run: what a letter can see (#395).
+static func arrived_among(contacts: Dictionary, growth: DemandGrowth) -> Array:
 	var arrived := how_many_arrived(growth)
 	if arrived <= 0:
 		return []
-	var dukes := all_in(run)
-	dukes.sort_custom(func(a: Contact, b: Contact) -> bool:
-		return String(a.id) < String(b.id))
+	var ids: Array = contacts.keys()
+	ids.sort()
+	var dukes: Array = []
+	for id in ids:
+		var contact: Contact = contacts[id]
+		if contact != null and contact.role == ROLE:
+			dukes.append(contact)
 	return dukes.slice(0, arrived)
 
 

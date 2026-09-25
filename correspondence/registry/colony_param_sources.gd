@@ -41,6 +41,10 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"enemies_near_my_company", {}, ColonyParamSources.enemies_near_my_company
 	)
+	# The duke a patron offers to trouble, as an id or by name (#395).
+	ContentRegistry.register_param_source(
+		"the_duke_to_trouble", {"field": "string"}, ColonyParamSources.the_duke_to_trouble
+	)
 	# The one kind a patron's specialty names (#396, `patrons.md` §3).
 	ContentRegistry.register_param_source(
 		"his_specialty_kind", {}, ColonyParamSources.his_specialty_kind
@@ -276,6 +280,15 @@ static func enemies_near(company: Company, context: LetterContext) -> int:
 		if away <= OrderRule.THREAT_WITHIN:
 			count += 1
 	return count
+
+
+## The duke a patron offers to trouble (#395): `field` `id` for the effect,
+## `name` for the prose.
+static func the_duke_to_trouble(args: Dictionary, context: LetterContext) -> Variant:
+	var duke := ColonyConditions.the_duke_to_trouble(context)
+	if duke == null:
+		return ""
+	return String(duke.id) if String(args.get("field", "name")) == "id" else duke.display_name
 
 
 ## The one kind his specialty names (#396): *horses*, *sugar*. Empty for a
