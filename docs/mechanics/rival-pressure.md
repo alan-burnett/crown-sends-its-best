@@ -187,7 +187,9 @@ needs a truthfulness dial, and nothing should acquire one.
 SPEC §8.4 is unusually prescriptive, and these are locks rather than defaults:
 
 - **Never asks for help** against another rival or against the natives.
-- **Never offers his own resources.** There is no trade with a rival, ever.
+- **Never offers his own resources** to the PC. There is no trade with a rival,
+  ever. Backing a rebel town is not an exception: that town has repudiated the
+  PC (below).
 - **Never becomes peaceful or mutually beneficial**, at any loyalty. High loyalty
   is a cheap racket, not an alliance.
 - **One duke per rival**, and he is the PC's only contact with that empire.
@@ -195,13 +197,63 @@ SPEC §8.4 is unusually prescriptive, and these are locks rather than defaults:
 A dev who finds himself writing a rival offer, a rival alliance, or a second
 rival contact has left the spec.
 
-### They do court rebel towns
+### They back rebel towns
 
-§12.3: a rebel town handles its own diplomacy, **rivals can court it**, and a
-rival or a tribe taking it turns it into a **lost town**. That is a rival
-behaviour, it belongs to the rebellion machinery rather than to tribute, and it
-is the one route by which a duke gains from the PC's failure without fighting him
-for it.
+Author's ruling (#403). SPEC §12.3 has a rebel town handling its own diplomacy,
+and says **rivals can court it**. This is what courting is: **an offer the town
+cannot refuse.**
+
+**When.** Once a town has been rebelling for **three months**, every duke who has
+arrived and has not yet backed a rebellion rolls, each month, to back one. **His
+loyalty to the PC sets the chance**: certain at none, never at full, and in
+proportion between.
+
+**Where.** If his roll succeeds, he backs **the most populous** town that has
+been rebelling three months or more, ties to town order.
+
+**What he sends.** He writes to that town's governor, not to the PC, pledging
+his support, and with it:
+
+- **gold, food and guns**, into the town's purse and stores;
+- **a company with a commander**: new people from outside the colony, never the
+  town's own.
+
+All of it scales with the town's population (§9).
+
+**The company is loyal to the rebellion.** Its allegiance is rebel and its
+commander is a rebel commander, who corresponds with the PC as any rebel general
+does (`commanders.md` §1). It takes its standing order as the rebel town's own
+companies do, and fights for the same ends.
+
+**The duke feeds it**, as the Crown feeds its troops (`battles.md` §3), so the
+town never pays for it.
+
+**Once in his life.** Each duke backs one rebellion, ever. With three dukes, three
+towns may be backed, and nothing stops two of them backing the same town.
+
+**The town is never lost to him.** Backing is not conquest. The town stays a
+rebel town of the colony, and only being taken makes a town lost (SPEC §12.3).
+
+**If the town comes back to the Crown**, returned or retaken, **the duke's
+company goes home**, commander and all. He backed a rebellion, not the colony.
+
+#### What it does to the PC
+
+**It blunts his foothold.** A rebel town finds its way back as its quality of
+life falls (`rebel-sentiment.md` §5). The duke's gold and stores hold that up,
+his company stands against the Crown's troops, and a rebel town that looks
+prosperous and unpunished spreads (§12.3).
+
+**He hears of it from the Diplomat.** The duke's letter goes to the governor. If
+the Diplomat is in the colony, he writes to the PC explaining what happened.
+Otherwise the PC has only the map, if the colony can see the new company.
+
+**Nothing is aimed at it.** He fights a backed rebellion the way he fights any
+rebellion: Crown troops, punishment, persuasion.
+
+**It does not break §8.4.** *"They will not offer any of their own resources to
+you"*: the rebel town is not the PC. It has repudiated him, and the duke's gift is
+aimed at him, not given to him.
 
 ## 9. Tuning targets
 
@@ -212,6 +264,8 @@ for it.
 - How many tiles a duke can deny, and for how long.
 - The tribute optic's gold-equivalent, which is #187's to set against every other
   optic rather than here.
+- The size of a duke's backing of a rebel town, per thousand people: its gold,
+  food, guns, and the company's size (§8).
 
 ## 10. Open items
 
