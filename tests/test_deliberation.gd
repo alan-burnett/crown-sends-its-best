@@ -313,6 +313,10 @@ func test_every_declared_kind_is_one_an_actor_actually_chooses() -> void:
 		#
 		# ⚠️ Eight now, against the doc's six. Both missing rows are the PO's.
 		DecisionKind.COMMANDER_OBJECTIVE,
+		# **Considered, and it belongs** (#435). `natives.md` §11 names it: *"It
+		# is a decision point, so it goes through the kernel."* A governor answers
+		# a tribe's letter by yielding, giving, refusing or threatening.
+		DecisionKind.TRIBE_GRIEVANCE,
 	]
 	assert_eq(DecisionKind.ALL.size(), expected.size(),
 		"a decision kind was added or removed without this test being considered")

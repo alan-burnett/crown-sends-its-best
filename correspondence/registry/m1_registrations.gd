@@ -198,6 +198,8 @@ static func register_considerations() -> void:
 	# attack scoring below retreat rather than a branch.
 	CommanderConsiderations.register_all()
 	CoordinationConsiderations.register_all()
+	# A governor answering a tribe's letter (#435).
+	GrievanceConsiderations.register_all()
 	# 🔒 **`faction_posture` finally has something registered against it** (#206).
 	# It has been a decision kind with no considerations since the kernel was
 	# built, which is a decision nobody could make.

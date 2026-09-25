@@ -202,6 +202,10 @@ var harvested: Dictionary = {}
 ## tile nobody worked adds nothing to this month's harvest whatever is built on it.
 var harvested_at: Dictionary = {}
 
+## 🔒 **Fields yielded to a tribe** (#435, `natives.md` §11): `"x,y"` -> the tribe.
+## The town stops working them; whatever stands on them stays.
+var yielded_tiles: Dictionary = {}
+
 ## How many expeditions this town has ever sent (#429, `expeditions_launched_below`).
 var expeditions_launched: int = 0
 
@@ -394,6 +398,15 @@ func take_lives(count: int) -> Dictionary:
 
 # --- Stockpile -------------------------------------------------------------
 
+## Give a field up to a tribe (#435): the town works it no more.
+func yield_tile(at: Vector2i, tribe: StringName) -> void:
+	yielded_tiles["%d,%d" % [at.x, at.y]] = String(tribe)
+
+
+func has_yielded(at: Vector2i) -> bool:
+	return yielded_tiles.has("%d,%d" % [at.x, at.y])
+
+
 func held(resource: StringName) -> float:
 	return float(stockpile.get(String(resource), 0.0))
 
@@ -555,6 +568,7 @@ func to_dict() -> Dictionary:
 		"objective_idle_months": objective_idle_months,
 		"harvested": harvested.duplicate(),
 		"harvested_at": harvested_at.duplicate(true),
+		"yielded_tiles": yielded_tiles.duplicate(),
 		"expeditions_launched": expeditions_launched,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
@@ -608,6 +622,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.objective_idle_months = int(data.get("objective_idle_months", 0))
 	town.harvested = data.get("harvested", {}).duplicate()
 	town.harvested_at = data.get("harvested_at", {}).duplicate(true)
+	town.yielded_tiles = data.get("yielded_tiles", {}).duplicate()
 	town.expeditions_launched = int(data.get("expeditions_launched", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()

@@ -112,6 +112,9 @@ func _init(p_run: RunState) -> void:
 	# A patron working against a duke, because the PC accepted (#395).
 	var sabotage_by_letter := SabotageExecutor.new()
 	sabotage_by_letter.contacts = run.contacts
+	# What a governor's answer to a tribe does, the month after (#435).
+	var tribe_answers := TribeAnswerExecutor.new()
+	tribe_answers.run = run
 	# Goods leave a town over months, so a letter can still reach them (#69).
 	var shipments := ShipmentExecutor.new()
 	shipments.colony = run.colony
@@ -324,6 +327,11 @@ func _init(p_run: RunState) -> void:
 	# their people on the same ground the towns do (#205). Nothing reads across,
 	# so the order between the two decides nothing.
 	var villages := VillageDriver.new(run.tribes, run.map)
+	villages.colony = run.colony
+
+	# Phases 7 and 8. The tribes notice what the colony did and write to the
+	# governors first; the governors answer; the tribes take the answers (#435).
+	var tribe_letters := TribeGrievanceDriver.new(run)
 
 	# Phase 7. What the month did to the neighbours, asked after the Colony Month
 	# so the fields a town worked are fields it has actually worked (#204).
@@ -348,7 +356,7 @@ func _init(p_run: RunState) -> void:
 		muster, crown_troops,
 		immigration, native_help, crown_foundings, expeditions, crown_affairs, territory,
 		rival_tiles,
-		colony_month, villages, promise_driver, standings, native_trade,
+		colony_month, villages, promise_driver, standings, native_trade, tribe_letters,
 		policies, crown_standing, run_end, prestige, drift, rivals, patron_driver,
 		expert_travel, cultivation, sabotage,
 		companies,
@@ -358,7 +366,7 @@ func _init(p_run: RunState) -> void:
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, company_urging, sabotage_by_letter, shipments, embargoes, tribute, deflection, preferences, foundings,
+		urging, company_urging, sabotage_by_letter, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
 		diplomat_moves, executor,
 	]
 

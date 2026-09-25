@@ -45,6 +45,11 @@ const START_MAX: float = 62.0
 static var _start_shift: float = 0.0
 
 
+## 🔒 **What the tribes have written to the governors** (#435, `natives.md` §11),
+## and the acts still going on. Never the PC's post.
+var grievances: TribeGrievances = TribeGrievances.new()
+
+
 static func start_shift() -> float:
 	return _start_shift
 
@@ -313,7 +318,7 @@ func to_dict() -> Dictionary:
 	var homes: Array = []
 	for village in villages_in_order():
 		homes.append((village as Village).to_dict())
-	return {"tribes": out, "villages": homes}
+	return {"tribes": out, "villages": homes, "grievances": grievances.to_dict()}
 
 
 static func from_dict(data: Dictionary) -> Tribes:
@@ -322,4 +327,5 @@ static func from_dict(data: Dictionary) -> Tribes:
 		tribes.all.append(Tribe.from_dict(entry))
 	for entry in data.get("villages", []):
 		tribes.villages.append(Village.from_dict(entry))
+	tribes.grievances = TribeGrievances.from_dict(data.get("grievances", {}))
 	return tribes

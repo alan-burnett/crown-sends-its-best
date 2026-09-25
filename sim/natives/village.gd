@@ -118,7 +118,9 @@ func land(map: WorldMap) -> Array[Vector2i]:
 ## 🔒 **Steered by the tribe's standings and nothing else.** There is no village
 ## opinion to be wrong, no governor to argue with, and no intent for the PC to
 ## write about — which is the whole reason a village needs no layer a town needs.
-func decide(its_tribe: Tribe, months_of_food: float, context: ColonyContext) -> StringName:
+func decide(
+	its_tribe: Tribe, months_of_food: float, context: ColonyContext, written_first: bool = true,
+) -> StringName:
 	var was := objective
 
 	if months_of_food < HUNGRY_BELOW:
@@ -127,7 +129,10 @@ func decide(its_tribe: Tribe, months_of_food: float, context: ColonyContext) -> 
 	elif its_tribe != null and its_tribe.is_irreconcilable_with(Tribe.COLONY):
 		# 🔒 Past the point of no return there is nothing left to discuss, and
 		# what a village does about that is not a mood — it is a conclusion.
-		objective = DRIVE_THEM_OFF
+		#
+		# 🔒 **But they always write first** (#435, `natives.md` §11): until the
+		# governor has had their letter, they arm and wait.
+		objective = DRIVE_THEM_OFF if written_first else ARM_OURSELVES
 	elif its_tribe != null and its_tribe.trust() < FRIGHTENED_BELOW:
 		objective = ARM_OURSELVES
 	elif its_tribe != null and its_tribe.trust() < UNEASY_BELOW:
@@ -150,11 +155,11 @@ func decide(its_tribe: Tribe, months_of_food: float, context: ColonyContext) -> 
 ##
 ## **They grow in place.** Nothing here founds anything, and there is nowhere in
 ## this file that could.
-func live(its_tribe: Tribe, context: ColonyContext) -> void:
+func live(its_tribe: Tribe, context: ColonyContext, written_first: bool = true) -> void:
 	var eaten := Population.of(ColonyNeeds.per_head(&"food"), float(people))
 	var held := float(stores.get("food", 0.0))
 	var months := held / maxf(0.0001, eaten)
-	decide(its_tribe, months, context)
+	decide(its_tribe, months, context, written_first)
 
 	# What the land gives them, at the reach they hold.
 	#

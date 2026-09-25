@@ -79,6 +79,11 @@ const COMMANDER_ORDERS: StringName = &"commander_orders"
 ## commands and the Marshal is an ocean away. **There is nobody to model.**
 const COMMANDER_OBJECTIVE: StringName = &"commander_objective"
 
+## 🔒 **A governor answers a tribe's letter** (#435, `natives.md` §11): yield,
+## gift, refuse or threaten. A decision point, so it goes through the kernel and
+## emits its trace like every other.
+const TRIBE_GRIEVANCE: StringName = &"tribe_grievance"
+
 const ALL: Array[StringName] = [
 	GOVERNOR_INTENT,
 	ORDER_COMPLIANCE,
@@ -87,6 +92,7 @@ const ALL: Array[StringName] = [
 	FACTION_POSTURE,
 	COMMANDER_ORDERS,
 	COMMANDER_OBJECTIVE,
+	TRIBE_GRIEVANCE,
 ]
 
 

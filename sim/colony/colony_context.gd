@@ -161,11 +161,17 @@ func tiles_of(town: Town) -> Array[Vector2i]:
 	if territory == null:
 		return []
 	var mine := territory.tiles_of(town.id)
-	if denied == null or denied.held.is_empty():
+	var denying := denied != null and not denied.held.is_empty()
+	if not denying and town.yielded_tiles.is_empty():
 		return mine
 
 	var workable: Array[Vector2i] = []
 	for at in mine:
-		if not denied.is_denied(at):
-			workable.append(at)
+		if denying and denied.is_denied(at):
+			continue
+		# 🔒 **A field yielded to a tribe is absent too** (#435, `natives.md`
+		# §11): the town gave its word, so the field is not a thing it looks at.
+		if town.has_yielded(at):
+			continue
+		workable.append(at)
 	return workable
