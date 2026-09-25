@@ -1,19 +1,17 @@
 extends TestCase
 
-## The offer object, and the six months that close (#283,
-## `docs/mechanics/patrons.md` §4, §8, `docs/mechanics/prestige.md` §5).
-##
-## 🔒 **Five shapes, one object, one resolution path.** Gift, request, barter,
-## sale and purchase are four fields with some of them empty, and nothing
-## branches on which of the five it is holding.
-##
-## 🔒 **Loyalty gates what he proposes**, never how an offer resolves.
+## The six months that close (#283, `docs/mechanics/patrons.md` §8,
+## `docs/mechanics/prestige.md` §5).
 ##
 ## 🔒 **No patron leaves before two years**, the extra term is drawn once and
 ## hidden, and the six months of notice keep trading.
 ##
 ## 🔒 **His final loyalty banks on departure and never moves again**, and the
 ## live term stops the month he goes.
+##
+## The offer object this file once also held (`PatronOffer`) was retired by
+## #439: a patron's letters are his need, his gold, and his specialty offered
+## (`patrons.md` §4).
 
 const SEED: int = 4801
 
@@ -45,120 +43,6 @@ func _patron(run: RunState, since: int = 0, loyalty: float = 50.0) -> Contact:
 	patron.relationship = Relationship.new(patron.id, loyalty)
 	run.add_contact(patron)
 	return patron
-
-
-const SHAPES: PackedStringArray = [
-	"barter", "gift", "purchase", "request", "sale",
-]
-
-
-# --- 🔒 Every offer is one object -------------------------------------------
-
-func test_the_five_shapes_are_four_fields() -> void:
-	var seen: Dictionary = {}
-	for name in SHAPES:
-		var offer := PatronOffer.of_shape(StringName(name), 10.0, 100.0)
-		assert_true(offer.is_real(), "%s is not a real offer" % name)
-		assert_eq(String(offer.shape()), name,
-			"%s came back as %s" % [name, offer.shape()])
-		seen["%s>%s" % [offer.gives, offer.wants]] = name
-	assert_eq(seen.size(), SHAPES.size(),
-		"two shapes are the same pair of fields: %s" % [seen])
-
-
-func test_nothing_in_the_model_branches_on_the_shape() -> void:
-	# 🔒 §4: *one letter family, one resolution path.* A dev who writes
-	# `if offer.shape() == GIFT` has made five mechanics out of one, and the sixth
-	# somebody adds later will be missing from five places.
-	var code := _code_of("res://correspondence/contacts/patron_offer.gd")
-	var body := code.substr(code.find("static func settle"))
-	for name in SHAPES:
-		assert_false(body.contains(name.to_upper()),
-			"the resolution path names the %s shape" % name)
-
-
-func test_every_shape_settles_through_the_same_call() -> void:
-	var run := _run()
-	var settled := PackedStringArray()
-	for name in SHAPES:
-		var patron := _patron(run, 0, 60.0)
-		var offer := PatronOffer.of_shape(StringName(name), 10.0, 100.0)
-		var moved := PatronOffer.settle(offer, patron, true, run.log, 4)
-		assert_true(moved.has("to_the_colony") and moved.has("to_the_patron"),
-			"%s did not resolve" % name)
-		settled.append(name)
-	assert_eq(settled.size(), SHAPES.size())
-	assert_eq(run.log.of_type(PatronOffer.EVENT_SETTLED).size(), SHAPES.size(),
-		"a shape resolved without saying so")
-
-
-func test_what_moves_is_read_off_the_fields() -> void:
-	var run := _run()
-	var patron := _patron(run, 0, 80.0)
-
-	var gift := PatronOffer.settle(
-		PatronOffer.of_shape(PatronOffer.GIFT, 12.0, 0.0), patron, true, run.log, 4)
-	assert_eq(String(gift["to_the_colony"].get("shipment", "")), patron.specialty)
-	assert_empty(gift["to_the_patron"], "a gift asked for something")
-
-	var request := PatronOffer.settle(
-		PatronOffer.of_shape(PatronOffer.REQUEST, 12.0, 0.0), patron, true, run.log, 5)
-	assert_empty(request["to_the_colony"], "a bare request sent something")
-	assert_eq(String(request["to_the_patron"].get("shipment", "")), patron.need)
-
-	var sale := PatronOffer.settle(
-		PatronOffer.of_shape(PatronOffer.SALE, 12.0, 250.0), patron, true, run.log, 6)
-	assert_eq(String(sale["to_the_colony"].get("shipment", "")), patron.specialty)
-	assert_almost_eq(float(sale["to_the_patron"].get("gold", 0.0)), 250.0, 0.0001)
-
-
-func test_a_refusal_moves_nothing_and_still_lands() -> void:
-	# 🔒 `prestige.md` §5 prices an answer. Refusing is a slight he will mention
-	# at court; only silence is not a deed.
-	var run := _run()
-	var patron := _patron(run, 0, 60.0)
-	var moved := PatronOffer.settle(
-		PatronOffer.of_shape(PatronOffer.BARTER, 12.0, 0.0), patron, false, run.log, 4)
-
-	assert_empty(moved["to_the_colony"])
-	assert_empty(moved["to_the_patron"])
-	assert_true(Prestige.patron_credit_in(run.log) < 0.0,
-		"refusing a patron cost the PC nothing at court")
-
-
-# --- 🔒 Loyalty gates what he proposes --------------------------------------
-
-func test_gifts_belong_to_high_regard_and_bare_requests_to_low() -> void:
-	var lowest := PatronOffer.shapes_at(0.0)
-	var highest := PatronOffer.shapes_at(Relationship.MAX_LOYALTY)
-
-	assert_eq(lowest, PackedStringArray([String(PatronOffer.REQUEST)]),
-		"a man who thinks nothing of the PC offered him something")
-	assert_true(highest.has(String(PatronOffer.GIFT)),
-		"a man who thinks the world of the PC never sends a gift")
-	assert_eq(highest.size(), SHAPES.size(),
-		"the highest regard cannot propose every shape")
-
-
-func test_what_he_will_propose_only_ever_widens() -> void:
-	var was := 0
-	for loyalty in range(0, 101, 5):
-		var now := PatronOffer.shapes_at(float(loyalty)).size()
-		assert_true(now >= was,
-			"a shape stopped being offered as regard rose, at %d" % loyalty)
-		was = now
-
-
-func test_the_gate_is_on_proposing_and_not_on_resolving() -> void:
-	# 🔒 §4: once an offer exists it is the same object however well he thinks of
-	# the PC. Otherwise the PC's own letter asking for a specialty (§4) would
-	# resolve differently from one the patron proposed.
-	var run := _run()
-	var hated := _patron(run, 0, 1.0)
-	var moved := PatronOffer.settle(
-		PatronOffer.of_shape(PatronOffer.GIFT, 9.0, 0.0), hated, true, run.log, 4)
-	assert_eq(String(moved["to_the_colony"].get("shipment", "")), hated.specialty,
-		"a gift from a man who dislikes the PC resolved into nothing")
 
 
 # --- 🔒 The term, and the hidden roll ---------------------------------------
@@ -284,26 +168,19 @@ func test_he_announces_the_date_six_months_out() -> void:
 
 func test_and_the_business_continues_as_normal() -> void:
 	# 🔒 §8. A patron who stopped dealing the month he gave notice would make the
-	# window worthless, which is the opposite of the point.
+	# window worthless, which is the opposite of the point: a man on his way out
+	# still has his market to offer.
 	var run := _run()
 	var patron := _patron(run, 0, 80.0)
+	patron.specialty = "resources"
+	patron.specialty_kind = "sugar"
+	patron.specialty_bonus = Patron.BONUS_PRICE
 	patron.leaves_month = 60
+	var context := _context_for(run, patron, 56)
+	context.policies = run.policies
 	assert_true(PatronTerm.is_leaving(patron, 56))
-
-	var moved := PatronOffer.settle(
-		PatronOffer.of_shape(PatronOffer.BARTER, 10.0, 0.0), patron, true, run.log, 56)
-	assert_false(moved["to_the_colony"].is_empty(),
-		"a patron on his way out stopped trading")
-	assert_eq(PatronOffer.shapes_at(patron.loyalty()).size(),
-		PatronOffer.shapes_at(80.0).size(),
-		"leaving narrowed what he would propose")
-
-
-func test_nothing_in_the_offer_knows_he_is_leaving() -> void:
-	var code := _code_of("res://correspondence/contacts/patron_offer.gd")
-	for token in ["leaves_month", "PatronTerm", "is_leaving"]:
-		assert_false(code.contains(token),
-			"the offer reads the departure window: %s" % token)
+	assert_true(ColonyConditions.his_barony_has_a_market({}, context),
+		"a patron on his way out stopped offering")
 
 
 func test_the_months_left_count_down_to_the_month() -> void:
@@ -400,13 +277,6 @@ func test_prestige_counts_both_terms() -> void:
 		"the two patron terms do not both reach the total")
 
 
-func _code_of(path: String) -> String:
-	var kept := PackedStringArray()
-	for line in FileAccess.get_file_as_string(path).split("\n"):
-		if not String(line).strip_edges().begins_with("#"):
-			kept.append(String(line))
-	return "\n".join(kept)
-
 # --- 🔒 He writes, and answering him reaches prestige (#388) ----------------
 
 func _letter(id: String) -> Letter:
@@ -480,7 +350,8 @@ func test_the_pc_still_cannot_write_to_a_patron_unprompted() -> void:
 
 func test_answering_him_well_banks_credit() -> void:
 	# 🔒 The acceptance line. `PatronCredit.bank` had two callers and neither
-	# could be reached: `PatronOffer.settle`, which nothing called, and
+	# could be reached: the offer object's `settle` (retired by #439), which
+	# nothing called, and
 	# `compliance.gd`, which banks on an Order addressed to a patron — and no
 	# Order could be addressed to one, because no letter from one existed.
 	var run := _run()
@@ -575,21 +446,15 @@ func test_the_introduction_is_asked_of_the_man_and_not_the_colony() -> void:
 		"a patron of long standing introduced himself again because somebody else arrived")
 
 
-func test_what_he_proposes_is_gated_by_the_offer_model_and_not_the_letter() -> void:
-	# 🔒 §4's rule lives in `PatronOffer.shapes_at`, and a letter that made its
-	# own judgement about when a man is generous would be a second answer to a
-	# question the model already answers — and the two would disagree the first
-	# time either moved.
+func test_any_patron_may_ask_for_gold_at_any_regard() -> void:
+	# 🔒 #439 retired the offer model this letter's gate once asked, and kept the
+	# gate it had: a bare request was open to every patron at every regard.
 	var run := _run()
-	var cold := _patron(run, 0, 5.0)
-	var warm := _patron(run, 0, 95.0)
-
-	assert_true(
-		ColonyConditions.he_would_propose({"shape": "request"}, _context_for(run, cold)),
-		"a man who thinks little of the PC will not even ask him for anything")
-	assert_false(
-		ColonyConditions.he_would_propose({"shape": "gift"}, _context_for(run, cold)),
-		"a man who thinks little of the PC is sending him presents")
-	assert_true(
-		ColonyConditions.he_would_propose({"shape": "gift"}, _context_for(run, warm)),
-		"a man who thinks the world of the PC will not send him anything")
+	var machine := TurnMachine.new(run)
+	machine.use_content(content)
+	machine.saves_on_send = false
+	var trigger: Dictionary = content.collection("triggers")["trigger.patron.request_gold"]
+	for loyalty in [1.0, 50.0, 99.0]:
+		var patron := _patron(run, 0, loyalty)
+		assert_true(machine.director._conditions_hold(trigger, machine.director._context(run, patron)),
+			"a patron at regard %d may not ask for gold" % int(loyalty))

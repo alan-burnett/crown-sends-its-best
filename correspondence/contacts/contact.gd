@@ -278,8 +278,8 @@ var known_since: int = 0
 ## facts about the man in the same way his name is. `Patron` does the rolling and
 ## `PatronVices` reads the third; nothing here knows what a specialty is for.
 ##
-## 🔒 **Never equal**, guaranteed by the draw rather than by a check — the need
-## is taken from the catalogue with the specialty removed.
+## 🔒 **His need is never his specialty's kind** (#439), guaranteed by the draw
+## rather than by a check — the need's kind is drawn with the specialty's removed.
 var specialty: String = ""
 var need: String = ""
 
@@ -289,6 +289,11 @@ var need: String = ""
 ## troops and rivals, and on everybody who is not a patron.
 var specialty_kind: String = ""
 var need_kind: String = ""
+
+## 🔒 **Which of the two bonuses his resource or livestock specialty offers**
+## (#439, `patrons.md` §3): `Patron.BONUS_PRICE` or `Patron.BONUS_MORE`. Rolled
+## with him, and empty for every other specialty.
+var specialty_bonus: String = ""
 
 ## 🔒 **What makes him difficult** (#282, `patrons.md` §6).
 ##
@@ -378,6 +383,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.need = String(record.get("need", ""))
 	contact.specialty_kind = String(record.get("specialty_kind", ""))
 	contact.need_kind = String(record.get("need_kind", ""))
+	contact.specialty_bonus = String(record.get("specialty_bonus", ""))
 	contact.vice = StringName(record.get("vice", ""))
 	contact.leaves_month = int(record.get("leaves_month", -1))
 	contact.known_since = int(record.get("known_since", 0))
@@ -480,6 +486,7 @@ func to_dict() -> Dictionary:
 		"need": need,
 		"specialty_kind": specialty_kind,
 		"need_kind": need_kind,
+		"specialty_bonus": specialty_bonus,
 		"vice": String(vice),
 		"leaves_month": leaves_month,
 		"known_since": known_since,

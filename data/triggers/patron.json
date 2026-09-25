@@ -23,7 +23,7 @@
     "letter": "patron.request_gold",
     "urgency": 0.6,
     "cooldown": 14,
-    "note": "Issue 388, patrons.md section 10. Gated by loyalty through PatronOffer.shapes_at, which is where the rule about what a man will propose at what regard already lives - a letter that made its own judgement would be a second answer to a question the offer model already answers, and the two would disagree the first time either moved. A bare request is unconditional there, so this gates nothing today and gates everything for the four shapes #368 brings. Cooldown 14, as the duke's is: a man who asked twice a year would be a tax rather than a character. Urgency below a duke's 0.7, because a patron is asking a favour and a duke is describing a difficulty he has.",
+    "note": "Issue 388, patrons.md sections 4 and 10: every patron has this letter. Any patron may send it, at any regard - the gate it always had, since the offer model it once asked (PatronOffer, retired by #439) made a bare request unconditional. Cooldown 14, as the duke's is: a man who asked twice a year would be a tax rather than a character. Urgency below a duke's 0.7, because a patron is asking a favour and a duke is describing a difficulty he has.",
     "params": {
       "patron": {
         "from": "sender_id"
@@ -32,13 +32,7 @@
         "from": "patron_ask"
       }
     },
-    "conditions": [
-      {
-        "he_would_propose": {
-          "shape": "request"
-        }
-      }
-    ]
+    "conditions": []
   },
   {
     "id": "trigger.patron.taking_his_leave",

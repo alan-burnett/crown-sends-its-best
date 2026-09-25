@@ -33,12 +33,13 @@ func after_each() -> void:
 	content.free()
 
 
-func _patron(specialty: String = "", kind: String = "") -> Contact:
+func _patron(specialty: String = "", kind: String = "", bonus: String = Patron.BONUS_PRICE) -> Contact:
 	var patron := Patron.generate(run.patrons.next_id(), run.streams, 0)
 	patron.relationship = Relationship.new(patron.id, 60.0)
 	if not specialty.is_empty():
 		patron.specialty = specialty
 		patron.specialty_kind = kind
+		patron.specialty_bonus = bonus if Patron.WITH_A_BONUS.has(specialty) else ""
 	run.add_contact(patron)
 	return patron
 
@@ -86,7 +87,7 @@ func test_the_same_seed_gives_the_same_kinds() -> void:
 
 func test_the_kinds_survive_a_save() -> void:
 	var patron := _patron("livestock", "horses")
-	patron.need = "experts"
+	patron.need = "resources"
 	patron.need_kind = "tobacco"
 	var restored := Contact.from_data(patron.to_dict())
 	assert_eq(restored.specialty_kind, "horses")
@@ -100,6 +101,15 @@ func test_a_horse_breeder_offers_his_market_and_a_gold_man_does_not() -> void:
 	assert_true(_true_for(_patron("resources", "sugar")), "a sugar man had no market to offer")
 	assert_false(_true_for(_patron("gold", "")), "a patron dealing in gold offered a market")
 	assert_false(_true_for(_patron("experts", "tobacco")), "an experts patron offered a Crown price")
+
+
+func test_only_the_price_bonus_offers_a_market() -> void:
+	# 🔒 #439, `patrons.md` §3: the second patron of a kind offers the other
+	# bonus, so a man rolled with *more of it* has no Crown price to lift.
+	assert_false(_true_for(_patron("resources", "sugar", Patron.BONUS_MORE)),
+		"a sugar man rolled with more sugar offered his market")
+	assert_false(_true_for(_patron("livestock", "horses", Patron.BONUS_MORE)),
+		"a horse breeder rolled with faster breeding offered his market")
 
 
 func test_accepting_raises_the_crowns_price_for_his_kind() -> void:

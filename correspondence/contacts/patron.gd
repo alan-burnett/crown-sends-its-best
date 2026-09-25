@@ -8,14 +8,18 @@ extends RefCounted
 ##
 ## | | |
 ## | :--- | :--- |
-## | **Specialty** | something he can supply or arrange |
-## | **Need** | something of particular value to him |
+## | **Specialty** | what he will do for the colony once he thinks well enough of it |
+## | **Need** | a resource or livestock kind he wants shipped to him |
 ## | **Vice** | what makes him difficult |
 ##
-## **Specialty and need are never the same** (§3), and it is guaranteed by the
-## draw rather than checked afterwards: the need is taken from the catalogue with
-## his specialty removed, so there is no state in which the two match and no
-## rule anybody has to remember.
+## **His need is never his specialty's kind** (§3), and it is guaranteed by the
+## draw rather than checked afterwards: the need's kind is drawn with his
+## specialty's kind taken out, so there is no state in which the two match and
+## no rule anybody has to remember.
+##
+## **Two patrons to a kind, then none** (#439, §3). A resource or livestock
+## specialty comes with one of two permanent bonuses, and what each kind has been
+## rolled with is kept in `PatronBook.rolled`, which outlives the men.
 ##
 ## **Vice, not personality.** `contacts.md` §1 reserves *personality* for the
 ## weight vector every contact has, this one included. A vice is a named bundle
@@ -35,8 +39,8 @@ extends RefCounted
 ##
 ## ## What is not here
 ##
-## The offer object, the departure clock and the rival specialty are §§4, 5 and
-## 8, and each has its own ticket. This is the man: who he is, what he wants, and
+## His letters, the departure clock and the rival specialty are §§4, 5 and 8,
+## and each has its own ticket. This is the man: who he is, what he wants, and
 ## when he turns up.
 
 const ROLE: StringName = Contact.ROLE_PATRON
@@ -99,10 +103,27 @@ static func catalogue_ids() -> PackedStringArray:
 	return out
 
 
+## 🔒 **The two bonuses a resource or livestock specialty offers** (#439,
+## `patrons.md` §3): a higher Crown price for his kind, or more of it across the
+## colony — for livestock, faster breeding. **Permanent**, which is the only
+## reason a kind is capped at one patron for each.
+const BONUS_PRICE: String = "price"
+const BONUS_MORE: String = "more"
+const BONUSES: PackedStringArray = ["price", "more"]
+
+## The specialties that roll a bonus, and so are capped at two to a kind (§3).
+## **Experts, troops, gold and the rivals have no limit**, and their favours
+## repeat.
+const WITH_A_BONUS: PackedStringArray = ["resources", "livestock"]
+
+
 ## 🔒 **What a category names one of** (#396, `patrons.md` §3). A resource is
 ## anything the Crown prices that is not livestock; livestock is its own; an
 ## expert is expert in something the colony can make. Gold, troops and the rival
 ## specialty come in no kinds. Sorted, so the draw reads the same list every time.
+##
+## **What a need can name.** A specialty draws from `specialty_kinds_of`, which
+## is narrower.
 static func kinds_of(category: String) -> PackedStringArray:
 	var out := PackedStringArray()
 	match category:
@@ -119,18 +140,78 @@ static func kinds_of(category: String) -> PackedStringArray:
 	return out
 
 
+## 🔒 **What a specialty can name** (#439, §3): only what the colony can make.
+## **Tea is never a specialty** — the colony can neither grow it nor sell it, so
+## nothing he could do for it would matter.
+static func specialty_kinds_of(category: String) -> PackedStringArray:
+	var out := PackedStringArray()
+	for id in kinds_of(category):
+		var kind := ResourceCatalogue.get_kind(StringName(id))
+		if kind != null and kind.producible:
+			out.append(id)
+	return out
+
+
+## Whether a catalogue entry can be a patron's need (§3): **only a resource or a
+## livestock kind**, something the colony can ship him. Read off the file, so the
+## catalogue says it once.
+static func can_be_needed(id: String) -> bool:
+	for entry in _catalogue:
+		if String((entry as Dictionary).get("id", "")) == id:
+			return bool((entry as Dictionary).get("needed", false))
+	return false
+
+
 static func _one_of(kinds: PackedStringArray, rng: RandomNumberGenerator) -> String:
 	if kinds.is_empty():
 		return ""
 	return kinds[rng.randi_range(0, kinds.size() - 1)]
 
 
-## What kind of thing a catalogue entry is: a shipment, or rivals (§3).
-static func kind_of(id: String) -> String:
-	for entry in _catalogue:
-		if String((entry as Dictionary).get("id", "")) == id:
-			return String((entry as Dictionary).get("kind", "shipment"))
-	return ""
+## The kinds of a category still open to a new specialty, given what each kind
+## has been rolled with before (§3). **A kind two patrons have held is closed**:
+## both bonuses have been on offer, and the book on it is shut.
+static func _open_kinds(category: String, rolled: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
+	for kind in specialty_kinds_of(category):
+		if WITH_A_BONUS.has(category) and (rolled.get(kind, []) as Array).size() >= BONUSES.size():
+			continue
+		out.append(kind)
+	return out
+
+
+## The catalogue entries a new patron can still specialise in, in file order.
+## One whose kinds are all closed is closed; one that comes in no kinds never is.
+static func _open_specialties(rolled: Dictionary) -> PackedStringArray:
+	var out := PackedStringArray()
+	for id in catalogue_ids():
+		if not kinds_of(id).is_empty() and _open_kinds(id, rolled).is_empty():
+			continue
+		out.append(id)
+	return out
+
+
+## 🔒 **The second patron of a kind offers the other bonus** (§3); the first
+## draws one.
+static func _bonus_for(contact: Contact, rolled: Dictionary, rng: RandomNumberGenerator) -> String:
+	if not WITH_A_BONUS.has(contact.specialty) or contact.specialty_kind.is_empty():
+		return ""
+	var taken: Array = rolled.get(contact.specialty_kind, [])
+	if not taken.is_empty():
+		for bonus in BONUSES:
+			if not taken.has(bonus):
+				return bonus
+	return BONUSES[rng.randi_range(0, BONUSES.size() - 1)]
+
+
+## What a need of this category could name for him: every kind of it but his
+## specialty's.
+static func _wanted_kinds(category: String, contact: Contact) -> PackedStringArray:
+	var out := PackedStringArray()
+	for kind in kinds_of(category):
+		if kind != contact.specialty_kind:
+			out.append(kind)
+	return out
 
 
 static func is_patron(contact: Contact) -> bool:
@@ -187,37 +268,50 @@ static func all_in(run: RunState) -> Array:
 ##
 ## 🔒 **The order of the draws is the order of the fields**, and it must not
 ## change: the same seed has to keep giving the same man however much is added
-## around him. Specialty, then need from the catalogue with the specialty taken
-## out, then vice — **then the kind of each** (#396), appended so every man
-## rolled before the kinds existed is still the man he was.
+## around him. Specialty, its kind and its bonus; then need and its kind; then
+## vice.
+##
+## #439 reordered them, deliberately, when the need stopped being drawn from the
+## specialty's list; saves from before it refuse to load.
 ##
 ## `Contact.generate` has already drawn his personality, his name and his
-## temperament from the same stream, so these three continue that sequence
-## rather than starting one.
+## temperament from the same stream, so these continue that sequence rather than
+## starting one.
+##
+## 🔒 **`book` is what closes a kind** (§3, *two patrons to a kind, then none*).
+## It holds what every patron before him was rolled with, the ones gone home
+## included, since their own streams fixed it; and this man is entered in it.
+## Without a book nothing is closed, which is only ever a test asking about one
+## man.
 static func generate(
-	id: StringName, streams: RngStreams, month: int = 0
+	id: StringName, streams: RngStreams, month: int = 0, book: PatronBook = null
 ) -> Contact:
 	var contact := Contact.generate(id, ROLE, streams, IntentConsiderations.ALL)
 	contact.known_since = month
 	var rng := streams.contact_stream(String(id))
-	var ids := catalogue_ids()
-	if not ids.is_empty():
-		contact.specialty = String(ids[rng.randi_range(0, ids.size() - 1)])
-		# 🔒 **The mismatch is the draw, not a check.** Removing his specialty
-		# before the second draw means there is no state in which the two match,
-		# so nothing downstream has to ask.
-		var wanted := PackedStringArray()
-		for entry in ids:
-			if String(entry) != contact.specialty:
-				wanted.append(String(entry))
-		if not wanted.is_empty():
-			contact.need = String(wanted[rng.randi_range(0, wanted.size() - 1)])
+	var rolled: Dictionary = book.rolled if book != null else {}
+
+	var open := _open_specialties(rolled)
+	if not open.is_empty():
+		contact.specialty = String(open[rng.randi_range(0, open.size() - 1)])
+		contact.specialty_kind = _one_of(_open_kinds(contact.specialty, rolled), rng)
+		contact.specialty_bonus = _bonus_for(contact, rolled, rng)
+
+	# 🔒 **The mismatch is the draw, not a check.** His specialty's kind is taken
+	# out before the need's is drawn, so there is no state in which the two match
+	# and nothing downstream has to ask.
+	var needs := PackedStringArray()
+	for entry in catalogue_ids():
+		if can_be_needed(entry) and not _wanted_kinds(entry, contact).is_empty():
+			needs.append(entry)
+	if not needs.is_empty():
+		contact.need = String(needs[rng.randi_range(0, needs.size() - 1)])
+		contact.need_kind = _one_of(_wanted_kinds(contact.need, contact), rng)
+
 	var vices := PatronVices.ids()
 	if not vices.is_empty():
 		contact.vice = StringName(vices[rng.randi_range(0, vices.size() - 1)])
-	# 🔒 **A category names one kind** (#396, §3): what he ships, what he wants,
-	# and which Crown price his Barony's market lifts are all fixed here.
-	contact.specialty_kind = _one_of(kinds_of(contact.specialty), rng)
-	contact.need_kind = _one_of(kinds_of(contact.need), rng)
 	PatronVices.apply_to(contact)
+	if book != null:
+		book.note_roll(contact)
 	return contact

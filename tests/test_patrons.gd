@@ -3,10 +3,11 @@ extends TestCase
 ## Patrons: specialty, need, vice, and arrival (#282, SPEC §8.3;
 ## `docs/mechanics/patrons.md` §1, §2, §3, §6, §7).
 ##
-## 🔒 **Three things rolled at arrival, and specialty is never the need.** The
-## mismatch is the whole reason a patron is interesting — he has what you may not
-## want and wants what you may not have — and it is guaranteed by the draw rather
-## than by a check anybody has to remember.
+## 🔒 **Three things rolled at arrival, and his need is never his specialty's
+## kind.** The mismatch is the whole reason a patron is interesting — he has what
+## you may not want and wants what you may not have — and it is guaranteed by the
+## draw rather than by a check anybody has to remember. The rest of the roll
+## (#439) is `test_patron_roll.gd`.
 ##
 ## 🔒 **Arrival is dimension 4 and there is no second clock** (§7). The same
 ## arithmetic the dukes use, against a later threshold.
@@ -81,7 +82,7 @@ func test_a_patron_arrives_with_a_specialty_a_need_and_a_vice() -> void:
 		assert_false(man.display_name.is_empty(), "%s has no name" % man.id)
 
 
-func test_specialty_and_need_are_never_the_same() -> void:
+func test_his_need_is_never_his_specialtys_kind() -> void:
 	# 🔒 The acceptance line, and asked over enough men that a lucky seed cannot
 	# carry it. Two hundred draws from two hundred streams, which is the whole
 	# catalogue several times over.
@@ -89,8 +90,9 @@ func test_specialty_and_need_are_never_the_same() -> void:
 	var seen: Dictionary = {}
 	for index in range(200):
 		var man := Patron.generate(StringName("probe_%d" % index), run.streams)
-		assert_ne(man.specialty, man.need,
-			"%s was given a need he already supplies: %s" % [man.id, man.specialty])
+		assert_false(man.need_kind.is_empty(), "%s needs no kind of anything" % man.id)
+		assert_ne(man.specialty_kind, man.need_kind,
+			"%s was given a need he already supplies: %s" % [man.id, man.need_kind])
 		seen[man.specialty] = true
 	assert_true(seen.size() >= 3, (
 		"two hundred men between them specialised in %d things, so the draw is "
@@ -483,16 +485,31 @@ func test_a_vice_that_names_no_knobs_is_refused() -> void:
 	db.free()
 
 
-func test_a_catalogue_of_one_is_refused() -> void:
-	# §3's mismatch is impossible with one entry, so the man could have no need.
+func test_a_catalogue_that_needs_nothing_is_refused() -> void:
+	# §3: every patron wants something shipped to him, so a catalogue with no
+	# need in it rolls a man who wants nothing.
 	var db := ContentDatabase.new()
 	db.load_all("en")
-	db.record(Patron.COLLECTION, Patron.CATALOGUE_RECORD)["entries"] = [
-		{"id": "gold", "kind": "shipment"},
-	]
+	for entry in db.record(Patron.COLLECTION, Patron.CATALOGUE_RECORD)["entries"]:
+		(entry as Dictionary).erase("needed")
 	var validator := ContentValidator.new()
 	validator.check_patrons(db)
-	assert_false(validator.ok(), "a catalogue with nothing to mismatch passed")
+	assert_false(validator.ok(), "a catalogue in which nothing can be needed passed")
+	db.free()
+
+
+func test_a_need_that_names_no_kind_is_refused() -> void:
+	# 🔒 #439, §3: a need is a resource or livestock kind. Gold names none, so a
+	# patron who needed it would be asking the colony for its people or its purse.
+	var db := ContentDatabase.new()
+	db.load_all("en")
+	for entry in db.record(Patron.COLLECTION, Patron.CATALOGUE_RECORD)["entries"]:
+		if String((entry as Dictionary)["id"]) == "gold":
+			entry["needed"] = true
+	var validator := ContentValidator.new()
+	validator.check_patrons(db)
+	assert_false(validator.ok(), "a need of gold passed")
+	assert_true(_said(validator).contains("gold"), _said(validator))
 	db.free()
 
 

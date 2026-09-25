@@ -190,9 +190,6 @@ static func register_all() -> void:
 		ColonyConditions.he_has_just_arrived,
 	)
 	ContentRegistry.register_condition(
-		"he_would_propose", {"shape": "string"}, ColonyConditions.he_would_propose
-	)
-	ContentRegistry.register_condition(
 		"he_is_taking_his_leave", {}, ColonyConditions.he_is_taking_his_leave
 	)
 	# The clergy's two asks (#278). A festival needs a trade worth celebrating
@@ -795,11 +792,15 @@ static func the_duke_to_trouble(context: LetterContext) -> Contact:
 ## Whether this patron's Barony has a market he could turn the colony's way
 ## (#396, `policy.md` §8): his specialty is resources or livestock, it names a
 ## kind, and he is not already carrying a market policy for the PC.
+##
+## 🔒 **Only a man rolled with the price bonus** (#439, `patrons.md` §3). The
+## second patron of a kind offers the other bonus, so one rolled with *more of
+## it* has no market to offer.
 static func his_barony_has_a_market(_args: Dictionary, context: LetterContext) -> bool:
 	var him := context.sender
 	if him == null or not Patron.is_patron(him) or him.specialty_kind.is_empty():
 		return false
-	if not ["resources", "livestock"].has(him.specialty):
+	if not Patron.WITH_A_BONUS.has(him.specialty) or him.specialty_bonus != Patron.BONUS_PRICE:
 		return false
 	if context.policies != null:
 		for policy in context.policies.held_by(him.id):
@@ -922,27 +923,6 @@ static func he_has_just_arrived(args: Dictionary, context: LetterContext) -> boo
 		if context.month - event.month < within:
 			return true
 	return false
-
-
-## Whether this patron would presently put an offer of this shape in the post
-## (#388, `patrons.md` §4).
-##
-## 🔒 **Gated by loyalty through `PatronOffer.shapes_at`**, which is where
-## that rule lives — gifts belong to high regard and bare requests to low. A
-## letter that made its own judgement about when a man is generous would be a
-## second answer to a question the offer model already answers, and the two would
-## disagree the first time either moved.
-##
-## A bare request is unconditional there, so this gates nothing for the letter
-## that exists today and gates everything for the four #368 will bring. That is
-## the point of asking the model rather than the letter.
-static func he_would_propose(args: Dictionary, context: LetterContext) -> bool:
-	if context == null or context.sender == null:
-		return false
-	if not Patron.is_patron(context.sender):
-		return false
-	return PatronOffer.shapes_at(context.sender.loyalty()).has(
-		String(args.get("shape", PatronOffer.REQUEST)))
 
 
 ## Whether this patron has given his notice and is inside the six months

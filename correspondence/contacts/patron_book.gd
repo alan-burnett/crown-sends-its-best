@@ -12,6 +12,7 @@ extends RefCounted
 ## | :--- | :--- |
 ## | `arrived` | how many patrons the run has ever had, so numbers are never reused |
 ## | `heard` | where each man's regard stood when the court last heard from him |
+## | `rolled` | which bonuses each resource or livestock kind has been rolled with |
 ##
 ## `heard` is what makes gossip a **movement** rather than a level. A patron who
 ## is merely low is a patron the court has already heard about, and he must not
@@ -29,6 +30,13 @@ var arrived: int = 0
 
 ## Contact id -> his regard when the court last heard from him.
 var heard: Dictionary = {}
+
+## 🔒 **Two patrons to a kind, then none** (#439, `patrons.md` §3): kind -> the
+## bonuses patrons of it have been rolled with, in the order they came.
+##
+## **Here rather than read off the roster**, because a patron who goes home is
+## erased from it (`PatronTerm._depart`) and the kind he held stays closed.
+var rolled: Dictionary = {}
 
 
 func has_heard_of(patron: StringName) -> bool:
@@ -55,6 +63,16 @@ func note(patron: Contact) -> void:
 	heard[String(patron.id)] = patron.relationship.loyalty
 
 
+## Enter what a newly rolled patron holds, so the next man of his kind is given
+## the other bonus and a third is never rolled with it.
+func note_roll(patron: Contact) -> void:
+	if patron == null or patron.specialty_bonus.is_empty() or patron.specialty_kind.is_empty():
+		return
+	var taken: Array = rolled.get(patron.specialty_kind, [])
+	taken.append(patron.specialty_bonus)
+	rolled[patron.specialty_kind] = taken
+
+
 ## The id the next patron to arrive goes by.
 func next_id() -> StringName:
 	arrived += 1
@@ -67,7 +85,12 @@ func to_dict() -> Dictionary:
 	ids.sort()  # Ordered, so the same run writes the same save.
 	for id in ids:
 		out[String(id)] = float(heard[String(id)])
-	return {"arrived": arrived, "heard": out}
+	var kinds: Dictionary = {}
+	var names: PackedStringArray = PackedStringArray(rolled.keys())
+	names.sort()
+	for kind in names:
+		kinds[String(kind)] = (rolled[kind] as Array).duplicate()
+	return {"arrived": arrived, "heard": out, "rolled": kinds}
 
 
 static func from_dict(data: Dictionary) -> PatronBook:
@@ -75,4 +98,9 @@ static func from_dict(data: Dictionary) -> PatronBook:
 	book.arrived = int(data.get("arrived", 0))
 	for id in data.get("heard", {}):
 		book.heard[String(id)] = float(data["heard"][id])
+	for kind in data.get("rolled", {}):
+		var taken: Array = []
+		for bonus in data["rolled"][kind]:
+			taken.append(String(bonus))
+		book.rolled[String(kind)] = taken
 	return book

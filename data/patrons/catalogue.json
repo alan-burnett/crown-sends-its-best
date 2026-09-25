@@ -1,31 +1,27 @@
 [
   {
 	"id": "catalogue",
-	"note": "What a patron can supply and what he wants, drawn from one list so that specialty and need are the same kind of thing (patrons.md section 3). Everything except rivals is a shipment: it arrives, or the PC sends it, and a patron with his own means is wealthy enough to move goods across an ocean - that is all the machinery it takes. No prose here: the folder carries no language suffix, so the words a letter uses for a specialty belong in data/letters_en with the letter that says them.",
+	"note": "What a patron can specialise in, and which of those can also be his need (patrons.md sections 2 and 3, #439). A patron never ships the colony anything: his specialty changes the colony as a policy or arrives as a favour, and his need is something the colony ships to him - so only a resource or a livestock kind is 'needed'. Nobody asks the colony for its people, and every patron asks for gold anyway. File order is the draw order; adding an entry re-rolls every patron. No prose here: the folder carries no language suffix, so the words a letter uses for a specialty belong in data/letters_en with the letter that says them.",
 	"entries": [
 	  {
 		"id": "resources",
-		"kind": "shipment"
+		"needed": true
 	  },
 	  {
-		"id": "troops",
-		"kind": "shipment"
+		"id": "troops"
 	  },
 	  {
-		"id": "gold",
-		"kind": "shipment"
+		"id": "gold"
 	  },
 	  {
-		"id": "experts",
-		"kind": "shipment"
+		"id": "experts"
 	  },
 	  {
 		"id": "livestock",
-		"kind": "shipment"
+		"needed": true
 	  },
 	  {
-		"id": "rivals",
-		"kind": "rivals"
+		"id": "rivals"
 	  }
 	]
   }

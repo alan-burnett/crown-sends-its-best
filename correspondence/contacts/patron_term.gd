@@ -28,7 +28,7 @@ extends RefCounted
 ##
 ## ## 🔒 Business continues as normal
 ##
-## He still offers, still asks, still trades. Nothing in `PatronOffer` knows he
+## He still offers, still asks, still trades. Nothing in his letters' gates knows he
 ## is leaving, and there is no branch anywhere that quiets a man on his way out —
 ## a patron who stopped dealing the month he gave notice would make the window
 ## worthless, which is the opposite of the point.

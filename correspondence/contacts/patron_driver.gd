@@ -58,7 +58,7 @@ func _arrive(state: WorldState, log: EventLog) -> void:
 	var wanted := Patron.how_many_arrived(run.demands)
 	var here := Patron.all_in(run).size()
 	while here < wanted:
-		var patron := Patron.generate(run.patrons.next_id(), run.streams, state.month)
+		var patron := Patron.generate(run.patrons.next_id(), run.streams, state.month, run.patrons)
 		run.add_contact(patron)
 		here += 1
 		# Seam A. What he is, said once, so the letters and the map read the same
@@ -67,6 +67,9 @@ func _arrive(state: WorldState, log: EventLog) -> void:
 			"patron": String(patron.id),
 			"name": patron.display_name,
 			"specialty": patron.specialty,
+			"specialty_kind": patron.specialty_kind,
+			"bonus": patron.specialty_bonus,
 			"need": patron.need,
+			"need_kind": patron.need_kind,
 			"vice": String(patron.vice),
 		}, WorldPhase.ARRIVALS)

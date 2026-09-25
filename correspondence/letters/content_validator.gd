@@ -1044,7 +1044,7 @@ func check_run_modifiers(content: ContentDatabase) -> void:
 ##
 ## | | Because |
 ## | :--- | :--- |
-## | a catalogue with fewer than two entries | §3's mismatch is impossible with one |
+## | a catalogue where nothing can be needed, or a need that names no kind | §3: a need is a resource or livestock kind, never experts, troops, gold or the rivals |
 ## | no vices at all | every patron would roll nothing |
 ## | a knob nothing turns and nothing reads | the vice would be a name and no more |
 ##
@@ -1061,12 +1061,8 @@ func check_patrons(content: ContentDatabase) -> void:
 	else:
 		var entries: Array = content.record(
 			Patron.COLLECTION, Patron.CATALOGUE_RECORD).get("entries", [])
-		if entries.size() < 2:
-			_problem(Patron.CATALOGUE_RECORD, (
-				"holds %d entries, and §3 wants a specialty and a need that are "
-				+ "never the same — which needs two"
-			) % entries.size())
 		var seen: Dictionary = {}
+		var needed := 0
 		for entry in entries:
 			var id := String((entry as Dictionary).get("id", ""))
 			if id.is_empty():
@@ -1074,6 +1070,18 @@ func check_patrons(content: ContentDatabase) -> void:
 			elif seen.has(id):
 				_problem("%s.%s" % [Patron.CATALOGUE_RECORD, id], "is declared twice")
 			seen[id] = true
+			if not bool((entry as Dictionary).get("needed", false)):
+				continue
+			needed += 1
+			# 🔒 **A need is a kind** (#439, §3): something the colony can ship him.
+			# Experts, troops, gold and the rivals come in none.
+			if Patron.kinds_of(id).is_empty():
+				_problem("%s.%s" % [Patron.CATALOGUE_RECORD, id], (
+					"is marked needed and names no kind, and §3 makes a need a "
+					+ "resource or livestock kind the colony can ship him"))
+		if needed == 0:
+			_problem(Patron.CATALOGUE_RECORD,
+				"marks nothing as needed, so every patron would arrive wanting nothing")
 
 	if not content.has_record(PatronVices.COLLECTION, PatronVices.RECORD):
 		_problem(PatronVices.RECORD,
