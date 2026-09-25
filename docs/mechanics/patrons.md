@@ -13,8 +13,9 @@
 SPEC §8.3: a merchant, noble, bishop or scholar who takes an interest in the
 colony, asks for things, proposes trades, and does not stay.
 
-**Materially they are a net drain.** What they ask for over a run outweighs what
-they hand over, and a PC who simply feeds every patron is poorer for it.
+**Materially they are a net drain until their specialty comes into play.** Until
+then, what they ask for outweighs what they hand over, and a PC who simply feeds
+every patron is poorer for it.
 
 **What makes them worth keeping is prestige** (§14.1), and what makes them worth
 *handling* is that a specialty used at the right moment is worth far more than it
@@ -95,7 +96,7 @@ exists.** The PC cannot ask for it.
 
 | Specialty | He offers | Form | The colony must have, somewhere |
 | :--- | :--- | :--- | :--- |
-| a resource | **a higher Crown price** for his kind, or **more of it**, whichever he was rolled with | policy | a sugar, tobacco or cotton plantation for those; a mine for ore; a farm for food; the conversion building for rum, cigars, clothing, beer, iron, tools or guns; **nothing** for wood, stone or furs |
+| a resource | **a higher Crown price** for his kind, or **more of it**, whichever he was rolled with | policy | a sugar, tobacco or cotton plantation for those; a mine for ore; a farm for food; the conversion building for rum, cigars, clothing, beer, iron, tools or guns, never the town hall; **nothing** for wood, stone or furs |
 | a livestock kind | **a higher Crown price** for it, or **faster breeding** across the colony | policy | a pasture, or a town pasture |
 | experts | **an expert of his kind**, arriving in the town with a library that holds the fewest experts of that kind, ties to town order | one-off | a town with a library |
 | troops | **a company the Crown feeds**, as the Marshal's are | policy | nothing |
@@ -336,8 +337,8 @@ That is why §7's arrival has to produce a letter, not merely a contact.
 
 ## 11. Tuning targets
 
-- How far a specialty's worth exceeds what a need costs, and whether *net drain*
-  holds across a run at every loyalty.
+- How far a specialty's worth exceeds what a need costs, and whether the net
+  drain holds, at every loyalty, until the specialty comes into play.
 - The sabotage magnitude, and its one-year term.
 - The regard at which he offers his specialty.
 - The size of each specialty: the price lift, the yield, the company, the gold.
