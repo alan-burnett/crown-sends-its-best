@@ -397,30 +397,19 @@ ale house sets its pleasure in direct competition with its supper.
 
 ## 9. What is live
 
-Every effect in §4 was checked against `data/buildings/buildings.json` and what
-the code reads (#416). **All of them are live except these:**
+**Every effect in §4 is live.** #409–#415 built the last of them, and #416
+checked each one against `data/buildings/buildings.json` and the code that reads
+it. Their magnitudes are placeholders, to be tuned (§10).
 
-| Building | Missing | Ticket |
-| :--- | :--- | :--- |
-| dock | sea and ocean food | #409 |
-| irrigation station | grassland and plains food, doubled on farms | #409 |
-| windmill, river mill | farm yield | #409 |
-| wharf | +10% gold from Crown trade | #411 |
-| guard towers | vision, influence | #410 |
-| scouts | double stores and 10 tools for its expeditions; influence | #413, #410 |
-| worker cabins | faster improvements, no improvement upkeep; influence | #412, #410 |
-| fairgrounds | influence; amusement to every town without one | #410, #415 |
-| cathedral | safety and amusement to every town without a church | #415 |
-| printing press | amusement in every town | #415 |
-| tea house, ale house | a measure of tea or beer serving more of the town | #414 |
+**Every building must do something.** Every building is on some intent's menu,
+and a menu takes a building for its place, not its effect
+(`governor-agendas.md` §3). So a building with no effects is a town spending wood
+and stone on nothing. The content validator refuses a building whose `effects`
+is empty.
 
-**Since #429 a town builds these anyway.** Every building is on some intent's
-menu, and a menu takes a building for its place, not its effect — so until they
-land, a town can spend wood and stone on a dock that feeds nobody. Under the old
-axis model they scored nought and were never built, which is why nobody noticed.
-
-**The PO rewrites this section when #409–#415 close**, and it then says only
-what is live.
+That is how the tree drifted before. The old axis model scored an inert building
+at nought, no town built one, and nobody noticed that two thirds of the tree did
+nothing.
 
 ## 10. Tuning targets
 
