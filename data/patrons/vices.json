@@ -1,7 +1,7 @@
 [
   {
 	"id": "vices",
-	"note": "A named bundle of mechanical behaviour on top of the personality every contact has (patrons.md section 6). contacts.md section 1 reserves 'personality' for the weight vector, and the two words must not merge. Every knob here is an id into a code-side table: one that is turned when he arrives, or one that is read where it is needed. A knob nothing turns and nothing reads is refused by the validator.",
+	"note": "A named bundle of mechanical behaviour on top of the personality every contact has (patrons.md section 6). contacts.md section 1 reserves 'personality' for the weight vector, and the two words must not merge. Every knob here is an id into a code-side table: one that is turned when he arrives, or one that is read where it is needed. A knob nothing turns and nothing reads is refused by the validator. Section 6 names ten vices and seven are here: Doctrinaire, Dilatory and Impatient named only knobs nothing read, and wait on issue 444 for a design.",
 	"entries": [
 	  {
 		"id": "thin_skinned",
@@ -68,47 +68,11 @@
 	  },
 	  {
 		"id": "respectable",
-		"note": "He watches how the colony is governed and cannot be seen doing business with a man who is losing his. His standing arrangements end when a town declares.",
+		"note": "He watches how the colony is governed and cannot be seen doing business with a man who is losing his. Cancelling his standing arrangements when a town declares (patrons.md section 6) waits on a design and a reader, issue 444; until then he only watches.",
 		"knobs": [
 		  {
 			"cares_about": {
 			  "measure": "colony_is_quiet"
-			}
-		  },
-		  {
-			"cancels_on_rebellion": {}
-		  }
-		]
-	  },
-	  {
-		"id": "doctrinaire",
-		"note": "He will not touch certain goods. A filter on the catalogue, so it needs no behaviour of its own.",
-		"knobs": [
-		  {
-			"will_not_touch": {
-			  "resource": "rum"
-			}
-		  }
-		]
-	  },
-	  {
-		"id": "dilatory",
-		"note": "His side of a bargain arrives late. The promise machinery, aimed at him.",
-		"knobs": [
-		  {
-			"delivers_late": {
-			  "months": 2
-			}
-		  }
-		]
-	  },
-	  {
-		"id": "impatient",
-		"note": "His offers expire within the turn: silence is a refusal, not a delay.",
-		"knobs": [
-		  {
-			"offer_expires_in": {
-			  "months": 0
 			}
 		  }
 		]

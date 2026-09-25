@@ -50,7 +50,7 @@ const RECORD: String = "experience"
 const READ_BY: Dictionary = {
 	"bearing": "Force.leadership_of",
 	"marches": "Company.tiles_this_month",
-	"hardiness": "Company.attrition_for",
+	"hardiness": "Company.attrition_for_me",
 	"country": "Force.terrain_of",
 	"husbandry": "Company.wants_per_head",
 	"siegecraft": "Force.fortification_of",

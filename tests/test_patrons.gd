@@ -234,7 +234,7 @@ func test_a_vice_nobody_has_written_turns_nothing() -> void:
 	patron.vice = &"a_vice_nobody_has_written"
 	PatronVices.apply_to(patron)
 	assert_eq(patron.writes_readily, before, "an unknown vice turned something")
-	assert_empty(PatronVices.knob_of(patron, "will_not_touch"),
+	assert_empty(PatronVices.knob_of(patron, PatronCredit.KNOB),
 		"an unknown vice answered a question about a knob")
 
 

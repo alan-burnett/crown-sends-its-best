@@ -23,9 +23,9 @@ extends RefCounted
 ##
 ## A knob is in `APPLIES` when some existing field holds it: a weight on a deed,
 ## a lean, a `cares_about`, how readily he writes. It is in `READ_BY` when the
-## machinery that wants it asks the question at the moment it matters — whether
-## he will touch rum, how late his shipment runs — because storing the answer
-## would put it in two places.
+## machinery that wants it asks the question at the moment it matters — how
+## loudly he speaks of the PC at court, how far his displeasure travels — because
+## storing the answer would put it in two places.
 ##
 ## **Neither table may be empty of a knob some file names.** `ContentValidator`
 ## refuses a vice naming a knob that is in neither, which is the failure this
@@ -54,13 +54,20 @@ const APPLIES: Dictionary = {
 ## 🔒 **Not a no-op list.** Each of these is asked for by name at the point it
 ## decides something, and the string says where — so a knob that stops being read
 ## is a dead entry somebody can see rather than a silent nothing.
+##
+## 🔒 **`Class.function`, and the function exists.** `test_knob_readers` holds
+## every entry to that, because an entry here is the validator's whole reason to
+## pass a vice. Four once pointed at machinery nobody had built, and three vices
+## shipped doing nothing.
+##
+## **Not here, because nothing reads them yet** (#444): Respectable's
+## `cancels_on_rebellion`, Doctrinaire's `will_not_touch`, Dilatory's
+## `delivers_late` and Impatient's `offer_expires_in`. §6 names all four. Until
+## each has a design and a reader, it stays out of this table and out of
+## `data/patrons/vices.json`.
 const READ_BY: Dictionary = {
 	"prestige_voice": "PatronCredit.voice_of",
 	"displeasure_spreads": "PatronGossip.share_of",
-	"cancels_on_rebellion": "Patron cancellation, #283",
-	"will_not_touch": "the offer catalogue filter, #283",
-	"delivers_late": "the promise machinery, #283",
-	"offer_expires_in": "offer expiry, #283",
 }
 
 static var _vices: Dictionary = {}
@@ -108,7 +115,7 @@ static func knobs_of(vice: StringName) -> Array:
 ##
 ## **The reader half of the contract.** A patron with no vice, a vice with no
 ## such knob and no vices loaded at all all answer the same way, so a caller
-## asking *how late does he deliver* gets an empty dictionary rather than a
+## asking *how loudly does he talk* gets an empty dictionary rather than a
 ## crash.
 static func knob_of(contact: Contact, knob: String) -> Dictionary:
 	if contact == null:

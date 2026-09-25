@@ -1049,9 +1049,13 @@ func check_run_modifiers(content: ContentDatabase) -> void:
 ## | a knob nothing turns and nothing reads | the vice would be a name and no more |
 ##
 ## The last is the one that matters, and it is the same check the perks carry for
-## the same reason. **A vice naming `will_not_touch_gold` instead of
-## `will_not_touch` would apply nothing**, the Author would have written it, the
+## the same reason. **A vice naming `prestige_volume` instead of
+## `prestige_voice` would apply nothing**, the Author would have written it, the
 ## player would have met him, and nobody would ever find out.
+##
+## 🔒 **The check is only as honest as the tables.** It trusts `READ_BY`, so an
+## entry naming a reader that does not exist passes a vice that does nothing.
+## `test_knob_readers` holds every entry to a function that does (#444).
 func check_patrons(content: ContentDatabase) -> void:
 	_file = "data/%s" % Patron.COLLECTION
 
