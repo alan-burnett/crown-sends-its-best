@@ -37,6 +37,11 @@ const DEFAULT_COOLDOWN: int = 3
 const STREAM: String = "letters"
 
 const EVENT_CULLED: StringName = &"letter_culled"
+
+## 🔒 **The two-voice month** (#404): a trigger names the one companion its
+## letter brings, and the companion names it back. See `_with_companions`.
+const COMPANION_KEY: String = "companion"
+const COMPANION_OF_KEY: String = "companion_of"
 const EVENT_DISPATCHED: StringName = &"letter_dispatched"
 
 var content: ContentDatabase = null
@@ -68,7 +73,9 @@ func compose_inbox(run: RunState, outcomes: Array = []) -> Array[InboundLetter]:
 
 	var fired := _fired_triggers(run)
 	var acknowledging := _acknowledgements(run, outcomes)
-	var letters := _cull(fired, acknowledging, run)
+	# **Companions after the cull**, so a lead that was culled or damped brings
+	# nobody, and the pair has spent one letter of the budget between them (#404).
+	var letters := _with_companions(_cull(fired, acknowledging, run), run)
 
 	for letter in letters:
 		run.letters_sent[sent_key(letter.letter_id, letter.sender)] = run.world.month
@@ -95,6 +102,10 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 		# acknowledgements then crowd out every real letter with news of orders
 		# nobody gave.
 		if trigger.has("acknowledges") or bool(trigger.get(Composer.OFFERS_KEY, false)):
+			continue
+		# 🔒 **A companion never travels alone** (#404). It is composed with its
+		# lead or not at all, so it is no part of the ordinary sweep.
+		if trigger.has(COMPANION_OF_KEY):
 			continue
 
 		var letter_id := String(trigger.get("letter", ""))
@@ -341,6 +352,55 @@ func _only_what_they_want_to_say(
 
 
 
+## 🔒 **The two-voice month** (#404; the Author's ruling is on the ticket, and
+## `the-director.md` §11 is to carry it): two contacts, one decision, opposite
+## advice, the same post.
+##
+## | | |
+## | :--- | :--- |
+## | **Declared on the lead** | its trigger names one `companion`, which names it back with `companion_of` |
+## | **Only with its lead** | a lead culled by the budget or damped by its sender brings nobody |
+## | **Its own conditions** | still hold, or the lead goes alone; and its own cooldown |
+## | **Not its sender's pressure** | the lead's decision is the occasion, so the companion rides on it |
+## | **One letter of budget** | the pair counts as one, so it goes even when the lead filled the last place |
+## | **The lead's params** | readable by name through the `lead` param source |
+##
+## A second man: the companion is never sent by the lead's own sender.
+func _with_companions(letters: Array[InboundLetter], run: RunState) -> Array[InboundLetter]:
+	var out: Array[InboundLetter] = []
+	for lead in letters:
+		out.append(lead)
+		var companion := _companion_of(lead, run)
+		if companion != null:
+			out.append(companion)
+	return out
+
+
+## The companion this letter brings, composed now, or null.
+func _companion_of(lead: InboundLetter, run: RunState) -> InboundLetter:
+	var triggers: Dictionary = content.collection("triggers")
+	if lead.trigger_id.is_empty() or not triggers.has(lead.trigger_id):
+		return null
+	var companion_id := String((triggers[lead.trigger_id] as Dictionary).get(COMPANION_KEY, ""))
+	if companion_id.is_empty() or not triggers.has(companion_id):
+		return null
+	var trigger: Dictionary = triggers[companion_id]
+	var letter_id := String(trigger.get("letter", ""))
+	if not content.has_record("letters", letter_id):
+		return null
+	var letter := Letter.from_record(content.record("letters", letter_id))
+	for entry in senders_of(letter, run):
+		var contact: Contact = entry
+		if contact.id == lead.sender or _too_soon(trigger, letter_id, contact, run):
+			continue
+		var context := _context(run, contact)
+		context.lead = lead.params.duplicate(true)
+		if not _conditions_hold(trigger, context):
+			continue
+		return _inbound(trigger, letter, contact, context, run)
+	return null
+
+
 ## Whether this letter arrived too recently to arrive again.
 func _too_soon(
 	trigger: Dictionary, letter_id: String, contact: Contact, run: RunState
@@ -404,6 +464,7 @@ func _inbound(trigger: Dictionary, letter: Letter, contact: Contact, context: Le
 	# ranks, whether he is still consulting — and with a role in that field two
 	# governors would be one correspondent who wrote twice.
 	var inbound := InboundLetter.new(letter.id, contact.id, &"")
+	inbound.trigger_id = String(trigger.get("id", ""))
 	inbound.id = StringName("inbound_%d_%s_%s" % [run.turn, contact.id, letter.id])
 	inbound.month = run.world.month
 	inbound.measures = context.measures.duplicate()

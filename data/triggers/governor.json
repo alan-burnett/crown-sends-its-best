@@ -720,5 +720,29 @@
         "remembers_his_kindness": {}
       }
     ]
+  },
+  {
+    "id": "trigger.governor.a_rise_would_be_felt",
+    "letter": "governor.a_rise_would_be_felt",
+    "companion_of": "trigger.steward.request_tax_rise",
+    "cooldown": 6,
+    "note": "Issue 404, the two-voice month (the Author's ruling on the ticket). Composed only beside the Steward's proposed rise, in the same post, by a governor whose town has traded the resource it names in the last three months; never on its own. It needs no pressure of his and costs no budget of its own. The PC is the arbiter: the Steward says the colony will hardly notice, the man who runs a town that buys it says otherwise.",
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "lead",
+        "param": "resource"
+      }
+    },
+    "conditions": [
+      {
+        "his_town_trades": {
+          "lead_param": "resource",
+          "within": 3
+        }
+      }
+    ]
   }
 ]

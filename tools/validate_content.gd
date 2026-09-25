@@ -34,6 +34,7 @@ func _init() -> void:
 	var validator := ContentValidator.new()
 	validator.validate(content)
 	validator.check_trigger_targets(content)
+	validator.check_companions(content)
 	validator.check_trigger_params(content)
 	validator.check_effects_are_reachable(content)
 	validator.check_building_reserves(content)

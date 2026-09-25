@@ -122,6 +122,10 @@ var natives: Tribes = null
 var map: WorldMap = null
 var territory: Territory = null
 
+## 🔒 **The letter this one travels with** (#404): its params, by name, when this
+## is a companion being composed in the same post. Empty for every other letter.
+var lead: Dictionary = {}
+
 
 func _init(p_state: WorldState = null, p_sender: Contact = null, p_tone: StringName = &"") -> void:
 	state = p_state

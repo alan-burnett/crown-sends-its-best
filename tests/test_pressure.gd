@@ -249,6 +249,16 @@ func test_a_tie_is_broken_by_the_topic_and_not_by_a_die() -> void:
 		"two identical worlds picked different grievances")
 
 
+## Whether this letter is only ever sent as a companion (#404): the two-voice
+## month's second voice, which rides on its lead rather than on his pressure.
+func _is_a_companion(letter_id: String) -> bool:
+	for id in content.ids("triggers"):
+		var trigger: Dictionary = content.collection("triggers")[id]
+		if String(trigger.get("letter", "")) == letter_id and trigger.has(Director.COMPANION_OF_KEY):
+			return true
+	return false
+
+
 func test_no_contact_writes_twice_in_one_month() -> void:
 	# 🔒 The acceptance, through the real director. A man who wrote about all
 	# three of his grievances would be a man the player learns to skim, which is
@@ -265,6 +275,8 @@ func test_no_contact_writes_twice_in_one_month() -> void:
 			var record: Dictionary = content.record("letters", inbound.letter_id)
 			if not bool(record.get("skippable", true)):
 				continue  # A must-send bypasses pressure, and may double up.
+			if _is_a_companion(inbound.letter_id):
+				continue  # So does a companion, riding on its lead's occasion (#404).
 			var sender := String(inbound.sender)
 			assert_false(seen.has(sender),
 				"%s wrote twice in one month: %s and %s"

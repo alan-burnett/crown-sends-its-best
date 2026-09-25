@@ -59,6 +59,8 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"patron_ask", {}, ColonyParamSources.patron_ask
 	)
+	# The letter a companion travels with, read by name (#404).
+	ContentRegistry.register_param_source("lead", {"param": "string"}, ColonyParamSources.lead)
 	# What a patron wants shipped to him: its kind, how much, how soon (#441).
 	ContentRegistry.register_param_source(
 		"his_need", {"field": "string"}, ColonyParamSources.his_need
@@ -827,6 +829,15 @@ static func best_selling_resource(args: Dictionary, context: LetterContext) -> V
 
 static func patron_ask(_args: Dictionary, context: LetterContext) -> Variant:
 	return maxf(1.0, DemandSchedule.gold_target(context.demands) * PATRON_ASK_SHARE)
+
+
+## 🔒 **What the letter this one travels with said** (#404): one of its params,
+## by name. Only a companion has a lead; anywhere else this is empty, and the
+## validator refuses it outside a `companion_of` trigger.
+static func lead(args: Dictionary, context: LetterContext) -> Variant:
+	if context == null:
+		return ""
+	return context.lead.get(String(args.get("param", "")), "")
 
 
 ## 🔒 **What a patron wants shipped to him** (#441, `patrons.md` §4): his need's

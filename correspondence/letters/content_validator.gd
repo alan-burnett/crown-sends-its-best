@@ -1563,6 +1563,43 @@ func check_cutscenes(content: ContentDatabase) -> void:
 				_problem("params", "'%s' shows '%s' without supplying '%s'" % [id, cutscene, name])
 
 
+## 🔒 **A pair names itself from both ends** (#404). A lead's `companion` must be
+## a trigger that names it back with `companion_of`, and a `companion_of` must be
+## named by its lead — or the companion is a letter nothing will ever send. A
+## companion brings no companion of its own. The `lead` param source and the
+## `his_town_trades` condition read the lead's params, which only a companion
+## has, so they are refused anywhere else.
+func check_companions(content: ContentDatabase) -> void:
+	var triggers: Dictionary = content.collection("triggers")
+	var ids: Array = triggers.keys()
+	ids.sort()
+	for id in ids:
+		var record: Dictionary = triggers[id]
+		_file = String(record.get(JsonLoader.SOURCE_KEY, ""))
+		var companion := String(record.get(Director.COMPANION_KEY, ""))
+		if not companion.is_empty():
+			if not triggers.has(companion):
+				_problem(Director.COMPANION_KEY, "names trigger '%s', which does not exist" % companion)
+			elif String((triggers[companion] as Dictionary).get(Director.COMPANION_OF_KEY, "")) != String(id):
+				_problem(Director.COMPANION_KEY, "names '%s', which does not name '%s' back" % [companion, id])
+			if record.has(Director.COMPANION_OF_KEY):
+				_problem(Director.COMPANION_KEY, "is itself a companion, and a companion brings nobody")
+		var lead := String(record.get(Director.COMPANION_OF_KEY, ""))
+		if not lead.is_empty():
+			if not triggers.has(lead) or String((triggers[lead] as Dictionary).get(Director.COMPANION_KEY, "")) != String(id):
+				_problem(Director.COMPANION_OF_KEY, "names '%s', which does not bring it, so it is never sent" % lead)
+			continue
+		var params: Variant = record.get("params", {})
+		if typeof(params) == TYPE_DICTIONARY:
+			for name in params:
+				var spec: Variant = params[name]
+				if typeof(spec) == TYPE_DICTIONARY and String(spec.get("from", "")) == "lead":
+					_problem("params.%s" % name, "reads a lead, and this trigger is no companion")
+		for entry in record.get("conditions", []):
+			if typeof(entry) == TYPE_DICTIONARY and (entry as Dictionary).has("his_town_trades"):
+				_problem("conditions", "asks his_town_trades, which reads a lead, and this trigger is no companion")
+
+
 func check_trigger_targets(content: ContentDatabase) -> void:
 	var referenced: Dictionary = {}
 	for id in content.ids("triggers"):

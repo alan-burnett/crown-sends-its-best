@@ -22,6 +22,7 @@
   {
     "id": "trigger.steward.request_tax_rise",
     "letter": "steward.request_tax_rise",
+    "companion": "trigger.governor.a_rise_would_be_felt",
     "note": "Issue 365: not before the colony has lived a month. A new colony starts poor, so the revenue threshold alone is true on turn one - and a colony that has never earned anything has not disappointed anybody yet.",
     "urgency": 0.4,
     "cooldown": 6,

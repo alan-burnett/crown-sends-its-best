@@ -42,6 +42,11 @@ var month: int = 0
 ## it is when read.
 var arrives_month: int = -1
 
+## The trigger that sent it (#404), so the director can find the companion it
+## brings. **Not saved**: it is read in the pass that composes the post and
+## never again.
+var trigger_id: String = ""
+
 
 func _init(p_letter_id: String = "", p_sender: StringName = &"", p_tone: StringName = &"") -> void:
 	letter_id = p_letter_id

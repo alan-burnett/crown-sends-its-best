@@ -220,6 +220,15 @@ func test_a_mans_damper_is_his_own() -> void:
 
 # --- 🔒 A must-send bypasses both -------------------------------------------
 
+## Whether this letter is only ever sent as a companion (#404).
+func _is_a_companion(letter_id: String) -> bool:
+	for id in content.ids("triggers"):
+		var trigger: Dictionary = content.collection("triggers")[id]
+		if String(trigger.get("letter", "")) == letter_id and trigger.has(Director.COMPANION_OF_KEY):
+			return true
+	return false
+
+
 func test_a_must_send_is_not_recorded_as_having_had_his_say() -> void:
 	# §2 and §6. A governor reporting that the natives have attacked has not
 	# thereby said what he meant to say, and next month he can still raise it.
@@ -242,7 +251,9 @@ func test_a_must_send_is_not_recorded_as_having_had_his_say() -> void:
 		machine.begin_turn()
 		for inbound in run.inbox:
 			var id := String(inbound.sender)
-			if bool(content.record("letters", inbound.letter_id).get("skippable", true)):
+			if _is_a_companion(inbound.letter_id):
+				pass  # Rides on its lead, not on his pressure, so no writing (#404).
+			elif bool(content.record("letters", inbound.letter_id).get("skippable", true)):
 				skippable_sent[id] = int(skippable_sent.get(id, 0)) + 1
 			else:
 				must_sends += 1

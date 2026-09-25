@@ -1,0 +1,34 @@
+{
+  "id": "governor.a_rise_would_be_felt",
+  "sender": "governor",
+  "type": "warning",
+  "skippable": true,
+  "note": "Issue 404, the two-voice month: the other voice beside steward.request_tax_rise, in the same post. The Steward proposes a firmer rate and says the colony will hardly notice; this governor's town trades the very resource, and he says it will. There is nothing to answer here - the decision is the Steward's letter, and the PC is the arbiter between them. Placeholder prose.",
+  "params": {
+    "governor": "contact",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "I understand the Steward means to write to you about the duty on {param:resource}. I thought you had better hear from somebody who has to pay it."
+    },
+    {
+      "text": "This town deals in {param:resource} every month. Put the rate up and it is my people who find the difference, not the Treasury, and they will not find it quietly."
+    },
+    {
+      "text": "I do not tell you what to decide. I only ask that you decide it knowing this.",
+      "only_tones": [
+        "pleased",
+        "dutiful"
+      ]
+    },
+    {
+      "text": "I expect you will do as the Steward says. I wanted it on paper that you were told.",
+      "only_tones": [
+        "annoyed",
+        "desperate",
+        "hateful"
+      ]
+    }
+  ]
+}

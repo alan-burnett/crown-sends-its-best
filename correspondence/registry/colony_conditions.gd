@@ -89,6 +89,10 @@ static func register_all() -> void:
 	)
 	# A patron who would write asking for his need (#441).
 	ContentRegistry.register_condition("he_has_a_need", {}, ColonyConditions.he_has_a_need)
+	# A governor whose town trades what the letter he answers names (#404).
+	ContentRegistry.register_condition(
+		"his_town_trades", {"lead_param": "string", "within": "integer"}, ColonyConditions.his_town_trades
+	)
 	# A patron's expert, his gold and his men, offered (#443).
 	ContentRegistry.register_condition(
 		"he_could_send_an_expert", {}, ColonyConditions.he_could_send_an_expert
@@ -799,6 +803,30 @@ static func he_could_trouble_a_duke(_args: Dictionary, context: LetterContext) -
 	if not _he_would_offer(context, "rivals"):
 		return false
 	return the_duke_to_trouble(context) != null
+
+
+## Whether this governor's town has bought or sold, in the last `within` months,
+## the resource the letter he travels with names in its `lead_param` (#404).
+##
+## **A companion's condition.** It reads the lead's params, which only a
+## companion has, so the governor who writes beside the Steward's proposed rise
+## on clothing is one whose town trades in clothing.
+static func his_town_trades(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null or context.colony == null or context.log == null:
+		return false
+	var town := context.colony.governed_by(context.sender.id)
+	var resource := String(context.lead.get(String(args.get("lead_param", "resource")), ""))
+	if town == null or resource.is_empty():
+		return false
+	var within := maxi(1, int(args.get("within", 3)))
+	for type in [Trade.EVENT_BOUGHT, Trade.EVENT_SOLD]:
+		for event in context.log.of_type(type):
+			if context.month - event.month >= within:
+				continue
+			var here := String(event.payload.get("town", "")) == String(town.id)
+			if here and String(event.payload.get("resource", "")) == resource:
+				return true
+	return false
 
 
 ## Whether this patron's specialty is `specialty` and he thinks well enough of
