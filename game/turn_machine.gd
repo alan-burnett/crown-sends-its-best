@@ -200,6 +200,8 @@ func _init(p_run: RunState) -> void:
 	crown_standing.promises = promise_driver
 	orders.colony = run.colony
 	orders.policies = run.policies
+	# A governor who asked how to answer a tribe hears the reply (#436).
+	orders.tribes = run.tribes
 	crown_standing.growth = run.demands
 	crown_standing.policies = run.policies
 	crown_standing.contacts = run.contacts
@@ -458,6 +460,9 @@ static func order_effects() -> Dictionary:
 		String(M1Registrations.ORDER_URGE_COMPANY): {"target": ""},
 		# Landed by `SabotageExecutor` through `SabotageDriver.arrange` (#395).
 		String(M1Registrations.ORDER_TROUBLE_A_DUKE): {"target": ""},
+		# **Taken at compliance**, as a policy is (#436): the urging sits on the
+		# letter he asked about, and nothing is left for the month after.
+		String(M1Registrations.ORDER_ANSWER_THE_TRIBE): {"target": ""},
 	}
 
 

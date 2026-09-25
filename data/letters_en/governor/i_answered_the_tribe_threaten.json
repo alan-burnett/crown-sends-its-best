@@ -1,0 +1,43 @@
+{
+  "id": "governor.i_answered_the_tribe_threaten",
+  "sender": "governor",
+  "type": "report",
+  "skippable": true,
+  "note": "Issue 436, natives.md section 11. A governor below neutral and above the floor answers a tribe himself and tells the PC afterwards, naming the answer he gave. One letter per answer, because a line cannot be chosen by a condition. Placeholder prose.",
+  "params": {
+    "town": "town",
+    "tribe": "tribe"
+  },
+  "body": [
+    {
+      "text": "The {param:tribe} wrote to me about what {param:town} was doing on their ground."
+    },
+    {
+      "text": "I have told them what the town will do if they push it. I meant it, and I think they believed me."
+    },
+    {
+      "text": "I did not think the matter would keep for a letter to you and back."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the {param:tribe}, I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "obliged for the notice"
+        },
+        {
+          "tone": "annoyed",
+          "text": "sorry you did not write to me first"
+        }
+      ]
+    },
+    "steps": [],
+    "closing": [
+      {
+        "text": "I remain your servant,"
+      }
+    ]
+  }
+}

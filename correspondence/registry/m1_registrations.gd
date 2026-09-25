@@ -80,6 +80,10 @@ const ORDER_URGE_COMPANY: StringName = &"urge_company"
 ## 🔒 **A patron works against a duke** (#395, `patrons.md` §5). The same kind as
 ## the Intent `SabotageExecutor` lands.
 const ORDER_TROUBLE_A_DUKE: StringName = &"trouble_a_duke"
+## 🔒 **How the PC would have a governor answer a tribe** (#436, `natives.md`
+## §11). Resolved by compliance into an urging on the letter he asked about; it
+## never touches the tribe.
+const ORDER_ANSWER_THE_TRIBE: StringName = &"answer_the_tribe"
 
 
 ## Populate the resource catalogue and the terrain table from loaded content.
@@ -409,6 +413,9 @@ static func register_effects() -> void:
 	# with it. Nothing reaches the duke's regard.
 	ContentRegistry.register_effect(
 		"trouble_a_duke", {"to": "contact", "duke": "rival"}, ORDER_TROUBLE_A_DUKE
+	)
+	ContentRegistry.register_effect(
+		"answer_the_tribe", {"to": "contact", "answer": "string"}, ORDER_ANSWER_THE_TRIBE
 	)
 	# **The player never sets a rate directly** (SPEC §10.2). It is always a
 	# letter to the Steward, resolved through compliance like any other Order —

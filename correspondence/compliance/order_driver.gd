@@ -27,6 +27,11 @@ var colony: Colony = null
 ## puts his name to it here, in the month he agrees.
 var policies: PolicyBook = null
 
+## The tribes' letters, which a governor who asked the PC holds open (#436).
+var tribes: Tribes = null
+
+const EVENT_ANSWER_URGED: StringName = &"tribe_answer_urged"
+
 ## Orders waiting to be read. Filled when the post is sent, emptied when it lands.
 ##
 ## 🔒 **The run's array, not the driver's** (#390). Under *Distant colony* an
@@ -87,6 +92,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		result["order"] = order
 		results.append(result)
 		_enact_if_agreed(order, contact, result, state, log)
+		_urge_the_answer_if_agreed(order, contact, result, state, log)
 		_settle_policy(order, contact, state, log)
 
 	pending.clear()
@@ -123,6 +129,37 @@ func _enact_if_agreed(
 		StringName(order.get_param("split", Policy.NONE)),
 		order.params,
 	), log, state.month)
+
+
+## 🔒 **The PC's word on how to answer a tribe reaches the letter he asked about**
+## (#436, `natives.md` §11), and only if his compliance took it. It is an urging
+## on the letter, weighed with everything else when he answers this month; a
+## refusal leaves him to answer exactly as he would have with no reply. The same
+## moment a policy stands from, and for the same reason: he answers in the month
+## the reply reaches him.
+func _urge_the_answer_if_agreed(
+	order: Order,
+	contact: Contact,
+	result: Dictionary,
+	state: WorldState,
+	log: EventLog,
+) -> void:
+	if tribes == null or order.kind != M1Registrations.ORDER_ANSWER_THE_TRIBE:
+		return
+	if String(result.get("outcome", "")) != String(Compliance.COMPLY):
+		return
+	var answer := StringName(order.get_param("answer", ""))
+	var grievance := tribes.grievances.asked_by(contact.id)
+	if grievance == null or not TribeGrievance.ANSWERS.has(answer):
+		return
+	grievance.urged = answer
+	grievance.urged_tone = order.tone
+	log.emit(EVENT_ANSWER_URGED, contact.id, state.month, {
+		"grievance": String(grievance.id),
+		"governor": String(contact.id),
+		"urged": String(answer),
+		"tone": String(order.tone),
+	}, WorldPhase.RECKONING)
 
 
 ## The PC's answer to a man who said he would not carry it further (§4).

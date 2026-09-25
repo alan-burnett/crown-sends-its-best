@@ -40,6 +40,7 @@ static func register_all() -> void:
 	Deliberation.register_consideration(CostOfYielding.new(), kinds)
 	Deliberation.register_consideration(CostOfAGift.new(), kinds)
 	Deliberation.register_consideration(ByTemper.new(), kinds)
+	Deliberation.register_consideration(AsTheCrownUrged.new(), kinds)
 	Deliberation.register_filter(OnlyWhatCanBeYielded.new(), kinds)
 	Deliberation.register_filter(OnlyWhatHeHasToGive.new(), kinds)
 
@@ -194,6 +195,20 @@ class ByTemper extends Consideration:
 			TribeGrievance.GIFT:
 				return pity
 		return 0.0
+
+
+## 🔒 **What the PC urged, when he was asked** (#436, §11). It moves which answer
+## he gives and never gives it by itself: one push among several, as hard as the
+## letter was written. Present only when his compliance took the letter.
+class AsTheCrownUrged extends Consideration:
+	func _init() -> void:
+		super(&"answer_as_urged")
+
+	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
+		var grievance := GrievanceConsiderations._grievance(context)
+		if grievance == null or String(grievance.urged).is_empty() or candidate.id != grievance.urged:
+			return 0.0
+		return IntentConsiderations.intensity_of(grievance.urged_tone)
 
 
 # --- Filters ----------------------------------------------------------------------------

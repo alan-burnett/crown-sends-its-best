@@ -1,0 +1,111 @@
+{
+  "id": "governor.a_tribe_has_written",
+  "sender": "governor",
+  "type": "request",
+  "skippable": false,
+  "note": "Issue 436, natives.md sections 8 and 11. A governor at or above neutral passes a tribe's letter on before he answers it, and waits a month for the reply. Unskippable by the director's own example (the-director.md section 2): the natives are at his door and he wants orders. The reply is an Order to him, resolved by compliance into an urging on his answer; it never touches the tribe. Placeholder prose that stands in for the tribe's own words, which the Author writes.",
+  "params": {
+    "town": "town",
+    "tribe": "tribe",
+    "governor": "contact"
+  },
+  "body": [
+    {
+      "text": "The {param:tribe} have written to me. They object to what {param:town} is doing on ground they call theirs, and they want it stopped."
+    },
+    {
+      "text": "I have not answered them. I would rather answer as you would have me answer, and I think they will wait a month for it. I do not think they will wait longer."
+    },
+    {
+      "text": "I will tell you plainly that I do not know what they will do if we refuse them. Nobody here does.",
+      "only_tones": [
+        "dutiful",
+        "desperate"
+      ]
+    },
+    {
+      "text": "I will tell you plainly that I have my own view, and that I am asking yours anyway.",
+      "only_tones": [
+        "pleased",
+        "annoyed",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the {param:tribe}, I write {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "having considered it"
+        },
+        {
+          "tone": "desperate",
+          "text": "knowing how much may turn on it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would sooner not have had to"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "answer",
+        "prompt": "How {param:town} should answer them",
+        "options": [
+          {
+            "id": "yield",
+            "label": "give them what they ask",
+            "text": "Give them what they ask. It is not worth a war.",
+            "effect": {
+              "answer_the_tribe": {
+                "to": "{governor}",
+                "answer": "yield"
+              }
+            }
+          },
+          {
+            "id": "gift",
+            "label": "send them something to smooth it over",
+            "text": "Send them something for their trouble, and carry on.",
+            "effect": {
+              "answer_the_tribe": {
+                "to": "{governor}",
+                "answer": "gift"
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "refuse them",
+            "text": "Refuse them. The ground is the Crown's.",
+            "effect": {
+              "answer_the_tribe": {
+                "to": "{governor}",
+                "answer": "refuse"
+              }
+            }
+          },
+          {
+            "id": "threaten",
+            "label": "tell them what will happen if they push it",
+            "text": "Tell them what the town will do if they push it, and mean it.",
+            "effect": {
+              "answer_the_tribe": {
+                "to": "{governor}",
+                "answer": "threaten"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,"
+      }
+    ]
+  }
+}

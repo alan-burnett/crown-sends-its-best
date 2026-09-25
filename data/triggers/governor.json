@@ -562,5 +562,122 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.governor.a_tribe_has_written",
+    "letter": "governor.a_tribe_has_written",
+    "urgency": 0.7,
+    "cooldown": 1,
+    "note": "Issue 436, natives.md section 11. A governor at or above neutral passes a tribe's letter on and asks how to answer; he holds his answer a month for the reply.",
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      },
+      "governor": {
+        "from": "sender_id"
+      }
+    },
+    "conditions": [
+      {
+        "i_asked_how_to_answer_a_tribe": {
+          "within": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.i_answered_the_tribe_yield",
+    "letter": "governor.i_answered_the_tribe_yield",
+    "urgency": 0.35,
+    "cooldown": 1,
+    "note": "Issue 436, natives.md section 11. A governor below neutral and above the floor answers a tribe himself and tells the PC afterwards, naming the answer.",
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      }
+    },
+    "conditions": [
+      {
+        "i_answered_a_tribe": {
+          "answer": "yield",
+          "within": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.i_answered_the_tribe_gift",
+    "letter": "governor.i_answered_the_tribe_gift",
+    "urgency": 0.35,
+    "cooldown": 1,
+    "note": "Issue 436, natives.md section 11. A governor below neutral and above the floor answers a tribe himself and tells the PC afterwards, naming the answer.",
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      }
+    },
+    "conditions": [
+      {
+        "i_answered_a_tribe": {
+          "answer": "gift",
+          "within": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.i_answered_the_tribe_refuse",
+    "letter": "governor.i_answered_the_tribe_refuse",
+    "urgency": 0.35,
+    "cooldown": 1,
+    "note": "Issue 436, natives.md section 11. A governor below neutral and above the floor answers a tribe himself and tells the PC afterwards, naming the answer.",
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      }
+    },
+    "conditions": [
+      {
+        "i_answered_a_tribe": {
+          "answer": "refuse",
+          "within": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.i_answered_the_tribe_threaten",
+    "letter": "governor.i_answered_the_tribe_threaten",
+    "urgency": 0.35,
+    "cooldown": 1,
+    "note": "Issue 436, natives.md section 11. A governor below neutral and above the floor answers a tribe himself and tells the PC afterwards, naming the answer.",
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      }
+    },
+    "conditions": [
+      {
+        "i_answered_a_tribe": {
+          "answer": "threaten",
+          "within": 1
+        }
+      }
+    ]
   }
 ]

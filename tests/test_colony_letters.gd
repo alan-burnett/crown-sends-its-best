@@ -47,7 +47,11 @@ func test_no_governor_reply_names_a_project_a_tile_or_a_month() -> void:
 	#
 	# `tools/lint.gd` keeps the code side of this. **This is the content side**:
 	# there must be no reply option anywhere that carries a project.
-	var allowed: PackedStringArray = ["urge_intent", "refuse"]
+	#
+	# `answer_the_tribe` (#436) is the same kind of thing: it argues how he
+	# should answer a tribe's letter, names no project, tile or month, and is
+	# weighed rather than obeyed (`natives.md` §11).
+	var allowed: PackedStringArray = ["urge_intent", "refuse", "answer_the_tribe"]
 	var letters := _governor_letters()
 	assert_not_empty(letters, "there are no governor letters to check")
 

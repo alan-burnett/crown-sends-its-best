@@ -74,6 +74,15 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"i_have_no_command", {}, ColonyConditions.i_have_no_command
 	)
+	# 🔒 **A tribe's letter reaches the desk through a governor** (#436, §11).
+	ContentRegistry.register_condition(
+		"i_asked_how_to_answer_a_tribe", {"within": "integer"},
+		ColonyConditions.i_asked_how_to_answer_a_tribe,
+	)
+	ContentRegistry.register_condition(
+		"i_answered_a_tribe", {"answer": "string", "within": "integer"},
+		ColonyConditions.i_answered_a_tribe,
+	)
 	# A patron who could make a duke's year difficult (#395).
 	ContentRegistry.register_condition(
 		"he_could_trouble_a_duke", {}, ColonyConditions.he_could_trouble_a_duke
@@ -724,6 +733,35 @@ static func his_troops_are_going_home(_args: Dictionary, context: LetterContext)
 ## nobody else holds the troops policy (`the-marshal.md` §2).
 static func he_sends_the_troops(_args: Dictionary, context: LetterContext) -> bool:
 	return context.sender != null and context.sender.id == CrownTroops.MARSHAL
+
+
+## Whether this governor wrote this month asking how to answer a tribe (#436).
+static func i_asked_how_to_answer_a_tribe(args: Dictionary, context: LetterContext) -> bool:
+	return _his_event(TribeGrievanceDriver.EVENT_ASKED, args, context, "") != null
+
+
+## Whether this governor answered a tribe with `answer` and **means to tell the
+## PC** (#436): below neutral and above the floor (§11).
+static func i_answered_a_tribe(args: Dictionary, context: LetterContext) -> bool:
+	var answered := _his_event(TribeGrievanceDriver.EVENT_ANSWERED, args, context, String(args.get("answer", "")))
+	return answered != null and bool(answered.payload.get("tells", false))
+
+
+## His latest event of this type within the window, answering `answer` if given.
+static func _his_event(type: StringName, args: Dictionary, context: LetterContext, answer: String) -> SimEvent:
+	if context == null or context.log == null or context.sender == null:
+		return null
+	var within := maxi(1, int(args.get("within", 1)))
+	var found: SimEvent = null
+	for event in context.log.of_type(type):
+		if context.month - event.month >= within:
+			continue
+		if String(event.payload.get("governor", "")) != String(context.sender.id):
+			continue
+		if not answer.is_empty() and String(event.payload.get("answer", "")) != answer:
+			continue
+		found = event
+	return found
 
 
 ## Whether this patron could make a duke's year difficult (#395, `patrons.md`

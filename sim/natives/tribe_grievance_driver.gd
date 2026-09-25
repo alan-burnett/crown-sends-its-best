@@ -20,13 +20,22 @@ extends RefCounted
 ## it, read from the event log and the month's work (Seam A). ⚠ assumed: the same
 ## act on the same tile is noticed once, until it stops and starts again.
 ##
-## ## 🔒 Every governor answers at once
+## ## 🔒 Whether he asks the PC first depends on his loyalty (#436, §11)
 ##
-## Whether a loyal governor asks the PC first is #436's. Here every one of them
-## answers the month after he is written to.
+## | His loyalty | He |
+## | :--- | :--- |
+## | at or above neutral (50) | writes to the PC asking how to answer, and waits a month for the reply |
+## | below neutral | decides, and tells the PC afterwards |
+## | at or below the loyalty floor | decides, and says nothing |
+##
+## ⚠ assumed there: the thresholds are the `loyalty` consideration's —
+## `Relationship.NEUTRAL_LOYALTY` and `IntentConsiderations.SEDITION_AT`.
 
 const EVENT_TOOK: StringName = &"tribe_took_the_answer"
 const EVENT_ANSWERED: StringName = &"governor_answered_a_tribe"
+## 🔒 **A loyal governor asks the PC first** (#436, §11), and holds his answer a
+## month for the reply.
+const EVENT_ASKED: StringName = &"governor_asked_about_a_tribe"
 
 ## The Intent kind a governor's answer becomes.
 const ANSWER_KIND: StringName = &"answer_a_tribe"
@@ -232,6 +241,22 @@ func _answer(context: ColonyContext) -> void:
 		var governor: Contact = run.contact(grievance.governor) if not String(grievance.governor).is_empty() else null
 		if town == null or governor == null or governor.is_dead:
 			continue
+		var loyalty := governor.loyalty()
+		var asks := loyalty >= Relationship.NEUTRAL_LOYALTY
+		if asks:
+			if grievance.asked_month < 0:
+				# **He asks, and holds his answer a month** for the reply.
+				grievance.asked_month = context.state.month
+				context.log.emit(EVENT_ASKED, governor.id, context.state.month, {
+					"grievance": String(grievance.id),
+					"tribe": String(grievance.tribe),
+					"town": String(town.id),
+					"governor": String(governor.id),
+					"act": String(grievance.act),
+				}, WorldPhase.INTENT)
+				continue
+			if context.state.month <= grievance.asked_month:
+				continue
 		var village := _nearest_village(grievance.tribe, grievance.at)
 		var gift := GrievanceConsiderations.gift_for(grievance, town, village, run.map)
 
@@ -263,6 +288,11 @@ func _answer(context: ColonyContext) -> void:
 			"governor": String(governor.id),
 			"act": String(grievance.act),
 			"answer": String(grievance.answer),
+			"asked": asks,
+			# 🔒 **Below neutral he tells the PC afterwards; at the floor he says
+			# nothing** (§11).
+			"tells": not asks and loyalty > IntentConsiderations.SEDITION_AT,
+			"urged": String(grievance.urged),
 		}, WorldPhase.INTENT)
 
 

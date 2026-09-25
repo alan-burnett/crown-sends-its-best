@@ -54,6 +54,7 @@ func _init() -> void:
 	validator.check_troop_requests(content)
 	validator.check_policy_targets(content)
 	validator.check_company_urgings(content)
+	validator.check_tribe_answers(content)
 	print(validator.report())
 
 	var ok := validator.ok()

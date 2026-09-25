@@ -1290,6 +1290,23 @@ func check_company_urgings(content: ContentDatabase) -> void:
 						"'%s' is nothing a commander weighs" % order)
 
 
+## 🔒 **What the PC may tell a governor to say to a tribe is one of the four**
+## (#436, `natives.md` §11).
+func check_tribe_answers(content: ContentDatabase) -> void:
+	for id in content.ids("letters"):
+		var letter: Dictionary = content.collection("letters")[id]
+		_file = String(letter.get(JsonLoader.SOURCE_KEY, id))
+		for step in letter.get(LetterSchema.KEY_REPLY, {}).get(LetterSchema.KEY_STEPS, []):
+			for option in step.get(LetterSchema.KEY_OPTIONS, []):
+				var effect: Variant = option.get("effect", {})
+				if typeof(effect) != TYPE_DICTIONARY or not (effect as Dictionary).has("answer_the_tribe"):
+					continue
+				var answer := String(effect["answer_the_tribe"].get("answer", ""))
+				if not answer.begins_with("{") and not TribeGrievance.ANSWERS.has(StringName(answer)):
+					_problem("options.%s.answer_the_tribe" % option.get("id", "?"),
+						"'%s' is not an answer a governor can give a tribe" % answer)
+
+
 ## 🔒 **A policy's target is one it reads** (#396, `policy.md` §8): every
 ## `enact_policy_on` names a policy aimed at a resource, and a resource the
 ## catalogue has; every `enact_policy` names one that is not. A slot is the

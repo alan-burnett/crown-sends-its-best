@@ -63,6 +63,27 @@ func awaiting_answer(month: int) -> Array[TribeGrievance]:
 	return out
 
 
+## The letter this governor asked the PC about and has not yet answered, the
+## latest first (#436), or null.
+func asked_by(governor: StringName) -> TribeGrievance:
+	var latest: TribeGrievance = null
+	for grievance in list:
+		if grievance.governor != governor or grievance.asked_month < 0 or grievance.is_answered():
+			continue
+		if latest == null or grievance.asked_month >= latest.asked_month:
+			latest = grievance
+	return latest
+
+
+## The latest letter written to this governor, whatever became of it (#436).
+func latest_to(governor: StringName) -> TribeGrievance:
+	var latest: TribeGrievance = null
+	for grievance in list:
+		if grievance.governor == governor and (latest == null or grievance.month >= latest.month):
+			latest = grievance
+	return latest
+
+
 ## 🔒 **Whether this tribe has written to this town's governor in an earlier
 ## month** — the lock every hostile objective waits on (§11).
 func has_written_before(tribe: StringName, town: StringName, month: int) -> bool:

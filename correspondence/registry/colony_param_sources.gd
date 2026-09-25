@@ -41,6 +41,10 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"enemies_near_my_company", {}, ColonyParamSources.enemies_near_my_company
 	)
+	# The tribe whose letter a governor passes on (#436).
+	ContentRegistry.register_param_source(
+		"the_tribe_that_wrote_to_me", {}, ColonyParamSources.the_tribe_that_wrote_to_me
+	)
 	# The duke a patron offers to trouble, as an id or by name (#395).
 	ContentRegistry.register_param_source(
 		"the_duke_to_trouble", {"field": "string"}, ColonyParamSources.the_duke_to_trouble
@@ -280,6 +284,16 @@ static func enemies_near(company: Company, context: LetterContext) -> int:
 		if away <= OrderRule.THREAT_WITHIN:
 			count += 1
 	return count
+
+
+## The people whose latest letter to this governor he is passing on (#436), by
+## name.
+static func the_tribe_that_wrote_to_me(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.sender == null or context.natives == null:
+		return "the natives"
+	var latest := context.natives.grievances.latest_to(context.sender.id)
+	var tribe: Tribe = context.natives.find(latest.tribe) if latest != null else null
+	return tribe.display_name if tribe != null else "the natives"
 
 
 ## The duke a patron offers to trouble (#395): `field` `id` for the effect,

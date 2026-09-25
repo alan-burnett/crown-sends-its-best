@@ -403,6 +403,10 @@ static func _priced(order: Order) -> Variant:
 			# **It is his specialty and his pleasure** (#395, `patrons.md` §5): he
 			# offered it, so being taken up on it costs him nothing he minds.
 			return 0.0
+		M1Registrations.ORDER_ANSWER_THE_TRIBE:
+			# **He asked** (#436). Being told what to say to the tribe costs him
+			# nothing but his own opinion of it.
+			return 0.0
 		M1Registrations.ORDER_URGE_INTENT, M1Registrations.ORDER_URGE_COMPANY:
 			# **Being told what matters costs a governor nothing to carry out.**
 			# Nor a commander what his men should do (#394): he is commanding
@@ -508,7 +512,8 @@ static func _cut_below_his_rate(order: Order, state: WorldState) -> float:
 
 static func vagueness_of(order: Order) -> float:
 	# One of a handful of things the PC can say, with nothing in it to misread.
-	if order.kind == M1Registrations.ORDER_URGE_INTENT or order.kind == M1Registrations.ORDER_URGE_COMPANY:
+	if order.kind == M1Registrations.ORDER_URGE_INTENT or order.kind == M1Registrations.ORDER_URGE_COMPANY \
+			or order.kind == M1Registrations.ORDER_ANSWER_THE_TRIBE:
 		return 0.0
 	for key in order.params:
 		if key == "to":

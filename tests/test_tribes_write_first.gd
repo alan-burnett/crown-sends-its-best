@@ -143,6 +143,8 @@ func test_nothing_far_from_them_is_noticed() -> void:
 # --- 🔒 The governor answers through the kernel --------------------------------------------
 
 func test_the_governor_answers_the_month_after_through_the_kernel_with_its_trace() -> void:
+	# Below neutral, so he answers himself rather than asking the PC first (#436).
+	run.contact(_town().governor_id).relationship.loyalty = Relationship.NEUTRAL_LOYALTY - 10.0
 	var village := _neighbours()
 	var field := _their_field(village)
 	_town().harvested_at = {"%d,%d" % [field.x, field.y]: {"food": 3.0}}

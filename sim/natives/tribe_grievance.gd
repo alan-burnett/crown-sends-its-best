@@ -58,6 +58,15 @@ var answered_month: int = -1
 ## The month the tribe took it, or -1 while it has not.
 var taken_month: int = -1
 
+## 🔒 **The month he wrote to the PC asking how to answer**, or -1 (#436, §11). A
+## governor at or above neutral asks first and holds his answer a month.
+var asked_month: int = -1
+
+## What the PC urged, once the governor's compliance took it (#436), and how hard
+## it was said. **An urging, never the answer**: he still weighs it.
+var urged: StringName = &""
+var urged_tone: StringName = &""
+
 
 func is_answered() -> bool:
 	return not String(answer).is_empty()
@@ -82,6 +91,9 @@ func to_dict() -> Dictionary:
 		"answer": String(answer),
 		"answered_month": answered_month,
 		"taken_month": taken_month,
+		"asked_month": asked_month,
+		"urged": String(urged),
+		"urged_tone": String(urged_tone),
 	}
 
 
@@ -99,4 +111,7 @@ static func from_dict(data: Dictionary) -> TribeGrievance:
 	grievance.answer = StringName(data.get("answer", ""))
 	grievance.answered_month = int(data.get("answered_month", -1))
 	grievance.taken_month = int(data.get("taken_month", -1))
+	grievance.asked_month = int(data.get("asked_month", -1))
+	grievance.urged = StringName(data.get("urged", ""))
+	grievance.urged_tone = StringName(data.get("urged_tone", ""))
 	return grievance
