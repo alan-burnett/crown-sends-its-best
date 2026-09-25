@@ -36,6 +36,10 @@ var improvements: PackedStringArray = PackedStringArray()
 ## be the one that forgot.
 var idle_improvements: Dictionary = {}
 
+## Who built each fort (#419, `tiles-and-improvements.md` §6): `"x,y"` ->
+## `{by, side}`. **A fort records its owner** so its fall can say whose it was.
+var fort_owners: Dictionary = {}
+
 
 func _init(p_width: int = 0, p_height: int = 0, fill: StringName = &"ocean") -> void:
 	width = p_width
@@ -133,13 +137,21 @@ func can_build(x: int, y: int, id: StringName) -> bool:
 ## Build, replacing whatever was there. Returns the improvement displaced, or "".
 ##
 ## Emits, because map playback and the letters both want to know (Seam A).
-func build(x: int, y: int, id: StringName, log: EventLog = null, month: int = 0, by: StringName = &"") -> StringName:
+func build(
+	x: int, y: int, id: StringName, log: EventLog = null, month: int = 0, by: StringName = &"",
+	side: StringName = &"",
+) -> StringName:
 	if not can_build(x, y, id):
 		push_error("Cannot build '%s' at %d,%d." % [id, x, y])
 		return &""
 
 	var displaced := improvement_at(x, y)
 	improvements[index_of(x, y)] = String(id)
+	var key := "%d,%d" % [x, y]
+	fort_owners.erase(key)
+	var built := Improvement.find(id)
+	if built != null and built.is_a_fortification():
+		fort_owners[key] = {"by": String(by), "side": String(side)}
 
 	if log != null:
 		log.emit(&"improvement_built", by, month, {
@@ -154,6 +166,12 @@ func build(x: int, y: int, id: StringName, log: EventLog = null, month: int = 0,
 func clear_improvement(x: int, y: int) -> void:
 	if in_bounds(x, y):
 		improvements[index_of(x, y)] = ""
+		fort_owners.erase("%d,%d" % [x, y])
+
+
+## Who built the fort on this tile, `{by, side}`, or empty.
+func fort_owner(x: int, y: int) -> Dictionary:
+	return fort_owners.get("%d,%d" % [x, y], {})
 
 
 ## Livestock this tile can support without their eating (SPEC §11.1).
@@ -184,6 +202,7 @@ func to_dict() -> Dictionary:
 		"tiles": tiles.duplicate(),
 		"improvements": improvements.duplicate(),
 		"idle_improvements": idle_improvements.duplicate(),
+		"fort_owners": fort_owners.duplicate(true),
 	}
 
 
@@ -194,6 +213,7 @@ static func from_dict(data: Dictionary) -> WorldMap:
 	map.tiles = PackedStringArray(data.get("tiles", []))
 	map.improvements = PackedStringArray(data.get("improvements", []))
 	map.idle_improvements = data.get("idle_improvements", {}).duplicate()
+	map.fort_owners = data.get("fort_owners", {}).duplicate(true)
 	if map.improvements.size() != map.tiles.size():
 		map.improvements.resize(map.tiles.size())
 	return map

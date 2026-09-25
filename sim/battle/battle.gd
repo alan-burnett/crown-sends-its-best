@@ -225,6 +225,11 @@ static func resolve(
 		"attacker_destroyed": attacker.is_empty(),
 	}, WorldPhase.MOVEMENT)
 
+	# 🔒 **A manned fort falls with its last defender** (#419): whichever side
+	# stood in it, the moment the last company there is destroyed.
+	Forts.fall_with(defender, attacker, map, context)
+	Forts.fall_with(attacker, defender, map, context)
+
 	return {
 		"attacker_casualties": i_lose,
 		"defender_casualties": they_lose,

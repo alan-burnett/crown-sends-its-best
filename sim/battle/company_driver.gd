@@ -201,6 +201,10 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 					break
 				_strike(company, prey, context)
 				attacks -= 1
+			CommanderConsiderations.FORTIFY:
+				# It takes his month, like razing.
+				_fortify(company, context)
+				break
 			CommanderConsiderations.ATTACK:
 				if attacks <= 0:
 					break
@@ -285,12 +289,41 @@ func _something_to_burn(company: Company) -> Vector2i:
 			var improvement := Improvement.find(map.improvement_at(at.x, at.y))
 			if improvement == null or improvement.natural:
 				continue
-			var owner := _ground_of(at)
-			if owner == null or not Battle.may_fight(company, TownCompany.of(owner, company)):
-				continue
+			if improvement.is_a_fortification():
+				# 🔒 **An empty fort is razed like any improvement** (#419); a manned
+				# one falls only with its last defender. Whose it is is its owner's,
+				# not the ground's.
+				if Forts.is_manned(at, companies) or not Forts.may_bring_down(company, map, at, colony):
+					continue
+			else:
+				var owner := _ground_of(at)
+				if owner == null or not Battle.may_fight(company, TownCompany.of(owner, company)):
+					continue
 			if best == Company.NOWHERE or _nearer(at, best, company.at):
 				best = at
 	return best
+
+
+## 🔒 **Whether he may raise a fort where he stands** (#419, §6): a commander of
+## anybody but a tribe (locked: villages never fortify), on bare ground a fort may
+## stand on.
+func _may_fortify(company: Company) -> bool:
+	if map == null or company.at == Company.NOWHERE or company.allegiance == Company.NATIVE:
+		return false
+	if not String(map.improvement_at(company.at.x, company.at.y)).is_empty():
+		return false
+	return map.can_build(company.at.x, company.at.y, &"fort")
+
+
+## Raise it (Seam A, through `WorldMap.build`'s event). **A fort records who
+## built it**: a duke's men build the duke's fort; anybody else's, their
+## commander's.
+func _fortify(company: Company, context: ColonyContext) -> void:
+	if not _may_fortify(company):
+		return
+	var owner := company.raised_by if company.allegiance == Company.RIVAL and not String(company.raised_by).is_empty() \
+		else company.commander
+	map.build(company.at.x, company.at.y, &"fort", context.log, context.state.month, owner, company.allegiance)
 
 
 ## 🔒 **An expedition he could fall on** (#417, `founding-towns.md` §7 *Who
@@ -353,6 +386,10 @@ func _nearer(a: Vector2i, b: Vector2i, from: Vector2i) -> bool:
 func _raze(company: Company, at: Vector2i, context: ColonyContext) -> void:
 	if at == Company.NOWHERE:
 		return
+	# **A razed fort is a fort that fell, not a farm that burned** (#419).
+	if Forts.is_fort(map, at):
+		Forts.fall(at, company, map, context, Forts.RAZED)
+		return
 	var burnt := map.improvement_at(at.x, at.y)
 	var owner := _ground_of(at)
 	map.clear_improvement(at.x, at.y)
@@ -414,7 +451,8 @@ func _what_he_decides(
 			company.destination != Company.NOWHERE and company.at != company.destination,
 			OrderRule.nearest_unexplored(company.at, map, knowledge) != Company.NOWHERE,
 			_something_to_burn(company) != Company.NOWHERE,
-			_party_in_reach(company) != null),
+			_party_in_reach(company) != null,
+			_may_fortify(company)),
 		deliberation)
 	return decision.chosen_id() if decision.has_choice() else CommanderConsiderations.HOLD
 

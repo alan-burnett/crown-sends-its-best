@@ -1073,6 +1073,34 @@
 		}
 	},
 	{
+		"id": "trigger.cutscene.the_fort_falls",
+		"cutscene": "the_fort_falls",
+		"kind": "first",
+		"on": {
+			"event_happened": {
+				"event": "fort_fell",
+				"where": {
+					"owner_side": "rival"
+				}
+			}
+		},
+		"params": {
+			"date": {
+				"from": "date"
+			},
+			"duke": {
+				"from": "event",
+				"field": "owner",
+				"as": "contact"
+			},
+			"ground": {
+				"from": "event",
+				"field": "at",
+				"as": "place"
+			}
+		}
+	},
+	{
 		"id": "trigger.cutscene.they_burned_it",
 		"cutscene": "they_burned_it",
 		"kind": "first",

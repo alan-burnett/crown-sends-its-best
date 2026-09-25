@@ -35,6 +35,9 @@ func _run() -> RunState:
 	for dx in range(1, 5):
 		run.map.set_terrain(town.at.x + dx, town.at.y, &"plains")
 	run.map.build(town.at.x + 2, town.at.y, &"farm")
+	# The duke's men stand on a road, so walls of their own (#419) are not on
+	# offer and the farm is the thing to hand.
+	run.map.build(town.at.x + 3, town.at.y, &"road")
 	return run
 
 

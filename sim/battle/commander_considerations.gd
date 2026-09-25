@@ -139,8 +139,11 @@ const RAZE: StringName = &"raze"
 ## 🔒 **Fall on an expedition in the open** (#417, `founding-towns.md` §7): it
 ## does not fight back, so he loses nobody.
 const STRIKE: StringName = &"strike"
+## 🔒 **Raise a fort where he stands** (#419, `tiles-and-improvements.md` §6):
+## a commander can build one, and a duke will. A tribe never does.
+const FORTIFY: StringName = &"fortify"
 
-const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, STRIKE, WITHDRAW, DISBAND]
+const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, STRIKE, FORTIFY, WITHDRAW, DISBAND]
 
 
 ## Everything this commander could do this month.
@@ -154,6 +157,7 @@ const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, STRIKE, 
 static func options_for(
 	company: Company, enemy: Company, has_somewhere_to_go: bool, has_land_to_find: bool = false,
 	has_something_to_burn: bool = false, has_a_party_in_reach: bool = false,
+	has_ground_to_fortify: bool = false,
 ) -> Array:
 	var out: Array = []
 	var board := {"company": company, "enemy": enemy}
@@ -178,6 +182,9 @@ static func options_for(
 		out.append(Candidate.new(RAZE, board))
 	if has_a_party_in_reach:
 		out.append(Candidate.new(STRIKE, board))
+	# **Not in the face of an enemy**: walls are raised before the fight.
+	if has_ground_to_fortify and enemy == null:
+		out.append(Candidate.new(FORTIFY, board))
 	out.append(Candidate.new(WITHDRAW, board))
 	out.append(Candidate.new(DISBAND, board))
 	return out
@@ -243,7 +250,11 @@ class StayingAliveConsideration:
 				return clampf(
 					(0.5 - CommanderConsiderations._odds(candidate, context)) * 2.0,
 					0.0, 1.0)
-			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE, CommanderConsiderations.RAZE:
+			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE, CommanderConsiderations.RAZE, 					CommanderConsiderations.FORTIFY:
+				# Fortifying is never on offer with an enemy in front of him, so a
+				# wall's safety is against somebody who has not come: no more an
+				# argument for staying alive than marching is. Scored higher, a man
+				# who thought little of his orders built walls instead of marching.
 				return 0.0
 			CommanderConsiderations.STRIKE:
 				# **It inflicts nothing** (§7): a strike costs him no men, so it is
@@ -320,6 +331,10 @@ class OrdersConsideration:
 			CommanderConsiderations.STRIKE:
 				# The same as an attack: what a man sent against them is for.
 				asked = 0.8 if sent else 0.2
+			CommanderConsiderations.FORTIFY:
+				# **A man told to hold builds walls**; one sent out does it when he
+				# has nothing better to do with the month.
+				asked = 0.2 if sent else 0.8
 			CommanderConsiderations.RAZE:
 				# **Harassment is what a man sent against them does when he is not
 				# marching or fighting** (#418): less than pressing on, more than
