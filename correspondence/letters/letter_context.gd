@@ -158,5 +158,8 @@ func sender_field(field: StringName) -> String:
 			return sender.specialty
 		&"need":
 			return sender.need
+		&"counts":
+			# How he counts a crowd (#437): `heads` or `words`.
+			return String(sender.counts())
 	push_error("'%s' is not on the sender whitelist." % field)
 	return ""

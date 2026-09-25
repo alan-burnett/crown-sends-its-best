@@ -34,6 +34,13 @@ const ROLE_INSTITUTIONAL: StringName = &"institutional"
 ## what he does.
 const ROLE_DIPLOMAT: StringName = &"diplomat"
 
+## 🔒 **How a man counts a crowd** (#437, `population.md` §7, the Author's
+## ruling): **heads**, rounded to the nearest ten, or **words**, an estimate.
+## A town's own governor (about his own town) and the Steward count heads;
+## everyone else writes words. Rounding is formatting, not perception.
+const COUNTS_HEADS: StringName = &"heads"
+const COUNTS_IN_WORDS: StringName = &"words"
+
 ## 🔒 **Every role there is**, so a letter file can name one (#361).
 ##
 ## `Director.senders_of` reads a letter's `sender` as a contact id first and as a
@@ -426,6 +433,15 @@ static func generate(
 
 
 # --- Serialisation ---------------------------------------------------------
+
+## How he counts a crowd (#437): heads for a governor and the Steward, words
+## for everybody else. Whether a governor is writing about **his own** town is
+## the letter engine's question, not his.
+func counts() -> StringName:
+	if role == ROLE_GOVERNOR or id == &"steward":
+		return COUNTS_HEADS
+	return COUNTS_IN_WORDS
+
 
 func to_dict() -> Dictionary:
 	return {

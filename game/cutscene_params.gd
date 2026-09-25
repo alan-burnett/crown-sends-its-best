@@ -92,8 +92,8 @@ static func written(value: Variant, kind: String, run: RunState) -> String:
 		"number", "gold":
 			return Figures.with_thousands(int(roundf(float(value))))
 		"people":
-			# The one scale letters and the summary use too (`Config`).
-			return Figures.people(float(value))
+			# **A painting says it in words** (#437, `population.md` §7).
+			return Figures.estimated(Figures.headcount(float(value)))
 		"percent":
 			return "%d%%" % int(roundf(float(value) * 100.0))
 		"town":
@@ -194,5 +194,5 @@ static func _colony(measure: String, run: RunState) -> String:
 			var people := 0
 			for town in run.colony.in_order():
 				people += (town as Town).population()
-			return Figures.people(float(people))
+			return Figures.estimated(Figures.headcount(float(people)))
 	return UNKNOWN

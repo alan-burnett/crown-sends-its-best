@@ -112,7 +112,9 @@ func test_a_head_count_reads_as_it_did_before_the_change() -> void:
 	# The display's thousand moved into the sim: *12,000 settlers* still reads so.
 	assert_eq(Config.PEOPLE_PER_POPULATION, 1)
 	assert_eq(Figures.people(12_000), "12,000")
-	assert_eq(CutsceneParams.written(12_000, "people", null), "12,000")
+	# A painting says it in words since #437 (`population.md` §7), and the
+	# thousand is still in the sim: twelve thousand, not twelve.
+	assert_eq(CutsceneParams.written(12_000, "people", null), "some twelve thousand")
 
 
 # --- 🔒 Saves from before are refused -----------------------------------------------------

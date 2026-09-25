@@ -101,7 +101,7 @@ const SLOT_KINDS: Array[StringName] = [SLOT_PARAM, SLOT_PERCEPTION, SLOT_SENDER,
 ## `specialty` and `need` are a patron's, and empty on everybody else (#282) —
 ## which is the ordinary shape here: `town` is empty on the Crown's officers.
 const SENDER_FIELDS: Array[StringName] = [
-	&"name", &"title", &"town", &"months_silent", &"specialty", &"need",
+	&"name", &"title", &"town", &"months_silent", &"specialty", &"need", &"counts",
 ]
 
 ## Where a tone option's wording drops into the line that offers it:

@@ -106,12 +106,32 @@ func _param(name: String, letter: Letter, context: LetterContext) -> String:
 		push_error("No value supplied for {param:%s}." % name)
 		return ""
 	var value: Variant = context.param(name)
-	# A head count reads as the souls it stands for (`Figures.people`).
+	# **A head count reads as the man writing counts it** (#437,
+	# `population.md` §7): counted heads from a town's own governor and the
+	# Steward, an estimate in words from everybody else.
 	if letter != null and String(letter.params.get(name, "")) == "people":
-		return Figures.people(float(value))
+		var souls := Figures.headcount(float(value))
+		return Figures.counted(souls) if _counts_heads(letter, context) else Figures.estimated(souls)
 	if JsonTypes.is_int_like(value) and typeof(value) != TYPE_STRING:
 		return str(JsonTypes.to_int(value, name))
 	return str(value)
+
+
+## Whether this letter's sender counts heads here (#437). The Steward always
+## does; a governor only about **his own** town, which is the letter's `town`
+## param when it has one, and his own when it has none.
+func _counts_heads(letter: Letter, context: LetterContext) -> bool:
+	var sender := context.sender
+	if sender == null or sender.counts() != Contact.COUNTS_HEADS:
+		return false
+	if sender.role != Contact.ROLE_GOVERNOR:
+		return true
+	for name in letter.params:
+		if String(letter.params[name]) != "town" or not context.has_param(String(name)):
+			continue
+		var about := String(context.param(String(name)))
+		return about == sender.town or about == String(sender.id).trim_prefix("governor_")
+	return true
 
 
 ## A biased judgment. The ladder is local to this letter; the lean belongs to the
