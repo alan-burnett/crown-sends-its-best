@@ -18,17 +18,20 @@ extends DeliberationActor
 ## **A man who has never met them, arguing with a man who has, about people he
 ## will never see.**
 ##
-## ## 🔒 Standing is held per faction, and they can tell everyone apart
+## ## 🔒 Standing is held toward the colony and the Crown's troops, and nobody else
 ##
-## The colony, each rival, each other tribe, and the **Crown's troops** — which
-## they distinguish from the colonists those troops are supposedly protecting.
+## The colony, and the **Crown's troops** — which they distinguish from the
+## colonists those troops are supposedly protecting. **None toward the dukes or the
+## other tribes** (#402, `natives.md` §2, §7, the Author's ruling): a tribe is
+## neutral with both, no trade and no combat, and its diplomacy is with the colony
+## alone. SPEC §12.5's wider native diplomacy is deferred past M8.
 ##
 ## **Trust is its standing toward the colony** (§12.5). The same quantity under a
 ## named relationship, and **not a second field**: two numbers would eventually
 ## disagree, and the one the letters read would be the wrong one.
 ##
-## Held per faction means a tribe can be hostile to the colony and civil with a
-## rival — **and then deal with that rival about the colony.**
+## Held per faction means a tribe can conclude that the Crown's soldiers mean it
+## destroyed while still dealing with the colonists, or the reverse.
 ##
 ## ## 🔒 A people has a temperament, like anybody else who chooses
 ##

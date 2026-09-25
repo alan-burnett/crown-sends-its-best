@@ -294,14 +294,44 @@ func test_a_rebel_town_fights_the_crowns_forces() -> void:
 	assert_true(Battle.may_fight(rebel, crown))
 
 
-func test_rivals_and_natives_fight_anybody_not_their_own() -> void:
+func test_rivals_and_natives_fight_the_colony() -> void:
 	var run := _run()
 	var rival := _raise(run, Company.RIVAL, 20)
 	var natives := _raise(run, Company.NATIVE, 20)
 	var loyal := _raise(run, Company.COLONIAL, 20)
-	assert_true(Battle.may_fight(rival, loyal))
-	assert_true(Battle.may_fight(natives, loyal))
-	assert_true(Battle.may_fight(rival, natives))
+	var crown := _raise(run, Company.CROWN, 20)
+	var rebel := _raise(run, Company.REBEL, 20)
+	for theirs in [rival, natives]:
+		for ours in [loyal, crown, rebel]:
+			assert_true(Battle.may_fight(theirs, ours))
+			assert_true(Battle.may_fight(ours, theirs))
+
+
+func test_a_tribe_and_a_duke_never_fight() -> void:
+	# 🔒 #402, `natives.md` §7: a tribe's diplomacy is with the colony alone.
+	var run := _run()
+	var rival := _raise(run, Company.RIVAL, 20)
+	var natives := _raise(run, Company.NATIVE, 20)
+	assert_false(Battle.may_fight(rival, natives), "a duke's company fell on a war party")
+	assert_false(Battle.may_fight(natives, rival), "a war party fell on a duke's company")
+	assert_empty(Battle.resolve(rival, natives, run.map, _context(run)),
+		"a battle was fought between a tribe and a duke")
+
+
+func test_a_war_party_and_a_dukes_company_in_contact_are_not_offered_each_other() -> void:
+	# ATTACK is on a commander's ballot only when `_in_contact_with` finds him
+	# somebody, so this is the question of whether it is ever offered.
+	var run := _run()
+	var far := run.colony.in_order()[0].at + Vector2i(12, 0)
+	var rival := _raise(run, Company.RIVAL, 20, far)
+	var natives := _raise(run, Company.NATIVE, 20, far + Vector2i(1, 0))
+	assert_true(Battle.are_in_contact(rival, natives), "the fixture did not put them in contact")
+	var driver := CompanyDriver.new()
+	driver.companies = run.companies
+	driver.colony = run.colony
+	driver.map = run.map
+	assert_true(driver._in_contact_with(rival) == null, "a duke's commander was offered the war party beside him")
+	assert_true(driver._in_contact_with(natives) == null, "a war party was offered the duke's company beside it")
 
 
 func test_a_company_never_fights_its_own_faction_or_itself() -> void:

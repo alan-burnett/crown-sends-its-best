@@ -93,6 +93,7 @@ static func lethality() -> float:
 ## | :--- | :--- |
 ## | *Colonists do not fight colonists* | colonial never meets rebel, and never meets the Crown |
 ## | *Rebel towns fight the Crown's forces but never loyal towns* | rebel meets Crown, and nobody else of the colony |
+## | *A tribe's diplomacy is with the colony alone* (#402, `natives.md` §7) | native never meets rival |
 ##
 ## Which has a consequence worth naming: **the colony's own militia cannot put
 ## down a rebellion.** Only Crown troops can, so a PC watching a town go has to
@@ -108,6 +109,8 @@ static func may_fight(mine: Company, theirs: Company) -> bool:
 		return false
 	if mine.allegiance == theirs.allegiance:
 		return false
+	if _neutral(mine.allegiance, theirs.allegiance):
+		return false
 	return not _on_one_side(mine.allegiance, theirs.allegiance)
 
 
@@ -122,6 +125,16 @@ static func _on_one_side(one: StringName, other: StringName) -> bool:
 	if pair.has(Company.COLONIAL) and pair.has(Company.REBEL):
 		return true
 	return false
+
+
+## 🔒 **A tribe and a duke pass each other by** (#402, `natives.md` §7, the
+## Author's ruling). Not allies — **neutral**: no trade, no combat. A tribe's
+## diplomacy is with the colony alone, and two tribes never fight because they
+## share the one allegiance. SPEC §12.5's wider native diplomacy is deferred past
+## M8.
+static func _neutral(one: StringName, other: StringName) -> bool:
+	var pair := [one, other]
+	return pair.has(Company.NATIVE) and pair.has(Company.RIVAL)
 
 
 ## Whether these two are close enough to fight.
