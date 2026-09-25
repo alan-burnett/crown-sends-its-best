@@ -175,15 +175,17 @@ func test_he_writes_as_the_colony_dwindles_and_again_as_it_worsens() -> void:
 
 	var wrote := 0
 	var month := 1
-	for people in [200_000, 38_000, 37_000, 24_000, 14_000, 7_000, 2_000]:
+	# A half, a third, a fifth, a tenth and a twentieth of the peak of 200,000;
+	# 99,000 is the first rung again, and brings nothing.
+	for people in [200_000, 100_000, 99_000, 66_000, 40_000, 20_000, 10_000]:
 		town.workers = people
 		_look(run, month)
 		if LastChance.newly_dire(run.log, month):
 			wrote += 1
 		month += 1
-	assert_eq(wrote, LastChance.DIRE_AT.size(),
+	assert_eq(wrote, LastChance.DIRE_SHARE.size(),
 		"he wrote %d times on the way down through %d rungs"
-			% [wrote, LastChance.DIRE_AT.size()])
+			% [wrote, LastChance.DIRE_SHARE.size()])
 
 
 func test_and_never_twice_about_the_same_figure() -> void:
@@ -193,22 +195,52 @@ func test_and_never_twice_about_the_same_figure() -> void:
 
 	town.workers = 200_000
 	_look(run, 1)
-	town.workers = 20_000
+	town.workers = 90_000
 	_look(run, 2)
 	assert_true(LastChance.newly_dire(run.log, 2))
 
 	# It recovers a little and falls back to the same rung.
-	town.workers = 30_000
+	town.workers = 120_000
 	_look(run, 3)
-	town.workers = 20_000
+	town.workers = 90_000
 	_look(run, 4)
 	assert_false(LastChance.newly_dire(run.log, 4),
 		"a town that lost a man and took in another set him writing twice")
 
 
 func test_a_healthy_colony_is_on_no_rung_at_all() -> void:
-	assert_eq(LastChance.rung_for(10_000_000), -1)
-	assert_true(LastChance.rung_for(1) >= 0)
+	assert_eq(LastChance.rung_for(10_000_000, 10_000_000), -1)
+	assert_true(LastChance.rung_for(1, 10_000) >= 0)
+
+
+func test_a_new_colony_is_not_dwindling() -> void:
+	# 🔒 The bug this replaced: fixed rungs of 40,000 down to 3,000 sat above a
+	# new colony's 12,000, so the Chancellor warned at founding that a colony with
+	# nobody in it is lost. A colony at the size it was founded at has fallen
+	# from nothing.
+	var run := _run()
+	_look(run, 1)
+	_look(run, 2)
+	assert_eq(int(LastChance.latest(run.log, 2).get("rung", 0)), -1,
+		"a colony at its founding size is on a rung of dwindling")
+	assert_false(LastChance.newly_dire(run.log, 1))
+	assert_false(LastChance.newly_dire(run.log, 2))
+
+
+func test_how_far_it_has_fallen_is_from_the_most_it_ever_held() -> void:
+	# A large colony that halves is dire, however many are left.
+	var run := _run()
+	var town := run.colony.in_order()[0]
+	town.experts = {}
+	town.workers = 400_000
+	_look(run, 1)
+	town.workers = 300_000
+	_look(run, 2)
+	assert_false(LastChance.newly_dire(run.log, 2), "losing a quarter was called dire")
+	town.workers = 200_000
+	_look(run, 3)
+	assert_true(LastChance.newly_dire(run.log, 3), "a colony that halved went unremarked")
+	assert_eq(int(LastChance.latest(run.log, 3).get("peak", 0)), 400_000)
 
 
 # --- 🔒 No ending fires without a warning having preceded it -----------------

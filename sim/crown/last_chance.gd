@@ -59,13 +59,22 @@ const CONDITIONS: Array[String] = [
 	CONFIDENCE_LOST, EVERY_TOWN_REBELS, NO_MORE_COMING, NO_TROOPS,
 ]
 
-## How few people left makes it worth writing about, and the rungs below that.
+## How far the colony has fallen from **the most people it has ever held** before
+## it is worth writing about, and the rungs below that: a half, a third, a fifth,
+## a tenth, a twentieth.
 ##
 ## **Descending, and he writes again at each one** (§2: *and again as it
 ## worsens*). Tuning, and it is the one figure here that is: the rungs decide how
 ## much warning the player gets, and `endings.md` §2's claim is that by the time
 ## the Chancellor arrives *the player has watched it coming for a year*.
-const DIRE_AT: Array[int] = [40_000, 25_000, 15_000, 8_000, 3_000]
+##
+## 🔒 **Shares of the peak, never fixed head counts** (the Author, 2026-09-25).
+## Overrun is *only a number falling*, and a count can only say how small the
+## colony is. The fixed rungs this replaced (40,000 down to 3,000) sat above a
+## new colony's 12,000, so he warned the player at founding that a colony with
+## nobody in it is lost; and a colony grown to 200,000 could halve without a
+## word from him.
+const DIRE_SHARE: Array[float] = [0.5, 1.0 / 3.0, 0.2, 0.1, 0.05]
 
 
 ## Look at the colony and say what is true, in the log (Seam A).
@@ -82,10 +91,14 @@ static func look(
 ) -> Dictionary:
 	var people := RunEndCheck.people_in(colony, parties)
 	var flags := conditions_of(colony, companies, standing, marshal, state)
+	# **The most it has ever held**, carried forward look to look, so the log is
+	# still the only place it lives.
+	var peak := maxi(people, peak_before(log))
 
 	var payload := flags.duplicate()
 	payload["people"] = people
-	payload["rung"] = rung_for(people)
+	payload["peak"] = peak
+	payload["rung"] = rung_for(people, peak)
 	payload["how_many"] = how_many_true(flags)
 	payload["towns"] = 0 if colony == null else colony.in_order().size()
 	log.emit(EVENT_LOOKED, &"crown", state.month, payload, WorldPhase.RUN_END_CHECK)
@@ -126,17 +139,31 @@ static func how_many_true(flags: Dictionary) -> int:
 	return count
 
 
-## Which rung of the dwindling this population is on, or `-1` while it is fine.
+## Which rung of the dwindling this population is on, against the most the
+## colony has held, or `-1` while it is fine.
 ##
 ## **Counted from the top down**, so a colony that fell two rungs in one month
 ## reports the lower of them and the Chancellor's letter is about where it is
 ## rather than about where it passed.
-static func rung_for(people: int) -> int:
+static func rung_for(people: int, peak: int) -> int:
 	var rung := -1
-	for index in DIRE_AT.size():
-		if people <= DIRE_AT[index]:
+	if peak <= 0:
+		return rung
+	for index in DIRE_SHARE.size():
+		if float(people) <= float(peak) * DIRE_SHARE[index]:
 			rung = index
 	return rung
+
+
+## The most people any earlier look found, or nought before the first.
+static func peak_before(log: EventLog) -> int:
+	if log == null:
+		return 0
+	var looks := log.of_type(EVENT_LOOKED)
+	if looks.is_empty():
+		return 0
+	var last: Dictionary = looks[-1].payload
+	return int(last.get("peak", last.get("people", 0)))
 
 
 # --- Reading it back --------------------------------------------------------
