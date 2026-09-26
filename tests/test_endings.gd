@@ -214,6 +214,9 @@ func test_the_summary_names_which_fail_condition_it_was() -> void:
 	var driver := RunEndDriver.new(run)
 	_overrun(run)
 	run.world.month = 44
+	# His warning went out the month before (#447), so it ends the month it is lost.
+	run.log.emit(Director.EVENT_DISPATCHED, &"chancellor", 43,
+		{"letter": "chancellor.colony_dwindling"}, WorldPhase.DISPATCH)
 	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
 
 	var facts := RunSummary.of(run)

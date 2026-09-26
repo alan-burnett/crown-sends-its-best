@@ -254,8 +254,10 @@ func test_no_ending_fires_in_a_month_he_was_not_shown() -> void:
 	for town in run.colony.in_order().duplicate():
 		run.colony.towns.erase(town)
 
-	run.world.month = 9
-	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	# Unwarned, it goes on a month so his warning can reach the player (#447).
+	for month in [9, 10]:
+		run.world.month = month
+		driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
 
 	var lost := run.log.of_type(RunEndDriver.EVENT_LOST)
 	assert_eq(lost.size(), 1, "the run did not end, so this proves nothing")

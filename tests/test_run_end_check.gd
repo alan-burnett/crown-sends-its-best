@@ -46,6 +46,14 @@ func _emptied(run: RunState) -> void:
 		town.experts = {}
 
 
+## The Chancellor's warnings have already reached the player (#447), so the
+## check may end the run in the month it finds it lost.
+func _warned(run: RunState) -> void:
+	for letter in RunEndDriver.WARNED_BY.values():
+		run.log.emit(Director.EVENT_DISPATCHED, &"chancellor", run.world.month - 1,
+			{"letter": letter}, WorldPhase.DISPATCH)
+
+
 ## A party of settlers still crossing the map.
 func _walking(people: int) -> ExpeditionParty:
 	var party := ExpeditionParty.new()
@@ -296,6 +304,7 @@ func test_a_going_concern_ends_nothing() -> void:
 func test_phase_six_ends_the_run_and_says_how() -> void:
 	var run := _independent()
 	_emptied(run)
+	_warned(run)
 	var driver := RunEndDriver.new(run)
 	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
 
@@ -313,6 +322,7 @@ func test_it_ends_the_run_once() -> void:
 	# would overwrite the month a run was lost with the month somebody noticed.
 	var run := _independent()
 	_emptied(run)
+	_warned(run)
 	var driver := RunEndDriver.new(run)
 	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
 	var lost_in := run.ending.month
@@ -410,3 +420,85 @@ func test_the_chancellor_and_the_check_agree_about_the_troops() -> void:
 		run.colony, run.companies, run.standing, run.contact(&"marshal"), run.world)
 	assert_false(bool(flags[LastChance.NO_TROOPS]),
 		"the Chancellor reported no troops while a Crown company stood in the colony")
+
+
+# --- 🔒 The term, and no defeat without warning (#447) ------------------------
+
+func test_a_run_ends_at_fifty_years() -> void:
+	var run := _run()
+	var driver := RunEndDriver.new(run)
+	run.world.month = RunEndDriver.TERM_YEARS * WorldState.MONTHS_PER_YEAR - 1
+	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	assert_false(run.ending.is_over(), "the PC was retired before his fifty years were up")
+	run.world.month += 1
+	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	assert_true(run.ending.is_over(), "fifty years passed and the PC was never retired")
+	assert_eq(run.ending.reason, RunEnding.TERM_EXPIRED)
+
+
+## A month of the colony as it was, then `fall` applied, then the checks of the
+## falling month and the next, with the post composed between them. Returns the
+## letters of the falling month's post.
+func _falls(fall: Callable) -> Dictionary:
+	var run := _run()
+	var machine := TurnMachine.new(run)
+	machine.use_content(content)
+	machine.saves_on_send = false
+	var driver := RunEndDriver.new(run)
+	run.world.month = 8
+	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	fall.call(run)
+	run.world.month = 9
+	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	var ended_at_once := run.ending.is_over()
+	var post := PackedStringArray()
+	for inbound in machine.director.compose_inbox(run):
+		post.append(inbound.letter_id)
+	run.world.month = 10
+	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	return {"run": run, "ended_at_once": ended_at_once, "post": post}
+
+
+func _collapse(run: RunState) -> void:
+	_emptied(run)
+
+
+func _every_condition(run: RunState) -> void:
+	_all_rebelling(run)
+	run.standing.standing = 0.0
+	run.standing.band = CrownStanding.BAND_LOST
+	run.contact(&"marshal").relationship = Relationship.new(&"marshal", 0.0)
+
+
+func test_a_one_month_collapse_is_warned_before_the_run_ends() -> void:
+	var fell := _falls(_collapse)
+	assert_false(fell["ended_at_once"], "the colony fell in a month and the run ended unwarned")
+	assert_true((fell["post"] as PackedStringArray).has("chancellor.colony_dwindling"),
+		"the run was held open and the Chancellor still did not write")
+	var run: RunState = fell["run"]
+	assert_true(run.ending.is_over(), "warned, the run did not end the month after")
+	assert_eq(run.ending.how, RunEndCheck.OVERRUN)
+
+
+func test_every_independence_condition_at_once_is_warned_before_the_run_ends() -> void:
+	var fell := _falls(_every_condition)
+	assert_false(fell["ended_at_once"], "every condition flipped at once and the run ended unwarned")
+	assert_true((fell["post"] as PackedStringArray).has("chancellor.last_chance"),
+		"the run was held open and the Chancellor still did not write")
+	var run: RunState = fell["run"]
+	assert_true(run.ending.is_over())
+	assert_eq(run.ending.how, RunEndCheck.INDEPENDENCE)
+
+
+func test_a_run_is_held_open_once_and_no_more() -> void:
+	# Nothing can hold a run open: if his warning somehow never went out, it ends
+	# the month after all the same.
+	var run := _run()
+	var driver := RunEndDriver.new(run)
+	run.world.month = 8
+	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	_emptied(run)
+	for month in [9, 10]:
+		run.world.month = month
+		driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
+	assert_true(run.ending.is_over(), "an unwarned run was held open for more than a month")

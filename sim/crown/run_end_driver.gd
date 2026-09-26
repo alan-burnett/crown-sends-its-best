@@ -52,6 +52,17 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 		run.colony, run.parties, run.companies, run.standing,
 		run.contact(&"marshal"), state)
 	if String(reason).is_empty():
+		_end_the_term(state, log)
+		return
+
+	# 🔒 **Defeat is never a surprise** (#447, SPEC §13.1, `endings.md` §2). His
+	# letters are composed after the month is resolved, so a colony that fell in
+	# one month, or met every Independence condition at once, ended before his
+	# warning could be written. A run that meets a fail condition unwarned goes
+	# on one more month: the warning goes out in this month's post, and the run
+	# ends at the next check. Once only, so nothing can hold a run open.
+	if not was_warned(reason, log, state.month) and not _deferred_last_month(log, state.month):
+		log.emit(EVENT_DEFERRED, &"crown", state.month, {"how": String(reason)}, WorldPhase.RUN_END_CHECK)
 		return
 
 	# **The reason is recorded beside the ending, not instead of it.** Both ways
@@ -69,6 +80,49 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 
 	run.ending = RunEnding.end(RunEnding.FAILED, log, state.month)
 	run.ending.how = reason
+
+
+## 🔒 **The PC is retired at fifty years** (#447, SPEC §13.2). `TERM_EXPIRED`
+## was declared, and read by the records, the epitaph and the summary, and
+## nothing ever ended a run with it.
+const TERM_YEARS: int = 50
+
+## A fail ending held back a month so the Chancellor's warning could reach the
+## player first (#447).
+const EVENT_DEFERRED: StringName = &"run_end_deferred"
+
+## Which of the Chancellor's letters warns of each way of losing (#447,
+## `endings.md` §2): the colony dwindling for Overrun, a condition flipping for
+## Independence.
+const WARNED_BY: Dictionary = {
+	"colony_overrun": "chancellor.colony_dwindling",
+	"independence": "chancellor.last_chance",
+}
+
+
+func _end_the_term(state: WorldState, log: EventLog) -> void:
+	if state.month < TERM_YEARS * WorldState.MONTHS_PER_YEAR:
+		return
+	run.ending = RunEnding.end(RunEnding.TERM_EXPIRED, log, state.month)
+
+
+## Whether the warning for this way of losing went out in an earlier month's
+## post, so the player has read it.
+static func was_warned(reason: StringName, log: EventLog, month: int) -> bool:
+	var letter := String(WARNED_BY.get(String(reason), ""))
+	if letter.is_empty() or log == null:
+		return true
+	for event in log.of_type(Director.EVENT_DISPATCHED):
+		if event.month < month and String(event.payload.get("letter", "")) == letter:
+			return true
+	return false
+
+
+static func _deferred_last_month(log: EventLog, month: int) -> bool:
+	for event in log.of_type(EVENT_DEFERRED):
+		if event.month == month - 1:
+			return true
+	return false
 
 
 ## 🔒 **What finished the colony: the last thing that cost it people.**
