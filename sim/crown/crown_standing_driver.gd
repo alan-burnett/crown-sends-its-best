@@ -104,7 +104,7 @@ func _judgement(log: EventLog, month: int) -> float:
 				# PC had noticed him, and letting the deadline pass costs what
 				# saying no plainly would have cost. SPEC §9.3 lets the post pile
 				# up; it does not make it free.
-				total -= DemandSchedule.refusal_cost(growth)
+				total -= DemandSchedule.refusal_cost(growth, month)
 			Compliance.OUTCOME_EVENTS[Compliance.COMPLY], \
 			Compliance.OUTCOME_EVENTS[Compliance.PARTIAL], \
 			Compliance.OUTCOME_EVENTS[Compliance.DELAY], \
@@ -115,7 +115,7 @@ func _judgement(log: EventLog, month: int) -> float:
 				# separate matter and is already on the relationship.
 				var order: Dictionary = event.payload.get("order", {})
 				if String(order.get("kind", "")) == String(M1Registrations.ORDER_DECLINE_DEMAND):
-					total -= DemandSchedule.refusal_cost(growth)
+					total -= DemandSchedule.refusal_cost(growth, month)
 	return total
 
 

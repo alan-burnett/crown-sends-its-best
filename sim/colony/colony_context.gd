@@ -126,7 +126,14 @@ func _init(
 ##
 ## The question needs the colony as well as the state, which is why it is asked
 ## here and not in `TaxWaiver`.
+## 🔒 **The rate the colony pays and feels** (#399): the Crown's, less any
+## forgiveness. What a town is charged, what it weighs and what it resents.
 func tax_rate(resource: StringName) -> float:
+	return maxf(0.0, crown_rate(resource) - TaxRates.forgiven(state, resource))
+
+
+## The rate the Crown books: the authored rate, or a waiver's while it runs.
+func crown_rate(resource: StringName) -> float:
 	var authored := TaxRates.rate_for(state, resource)
 	if not TaxWaiver.running(state, resource):
 		return authored

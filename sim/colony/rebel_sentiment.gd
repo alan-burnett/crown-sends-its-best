@@ -261,7 +261,9 @@ static func _tax(town: Town, context: ColonyContext) -> float:
 				tier = "sale"
 			_:
 				continue
-		weighted += float(event.payload.get("tax", 0.0)) \
+		# 🔒 **What the town paid, not what the Crown booked** (#399): a
+		# forgiven duty is resented at the rate the town sees.
+		weighted += float(event.payload.get("colony_tax", event.payload.get("tax", 0.0))) \
 			* float(TIER_WEIGHT.get(tier, TIER_WEIGHT["want"]))
 
 	# 🔒 **What the town believes it paid** (#279, the journalist's *Crown

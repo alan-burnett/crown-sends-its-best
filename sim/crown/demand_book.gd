@@ -32,6 +32,14 @@ const KIND_RESOURCE: StringName = &"resource"
 
 const EVENT_DEMANDED: StringName = &"crown_demanded"
 const EVENT_LAPSED: StringName = &"crown_demand_lapsed"
+## A demand that would have been issued and was not, because he had been given
+## a break (#399).
+const EVENT_SKIPPED: StringName = &"crown_demand_skipped"
+
+## 🔒 **Askers whose next demand is skipped** (#399, relief 1): a targeted break.
+## The schedule moves on as though it had been issued, so the one after arrives
+## when it would have.
+var skipping: PackedStringArray = PackedStringArray()
 
 ## Months before the Crown asks for anything at all.
 ##
@@ -144,6 +152,13 @@ func advance(month: int, growth: DemandGrowth, streams: RngStreams, log: EventLo
 		asker = &"steward"
 		kind = KIND_GOLD
 
+	if skipping.has(String(asker)):
+		skipping.remove_at(skipping.find(String(asker)))
+		issued_month = -1
+		if log != null:
+			log.emit(EVENT_SKIPPED, asker, month, {"asker": String(asker)}, WorldPhase.CROWNS_MONTH)
+		return false
+
 	if log != null:
 		log.emit(EVENT_DEMANDED, asker, month, {
 			"asker": String(asker),
@@ -215,6 +230,7 @@ func to_dict() -> Dictionary:
 		"term_months": term_months,
 		"resource": String(resource),
 		"expires_month": expires_month,
+		"skipping": Array(skipping),
 	}
 
 
@@ -228,4 +244,5 @@ static func from_dict(data: Dictionary) -> DemandBook:
 	restored.term_months = int(data.get("term_months", 0))
 	restored.resource = StringName(data.get("resource", ""))
 	restored.expires_month = int(data.get("expires_month", -1))
+	restored.skipping = PackedStringArray(data.get("skipping", []))
 	return restored

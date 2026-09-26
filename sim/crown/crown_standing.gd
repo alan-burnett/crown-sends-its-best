@@ -101,6 +101,14 @@ var net_position: float = 0.0
 ## without anything having to remember the previous number.
 var band: StringName = BAND_CONTENT
 
+## 🔒 **Goodwill** (#399, `crown-demands.md` §10 relief 4, §2 here): standing
+## earned by a favour done for someone high up at no cost in gold. **Added on
+## top of the financial standing, the sum capped at the maximum, for ever.** The
+## bands, the warnings and the refusal of payments read the sum (`value`); it
+## never touches `net_position`, and so never prestige. A PC with 15 goodwill
+## never reads below 15, however the books go.
+var goodwill: float = 0.0
+
 
 # --- A month ----------------------------------------------------------------
 
@@ -124,7 +132,7 @@ func advance(revenue: float, spending: float, judgement: float = 0.0) -> Diction
 		delta = rise_rate() * maxf(RISE_FLOOR, 1.0 - horizon / H_MAX)
 
 	standing = clampf(standing + delta + judgement, 0.0, MAXIMUM)
-	band = band_of(standing)
+	band = band_of(value())
 
 	return {
 		"before": before, "after": standing, "delta": standing - before,
@@ -181,7 +189,19 @@ func rise_rate() -> float:
 ## revenue. The demands themselves are #69; this is the door they come through.
 func adjust(amount: float) -> void:
 	standing = clampf(standing + amount, 0.0, MAXIMUM)
-	band = band_of(standing)
+	band = band_of(value())
+
+
+## 🔒 **What the Crown thinks of him, all told**: the books and the goodwill,
+## capped (#399). What the bands read.
+func value() -> float:
+	return minf(MAXIMUM, standing + goodwill)
+
+
+## Bank goodwill (#399). It never decays and is never gold.
+func bank_goodwill(amount: float) -> void:
+	goodwill = maxf(0.0, goodwill + amount)
+	band = band_of(value())
 
 
 # --- Bands ------------------------------------------------------------------
@@ -214,6 +234,7 @@ func to_dict() -> Dictionary:
 		"standing": standing,
 		"net_position": net_position,
 		"band": String(band),
+		"goodwill": goodwill,
 	}
 
 
@@ -221,5 +242,6 @@ static func from_dict(data: Dictionary) -> CrownStanding:
 	var restored := CrownStanding.new()
 	restored.standing = float(data.get("standing", START))
 	restored.net_position = float(data.get("net_position", 0.0))
+	restored.goodwill = float(data.get("goodwill", 0.0))
 	restored.band = StringName(data.get("band", String(band_of(restored.standing))))
 	return restored

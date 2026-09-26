@@ -327,6 +327,10 @@ var machines_broke: int = -1
 ## And whether the Crown has yet to answer about them (#438).
 var machines_waiting: bool = false
 
+## 🔒 **His next ask is skipped** (#399, relief 1: a targeted break). Consumed
+## by the director the next time an ask of his would be sent.
+var skips_next_ask: bool = false
+
 var relationship: Relationship = null
 
 
@@ -401,6 +405,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.backed_rebellion = String(record.get("backed_rebellion", ""))
 	contact.machines_broke = int(record.get("machines_broke", -1))
 	contact.machines_waiting = bool(record.get("machines_waiting", false))
+	contact.skips_next_ask = bool(record.get("skips_next_ask", false))
 	contact.known_since = int(record.get("known_since", 0))
 	contact.relationship = Relationship.new(
 		contact.id,
@@ -507,6 +512,7 @@ func to_dict() -> Dictionary:
 		"backed_rebellion": backed_rebellion,
 		"machines_broke": machines_broke,
 		"machines_waiting": machines_waiting,
+		"skips_next_ask": skips_next_ask,
 		"known_since": known_since,
 		"relationship": relationship.to_dict(),
 	}

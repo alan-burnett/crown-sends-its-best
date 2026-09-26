@@ -21,6 +21,7 @@
   {
     "id": "trigger.patron.request_gold",
     "letter": "patron.request_gold",
+    "an_ask": true,
     "urgency": 0.6,
     "cooldown": 14,
     "note": "Issue 388, patrons.md sections 4 and 10: every patron has this letter. Any patron may send it, at any regard - the gate it always had, since the offer model it once asked (PatronOffer, retired by #439) made a bare request unconditional. Cooldown 14, as the duke's is: a man who asked twice a year would be a tax rather than a character. Urgency below a duke's 0.7, because a patron is asking a favour and a duke is describing a difficulty he has.",
@@ -127,6 +128,7 @@
   {
     "id": "trigger.patron.his_need",
     "letter": "patron.his_need",
+    "an_ask": true,
     "urgency": 0.55,
     "cooldown": 12,
     "note": "Issue 441, patrons.md section 4. Every patron asks for his need, a resource or livestock kind that is never his specialty's. Not while anything the PC promised him is still outstanding: a man waiting on a ship does not write for another. Cooldown 12: a year's shipment is a year's favour, and asked for more often it would be a levy. Urgency just under his gold letter's, because a need met through two letters is the slower favour.",

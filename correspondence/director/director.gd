@@ -44,6 +44,11 @@ const COMPANION_KEY: String = "companion"
 const COMPANION_OF_KEY: String = "companion_of"
 const EVENT_DISPATCHED: StringName = &"letter_dispatched"
 
+## 🔒 **A trigger that asks the PC for something** (#399): gold, goods, a need
+## met. What a targeted break skips.
+const AN_ASK_KEY: String = "an_ask"
+const EVENT_ASK_SKIPPED: StringName = &"ask_skipped"
+
 var content: ContentDatabase = null
 
 ## Letters the director could not acknowledge because no content exists for it
@@ -126,6 +131,15 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 			# *true*; pressure says whether he *bothers*. A letter that is not
 			# true is never a candidate whatever he feels about the world.
 			if not _conditions_hold(trigger, context):
+				continue
+			# 🔒 **A break skips his next ask** (#399, relief 1). It counts as
+			# sent, so the one after it arrives when it would have.
+			if bool(trigger.get(AN_ASK_KEY, false)) and contact.skips_next_ask:
+				contact.skips_next_ask = false
+				run.letters_sent[sent_key(letter_id, contact.id)] = run.world.month
+				run.log.emit(EVENT_ASK_SKIPPED, contact.id, run.world.month, {
+					"letter": letter_id,
+				}, WorldPhase.DISPATCH)
 				continue
 
 			fired.append(_inbound(trigger, letter, contact, context, run))

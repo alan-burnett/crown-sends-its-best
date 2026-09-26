@@ -135,10 +135,14 @@ static func gold_target(growth: DemandGrowth) -> float:
 ##
 ## **The axis a player who pays everything never feels**, which is why it cannot
 ## be folded into size and why §8 refuses to reduce difficulty to one number.
-static func refusal_cost(growth: DemandGrowth) -> float:
+##
+## **In `month`**, so a war relief running then is felt (#399). Without one the
+## axis reads its level, as it always did.
+static func refusal_cost(growth: DemandGrowth, month: int = -1) -> float:
 	var base := _steady_value("refusal_cost", DEFAULT_REFUSAL_COST)
 	var step := _growth_value(DemandGrowth.DESPERATION, "refusal_cost", 0.4)
-	return base * (1.0 + step * _level(growth, DemandGrowth.DESPERATION))
+	var level := 0.0 if growth == null else float(growth.desperation_at(month))
+	return base * (1.0 + step * level)
 
 
 ## How many sources are demanding at all: the Steward's, and every hand the

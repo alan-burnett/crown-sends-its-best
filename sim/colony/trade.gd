@@ -84,7 +84,10 @@ static func buy(
 	if desired <= 0.0:
 		return nothing
 
+	# 🔒 **Two rates, if anything is forgiven** (#399): the colony pays at its
+	# own, the Crown books its full duty, and the gap is somebody's purse.
 	var rate := context.tax_rate(resource)
+	var crown_rate := context.crown_rate(resource)
 	var price := Valuation.crown(resource, context.state)
 	if price <= 0.0:
 		return nothing
@@ -116,7 +119,8 @@ static func buy(
 		return nothing
 
 	var received := spent / taxed_unit
-	var tax := spent - received * price
+	var colony_tax := spent - received * price
+	var tax := received * price * crown_rate
 
 	town.store(resource, received)
 	town.traded_value += spent
@@ -134,7 +138,9 @@ static func buy(
 		"wanted": desired,
 		"quantity": received,
 		"unit_price": price,
-		"rate": rate,
+		"rate": crown_rate,
+		"colony_rate": rate,
+		"colony_tax": colony_tax,
 		"gross": received * price,
 		"tax": tax,
 		"spent": spent,
@@ -172,11 +178,14 @@ static func sell(town: Town, resource: StringName, quantity: float, context: Col
 
 	var rate := context.tax_rate(resource)
 	var gross := sold * price
-	var tax := gross * rate
+	# 🔒 **The town is docked at its own rate; the Crown books its full duty**
+	# (#399). They differ only where somebody has forgiven part of it.
+	var colony_tax := gross * rate
+	var tax := gross * context.crown_rate(resource)
 	# 🔒 **A wharf sells better, and the Crown's duty is untouched** (#411): the
 	# town receives more for what it has already been taxed on.
-	var better := (gross - tax) * Building.crown_sale_bonus_for(town)
-	var earned := gross - tax + better
+	var better := (gross - colony_tax) * Building.crown_sale_bonus_for(town)
+	var earned := gross - colony_tax + better
 
 	town.receive_gold(earned)
 	town.traded_value += gross
@@ -188,9 +197,11 @@ static func sell(town: Town, resource: StringName, quantity: float, context: Col
 		"luxury": ResourceCatalogue.is_luxury(resource),
 		"quantity": sold,
 		"unit_price": price,
-		"rate": rate,
+		"rate": context.crown_rate(resource),
+		"colony_rate": rate,
 		"gross": gross,
 		"tax": tax,
+		"colony_tax": colony_tax,
 		"earned": earned,
 		# What a wharf added, so a letter can say the trade paid better.
 		"better_sold": better,

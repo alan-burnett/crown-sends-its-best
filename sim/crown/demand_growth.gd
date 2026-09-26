@@ -141,10 +141,53 @@ var drawn_this_year: int = 0
 var grew_in_month: int = -1
 
 
+## 🔒 **Crown war relief** (#399, `crown-demands.md` §10 relief 2): the month
+## before which the desperation axis reads one level lower. **It never touches the
+## war**: `crown_war_intensity` stays nobody's to influence
+## (`the-marshal.md` §8). This eases what the Crown asks of the colony while the
+## war goes on as before.
+var war_relief_until: int = -1
+
+const EVENT_PULLED_BACK: StringName = &"crown_hand_pulled_back"
+const EVENT_WAR_RELIEF: StringName = &"crown_war_relief"
+
+
 func _init() -> void:
 	for dimension in DIMENSIONS:
 		levels[dimension] = 0
 	_fill()
+
+
+## Relieve the war's desperation for `months` from `month` (#399). A second
+## relief while one runs extends it rather than stacking a second level.
+func relieve_the_war(month: int, months: int, log: EventLog = null) -> void:
+	war_relief_until = maxi(war_relief_until, month + months)
+	if log != null:
+		log.emit(EVENT_WAR_RELIEF, &"crown", month, {"until": war_relief_until}, WorldPhase.CROWNS_MONTH)
+
+
+## The desperation a demand is judged at in `month`: one level lower while war
+## relief runs (#399). A reader that names no month (-1) asks for the axis.
+func desperation_at(month: int) -> int:
+	var level := level_of(DESPERATION)
+	var relieved := month >= 0 and month < war_relief_until
+	return maxi(0, level - 1) if relieved else level
+
+
+## 🔒 **Pulling back a hand** (#399, `crown-demands.md` §10 relief 3): a Crown
+## officer the Squeeze turned needy stops asking, and the demand kind that draw
+## gave him is withdrawn. **The one relief that retires a source**, and allowed
+## because a contact does it, not the draw — which still never eases off on its
+## own. A later draw may turn him needy again, since his room is open once more.
+## Patrons and dukes are never pulled back this way. Returns whether one was.
+func pull_back_a_hand(month: int, log: EventLog = null) -> bool:
+	var at := sources.find(String(SOURCE_CROWN))
+	if at < 0:
+		return false
+	sources.remove_at(at)
+	if log != null:
+		log.emit(EVENT_PULLED_BACK, &"crown", month, {"source": String(SOURCE_CROWN)}, WorldPhase.CROWNS_MONTH)
+	return true
 
 
 ## How many growth events this dimension has seen.
@@ -286,6 +329,7 @@ func to_dict() -> Dictionary:
 		"growth_months": Array(growth_months),
 		"drawn_this_year": drawn_this_year,
 		"grew_in_month": grew_in_month,
+		"war_relief_until": war_relief_until,
 	}
 
 
@@ -303,4 +347,5 @@ static func from_dict(data: Dictionary) -> DemandGrowth:
 	restored.growth_months = PackedInt32Array(data.get("growth_months", []))
 	restored.drawn_this_year = int(data.get("drawn_this_year", 0))
 	restored.grew_in_month = int(data.get("grew_in_month", -1))
+	restored.war_relief_until = int(data.get("war_relief_until", -1))
 	return restored
