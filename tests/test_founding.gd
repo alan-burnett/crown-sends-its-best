@@ -99,7 +99,8 @@ func test_livestock_arrives_as_beasts_and_not_as_stores() -> void:
 	# reckoning rather than grazed, which is a different animal entirely.
 	var town := _arrived().found(&"town_new", "Newhaven", _context())
 	assert_eq(town.livestock_head(&"cows"), 6, "the herd arrived as sacks of beef")
-	assert_almost_eq(town.held(&"cows"), 0.0, 0.001, "and also as sacks of beef")
+	# The herd is the only count of cows (#461), so none may be in the warehouse.
+	assert_almost_eq(float(town.stockpile.get("cows", 0.0)), 0.0, 0.001, "and also as sacks of beef")
 
 
 func test_a_building_the_crown_equipped_it_with_is_standing() -> void:

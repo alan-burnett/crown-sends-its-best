@@ -34,7 +34,9 @@ var at: Vector2i = Vector2i(-1, -1)
 ## traded and pastured. Experts and livestock grow in M4.
 var workers: int = 0
 var experts: Dictionary = {}    ## resource id -> how many experts of it
-var livestock: Dictionary = {}  ## livestock resource id -> head
+## Livestock resource id -> head, with any part-bought beast carried as a
+## fraction (#461). `livestock_head` is the whole beasts; `held` is the lot.
+var livestock: Dictionary = {}
 
 ## Resource id -> how much is held.
 var stockpile: Dictionary = {}
@@ -321,12 +323,14 @@ func add_experts(resource: StringName, count: int) -> void:
 	experts[String(resource)] = expert_count(resource) + count
 
 
+## Whole beasts. A part-bought one is in `held` and not here, so nothing grazes,
+## breeds or is slaughtered that the town does not wholly own.
 func livestock_head(kind: StringName) -> int:
-	return int(livestock.get(String(kind), 0))
+	return int(floorf(float(livestock.get(String(kind), 0.0))))
 
 
 func add_livestock(kind: StringName, head: int) -> void:
-	livestock[String(kind)] = maxi(0, livestock_head(kind) + head)
+	livestock[String(kind)] = maxf(0.0, float(livestock.get(String(kind), 0.0)) + float(head))
 
 
 func population() -> int:
@@ -407,28 +411,39 @@ func has_yielded(at: Vector2i) -> bool:
 	return yielded_tiles.has("%d,%d" % [at.x, at.y])
 
 
+## 🔒 **Livestock is the herd, however it came** (#461, `population.md` §2:
+## *horses bought or sold are counted the same way*). Stored, taken and held
+## through the one `livestock` count, so a horse the Crown sold grazes, breeds,
+## eats and can be slaughtered like one the town bred, and a company is horsed
+## from that same herd. A warehouse of horses beside the herd was two counts of
+## one thing, and the bought one never ate.
+func _pen_of(resource: StringName) -> Dictionary:
+	return livestock if ResourceCatalogue.is_livestock(resource) else stockpile
+
+
 func held(resource: StringName) -> float:
-	return float(stockpile.get(String(resource), 0.0))
+	return float(_pen_of(resource).get(String(resource), 0.0))
 
 
 func store(resource: StringName, amount: float) -> void:
-	stockpile[String(resource)] = maxf(0.0, held(resource) + amount)
+	_pen_of(resource)[String(resource)] = maxf(0.0, held(resource) + amount)
 
 
 ## Take what is there, up to `amount`. Returns how much was actually taken, so a
 ## caller never has to check first and act second.
 func take(resource: StringName, amount: float) -> float:
 	var taken := minf(held(resource), maxf(0.0, amount))
-	stockpile[String(resource)] = held(resource) - taken
+	_pen_of(resource)[String(resource)] = held(resource) - taken
 	return taken
 
 
-## Resource ids held in any quantity, sorted.
+## Resource ids held in any quantity, sorted. Herds included.
 func stocked() -> PackedStringArray:
 	var out: PackedStringArray = PackedStringArray()
-	for resource in stockpile:
-		if float(stockpile[resource]) > 0.0:
-			out.append(String(resource))
+	for pen in [stockpile, livestock]:
+		for resource in pen:
+			if float(pen[resource]) > 0.0:
+				out.append(String(resource))
 	out.sort()
 	return out
 

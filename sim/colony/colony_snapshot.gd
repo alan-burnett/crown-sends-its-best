@@ -29,11 +29,13 @@ func ids() -> PackedStringArray:
 	return out
 
 
+## Livestock from the herd, as `Town.held` reads it (#461).
 func held(id: StringName, resource: StringName) -> float:
 	if not towns.has(String(id)):
 		return 0.0
-	var stockpile: Dictionary = towns[String(id)].get("stockpile", {})
-	return float(stockpile.get(String(resource), 0.0))
+	var pen := "livestock" if ResourceCatalogue.is_livestock(resource) else "stockpile"
+	var stock: Dictionary = towns[String(id)].get(pen, {})
+	return float(stock.get(String(resource), 0.0))
 
 
 func workers(id: StringName) -> int:
