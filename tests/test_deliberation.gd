@@ -317,6 +317,11 @@ func test_every_declared_kind_is_one_an_actor_actually_chooses() -> void:
 		# is a decision point, so it goes through the kernel."* A governor answers
 		# a tribe's letter by yielding, giving, refusing or threatening.
 		DecisionKind.TRIBE_GRIEVANCE,
+		# **Considered, and it belongs** (#452). `the-steward.md` §3: *"he
+		# deliberates, produces will, and that becomes an Intent"* — SPEC §10.2's
+		# *he may* raise taxes over the PC's head. Not compliance's *act alone*,
+		# because nothing was ordered: there is no Order for the kernel to weigh.
+		DecisionKind.STEWARD_RAISES,
 	]
 	assert_eq(DecisionKind.ALL.size(), expected.size(),
 		"a decision kind was added or removed without this test being considered")

@@ -1,0 +1,21 @@
+{
+  "id": "steward.i_raised_the_duty",
+  "sender": "steward",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 452, the-steward.md section 3, SPEC 10.2: with Crown standing lost and his regard low, he raises the rate he has been advising, one step, and informs the PC after the fact. Unskippable: it is the only way the PC learns his instruction was overridden. Placeholder prose: the Author writes the real lines.",
+  "params": {
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "You will hear it from the ports before you hear it from me, so I will be plain: I have given orders to raise the duty on {param:resource}."
+    },
+    {
+      "text": "I did not ask you. The Crown has stopped honouring what you pledge, and I have said for a year what the colony's returns wanted. I have now done it."
+    },
+    {
+      "text": "You may write to countermand me. I would ask you to read the ledger first."
+    }
+  ]
+}

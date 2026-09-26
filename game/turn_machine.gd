@@ -244,6 +244,9 @@ func _init(p_run: RunState) -> void:
 	# Phase 7, last: the gunsmith's machines break, and what came of the Crown's
 	# answer is read once promises have settled and silence has been counted (#438).
 	var machines := GunsmithMachines.new(run)
+	# Phase 8. The Steward raises a duty himself, once standing is lost and his
+	# regard with it (#452).
+	var steward_raise := StewardRaise.new(run)
 
 	# Phase 1. Settlers land before the colony works its month, so the people who
 	# arrived are counted in it — and they are drawn by the quality of life last
@@ -382,7 +385,7 @@ func _init(p_run: RunState) -> void:
 		expert_travel, cultivation, sabotage,
 		companies,
 		orders, silence, provost, governors,
-		grievances, favours, backing, machines,
+		grievances, favours, backing, machines, steward_raise,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.

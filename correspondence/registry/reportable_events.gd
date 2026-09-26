@@ -83,6 +83,11 @@ const TABLE: Dictionary = {
 	},
 	# The gunsmith's machines have broken, and the quartermaster asks what it
 	# costs to mend them (#438).
+	# The Steward raised a duty over the PC's head, and says so after (#452).
+	"steward_raised_the_duty": {
+		"man": "steward",
+		"fields": {"resource": "resource"},
+	},
 	"gunsmith_machines_broke": {
 		"town": "town",
 		"man": "quartermaster",
@@ -159,6 +164,9 @@ static func read(happened: SimEvent, event: String, field: String, context: Lett
 		"contact", "rival":
 			var contact: Contact = context.contacts.get(String(raw))
 			return "" if contact == null else contact.display_name
+		"resource":
+			# A resource param carries its id, as every other letter's does.
+			return String(raw) if ResourceCatalogue.has(StringName(raw)) else ""
 	return ""
 
 

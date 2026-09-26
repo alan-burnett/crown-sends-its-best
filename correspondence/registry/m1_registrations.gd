@@ -205,6 +205,7 @@ static func register_all() -> void:
 static func register_considerations() -> void:
 	ComplianceConsiderations.register_all()
 	UnansweredConsiderations.register_all()
+	StewardRaise.register_all()
 	IntentConsiderations.register_all()
 	# **A milestone that adds a system ships that system's considerations with
 	# it** (#221). A commander scores every option open to him, and refusal is

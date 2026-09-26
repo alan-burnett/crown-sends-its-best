@@ -1,5 +1,30 @@
 [
   {
+    "id": "trigger.steward.i_raised_the_duty",
+    "letter": "steward.i_raised_the_duty",
+    "urgency": 0.85,
+    "cooldown": 12,
+    "note": "Issue 452, the-steward.md section 3. StewardRaise decides the raise and emits steward_raised_the_duty; this is him informing the PC after the fact. Cooldown 12 matches his own.",
+    "params": {
+      "resource": {
+        "from": "what_happened",
+        "event": "steward_raised_the_duty",
+        "within": 2,
+        "concerning": "him",
+        "field": "resource"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "steward_raised_the_duty",
+          "within": 2,
+          "concerning": "him"
+        }
+      }
+    ]
+  },
+  {
     "id": "trigger.steward.revenue_report",
     "letter": "steward.revenue_report",
     "urgency": 0.1,
