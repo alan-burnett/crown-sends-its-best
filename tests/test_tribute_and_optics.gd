@@ -103,10 +103,17 @@ func test_the_dukes_arrive_on_the_bucket_and_nothing_else() -> void:
 		# a patron, and it says nothing about when he would otherwise write.
 		# Afterwards the bucket is again the only thing deciding.
 		#
+		# ⚠️ **Nor are `he_has_arrived` and `he_asks_for_tribute`** (#458). The
+		# first is the bucket itself, read for this duke rather than for any: it
+		# counts the same arrivals. The second is §3's band — whether he asks at
+		# all, never when. Without them the first arrival had all three writing,
+		# and a duke at Low asking 1 gold.
+		#
 		# Anything else here is a timetable, and the guard still refuses it.
 		for gate in gates:
 			assert_true(
-				gate == "a_rival_has_a_hand_out" or gate == "he_is_free_to_demand",
+				gate in ["a_rival_has_a_hand_out", "he_is_free_to_demand",
+					"he_has_arrived", "he_asks_for_tribute"],
 				"%s decides for itself when a duke writes: %s" % [id, gate])
 
 

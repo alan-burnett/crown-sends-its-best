@@ -135,6 +135,12 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
 	)
+	# 🔒 **A duke asks tribute once he himself has arrived, and only in the bands
+	# that ask** (#458, `rival-pressure.md` §3, §6).
+	ContentRegistry.register_condition("he_has_arrived", {}, ColonyConditions.he_has_arrived)
+	ContentRegistry.register_condition(
+		"he_asks_for_tribute", {}, ColonyConditions.he_asks_for_tribute
+	)
 	# Whether the colony has bought this from the Crown lately (#407).
 	ContentRegistry.register_condition(
 		"the_colony_paid_the_crown_for", {"resource": "resource", "months": "integer"},
@@ -1404,6 +1410,33 @@ static func bargain_arms_them(context: LetterContext) -> bool:
 ## slightly more gold.
 static func a_rival_has_a_hand_out(_args: Dictionary, context: LetterContext) -> bool:
 	return DemandSchedule.rivals_are_asking(context.demands)
+
+
+## 🔒 **Whether this duke is among those who have arrived** (#458). All three
+## are on the roster from the first month; the first arrival used to qualify
+## every duke's tribute letter, because the only gate asked whether *any* had.
+static func he_has_arrived(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null:
+		return false
+	for entry in RivalDuke.arrived_among(context.contacts, context.demands):
+		if (entry as Contact).id == context.sender.id:
+			return true
+	return false
+
+
+## 🔒 **Whether his band asks for tribute** (#458, §3): High asks reasonable
+## tribute and Medium dearer; at Low he attacks improvements and at Minimum makes
+## war, and neither asks. **Minimum is a latch**, read off the log, so a duke
+## whose loyalty has climbed back does not start asking again. A Low duke used
+## to ask 1 gold: a multiple of nought, floored at one.
+static func he_asks_for_tribute(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null:
+		return false
+	if context.log != null:
+		for event in context.log.of_type(RivalBook.EVENT_LATCHED):
+			if event.subject == context.sender.id:
+				return false
+	return RivalDuke.tribute_multiple(RivalDuke.band_of(context.sender.loyalty())) > 0.0
 
 
 ## 🔒 Whether somebody's men are standing on this governor's fields (#188).
