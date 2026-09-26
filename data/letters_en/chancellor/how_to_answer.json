@@ -9,7 +9,7 @@
   },
   "body": [
     {
-      "text": "The court asks what is to be done about the colony's {param:amount} in arrears."
+      "text": "The court asks what is to be done about the colony's returns, which came to {param:amount} last month."
     },
     {
       "text": "I shall need an answer, and I should not like to invent one{insert:barb}.",
@@ -37,12 +37,12 @@
     "steps": [
       {
         "id": "answer",
-        "prompt": "The arrears",
+        "prompt": "The returns",
         "options": [
           {
             "id": "pay",
-            "label": "settle them from the Crown's purse",
-            "text": "Settle them, and say no more of it.",
+            "label": "answer for them from the Crown's purse",
+            "text": "The Crown will answer for them from its own purse, and say no more of it.",
             "effect": {
               "promise_gold": {
                 "to": "chancellor",
@@ -52,8 +52,8 @@
           },
           {
             "id": "deny",
-            "label": "refuse to settle them",
-            "text": "They may wait.",
+            "label": "let them stand",
+            "text": "They may stand as they are.",
             "effect": {
               "refuse": {
                 "to": "chancellor"

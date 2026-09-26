@@ -28,6 +28,15 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"treasury_honoured_this_year", {}, ColonyParamSources.treasury_honoured_this_year
 	)
+	# The duty the Crown took in the month just run, and what the colony paid it
+	# for one resource lately (#407).
+	ContentRegistry.register_param_source(
+		"duty_last_month", {}, ColonyParamSources.duty_last_month
+	)
+	ContentRegistry.register_param_source(
+		"paid_the_crown_for", {"resource": "resource", "months": "integer"},
+		ColonyParamSources.paid_the_crown_for,
+	)
 	# What the reported event carried, as a name or a number (#398).
 	ContentRegistry.register_param_source(
 		"what_happened",
@@ -179,6 +188,36 @@ static func treasury_honoured_this_year(_args: Dictionary, context: LetterContex
 	if context == null:
 		return 0
 	return int(roundf(CrownAccounts.of(context.log).paid_in_year_of(context.month)))
+
+
+## 🔒 **The duty the Crown took in the month just run** (#407, SPEC §9.1): the
+## Ledger's *in* column for it, less a patron's gift, which is not duty.
+##
+## The Steward's report said *{amount} in duties* and printed a fifth of colony
+## revenue, floored at ten; a player checking it against the Ledger got another
+## figure. **The month just run is `context.month`**: the world advances the
+## month before its phases run, so the events a letter reads carry the month it
+## is composed in.
+static func duty_last_month(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null:
+		return 0
+	return int(roundf(CrownAccounts.of(context.log).received_in(context.month)))
+
+
+## 🔒 **What the colony paid the Crown for `resource` over the last `months`**
+## (#407), duty included, from the purchases themselves. What natives sold it
+## is not the Crown's and is not counted.
+static func paid_the_crown_for(args: Dictionary, context: LetterContext) -> Variant:
+	if context == null or context.log == null:
+		return 0
+	var resource := String(args.get("resource", ""))
+	var since := context.month - maxi(1, int(args.get("months", 1)))
+	var paid := 0.0
+	for entry in context.log.of_type(Trade.EVENT_BOUGHT):
+		var bought: SimEvent = entry
+		if bought.month > since and String(bought.payload.get("resource", "")) == resource:
+			paid += float(bought.payload.get("spent", 0.0))
+	return int(roundf(paid))
 
 
 ## How many years the PC has held the post.

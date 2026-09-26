@@ -135,6 +135,11 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
 	)
+	# Whether the colony has bought this from the Crown lately (#407).
+	ContentRegistry.register_condition(
+		"the_colony_paid_the_crown_for", {"resource": "resource", "months": "integer"},
+		ColonyConditions.the_colony_paid_the_crown_for,
+	)
 	ContentRegistry.register_condition(
 		"crown_reopened_the_faucet", {}, ColonyConditions.crown_reopened_the_faucet
 	)
@@ -1255,6 +1260,13 @@ static func town_disagrees_with_the_crown(_args: Dictionary, context: LetterCont
 static func treasury_honoured_this_year(args: Dictionary, context: LetterContext) -> bool:
 	var at_least := float(args.get("at_least", 1.0))
 	return float(ColonyParamSources.treasury_honoured_this_year({}, context)) >= at_least
+
+
+## 🔒 **The colony paid the Crown for it lately, by a whole gold at least**
+## (#407). Asked of the figure the letter prints, so the Steward never writes
+## about a duty on something nobody buys, nor prints a price of nought.
+static func the_colony_paid_the_crown_for(args: Dictionary, context: LetterContext) -> bool:
+	return int(ColonyParamSources.paid_the_crown_for(args, context)) >= 1
 
 
 static func crown_opened_the_window(_args: Dictionary, context: LetterContext) -> bool:

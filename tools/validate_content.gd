@@ -41,6 +41,7 @@ func _init() -> void:
 	validator.check_expedition_outfitting(content)
 	validator.check_tile_yield_bonuses(content)
 	validator.check_conversion_gates(content)
+	validator.check_scaled_figures(content)
 	validator.check_colony_reach(content)
 	validator.check_buildings_do_something(content)
 	validator.check_no_authored_durations(content)

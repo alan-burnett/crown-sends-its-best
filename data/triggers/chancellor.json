@@ -2,17 +2,11 @@
   {
     "id": "trigger.chancellor.how_to_answer",
     "letter": "chancellor.how_to_answer",
-    "note": "Issue 365: not before the colony has lived a month. A new colony starts poor, so a revenue threshold alone is true before anything has happened, and the Chancellor would be asking about a colony nobody has run yet.",
+    "note": "Issue 365: not before the colony has lived a month. A new colony starts poor, so a revenue threshold alone is true before anything has happened, and the Chancellor would be asking about a colony nobody has run yet. Issue 407, SPEC 9.1: nothing is in arrears, so he no longer says so; he names the returns of the month just run, the duty the Ledger shows for it.",
     "urgency": 0.8,
     "cooldown": 5,
     "params": {
-      "amount": {
-        "from": "scaled_world_value",
-        "key": "colony_revenue",
-        "factor": 0.1,
-        "minimum": 5,
-        "maximum": 2000
-      }
+      "amount": { "from": "duty_last_month" }
     },
     "conditions": [
       { "the_colony_has_lived": { "months": 1 } },

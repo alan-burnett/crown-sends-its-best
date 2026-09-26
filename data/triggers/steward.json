@@ -4,14 +4,9 @@
     "letter": "steward.revenue_report",
     "urgency": 0.1,
     "cooldown": 3,
+    "note": "Issue 407, SPEC 9.1. The duty the Crown took in the month just run, the Ledger's in column for it. It used to be a fifth of colony revenue floored at ten, which no ledger showed.",
     "params": {
-      "amount": {
-        "from": "scaled_world_value",
-        "key": "colony_revenue",
-        "factor": 0.2,
-        "minimum": 10,
-        "maximum": 4000
-      }
+      "amount": { "from": "duty_last_month" }
     },
     "conditions": [
       {
@@ -52,22 +47,26 @@
   {
     "id": "trigger.steward.question_tea",
     "letter": "steward.question_tea",
-    "note": "Issue 365: year two, not year one. Year one is the first year, so year_at_least 1 was a condition that was never false, and the Steward raised the tea on the first turn of every run.",
+    "note": "Issue 365: year two, not year one. Year one is the first year, so year_at_least 1 was a condition that was never false, and the Steward raised the tea on the first turn of every run. Issue 407, SPEC 9.1: the price he names is what the colony paid the Crown for tea over the last three months, and he writes only if it bought any.",
     "urgency": 0.2,
     "cooldown": 8,
     "params": {
       "amount": {
-        "from": "scaled_world_value",
-        "key": "colony_revenue",
-        "factor": 0.12,
-        "minimum": 20,
-        "maximum": 900
+        "from": "paid_the_crown_for",
+        "resource": "tea",
+        "months": 3
       }
     },
     "conditions": [
       {
         "year_at_least": {
           "year": 2
+        }
+      },
+      {
+        "the_colony_paid_the_crown_for": {
+          "resource": "tea",
+          "months": 3
         }
       }
     ]
@@ -187,44 +186,40 @@
   {
     "id": "trigger.steward.standing_concern",
     "letter": "steward.standing_concern",
+    "note": "Issue 407, SPEC 9.1. What the Crown has laid out on the PC's word this year, the Ledger's out column, and only when it is above nought: a concern with no payouts behind it is the Chancellor's to raise.",
     "urgency": 0.55,
     "cooldown": 6,
     "params": {
-      "amount": {
-        "from": "scaled_world_value",
-        "key": "colony_revenue",
-        "factor": 0.45,
-        "minimum": 60,
-        "maximum": 6000
-      }
+      "amount": { "from": "treasury_honoured_this_year" }
     },
     "conditions": [
       {
         "crown_standing_is": {
           "band": "concern"
         }
+      },
+      {
+        "treasury_honoured_this_year": { "at_least": 1 }
       }
     ]
   },
   {
     "id": "trigger.steward.standing_alarm",
     "letter": "steward.standing_alarm",
+    "note": "Issue 407, SPEC 9.1. The same figure as standing_concern, which is what 'out on your word' means, under the same gate.",
     "urgency": 0.75,
     "cooldown": 5,
     "params": {
-      "amount": {
-        "from": "scaled_world_value",
-        "key": "colony_revenue",
-        "factor": 0.45,
-        "minimum": 60,
-        "maximum": 6000
-      }
+      "amount": { "from": "treasury_honoured_this_year" }
     },
     "conditions": [
       {
         "crown_standing_is": {
           "band": "alarm"
         }
+      },
+      {
+        "treasury_honoured_this_year": { "at_least": 1 }
       }
     ]
   },

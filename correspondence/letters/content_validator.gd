@@ -670,6 +670,46 @@ func check_tile_yield_bonuses(content: ContentDatabase) -> void:
 					_problem("effects.tile_yield_bonus", "'%s' is not an improvement" % improvement)
 
 
+## 🔒 **A scaled world value printed in prose is about that value itself**
+## (#407, SPEC §9.1). `scaled_world_value` takes a world figure, multiplies it,
+## clamps it and hands it over as though it were some other fact; six letters
+## printed one that way — *in arrears*, *in duties*, *laid out on your word* —
+## and none of them was true. **Listed, not open**: whether a sentence is about
+## the value itself is a judgement, made once here, and an unlisted use fails.
+const SCALED_FIGURES_ALLOWED: Dictionary = {
+	# The Crown's war is off the map, and its intensity is the whole of its
+	# simulation: a figure scaled off it is the war's size, not a fact about the
+	# colony.
+	"trigger.marshal.request_supplies.amount": "the war's appetite",
+	"trigger.marshal.demand_gold.amount": "the war's appetite",
+	"trigger.marshal.news_victory.amount": "the war's dead",
+	"trigger.chancellor.news_defeat.amount": "the war's dead",
+	# A projection, hedged *perhaps*, of what a rise would bring on the colony's
+	# revenue. Not in #407's list; left to the PO there.
+	"trigger.steward.request_tax_rise.amount": "a projection on revenue",
+}
+
+
+func check_scaled_figures(content: ContentDatabase) -> void:
+	for id in content.ids("triggers"):
+		var trigger: Dictionary = content.collection("triggers")[id]
+		_file = "triggers/%s" % id
+		var letter_id := String(trigger.get("letter", ""))
+		if not content.has_record("letters", letter_id):
+			continue
+		var prose := JSON.stringify(content.record("letters", letter_id))
+		var params: Dictionary = trigger.get("params", {})
+		for name in params:
+			var source: Variant = params[name]
+			if typeof(source) != TYPE_DICTIONARY or String(source.get("from", "")) != "scaled_world_value":
+				continue
+			if not prose.contains("{param:%s}" % name):
+				continue
+			if not SCALED_FIGURES_ALLOWED.has("%s.%s" % [id, name]):
+				_problem("params.%s" % name,
+					"prints a scaled '%s' as though it were a fact about the colony" % source.get("key", ""))
+
+
 ## 🔒 **Terms that work while another building does name a real one** (#438).
 ## A misspelt master would never be lit, and the terms would quietly never
 ## apply — the armoury would stop making guns for good and nothing would say so.
