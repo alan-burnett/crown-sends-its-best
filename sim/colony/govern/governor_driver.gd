@@ -28,9 +28,12 @@ const EVENT_INTENT_SET: StringName = &"governor_intent"
 var colony: Colony = null
 var map: WorldMap = null
 
-## Town id -> the governor who speaks for it, as a `DeliberationActor`. Supplied
-## by the run, because loyalty lives in the correspondence layer and a `Contact`
-## may not be reached from `sim/`.
+## Governor id -> the man, as a `DeliberationActor`. Supplied by the run,
+## because loyalty lives in the correspondence layer and a `Contact` may not be
+## reached from `sim/`.
+##
+## 🔒 **The run's live roster** (#446), so a governor elected mid-run is here
+## from the month he takes office. Read by id, never walked.
 var actors: Dictionary = {}
 
 ## Supplied by the territory driver, which runs in phase 3.

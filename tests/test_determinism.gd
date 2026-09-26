@@ -163,6 +163,54 @@ func test_a_reloaded_run_carries_on_identically() -> void:
 	assert_eq(restored.state_hash(), original.state_hash())
 
 
+## A town founded mid-run, with the governor elected for it, as an expedition or
+## a Crown founding puts one in: after the machine was built.
+func _found_a_town(run: RunState) -> Town:
+	var first: Town = run.colony.in_order()[0]
+	var town := Town.new(&"second_town", "Second", first.at + Vector2i(6, 0))
+	town.workers = 8_000
+	run.colony.add(town)
+	run.add_contact(Governor.generate(town, run.streams))
+	return town
+
+
+func _turns(machine: TurnMachine, run: RunState, turns: int) -> void:
+	for turn in turns:
+		machine.begin_turn()
+		for inbound in run.inbox:
+			inbound.status = InboundLetter.SET_ASIDE
+		machine.send_post()
+
+
+func test_a_run_with_a_founding_plays_the_same_whether_or_not_it_was_reloaded() -> void:
+	# 🔒 #446. The governor of a town founded mid-run was never given to the
+	# machine built at the start, so his town never deliberated — until a reload
+	# built a new machine, and the same run then played differently.
+	var straight := RunState.new_run(SEED)
+	ContactRoster.load_into(straight, content)
+	var machine := TurnMachine.new(straight)
+	machine.use_content(content)
+	machine.saves_on_send = false
+	_turns(machine, straight, 2)
+	var founded := _found_a_town(straight)
+	_turns(machine, straight, 3)
+	assert_false(String(founded.intent).is_empty(), "the governor of a town founded mid-run never deliberated")
+
+	var reloaded := RunState.new_run(SEED)
+	ContactRoster.load_into(reloaded, content)
+	var first_machine := TurnMachine.new(reloaded)
+	first_machine.use_content(content)
+	first_machine.saves_on_send = false
+	_turns(first_machine, reloaded, 2)
+	_found_a_town(reloaded)
+	SaveGame.save(reloaded, PATH)
+	var restored: RunState = SaveGame.load_run(PATH)["run"]
+	_continue(restored, 3)
+
+	assert_eq(restored.state_hash(), straight.state_hash(),
+		"the same run played differently for having been saved and reloaded after a founding")
+
+
 func _continue(run: RunState, turns: int) -> void:
 	var machine := TurnMachine.new(run)
 	machine.use_content(content)

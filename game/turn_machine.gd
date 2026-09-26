@@ -196,10 +196,11 @@ func _init(p_run: RunState) -> void:
 	# A governor weighs how much of his own ground is somebody else's, and cannot
 	# intend to drive off people he has never met (#204).
 	governors.natives = run.tribes
-	for id in run.contact_ids():
-		var contact := run.contact(StringName(id))
-		if contact != null and contact.role == Governor.ROLE:
-			governors.actors[String(id)] = contact
+	# 🔒 **The live roster, not a copy taken now** (#446). A governor elected
+	# with an expedition or put in by a Crown founding joins the contacts later;
+	# a copy never saw him, so his town never deliberated — until a reload built
+	# a new machine, and the same run then played differently.
+	governors.actors = run.contacts
 
 	# Phase 6. Standing reacts to the month's duty and the month's promises, and
 	# those land in phases 4 and 5 — so it judges after both (#67).
