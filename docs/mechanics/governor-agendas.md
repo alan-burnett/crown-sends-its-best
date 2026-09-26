@@ -123,9 +123,28 @@ a menu would be taken for ever.
 
 ### How long an objective is held
 
-**Until it is complete, or the governor's intent changes.** Nothing else ends
-it. A town that goes broke keeps the objective and makes no progress — too bad.
-There is no stall detection and no crisis override.
+**Until it is complete, the governor's intent changes, or it stalls.** There is
+no crisis override.
+
+#### A building or an improvement stalls
+
+Author's ruling (#467), as SPEC §11.3 asks. **A town that has committed no
+resources to a building or improvement objective for three months running has
+stalled.** It then:
+
+1. **abandons the objective**, and every resource already committed to it
+   returns to the town's stockpile;
+2. **walks its intent's menu again** for a new objective;
+3. **passes over the abandoned objective for 12 months** (a placeholder), so the
+   walk does not take straight back what the town has just shown it cannot
+   build. After that it may be taken again.
+
+The check runs every month and is deterministic.
+
+**Expeditions and companies never stall.** They can leave with no stores at all,
+taking only their share of the town's people, so there is nothing for them to
+wait on. *No building* commits nothing and never completes, so it cannot stall
+either.
 
 ## 4. The shape of a menu
 

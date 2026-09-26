@@ -359,6 +359,9 @@ Guns are the right thing to gate: they arm the militia, they are what SPEC §10.
 says the natives covet most, and a colony that could arm itself with no
 investment would have skipped a decision that ought to cost something.
 
+**A gunsmith whose machines have broken stops the town making guns at all**, the
+armoury included, for six months (`institutional-contacts.md` §3, #438).
+
 ## 7. Amusement
 
 **Amusement is pleasure without trade.** It feeds quality of life through the

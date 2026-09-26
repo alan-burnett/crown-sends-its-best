@@ -242,6 +242,24 @@ Unlike education, though, **the player can check**. The stockpile is a number th
 letters quote, so his alarm is verifiable and therefore learnable, which makes him
 the easiest of the four to discount correctly.
 
+#### His machines break
+
+Author's ruling (#438). **The quartermaster writes that the gunsmith's machines
+have broken**, and asks the PC for **50 gold** (a placeholder) to mend them, or
+the town must stop making guns.
+
+- **When.** In a month when his town's quality of life is **below 0.4**, if it
+  has not happened to him in the past year, he rolls from his own stream: a
+  **20% chance** that it happens.
+- **If the PC agrees**, it is a promise of gold to the town (`town-economy.md`
+  §4). The Crown pays it into the town's purse, and the machines are mended.
+- **If not** (refused, ignored, or promised and then unpaid because the Crown
+  is refusing payments), **the gunsmith is dark for six months.** The town may
+  not pay its upkeep, and it is disabled exactly as if the town were too poor to
+  (`buildings.md` §3). **While it is dark the town makes no guns at all, the
+  armoury's included.**
+- After six months it lights again as soon as the town can pay its upkeep.
+
 **The armoury** extends him.
 
 ### The journalist

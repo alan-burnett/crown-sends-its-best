@@ -269,12 +269,14 @@ mechanism, not two.
 
 ## 7. Reconsideration
 
-**An objective is held until it is complete, or the governor's intent changes.**
-Nothing else ends it (`governor-agendas.md` §3). Author's ruling.
+**An objective is held until it is complete, the governor's intent changes, or
+it stalls** (`governor-agendas.md` §3).
 
-- **No stall detection.** Buildings do not compete with tile yields, and needs
-  are paid before the objective, so a town that goes broke keeps its objective
-  and makes no progress — too bad. It resumes when it can afford to.
+- **A building or improvement stalls** after three months with nothing committed
+  to it. The town abandons it, takes back what it had committed, chooses again,
+  and passes the abandoned one over for a year (Author's ruling, #467).
+  Buildings still do not compete with tile yields, and needs are still paid
+  before the objective.
 - **No crisis override.** There is no crisis intent any more: a starving town
   turns its tiles to food through the needs tier, which outranks any objective.
 - ***No building* never holds.** It never completes, so the menu is walked again
