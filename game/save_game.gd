@@ -4,9 +4,10 @@ extends RefCounted
 ## Ironman saving. **One save per run, and no loading of earlier states**
 ## (SPEC §16.2).
 ##
-## The game saves automatically when the post is sent, and the player may quit at
-## any time and continue later with the turn in progress — including its outgoing
-## post — intact.
+## The game saves automatically when a run begins, as the desk changes, when the
+## window closes and when the post is sent (#464, `TurnMachine.save_now`), so the
+## player may quit at any time and continue later with the turn in progress —
+## including its outgoing post — intact.
 ##
 ## **There is no code path here that loads any state other than the current
 ## one.** No slots, no timestamps, no "load previous". A corrupt save is a lost

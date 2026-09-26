@@ -248,6 +248,11 @@ func refresh() -> void:
 			+ "made of you is not yours to read."
 		) % [run.world.year_index()]
 
+	# 🔒 **The turn in progress is kept** (#464, SPEC §16.2). The desk is
+	# redrawn after everything the player does to it — a letter answered or set
+	# aside, one composed, the desk first opened — so it is saved as it changes.
+	machine.save_now()
+
 
 ## **Handled letters are visibly distinct from unread**, by paper colour and by
 ## what the line says, not by colour alone.

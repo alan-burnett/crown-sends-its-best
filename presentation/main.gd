@@ -32,6 +32,15 @@ var run: RunState = null
 var machine: TurnMachine = null
 
 
+## 🔒 **Quitting keeps the turn in progress** (#464, SPEC §16.2): the window
+## closing, or a phone putting the game away, saves the run as it stands.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED \
+			or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
+		if machine != null:
+			machine.save_now()
+
+
 func _ready() -> void:
 	if DisplayServer.get_name() != "headless":
 		get_window().size = PORTRAIT_SIZE

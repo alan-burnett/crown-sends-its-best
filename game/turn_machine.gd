@@ -588,6 +588,20 @@ func retire() -> bool:
 	return true
 
 
+## 🔒 **The turn in progress is kept** (#464, SPEC §16.2): *the player can quit
+## at any time and continue later, and a turn in progress, including its
+## outgoing post, is kept.* The one save, overwritten: when a new run's desk
+## opens, whenever the desk changes, and when the window closes, as well as on
+## sending. Only sending used to save, so a new run was lost if the player quit
+## before its first post, and a half-written post was lost on any quit.
+##
+## Nothing for an ended run, whose save is already gone.
+func save_now() -> bool:
+	if not saves_on_send or is_over():
+		return false
+	return SaveGame.save(run, save_path)
+
+
 ## Write a finished run into the hall of records (#354, SPEC §14.3).
 ##
 ## 🔒 **Not part of the save**, and deliberately after it: `SaveGame` holds the
