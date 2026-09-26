@@ -118,9 +118,15 @@ func _compose_the_page() -> void:
 	_hold(_body("The court reckons you at %s. It reckons everybody at something, "
 		% [_pounds(float(facts.get("score", 0.0)))]
 		+ "and it has never found a second way of doing it."))
-	_hold(_body("%s of that is what you netted them. %s of it is what it cost them "
-		% [_pounds(float(facts.get("net_gold", 0.0))), _pounds(float(facts.get("optics_debt", 0.0)))]
-		+ "to be embarrassed by you."))
+	# 🔒 **Every term, so the parts sum to the figure** (#463, `prestige.md` §2):
+	# gold, plus what patrons said at court, less the embarrassment.
+	var patrons := float(facts.get("patron_credit", 0.0)) + float(facts.get("patron_regard", 0.0))
+	var said := "%s is what your patrons said of you at court" % _pounds(patrons) if patrons >= 0.0 \
+		else "your patrons' talk at court took %s off it" % _pounds(-patrons)
+	_hold(_body("%s of that is what you netted them, and %s. "
+		% [_pounds(float(facts.get("net_gold", 0.0))), said]
+		+ "Less %s, which is what it cost them to be embarrassed by you."
+		% [_pounds(float(facts.get("optics_debt", 0.0)))]))
 	_hold(DeskTheme.spacer())
 
 	_hold(_heading("And you"))

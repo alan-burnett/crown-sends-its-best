@@ -118,6 +118,12 @@ static func of(log: EventLog) -> Ledger:
 					continue
 				ledger._add(event.month, OUT, float(event.payload.get("terms", {}).get("amount", 0.0)),
 					"honoured to %s" % String(event.payload.get("to", "a contact")))
+			PolicyBook.EVENT_BILLED:
+				# 🔒 **Every Crown-side transaction** (#463, SPEC §10.4): the monthly
+				# charge on a policy the PC is funding. `CrownAccounts` counted it and
+				# this sheet did not, so the rows fell short of the total above them.
+				ledger._add(event.month, OUT, float(event.payload.get("crown_paid", 0.0)),
+					"the charge on %s" % String(event.payload.get("effect", "a policy")).replace("_", " "))
 			GoldGiftExecutor.EVENT_GIVEN:
 				# **A patron's gold, shown where the Crown's money is** (#443).
 				ledger._add(event.month, IN, float(event.payload.get("amount", 0.0)),

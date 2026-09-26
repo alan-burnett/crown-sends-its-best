@@ -51,6 +51,12 @@ var score: float = 0.0
 var net_gold: float = 0.0
 var optics_debt: float = 0.0
 
+## 🔒 **Every term of the score** (#463, `prestige.md` §2): what patrons said of
+## the PC at court, deed by deed and in their regard. The summary states the
+## parts, and they must sum to the score it states.
+var patron_credit: float = 0.0
+var patron_regard: float = 0.0
+
 ## 🔒 **Which fail condition it was** (#267, `endings.md` §1). Both ways of
 ## losing are `FAILED` and cost the same final optics debt — the court is equally
 ## embarrassed either way — so this is what the summary and the epitaph read to
@@ -82,6 +88,8 @@ static func end(reason_for: StringName, log: EventLog, month_now: int) -> RunEnd
 	ending.score = float(parts["total"])
 	ending.net_gold = float(parts["net_gold"])
 	ending.optics_debt = float(parts["optics_debt"])
+	ending.patron_credit = float(parts["patron_credit"])
+	ending.patron_regard = float(parts["patron_regard"])
 
 	# 🔒 **No figure on the payload.** SPEC §14.1 keeps prestige off the player's
 	# screens, and that does not stop being true because the run is over — #78's
@@ -103,6 +111,8 @@ func to_dict() -> Dictionary:
 		"score": score,
 		"net_gold": net_gold,
 		"optics_debt": optics_debt,
+		"patron_credit": patron_credit,
+		"patron_regard": patron_regard,
 		"how": String(how),
 	}
 
@@ -114,5 +124,7 @@ static func from_dict(data: Dictionary) -> RunEnding:
 	out.score = float(data.get("score", 0.0))
 	out.net_gold = float(data.get("net_gold", 0.0))
 	out.optics_debt = float(data.get("optics_debt", 0.0))
+	out.patron_credit = float(data.get("patron_credit", 0.0))
+	out.patron_regard = float(data.get("patron_regard", 0.0))
 	out.how = StringName(data.get("how", ""))
 	return out

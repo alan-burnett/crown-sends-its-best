@@ -83,6 +83,9 @@ static func of(run: RunState) -> Dictionary:
 		out["score"] = run.ending.score
 		out["net_gold"] = run.ending.net_gold
 		out["optics_debt"] = run.ending.optics_debt
+		# Every term of it (#463), so the parts the summary states sum to it.
+		out["patron_credit"] = run.ending.patron_credit
+		out["patron_regard"] = run.ending.patron_regard
 	return out
 
 
