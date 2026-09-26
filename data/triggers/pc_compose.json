@@ -35,11 +35,36 @@
   {
     "id": "trigger.pc.state_a_preference",
     "letter": "pc.state_a_preference",
-    "urgency": 0.5,
-    "cooldown": 1,
+    "offers_composition": true,
+    "note": "Issue 454, founding-towns.md section 5. The PC's instrument for steering a founding: composed to the governor his travelling party elected, while it is on the march. It was a director trigger for a letter with no sender, so nobody could ever send it, and its condition asked whether the town was preparing for rebellion.",
     "conditions": [
       {
-        "town_is_preparing_to_leave": {}
+        "his_expedition_is_travelling": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.pc.demand_the_stores",
+    "letter": "pc.demand_the_stores",
+    "offers_composition": true,
+    "note": "Issue 454: the letter existed and no trigger offered it.",
+    "conditions": []
+  },
+  {
+    "id": "trigger.pc.order_the_quota",
+    "letter": "pc.order_the_quota",
+    "offers_composition": true,
+    "note": "Issue 454: the letter existed and no trigger offered it.",
+    "conditions": []
+  },
+  {
+    "id": "trigger.pc.urge_a_course",
+    "letter": "pc.urge_a_course",
+    "offers_composition": true,
+    "note": "Issue 454, SPEC 9.4 'ordering construction': by 8.5 an urging of intent, composed rather than only answered. Any governor with a town to direct.",
+    "conditions": [
+      {
+        "he_governs_a_town": {}
       }
     ]
   },

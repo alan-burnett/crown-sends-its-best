@@ -1,0 +1,42 @@
+{
+  "id": "pc.urge_a_course",
+  "type": "request",
+  "purpose": "Tell a governor what his town should be about",
+  "note": "Issue 454, SPEC 9.4 'ordering construction' and 8.5: the PC never names a project; he argues for a goal, and the governor's menu chooses what serves it. Composed rather than only answered, so the PC can make the argument unprompted. The same four courses the governors' reports offer, and the same effect. Education is not among them: it is the Provost's to urge. Placeholder prose: the Author writes the real lines.",
+  "to_roles": ["governor"],
+  "params": { "to": "contact" },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        { "tone": "dutiful",   "text": "on a matter of the town's direction" },
+        { "tone": "pleased",   "text": "with every confidence in what you have made of it" },
+        { "tone": "annoyed",   "text": "because the town has drifted long enough" },
+        { "tone": "desperate", "text": "because the colony cannot afford a town that does nothing in particular" }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What the town should be about",
+        "options": [
+          { "id": "profit", "label": "attend to the colony's profit",
+            "text": "Attend to the colony's profit. That is what you are there for, and what the Crown will ask me about.",
+            "effect": { "urge_intent": { "to": "{to}", "intent": "get_rich" } } },
+          { "id": "growth", "label": "see that the town grows",
+            "text": "See that the town grows: people, and the comforts that keep them.",
+            "effect": { "urge_intent": { "to": "{to}", "intent": "go_tall" } } },
+          { "id": "defence", "label": "see to your defences",
+            "text": "See to your defences. I had rather pay for walls than for what comes over them.",
+            "effect": { "urge_intent": { "to": "{to}", "intent": "military" } } },
+          { "id": "settle", "label": "plant a new settlement",
+            "text": "Plant a new settlement. The land is there, and somebody will have it.",
+            "effect": { "urge_intent": { "to": "{to}", "intent": "go_wide" } } }
+        ]
+      }
+    ],
+    "closing": [
+      { "text": "Your servant," }
+    ]
+  }
+}

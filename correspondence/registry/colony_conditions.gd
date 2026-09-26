@@ -135,6 +135,11 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
 	)
+	# Who a composed letter may go to (#454).
+	ContentRegistry.register_condition(
+		"his_expedition_is_travelling", {}, ColonyConditions.his_expedition_is_travelling
+	)
+	ContentRegistry.register_condition("he_governs_a_town", {}, ColonyConditions.he_governs_a_town)
 	# 🔒 **A duke asks tribute once he himself has arrived, and only in the bands
 	# that ask** (#458, `rival-pressure.md` §3, §6).
 	ContentRegistry.register_condition("he_has_arrived", {}, ColonyConditions.he_has_arrived)
@@ -1408,6 +1413,24 @@ static func bargain_arms_them(context: LetterContext) -> bool:
 ## first growth of *any* dimension — so a run whose first draw was `size` had a
 ## foreign power writing for tribute as its reward for the Steward asking for
 ## slightly more gold.
+## 🔒 **Whether he leads a party on the march** (#454, `founding-towns.md` §5):
+## the governor it elected, while it is still travelling and not turning back.
+## The window in which a preference about the site can still reach him.
+static func his_expedition_is_travelling(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null:
+		return false
+	for entry in context.parties:
+		var party: ExpeditionParty = entry
+		if party.governor == context.sender.id and not party.turning_back and not party.is_empty():
+			return true
+	return false
+
+
+## Whether he has a town to direct (#454). A governor still on the march does not.
+static func he_governs_a_town(_args: Dictionary, context: LetterContext) -> bool:
+	return context != null and context.town != null
+
+
 static func a_rival_has_a_hand_out(_args: Dictionary, context: LetterContext) -> bool:
 	return DemandSchedule.rivals_are_asking(context.demands)
 

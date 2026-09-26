@@ -136,6 +136,7 @@ func _context_for(run: RunState, contact: Contact) -> LetterContext:
 	context.prestige = run.prestige
 	context.colony = run.colony
 	context.contacts = run.contacts
+	context.parties = run.parties
 	context.natives = run.tribes
 	context.demands = run.demands
 	context.demand_book = run.demand_book
