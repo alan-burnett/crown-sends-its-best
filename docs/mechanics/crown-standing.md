@@ -36,6 +36,11 @@ monthly_net    this month's revenue minus this month's spending
 ```
 
 Revenue is tax income from colony trade (§10.2, both buying and selling).
+
+**And one term that is not money: goodwill.** Favours done for people high up
+bank goodwill, which is added on top of the standing these produce, capped at
+100, and never decays (`crown-demands.md` §10, *Goodwill*; #399). It never
+touches `net_position`.
 Spending is what the Crown pays to honor the PC's promises (§9.5), gold
 promised to a town included (`town-economy.md` §4).
 

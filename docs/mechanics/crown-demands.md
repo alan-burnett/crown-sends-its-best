@@ -468,6 +468,68 @@ and a demand asked for grain, the demand must be the same demand.
 Otherwise the draw would ease off on its own the moment prices moved, which is
 exactly what §10's lock forbids, and it would do it invisibly.
 
+### Stated interactions: the five reliefs (#399)
+
+Author's ruling. **Five hooks a letter can pull**, each loosening the Squeeze in
+its own way. What pulls them (which contact, when, and at what cost) is content,
+written in #368. Every figure below is a placeholder.
+
+None of them is the draw easing off on its own. Each is a contact's ability or a
+favour earned, which is what this section says relief must be.
+
+#### 1. A targeted break
+
+**One contact who regularly asks the PC for something gets a single large lift in
+regard (+20), and skips his next ask.** The asks are a Crown officer's demands
+(§4) and a patron's asks (`patrons.md` §4). His next one is not issued, and he
+may write to say his needs have been met.
+
+#### 2. Crown war relief
+
+**For 12 months, the desperation axis (§6) reads one level lower**: refusing a
+Crown demand costs less standing and loyalty, and demands arrive less
+desperately. It is pulled by the PC's dealings with the dukes.
+
+🔒 **It never touches the war.** `crown_war_intensity` stays nobody's to
+influence (`the-marshal.md` §8). This eases what the Crown *asks of the colony*
+while the war goes on as before, and the war's prices with it.
+
+#### 3. Pulling back a hand
+
+**A Crown officer the Squeeze turned needy (dimension 4's first source) stops
+asking.** He has had his windfall, or his scolding, and the demand kind that draw
+gave him is withdrawn. A later dimension-4 draw may turn him needy again. Patrons
+and dukes are never pulled back this way.
+
+This is the one relief that retires a source, and it is allowed because a contact
+does it, not the draw.
+
+#### 4. Goodwill
+
+**A favour done for someone high up, at no cost in gold, banks goodwill (+5)
+toward Crown Standing, for ever.** Goodwill is added on top of the financial
+standing (`crown-standing.md` §2), capped at 100, and never decays: a PC with 15
+goodwill never reads below 15, however the books go. It moves the bands, the
+warnings and the refusal of payments like any other standing.
+
+**It is never gold.** It touches neither `net_position` nor prestige.
+
+#### 5. Tax forgiveness
+
+**A wealthy Crown contact, a patron or the Steward, starts paying part of the
+colony's duty on one resource himself: 5 points of the rate, for ever.** It is
+not a policy, has no monthly charge, and cannot be cancelled.
+
+With rum taxed at 12% and 5 points forgiven:
+
+| | Sees |
+| :--- | :--- |
+| **The Crown**: its income, the Ledger, standing, prestige, the Steward | **12%** |
+| **The colony**: what a town pays, its purchasing power, its quality of life, its rebel sentiment, its protests | **7%** |
+
+The gap is his; nothing tracks his purse. **Forgivenesses on one resource
+stack**, and the colony never sees less than 0%.
+
 ### One thing the harness should watch
 
 `buildings.md` §11 records that towns could once not accumulate iron at all. A
