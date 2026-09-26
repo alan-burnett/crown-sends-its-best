@@ -182,12 +182,42 @@ func options_for(index: int, context: LetterContext) -> Array[Dictionary]:
 ## house* — cannot be an always-present answer to a tribute demand, because
 ## without that patron there is nobody to send the duke to.
 static func may_take(option: Dictionary, context: LetterContext) -> bool:
+	if _promises_no_gold(option, context):
+		return false
 	for entry in option.get(LetterSchema.KEY_CONDITIONS, []):
 		for condition_id in entry:
 			if not ContentRegistry.test_condition(
 					String(condition_id), entry[condition_id], context):
 				return false
 	return true
+
+
+## 🔒 **A promise of no gold is never offered** (#460). An option whose effect
+## promises gold, a tribute included, with an amount that comes to nought or less
+## is a kindness that gives nothing. Read against the letter's own params, since
+## the amount is usually `{amount}`.
+static func _promises_no_gold(option: Dictionary, context: LetterContext) -> bool:
+	var effect: Variant = option.get(LetterSchema.KEY_EFFECT, {})
+	if typeof(effect) != TYPE_DICTIONARY:
+		return false
+	for effect_id in effect:
+		var kind := ContentRegistry.order_kind_of(String(effect_id))
+		if kind != M1Registrations.ORDER_PROMISE_GOLD and kind != M1Registrations.ORDER_PAY_TRIBUTE:
+			continue
+		var args: Variant = effect[effect_id]
+		if typeof(args) != TYPE_DICTIONARY or not (args as Dictionary).has("amount"):
+			continue
+		var amount: Variant = args["amount"]
+		if typeof(amount) == TYPE_STRING and String(amount).begins_with("{") and String(amount).ends_with("}"):
+			if context == null:
+				continue
+			var name := String(amount).substr(1, String(amount).length() - 2)
+			if not context.params.has(name):
+				continue
+			amount = context.params[name]
+		if (typeof(amount) == TYPE_INT or typeof(amount) == TYPE_FLOAT) and float(amount) <= 0.0:
+			return true
+	return false
 
 
 ## Take an option.

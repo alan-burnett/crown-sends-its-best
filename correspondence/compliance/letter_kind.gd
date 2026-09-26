@@ -52,6 +52,7 @@ const ANSWERS: Array[StringName] = [
 	M1Registrations.ORDER_END_POLICY,
 	M1Registrations.ORDER_REFUSE,
 	M1Registrations.ORDER_GRANT_FAVOR,
+	M1Registrations.ORDER_APOLOGISE,
 	M1Registrations.ORDER_PAY_TRIBUTE,
 	M1Registrations.ORDER_FUND_FOUNDING,
 	M1Registrations.ORDER_ADJUST_LOYALTY,

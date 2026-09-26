@@ -26,8 +26,10 @@ static func to_int(value: Variant, context: String = "value") -> int:
 			return value
 		TYPE_FLOAT:
 			if not is_equal_approx(value, roundf(value)):
+				# **Rounded, never dropped** (#460). It is still a defect, and says
+				# so; but a fractional figure read as nought put a demand for no gold
+				# on the desk, which is worse than a figure a fraction out.
 				push_error("%s: expected a whole number, got %s" % [context, value])
-				return 0
 			return int(roundf(value))
 		TYPE_STRING:
 			if value.is_valid_int():

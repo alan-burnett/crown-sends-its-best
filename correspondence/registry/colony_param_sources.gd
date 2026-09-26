@@ -202,8 +202,8 @@ static func crown_demand(args: Dictionary, context: LetterContext) -> Variant:
 		return 0
 	match String(args.get("field", "")):
 		"amount":
-			return int(roundf(book.amount)) if book.kind == DemandBook.KIND_RESOURCE \
-				else book.amount
+			# Whole, gold or goods (#460).
+			return int(roundf(book.amount))
 		"months":
 			return book.term_months
 		"resource":
@@ -767,10 +767,14 @@ static func bargain(args: Dictionary, context: LetterContext) -> Variant:
 ## colonial town — only the Crown trades with these colonies — so there is no
 ## resource to name and no conversion at the end of this. The figure was always
 ## gold; it used to be divided by a price on the way out.
+##
+## 🔒 **Whole gold, rounded here** (#460). The director coerces a `gold` param to
+## an integer and drops a fraction to nought, so a figure left fractional was a
+## demand for nothing at most sizes of the Squeeze.
 static func tribute_amount(_args: Dictionary, context: LetterContext) -> Variant:
 	var band := RivalDuke.band_of(context.loyalty())
-	return maxf(1.0, DemandSchedule.gold_target(context.demands)
-		* RivalDuke.tribute_multiple(band))
+	return maxi(1, int(roundf(DemandSchedule.gold_target(context.demands)
+		* RivalDuke.tribute_multiple(band))))
 
 
 ## 🔒 **What a patron asks for when a matter at home has gone against him**
@@ -827,8 +831,11 @@ static func best_selling_resource(args: Dictionary, context: LetterContext) -> V
 	return best if not best.is_empty() else fallback
 
 
+## 🔒 **Whole gold, rounded here** (#460): `gold_target × 0.55` is fractional at
+## every size of the Squeeze but one in four, and the director's coercion
+## dropped a fraction to nought, so a patron asked for 0 gold.
 static func patron_ask(_args: Dictionary, context: LetterContext) -> Variant:
-	return maxf(1.0, DemandSchedule.gold_target(context.demands) * PATRON_ASK_SHARE)
+	return maxi(1, int(roundf(DemandSchedule.gold_target(context.demands) * PATRON_ASK_SHARE)))
 
 
 ## 🔒 **What the letter this one travels with said** (#404): one of its params,

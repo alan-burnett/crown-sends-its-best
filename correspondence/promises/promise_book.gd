@@ -44,6 +44,10 @@ func make(promise: Promise, contact: Contact, log: EventLog, month: int) -> Prom
 
 ## Build a promise from an Order, or null if that Order promises nothing.
 static func from_order(order: Order, month: int) -> Promise:
+	# 🔒 **A promise of no gold is no promise** (#460): nothing to keep, and no
+	# gratitude when it is kept.
+	if Compliance.is_an_empty_promise(order):
+		return null
 	match order.kind:
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PAY_TRIBUTE:
 			# 🔒 **Tribute is a gold promise like any other** (SPEC §8.4, v3.0).
@@ -94,10 +98,10 @@ static func from_order(order: Order, month: int) -> Promise:
 			}, month, month + int(order.get_param("months", 0)))
 			undertaking.payer = Promise.PAYER_COLONY
 			return undertaking
-		M1Registrations.ORDER_GRANT_FAVOR:
-			return Promise.new(order.addressed_to, &"favor", {
-				"favor": order.get_param("favor", ""),
-			}, month, 0)
+	# 🔒 **A favour is one deed, not a promise as well** (#459). It has no effect
+	# in the world, so there is nothing to keep: it was granted at compliance,
+	# and a promise kept the month after banked it a second time. A Crown that
+	# closed its purse even broke it, though it cost nothing.
 	return null
 
 

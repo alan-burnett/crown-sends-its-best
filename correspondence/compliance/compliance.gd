@@ -202,10 +202,13 @@ static func resolve(
 	# (SPEC §8.5). Paying generously for troops costs nothing; paying less does.
 	_settle_loyalty(order, contact, outcome)
 	# **And he remembers it**, with enough to describe it later (#127). The count
-	# says how often; this says what.
-	contact.relationship.remember(
-		_deed_of(order), state.month, _size_of(order), _about(order)
-	)
+	# says how often; this says what. 🔒 **A promise of no gold is nothing to
+	# remember** (#460), and nothing the court hears of either.
+	var empty := is_only_words(order)
+	if not empty:
+		contact.relationship.remember(
+			_deed_of(order), state.month, _size_of(order), _about(order)
+		)
 	# 🔒 **And what he did for the PC, if it cost him** (#397).
 	_remember_his_favour(order, contact, outcome, state.month)
 	# **And the court hears of it, if he is the sort the court listens to**
@@ -216,7 +219,7 @@ static func resolve(
 	# 🔒 **Except an undertaking to ship** (#441, `patrons.md` §4): the goods
 	# arriving are the deed, so `PromiseBook` banks it when the promise is kept
 	# or broken, and a promise alone is nothing the court has seen.
-	if order.kind != M1Registrations.ORDER_PROMISE_SHIPMENT:
+	if order.kind != M1Registrations.ORDER_PROMISE_SHIPMENT and not empty:
 		PatronCredit.bank(contact, _deed_of(order), log, state.month)
 
 	var intent: Intent = null
@@ -477,6 +480,7 @@ static func _priced(order: Order) -> Variant:
 			# because a preference is an urging about a place.
 			return 0.0
 		M1Registrations.ORDER_ADJUST_LOYALTY, M1Registrations.ORDER_GRANT_FAVOR, \
+		M1Registrations.ORDER_APOLOGISE, \
 		M1Registrations.ORDER_FUND_FOUNDING, M1Registrations.ORDER_PAY_TRIBUTE, \
 		M1Registrations.ORDER_DEFLECT_TRIBUTE:
 			# Answering letters (#261). He never deliberates over these, so the
@@ -582,7 +586,31 @@ static func payment_ratio(order: Order) -> float:
 ## What the PC did — asked for something costly, paid for it or did not, granted
 ## something — is what registers. Whether the contact then complied is his own
 ## business, not a favour the PC did him.
+## 🔒 **A promise of no gold gives nothing** (#460): a gold promise or tribute of
+## nought or less. It earns no gratitude, no memory and no promise to keep, and
+## the reply wizard never offers one.
+static func is_an_empty_promise(order: Order) -> bool:
+	if order.kind != M1Registrations.ORDER_PROMISE_GOLD and order.kind != M1Registrations.ORDER_PAY_TRIBUTE:
+		return false
+	return float(order.get_param("amount", 0.0)) <= 0.0
+
+
+## 🔒 **An order that gives nothing but words** (#459, #460): an apology, or a
+## promise of no gold. It moves a man only as the tone of the letter does: no
+## deed, no memory, and nothing the court hears of.
+##
+## *Deeds outweigh words* (SPEC §8.5): owning a broken promise must never leave
+## him better disposed than before it was broken, and a deed of gratitude for an
+## apology did.
+static func is_only_words(order: Order) -> bool:
+	return order.kind == M1Registrations.ORDER_APOLOGISE or is_an_empty_promise(order)
+
+
 static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName) -> void:
+	if is_only_words(order):
+		if not order.tone.is_empty():
+			contact.relationship.record_tone(order.tone)
+		return
 	match order.kind:
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
 		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \

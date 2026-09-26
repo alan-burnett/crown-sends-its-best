@@ -432,6 +432,8 @@ static func order_effects() -> Dictionary:
 			{"target_from_data": "key", "set_from_data": "months_left"},
 		String(M1Registrations.ORDER_SET_POLICY): {"target": ""},
 		String(M1Registrations.ORDER_GRANT_FAVOR): {"target": ""},
+		# A word, and nothing in the world moves (#459).
+		String(M1Registrations.ORDER_APOLOGISE): {"target": ""},
 		String(M1Registrations.ORDER_ADJUST_LOYALTY): {"target": ""},
 		String(M1Registrations.ORDER_REFUSE): {"target": ""},
 		# Declining moves no world value. What it costs is Crown standing, and the

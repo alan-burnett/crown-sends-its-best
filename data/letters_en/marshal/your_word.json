@@ -4,7 +4,7 @@
   "type": "warning",
   "skippable": true,
   "speaks_to": 80,
-  "note": "Issue 391, contacts.md section 7: the angrier of the two sour accusations - being promised is being lied to. He reaches for the last promise the PC made him that was broken, whoever broke it, and remembers_a_broken_word gates it so the letter only fires when there is a broken word to name. Kept apart from marshal.you_refused_me on purpose: a man told no and a man told yes and then let down write different letters. The Marshal because he is promised more than anyone - gold, supplies and shipments against the Crown's demands - and no governor is promised anything yet. Prose is placeholder; the final wording and every other sender belong to #368's authoring pass.",
+  "note": "Issue 391, contacts.md section 7: the angrier of the two sour accusations - being promised is being lied to. He reaches for the last promise the PC made him that was broken, whoever broke it, and remembers_a_broken_word gates it so the letter only fires when there is a broken word to name. Kept apart from marshal.you_refused_me on purpose: a man told no and a man told yes and then let down write different letters. The Marshal because he is promised more than anyone - gold, supplies and shipments against the Crown's demands - and no governor is promised anything yet. Prose is placeholder; the final wording and every other sender belong to #368's authoring pass. #459: owning it is an apology, which is a word and not a deed (SPEC section 8.5) - it moves him as the tone of the letter does, and never outweighs the broken promise it answers.",
   "params": {
     "promised_amount": "integer",
     "promised": "resource",
@@ -35,8 +35,8 @@
           {
             "id": "own_it",
             "label": "own it, and ask his pardon",
-            "text": "You are right, and I do not pretend otherwise. Take this as the least I owe you.",
-            "effect": { "grant_favor": { "to": "marshal", "favor": "an apology" } }
+            "text": "You are right, and I do not pretend otherwise. I ask your pardon, which is the least I owe you.",
+            "effect": { "apologise": { "to": "marshal" } }
           },
           {
             "id": "deflect",

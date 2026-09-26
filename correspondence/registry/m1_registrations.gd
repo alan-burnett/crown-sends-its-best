@@ -25,6 +25,10 @@ const ORDER_FUND_POLICY: StringName = &"fund_policy"
 const ORDER_END_POLICY: StringName = &"end_policy"
 const ORDER_REFUSE: StringName = &"refuse"
 const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
+## 🔒 **An apology is a word, not a deed** (#459, SPEC §8.5): it moves a man as
+## the tone of a letter does, and never more than the broken promise it answers
+## cost him.
+const ORDER_APOLOGISE: StringName = &"apologise"
 const ORDER_SET_POLICY: StringName = &"set_policy"
 
 ## **Paying a foreigner to leave you alone** (#69, `crown-demands.md` §4).
@@ -359,6 +363,7 @@ static func register_effects() -> void:
 	ContentRegistry.register_effect(
 		"grant_favor", {"to": "contact", "favor": "string"}, ORDER_GRANT_FAVOR
 	)
+	ContentRegistry.register_effect("apologise", {"to": "contact"}, ORDER_APOLOGISE)
 	# **The fourth currency** (#69, `crown-demands.md` §4). A rival bullies the PC
 	# into handing over goods, and **accepting defers the risk of an attack
 	# without ever buying peace**. It costs **prestige** rather than standing —
