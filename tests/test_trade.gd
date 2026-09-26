@@ -238,6 +238,37 @@ func test_exchange_buys_luxuries_when_there_is_money_left() -> void:
 	assert_true(bought > 0.0, "a rich and well-fed town bought no comforts at all")
 
 
+## What a month's shopping laid out on food, and what it carried home.
+func _food_bought(context: ColonyContext) -> Dictionary:
+	var out := {"spent": 0.0, "received": 0.0}
+	for event in context.log.of_type(Trade.EVENT_BOUGHT):
+		if String(event.payload.get("resource", "")) == "food":
+			out["spent"] += float(event.payload["spent"])
+			out["received"] += float(event.payload["quantity"])
+	return out
+
+
+func test_exchange_spends_a_needs_budget_once() -> void:
+	# 🔒 SPEC §10.2 across a whole month, not one purchase (#453): *colonists will
+	# spend the same amount of money, and receive less of the resource*. A town
+	# that went back for what the duty kept from it spent more and got the same.
+	var free_town := _town(6, 50_000.0, {"clothing": 50.0})
+	var free: ColonyContext = _harness(
+		free_town, ColonyMonth.EXCHANGE, ExchangePhase.new(), {TaxRates.BASE_KEY: 0.0})["context"]
+	var taxed_town := _town(6, 50_000.0, {"clothing": 50.0})
+	var taxed: ColonyContext = _harness(
+		taxed_town, ColonyMonth.EXCHANGE, ExchangePhase.new(), {TaxRates.BASE_KEY: 0.5})["context"]
+
+	var without := _food_bought(free)
+	var with_duty := _food_bought(taxed)
+	assert_true(float(with_duty["received"]) > 0.0, "the taxed town bought no food to compare")
+	assert_true(float(with_duty["spent"]) <= float(without["spent"]) * 1.1,
+		"a duty on food made the town spend more on it: %.1f against %.1f"
+			% [float(with_duty["spent"]), float(without["spent"])])
+	assert_true(float(with_duty["received"]) < float(without["received"]) * 0.9,
+		"a duty on food did not leave the town with less of it")
+
+
 func test_exchange_shops_for_the_objective() -> void:
 	var town := _town(6, 5000.0, {"food": 100.0, "clothing": 50.0})
 	town.objective = &"granary"
