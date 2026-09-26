@@ -106,13 +106,19 @@ static func walk(town: Town, intent: StringName, context: ColonyContext) -> Dict
 			continue
 		if is_slot(id):
 			var placed := _place(town, intent, entry, context)
-			if placed.is_empty():
+			if placed.is_empty() or _passed_over(town, placed["id"], context):
 				continue
 			return placed
-		if not building_is_takeable(id, town, context):
+		if _passed_over(town, id, context) or not building_is_takeable(id, town, context):
 			continue
 		return {"id": id, "target": Vector2i(-1, -1)}
 	return {"id": NO_BUILDING, "target": Vector2i(-1, -1)}
+
+
+## 🔒 **What a stall set aside is passed over** (#467): the walk does not take
+## straight back what the town has just shown it cannot build.
+static func _passed_over(town: Town, id: StringName, context: ColonyContext) -> bool:
+	return context != null and town.is_passing_over(id, context.state.month)
 
 
 ## Fill a slot. **An expedition or a company is placed or it is not** (#431,

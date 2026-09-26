@@ -538,7 +538,7 @@ func test_no_building_is_walked_again_and_a_building_is_held() -> void:
 		"a project outlived the intent it stood for")
 
 
-# --- 🔒 Held until complete or the intent changes -------------------------
+# --- 🔒 Held until complete, the intent changes, or it stalls ---------------
 
 func test_a_town_does_not_oscillate() -> void:
 	# A town making progress simply carries on, so months of running produce no
@@ -578,23 +578,6 @@ func test_gathering_is_not_a_stall() -> void:
 	assert_eq(town.objective_idle_months, 1, "a month that put nothing in was not counted")
 
 
-func test_a_town_going_nowhere_keeps_its_objective() -> void:
-	# 🔒 §3: *a town that goes broke keeps the objective and makes no
-	# progress — too bad.* No stall detection and no crisis override: ten years
-	# of nothing, hungry and penniless, is still the church.
-	var town := _town(GovernorIntent.GET_RICH)
-	town.objective = &"church"
-	town.objective_intent = GovernorIntent.GET_RICH
-	town.objective_idle_months = 120
-	town.spend_share(1.0)
-	var harness := _harness(town, [ColonyMonth.BUILD, ColonyMonth.SETTLE])
-	for _month in 3:
-		_run_month(harness)
-
-	assert_eq(String(town.objective), "church", "a town gave up for want of progress")
-	assert_empty(harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED))
-
-
 ## A build with `share` of its materials already in the frame.
 ##
 ## **Materials, not months** (#148): the materials *are* the progress, so
@@ -609,6 +592,16 @@ func _part_built(objective: StringName, share: float) -> Town:
 		town.store(StringName(resource), cost)
 		town.invest(StringName(resource), cost * share)
 	town.objective_progress = 1
+	return town
+
+
+## Part-built, with nothing to put into the rest: the stores hold none of it
+## and the purse is empty.
+func _stranded(objective: StringName, share: float) -> Town:
+	var town := _part_built(objective, share)
+	for resource in town.stocked():
+		town.take(StringName(resource), town.held(StringName(resource)))
+	town.spend_share(1.0)
 	return town
 
 
@@ -667,6 +660,93 @@ func test_abandoning_forfeits_what_was_invested() -> void:
 	var events: Array = harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED)
 	assert_eq(events.size(), 1)
 	assert_eq(String(events[0].payload["reason"]), String(Reconsideration.INTENT_CHANGED))
+
+
+func test_a_building_going_nowhere_for_three_months_is_given_up() -> void:
+	# 🔒 §3, the Author's ruling (#467): *a building or an improvement stalls.*
+	# Three months running with nothing committed, and the town gives it up,
+	# takes back exactly what it had put in, and walks its menu that same month.
+	var town := _stranded(&"church", 0.5)
+	AgendaMenu.load_from({"intents": [
+		{"id": "get_rich", "menu": [{"objective": "church"}, {"objective": "granary"}]},
+	]})
+	var sunk := town.objective_invested.duplicate()
+	var harness := _harness(town, [ColonyMonth.BUILD, ColonyMonth.SETTLE])
+
+	for _month in Reconsideration.STALL_MONTHS - 1:
+		_run_month(harness)
+	assert_eq(String(town.objective), "church", "a town gave up before three idle months")
+	assert_empty(harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED))
+
+	_run_month(harness)
+	var events: Array = harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED)
+	assert_eq(events.size(), 1, "three months of nothing did not stall the church")
+	if events.size() != 1:
+		return
+	assert_eq(String(events[0].payload["reason"]), String(Reconsideration.STALLED))
+	assert_eq(events[0].payload["returned"], sunk, "the stall did not name what it returned")
+	for resource in sunk:
+		assert_almost_eq(town.held(StringName(resource)), float(sunk[resource]), 0.001,
+			"the %s in the frame did not come back to the stockpile" % resource)
+	assert_eq(String(town.objective), "granary", "the town did not walk its menu the month it stalled")
+	var chosen: Array = harness["context"].log.of_type(ObjectiveSelector.EVENT_CHOSEN)
+	assert_eq(String(chosen[-1].payload["after"]), String(Reconsideration.STALLED))
+
+
+func test_a_stalled_objective_is_passed_over_for_a_year() -> void:
+	var town := _stranded(&"church", 0.5)
+	AgendaMenu.load_from({"intents": [
+		{"id": "get_rich", "menu": [{"objective": "church"}, {"objective": "granary"}]},
+	]})
+	var harness := _harness(town)
+	var context: ColonyContext = harness["context"]
+	var stalled_in := context.state.month
+	Reconsideration.stall(town, context)
+
+	for month in range(stalled_in, stalled_in + Reconsideration.PASS_OVER_MONTHS):
+		context.state.month = month
+		assert_eq(String(AgendaMenu.walk(town, town.intent, context)["id"]), "granary",
+			"the stalled church was taken back %d months later" % (month - stalled_in))
+	context.state.month = stalled_in + Reconsideration.PASS_OVER_MONTHS
+	assert_eq(String(AgendaMenu.walk(town, town.intent, context)["id"]), "church",
+		"the church was still passed over after a year")
+
+
+func test_a_month_with_something_committed_keeps_the_objective() -> void:
+	# Two idle months, then ten of timber into the frame: the count starts
+	# again, and the church is still the church.
+	var town := _stranded(&"church", 0.5)
+	town.objective_idle_months = Reconsideration.STALL_MONTHS - 1
+	town.store(&"wood", 10.0)
+	var harness := _harness(town, [ColonyMonth.BUILD, ColonyMonth.SETTLE])
+	_run_month(harness)
+
+	assert_eq(String(town.objective), "church")
+	assert_eq(town.objective_idle_months, 0)
+	assert_empty(harness["context"].log.of_type(Reconsideration.EVENT_ABANDONED))
+
+
+func test_expeditions_companies_and_no_building_never_stall() -> void:
+	# They can leave with nothing but their share of the town's people (#467).
+	var town := _town(GovernorIntent.GET_RICH)
+	town.objective_intent = GovernorIntent.GET_RICH
+	town.objective_idle_months = 120
+	for objective in [&"lean_expedition", &"thick_expedition", &"scouting_company", &"big_company"]:
+		town.objective = objective
+		assert_eq(String(Reconsideration.verdict(town)), String(Reconsideration.NONE),
+			"%s stalled" % objective)
+	town.objective = AgendaMenu.NO_BUILDING
+	assert_eq(String(Reconsideration.verdict(town)), String(Reconsideration.OPEN))
+
+
+func test_what_a_stall_passes_over_survives_a_save() -> void:
+	var town := _stranded(&"church", 0.5)
+	var harness := _harness(town)
+	Reconsideration.stall(town, harness["context"])
+	var restored := Town.from_dict(bytes_to_var(var_to_bytes(town.to_dict())))
+	assert_eq(restored.passed_over, town.passed_over)
+	assert_true(restored.is_passing_over(&"church", harness["context"].state.month),
+		"a reload forgot what the town had just given up")
 
 
 # --- 🔒 The PC argues for a goal and nothing else ---------------------------

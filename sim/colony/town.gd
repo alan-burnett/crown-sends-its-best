@@ -190,8 +190,12 @@ var objective_since: int = 0
 
 ## Months in a row the build has put in no labour. **Kept by Build, read by
 ## hope** (`QualityOfLife.progress_of`): only Build knows whether a month moved the
-## project on. Nothing ends an objective for it (#429).
+## project on. Three of them stall a building or an improvement (#467).
 var objective_idle_months: int = 0
+
+## 🔒 **What a stall set aside** (#467): objective id -> the month the menu walk
+## may take it again. Bounded by the objectives there are, so nothing prunes it.
+var passed_over: Dictionary = {}
 
 ## What the town's tiles gave last month, by resource (#429). Written by Work;
 ## read by the menus' `harvested_at_least`, which asks what the ground actually
@@ -217,8 +221,8 @@ var objective_progress: int = 0
 ## Resource id -> how much has gone into the build.
 ##
 ## **Invested is spent.** It has left the stockpile, so it cannot be eaten, sold
-## or given away, and a town that stalls for want of the rest does not get it
-## back (#49).
+## or given away, and a town waiting on the rest does not get it back (#49) —
+## until three idle months stall the build, which returns it (#467).
 var objective_invested: Dictionary = {}
 
 ## Months in a row the town has gone meaningfully without food.
@@ -524,6 +528,15 @@ func invest(resource: StringName, amount: float) -> float:
 	return moved
 
 
+## Set a stalled objective aside until `until_month` (#467).
+func pass_over(objective_id: StringName, until_month: int) -> void:
+	passed_over[String(objective_id)] = until_month
+
+
+func is_passing_over(objective_id: StringName, month: int) -> bool:
+	return month < int(passed_over.get(String(objective_id), month))
+
+
 ## Start again on something else. **Whatever was invested is gone** — the timber
 ## is already cut and standing in the half-built frame.
 func clear_objective() -> void:
@@ -587,6 +600,7 @@ func to_dict() -> Dictionary:
 		"expeditions_launched": expeditions_launched,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
+		"passed_over": passed_over.duplicate(),
 		"months_hungry": months_hungry,
 		"battle_owed": battle_owed,
 		"relief_balance": relief_balance,
@@ -641,6 +655,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.expeditions_launched = int(data.get("expeditions_launched", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
+	town.passed_over = data.get("passed_over", {}).duplicate()
 	town.months_hungry = int(data.get("months_hungry", 0))
 	town.battle_owed = float(data.get("battle_owed", 0.0))
 	town.relief_balance = float(data.get("relief_balance", 0.0))

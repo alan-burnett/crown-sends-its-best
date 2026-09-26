@@ -25,7 +25,8 @@ extends RefCounted
 ## stockpile and become `objective_invested`, which is what makes "a town that
 ## runs short stalls rather than losing what it has already invested" true
 ## (#49): the invested resources are not in the stockpile to be eaten, sold or
-## given away, and a stall does not refund them.
+## given away. A build that stalls for three months is given up and they come
+## back (#467, `Reconsideration.stall`).
 
 ## No objective at all.
 const NONE: StringName = &"none"

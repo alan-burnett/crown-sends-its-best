@@ -323,6 +323,9 @@ func _reconsider(town: Town, context: ColonyContext) -> void:
 	if verdict == Reconsideration.NONE:
 		return
 
+	if verdict == Reconsideration.STALLED:
+		Reconsideration.stall(town, context)
+
 	if verdict == Reconsideration.INTENT_CHANGED:
 		# **The new intent may want the very same thing.** Go wide and go tall
 		# both list the granary; tearing down a half-raised frame to begin the
