@@ -26,16 +26,26 @@ const ROLE: StringName = &"governor"
 ## ships the rest (#53) — **personality is a weight vector over these and
 ## nothing else**, so a cautious governor and a greedy one differ by seven
 ## numbers rather than by a line of code.
-const WEIGHTED: PackedStringArray = [
+##
+## 🔒 **The intent kernel's own list, never a copy of it** (#462). A copy kept by
+## hand left out `baseline`, `wealth` and `safety` — so every governor weighed
+## the three that most separate a quiet builder from a nervous one identically —
+## and kept drawing `revenue`, `native_threat` and `native_land` after the kernel
+## retired them. See `weighted()`.
+const COMPLIANCE_WEIGHTED: PackedStringArray = [
 	"loyalty", "cost_of_request", "payment_offered", "autonomy", "order_clarity",
-	"quality_of_life", "food_security", "revenue", "native_threat",
-	"room_to_grow", "mandate", "crown_urging",
-	# **Every id `IntentConsiderations.ALL` declares.** One left out is not a
-	# missing line, it is a consideration every governor in the game weighs
-	# identically — which quietly deletes the character the consideration was
-	# split out to create. `crowding` was in that state (#175, #204).
-	"crowding", "native_land",
 ]
+
+
+## Every consideration a governor draws a weight for, sorted: compliance's, and
+## every one `IntentConsiderations.ALL` declares.
+static func weighted() -> PackedStringArray:
+	var out := COMPLIANCE_WEIGHTED.duplicate()
+	for id in IntentConsiderations.ALL:
+		if not out.has(id):
+			out.append(id)
+	out.sort()
+	return out
 
 ## Topics a governor shades when he writes about his own town. **These are what
 ## make him a lens rather than a readout.**
@@ -147,7 +157,7 @@ static func _draw(id: StringName, streams: RngStreams, title: String) -> Contact
 
 	# Sorted, so the draws are consumed in a fixed order and the same seed gives
 	# the same man however the lists were assembled.
-	var weights := WEIGHTED.duplicate()
+	var weights := weighted()
 	weights.sort()
 	for consideration in weights:
 		contact.set_weight(StringName(consideration), rng.randf_range(Contact.WEIGHT_MIN, Contact.WEIGHT_MAX))
