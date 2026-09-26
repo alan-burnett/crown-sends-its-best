@@ -15,6 +15,51 @@ const KINDS: Array[StringName] = [DecisionKind.UNANSWERED]
 static func register_all() -> void:
 	Deliberation.register_consideration(SelfInterestConsideration.new(&"self_interest"), KINDS)
 	Deliberation.register_consideration(CapriceConsideration.new(&"caprice"), KINDS)
+	# ⚠ Provisional, pending the PO's ruling on #450 — see the class.
+	Deliberation.register_filter(NotOnTheCrownsPurse.new(&"not_on_the_crowns_purse"), KINDS)
+
+
+## ⚠ **Provisional: he does not spend the Crown's money** (#450).
+##
+## A decision left to him is now carried out, and `SelfInterestConsideration`
+## values a promise of gold highest — so a man left alone would pick the option
+## that pays him from the Crown's purse. **Whether he may is the PO's to rule**,
+## in `contacts.md` §3. Until then he may not: an answer the PC never gave does
+## not commit the Crown's money.
+##
+## A filter and not a weight, because whichever way it is ruled it is a rule
+## (`deliberation.md` §5). Ruled the other way, this class and its registration
+## are deleted and nothing else changes.
+class NotOnTheCrownsPurse:
+	extends DeliberationFilter
+
+	## Effects that pay out of the Crown's purse whatever their arguments.
+	const CROWN_PAID: Array = [
+		"promise_gold", "promise_gold_to_town", "fund_policy", "ship_resource_paying_double",
+	]
+
+	func permits(_actor: DeliberationActor, candidate: Candidate, _context: DeliberationContext) -> bool:
+		var effects: Variant = candidate.get_value("effect", {})
+		if typeof(effects) != TYPE_DICTIONARY:
+			return true
+		for effect_id in effects:
+			if spends_the_crowns_money(String(effect_id), effects[effect_id]):
+				return false
+		return true
+
+	## A policy the Crown pays some of, or a payment that is not nought.
+	static func spends_the_crowns_money(effect_id: String, args: Variant) -> bool:
+		if CROWN_PAID.has(effect_id):
+			return true
+		if typeof(args) != TYPE_DICTIONARY:
+			return false
+		var split := String(args.get("split", Policy.NONE))
+		if split != String(Policy.NONE):
+			return true
+		var payment: Variant = args.get("payment", 0)
+		if typeof(payment) == TYPE_STRING:
+			return not String(payment).is_empty() and String(payment) != "0"
+		return float(payment) > 0.0
 
 
 ## **In his own interest.** An option that grants him something looks good; one

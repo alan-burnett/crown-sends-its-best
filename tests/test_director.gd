@@ -452,15 +452,21 @@ func test_deciding_for_himself_produces_a_trace() -> void:
 func test_personality_changes_what_he_decides() -> void:
 	# "At random or in their own interest, depending on personality" — and which
 	# of those wins is a weight, not a branch.
-	var letter := Letter.from_record(content.record("letters", "chancellor.how_to_answer"))
-	var inbound := InboundLetter.new("chancellor.how_to_answer", &"chancellor", Tone.HATEFUL)
+	#
+	# **A favour, not the Crown's gold** (#450). This took the Chancellor's own
+	# letter and had him promise himself the money; a man left to decide may not
+	# spend the Crown's purse, provisionally, so the example is a patron granting
+	# a favour or refusing one (`test_left_to_decide` covers the purse).
+	var letter := Letter.from_record(content.record("letters", "patron.introduction"))
+	var inbound := InboundLetter.new("patron.introduction", &"patron_1", Tone.HATEFUL)
 	inbound.id = &"r5"
+	inbound.params = {"patron": "patron_1"}
 
-	var grasping := Contact.from_data({"id": "chancellor", "loyalty": 20, "weights": {"self_interest": 2.0, "caprice": 0.0}})
-	var whimsical := Contact.from_data({"id": "chancellor", "loyalty": 20, "weights": {"self_interest": 0.0, "caprice": 2.0}})
+	var grasping := Contact.from_data({"id": "patron_1", "loyalty": 20, "weights": {"self_interest": 2.0, "caprice": 0.0}})
+	var whimsical := Contact.from_data({"id": "patron_1", "loyalty": 20, "weights": {"self_interest": 0.0, "caprice": 2.0}})
 
 	var by_interest := Silence.decide_alone(grasping, letter, inbound, run, true)
-	assert_eq(by_interest.chosen_id(), &"pay", "self-interest should take the money")
+	assert_eq(by_interest.chosen_id(), &"welcome", "self-interest should take the favour")
 
 	var by_whim := Silence.decide_alone(whimsical, letter, inbound, run, true)
 	assert_true(by_whim.has_choice())

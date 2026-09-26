@@ -372,6 +372,12 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 	return intent
 
 
+## 🔒 **An Order he carries out of his own will** (#450): the Intent acting
+## alone produces, for a decision the PC left to him.
+static func as_his_own_will(order: Order, contact: Contact) -> Intent:
+	return _intent_for(order, ACT_ALONE, contact)
+
+
 ## What the request costs the contact, roughly, in the same units as payment.
 static func cost_of(order: Order) -> float:
 	var priced: Variant = _priced(order)
