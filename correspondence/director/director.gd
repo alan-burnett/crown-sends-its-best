@@ -566,9 +566,24 @@ func _acknowledgements(run: RunState, outcomes: Array) -> Array[InboundLetter]:
 		if contact == null:
 			continue
 
-		var trigger := _acknowledgement_trigger(String(order.addressed_to), outcome)
-		if trigger.is_empty():
+		var candidates := _acknowledgement_triggers(contact, outcome, run)
+		if candidates.is_empty():
 			unacknowledged.append("%s/%s" % [order.addressed_to, outcome])
+			continue
+
+		var context := _context(run, contact)
+		# The order that provoked it is a param source in its own right, so an
+		# acknowledgement can say what it was you asked for.
+		context.data_order = order
+		# 🔒 **An acknowledgement says what actually happened** (#448). Its own
+		# conditions hold, as any trigger's must: the Marshal's thanks for goods
+		# follow goods, and a governor turning his town follows an urging.
+		var trigger: Dictionary = {}
+		for candidate in candidates:
+			if _conditions_hold(candidate, context):
+				trigger = candidate
+				break
+		if trigger.is_empty():
 			continue
 
 		var letter_id := String(trigger["letter"])
@@ -577,18 +592,21 @@ func _acknowledgements(run: RunState, outcomes: Array) -> Array[InboundLetter]:
 		already[letter_id] = true
 
 		var letter := Letter.from_record(content.record("letters", letter_id))
-		var context := _context(run, contact)
-		# The order that provoked it is a param source in its own right, so an
-		# acknowledgement can say what it was you asked for.
-		context.data_order = order
 		var inbound := _inbound(trigger, letter, contact, context, run)
 		inbound.id = StringName("inbound_%d_ack_%s" % [run.turn, order.id])
 		letters.append(inbound)
 	return letters
 
 
-## The trigger marked `"acknowledges"` for this sender and outcome, or {}.
-func _acknowledgement_trigger(sender: String, outcome: String) -> Dictionary:
+## Every trigger marked `"acknowledges"` this outcome whose letter this man could
+## send, in trigger id order.
+##
+## 🔒 **Senders resolve as they do for every other trigger** (#448): by name, by
+## role or by kind (`senders_of`). This compared the letter's `sender` with the
+## contact's id, and a governor's letters name the role `governor`, so no
+## governor ever acknowledged anything.
+func _acknowledgement_triggers(contact: Contact, outcome: String, run: RunState) -> Array:
+	var out: Array = []
 	for trigger_id in content.ids("triggers"):
 		var trigger: Dictionary = content.collection("triggers")[trigger_id]
 		if String(trigger.get("acknowledges", "")) != outcome:
@@ -596,9 +614,10 @@ func _acknowledgement_trigger(sender: String, outcome: String) -> Dictionary:
 		var letter_id := String(trigger.get("letter", ""))
 		if not content.has_record("letters", letter_id):
 			continue
-		if String(content.record("letters", letter_id).get("sender", "")) == sender:
-			return trigger
-	return {}
+		var letter := Letter.from_record(content.record("letters", letter_id))
+		if senders_of(letter, run).has(contact):
+			out.append(trigger)
+	return out
 
 
 # --- Culling ---------------------------------------------------------------

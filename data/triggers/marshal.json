@@ -87,7 +87,7 @@
         "fallback": "consignment"
       }
     },
-    "conditions": []
+    "conditions": [{ "the_order_was": { "kind": "promise_resource" } }]
   },
   {
     "id": "trigger.marshal.ack_refused",

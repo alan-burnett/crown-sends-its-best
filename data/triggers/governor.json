@@ -317,7 +317,7 @@
         "from": "sender_id"
       }
     },
-    "conditions": []
+    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
   },
   {
     "id": "trigger.governor.ack_delayed",
@@ -336,7 +336,7 @@
         "from": "sender_id"
       }
     },
-    "conditions": []
+    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
   },
   {
     "id": "trigger.governor.ack_refused",
@@ -355,7 +355,7 @@
         "from": "sender_id"
       }
     },
-    "conditions": []
+    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
   },
   {
     "id": "trigger.governor.ack_acted_alone",
@@ -374,7 +374,7 @@
         "from": "sender_id"
       }
     },
-    "conditions": []
+    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
   },
   {
     "id": "trigger.governor.we_are_coming_back",

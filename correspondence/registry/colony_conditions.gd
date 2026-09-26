@@ -161,6 +161,8 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"remembers_a_slight", {}, ColonyConditions.remembers_a_slight
 	)
+	# The order an acknowledgement answers was of this kind (#448).
+	ContentRegistry.register_condition("the_order_was", {"kind": "string"}, ColonyConditions.the_order_was)
 	# What he did for the PC, and can name (#397).
 	ContentRegistry.register_condition(
 		"remembers_his_kindness", {}, ColonyConditions.remembers_his_kindness
@@ -654,6 +656,19 @@ static func remembers_a_kindness(_args: Dictionary, context: LetterContext) -> b
 	if context.sender == null or context.sender.relationship == null:
 		return false
 	return nameable(context.sender.relationship.most_generous())
+
+
+## Whether the order an acknowledgement answers was of this kind (#448).
+##
+## 🔒 **An acknowledgement says what actually happened.** The Marshal's thanks
+## that *your consignment reached the quartermasters* followed a refusal, a
+## declined requisition and a promise to ship before anything moved; a governor
+## *turning his town* followed orders that turned nothing. False where there is
+## no order, so an ordinary letter never passes it.
+static func the_order_was(args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.data_order == null:
+		return false
+	return String(context.data_order.kind) == String(args.get("kind", ""))
 
 
 ## 🔒 **Whether he remembers a favour he did the PC, by name** (#397).
