@@ -81,6 +81,13 @@ const TABLE: Dictionary = {
 		"man": "duke",
 		"fields": {"town": "town", "duke": "rival", "men": "integer", "gold": "gold"},
 	},
+	# The gunsmith's machines have broken, and the quartermaster asks what it
+	# costs to mend them (#438).
+	"gunsmith_machines_broke": {
+		"town": "town",
+		"man": "quartermaster",
+		"fields": {"town": "town", "amount": "gold"},
+	},
 }
 
 

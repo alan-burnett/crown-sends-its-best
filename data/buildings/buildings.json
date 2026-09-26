@@ -643,7 +643,8 @@
 	"effects": {
 	  "conversions": {
 		"guns<-iron": {
-		  "ratio": 2.0
+		  "ratio": 2.0,
+		  "while_lit": "gunsmith"
 		}
 	  },
 	  "reserve_months": {

@@ -193,6 +193,11 @@ var objective_since: int = 0
 ## project on. Three of them stall a building or an improvement (#467).
 var objective_idle_months: int = 0
 
+## 🔒 **Buildings the town may not pay for** (#438): building id -> the month
+## it may again. Dark until then whatever is in the purse, as the gunsmith is
+## when his machines break and the Crown does not pay to mend them.
+var shut_until: Dictionary = {}
+
 ## 🔒 **What a stall set aside** (#467): objective id -> the month the menu walk
 ## may take it again. Bounded by the objectives there are, so nothing prunes it.
 var passed_over: Dictionary = {}
@@ -528,6 +533,15 @@ func invest(resource: StringName, amount: float) -> float:
 	return moved
 
 
+## Forbid paying for a building until `until_month` (#438).
+func shut(building: StringName, until_month: int) -> void:
+	shut_until[String(building)] = until_month
+
+
+func is_shut(building: StringName, month: int) -> bool:
+	return month < int(shut_until.get(String(building), month))
+
+
 ## Set a stalled objective aside until `until_month` (#467).
 func pass_over(objective_id: StringName, until_month: int) -> void:
 	passed_over[String(objective_id)] = until_month
@@ -601,6 +615,7 @@ func to_dict() -> Dictionary:
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
 		"passed_over": passed_over.duplicate(),
+		"shut_until": shut_until.duplicate(),
 		"months_hungry": months_hungry,
 		"battle_owed": battle_owed,
 		"relief_balance": relief_balance,
@@ -656,6 +671,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
 	town.passed_over = data.get("passed_over", {}).duplicate()
+	town.shut_until = data.get("shut_until", {}).duplicate()
 	town.months_hungry = int(data.get("months_hungry", 0))
 	town.battle_owed = float(data.get("battle_owed", 0.0))
 	town.relief_balance = float(data.get("relief_balance", 0.0))

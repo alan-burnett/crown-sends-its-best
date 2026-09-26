@@ -670,6 +670,25 @@ func check_tile_yield_bonuses(content: ContentDatabase) -> void:
 					_problem("effects.tile_yield_bonus", "'%s' is not an improvement" % improvement)
 
 
+## 🔒 **Terms that work while another building does name a real one** (#438).
+## A misspelt master would never be lit, and the terms would quietly never
+## apply — the armoury would stop making guns for good and nothing would say so.
+func check_conversion_gates(content: ContentDatabase) -> void:
+	for id in content.ids("buildings"):
+		_file = "buildings/%s" % id
+		var effects: Dictionary = content.collection("buildings")[id].get("effects", {})
+		var conversions: Dictionary = effects.get("conversions", {})
+		for recipe in conversions:
+			var terms: Dictionary = conversions[recipe]
+			if not terms.has(Building.WHILE_LIT):
+				continue
+			var master := String(terms[Building.WHILE_LIT])
+			if master == String(id):
+				_problem("effects.conversions.%s" % recipe, "works only while it is itself lit")
+			elif not content.has_record("buildings", master):
+				_problem("effects.conversions.%s" % recipe, "works while '%s' is lit, and there is no such building" % master)
+
+
 ## 🔒 **Every building does something** (#416). Thirteen buildings once sat in
 ## the tree with `"effects": {}` and nothing failed, because an empty effect
 ## passes every other check; since #429 a town builds whatever its menu lists,

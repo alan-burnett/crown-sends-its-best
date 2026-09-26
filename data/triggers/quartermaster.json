@@ -1,0 +1,37 @@
+[
+  {
+    "id": "trigger.quartermaster.machines_broken",
+    "letter": "quartermaster.machines_broken",
+    "urgency": 0.8,
+    "cooldown": 12,
+    "note": "Issue 438, institutional-contacts.md section 3 'His machines break'. GunsmithMachines rolls the break (quality of life below 0.4, not in the past year, 20% from his own stream) and emits gunsmith_machines_broke naming him; this is his letter about it. The town and the sum are the event's, so the letter prints what the simulation produced (SPEC 9.1). Cooldown 12 matches the break's own: it cannot happen to him twice in a year.",
+    "params": {
+      "quartermaster": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "what_happened",
+        "event": "gunsmith_machines_broke",
+        "within": 2,
+        "concerning": "him",
+        "field": "town"
+      },
+      "amount": {
+        "from": "what_happened",
+        "event": "gunsmith_machines_broke",
+        "within": 2,
+        "concerning": "him",
+        "field": "amount"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "gunsmith_machines_broke",
+          "within": 2,
+          "concerning": "him"
+        }
+      }
+    ]
+  }
+]

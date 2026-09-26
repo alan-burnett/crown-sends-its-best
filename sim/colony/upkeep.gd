@@ -71,6 +71,12 @@ static func settle(town: Town, context: ColonyContext) -> float:
 	var dark: PackedStringArray = PackedStringArray()
 	for item in items:
 		var due := float(item["upkeep"])
+		# 🔒 **Shut, and the town may not pay for it** (#438): dark exactly as if
+		# it could not afford to, whatever is in the purse.
+		if bool(item.get("shut", false)):
+			dark.append(String(item["key"]))
+			_light(town, context, item, false)
+			continue
 		if due <= 0.0:
 			_light(town, context, item, true)
 			continue
@@ -100,6 +106,8 @@ static func _cabins_are_paid(town: Town, items: Array) -> bool:
 	var owed := 0.0
 	var carried := false
 	for item in items:
+		if bool(item.get("shut", false)):
+			continue
 		var due := float(item["upkeep"])
 		var paid := due <= 0.0 or town.can_afford(owed + due)
 		if paid:
@@ -124,6 +132,7 @@ static func _billable(town: Town, context: ColonyContext) -> Array:
 			"kind": "building",
 			"upkeep": building.upkeep,
 			"worth": -float(AgendaMenu.rank_of(town.intent, StringName(id))),
+			"shut": town.is_shut(StringName(id), context.state.month),
 		})
 
 	if context.map == null or context.territory == null:

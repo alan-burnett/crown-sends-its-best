@@ -320,6 +320,13 @@ var leaves_month: int = -1
 ## has backed a rebellion never rolls again. Empty on everybody who is not a duke.
 var backed_rebellion: String = ""
 
+## 🔒 **When his machines last broke** (#438), for the year that must pass
+## before they can again; -1 if never. A quartermaster's only.
+var machines_broke: int = -1
+
+## And whether the Crown has yet to answer about them (#438).
+var machines_waiting: bool = false
+
 var relationship: Relationship = null
 
 
@@ -392,6 +399,8 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.vice = StringName(record.get("vice", ""))
 	contact.leaves_month = int(record.get("leaves_month", -1))
 	contact.backed_rebellion = String(record.get("backed_rebellion", ""))
+	contact.machines_broke = int(record.get("machines_broke", -1))
+	contact.machines_waiting = bool(record.get("machines_waiting", false))
 	contact.known_since = int(record.get("known_since", 0))
 	contact.relationship = Relationship.new(
 		contact.id,
@@ -496,6 +505,8 @@ func to_dict() -> Dictionary:
 		"vice": String(vice),
 		"leaves_month": leaves_month,
 		"backed_rebellion": backed_rebellion,
+		"machines_broke": machines_broke,
+		"machines_waiting": machines_waiting,
 		"known_since": known_since,
 		"relationship": relationship.to_dict(),
 	}
