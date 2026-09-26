@@ -86,6 +86,10 @@ const REQUEST_NOTES: Dictionary = {
 
 var setup: RunSetup = null
 
+## Where the perks and quirks are read from (#465). Null in a harness that has
+## none, which offers the first-day perk and nothing else.
+var content: ContentDatabase = null
+
 var _column: VBoxContainer = null
 var _seed_label: Label = null
 var _name_field: LineEdit = null
@@ -95,10 +99,25 @@ var _mandate_buttons: Array[Button] = []
 var _split_buttons: Array[Button] = []
 var _request_buttons: Array[Button] = []
 var _proximity_buttons: Array[Button] = []
+var _perks: PackedStringArray = PackedStringArray()
+var _quirks: PackedStringArray = PackedStringArray()
+var _perk_buttons: Array[Button] = []
+var _quirk_buttons: Array[Button] = []
+var _portrait_buttons: Array[Button] = []
+var _colour_buttons: Array[Button] = []
 
 
-func begin(p_setup: RunSetup) -> void:
+func begin(p_setup: RunSetup, p_content: ContentDatabase = null) -> void:
 	setup = p_setup
+	content = p_content
+	# 🔒 **Only what is unlocked** (#465, SPEC §5).
+	var unlocks := Records.unlocks()
+	_perks = RunModifiers.unlocked(content, RunModifiers.PERKS_RECORD, unlocks)
+	if _perks.is_empty():
+		_perks = PackedStringArray([String(RunSetup.PERK_FIRST_DAY)])
+	_quirks = RunModifiers.unlocked(content, RunModifiers.QUIRKS_RECORD, unlocks)
+	if not _perks.has(String(setup.perk)):
+		setup.perk = StringName(_perks[0])
 	_build()
 	_refresh()
 
@@ -156,6 +175,28 @@ func _build() -> void:
 	_complaint = _note("")
 	_complaint.add_theme_color_override("font_color", DeskTheme.SEAL)
 	_complaint.visible = false
+
+	_rule()
+	_heading("Your likeness")
+	_note("How the court will remember you, and the colours your letters go under.")
+	_portrait_buttons = _choices(
+		RunSetup.PORTRAITS, _likenesses(), {}, _on_portrait)
+	_colour_buttons = _swatches()
+
+	_rule()
+	_heading("What you bring")
+	_note("One thing about you the court has noticed. More come with a name at court.")
+	_perk_buttons = _choices(Array(_perks), _names_of(RunModifiers.PERKS_RECORD, _perks),
+		_blurbs_of(RunModifiers.PERKS_RECORD, _perks), _on_perk)
+
+	_rule()
+	_heading("The world you are given")
+	if _quirks.is_empty():
+		_note("Nothing out of the ordinary, yet. Colonies of note come to those who have held one.")
+	else:
+		_note("Any, all or none. Each is a fact about the place, and cuts both ways.")
+		_quirk_buttons = _choices(Array(_quirks), _names_of(RunModifiers.QUIRKS_RECORD, _quirks),
+			_blurbs_of(RunModifiers.QUIRKS_RECORD, _quirks), _on_quirk)
 
 	_rule()
 	_heading("The Crown's purpose")
@@ -272,7 +313,79 @@ func _choice(text: String) -> Button:
 	return button
 
 
+## A perk's or quirk's name, by id, from the data.
+func _names_of(record: String, ids: PackedStringArray) -> Dictionary:
+	var out: Dictionary = {}
+	for id in ids:
+		out[StringName(id)] = String(RunModifiers.entry(content, record, id).get("name", id))
+	return out
+
+
+func _blurbs_of(record: String, ids: PackedStringArray) -> Dictionary:
+	var out: Dictionary = {}
+	for id in ids:
+		out[StringName(id)] = String(RunModifiers.entry(content, record, id).get("blurb", ""))
+	return out
+
+
+## The likenesses, named for the page. The art is the asset's; these are its
+## captions.
+func _likenesses() -> Dictionary:
+	var out: Dictionary = {}
+	for at in RunSetup.PORTRAITS.size():
+		out[StringName(RunSetup.PORTRAITS[at])] = "Likeness %s" % ["I", "II", "III", "IV", "V"][mini(at, 4)]
+	return out
+
+
+## One button per colour, filled with it.
+func _swatches() -> Array[Button]:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", DeskTheme.GAP)
+	_column.add_child(row)
+	var made: Array[Button] = []
+	for at in RunSetup.COLOURS.size():
+		var swatch := Button.new()
+		swatch.toggle_mode = true
+		swatch.custom_minimum_size = Vector2(DeskTheme.TAP_HEIGHT, DeskTheme.TAP_HEIGHT)
+		swatch.tooltip_text = "Colour %d" % (at + 1)
+		swatch.add_theme_stylebox_override("normal", DeskTheme.panel(RunSetup.COLOURS[at]))
+		swatch.add_theme_stylebox_override("hover", DeskTheme.panel(RunSetup.COLOURS[at]))
+		swatch.add_theme_stylebox_override("pressed", DeskTheme.panel(RunSetup.COLOURS[at].darkened(0.4)))
+		swatch.pressed.connect(_on_colour.bind(at))
+		row.add_child(swatch)
+		made.append(swatch)
+	return made
+
+
 # --- Choosing ---------------------------------------------------------------
+
+func _on_portrait(at: int) -> void:
+	setup.portrait = RunSetup.PORTRAITS[at]
+	_refresh()
+
+
+func _on_colour(at: int) -> void:
+	setup.colour = RunSetup.COLOURS[at]
+	_refresh()
+
+
+## 🔒 **One perk** (SPEC §5).
+func _on_perk(at: int) -> void:
+	setup.perk = StringName(_perks[at])
+	_refresh()
+
+
+## 🔒 **Any number of quirks** (SPEC §5): each toggles on its own.
+func _on_quirk(at: int) -> void:
+	var id := _quirks[at]
+	var chosen := setup.quirks.duplicate()
+	if chosen.has(id):
+		chosen.remove_at(chosen.find(id))
+	else:
+		chosen.append(id)
+	chosen.sort()
+	setup.quirks = chosen
+	_refresh()
 
 func _on_mandate(at: int) -> void:
 	setup.mandate = RunSetup.MANDATES[at]
@@ -336,6 +449,14 @@ func _refresh() -> void:
 		_request_buttons[at].button_pressed = setup.request == SiteRequest.ALL[at]
 	for at in _proximity_buttons.size():
 		_proximity_buttons[at].button_pressed = setup.proximity == RunSetup.PROXIMITIES[at]
+	for at in _perk_buttons.size():
+		_perk_buttons[at].button_pressed = String(setup.perk) == _perks[at]
+	for at in _quirk_buttons.size():
+		_quirk_buttons[at].button_pressed = setup.quirks.has(_quirks[at])
+	for at in _portrait_buttons.size():
+		_portrait_buttons[at].button_pressed = setup.portrait == RunSetup.PORTRAITS[at]
+	for at in _colour_buttons.size():
+		_colour_buttons[at].button_pressed = setup.colour.is_equal_approx(RunSetup.COLOURS[at])
 	if _seed_label != null:
 		_seed_label.text = "Chart no. %d. Write it down if you want this world again." \
 			% setup.seed_value

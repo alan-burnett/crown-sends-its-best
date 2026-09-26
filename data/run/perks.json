@@ -5,6 +5,7 @@
     "entries": [
       {
         "id": "its_my_first_day",
+        "unlocked_at_start": true,
         "name": "It's my first day",
         "blurb": "The court is inclined to make allowances, this once.",
         "modifiers": [

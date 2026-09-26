@@ -90,8 +90,20 @@ const TITLE_MIN: int = 1
 const TITLE_MAX: int = 20
 const NAME_MIN: int = 1
 const NAME_MAX: int = 48
-var portrait: String = "portrait_default"
-var colour: Color = Color(0.42, 0.29, 0.20)
+## 🔒 **The PC's likeness and colours are his to choose** (#465, SPEC §6.1).
+## Asset ids, never paths (§16.3): the files behind them are placeholders, and
+## the final art replaces them with no change here.
+const PORTRAITS: Array[String] = ["portrait.pc_1", "portrait.pc_2", "portrait.pc_3", "portrait.pc_4"]
+const COLOURS: Array[Color] = [
+	Color(0.42, 0.29, 0.20),
+	Color(0.55, 0.12, 0.14),
+	Color(0.14, 0.24, 0.45),
+	Color(0.18, 0.36, 0.22),
+	Color(0.36, 0.22, 0.42),
+]
+
+var portrait: String = PORTRAITS[0]
+var colour: Color = COLOURS[0]
 
 # --- Everything that shapes the colony -------------------------------------
 

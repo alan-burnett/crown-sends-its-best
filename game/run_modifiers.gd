@@ -172,6 +172,36 @@ static func offered(content: ContentDatabase, record: String) -> PackedStringArr
 	return out
 
 
+## 🔒 **What a new run may choose from** (#465, SPEC §5): what is offered, and
+## either unlocked from the start or unlocked by a past run. §5: *"only unlocked
+## perk from the start… no unlocked quirks"* — so with nothing unlocked a run is
+## offered the first-day perk and no quirks at all.
+static func unlocked(
+	content: ContentDatabase, record: String, unlocks: PackedStringArray
+) -> PackedStringArray:
+	var out := PackedStringArray()
+	for entry in entries_in(content, record):
+		var id := String((entry as Dictionary).get("id", ""))
+		if not bool((entry as Dictionary).get("offered", true)):
+			continue
+		if bool((entry as Dictionary).get(UNLOCKED_AT_START, false)) or unlocks.has(id):
+			out.append(id)
+	out.sort()
+	return out
+
+
+## The field that marks an entry available before anything is unlocked.
+const UNLOCKED_AT_START: String = "unlocked_at_start"
+
+
+## One entry's name and blurb, for a screen to show.
+static func entry(content: ContentDatabase, record: String, id: String) -> Dictionary:
+	for found in entries_in(content, record):
+		if String((found as Dictionary).get("id", "")) == id:
+			return found
+	return {}
+
+
 ## The raw entries a file holds, offered or not.
 static func entries_in(content: ContentDatabase, record: String) -> Array:
 	if content == null or not content.has_record(PERKS, record):
