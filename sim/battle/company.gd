@@ -275,6 +275,11 @@ var policy: StringName = &""
 ## and go home the month it ends, returned or retaken.
 var backs: StringName = &""
 
+## 🔒 **The town these men are quartered on** (#230, `rebel-sentiment.md` §5),
+## or empty. A town that came back to the Crown cannot declare again while they
+## stand.
+var garrisons: StringName = &""
+
 const MILITIA: StringName = &"militia"
 const COMMANDED: StringName = &"commander"
 
@@ -730,6 +735,7 @@ func to_dict() -> Dictionary:
 		"raised_under": String(raised_under),
 		"policy": String(policy),
 		"backs": String(backs),
+		"garrisons": String(garrisons),
 		"at": [at.x, at.y],
 		"destination": [destination.x, destination.y],
 		"raised_month": raised_month,
@@ -756,6 +762,7 @@ static func from_dict(data: Dictionary) -> Company:
 	company.raised_under = StringName(data.get("raised_under", ""))
 	company.policy = StringName(data.get("policy", ""))
 	company.backs = StringName(data.get("backs", ""))
+	company.garrisons = StringName(data.get("garrisons", ""))
 	company.at = _vector(data.get("at", []))
 	company.destination = _vector(data.get("destination", []))
 	company.raised_month = int(data.get("raised_month", 0))

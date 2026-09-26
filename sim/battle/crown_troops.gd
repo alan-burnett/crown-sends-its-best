@@ -73,6 +73,18 @@ const ORDER_FOR: Dictionary = {
 const GUNS_PER_THOUSAND: float = 1.0
 const TOOLS_PER_THOUSAND: float = 0.45
 
+# --- 🔒 The garrison on a town that came back (#230, `rebel-sentiment.md` §5) ---
+
+## How long it stays. The Author's figure.
+const GARRISON_MONTHS: int = 12
+
+## Its monthly charge, the PC bearing all of it. The Marshal's charge for a
+## garrison (`pc/request_troops`), a placeholder.
+const GARRISON_COST: float = 150.0
+
+## The policy param naming the town it is quartered on.
+const QUARTERED_ON: String = "town"
+
 var run: RunState = null
 
 
@@ -102,10 +114,30 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 	context.companies = run.companies
 	context.commanders = run.commanders
 	context.contacts = run.contacts
-	# **Leaving before landing**, so a policy replaced in one month does not have
-	# two companies ashore at once.
+	# **Quartered first**, so a town that came back last month has its garrison
+	# ashore this month. Then leaving before landing, so a policy replaced in one
+	# month does not have two companies ashore at once.
+	_quarter_the_returned(context)
 	_sail_home(context)
 	_land(context)
+
+
+## 🔒 **Whenever a town comes back, the Marshal garrisons it for a year**
+## (#230). Nobody asks for it; the Crown sends it, and the PC bears the whole
+## charge. Read off last month's returns, since a town comes back in Settle,
+## after this phase has run.
+func _quarter_the_returned(context: ColonyContext) -> void:
+	for entry in context.log.of_type(Rebellion.EVENT_RETURNED):
+		var returned: SimEvent = entry
+		if returned.month != context.state.month - 1:
+			continue
+		var policy := Policy.new(MARSHAL, PolicyEffects.CROWN_TROOPS, GARRISON_COST, Policy.ALL, {
+			"strength": String(A_GARRISON),
+			"posture": String(HOLD_THE_TOWNS),
+			QUARTERED_ON: String(returned.payload.get("town", "")),
+		})
+		policy.expires_month = context.state.month + GARRISON_MONTHS
+		run.policies.enact(policy, context.log, context.state.month)
 
 
 ## Every standing troops policy has its company ashore.
@@ -113,8 +145,15 @@ func _land(context: ColonyContext) -> void:
 	for policy in run.policies.active():
 		if policy.effect != PolicyEffects.CROWN_TROOPS or _its_company(policy.id) != null:
 			continue
+		# 🔒 **A garrison gone is gone** (#230): destroyed, it is not sent again,
+		# and the bar on its town ends with it.
+		if bool(policy.params.get("landed", false)):
+			run.policies.lapse(policy.id, context.log, context.state.month, "destroyed")
+			continue
 		var men := men_for(StringName(policy.params.get("strength", "")))
-		var ashore := _where_they_land()
+		var quartered := String(policy.params.get(QUARTERED_ON, ""))
+		var ashore := _where_they_land() if quartered.is_empty() \
+			else run.colony.by_id(StringName(quartered))
 		if men <= 0 or ashore == null:
 			continue
 		var posture := StringName(policy.params.get("posture", String(HOLD_THE_TOWNS)))
@@ -128,6 +167,9 @@ func _land(context: ColonyContext) -> void:
 		company.raised_by = policy.enactor
 		company.raised_under = posture
 		company.policy = policy.id
+		if not quartered.is_empty():
+			company.garrisons = StringName(quartered)
+			policy.params["landed"] = true
 		# **Troops granted come with one** (§9), from the Marshal's pool.
 		Commanders.take_command(company, null, run, context)
 		context.log.emit(EVENT_LANDED, policy.enactor, context.state.month, {

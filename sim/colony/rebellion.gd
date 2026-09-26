@@ -14,25 +14,27 @@ extends RefCounted
 ## loyal neighbours toward each other's objectives, and the PC may still write to
 ## its governor — he will simply get nothing back.
 ##
-## ## The gap is the drama
+## ## 🔒 It comes back when life is worse than under the Crown (#230)
 ##
-## It declares at 65 and returns at 45, and the space between them is hysteresis
-## for the same reason crown standing has it: **a town that flickers between
-## rebellion and loyalty month to month is noise, not drama.** One threshold
-## would give a town sitting near it a coin toss every month, and the Diplomat
-## would have nothing coherent to report.
+## It declares at sentiment 65, and **records its quality of life that month**.
+## For as long as it is out its quality of life carries a lift, free of the duty
+## (`QualityOfLife.REBELLION_LIFT`); **it returns the month its quality of life,
+## lift included, falls below the record** — SPEC §12.3's *once its people
+## believe life was better under the Crown.* The lift is what makes that take
+## time: the town has to lose the whole of its tax relief, and then some.
 ##
-## ## The sign flip is the PC's foothold
+## This replaced a return at sentiment 45. That band could not hold: the month
+## after a town declared, tax went to nothing, the quality term changed sign,
+## neighbours stopped counting and the stakes lost their trade half, all at once,
+## and a town that declared at 65 read near nought and came straight back — 129
+## to 135 round trips in eight years. Sentiment is still measured in a rebel
+## town, and still reported. It no longer brings the town back.
 ##
-## On rebelling, the largest standing contributor goes to zero, because the town
-## stops paying duty to a Crown it no longer recognises. Its quality of life then
-## falls — it cannot buy what it does not grow, and its specialty rots unsold.
+## ## 🔒 And a town that comes back is garrisoned for a year
 ##
-## Under attribution (`rebel-sentiment.md` §2) that falling quality of life now
-## **lowers** sentiment, because the rebellion is visibly what caused it. That is
-## the whole mechanism behind a peaceful return, and it is why none of this needs
-## Crown troops — which are M6 in any case, so in M3 a rebellion can only end by
-## the town choosing to end it.
+## The Marshal quarters a garrison on it (`CrownTroops`), and **while it stands
+## the town cannot declare**. When it sails home, is destroyed, or its policy
+## lapses, the bar ends with it.
 ##
 ## ## And the loop runs both ways
 ##
@@ -42,7 +44,6 @@ extends RefCounted
 
 ## Illustrative, and all tuning (`rebel-sentiment.md` §5, §8).
 const DECLARES_AT: float = 65.0
-const RETURNS_AT: float = 45.0
 
 const EVENT_DECLARED: StringName = &"town_declared_rebellion"
 const EVENT_RETURNED: StringName = &"town_returned_to_the_crown"
@@ -53,8 +54,11 @@ const EVENT_RETURNED: StringName = &"town_returned_to_the_crown"
 ## Returns what changed, or empty. Called from Settle with the sentiment just
 ## measured, so the state the *next* month reads is the state this month earned.
 static func resolve(town: Town, context: ColonyContext) -> StringName:
-	if not town.rebelling and town.rebel_sentiment >= DECLARES_AT:
+	if not town.rebelling and town.rebel_sentiment >= DECLARES_AT and not is_garrisoned(town, context):
 		town.rebelling = true
+		# What life was, the month it went. Settle has already measured it, and
+		# without the lift, since the town was not yet out.
+		town.declared_quality = town.quality_of_life
 		_turn_its_companies(town, Company.REBEL, context)
 		context.log.emit(EVENT_DECLARED, town.id, context.state.month, {
 			"town": String(town.id),
@@ -66,7 +70,7 @@ static func resolve(town: Town, context: ColonyContext) -> StringName:
 		}, WorldPhase.COLONY_MONTH)
 		return EVENT_DECLARED
 
-	if town.rebelling and town.rebel_sentiment <= RETURNS_AT:
+	if town.rebelling and town.quality_of_life < town.declared_quality:
 		town.rebelling = false
 		_turn_its_companies(town, Company.COLONIAL, context)
 		context.log.emit(EVENT_RETURNED, town.id, context.state.month, {
@@ -79,6 +83,18 @@ static func resolve(town: Town, context: ColonyContext) -> StringName:
 		return EVENT_RETURNED
 
 	return &""
+
+
+## 🔒 **Whether a garrison holds the town** (#230): a Crown company quartered
+## on it, still standing. While one does, the town cannot declare.
+static func is_garrisoned(town: Town, context: ColonyContext) -> bool:
+	if context == null or context.companies == null:
+		return false
+	for entry in context.companies.in_resolution_order():
+		var company: Company = entry
+		if not company.is_empty() and company.garrisons == town.id:
+			return true
+	return false
 
 
 ## 🔒 **Its companies take its side** (#434, `commanders.md` §3). A town's

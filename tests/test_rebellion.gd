@@ -59,8 +59,10 @@ func _context(towns: Array, month: int = 8) -> ColonyContext:
 	return context
 
 
-func _resolve(town: Town, sentiment: float, month: int = 8) -> Dictionary:
+func _resolve(town: Town, sentiment: float, month: int = 8, quality: float = -1.0) -> Dictionary:
 	town.rebel_sentiment = sentiment
+	if quality >= 0.0:
+		town.quality_of_life = quality
 	var context := _context([town], month)
 	var outcome := Rebellion.resolve(town, context)
 	return {"outcome": outcome, "log": context.log}
@@ -92,42 +94,42 @@ func test_a_town_below_the_threshold_stays_loyal() -> void:
 	assert_false(town.rebelling, "a town short of the threshold rebelled anyway")
 
 
-# --- 🔒 The gap is the drama ------------------------------------------------
+# --- 🔒 It comes back when life is worse than under the Crown (#230) ---------
 
-func test_a_rebel_town_does_not_come_back_the_moment_it_dips() -> void:
-	# **Hysteresis.** One threshold would give a town sitting near it a coin toss
-	# every month, and the Diplomat would have nothing coherent to report.
+func test_declaring_records_what_life_was() -> void:
 	var town := _town()
-	_resolve(town, 90.0)
-	assert_true(town.rebelling)
-
-	_resolve(town, Rebellion.DECLARES_AT - 1.0, 9)
-	assert_true(town.rebelling,
-		"a rebel town returned the moment it fell a point below the declaring line")
+	_resolve(town, 90.0, 8, 0.6)
+	assert_almost_eq(town.declared_quality, 0.6, 0.0001, "the town did not record what it left")
 
 
-func test_it_comes_back_once_it_falls_far_enough() -> void:
+func test_sentiment_falling_no_longer_brings_it_back() -> void:
+	# The old return at 45 flipped a town back the month after it declared, 129
+	# times in eight years. Sentiment is still measured; it decides nothing here.
 	var town := _town()
-	_resolve(town, 90.0)
-	var result := _resolve(town, Rebellion.RETURNS_AT - 1.0, 14)
-	assert_false(town.rebelling, "a settled town stayed out")
+	_resolve(town, 90.0, 8, 0.6)
+	_resolve(town, 0.0, 9, 0.7)
+	assert_true(town.rebelling, "a rebel town living better than it did came home on sentiment alone")
+
+
+func test_it_stays_out_until_life_falls_below_what_it_had() -> void:
+	var town := _town()
+	_resolve(town, 90.0, 8, 0.6)
+	_resolve(town, 0.0, 9, 0.6)
+	assert_true(town.rebelling, "a town living exactly as it did came home")
+	var result := _resolve(town, 0.0, 14, 0.59)
+	assert_false(town.rebelling, "a town living worse than under the Crown stayed out")
 	assert_eq(String(result["outcome"]), String(Rebellion.EVENT_RETURNED))
 
 
 func test_a_return_says_how_long_it_was_out() -> void:
 	var town := _town()
-	_resolve(town, 90.0)
+	_resolve(town, 90.0, 8, 0.6)
 	town.rebelling_since = 8
-	var result := _resolve(town, 10.0, 20)
+	var result := _resolve(town, 10.0, 20, 0.1)
 	var returned := (result["log"] as EventLog).of_type(Rebellion.EVENT_RETURNED)
 	assert_eq(returned.size(), 1, "a town came home and nothing said so")
 	assert_eq(int(returned[0].payload["months_out"]), 12,
 		"it came home having been out for no time at all")
-
-
-func test_the_gap_is_a_gap() -> void:
-	assert_true(Rebellion.RETURNS_AT < Rebellion.DECLARES_AT,
-		"a town would flicker between rebellion and loyalty month to month")
 
 
 # --- 🔒 What a rebel town will and will not do ------------------------------
@@ -275,25 +277,21 @@ func test_misery_settles_a_rebel_town_and_prosperity_does_not() -> void:
 		"a rebellion that was visibly costing the town was as attractive as one that was working")
 
 
-func test_a_rebel_town_that_cannot_trade_settles_over_months() -> void:
-	# The loop end to end, at the model level: tax goes to zero because it buys
-	# nothing, and its misery now argues against the rebellion rather than for
-	# it. Run far enough and it crosses back.
+func test_a_rebel_town_that_cannot_trade_comes_home_as_its_life_runs_down() -> void:
+	# The loop end to end, at the model level (#230): it cannot buy what it does
+	# not grow, so its life runs down month by month, and the month it falls
+	# below what it had under the Crown — lift and all — it comes home.
 	var town := _town()
-	town.rebel_sentiment = 90.0
-	town.rebelling = true
-	town.rebelling_since = 8
-	town.quality_of_life = 0.05
-
+	_resolve(town, 90.0, 8, 0.6)
 	var came_home := false
+	var quality := 0.6 + QualityOfLife.REBELLION_LIFT
 	for month in range(9, 30):
-		var context := _context([town], month)
-		town.rebel_sentiment = float(RebelSentiment.of(town, context, null, {})["total"])
-		if String(Rebellion.resolve(town, context)) == String(Rebellion.EVENT_RETURNED):
+		quality -= 0.05
+		if String(_resolve(town, 90.0, month, quality)["outcome"]) == String(Rebellion.EVENT_RETURNED):
 			came_home = true
 			break
 	assert_true(came_home,
-		"a rebel town living on nothing never reconsidered, so the PC has no foothold at all")
+		"a rebel town living on less and less never reconsidered, so the PC has no foothold at all")
 
 
 func test_nothing_here_lets_the_crown_retake_a_town() -> void:
@@ -466,6 +464,8 @@ func test_a_rebellion_survives_a_round_trip() -> void:
 	var restored := Town.from_dict(town.to_dict())
 	assert_true(restored.rebelling, "a reload brought a rebel town quietly back into the fold")
 	assert_eq(restored.rebelling_since, 8, "it came back having always been out, or never")
+	assert_almost_eq(restored.declared_quality, town.declared_quality, 0.0001,
+		"a reload forgot what life was when it went")
 
 
 # --- 🔒 Crown Sentiment: the town is talked out of a quarter of the duty -----

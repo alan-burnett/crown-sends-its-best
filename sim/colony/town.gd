@@ -273,6 +273,11 @@ var rebelling: bool = false
 ## return event can report it. `-1` while the town is loyal.
 var rebelling_since: int = -1
 
+## 🔒 **Its quality of life the month it declared** (#230,
+## `rebel-sentiment.md` §5): it comes back the month its life, lift included,
+## falls below this. -1 when it has never declared.
+var declared_quality: float = -1.0
+
 ## Months of embargo left to run (SPEC §12.3, #73, #74).
 ##
 ## **The Crown's one punishment before it has troops.** Its neighbours are
@@ -622,6 +627,7 @@ func to_dict() -> Dictionary:
 		"governor": String(governor_id),
 		"rebelling": rebelling,
 		"rebelling_since": rebelling_since,
+		"declared_quality": declared_quality,
 		"embargo_months": embargo_months,
 		"gold": _gold,
 	}
@@ -648,6 +654,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.experts_accrued = float(data.get("experts_accrued", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))
 	town.rebelling_since = int(data.get("rebelling_since", -1))
+	town.declared_quality = float(data.get("declared_quality", -1.0))
 	town.embargo_months = int(data.get("embargo_months", 0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.growth_accrued = float(data.get("growth_accrued", 0.0))
