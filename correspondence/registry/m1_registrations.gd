@@ -360,6 +360,15 @@ static func register_effects() -> void:
 		{"to": "contact", "resource": "resource", "amount": "integer", "payment": "gold"},
 		ORDER_SHIP_RESOURCE,
 	)
+	# 🔒 **Pay double pays twice what fair pays** (#451, SPEC §9.2). The same
+	# Order with the fair price the letter carries doubled here, so the two
+	# options are one figure and cannot drift apart.
+	ContentRegistry.register_effect(
+		"ship_resource_paying_double",
+		{"to": "contact", "resource": "resource", "amount": "integer", "payment": "gold"},
+		ORDER_SHIP_RESOURCE,
+		M1Registrations.build_double_shipment,
+	)
 	ContentRegistry.register_effect(
 		"grant_favor", {"to": "contact", "favor": "string"}, ORDER_GRANT_FAVOR
 	)
@@ -491,6 +500,13 @@ static func build_tax_order(args: Dictionary, context: LetterContext) -> Order:
 ## its params. **Which strengths and postures a letter may name is the content
 ## validator's** (`check_troop_requests`), so a bad one is refused when the data
 ## loads rather than when the player sends it.
+static func build_double_shipment(args: Dictionary, context: LetterContext) -> Order:
+	var params := args.duplicate()
+	# Whole gold, as every figure the PC pays is (#460).
+	params["payment"] = 2 * int(roundf(float(args.get("payment", 0))))
+	return Order.new(ORDER_SHIP_RESOURCE, StringName(args.get("to", "")), params, context.month)
+
+
 static func build_troops_order(args: Dictionary, context: LetterContext) -> Order:
 	var params := args.duplicate()
 	params["effect"] = String(PolicyEffects.CROWN_TROOPS)
