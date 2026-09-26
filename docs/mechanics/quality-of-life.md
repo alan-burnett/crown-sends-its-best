@@ -58,6 +58,14 @@ gains enormously.
 That is not a logical assessment of the situation. It is human nature, and it is
 the point.
 
+### In rebellion, a lift
+
+**A town in rebellion adds +0.2** (a placeholder) to its quality of life, for as
+long as it is out: it is free of the Crown's duty and glad of it
+(`rebel-sentiment.md` §5, #230). The lift is on the whole figure, clamped to one,
+and every reader sees it, which includes the neighbours a prosperous rebellion
+persuades.
+
 ## 4. The five components
 
 Each resolves to `[0, 1]`.

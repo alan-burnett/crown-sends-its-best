@@ -34,6 +34,10 @@ It is what reconciles §12.3's "shortages raise sentiment" with §12.3's lock th
 rebel towns can return peacefully — without it, a rebelling town's worsening life
 would drive it further away and no town could ever come home.
 
+**Since #230 the return reads quality of life directly** (§5): a rebel town comes
+back when life is worse than it was under the Crown. That is the same principle
+said more plainly, and it cannot flicker.
+
 | Situation | Blamed | Sentiment |
 | :--- | :--- | :--- |
 | Loyal town squeezed by taxes and denials | the Crown | **rises** |
@@ -193,35 +197,71 @@ by Crown troops is an argument *against* rebellion, and should read as one.
 
 ## 5. Rebellion, and coming back
 
-Illustrative numbers. **All tuning.**
+Author's ruling (#230). Illustrative numbers, **all tuning**.
 
 ```
-sentiment >= 65   the town declares rebellion
-sentiment <= 45   a rebel town returns to the Crown
+sentiment >= 65                           the town declares rebellion
+quality of life < what it was at declaring   a rebel town returns to the Crown
 ```
 
-The gap is hysteresis, for the same reason crown standing has it: a town that
-flickers between rebellion and loyalty month to month is noise, not drama.
+### Declaring is unchanged
 
-### Under rebellion, the sign flips
+A loyal town declares when its sentiment reaches 65.
 
-A rebel town stops paying tax, so the largest standing contributor **goes to
-zero**. It stops being refused by a Crown it no longer asks. Meanwhile its quality
-of life falls — trade is gone, and the Crown's forces are hostile where they were
-once its guardians.
+### In rebellion, life gets better, and then worse
 
-Under attribution, that falling quality of life now **lowers** sentiment, because
-the rebellion is visibly what caused it.
+**The month it declares, the town is free of the Crown's duty, and happier for
+it.** For as long as it is out, its quality of life carries a **lift of +0.2**
+(a placeholder, `quality-of-life.md` §3). The taxes stay gone, so the lift
+stays.
 
-**That is the PC's foothold**, and it is the whole reason §12.3's peaceful return
-is achievable rather than decorative.
+**Then life gets worse, for real reasons.** The Crown will not trade with a rebel
+town, so it cannot buy food, clothing or luxuries. Its stores run down (health,
+pleasure), its objective starves of what it would have bought (hope), and the
+Crown's troops are hostile where they were its guardians (safety). A duke's
+backing (`rival-pressure.md` §8) is what can hold that off.
+
+### It comes back when life is worse than under the Crown
+
+**A rebel town returns the month its quality of life, lift included, falls below
+what it was in the month it declared.** SPEC §12.3: a rebel town goes back *once
+its people believe life was better under the Crown.*
+
+The lift is what makes that take time. The town has to lose the whole of its tax
+relief, and then some, before it regrets going.
+
+**This replaces the return at sentiment 45.** That was a hysteresis band, and it
+could not hold. In the month after a town declared, tax went to nothing, the
+quality term changed sign, neighbours stopped counting and the stakes lost their
+trade half, all at once. A town that declared at 65 read near nought the month
+after and came straight back: 129 to 135 round trips in eight years, in the runs
+#230 measured.
+
+**Sentiment is still measured in a rebel town**, attribution and all (§2), and
+the Diplomat and the letters still report on it. It no longer decides the
+return.
+
+### A town that comes back is garrisoned for a year
+
+**Whenever a town comes back, peacefully or retaken (`battles.md` §9), the
+Marshal quarters a garrison on it for 12 months.** It is a Crown troops policy
+(`the-marshal.md` §2) at garrison strength, holding that town, and **the PC bears
+its whole charge.** Nobody asks for it; the Crown sends it.
+
+**While the garrison stands, the town cannot declare.**
+
+- After 12 months it sails home, and the town may declare again.
+- **If it is gone sooner**, whether destroyed by a duke, natives or anyone else,
+  or sent home because the policy lapsed unpaid (`policy.md` §4–§5), **the bar
+  ends with it.**
 
 ### And the loop runs both ways
 
-If the town survives — it beats what was sent, or the PC has no more troops to
-send — its safety re-establishes, quality of life recovers, and sentiment stops
-falling. Its neighbours now see a rebel town that is prosperous and unpunished,
-and §12.3's spread term does the rest.
+If the town holds out (well supplied, backed by a duke, beating what is sent),
+its life stays above what it had under the Crown, and it stays out. Its
+neighbours see a rebel town that is prosperous and unpunished, and the spread
+term (§4) does the rest. The lift makes a new rebellion look its most prosperous
+in its first months, which is exactly when it persuades most.
 
 **A rebellion that is not being put down is an advertisement.**
 
@@ -315,7 +355,7 @@ Tied to SPEC §6.2:
   rebellion in years 2–3, not sooner.
 
 Everything in §5 is a tuning value, as are all contributor weights and grievance
-durations.
+durations: the rebellion lift, and the garrison's length and strength, included.
 
 ## 10. Open items
 

@@ -48,6 +48,10 @@ Before any rebellion the first two are the whole of it: Crown troops keep the
 colony safe from rivals and natives. Afterwards the third becomes available, and
 it is the PC's only route to retaking a town by force.
 
+**He also garrisons every town that comes back from rebellion**, unasked, for 12
+months, and the PC bears the charge (`rebel-sentiment.md` §5, #230). While the
+garrison stands the town cannot declare again.
+
 **A posture against the Crown's interests can be refused** — §12.6 says Crown
 troops may decline such orders — but that judgement belongs to the commander on
 the ground (§9), not to the Marshal.
