@@ -182,6 +182,12 @@ and costs loyalty. A decision ignored is taken by the contact himself, in his ow
 interest or at random depending on personality, and also costs loyalty. A report
 ignored costs nothing.
 
+**He never spends the Crown's purse.** An option the Crown would pay for (a
+promise of gold, funding, a share of a policy's charge, a payment for goods) is
+not his to take when he decides alone: SPEC §10.3 has the Crown paying *the
+PC's* promises, and a man the PC did not answer has none of the PC's to make.
+He chooses among the rest (#450).
+
 ## 4. What to expect as loyalty shifts
 
 | Loyalty | Writing to the PC | Receiving an order |
