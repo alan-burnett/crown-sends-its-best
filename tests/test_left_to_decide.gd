@@ -7,8 +7,9 @@ extends TestCase
 ## chose happens**, as his own will (Seam C). It used to end at an event nothing
 ## read. 🔒 A request the PC ignores is still a rude refusal, not a decision.
 ##
-## ⚠ He does not spend the Crown's money, provisionally, until the PO rules in
-## `contacts.md` §3.
+## 🔒 He never spends the Crown's purse (`contacts.md` §3, the PO's ruling on
+## #450): the Crown pays the PC's promises, and a man the PC did not answer has
+## none of the PC's to make.
 
 const SEED: int = 450
 
@@ -103,9 +104,9 @@ func test_an_ignored_request_is_a_rude_refusal_and_nothing_more() -> void:
 	assert_empty(_his_will(governor), "an ignored request was carried out as a decision")
 
 
-func test_provisionally_he_does_not_spend_the_crowns_money() -> void:
-	# ⚠ #450's open question: until the PO rules, the Chancellor left alone does
-	# not promise himself the Crown's gold. He refuses instead.
+func test_he_never_spends_the_crowns_purse() -> void:
+	# The Chancellor left alone does not promise himself the Crown's gold. He
+	# refuses instead.
 	var chancellor := run.contact(&"chancellor")
 	var letter := Letter.from_record(content.record("letters", "chancellor.how_to_answer"))
 	var inbound := InboundLetter.new(String(letter.id), chancellor.id)

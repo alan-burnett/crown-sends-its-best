@@ -454,9 +454,9 @@ func test_personality_changes_what_he_decides() -> void:
 	# of those wins is a weight, not a branch.
 	#
 	# **A favour, not the Crown's gold** (#450). This took the Chancellor's own
-	# letter and had him promise himself the money; a man left to decide may not
-	# spend the Crown's purse, provisionally, so the example is a patron granting
-	# a favour or refusing one (`test_left_to_decide` covers the purse).
+	# letter and had him promise himself the money; a man left to decide never
+	# spends the Crown's purse (`contacts.md` §3), so the example is a patron
+	# granting a favour or refusing one (`test_left_to_decide` covers the purse).
 	var letter := Letter.from_record(content.record("letters", "patron.introduction"))
 	var inbound := InboundLetter.new("patron.introduction", &"patron_1", Tone.HATEFUL)
 	inbound.id = &"r5"

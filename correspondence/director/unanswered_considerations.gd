@@ -15,21 +15,19 @@ const KINDS: Array[StringName] = [DecisionKind.UNANSWERED]
 static func register_all() -> void:
 	Deliberation.register_consideration(SelfInterestConsideration.new(&"self_interest"), KINDS)
 	Deliberation.register_consideration(CapriceConsideration.new(&"caprice"), KINDS)
-	# ⚠ Provisional, pending the PO's ruling on #450 — see the class.
+	# 🔒 He never spends the Crown's purse (#450, `contacts.md` §3) — see the class.
 	Deliberation.register_filter(NotOnTheCrownsPurse.new(&"not_on_the_crowns_purse"), KINDS)
 
 
-## ⚠ **Provisional: he does not spend the Crown's money** (#450).
+## 🔒 **A man deciding alone never spends the Crown's purse** (#450,
+## `contacts.md` §3, the PO's ruling).
 ##
-## A decision left to him is now carried out, and `SelfInterestConsideration`
-## values a promise of gold highest — so a man left alone would pick the option
-## that pays him from the Crown's purse. **Whether he may is the PO's to rule**,
-## in `contacts.md` §3. Until then he may not: an answer the PC never gave does
-## not commit the Crown's money.
+## A decision left to him is carried out, and `SelfInterestConsideration` values
+## a promise of gold highest — so a man left alone would pick the option that
+## pays him from the Crown's purse. SPEC §10.3 has the Crown paying the PC's
+## promises, and a man the PC did not answer has none of the PC's to make.
 ##
-## A filter and not a weight, because whichever way it is ruled it is a rule
-## (`deliberation.md` §5). Ruled the other way, this class and its registration
-## are deleted and nothing else changes.
+## A filter and not a weight, because it is a rule (`deliberation.md` §5).
 class NotOnTheCrownsPurse:
 	extends DeliberationFilter
 
