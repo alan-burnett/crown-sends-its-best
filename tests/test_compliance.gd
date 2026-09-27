@@ -61,15 +61,23 @@ func _vague_order() -> Order:
 
 
 func test_all_six_outcomes_are_reachable() -> void:
-	# Swept across loyalty, payment, personality and how specific the order was,
-	# which is the honest way to ask "can this happen" without asserting a
-	# balance number.
+	# Swept across loyalty, payment, personality, the tone of the letter and how
+	# specific the order was, which is the honest way to ask "can this happen"
+	# without asserting a balance number.
+	#
+	# **The tone is in the sweep since #449.** A delay used to be reached only
+	# by a man paid in full, whom the old guarantee stopped from refusing and
+	# nothing else; paid in full he now complies, and a delay is what a man paid
+	# most of it does when he is asked kindly.
 	var seen: Dictionary = {}
 	for loyalty in [0.0, 15.0, 30.0, 50.0, 70.0, 85.0, 100.0]:
 		for autonomy in [0.4, 1.0, 1.8]:
 			for payment in [0.0, 250.0, 500.0, 900.0, 1000.0]:
-				var contact := _contact(loyalty, {"autonomy": autonomy})
-				seen[String(_resolve(_troop_request(payment), contact)["outcome"])] = true
+				for tone in [&"", Tone.PLEASED]:
+					var contact := _contact(loyalty, {"autonomy": autonomy})
+					var order := _troop_request(payment)
+					order.tone = tone
+					seen[String(_resolve(order, contact)["outcome"])] = true
 			seen[String(_resolve(_vague_order(), _contact(loyalty, {"autonomy": autonomy}))["outcome"])] = true
 	for outcome in Compliance.OUTCOMES:
 		assert_true(seen.has(String(outcome)), "%s was never reachable. Reached: %s" % [outcome, seen.keys()])

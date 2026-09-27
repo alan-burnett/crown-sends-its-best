@@ -117,6 +117,7 @@ static func resolve(
 	log: EventLog,
 	streams: RngStreams,
 	rebel: Town = null,
+	can_crown_pay: bool = true,
 ) -> Dictionary:
 	var context := DeliberationContext.new(DecisionKind.ORDER_COMPLIANCE, state, log)
 	context.phase = WorldPhase.RECKONING
@@ -124,7 +125,12 @@ static func resolve(
 	context.data = {
 		"order": order,
 		"cost": cost_of(order),
-		"payment": payment_in(order),
+		# 🔒 **Once the Crown honours nothing, the money is not there** (#449,
+		# SPEC §12.6). What the PC offered reaches him as nothing, and the
+		# guarantee full payment carries goes with it — the same two changes the
+		# Marshal's hypothetical makes (`RunEndCheck`).
+		"payment": payment_in(order) if can_crown_pay else 0.0,
+		"can_crown_pay": can_crown_pay,
 		"loyalty": contact.loyalty(),
 		"vagueness": vagueness_of(order),
 		# **Leaning on a man works** (`rebel-sentiment.md` §4). It is the surest

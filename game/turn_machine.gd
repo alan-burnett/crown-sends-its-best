@@ -92,6 +92,8 @@ func _init(p_run: RunState) -> void:
 
 	orders = OrderDriver.new(run.intents, run.promises)
 	orders.contacts = run.contacts
+	# Whether a full payment is still real (#449).
+	orders.refusal = run.refusal
 	# The run's own bag, so an Order still at sea under *Distant colony* is in the
 	# save and back in the driver when the game is loaded (#390).
 	orders.pending = run.orders_at_sea
@@ -122,6 +124,9 @@ func _init(p_run: RunState) -> void:
 	# The gunsmith goes dark, the month after the Crown did not pay (#438).
 	var shut_buildings := ShutBuildingExecutor.new()
 	shut_buildings.run = run
+	# A policy agreed to after a delay is enacted when the delay is up (#449).
+	var policy_enactments := PolicyEnactExecutor.new()
+	policy_enactments.policies = run.policies
 	# What a governor's answer to a tribe does, the month after (#435).
 	var tribe_answers := TribeAnswerExecutor.new()
 	tribe_answers.run = run
@@ -390,7 +395,7 @@ func _init(p_run: RunState) -> void:
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, company_urging, sabotage_by_letter, expert_gifts, gold_gifts, rebel_backings, shut_buildings, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
+		urging, company_urging, sabotage_by_letter, expert_gifts, gold_gifts, rebel_backings, shut_buildings, policy_enactments, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
 		diplomat_moves, executor,
 	]
 

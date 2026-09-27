@@ -240,16 +240,21 @@ class DissonanceConsideration:
 
 
 ## **Full payment is a guaranteed yes** while crown standing can cover it
-## (SPEC §12.6).
+## (SPEC §12.6, `contacts.md` §3).
 ##
 ## A filter rather than a heavy weight, because a guarantee that can lose a close
-## vote is not a guarantee. Crown standing is M3; until then the Crown always
-## pays, and the seam is the `can_crown_pay` flag the context carries.
+## vote is not a guarantee. **The Crown's refusal is the seam**: `can_crown_pay`
+## is whether it is still honouring what the PC pledges, and once it is not the
+## payment is nothing and the guarantee goes with it.
+##
+## 🔒 **A yes is compliance** (#449). This removed only the refusal, which left a
+## man paid everything he asked free to do part of it, put it off, read it his
+## own way or do something else — four answers that are not *yes*.
 class FullPaymentIsAYes:
 	extends DeliberationFilter
 
 	func permits(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> bool:
-		if candidate.id != Compliance.REFUSE:
+		if candidate.id == Compliance.COMPLY:
 			return true
 		var cost: float = float(context.get_value("cost", 0.0))
 		if cost <= 0.0:
