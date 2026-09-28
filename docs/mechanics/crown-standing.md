@@ -138,6 +138,23 @@ cutoff waits. This is the mechanism that satisfies §10.3's lock, and it is a
 **gate, not a threshold** — a naive threshold check violates the invariant the
 first time a catastrophic promise lands.
 
+### Answering a warning: *the colony will retrench*
+
+Author's ruling (#451). Both of the Chancellor's warnings offer the PC three
+answers: retrench, repay him in kind (a favour), or nothing. **Retrenching is a
+promise the Crown holds him to**:
+
+- **For the next six months, the Crown pays out on the PC's word no more than it
+  takes in from the colony.** Measured as the sum of those months' spending
+  against the sum of their revenue, the Ledger's two columns.
+- **Kept**, it is a promise delivered, and the Chancellor's regard rises for it.
+- **Broken**, it is a promise broken, and the Chancellor remembers it
+  (`contacts.md` §7). Nothing stops the PC spending; the promise is what it
+  costs him.
+
+It is the same machinery a revenue target uses: a statement about what the
+colony will do, judged by what it does.
+
 ### The window is the point
 
 During `WARNED`, promises are still honored. That is deliberate: it gives the PC
