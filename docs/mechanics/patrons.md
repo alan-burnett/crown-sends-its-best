@@ -258,6 +258,20 @@ that forced it.
 
 Nothing here adds a clock.
 
+### He has heard what the court says of the PC
+
+Author's ruling (#466), and SPEC §14.1's *especially patrons*. A patron reads the
+PC's prestige band (`prestige.md` §7) twice:
+
+- **On arrival, his regard starts warmer or colder by it.** Against his usual
+  start: ruinous −10, obscure ±0, respectable +10, handsome +20, celebrated +30
+  (placeholders). The band is read the month he arrives.
+- **While the PC is ruinous, he makes no offers.** He still introduces himself,
+  asks for his need and for gold, renegotiates a policy he already holds, and
+  takes his leave, but he offers nothing: no specialty, no one-off. The band is
+  read each month, so an offer he would make returns when the PC's name
+  recovers.
+
 ## 8. Departure, and the window that closes
 
 **Every patron stays at least two years.**
