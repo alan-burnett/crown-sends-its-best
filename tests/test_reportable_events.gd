@@ -69,7 +69,7 @@ func test_every_reportable_event_is_one_the_sim_emits() -> void:
 		OpticsRegister.EVENT_TRIBUTE_PAID, Company.EVENT_DESTROYED,
 		UrgeIntentExecutor.EVENT_PRESSED, BackRebellionExecutor.EVENT_BACKED,
 		GunsmithMachines.EVENT_BROKE, StewardRaise.EVENT_RAISED,
-		RunEndDriver.EVENT_FALLEN,
+		RunEndDriver.EVENT_FALLEN, MakingAnExample.EVENT_PROPOSED, MakingAnExample.EVENT_ACTED_ALONE,
 	]
 	var names := PackedStringArray()
 	for event in emitted:

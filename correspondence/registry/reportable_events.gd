@@ -93,6 +93,18 @@ const TABLE: Dictionary = {
 		"man": "quartermaster",
 		"fields": {"town": "town", "amount": "gold"},
 	},
+	# 🔒 **A Crown commander asked to make an example of a rebel town, or did it
+	# without asking** (#457, `commanders.md` §5). His letter either way.
+	"punishment_proposed": {
+		"town": "town",
+		"man": "commander",
+		"fields": {"town": "town"},
+	},
+	"made_an_example_unasked": {
+		"town": "town",
+		"man": "commander",
+		"fields": {"town": "town"},
+	},
 	# 🔒 **The colony has fallen** (#470, `endings.md` §1): no town and nobody
 	# walking. The last chance hangs off it — the Chancellor's formal warning and
 	# the Provost's offer of a town by sea, both in the month it falls.

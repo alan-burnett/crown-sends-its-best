@@ -69,6 +69,14 @@ var natives: Tribes = null
 ## The expeditions on the map (#417), so a war party can fall on one.
 var parties: Array = []
 
+## 🔒 **Ground men are sitting on** (#457), so a Crown company making an example
+## of a rebel town can deny it its fields, as a duke's men do. Null in a fixture,
+## and then nobody sits on anything.
+var denied: DeniedTiles = null
+
+## The companies punishing a town this month, whose men stay on its fields.
+var _punishing: Dictionary = {}
+
 
 func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngStreams) -> void:
 	if companies == null:
@@ -135,11 +143,16 @@ func _commission(context: ColonyContext) -> void:
 
 func _march(context: ColonyContext) -> void:
 	_commission(context)
+	_punishing = {}
 	for entry in companies.in_resolution_order():
 		var company: Company = entry
 		if company.is_empty():
 			continue
 		_take_the_month(company, context)
+	# 🔒 **They sit on its fields only while he goes on punishing it** (#457):
+	# a company that chose otherwise this month, or is gone, has left them.
+	if denied != null:
+		denied.leave_unless(_punishing, context)
 
 
 ## One company's month: **move and attack, interleaved** (#217, `battles.md` §8).
@@ -204,6 +217,10 @@ func _take_the_month(company: Company, context: ColonyContext) -> void:
 			CommanderConsiderations.FORTIFY:
 				# It takes his month, like razing.
 				_fortify(company, context)
+				break
+			CommanderConsiderations.PUNISH:
+				# 🔒 **It takes his month** (#457), as razing does.
+				_punish_or_ask(company, context)
 				break
 			CommanderConsiderations.ATTACK:
 				if attacks <= 0:
@@ -360,7 +377,106 @@ func _strike(company: Company, party: ExpeditionParty, context: ColonyContext) -
 	if theirs <= 0.0 or mine <= 0.0:
 		return
 	var share := minf(1.0, Battle.lethality() * mine / theirs)
-	party.attacked(share, "native" if company.allegiance == Company.NATIVE else "rival", context)
+	party.attacked(share, String(company.allegiance), context)
+
+
+# --- 🔒 Making an example of a rebel town (#457) ------------------------------
+
+func _may_punish(company: Company, context: ColonyContext) -> bool:
+	var town := MakingAnExample.town_within_reach(company, colony)
+	return town != null and MakingAnExample.may_punish(company, town, context.log, context.state.month)
+
+
+## He chose it. **With leave he does it; without, he asks first or acts alone**
+## (`commanders.md` §5) — the one rule for whether a man still asks, drawn on his
+## own stream so it is his and nobody else's.
+func _punish_or_ask(company: Company, context: ColonyContext) -> void:
+	var town := MakingAnExample.town_within_reach(company, colony)
+	if town == null:
+		return
+	var month := context.state.month
+	var leave := MakingAnExample.has_leave(company, town, context.log, month)
+	if not leave:
+		var commander := companies.commander_of(company, contacts)
+		var stream: RandomNumberGenerator = null
+		if context.streams != null and commander != null:
+			stream = context.streams.contact_stream(String(commander.id))
+		var asked := {
+			"commander": String(company.commander),
+			"town": String(town.id),
+			"company": String(company.id),
+		}
+		if Consultation.consults(commander, stream):
+			# He writes, and waits for the answer.
+			context.log.emit(MakingAnExample.EVENT_PROPOSED, company.commander, month, asked,
+				WorldPhase.MOVEMENT)
+			return
+		context.log.emit(MakingAnExample.EVENT_ACTED_ALONE, company.commander, month, asked,
+			WorldPhase.MOVEMENT)
+	_punish(company, town, leave, context)
+
+
+## A month of it: **burn a field, strike an expedition, sit on its ground**
+## (#457, `commanders.md` §5; `tiles-and-improvements.md` §7,
+## `founding-towns.md` §7, `rival-pressure.md` §5).
+func _punish(company: Company, town: Town, asked: bool, context: ColonyContext) -> void:
+	var burnt := ""
+	var to_burn := _one_of_theirs_to_burn(company, town)
+	if to_burn != Company.NOWHERE:
+		burnt = String(map.improvement_at(to_burn.x, to_burn.y))
+		_raze(company, to_burn, context)
+
+	var struck := 0
+	for entry in parties:
+		var party: ExpeditionParty = entry
+		if party.parent != town.id or party.is_empty() or party.at == Vector2i(-1, -1):
+			continue
+		if Battle.tiles_in_contact(company.at, party.at):
+			_strike(company, party, context)
+			struck += 1
+
+	var sat_on := 0
+	if denied != null and map != null:
+		_punishing[String(company.id)] = true
+		for dy in range(-1, 2):
+			for dx in range(-1, 2):
+				var at := company.at + Vector2i(dx, dy)
+				if not map.in_bounds(at.x, at.y) or _ground_of(at) != town:
+					continue
+				denied.occupy(company.id, at, town.id, context)
+				sat_on += 1
+
+	# 🔒 **Made an example of** (`rebel-sentiment.md` §4), for a year from now.
+	town.example_months = MakingAnExample.MONTHS
+	context.log.emit(MakingAnExample.EVENT_PUNISHED, town.id, context.state.month, {
+		"town": String(town.id),
+		"company": String(company.id),
+		"commander": String(company.commander),
+		"burnt": burnt,
+		"struck": struck,
+		"tiles": sat_on,
+		# With the PC's leave, or his own (Seam C).
+		"asked": asked,
+	}, WorldPhase.MOVEMENT)
+
+
+## An improvement of **this** town's on his tile or beside it: not a fort, and
+## not something the ground grew. The nearest, then north-west first.
+func _one_of_theirs_to_burn(company: Company, town: Town) -> Vector2i:
+	if map == null:
+		return Company.NOWHERE
+	var best := Company.NOWHERE
+	for dy in range(-1, 2):
+		for dx in range(-1, 2):
+			var at := company.at + Vector2i(dx, dy)
+			if not map.in_bounds(at.x, at.y) or _ground_of(at) != town:
+				continue
+			var improvement := Improvement.find(map.improvement_at(at.x, at.y))
+			if improvement == null or improvement.natural or improvement.is_a_fortification():
+				continue
+			if best == Company.NOWHERE or _nearer(at, best, company.at):
+				best = at
+	return best
 
 
 ## Whose ground a tile is: the first town by id whose reach covers it, as
@@ -452,7 +568,8 @@ func _what_he_decides(
 			OrderRule.nearest_unexplored(company.at, map, knowledge) != Company.NOWHERE,
 			_something_to_burn(company) != Company.NOWHERE,
 			_party_in_reach(company) != null,
-			_may_fortify(company)),
+			_may_fortify(company),
+			_may_punish(company, context)),
 		deliberation)
 	return decision.chosen_id() if decision.has_choice() else CommanderConsiderations.HOLD
 

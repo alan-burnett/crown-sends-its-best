@@ -1,0 +1,76 @@
+{
+  "id": "commander.may_i_make_an_example",
+  "sender": "commander",
+  "type": "question",
+  "skippable": false,
+  "note": "Issue 457, commanders.md section 5: a Crown commander putting down the rebellion proposes to make an example of a rebel town, and waits for the answer. The reply is an urging through compliance: yes urges him toward it, and anything else spares the town. Left unanswered, he decides for himself (SPEC 9.3). Placeholder prose.",
+  "params": {
+    "commander": "contact",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "{param:town} will not come out to fight, and I will not throw good men at its walls to prove a point the walls are already making."
+    },
+    {
+      "text": "There is another way to make it. I can burn what they have planted, fall on anybody they send out, and sit on their fields until the town is hungry enough to remember whose it is. Its neighbours will see what rebellion costs, which is the purpose."
+    },
+    {
+      "text": "I will not begin without your word. It is a hard thing to do to the King's subjects, however little they care to be."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and my answer is plain"
+        },
+        {
+          "tone": "desperate",
+          "text": "and a great deal rests on what you do next"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and I had hoped for better news of the campaign"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "orders",
+        "prompt": "What becomes of the rebel town",
+        "options": [
+          {
+            "id": "make_an_example",
+            "label": "make an example of them",
+            "text": "Do it. Let every town in the colony see what it costs.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "punish"
+              }
+            }
+          },
+          {
+            "id": "spare_them",
+            "label": "spare the town",
+            "text": "Spare their fields. Fight their men if they come out, and leave the rest standing.",
+            "effect": {
+              "urge_company": {
+                "to": "{commander}",
+                "order": "attack"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant in the field,"
+      }
+    ]
+  }
+}

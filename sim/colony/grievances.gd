@@ -24,7 +24,6 @@ extends RefCounted
 const REFUSED: StringName = &"refused"
 const PROMISE_BROKEN: StringName = &"promise_broken"
 const HARSH_ORDER: StringName = &"harsh_order"
-const MILITARY_ABUSE: StringName = &"military_abuse"
 const RELIEF_IMBALANCE: StringName = &"relief_imbalance"
 
 const EVENT_TAKEN: StringName = &"town_took_offence"

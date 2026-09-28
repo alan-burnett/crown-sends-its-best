@@ -335,6 +335,8 @@ func _init(p_run: RunState) -> void:
 	companies.natives = run.tribes
 	# The expeditions a war party may fall on (#417).
 	companies.parties = run.parties
+	# The ground a company making an example of a rebel town sits on (#457).
+	companies.denied = run.denied
 
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and

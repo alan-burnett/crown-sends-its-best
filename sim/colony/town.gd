@@ -292,6 +292,16 @@ var embargo_months: int = 0
 func is_embargoed() -> bool:
 	return embargo_months > 0
 
+
+## Months left in which this town counts as made an example of (#457,
+## `rebel-sentiment.md` §4): a Crown commander punished it, and its rebellion
+## persuades nobody much while that is remembered.
+var example_months: int = 0
+
+
+func is_made_an_example() -> bool:
+	return example_months > 0
+
 ## **The sum of its citizens' private wealth plus the town's coffers.** Rises
 ## selling to the Crown, falls buying from it, and never moves between towns or
 ## to natives.
@@ -629,6 +639,7 @@ func to_dict() -> Dictionary:
 		"rebelling_since": rebelling_since,
 		"declared_quality": declared_quality,
 		"embargo_months": embargo_months,
+		"example_months": example_months,
 		"gold": _gold,
 	}
 
@@ -656,6 +667,7 @@ static func from_dict(data: Dictionary) -> Town:
 	town.rebelling_since = int(data.get("rebelling_since", -1))
 	town.declared_quality = float(data.get("declared_quality", -1.0))
 	town.embargo_months = int(data.get("embargo_months", 0))
+	town.example_months = int(data.get("example_months", 0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.growth_accrued = float(data.get("growth_accrued", 0.0))
 	town.livestock_accrued = data.get("livestock_accrued", {}).duplicate()

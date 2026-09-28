@@ -26,7 +26,6 @@ const WEIGHTS: Dictionary = {
 	"refused": 9.0,
 	"promise_broken": 14.0,
 	"harsh_order": 6.0,
-	"military_abuse": 20.0,
 	"relief_imbalance": 7.0,
 }
 
@@ -34,7 +33,6 @@ const MONTHS: Dictionary = {
 	"refused": 14,
 	"promise_broken": 20,
 	"harsh_order": 10,
-	"military_abuse": 30,
 	"relief_imbalance": 12,
 }
 

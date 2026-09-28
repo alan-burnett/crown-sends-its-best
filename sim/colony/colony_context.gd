@@ -168,7 +168,7 @@ func tiles_of(town: Town) -> Array[Vector2i]:
 	if territory == null:
 		return []
 	var mine := territory.tiles_of(town.id)
-	var denying := denied != null and not denied.held.is_empty()
+	var denying := denied != null and not denied.is_empty()
 	if not denying and town.yielded_tiles.is_empty():
 		return mine
 
