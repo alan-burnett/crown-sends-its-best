@@ -59,6 +59,9 @@ func _arrive(state: WorldState, log: EventLog) -> void:
 	var here := Patron.all_in(run).size()
 	while here < wanted:
 		var patron := Patron.generate(run.patrons.next_id(), run.streams, state.month, run.patrons)
+		# 🔒 **He has heard what the court says of the PC** (#466, §7): his
+		# regard starts warmer or colder by the band, read the month he arrives.
+		Patron.hear_of_the_pc(patron, run.prestige)
 		run.add_contact(patron)
 		here += 1
 		# Seam A. What he is, said once, so the letters and the map read the same

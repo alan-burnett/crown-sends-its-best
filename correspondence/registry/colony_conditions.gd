@@ -135,6 +135,16 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
 	)
+	# While the PC is ruinous, no patron offers him anything (#466).
+	ContentRegistry.register_condition(
+		"the_pc_is_not_ruinous", {}, ColonyConditions.the_pc_is_not_ruinous
+	)
+	# Which man a composed letter goes to, by id (#452).
+	ContentRegistry.register_condition("he_is", {"id": "string"}, ColonyConditions.he_is)
+	# The Steward pushes only on something the colony trades (#452).
+	ContentRegistry.register_condition(
+		"the_colony_traded_last_month", {}, ColonyConditions.the_colony_traded_last_month
+	)
 	# Who a composed letter may go to (#454).
 	ContentRegistry.register_condition(
 		"his_expedition_is_travelling", {}, ColonyConditions.his_expedition_is_travelling
@@ -558,6 +568,24 @@ static func _his_town(context: LetterContext, him: Contact) -> Town:
 ## 🔒 **The direction, never the figure** (`prestige.md` §7). A letter may notice
 ## that the wind has changed; it may not read the number, and there is no
 ## condition here that would let it compare the number to anything.
+## 🔒 **A patron offers nothing while the PC is ruinous** (#466, `patrons.md`
+## §7). Read each month, so an offer returns when his name recovers. **The band,
+## never the figure**, like the two conditions below it.
+## Whether the letter's man is this one (#452).
+static func he_is(args: Dictionary, context: LetterContext) -> bool:
+	return context != null and context.sender != null \
+		and String(context.sender.id) == String(args.get("id", ""))
+
+
+static func the_colony_traded_last_month(_args: Dictionary, context: LetterContext) -> bool:
+	return not String(ColonyParamSources.most_traded_resource({}, context)).is_empty()
+
+
+static func the_pc_is_not_ruinous(_args: Dictionary, context: LetterContext) -> bool:
+	return context == null or context.prestige == null \
+		or context.prestige.band() != Prestige.RUINOUS
+
+
 static func the_court_is_cooling(_args: Dictionary, context: LetterContext) -> bool:
 	return context != null and context.prestige != null \
 		and context.prestige.direction() == "falling"

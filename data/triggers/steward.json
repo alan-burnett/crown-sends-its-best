@@ -47,10 +47,7 @@
     "urgency": 0.4,
     "cooldown": 6,
     "params": {
-      "resource": {
-        "from": "literal",
-        "value": "clothing"
-      },
+      "resource": { "from": "most_traded_resource" },
       "amount": {
         "from": "scaled_world_value",
         "key": "colony_revenue",
@@ -61,6 +58,7 @@
     },
     "conditions": [
       { "the_colony_has_lived": { "months": 1 } },
+      { "the_colony_traded_last_month": {} },
       {
         "world_value_below": {
           "key": "colony_revenue",

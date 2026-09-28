@@ -378,6 +378,26 @@ static func all_in(run: RunState) -> Array:
 ## included, since their own streams fixed it; and this man is entered in it.
 ## Without a book nothing is closed, which is only ever a test asking about one
 ## man.
+## 🔒 **What the court's opinion of the PC does to his welcome** (#466,
+## `patrons.md` §7): his starting regard, shifted by the PC's prestige band.
+## Placeholders. His vice and his own draw apply as before; this moves the start.
+const WELCOME_BY_BAND: Dictionary = {
+	"ruinous": -10.0,
+	"obscure": 0.0,
+	"respectable": 10.0,
+	"handsome": 20.0,
+	"celebrated": 30.0,
+}
+
+
+static func hear_of_the_pc(patron: Contact, prestige: Prestige) -> void:
+	if patron == null or prestige == null:
+		return
+	var shift := float(WELCOME_BY_BAND.get(String(prestige.band()), 0.0))
+	patron.relationship.loyalty = clampf(
+		patron.relationship.loyalty + shift, Relationship.MIN_LOYALTY, Relationship.MAX_LOYALTY)
+
+
 static func generate(
 	id: StringName, streams: RngStreams, month: int = 0, book: PatronBook = null
 ) -> Contact:

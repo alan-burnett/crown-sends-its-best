@@ -34,6 +34,9 @@ static func register_all() -> void:
 		"duty_last_month", {}, ColonyParamSources.duty_last_month
 	)
 	ContentRegistry.register_param_source(
+		"most_traded_resource", {}, ColonyParamSources.most_traded_resource
+	)
+	ContentRegistry.register_param_source(
 		"paid_the_crown_for", {"resource": "resource", "months": "integer"},
 		ColonyParamSources.paid_the_crown_for,
 	)
@@ -202,6 +205,30 @@ static func duty_last_month(_args: Dictionary, context: LetterContext) -> Varian
 	if context == null:
 		return 0
 	return int(roundf(CrownAccounts.of(context.log).received_in(context.month)))
+
+
+## 🔒 **The resource with the most gold changing hands in the month just run**
+## (#452, `the-steward.md` §4), bought and sold together, at its value before the
+## duty — where one rise brings the most duty, whichever way the colony trades
+## it. Ties to the resource first in id order; empty when nothing was traded.
+static func most_traded_resource(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null or context.log == null:
+		return ""
+	var value: Dictionary = {}
+	for type in [Trade.EVENT_BOUGHT, Trade.EVENT_SOLD]:
+		for entry in context.log.of_type(type):
+			var traded: SimEvent = entry
+			if traded.month != context.month:
+				continue
+			var resource := String(traded.payload.get("resource", ""))
+			value[resource] = float(value.get(resource, 0.0)) + float(traded.payload.get("gross", 0.0))
+	var best := ""
+	var ids: Array = value.keys()
+	ids.sort()
+	for id in ids:
+		if float(value[id]) > 0.0 and (best.is_empty() or float(value[id]) > float(value[best])):
+			best = String(id)
+	return best
 
 
 ## 🔒 **What the colony paid the Crown for `resource` over the last `months`**

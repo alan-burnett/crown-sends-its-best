@@ -30,6 +30,8 @@ static func register_all() -> void:
 	Deliberation.register_consideration(HarshnessConsideration.new(&"harshness"), KINDS)
 	Deliberation.register_consideration(DissonanceConsideration.new(&"against_his_judgement"), KINDS)
 	Deliberation.register_filter(FullPaymentIsAYes.new(&"full_payment_is_a_yes"), KINDS)
+	# 🔒 **The Steward follows a tax order while standing holds** (SPEC §10.2).
+	Deliberation.register_filter(TheStewardFollowsATaxOrder.new(&"the_steward_follows_a_tax_order"), KINDS)
 	# 🔒 **Desperate removes delay** (#261, `tone.md` §4). A filter, not a very
 	# large negative weight — see the class.
 	Deliberation.register_filter(DesperationIsNotPutOff.new(&"desperation_is_not_put_off"), KINDS)
@@ -250,6 +252,29 @@ class DissonanceConsideration:
 ## 🔒 **A yes is compliance** (#449). This removed only the refusal, which left a
 ## man paid everything he asked free to do part of it, put it off, read it his
 ## own way or do something else — four answers that are not *yes*.
+class TheStewardFollowsATaxOrder:
+	extends DeliberationFilter
+
+	## 🔒 SPEC §10.2: *he will not outright refuse to follow your instruction
+	## while your crown standing is still paying your debts* (`the-steward.md`
+	## §2, `contacts.md` §3). On a tax order his answers are comply, partial and
+	## delay. **Once the Crown is refusing payments** he may refuse; **and with
+	## his regard low as well** he may act alone, which is §3's unilateral raise.
+	func permits(actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> bool:
+		if candidate.id != Compliance.REFUSE and candidate.id != Compliance.ACT_ALONE:
+			return true
+		var order: Variant = context.get_value("order", null)
+		if not (order is Order) or (order as Order).kind != M1Registrations.ORDER_SET_TAX_RATE:
+			return true
+		if actor == null or actor.id != &"steward":
+			return true
+		if bool(context.get_value("can_crown_pay", true)):
+			return false
+		if candidate.id == Compliance.REFUSE:
+			return true
+		return Relationship.band_of(float(context.get_value("loyalty", 100.0))) == Relationship.LOW
+
+
 class FullPaymentIsAYes:
 	extends DeliberationFilter
 

@@ -70,6 +70,7 @@
       }
     },
     "conditions": [
+      { "the_pc_is_not_ruinous": {} },
       {
         "his_barony_has_a_market": {}
       }
@@ -95,6 +96,7 @@
       }
     },
     "conditions": [
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_trouble_a_duke": {}
       }
@@ -170,6 +172,7 @@
       }
     },
     "conditions": [
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_bring_more": {
           "of": "resources"
@@ -192,6 +195,7 @@
       }
     },
     "conditions": [
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_bring_more": {
           "of": "livestock"
@@ -214,6 +218,7 @@
       }
     },
     "conditions": [
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_send_an_expert": {}
       }
@@ -234,6 +239,7 @@
       }
     },
     "conditions": [
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_give_gold": {}
       }
@@ -251,6 +257,7 @@
       }
     },
     "conditions": [
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_send_troops": {}
       }
