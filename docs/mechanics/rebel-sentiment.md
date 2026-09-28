@@ -182,9 +182,10 @@ being punished (§5). Both halves are the same instrument seen from two sides.
 
 ### Made an example of
 
-Author's ruling (#457). SPEC §12.3's punishments are *embargoes, penalties, and
-making an example of the town*. **Penalties are dropped; the embargo covers
-them.** Making an example is the Crown's troops punishing a rebel town
+Author's ruling (#457). SPEC §12.3 (v3.1): punishment is *"discouraging
+rebellion by hurting the town's quality of life to compel them toward crown
+loyalty."* The embargo is one way. Making an example is the other: the Crown's
+troops punishing a rebel town
 (`commanders.md` §5): its improvements razed, its expeditions struck, its tiles
 occupied so they yield nothing.
 

@@ -119,18 +119,11 @@ costs standing directly.
 
 ### 🔒 Tribute — the rivals, and it is gold
 
-**A duke demands gold. Never resources.** Author's ruling, and it overrides the
-reading of §8.4 this section previously took.
-
-§8.4 says they bully the PC into giving them *resources*, and building that
-literally would mean a whole second shipping mechanic: a colony sending goods to
-a foreign power, with the routing, the convoys and the losses that implies. That
-is a large system bought for one contact, and none of it is the game. **The
-threat is the point, and gold carries the threat perfectly well.**
-
-> ⚠️ **SPEC §8.4 still reads *resources*** and the Author owns that file. Until it
-> is amended the spec technically disagrees with this paragraph; the ruling is
-> his, so the docs follow it, but the wording is one word he may want to change.
+**A duke demands gold. Never resources.** SPEC §8.4: they *"bully you into
+giving them gold."* Goods would mean a whole second shipping mechanic, a colony
+sending cargo to a foreign power with the routing and losses that implies, bought
+for one contact. **The threat is the point, and gold carries the threat perfectly
+well.**
 
 Accepting **defers** the risk of an attack without ever buying peace.
 
@@ -518,7 +511,9 @@ warnings and the refusal of payments like any other standing.
 
 **A wealthy Crown contact, a patron or the Steward, starts paying part of the
 colony's duty on one resource himself: 5 points of the rate, for ever.** It is
-not a policy, has no monthly charge, and cannot be cancelled.
+not a policy, has no monthly charge, and cannot be cancelled. (SPEC §10.1, v3.1,
+says *"unless an active policy forgives the taxes"*: the Author reads that as an
+arrangement in force, and this ruling stands.)
 
 With rum taxed at 12% and 5 points forgiven:
 

@@ -10,24 +10,29 @@
 
 ## 1. Two endings, and they are not the same shape
 
-### Colony Overrun — one test
+### Colony Overrun — when the Crown gives up
 
-> **The population of the colony and all its expeditions is zero.**
+SPEC §13.1: **every town the colony held has been destroyed or taken by rivals or
+natives, and the Crown will commit no more resources to retake them.** Author's
+ruling (v3.1): the second half is real, and it is the last chance (§2).
 
-Nothing else. Not standing, not troops, not the Marshal.
+**Losing the last town is not yet the end.** With no town and no expedition left:
 
-**Because there is nothing left to save.** The PC may have a full treasury, a
-willing Marshal and Crown troops standing on an empty map, and it buys him
-nothing: no immigration is coming to a colony that no longer exists.
+- **The Chancellor writes his formal warning** the month the last town falls.
+- **The Provost offers a Crown-launched expedition** (`founding-towns.md` §3): a
+  new town, arriving by ship, paid for through the PC's promise, as long as the
+  Crown is still honouring his promises (`crown-standing.md` §3).
+- If the PC takes it and the Crown pays, the town arrives and the run goes on.
 
-The Provost might in time propose a fresh expedition and the PC might outfit it.
-**But watching nothing happen until he does is not a game**, and a run that has
-reached zero people has reached its ending whatever the Crown still thinks of the
-man who lost them.
+**Overrun comes when the Crown will commit no more:**
+
+- the Crown is refusing payments, so no recovery can be funded, including a
+  promised expedition that the refusal breaks before it arrives; or
+- the PC lets the Provost's offer go, refusing it or leaving it unanswered.
 
 **An expedition in the field keeps the run alive.** A colony whose last town falls
 while a body of settlers is still crossing the map has not ended — it has one
-chance left, walking. That is why the test counts them.
+chance left, walking.
 
 **A rebel town's people are still the colony's people.** §13.1 counts every town
 the colony holds, *loyal or rebel*, so a colony entirely in revolt is populous and
@@ -73,18 +78,16 @@ writes naming the season it ends, and only then do they sail.
 So the invariant is satisfied **structurally**. A dev who finds himself building a
 countdown for it has built a third timer alongside two that were already running.
 
-### Colony Overrun: the colony visibly dies
-
-There is no conjunction to watch approach here — only a number falling.
-
-But it falls **slowly and in the open.** Population moves one at a time under
-hardship and in shares under arms (`CLAUDE.md`), every loss emits its own event,
-and the map shows towns shrinking month by month. **A colony does not arrive at
-zero people from a comfortable position.**
+### Colony Overrun: the colony visibly dies, then is offered one more chance
 
 **The Chancellor writes as it becomes dire**, on a population threshold rather
-than a conjunction, and again as it worsens. That is the formal warning §13.1
-requires, and by the time it arrives the player has watched it coming for a year.
+than a conjunction, and again as it worsens. A colony can still lose its last town
+in a single bad month, so those letters are not the lock's guarantee.
+
+**The guarantee is §1's last chance.** The month the last town falls, the colony
+is lost *"while the Crown still supports recovery"* (§13.1): the Chancellor's
+formal warning arrives, and the Provost's expedition is on the table. Overrun
+cannot come before the player has had both.
 
 ## 3. The Chancellor is delighted
 

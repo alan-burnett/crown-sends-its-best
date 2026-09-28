@@ -98,7 +98,7 @@ Upward:
 
 - **Trade**, kept up over time.
 - **Meeting their requests** for resources when they ask a governor for help with
-  their own wars (§12.5).
+  troubles abroad (§12.5, and *They ask for help*, below).
 - Time, and being left alone.
 
 ## 4. The village
@@ -198,9 +198,22 @@ tribes: no trade, no combat.** A native war party and a duke's company pass each
 other by, and two tribes never fight. Whatever a tribe has decided about the
 colony, it settles with the colony.
 
-SPEC §12.5's diplomacy with rivals and between tribes, with tribes at war with
-one another and asking governors to help their war effort, is **deferred past
-M8**, as a consideration for a future feature.
+SPEC v3.1 drops §12.5's diplomacy with rivals and between tribes: tribes at war
+with one another is a consideration for a future feature, not this game.
+
+### They ask for help with troubles abroad
+
+Author's ruling (v3.1). SPEC §12.5 keeps *"native tribes may ask governors for
+resources to assist in their war efforts."* With no wars on the map, **those wars
+are beyond it, and never named.**
+
+- **Now and then a tribe asks a governor for guns, tools or horses** for its
+  troubles: at most once a year per tribe, and only while its standing toward the
+  colony is civil or better (placeholders).
+- **The governor may ask the PC how to answer**, as a loyal one does with a
+  grievance (§11).
+- **Meeting the ask raises the tribe's standing** (§3). Refusing it leaves the
+  standing where it was.
 
 ## 8. The player sees almost none of it
 
@@ -214,8 +227,8 @@ movement on the map — and only if he is paying attention.
 
 Native affairs reach the desk directly in two places, both through a governor:
 
-- §12.5's last line: a tribe asks a governor for resources for its own war, and
-  **the governor asks the PC how to answer.**
+- §12.5's last line: a tribe asks a governor for resources for its troubles
+  abroad (§7), and **the governor asks the PC how to answer.**
 - **A tribe's grievance** (§11), which a loyal governor passes on before he
   answers it.
 

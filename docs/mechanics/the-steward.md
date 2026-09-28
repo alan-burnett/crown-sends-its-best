@@ -47,8 +47,7 @@ That is the right shape for him without changing anything:
 | a **deep cut** | high | puts it off, or does part of it |
 
 **🔒 While standing holds, he never refuses and never ignores the PC.** SPEC
-§10.2: *"he may delay, but he will not outright refuse to follow your instruction
-while your crown standing is still paying your debts."* On a tax order his
+§10.2: *"he will not outright refuse to follow your instruction while your crown standing is still paying your debts."* On a tax order his
 answers are comply, partial and delay; refuse and act alone are filtered out.
 **Only once standing is lost and his regard is low** may he act alone, which is
 §3's unilateral raise: the rate he would set himself, reported afterwards. A man
