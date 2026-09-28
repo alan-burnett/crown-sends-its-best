@@ -336,6 +336,22 @@ target being worn down by §6's curve, and needs no machinery of its own.
 takes a large one: a town facing it loses people quickly. That is the point of
 overwhelming force.
 
+### The Crown retakes a rebel town by making rebellion miserable
+
+Author's ruling (#455). SPEC §12.3 lets the PC win a rebel town back by force,
+with Crown troops. **There is no capture.**
+
+- **Crown troops sent to put down the rebellion march on rebel towns**, not only
+  on rebel companies.
+- **Force works through the town's life.** Crown troops at the walls make it
+  unsafe, cut it off and cost it people, and its quality of life falls. **It
+  returns the month that falls below what it had under the Crown**, exactly as
+  any rebel town does (`rebel-sentiment.md` §5), and is garrisoned for a year.
+  Force is simply the fastest way to make rebellion miserable.
+- **The Crown never destroys its own town.** If a Crown attack would take a
+  rebel town's last people, **it returns to the Crown instead**, with whoever is
+  left. A town is *lost* only to rivals or natives (SPEC §12.3).
+
 ## 10. What a battle reaches beyond the map
 
 Two systems read combat and neither is named anywhere else in this document.
