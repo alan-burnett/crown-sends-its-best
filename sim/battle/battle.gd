@@ -208,6 +208,11 @@ static func resolve(
 	var they_lost := defender.take_casualties(they_lose, EVENT_FOUGHT, context)
 	var i_lost := attacker.take_casualties(i_lose, EVENT_FOUGHT, context)
 
+	# 🔒 **By the blood spilled** (#456, `natives.md` §3): **an attack on** a
+	# tribe's people — a village or a war party — costs its standing toward
+	# whoever made it. A war party that attacks and loses men was not attacked.
+	TribeStanding.blood_spilled(attacker, defender, they_lost, context)
+
 	# 🔒 **Casualties inflicted, and nothing else** (#223, `commanders.md` §6).
 	# Not battles won — §6 of this doc has no rout and no surrender, so *winning*
 	# is not a quantity that exists. **Both sides learn**, because both inflicted

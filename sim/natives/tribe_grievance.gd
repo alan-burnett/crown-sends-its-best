@@ -21,13 +21,17 @@ extends RefCounted
 const LAND_WORKED: StringName = &"land_worked"
 const IMPROVEMENT_BUILT: StringName = &"improvement_built"
 const COMPANY_ON_ITS_GROUND: StringName = &"company_on_its_ground"
+## 🔒 **An expedition crossing their country** (#456, §11). `company` holds the
+## expedition's id. It moves on of its own accord, so there is nothing to yield.
+const EXPEDITION_ON_ITS_GROUND: StringName = &"expedition_on_its_ground"
 const TOWN_FOUNDED: StringName = &"town_founded"
 ## 🔒 **What it will do, said before it does it** (§11: *"writes again first,
 ## saying what it will do"*). The letter every hostile objective follows.
 const WE_WILL_DRIVE_YOU_OFF: StringName = &"we_will_drive_you_off"
 
 const ACTS: Array[StringName] = [
-	COMPANY_ON_ITS_GROUND, IMPROVEMENT_BUILT, LAND_WORKED, TOWN_FOUNDED, WE_WILL_DRIVE_YOU_OFF,
+	COMPANY_ON_ITS_GROUND, EXPEDITION_ON_ITS_GROUND, IMPROVEMENT_BUILT, LAND_WORKED, TOWN_FOUNDED,
+	WE_WILL_DRIVE_YOU_OFF,
 ]
 
 # --- The governor's four answers (§11) --------------------------------------------

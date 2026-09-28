@@ -599,6 +599,21 @@ func _in_contact_with(company: Company) -> Company:
 		var wall := TownCompany.of(town, company)
 		if Battle.may_fight(company, wall):
 			return wall
+	# 🔒 **Then a village of a tribe at war with his side** (#456), fought as a
+	# town with no wall. A village at peace is not in front of anybody.
+	if natives != null:
+		var context := ColonyContext.new(null, null, null, map)
+		context.natives = natives
+		context.companies = companies
+		for entry in natives.villages_in_order():
+			var village: Village = entry
+			if village.people <= 0 or not Battle.tiles_in_contact(company.at, village.at):
+				continue
+			if not VillageCompany.is_a_foe(village, company, context):
+				continue
+			var view := VillageCompany.of(village, company)
+			if Battle.may_fight(company, view):
+				return view
 	return null
 
 
