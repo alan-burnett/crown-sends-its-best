@@ -100,7 +100,18 @@
     "acknowledges": "partial",
     "urgency": 0.4,
     "cooldown": 0,
-    "conditions": []
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "set_tax_rate"
+        }
+      }
+    ],
+    "params": {
+      "share": {
+        "from": "the_share_carried_out"
+      }
+    }
   },
   {
     "id": "trigger.steward.revenue_demand",

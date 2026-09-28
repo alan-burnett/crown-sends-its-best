@@ -1,0 +1,16 @@
+{
+  "id": "marshal.ack_acted_alone",
+  "sender": "marshal",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out. Acting alone on troops he sends one strength less, as his own decision, and says so (the-marshal.md section 5).",
+  "params": {},
+  "body": [
+    {
+      "text": "I have read your letter, and I have sent fewer men than you asked."
+    },
+    {
+      "text": "It is never as bad as a colony's letters make it, and I will answer for the difference."
+    }
+  ]
+}

@@ -90,3 +90,43 @@ func test_an_answer_that_moves_no_goods_is_never_thanked_as_a_consignment() -> v
 		var ids := _acknowledged(pair[0], &"marshal", pair[1], Compliance.COMPLY)
 		assert_false(ids.has("marshal.ack_complied"),
 			"'%s' brought the Marshal's thanks for a consignment" % pair[0])
+
+
+# --- 🔒 And what they say is what happened (#449) ------------------------------------
+
+func _acks(order: Order, outcome: StringName) -> Array:
+	order.id = &"order_449"
+	return machine.director._acknowledgements(run, [{"order": order, "outcome": outcome}])
+
+
+func test_what_each_acknowledgement_says_is_what_happened() -> void:
+	var governor := _governor()
+	var town: Town = run.colony.in_order()[0]
+	# **The intent urged, never the one his town holds.**
+	var urged := GovernorIntent.GO_TALL if town.intent != GovernorIntent.GO_TALL else GovernorIntent.GO_WIDE
+	var urging := Order.new(M1Registrations.ORDER_URGE_INTENT, governor.id,
+		{"to": String(governor.id), "intent": String(urged)}, run.world.month)
+	for inbound in _acks(urging, Compliance.COMPLY):
+		assert_eq(String(inbound.params.get("what", "")), Objective.intent_name(urged),
+			"he acknowledged an urging by naming what his town already does")
+	# **A delay names when it lands.**
+	var delayed := _acks(urging, Compliance.DELAY)
+	assert_eq(delayed.size(), 1)
+	for inbound in delayed:
+		assert_eq(int(inbound.params.get("months", 0)), Compliance.DELAY_MONTHS + 1,
+			"a delay did not say when")
+	# **A partial answer names the share.**
+	var tax := Order.new(M1Registrations.ORDER_SET_TAX_RATE, &"steward",
+		{"to": "steward", "resource": "sugar", "rate": 0.3}, run.world.month)
+	tax.tone = Tone.DUTIFUL
+	var partly := _acks(tax, Compliance.PARTIAL)
+	assert_eq(partly.size(), 1, "a tax rate carried out in part went unacknowledged")
+	for inbound in partly:
+		assert_eq(int(inbound.params.get("share", -1)), int(roundf(Compliance.partial_share(tax) * 100.0)))
+	# **Troops in part, or alone, are one strength less, and he says so.**
+	var troops := Order.new(M1Registrations.ORDER_ENACT_POLICY, CrownTroops.MARSHAL, {
+		"to": String(CrownTroops.MARSHAL), "effect": String(PolicyEffects.CROWN_TROOPS),
+		"strength": String(CrownTroops.A_FORCE),
+	}, run.world.month)
+	for outcome in [Compliance.PARTIAL, Compliance.ACT_ALONE]:
+		assert_eq(_acks(troops, outcome).size(), 1, "the Marshal sent fewer men and said nothing (%s)" % outcome)

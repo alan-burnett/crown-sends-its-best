@@ -95,14 +95,14 @@
     "acknowledges": "refuse",
     "urgency": 0.6,
     "cooldown": 0,
-    "params": {
-      "what": {
-        "from": "order_param",
-        "name": "resource",
-        "fallback": "consignment"
+    "params": {},
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "enact_policy"
+        }
       }
-    },
-    "conditions": []
+    ]
   },
   {
     "id": "trigger.marshal.ack_delayed",
@@ -110,7 +110,18 @@
     "acknowledges": "delay",
     "urgency": 0.4,
     "cooldown": 0,
-    "conditions": []
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "enact_policy"
+        }
+      }
+    ],
+    "params": {
+      "months": {
+        "from": "months_until_it_lands"
+      }
+    }
   },
   {
     "id": "trigger.marshal.let_down",
@@ -211,6 +222,34 @@
     "conditions": [
       {
         "his_troops_are_going_home": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.marshal.ack_partial",
+    "letter": "marshal.ack_partial",
+    "acknowledges": "partial",
+    "urgency": 0.4,
+    "cooldown": 0,
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "enact_policy"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.marshal.ack_acted_alone",
+    "letter": "marshal.ack_acted_alone",
+    "acknowledges": "act_alone",
+    "urgency": 0.4,
+    "cooldown": 0,
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "enact_policy"
+        }
       }
     ]
   }

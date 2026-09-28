@@ -3,12 +3,14 @@
   "sender": "chancellor",
   "type": "report",
   "skippable": false,
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out. Acting alone, he carries on as he was.",
+  "params": {},
   "body": [
-    { "text": "You will wish to know — though you did not ask, and I did not wait — that the matter you wrote of is settled." },
-    { "text": "I acted on my own judgement. I am confident you would have arrived at the same place, given a month or two." },
-    { "text": "You are of course free to countermand me. The thing is done, but you are free to do it.",
-      "only_tones": ["annoyed", "hateful"] },
-    { "text": "I did not think it could wait on the tide, and I hope you will not think me forward.",
-      "only_tones": ["dutiful", "pleased", "desperate"] }
+    {
+      "text": "I have read your letter, and I have done as I thought best, which was to leave the matter exactly where it stood."
+    },
+    {
+      "text": "You are of course free to write again. I read everything you send me, and most of it twice."
+    }
   ]
 }

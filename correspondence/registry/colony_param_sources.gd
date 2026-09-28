@@ -57,6 +57,15 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"the_tribe_that_wrote_to_me", {}, ColonyParamSources.the_tribe_that_wrote_to_me
 	)
+	# 🔒 **What an acknowledgement may say happened** (#449): the intent the PC
+	# urged, when a delayed order lands, and what share of it was carried out.
+	ContentRegistry.register_param_source("the_intent_urged", {}, ColonyParamSources.the_intent_urged)
+	ContentRegistry.register_param_source(
+		"months_until_it_lands", {}, ColonyParamSources.months_until_it_lands
+	)
+	ContentRegistry.register_param_source(
+		"the_share_carried_out", {}, ColonyParamSources.the_share_carried_out
+	)
 	# What a tribe asked him for (#471): `field` `resource` or `amount`.
 	ContentRegistry.register_param_source(
 		"what_the_tribe_asked", {"field": "string"}, ColonyParamSources.what_the_tribe_asked
@@ -370,6 +379,28 @@ static func the_tribe_that_wrote_to_me(_args: Dictionary, context: LetterContext
 	var latest := context.natives.grievances.latest_to(context.sender.id)
 	var tribe: Tribe = context.natives.find(latest.tribe) if latest != null else null
 	return tribe.display_name if tribe != null else "the natives"
+
+
+## 🔒 **The intent the PC urged**, named (#449): not the one the town holds, which
+## is `intent_name`'s, and which an acknowledgement is not about.
+static func the_intent_urged(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.data_order == null:
+		return "the colony's good"
+	return Objective.intent_name(StringName(context.data_order.get_param("intent", "")))
+
+
+## 🔒 **When a delayed order lands**, in months from the post that says so
+## (#449): the month complying would have, and `Compliance.DELAY_MONTHS` more.
+static func months_until_it_lands(_args: Dictionary, _context: LetterContext) -> Variant:
+	return Compliance.DELAY_MONTHS + 1
+
+
+## 🔒 **What share of the order a partial answer carried out**, in hundredths
+## (#449), from the same figure the answer was shaped by.
+static func the_share_carried_out(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.data_order == null:
+		return 0
+	return int(roundf(Compliance.partial_share(context.data_order) * 100.0))
 
 
 ## What the tribe that last asked him for help asked for (#471): the resource

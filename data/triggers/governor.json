@@ -311,13 +311,19 @@
         "from": "town_name"
       },
       "what": {
-        "from": "intent_name"
+        "from": "the_intent_urged"
       },
       "governor": {
         "from": "sender_id"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.ack_delayed",
@@ -330,13 +336,22 @@
         "from": "town_name"
       },
       "what": {
-        "from": "intent_name"
+        "from": "the_intent_urged"
       },
       "governor": {
         "from": "sender_id"
+      },
+      "months": {
+        "from": "months_until_it_lands"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.ack_refused",
@@ -349,13 +364,19 @@
         "from": "town_name"
       },
       "what": {
-        "from": "intent_name"
+        "from": "the_intent_urged"
       },
       "governor": {
         "from": "sender_id"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.ack_acted_alone",
@@ -368,13 +389,22 @@
         "from": "town_name"
       },
       "what": {
+        "from": "the_intent_urged"
+      },
+      "own": {
         "from": "intent_name"
       },
       "governor": {
         "from": "sender_id"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.we_are_coming_back",

@@ -3,12 +3,14 @@
   "sender": "marshal",
   "type": "report",
   "skippable": false,
-  "params": { "what": "resource" },
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out. The Marshal refusing the troops the PC asked for.",
+  "params": {},
   "body": [
-    { "text": "So there is to be no {param:what} after all. I have struck the colony from my accounting and will not trouble you again this season." },
-    { "text": "I do not blame you for it. I blame the arithmetic.",
-      "only_tones": ["dutiful", "pleased"] },
-    { "text": "Others will draw their own conclusions, and I shall not be at pains to correct them.",
-      "only_tones": ["annoyed", "hateful"] }
+    {
+      "text": "I have your request for troops, and I will not send them."
+    },
+    {
+      "text": "The men are wanted elsewhere, and I do not answer to the colony for where."
+    }
   ]
 }

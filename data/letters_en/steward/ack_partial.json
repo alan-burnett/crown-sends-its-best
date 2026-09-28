@@ -3,12 +3,16 @@
   "sender": "steward",
   "type": "report",
   "skippable": false,
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out. A tax rate carried out in part moves a share of the way, and he names the share.",
+  "params": {
+    "share": "integer"
+  },
   "body": [
-    { "text": "Your instruction has been carried out, after a fashion." },
-    { "text": "Not the whole of it. The whole of it was not possible, and I judged a part better than a quarrel." },
-    { "text": "I trust that was the judgement you would have made, had you been here to make it.",
-      "only_tones": ["dutiful", "pleased"] },
-    { "text": "I did not trouble you for permission, since you did not trouble to be clear.",
-      "only_tones": ["annoyed", "hateful"] }
+    {
+      "text": "Your instruction on the duty has been carried out in part. I have moved the rate {param:share} parts in a hundred of the way you asked, and no further."
+    },
+    {
+      "text": "The whole of it was not possible, and I judged a part better than a quarrel."
+    }
   ]
 }

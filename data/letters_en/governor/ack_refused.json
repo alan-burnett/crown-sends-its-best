@@ -4,6 +4,7 @@
   "type": "report",
   "skippable": true,
   "speaks_to": 0,
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out.",
   "params": {
     "what": "intent",
     "town": "town"
