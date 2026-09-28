@@ -193,7 +193,7 @@ it:
 | :--- | :--- | :--- |
 | urge an intent (a governor) | the urging lands with a share of its pull | he keeps his own intent; the urging is never installed |
 | urge a company (a commander) | a share of its pull | he keeps his own standing order |
-| a tax rate (the Steward) | the rate moves a share of the way | he sets the rate he would set himself (`the-steward.md` §5) |
+| a tax rate (the Steward) | the rate moves a share of the way | **only with standing lost and his regard low** (SPEC §10.2): he sets the rate he would set himself. Otherwise he never acts alone on a tax order, and never refuses one (`the-steward.md` §2) |
 | a shipment (a governor) | a share of the amount, from what the town can spare | nothing is shipped; the town trades as it would have |
 | troops (the Marshal) | **one strength less** than asked | **one strength less** than asked: it is never as bad as the PC says (`the-marshal.md` §5), and he writes to say so |
 | enact a policy | enacted whole | **not enacted**; he carries on as he was |

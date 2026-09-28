@@ -43,12 +43,17 @@ That is the right shape for him without changing anything:
 | The PC orders | Dissonance | He |
 | :--- | :--- | :--- |
 | a **rise** | none | does it, and says something pleased about it |
-| a **small cut** | some | does it slowly |
-| a **deep cut** | high | does it his way and tells you after: the rate he would set himself (`contacts.md` §3) |
+| a **small cut** | some | does it, or does part of it |
+| a **deep cut** | high | puts it off, or does part of it |
 
-**He never flatly refuses**, which is correct for a Crown officer and is what the
-spec describes. A man who disagrees with the Crown's revenue policy does not
-write back *"no"*; he puts it off, or does what he thinks right and says so.
+**🔒 While standing holds, he never refuses and never ignores the PC.** SPEC
+§10.2: *"he may delay, but he will not outright refuse to follow your instruction
+while your crown standing is still paying your debts."* On a tax order his
+answers are comply, partial and delay; refuse and act alone are filtered out.
+**Only once standing is lost and his regard is low** may he act alone, which is
+§3's unilateral raise: the rate he would set himself, reported afterwards. A man
+who disagrees with the Crown's revenue policy does not write back *"no"*; he puts
+it off.
 
 ### What has to change to reach it
 
@@ -112,7 +117,8 @@ and the PC sets them by writing to the Steward. **The letter names a rate and a
 figure:** the base rate or one resource, and the new rate from a ladder of 0%, 5%,
 10%, 15%, 20%, 30% and 50% (placeholders). It goes through the Steward's
 compliance (§2 and `contacts.md` §3): a deep cut against his judgement may be
-delayed, or he sets the rate he would set himself and says so.
+delayed or partly done, and he never refuses it. Only with standing lost and his
+regard low may he set the rate he would set himself instead (§3).
 
 ---
 
