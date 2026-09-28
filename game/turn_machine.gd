@@ -41,6 +41,14 @@ const EVENT_TURN_BEGAN: StringName = &"turn_began"
 const EVENT_POST_SENT: StringName = &"post_sent"
 const EVENT_ORDER_ISSUED: StringName = &"order_issued"
 
+## A letter the PC left unanswered when the post went (#470). The silence is read
+## next month, in the phase a reply would have been; this is the record, in the
+## month it went, that the post carried none.
+const EVENT_SET_ASIDE: StringName = &"letter_set_aside"
+
+## Which letter an issued Order answers, in `EVENT_ORDER_ISSUED` (#470).
+const ANSWERS_KEY: String = "answers"
+
 var run: RunState = null
 var month_runner: WorldMonth = null
 
@@ -679,6 +687,9 @@ func send_post() -> bool:
 	for inbound in run.inbox:
 		if inbound.status == InboundLetter.SET_ASIDE:
 			silence.pending.append(inbound)
+			run.log.emit(EVENT_SET_ASIDE, inbound.sender, run.world.month, {
+				"letter": inbound.letter_id,
+			}, WorldPhase.DISPATCH)
 
 	issued_orders = _build_orders()
 	# **The Crown stops waiting once he has answered.** A demand for goods stands
@@ -815,8 +826,10 @@ func _build_orders() -> Array[Order]:
 				order.harsh = outgoing.harsh \
 					or bool(option.get(LetterSchema.KEY_HARSH, false))
 				orders.append(order)
+				var issued := order.to_dict()
+				issued[ANSWERS_KEY] = outgoing.letter_id
 				run.log.emit(EVENT_ORDER_ISSUED, order.addressed_to, run.world.month,
-					order.to_dict(), WorldPhase.DISPATCH)
+					issued, WorldPhase.DISPATCH)
 	return orders
 
 

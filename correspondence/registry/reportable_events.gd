@@ -93,6 +93,12 @@ const TABLE: Dictionary = {
 		"man": "quartermaster",
 		"fields": {"town": "town", "amount": "gold"},
 	},
+	# 🔒 **The colony has fallen** (#470, `endings.md` §1): no town and nobody
+	# walking. The last chance hangs off it — the Chancellor's formal warning and
+	# the Provost's offer of a town by sea, both in the month it falls.
+	"colony_fell": {
+		"fields": {},
+	},
 }
 
 

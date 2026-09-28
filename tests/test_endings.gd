@@ -46,12 +46,17 @@ func _look(run: RunState, month: int) -> Dictionary:
 		run.world, run.log)
 
 
-## A colony that has been taken to the last town and then past it.
+## A colony that has been taken to the last town and then past it, and a Crown
+## that has given up on it (#470): it fell while the Crown was refusing payments,
+## and the Chancellor's formal warning went out in that month's post.
 func _overrun(run: RunState) -> void:
 	var context := ColonyContext.new(run.world, run.log, run.streams, run.map)
 	context.colony = run.colony
 	for town in run.colony.in_order().duplicate():
 		run.colony.lost(town, Company.NATIVE, "stormed", context, WorldPhase.MOVEMENT)
+	run.log.emit(RunEndDriver.EVENT_FALLEN, &"crown", 0, {"paying": false}, WorldPhase.RUN_END_CHECK)
+	run.log.emit(Director.EVENT_DISPATCHED, &"chancellor", 0,
+		{"letter": RunEndDriver.WARNED_BY[String(RunEndCheck.OVERRUN)]}, WorldPhase.DISPATCH)
 
 
 # --- 🔒 What an ending scores -----------------------------------------------
@@ -214,9 +219,7 @@ func test_the_summary_names_which_fail_condition_it_was() -> void:
 	var driver := RunEndDriver.new(run)
 	_overrun(run)
 	run.world.month = 44
-	# His warning went out the month before (#447), so it ends the month it is lost.
-	run.log.emit(Director.EVENT_DISPATCHED, &"chancellor", 43,
-		{"letter": "chancellor.colony_dwindling"}, WorldPhase.DISPATCH)
+	# His warning went out when it fell (#447, #470), so it ends at this check.
 	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
 
 	var facts := RunSummary.of(run)

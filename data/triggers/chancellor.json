@@ -257,5 +257,21 @@
         "the_colony_has_fallen_further": {}
       }
     ]
+  },
+  {
+    "id": "trigger.chancellor.the_colony_has_fallen",
+    "letter": "chancellor.the_colony_has_fallen",
+    "urgency": 1.0,
+    "cooldown": 1,
+    "note": "Issue 470. The last chance section 13.1 locks: the month the last town falls with nobody walking, his formal warning goes out, beside the Provost's offer of a town by sea.",
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "colony_fell",
+          "within": 1,
+          "concerning": "the_colony"
+        }
+      }
+    ]
   }
 ]

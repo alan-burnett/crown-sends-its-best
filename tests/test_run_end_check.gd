@@ -54,6 +54,13 @@ func _warned(run: RunState) -> void:
 			{"letter": letter}, WorldPhase.DISPATCH)
 
 
+## The colony fell last month with the Crown refusing payments (#470), so there
+## was no offer to wait on and the Crown has given up.
+func _given_up(run: RunState) -> void:
+	run.log.emit(RunEndDriver.EVENT_FALLEN, &"crown", run.world.month - 1, {"paying": false},
+		WorldPhase.RUN_END_CHECK)
+
+
 ## A party of settlers still crossing the map.
 func _walking(people: int) -> ExpeditionParty:
 	var party := ExpeditionParty.new()
@@ -305,6 +312,7 @@ func test_phase_six_ends_the_run_and_says_how() -> void:
 	var run := _independent()
 	_emptied(run)
 	_warned(run)
+	_given_up(run)
 	var driver := RunEndDriver.new(run)
 	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
 
@@ -323,6 +331,7 @@ func test_it_ends_the_run_once() -> void:
 	var run := _independent()
 	_emptied(run)
 	_warned(run)
+	_given_up(run)
 	var driver := RunEndDriver.new(run)
 	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)
 	var lost_in := run.ending.month
@@ -471,9 +480,14 @@ func _every_condition(run: RunState) -> void:
 
 
 func test_a_one_month_collapse_is_warned_before_the_run_ends() -> void:
-	var fell := _falls(_collapse)
+	# The Crown is refusing payments, so it gives up the moment the colony falls
+	# (#470); the warning still comes first. A Crown still paying waits for the
+	# Provost's offer to be answered: `test_the_last_chance`.
+	var fell := _falls(func(run: RunState) -> void:
+		run.refusal.state = CrownRefusal.REFUSING
+		_collapse(run))
 	assert_false(fell["ended_at_once"], "the colony fell in a month and the run ended unwarned")
-	assert_true((fell["post"] as PackedStringArray).has("chancellor.colony_dwindling"),
+	assert_true((fell["post"] as PackedStringArray).has("chancellor.the_colony_has_fallen"),
 		"the run was held open and the Chancellor still did not write")
 	var run: RunState = fell["run"]
 	assert_true(run.ending.is_over(), "warned, the run did not end the month after")
@@ -492,8 +506,10 @@ func test_every_independence_condition_at_once_is_warned_before_the_run_ends() -
 
 func test_a_run_is_held_open_once_and_no_more() -> void:
 	# Nothing can hold a run open: if his warning somehow never went out, it ends
-	# the month after all the same.
+	# the month after all the same. The Crown is refusing payments, so it has
+	# given up the moment the colony falls (#470).
 	var run := _run()
+	run.refusal.state = CrownRefusal.REFUSING
 	var driver := RunEndDriver.new(run)
 	run.world.month = 8
 	driver.on_phase(WorldPhase.RUN_END_CHECK, run.world, run.log, run.streams)

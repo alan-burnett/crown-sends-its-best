@@ -47,6 +47,12 @@ const EVENT_DISPATCHED: StringName = &"letter_dispatched"
 ## 🔒 **A trigger that asks the PC for something** (#399): gold, goods, a need
 ## met. What a targeted break skips.
 const AN_ASK_KEY: String = "an_ask"
+
+## 🔒 **A letter the run's ending waits on is always put to the PC** (#470). The
+## Provost's last-chance offer is SPEC §13.1's guarantee — Overrun cannot come
+## before the player has had it — so a man past consulting does not settle it
+## for him. He asks, whatever his regard.
+const ALWAYS_ASKS_KEY: String = "always_asks"
 const EVENT_ASK_SKIPPED: StringName = &"ask_skipped"
 
 var content: ContentDatabase = null
@@ -231,7 +237,7 @@ func _still_consulting(fired: Array[InboundLetter], run: RunState) -> Array[Inbo
 		for index in fired.size():
 			if String(fired[index].sender) != sender:
 				continue
-			if Consultation.is_consultative(_type_of(fired[index])):
+			if Consultation.is_consultative(_type_of(fired[index])) and not _always_asked(fired[index]):
 				his.append(fired[index])
 				withheld[index] = true
 		_settles_it_himself(contact, his, run)
@@ -244,6 +250,11 @@ func _still_consulting(fired: Array[InboundLetter], run: RunState) -> Array[Inbo
 		if not withheld.has(index):
 			asking.append(fired[index])
 	return asking
+
+
+func _always_asked(inbound: InboundLetter) -> bool:
+	var trigger: Dictionary = content.collection("triggers").get(inbound.trigger_id, {})
+	return bool(trigger.get(ALWAYS_ASKS_KEY, false))
 
 
 ## The one he would have raised, settled without the PC.

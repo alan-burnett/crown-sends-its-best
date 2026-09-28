@@ -253,6 +253,9 @@ func test_no_ending_fires_in_a_month_he_was_not_shown() -> void:
 	var driver := RunEndDriver.new(run)
 	for town in run.colony.in_order().duplicate():
 		run.colony.towns.erase(town)
+	# The Crown is refusing payments, so it gives up the moment the colony falls
+	# and there is no offer to wait on (#470).
+	run.refusal.state = CrownRefusal.REFUSING
 
 	# Unwarned, it goes on a month so his warning can reach the player (#447).
 	for month in [9, 10]:
@@ -261,6 +264,8 @@ func test_no_ending_fires_in_a_month_he_was_not_shown() -> void:
 
 	var lost := run.log.of_type(RunEndDriver.EVENT_LOST)
 	assert_eq(lost.size(), 1, "the run did not end, so this proves nothing")
+	if lost.is_empty():
+		return
 	assert_false(LastChance.latest(run.log, lost[0].month).is_empty(),
 		"a run ended in a month the Chancellor was shown nothing")
 

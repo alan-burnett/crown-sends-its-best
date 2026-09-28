@@ -135,6 +135,15 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
 	)
+	# Whether the Crown is honouring payments at all, so a recovery can be funded
+	# (#470).
+	ContentRegistry.register_condition(
+		"the_crown_is_paying", {}, ColonyConditions.the_crown_is_paying
+	)
+	# Whether the colony holds a town, loyal or rebel (#470).
+	ContentRegistry.register_condition(
+		"the_colony_holds_a_town", {}, ColonyConditions.the_colony_holds_a_town
+	)
 	# While the PC is ruinous, no patron offers him anything (#466).
 	ContentRegistry.register_condition(
 		"the_pc_is_not_ruinous", {}, ColonyConditions.the_pc_is_not_ruinous
@@ -1315,6 +1324,20 @@ static func crown_opened_the_window(_args: Dictionary, context: LetterContext) -
 		and refusal.state == CrownRefusal.WARNED
 		and refusal.countdown == CrownRefusal.WARNING_TURNS
 	)
+
+
+## 🔒 **Whether the Crown is honouring payments** (#470, `crown-standing.md`
+## §3). Not refusing: warned is still paying. The Provost's last-chance offer is
+## made only while it is, because a recovery the Crown will not fund is not one.
+static func the_crown_is_paying(_args: Dictionary, context: LetterContext) -> bool:
+	return context.refusal == null or context.refusal.pays()
+
+
+## Whether the colony holds any town, loyal or rebel (#470). A colony that holds
+## none has fallen, and the Provost's ordinary proposal gives way to his offer of
+## a town by sea.
+static func the_colony_holds_a_town(_args: Dictionary, context: LetterContext) -> bool:
+	return context.colony != null and not context.colony.is_empty()
 
 
 ## Whether the faucet shut this month.

@@ -55,6 +55,35 @@
         "year_at_least": {
           "year": 2
         }
+      },
+      {
+        "the_colony_holds_a_town": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.provost.begin_again",
+    "letter": "provost.begin_again",
+    "urgency": 1.0,
+    "cooldown": 1,
+    "always_asks": true,
+    "note": "Issue 470. The Crown's half of Colony Overrun: the month the colony falls he offers a town by sea, whatever his usual conditions, while the Crown is honouring payments. He asks whatever his regard, because the ending waits on the answer.",
+    "params": {
+      "amount": {
+        "from": "literal",
+        "value": "1600"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "colony_fell",
+          "within": 1,
+          "concerning": "the_colony"
+        }
+      },
+      {
+        "the_crown_is_paying": {}
       }
     ]
   },

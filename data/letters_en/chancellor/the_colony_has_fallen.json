@@ -1,0 +1,32 @@
+{
+	"id": "chancellor.the_colony_has_fallen",
+	"sender": "chancellor",
+	"type": "warning",
+	"skippable": false,
+	"params": {},
+	"body": [
+		{
+			"text": "I have had the best paper brought up again. I confess I had been saving it."
+		},
+		{
+			"text": "The last of your towns is gone, and nobody of yours is walking anywhere to found another. So far as the clerks can discover, the colony at present consists of your correspondence and a great deal of empty coast."
+		},
+		{
+			"text": "It is my pleasant duty to warn you formally that the Crown does not retake ground it has no reason to want. Whether it will pay to try again is a question for the Treasury and, I am told, for the Provost, who has been seen with a pen in his hand. I should not put money on him. Then again, I should not put money on you."
+		},
+		{
+			"text": "If nothing comes of it, I shall write once more, to close the account. You may rely on me to do it beautifully."
+		}
+	],
+	"reply": {
+		"tone": {
+			"text": "I have your letter, and I answer it {choice}.",
+			"options": [
+				{ "tone": "dutiful", "text": "as a man with one more ship to send" },
+				{ "tone": "desperate", "text": "and I beg you to press the Treasury for me" },
+				{ "tone": "annoyed", "text": "with less ceremony than the paper deserved" },
+				{ "tone": "hateful", "text": "and I hope you frame it" }
+			]
+		}
+	}
+}

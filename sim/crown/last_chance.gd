@@ -224,6 +224,10 @@ static func newly_dire(log: EventLog, month: int) -> bool:
 	var now := latest(log, month)
 	if now.is_empty():
 		return false
+	# 🔒 **At nobody the colony has not dwindled, it has fallen** (#470), and the
+	# Chancellor's letter on the fall says so rather than this one's count.
+	if int(now.get("people", 0)) <= 0:
+		return false
 	var rung := int(now.get("rung", -1))
 	if rung < 0:
 		return false
