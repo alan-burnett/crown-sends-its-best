@@ -47,6 +47,7 @@ const ANSWERS: Array[StringName] = [
 	M1Registrations.ORDER_PROMISE_RESOURCE,
 	M1Registrations.ORDER_PROMISE_REVENUE,
 	M1Registrations.ORDER_PROMISE_SHIPMENT,
+	M1Registrations.ORDER_PROMISE_TO_RETRENCH,
 	M1Registrations.ORDER_DECLINE_DEMAND,
 	M1Registrations.ORDER_FUND_POLICY,
 	M1Registrations.ORDER_END_POLICY,

@@ -59,11 +59,6 @@ const REVENUE_BASELINE: String = "colony_revenue_baseline"
 
 ## How hard the Crown is pushing people towards the colony (#80).
 ##
-## **A policy's doing, and nothing else's.** Settlers were always going to come
-## or not; what a subsidy changes is the arithmetic they do about it
-## (`policy.md` §1). Recomputed from the standing policies each month rather
-## than accumulated, so one that ends stops pushing the month it ends.
-const IMMIGRATION: String = "crown_immigration_drive"
 
 ## How fast the running normal follows the figure. Tuning.
 ##

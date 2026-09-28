@@ -192,8 +192,9 @@ const MORE_PREFIX: String = "policy.more."
 ## every herd's breeding. Tuning (`patrons.md` §11, *the size of each specialty*).
 const MORE_LIFT: float = 0.25
 
-## How much faster people come to a colony the Crown is subsidising. Tuning.
-const IMMIGRATION_LIFT: float = 0.5
+## 🔒 **Encouraging immigration is the Provost's, one step of his volume knob**
+## (#451, `immigration.md` §4): what one setting adds over the one below it.
+const IMMIGRATION_STEP_SETTING: StringName = &"a_little"
 
 ## Where the journalist's two press. Read by `DriftDriver` and `RebelSentiment`,
 ## which is what keeps either of them from having to know a policy book exists.
@@ -286,8 +287,11 @@ static func pressure(book: PolicyBook) -> Dictionary:
 				if not key.is_empty():
 					values[key] = float(values.get(key, 0.0)) + MORE_LIFT
 			IMMIGRATION:
-				values[WorldValues.IMMIGRATION] = \
-					float(values.get(WorldValues.IMMIGRATION, 0.0)) + IMMIGRATION_LIFT
+				# It wrote a world value nothing read (#451). Now it presses on
+				# what `Immigration.due` reads.
+				values[VOLUME_KEY] = float(values.get(VOLUME_KEY, 0.0)) \
+					+ float(SETTING_STRENGTH[String(IMMIGRATION_STEP_SETTING)]) \
+					* float(AT_A_GREAT_DEAL[String(VOLUME)])
 			PUBLIC_RELATIONS:
 				values[PUBLIC_RELATIONS_KEY] = \
 					float(values.get(PUBLIC_RELATIONS_KEY, 0.0)) + PUBLIC_RELATIONS_LIFT

@@ -54,9 +54,10 @@ func _resolve(order: Order, contact: Contact) -> Dictionary:
 # --- The six outcomes ------------------------------------------------------
 
 func _vague_order() -> Order:
-	# No figure in it, so there is room to decide what the PC meant.
-	return Order.new(M1Registrations.ORDER_SET_POLICY, &"marshal", {
-		"to": "marshal", "policy": "tax.tea", "value": "lower",
+	# No figure in it, so there is room to decide what the PC meant. Priced at
+	# nothing, as the `set_policy` it replaces was (#451).
+	return Order.new(M1Registrations.ORDER_MOVE_DIPLOMAT, &"marshal", {
+		"to": "marshal", "town": "ashmere",
 	}, state.month)
 
 
@@ -251,7 +252,7 @@ func test_tone_moves_loyalty_far_less_than_the_deed() -> void:
 	Compliance.resolve(deed_order, by_deed, book, state, log, streams)
 
 	var by_tone := _contact(50.0)
-	var tone_order := Order.new(M1Registrations.ORDER_SET_POLICY, &"marshal", {"policy": "x", "value": "y"}, state.month)
+	var tone_order := Order.new(M1Registrations.ORDER_URGE_INTENT, &"marshal", {"intent": "military"}, state.month)
 	tone_order.tone = Tone.PLEASED
 	Compliance.resolve(tone_order, by_tone, book, state, log, streams)
 
@@ -379,9 +380,9 @@ func test_a_rate_costs_the_colony_and_not_the_man_who_sets_it() -> void:
 	# and *prefers high taxes*. Priced at the old fall-through, against a man whose
 	# heaviest weight is `cost_of_request`, the Steward of the Revenue refused an
 	# order to raise the revenue on turn one.
-	for kind in [M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY]:
+	for kind in [M1Registrations.ORDER_SET_TAX_RATE]:
 		var order := Order.new(kind, &"steward", {
-			"resource": "tea", "rate": 0.15, "policy": "x", "value": "y",
+			"resource": "tea", "rate": 0.15,
 		}, 0)
 		assert_eq(Compliance.cost_of(order), 0.0,
 			"being told to set %s was priced against him personally" % kind)

@@ -87,6 +87,14 @@ static func from_order(order: Order, month: int) -> Promise:
 			}, month, month + int(order.get_param("months", 0)))
 			wager.payer = Promise.PAYER_COLONY
 			return wager
+		M1Registrations.ORDER_PROMISE_TO_RETRENCH:
+			# **Not the Crown's money to refuse** either: it is kept or broken by
+			# what the Crown's books show, so a repudiation leaves it standing.
+			var austerity := Promise.new(order.addressed_to, Promise.KIND_RETRENCH, {
+				"term_months": order.get_param("months", 0),
+			}, month, month + int(order.get_param("months", 0)))
+			austerity.payer = Promise.PAYER_COLONY
+			return austerity
 		M1Registrations.ORDER_PROMISE_SHIPMENT:
 			# Settled on goods that actually left a town, not on the PC's word or
 			# on a governor's answer. A governor who agreed and then could not

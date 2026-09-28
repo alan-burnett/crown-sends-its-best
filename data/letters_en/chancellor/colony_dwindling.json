@@ -29,24 +29,6 @@
 				{ "tone": "annoyed", "text": "with the observation that clerks are cheap" },
 				{ "tone": "hateful", "text": "and I hope you enjoy the next one as much" }
 			]
-		},
-		"steps": [
-			{
-				"id": "answer",
-				"prompt": "What the Chancellor is to carry back",
-				"options": [
-					{
-						"id": "hold",
-						"label": "that the colony will hold",
-						"text": "Tell the court the colony will hold, and that I would welcome anything it cares to send."
-					},
-					{
-						"id": "silence",
-						"label": "nothing at all",
-						"text": "Tell the court nothing. You have had your afternoon."
-					}
-				]
-			}
-		]
+		}
 	}
 }

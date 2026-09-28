@@ -245,7 +245,7 @@ static func _deed_of(order: Order) -> StringName:
 	match order.kind:
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
 		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
-		M1Registrations.ORDER_GRANT_FAVOR:
+		M1Registrations.ORDER_PROMISE_TO_RETRENCH, M1Registrations.ORDER_GRANT_FAVOR:
 			return Relationship.GRANTED
 		M1Registrations.ORDER_TROUBLE_A_DUKE, M1Registrations.ORDER_SEND_AN_EXPERT, \
 		M1Registrations.ORDER_GIVE_THE_CROWN_GOLD:
@@ -430,7 +430,8 @@ static func _priced(order: Order) -> Variant:
 			return float(order.get_param("amount", 0)) \
 				* ResourceCatalogue.price_of(StringName(order.get_param("resource", "")))
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
-		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT:
+		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
+		M1Registrations.ORDER_PROMISE_TO_RETRENCH:
 			# Being given something costs the recipient nothing.
 			return 0.0
 		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND, \
@@ -472,7 +473,7 @@ static func _priced(order: Order) -> Variant:
 			# actually costs him is his own judgement, and that is the `autonomy`
 			# consideration's business rather than a price.
 			return 0.0
-		M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY, \
+		M1Registrations.ORDER_SET_TAX_RATE, \
 		M1Registrations.ORDER_WAIVE_DUTY, M1Registrations.ORDER_MOVE_DIPLOMAT:
 			# 🔒 **A rate costs the colony, not the man who sets it** (#302, SPEC
 			# §8.1). The Steward is being asked to do his job, in the direction he
@@ -626,7 +627,7 @@ static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName
 	match order.kind:
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
 		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
-		M1Registrations.ORDER_GRANT_FAVOR:
+		M1Registrations.ORDER_PROMISE_TO_RETRENCH, M1Registrations.ORDER_GRANT_FAVOR:
 			contact.relationship.record_deed(Relationship.GRANTED)
 		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
 			contact.relationship.record_deed(Relationship.REFUSED)

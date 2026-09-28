@@ -29,7 +29,10 @@ const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 ## the tone of a letter does, and never more than the broken promise it answers
 ## cost him.
 const ORDER_APOLOGISE: StringName = &"apologise"
-const ORDER_SET_POLICY: StringName = &"set_policy"
+## 🔒 **The colony will retrench** (#451, `crown-standing.md` §3): a promise to
+## the Chancellor that for the months named the Crown pays out on the PC's word
+## no more than it takes in from the colony.
+const ORDER_PROMISE_TO_RETRENCH: StringName = &"promise_to_retrench"
 
 ## **Paying a foreigner to leave you alone** (#69, `crown-demands.md` §4).
 ##
@@ -396,7 +399,7 @@ static func register_effects() -> void:
 		"deflect_tribute", {"to": "contact"}, ORDER_DEFLECT_TRIBUTE
 	)
 	ContentRegistry.register_effect(
-		"set_policy", {"policy": "string", "value": "string"}, ORDER_SET_POLICY
+		"promise_to_retrench", {"to": "contact", "months": "integer"}, ORDER_PROMISE_TO_RETRENCH
 	)
 	# The payment level is chosen in the letter. It drives the loyalty cost and
 	# then the refusal probability (SPEC §8.5, §12.6, #16).

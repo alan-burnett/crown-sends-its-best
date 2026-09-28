@@ -361,8 +361,8 @@ func test_two_governors_describe_the_same_harvest_differently() -> void:
 func test_orders_to_him_resolve_through_compliance() -> void:
 	var run := RunState.new_run(SEED)
 	var governor := run.contact(run.colony.in_order()[0].governor_id)
-	var order := Order.new(M1Registrations.ORDER_SET_POLICY, governor.id, {
-		"to": String(governor.id), "policy": "objective", "value": "fortify",
+	var order := Order.new(M1Registrations.ORDER_URGE_INTENT, governor.id, {
+		"to": String(governor.id), "intent": "military",
 	}, run.world.month)
 
 	var result := Compliance.resolve(

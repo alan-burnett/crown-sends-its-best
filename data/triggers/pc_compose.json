@@ -30,7 +30,19 @@
     "id": "trigger.pc.ask_for_a_policy",
     "letter": "pc.ask_for_a_policy",
     "offers_composition": true,
-    "conditions": []
+    "note": "Issue 451, immigration.md section 4: encouraging immigration is the Provost's policy, and no other Crown officer is asked.",
+    "conditions": [
+      { "he_is": { "id": "provost" } }
+    ]
+  },
+  {
+    "id": "trigger.pc.encourage_settlers",
+    "letter": "pc.encourage_settlers",
+    "offers_composition": true,
+    "note": "Issue 451: asked of a governor, encouraging immigration is an urging toward go tall.",
+    "conditions": [
+      { "he_governs_a_town": {} }
+    ]
   },
   {
     "id": "trigger.pc.state_a_preference",

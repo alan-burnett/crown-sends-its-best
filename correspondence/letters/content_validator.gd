@@ -308,12 +308,24 @@ func _check_reply(letter: Letter) -> void:
 		var options: Array = step.get(LetterSchema.KEY_OPTIONS, [])
 		if options.is_empty():
 			_problem(step_path, "a step needs at least one option")
+		# 🔒 **A choice with no effect is not a choice** (#451,
+		# `reply-vocabulary.md` §4, SPEC §9.2). A step whose options all do
+		# nothing is a tone-only reply dressed as a decision.
+		elif not options.any(_does_something):
+			_problem(step_path, "every option here does nothing; make it a tone-only reply, or give each option the effect its words promise")
 		for option_index in options.size():
 			_check_option(options[option_index], letter, "%s.options[%d]" % [step_path, option_index])
 
 	var closing: Array = letter.closing()
 	for index in closing.size():
 		_check_line(closing[index], letter, "reply.closing[%d]" % index)
+
+
+static func _does_something(option: Variant) -> bool:
+	if typeof(option) != TYPE_DICTIONARY:
+		return false
+	var effect: Variant = (option as Dictionary).get(LetterSchema.KEY_EFFECT, {})
+	return typeof(effect) == TYPE_DICTIONARY and not (effect as Dictionary).is_empty()
 
 
 func _check_option(option: Variant, letter: Letter, path: String) -> void:

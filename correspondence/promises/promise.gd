@@ -39,6 +39,12 @@ const KIND_REVENUE: StringName = &"revenue"
 ## governor's because he was asked something costly.
 const KIND_SHIPMENT: StringName = &"shipment"
 
+## 🔒 **The colony will retrench** (#451, `crown-standing.md` §3). Kept when, over
+## its months, the Crown paid out on the PC's word no more than it took in from
+## the colony: the Ledger's two columns. Nothing stops the PC spending; the
+## promise is what it costs him.
+const KIND_RETRENCH: StringName = &"retrench"
+
 var id: StringName = &""
 var to: StringName = &""
 var kind: StringName = &""
@@ -85,7 +91,7 @@ func is_due(month: int) -> bool:
 ## The driver has to judge it against what actually happened, so `settle_due`
 ## cannot simply mark it kept when the month comes round.
 func is_a_wager() -> bool:
-	return kind == KIND_REVENUE or kind == KIND_SHIPMENT
+	return kind == KIND_REVENUE or kind == KIND_SHIPMENT or kind == KIND_RETRENCH
 
 
 func amount() -> float:

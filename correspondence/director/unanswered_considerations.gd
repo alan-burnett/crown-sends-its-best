@@ -72,7 +72,6 @@ class SelfInterestConsideration:
 		"grant_favor": 0.7,
 		"station_troops": -0.4,
 		"adjust_loyalty": 0.2,
-		"set_policy": 0.0,
 		"refuse": -1.0,
 	}
 

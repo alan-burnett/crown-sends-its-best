@@ -24,7 +24,8 @@
         { "id": "acknowledge", "label": "acknowledge it, and say nothing you cannot keep",
           "text": "I have read it. I will not make you a promise this week that I could not keep last week, and I imagine you would rather have that than a pleasant letter." },
         { "id": "apologise", "label": "say plainly that it is your doing",
-          "text": "This is my doing and not London's, whatever the clerks told you. I would rather you heard that from me than worked it out." }
+          "text": "This is my doing and not London's, whatever the clerks told you. I would rather you heard that from me than worked it out.",
+          "effect": { "apologise": { "to": "steward" } } }
       ] }
     ],
     "closing": [
