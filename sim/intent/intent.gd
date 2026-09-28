@@ -119,7 +119,19 @@ func contends_with(other: Intent) -> bool:
 ## whole announce-then-act property: the actor writes back saying what he will
 ## do, and does it the month after.
 func may_advance_in(month: int) -> bool:
-	return is_live() and month > committed_month
+	return is_live() and month > committed_month and month >= lands_in()
+
+
+## 🔒 **The month it may first be carried out** (#449, `contacts.md` §3). Nought
+## for everything but a delay: an Intent lands the month after it is committed,
+## and a delayed one **exactly** `Compliance.DELAY_MONTHS` after that, whatever
+## executor carries it — which is what makes a delay the comply result, later,
+## rather than something each executor decides for itself.
+const LANDS: String = "lands"
+
+
+func lands_in() -> int:
+	return int(data.get(LANDS, 0))
 
 
 func remaining() -> int:

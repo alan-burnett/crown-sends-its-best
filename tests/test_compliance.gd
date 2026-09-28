@@ -204,8 +204,38 @@ func test_a_partial_compliance_delivers_less() -> void:
 	assert_eq(intent.data["amount"], 100)
 
 
-func test_a_delay_takes_longer_than_compliance() -> void:
-	assert_true(int(Compliance.MONTHS_FOR[Compliance.DELAY]) > int(Compliance.MONTHS_FOR[Compliance.COMPLY]))
+func test_a_delay_is_the_comply_result_three_months_later() -> void:
+	# 🔒 **Exactly what comply would do, three months later** (#449,
+	# `contacts.md` §3), held on the Intent so every executor honours it.
+	var delayed: Intent = null
+	for loyalty in [30.0, 50.0, 70.0, 85.0]:
+		for payment in [500.0, 900.0, 1000.0]:
+			if delayed != null:
+				break
+			var order := _troop_request(payment)
+			order.tone = Tone.PLEASED
+			var result := _resolve(order, _contact(loyalty))
+			if String(result["outcome"]) == String(Compliance.DELAY):
+				delayed = result["intent"]
+	assert_true(delayed != null, "no delay was reached to prove anything with")
+	if delayed == null:
+		return
+	assert_eq(delayed.months_required, int(Compliance.MONTHS_FOR[Compliance.COMPLY]),
+		"a delay was a longer piece of work rather than the same work later")
+	var lands := state.month + 1 + Compliance.DELAY_MONTHS
+	assert_eq(delayed.lands_in(), lands)
+	for month in range(state.month + 1, lands):
+		assert_false(delayed.may_advance_in(month), "a delayed order was carried out in month %d" % month)
+	assert_true(delayed.may_advance_in(lands), "a delayed order never landed")
+
+
+func test_accepting_an_offer_a_waiver_or_a_deflection_is_never_deliberated() -> void:
+	# 🔒 **He offered it; he does it** (#449, `contacts.md` §3). The clergyman
+	# asked for his waiver, and deflecting a duke's demand is its third answer.
+	for kind in [M1Registrations.ORDER_TROUBLE_A_DUKE, M1Registrations.ORDER_SEND_AN_EXPERT,
+			M1Registrations.ORDER_GIVE_THE_CROWN_GOLD, M1Registrations.ORDER_WAIVE_DUTY,
+			M1Registrations.ORDER_DEFLECT_TRIBUTE]:
+		assert_false(LetterKind.deliberates(kind), "%s was weighed as though it were an order" % kind)
 
 
 # --- Costly requests -------------------------------------------------------

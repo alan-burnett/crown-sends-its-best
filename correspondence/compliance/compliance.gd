@@ -46,13 +46,22 @@ const OUTCOME_EVENTS: Dictionary = {
 
 ## How long each outcome takes to carry out. **Consequential actions are
 ## multi-month so a letter can interrupt them**
-## (`docs/mechanics/world-month.md` §3); a delay is simply a longer one.
+## (`docs/mechanics/world-month.md` §3).
+##
+## 🔒 **A delay takes as long as complying does** (#449): it is the same work,
+## started later (`DELAY_MONTHS`), not a longer piece of work.
 const MONTHS_FOR: Dictionary = {
 	COMPLY: 1,
 	PARTIAL: 1,
-	DELAY: 3,
+	DELAY: 1,
 	ACT_ALONE: 2,
 }
+
+## 🔒 **Delay is exactly the comply result, this many months later** (#449,
+## `contacts.md` §3; a placeholder). Held on the Intent as the month it may land
+## (`Intent.LANDS`), so every executor honours it, and a later letter may still
+## overtake it as it may any Intent.
+const DELAY_MONTHS: int = 3
 
 ## The key the manner of the letter travels under, from the desk to the
 ## deliberation months later (#262).
@@ -232,6 +241,9 @@ static func resolve(
 		# another man's lands the month after. Nothing warns the PC.
 		if PatronVices.GIVES.has(StringName(order.kind)):
 			intent.months_required = maxi(intent.months_required, PatronVices.months_late(contact))
+		if outcome == DELAY:
+			# The month complying would have landed, and three more.
+			intent.data[Intent.LANDS] = state.month + 1 + DELAY_MONTHS
 		book.commit(intent, log, state.month)
 
 	return {"outcome": outcome, "decision": decision, "intent": intent}
