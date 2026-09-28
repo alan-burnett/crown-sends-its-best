@@ -17,7 +17,7 @@ The spec asks an actor to weigh a situation and choose in at least six places:
 | Decision | Spec |
 | :--- | :--- |
 | A governor picks a town objective | §11.3 |
-| A contact complies, partly complies, delays, reinterprets, refuses, or acts alone | §8.5 |
+| A contact complies, partly complies, delays, refuses, or acts alone (`contacts.md` §3) | §8.5 |
 | A contact decides for himself when the PC does not reply | §9.3 |
 | The director decides who writes to the PC and about what | §9.6 |
 | A town decides to hold a trade protest | §10.2 |

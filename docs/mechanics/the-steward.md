@@ -34,20 +34,21 @@ So two rules, and they are not the same rule:
 
 The kernel already has the consideration this needs.
 `DissonanceConsideration` — *against his judgement* — pulls toward
-**reinterpret**, **act alone** and **delay**, away from **comply**, and
-**deliberately not toward refuse**, with a lock in the code saying so.
+**act alone** and **delay**, away from **comply**, and **deliberately not toward
+refuse**, with a lock in the code saying so. (It also pulled toward reinterpret,
+until reinterpretation was cut, #449.)
 
 That is the right shape for him without changing anything:
 
 | The PC orders | Dissonance | He |
 | :--- | :--- | :--- |
 | a **rise** | none | does it, and says something pleased about it |
-| a **small cut** | some | does it slowly, or reads it generously |
-| a **deep cut** | high | reinterprets it, or does it his way and tells you after |
+| a **small cut** | some | does it slowly |
+| a **deep cut** | high | does it his way and tells you after: the rate he would set himself (`contacts.md` §3) |
 
 **He never flatly refuses**, which is correct for a Crown officer and is what the
 spec describes. A man who disagrees with the Crown's revenue policy does not
-write back *"no"*; he finds that the instruction admitted of another reading.
+write back *"no"*; he puts it off, or does what he thinks right and says so.
 
 ### What has to change to reach it
 
@@ -103,7 +104,7 @@ letter after a rise is how a player learns the lever exists.
 
 - The rate he would set — a function of standing pressure and the colony's
   revenue, and the reference point everything in §2 measures against.
-- How far below it a cut has to be before he reinterprets rather than delays.
+- How far below it a cut has to be before he acts alone rather than delays.
 - The loyalty threshold on §3's gate.
 
 ## 6. Open items

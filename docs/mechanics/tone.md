@@ -57,10 +57,10 @@ locked).
 
 ## 4. The table
 
-| | Loyalty | The six outcomes | Urging | Writes again | Prestige |
+| | Loyalty | The five outcomes | Urging | Writes again | Prestige |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **pleased** | gain | toward comply and partial; **big** push toward delay | decrease | **increase** | — |
-| **dutiful** | none | away from refuse, act alone and reinterpret | — | — | — |
+| **dutiful** | none | away from refuse and act alone | — | — | — |
 | **annoyed** | slight loss | big push toward partial; **away from delay** | decrease | decrease | — |
 | **desperate** | slight loss | **removes delay**; away from refuse | **increase** | — | **loss** |
 | **hateful** | major loss | toward refuse and act alone | **increase** | major decrease | — |
@@ -81,7 +81,7 @@ being out of touch again.
 ## 5. 🔒 Tone lives inside the kernel, not on top of it
 
 **Each tone is a consideration**, scoring zero unless the letter carries it. It
-sits alongside loyalty, cost, payment, harshness, clarity and autonomy, and is
+sits alongside loyalty, cost, payment, harshness and autonomy, and is
 weighted by personality like every one of them.
 
 **This is not a detail of where the code goes.** The kernel's whole design is that
@@ -157,7 +157,7 @@ months later it pulls at a governor barely at all.
 ### dutiful — costs nothing, buys nothing, excludes the sideways answers
 
 The plain register. It moves no loyalty, changes no urging, invites no extra post,
-and simply **pushes away from refusal, acting alone and reinterpretation.**
+and simply **pushes away from refusal and acting alone.**
 
 **It is the safe choice and it should be.** A player who never thinks about tone
 picks this and loses very little — he only forgoes what the others buy.

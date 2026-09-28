@@ -247,7 +247,7 @@ optimiser with a worse one and make the colony read as incompetent.
 So there is no objective-level order, and therefore **no objective-level
 compliance.** Compliance operates on intent alone:
 
-| | Comply | Refuse or reinterpret |
+| | Comply | Refuse or act alone |
 | :--- | :--- | :--- |
 | **Intent** | he adopts the intent the PC urges | he keeps his own, and may say so |
 

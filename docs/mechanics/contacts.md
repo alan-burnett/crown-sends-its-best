@@ -94,8 +94,10 @@ is sent, and what it chooses to mention.
 
 ### Receiving an order
 
-Compliance resolves an Order into one of six outcomes — comply, partial, delay,
-reinterpret, refuse, act alone — through the deliberation kernel.
+Compliance resolves an Order into one of **five** outcomes — comply, partial,
+delay, refuse, act alone — through the deliberation kernel. **Reinterpretation
+was cut** (Author's ruling, #449), and the clarity consideration with it: it
+existed only to pull toward reinterpreting.
 
 **The considerations**, each weighted by personality like any other:
 
@@ -104,10 +106,9 @@ reinterpret, refuse, act alone — through the deliberation kernel.
 | **loyalty** | his regard for the PC | **the heaviest of them.** High complies, low refuses or acts alone |
 | **cost** | what the order asks in **gold** | a large ask is easier to shave, put off or decline |
 | **payment** | what the PC offered against that cost | comply |
-| **harshness** | whether the letter leaned on him | comply, and **away from the sideways answers** — a man told plainly does not quietly reinterpret |
+| **harshness** | whether the letter leaned on him | comply, and **away from acting alone** — a man told plainly does not quietly go his own way |
 | **tone** | which of the five the PC chose | five considerations, one per tone, weighted by three traits (`tone.md` §5) |
-| **clarity** | how vague the order is | **reinterpret**, which without this axis could never happen at all |
-| **autonomy** | his disaffection | act alone, reinterpret |
+| **autonomy** | his disaffection | act alone |
 
 **And one filter.** Full payment is a guaranteed yes while Crown Standing can
 cover it (§12.6) — a filter rather than a heavy weight, because a guarantee that
@@ -116,9 +117,7 @@ can lose a close vote is not a guarantee.
 Two of these are worth reading twice. **Harshness is the surest way to be
 obeyed**, which is the whole reason the PC would write one, and he pays for it
 twice — in the governor's regard and in what the town holds against the Crown
-afterwards (`rebel-sentiment.md` §4). And **clarity means saying exactly what you
-want is a real choice**: an order with no figure in it leaves room to decide what
-the PC must have meant.
+afterwards (`rebel-sentiment.md` §4).
 
 ### 🔒 Harsh is a second axis, not a sixth tone
 
@@ -166,14 +165,68 @@ scoring pass, and the argument would stop being an argument.**
 
 What the list is missing is smaller and real: the **manner** of his answer takes
 no account of the conflict, so a governor with a tribe on his border and one in a
-quiet province reinterpret an unwelcome order at the same rate. A ninth
-consideration belongs here for that, pulling toward reinterpretation and acting
-alone — and pointedly **not** toward refusal, because refusing is about regard,
-and a man who disagrees with the PC but likes him finds a way to do both.
+quiet province go their own way on an unwelcome order at the same rate. A further
+consideration belongs here for that, pulling toward acting alone — and pointedly
+**not** toward refusal, because refusing is about regard, and a man who disagrees
+with the PC but likes him finds a way to do both.
 
 The outcome becomes an Intent the sim executes (`world-month.md`). Which is the
 important part: **a contact does not merely accept or decline. He forms an
 intention, and it need not be the PC's.**
+
+### What each answer does
+
+Author's rulings (#449). **One principle per outcome**, and every order follows
+it:
+
+| Outcome | What happens |
+| :--- | :--- |
+| **comply** | the order is carried out as written |
+| **partial** | **a share of the order's size** is carried out: the amount, the months, the steps of a rate, the pull of an urging. The share is set by tone (`tone.md` §5). An order with no size is carried out in full, and **a policy is enacted whole** (`policy.md` §3) |
+| **delay** | exactly what comply would do, **three months later** (a placeholder). A later letter may still overtake it, as it may any Intent |
+| **refuse** | nothing |
+| **act alone** | **he does what he would have done had the PC not written**, and writes to say so afterwards. His will, not the PC's order with his name on it (Seam C). Where his judgement has nothing to put in the order's place, he carries on as he was |
+
+**Which gives, order by order:**
+
+| Order | Partial | Act alone |
+| :--- | :--- | :--- |
+| urge an intent (a governor) | the urging lands with a share of its pull | he keeps his own intent; the urging is never installed |
+| urge a company (a commander) | a share of its pull | he keeps his own standing order |
+| a tax rate (the Steward) | the rate moves a share of the way | he sets the rate he would set himself (`the-steward.md` §5) |
+| a shipment (a governor) | a share of the amount, from what the town can spare | nothing is shipped; the town trades as it would have |
+| troops (the Marshal) | **one strength less** than asked | **one strength less** than asked: it is never as bad as the PC says (`the-marshal.md` §5), and he writes to say so |
+| enact a policy | enacted whole | **not enacted**; he carries on as he was |
+| an embargo (a governor) | a share of its months; one with no end is laid in full | not laid |
+| move the Diplomat | he moves | he moves where he himself asked to go (`the-diplomat.md` §3) |
+| a site preference (a travelling governor) | taken in full | ignored; he picks his site on the ground's merit alone |
+| dissuade a founding | in full | he founds it anyway (`founding-towns.md` §3) |
+| answer a tribe (a governor) | in full | he answers the tribe his own way (`natives.md` §11) |
+
+Delay is the same everywhere: the comply result, three months on.
+
+**Troops are the one place partial and acting alone land the same force.** What
+differs is whose it is: partial is the PC's request, carried out short, and
+acting alone is the Marshal's own decision, which he announces.
+
+#### Answers are not deliberated
+
+**Answering a man's own letter is not directing him.** The PC's answers to what
+a contact asked or offered are carried out as given, with no compliance roll:
+the answering kinds already listed in `LetterKind.ANSWERS`, and also
+
+- **accepting a patron's offer**: troubling a duke, an expert, gold to the Crown
+  (`patrons.md` §4). He offered it; he does it;
+- **a duty waiver** granted to the clergyman who asked for it
+  (`institutional-contacts.md` §3);
+- **deflecting tribute**, the third answer to a duke's demand, beside paying and
+  declining, which are answers already (`patrons.md` §5).
+
+#### Every acknowledgement says what happened
+
+A partial answer names the share; a delay names the month it will land; acting
+alone says what he did instead; a refusal says so. **No acknowledgement describes
+an outcome that is not the one the sim carries out** (SPEC §9.1).
 
 ### Being ignored
 
