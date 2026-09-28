@@ -128,6 +128,10 @@ func _enact_if_agreed(
 	var outcome := String(result.get("outcome", ""))
 	if outcome == String(Compliance.REFUSE) or outcome == String(Compliance.DELAY):
 		return
+	# **A dilatory man's policy takes effect late** (#444), when its Intent comes
+	# due, exactly as a delayed one does.
+	if PatronVices.months_late(contact) > 0:
+		return
 
 	var effect := StringName(order.get_param("effect", ""))
 	if not PolicyEffects.is_effect(effect):

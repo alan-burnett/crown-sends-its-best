@@ -231,6 +231,11 @@ static func resolve(
 	var intent: Intent = null
 	if outcome != REFUSE:
 		intent = _intent_for(order, outcome, contact)
+		# 🔒 **A dilatory patron's side lands late** (#444, `patrons.md` §6): what
+		# he gives arrives this many months after the PC accepts it, where
+		# another man's lands the month after. Nothing warns the PC.
+		if PatronVices.GIVES.has(StringName(order.kind)):
+			intent.months_required = maxi(intent.months_required, PatronVices.months_late(contact))
 		book.commit(intent, log, state.month)
 
 	return {"outcome": outcome, "decision": decision, "intent": intent}

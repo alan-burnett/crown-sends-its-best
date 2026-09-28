@@ -38,6 +38,9 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	var town := town_for(colony, kind)
 	if String(kind).is_empty() or town == null:
 		return Intent.STALLED
+	# **When it is due, not before** (#444): a dilatory patron's expert is late.
+	if not intent.advance():
+		return Intent.IN_PROGRESS
 	town.add_experts(kind, 1)
 	log.emit(EVENT_ARRIVED, town.id, state.month, {
 		"town": String(town.id),

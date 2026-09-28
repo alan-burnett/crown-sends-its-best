@@ -135,6 +135,10 @@ static func register_all() -> void:
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
 	)
+	# 🔒 An Impatient patron offers his specialty once (#444).
+	ContentRegistry.register_condition(
+		"he_may_offer_his_specialty", {}, ColonyConditions.he_may_offer_his_specialty
+	)
 	# Whether the Crown is honouring payments at all, so a recovery can be funded
 	# (#470).
 	ContentRegistry.register_condition(
@@ -1324,6 +1328,12 @@ static func crown_opened_the_window(_args: Dictionary, context: LetterContext) -
 		and refusal.state == CrownRefusal.WARNED
 		and refusal.countdown == CrownRefusal.WARNING_TURNS
 	)
+
+
+## 🔒 **Whether this patron may offer his specialty** (#444, `patrons.md` §4,
+## §6): always, unless he is Impatient and has offered it already.
+static func he_may_offer_his_specialty(_args: Dictionary, context: LetterContext) -> bool:
+	return PatronVices.may_offer_his_specialty(context.sender, context.log)
 
 
 ## 🔒 **Whether the Crown is honouring payments** (#470, `crown-standing.md`

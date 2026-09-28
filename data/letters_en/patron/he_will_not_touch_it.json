@@ -1,0 +1,45 @@
+{
+  "id": "patron.he_will_not_touch_it",
+  "sender": "patron",
+  "type": "news",
+  "skippable": false,
+  "note": "Issue 444, patrons.md section 6. A Doctrinaire patron, now and then, when the colony has sold the Crown the resource he disapproves of: his regard falls every such month whether or not he writes, and this is the letter that tells the PC why. Unskippable because a patron cares about no measure and a skippable letter from him would never clear his threshold; the cooldown is what makes it now and then. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "I understand the colony has been selling {param:resource} to the Crown again."
+    },
+    {
+      "text": "I have made my views on {param:resource} plain to you before, and I shall not rehearse them. I will only say that every shipment of it is a shipment I am obliged to hear about, and that I do not enjoy hearing about it."
+    },
+    {
+      "text": "I do not ask you to stop. I merely tell you what it costs you with me."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and I take your point"
+        },
+        {
+          "tone": "pleased",
+          "text": "and I respect your principles"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and the colony must live on something"
+        },
+        {
+          "tone": "hateful",
+          "text": "and I shall sell what I please"
+        }
+      ]
+    }
+  }
+}

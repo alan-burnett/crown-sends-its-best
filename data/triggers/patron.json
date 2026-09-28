@@ -70,6 +70,7 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
       { "the_pc_is_not_ruinous": {} },
       {
         "his_barony_has_a_market": {}
@@ -96,6 +97,7 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
       { "the_pc_is_not_ruinous": {} },
       {
         "he_could_trouble_a_duke": {}
@@ -172,6 +174,7 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
       { "the_pc_is_not_ruinous": {} },
       {
         "he_could_bring_more": {
@@ -195,6 +198,7 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
       { "the_pc_is_not_ruinous": {} },
       {
         "he_could_bring_more": {
@@ -218,6 +222,7 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
       { "the_pc_is_not_ruinous": {} },
       {
         "he_could_send_an_expert": {}
@@ -239,6 +244,7 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
       { "the_pc_is_not_ruinous": {} },
       {
         "he_could_give_gold": {}
@@ -257,9 +263,66 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
       { "the_pc_is_not_ruinous": {} },
       {
         "he_could_send_troops": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.no_longer_associated",
+    "letter": "patron.no_longer_associated",
+    "urgency": 0.9,
+    "cooldown": 1,
+    "note": "Issue 444, patrons.md section 6. A Respectable patron the month after a town declares; his policies end with this letter. Cooldown 1: every declaration does it again.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "what_happened",
+        "event": "patron_withdrew",
+        "within": 1,
+        "concerning": "him",
+        "field": "town"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "patron_withdrew",
+          "within": 1,
+          "concerning": "him"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.he_will_not_touch_it",
+    "letter": "patron.he_will_not_touch_it",
+    "urgency": 0.4,
+    "cooldown": 12,
+    "note": "Issue 444, patrons.md section 6. A Doctrinaire patron in a month the colony sold the Crown what he disapproves of. His regard falls every such month; he writes about it now and then, which is the cooldown.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "what_happened",
+        "event": "patron_objected",
+        "within": 1,
+        "concerning": "him",
+        "field": "resource"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "patron_objected",
+          "within": 1,
+          "concerning": "him"
+        }
       }
     ]
   }

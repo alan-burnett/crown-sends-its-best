@@ -302,6 +302,11 @@ var specialty_bonus: String = ""
 ## bundle of mechanical behaviour on top of it, and the two words must not merge.
 var vice: StringName = &""
 
+## 🔒 **What a Doctrinaire patron will not touch** (#444, `patrons.md` §6): one
+## resource drawn at arrival, which his need and specialty never name. Empty on
+## everybody else.
+var disapproves: String = ""
+
 ## The month a patron goes home, or `-1` while he has not settled on one (#283,
 ## `patrons.md` §8).
 ##
@@ -401,6 +406,7 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.need_kind = String(record.get("need_kind", ""))
 	contact.specialty_bonus = String(record.get("specialty_bonus", ""))
 	contact.vice = StringName(record.get("vice", ""))
+	contact.disapproves = String(record.get("disapproves", ""))
 	contact.leaves_month = int(record.get("leaves_month", -1))
 	contact.backed_rebellion = String(record.get("backed_rebellion", ""))
 	contact.machines_broke = int(record.get("machines_broke", -1))
@@ -508,6 +514,7 @@ func to_dict() -> Dictionary:
 		"need_kind": need_kind,
 		"specialty_bonus": specialty_bonus,
 		"vice": String(vice),
+		"disapproves": disapproves,
 		"leaves_month": leaves_month,
 		"backed_rebellion": backed_rebellion,
 		"machines_broke": machines_broke,

@@ -31,6 +31,9 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	var amount := float(intent.data.get("amount", 0.0))
 	if amount <= 0.0:
 		return Intent.STALLED
+	# **When it is due, not before** (#444): a dilatory patron's gift is late.
+	if not intent.advance():
+		return Intent.IN_PROGRESS
 	log.emit(EVENT_GIVEN, intent.source, state.month, {
 		"from": String(intent.source),
 		"amount": amount,

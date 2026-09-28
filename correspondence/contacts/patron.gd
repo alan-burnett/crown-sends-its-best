@@ -171,10 +171,12 @@ static func _one_of(kinds: PackedStringArray, rng: RandomNumberGenerator) -> Str
 ## The kinds of a category still open to a new specialty, given what each kind
 ## has been rolled with before (§3). **A kind two patrons have held is closed**:
 ## both bonuses have been on offer, and the book on it is shut.
-static func _open_kinds(category: String, rolled: Dictionary) -> PackedStringArray:
+static func _open_kinds(category: String, rolled: Dictionary, shunned: String = "") -> PackedStringArray:
 	var out := PackedStringArray()
 	for kind in specialty_kinds_of(category):
 		if WITH_A_BONUS.has(category) and (rolled.get(kind, []) as Array).size() >= BONUSES.size():
+			continue
+		if kind == shunned:
 			continue
 		out.append(kind)
 	return out
@@ -182,10 +184,10 @@ static func _open_kinds(category: String, rolled: Dictionary) -> PackedStringArr
 
 ## The catalogue entries a new patron can still specialise in, in file order.
 ## One whose kinds are all closed is closed; one that comes in no kinds never is.
-static func _open_specialties(rolled: Dictionary) -> PackedStringArray:
+static func _open_specialties(rolled: Dictionary, shunned: String = "") -> PackedStringArray:
 	var out := PackedStringArray()
 	for id in catalogue_ids():
-		if not kinds_of(id).is_empty() and _open_kinds(id, rolled).is_empty():
+		if not kinds_of(id).is_empty() and _open_kinds(id, rolled, shunned).is_empty():
 			continue
 		out.append(id)
 	return out
@@ -209,7 +211,8 @@ static func _bonus_for(contact: Contact, rolled: Dictionary, rng: RandomNumberGe
 static func _wanted_kinds(category: String, contact: Contact) -> PackedStringArray:
 	var out := PackedStringArray()
 	for kind in kinds_of(category):
-		if kind != contact.specialty_kind:
+		# Never his own specialty's kind, and never what he will not touch (#444).
+		if kind != contact.specialty_kind and kind != contact.disapproves:
 			out.append(kind)
 	return out
 
@@ -223,6 +226,14 @@ static func is_patron(contact: Contact) -> bool:
 ## The regard at which he offers his specialty. **He offers; the PC cannot
 ## ask** (§10). A placeholder: §11 lists it as tuning.
 const OFFERS_AT: float = 60.0
+
+## 🔒 **The letters that offer his specialty** (#444, §4, §6): what an Impatient
+## man sends once and never again.
+const SPECIALTY_OFFERS: PackedStringArray = [
+	"patron.a_gift_for_the_crown", "patron.a_word_against_the_duke", "patron.an_expert_for_you",
+	"patron.his_barony_would_buy", "patron.his_herds_would_thrive", "patron.his_men_for_you",
+	"patron.more_of_his_kind",
+]
 
 
 ## Whether he thinks well enough of the PC to offer what he has.
@@ -406,10 +417,19 @@ static func generate(
 	var rng := streams.contact_stream(String(id))
 	var rolled: Dictionary = book.rolled if book != null else {}
 
-	var open := _open_specialties(rolled)
+	# 🔒 **His vice first** (#444): a Doctrinaire man's need and specialty never
+	# name what he disapproves of, so it is drawn before either and they are
+	# drawn around it — the mismatch is the draw, as it is between the two.
+	var vices := PatronVices.ids()
+	if not vices.is_empty():
+		contact.vice = StringName(vices[rng.randi_range(0, vices.size() - 1)])
+	PatronVices.apply_to(contact)
+	contact.disapproves = PatronVices.disapproved_of(contact, rng)
+
+	var open := _open_specialties(rolled, contact.disapproves)
 	if not open.is_empty():
 		contact.specialty = String(open[rng.randi_range(0, open.size() - 1)])
-		contact.specialty_kind = _one_of(_open_kinds(contact.specialty, rolled), rng)
+		contact.specialty_kind = _one_of(_open_kinds(contact.specialty, rolled, contact.disapproves), rng)
 		contact.specialty_bonus = _bonus_for(contact, rolled, rng)
 
 	# 🔒 **The mismatch is the draw, not a check.** His specialty's kind is taken
@@ -423,10 +443,6 @@ static func generate(
 		contact.need = String(needs[rng.randi_range(0, needs.size() - 1)])
 		contact.need_kind = _one_of(_wanted_kinds(contact.need, contact), rng)
 
-	var vices := PatronVices.ids()
-	if not vices.is_empty():
-		contact.vice = StringName(vices[rng.randi_range(0, vices.size() - 1)])
-	PatronVices.apply_to(contact)
 	if book != null:
 		book.note_roll(contact)
 	return contact

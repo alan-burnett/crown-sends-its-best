@@ -40,6 +40,11 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 			_arrive(state, log)
 		WorldPhase.RECKONING:
 			PatronGossip.spread(run, log, state.month)
+			# 🔒 **Two vices read the month just run** (#444, `patrons.md` §6): a
+			# declaration last month, and a sale this month of what a man will
+			# not touch.
+			PatronVices.respectable_withdraws(run, log, state.month)
+			PatronVices.doctrinaire_objects(run, log, state.month)
 			# 🔒 **Terms before the regard is read** (#283). A man who goes this
 			# month has his final loyalty banked and is gone from the roster, so
 			# the live figure below is the men who are still here — which is what

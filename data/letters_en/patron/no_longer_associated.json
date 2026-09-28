@@ -1,0 +1,45 @@
+{
+  "id": "patron.no_longer_associated",
+  "sender": "patron",
+  "type": "news",
+  "skippable": false,
+  "note": "Issue 444, patrons.md section 6. A Respectable patron, the month after a town declares: he can no longer be associated with the colony, and his policies end with this letter, which is the warning policy.md section 4 requires. Anything the PC promised him still stands. Every declaration sends it again. Unskippable, because the policies end whether or not the PC hears of it and he must. Placeholder prose.",
+  "params": {
+    "patron": "contact",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "I have heard what {param:town} has done, and so, I am afraid, has everybody else."
+    },
+    {
+      "text": "You will understand that a man in my position cannot be seen doing business with a colony whose towns are declaring against the Crown. I have given instructions that my arrangements in the colony are to end with this letter."
+    },
+    {
+      "text": "What you undertook to me stands, and I shall expect it. I say that without warmth, which I regret, but I find I have none to spare this month."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and I understand your position"
+        },
+        {
+          "tone": "desperate",
+          "text": "and I beg you to think again"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and I note how quickly you found it"
+        },
+        {
+          "tone": "hateful",
+          "text": "and I shall remember it"
+        }
+      ]
+    }
+  }
+}

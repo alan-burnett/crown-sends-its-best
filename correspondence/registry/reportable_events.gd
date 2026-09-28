@@ -105,6 +105,17 @@ const TABLE: Dictionary = {
 		"man": "commander",
 		"fields": {"town": "town"},
 	},
+	# 🔒 **A Respectable patron withdrew, or a Doctrinaire one minds a sale**
+	# (#444, `patrons.md` §6). His letter either way.
+	"patron_withdrew": {
+		"town": "town",
+		"man": "patron",
+		"fields": {"town": "town"},
+	},
+	"patron_objected": {
+		"man": "patron",
+		"fields": {"resource": "resource"},
+	},
 	# 🔒 **The colony has fallen** (#470, `endings.md` §1): no town and nobody
 	# walking. The last chance hangs off it — the Chancellor's formal warning and
 	# the Provost's offer of a town by sea, both in the month it falls.
