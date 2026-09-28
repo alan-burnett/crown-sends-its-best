@@ -25,6 +25,37 @@ who wants it.
 §5 also fixes the balance targets: **every perk is the same power level as every
 other**, and **a quirk is power-neutral while rewarding a playstyle.**
 
+### What unlocks each
+
+Author's ruling (#465). SPEC §14.3 gates unlocks on the runs a player has had.
+**Every option but the first has one condition of its own, themed to what it
+does**, checked when a run ends, however it ends, and recorded in the hall of
+records for every run after. Thresholds are placeholders.
+
+| Perk | Unlocked by a run that… |
+| :--- | :--- |
+| It's my first day | *unlocked at the start* |
+| Righteous | ends with a clergyman who thinks highly of the PC |
+| Good first impression | founds five towns |
+| Hard to say no to | has governors take up the PC's urging twelve times |
+| Good PR | ends in the *respectable* prestige band or better |
+| My boss is a jerk | survives the Crown refusing the PC's promises, and goes on to retire |
+| Read between the lines | ends with the Diplomat still alive |
+| Well connected at court | ends with the Steward, the Marshal and the Chancellor all thinking highly of the PC |
+
+| Quirk | Unlocked by a run that… |
+| :--- | :--- |
+| Busy patrons | sees a patron leave thinking highly of the PC |
+| It could be worse | sees a town lose people to hunger |
+| Boom town | reaches 500,000 people |
+| Distant colony | lasts eight years |
+| A pious colony | ends with a church in every town |
+| Restless country | holds a trade agreement with a tribe |
+| Scarce iron | makes its own guns |
+| Commando commanders | sees a commander reach level three |
+
+*Thinks highly* is the High band of loyalty (`contacts.md` §4).
+
 ## 2. 🔒 A perk names a knob. It never adds a number
 
 *Righteous* is not `+5 clergy loyalty`. It is **a drift term on one class of
