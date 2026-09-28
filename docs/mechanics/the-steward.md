@@ -98,6 +98,22 @@ document's, and are listed here so they are not lost:
 the only contact who reacts to a number the player set directly, and a pleased
 letter after a rise is how a player learns the lever exists.
 
+### What his push names
+
+Author's ruling (#452). **He asks for a higher duty on the most-traded resource:
+the one with the most gold changing hands last month, bought and sold together.**
+He goes where one rise brings the most duty, whichever way the colony trades it.
+When he raises a rate unasked (§3), it is this one.
+
+### The PC's tax letter
+
+Author's ruling (#452). SPEC §10.2 has one base rate and per-resource overrides,
+and the PC sets them by writing to the Steward. **The letter names a rate and a
+figure:** the base rate or one resource, and the new rate from a ladder of 0%, 5%,
+10%, 15%, 20%, 30% and 50% (placeholders). It goes through the Steward's
+compliance (§2 and `contacts.md` §3): a deep cut against his judgement may be
+delayed, or he sets the rate he would set himself and says so.
+
 ---
 
 ## 5. Tuning targets
