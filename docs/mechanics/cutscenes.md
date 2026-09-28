@@ -55,7 +55,7 @@ without asking, the Marshal pulling troops back — those happen on the desk**, 
 they deserve a painting as much as a battle does.
 
 They need no new machinery, because the correspondence layer already emits into
-the same log the sim does: `compliance.gd` logs all six outcomes —
+the same log the sim does: `compliance.gd` logs all five outcomes —
 `order_refused` and `contact_acted_alone` among them — and the director logs what
 it dispatched, culled and ignored.
 
