@@ -137,6 +137,13 @@ func _remove(count: int, reason: StringName, context: ColonyContext) -> int:
 	var wanted := mini(maxi(0, count), town.population())
 	if wanted <= 0:
 		return 0
+	# 🔒 **The Crown never destroys its own town** (#455, `battles.md` §9, SPEC
+	# §12.3). An attack of the Crown's that would take a rebel town's last people
+	# takes none of them: the town comes back to the Crown instead, with whoever
+	# is left. A town is lost only to rivals or natives.
+	if town.rebelling and stormed_by == Company.CROWN and wanted >= town.population():
+		Rebellion.bring_back(town, context, Rebellion.RETAKEN)
+		return 0
 
 	var before := town.population()
 	var taken := town.take_lives(wanted)
@@ -200,5 +207,8 @@ func _the_crowns_man(context: ColonyContext, lost: int, before: int) -> void:
 ## once. This is the seam that file named and said M6 would fill.
 func _the_town_may_be_lost(context: ColonyContext) -> void:
 	if town.population() > 0 or context.colony == null:
+		return
+	# Never to the Crown, whatever else happens (#455).
+	if stormed_by == Company.CROWN:
 		return
 	context.colony.lost(town, stormed_by, "stormed", context, WorldPhase.MOVEMENT)

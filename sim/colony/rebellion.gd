@@ -71,18 +71,33 @@ static func resolve(town: Town, context: ColonyContext) -> StringName:
 		return EVENT_DECLARED
 
 	if town.rebelling and town.quality_of_life < town.declared_quality:
-		town.rebelling = false
-		_turn_its_companies(town, Company.COLONIAL, context)
-		context.log.emit(EVENT_RETURNED, town.id, context.state.month, {
-			"town": String(town.id),
-			"population": town.population(),
-			"governor": String(town.governor_id),
-			"months_out": context.state.month - town.rebelling_since,
-		}, WorldPhase.COLONY_MONTH)
-		town.rebelling_since = -1
+		bring_back(town, context, BY_ITS_LIFE)
 		return EVENT_RETURNED
 
 	return &""
+
+
+## How a rebel town came back: its life fell below what it had (§5), or the
+## Crown's troops beat it (#455, `battles.md` §9).
+const BY_ITS_LIFE: StringName = &"its_life"
+const RETAKEN: StringName = &"retaken"
+
+
+## 🔒 **A rebel town comes back to the Crown** — one path, however it came back,
+## so the garrison that follows (#230) reads one event whichever it was.
+static func bring_back(town: Town, context: ColonyContext, how: StringName) -> void:
+	if not town.rebelling:
+		return
+	town.rebelling = false
+	_turn_its_companies(town, Company.COLONIAL, context)
+	context.log.emit(EVENT_RETURNED, town.id, context.state.month, {
+		"town": String(town.id),
+		"population": town.population(),
+		"governor": String(town.governor_id),
+		"months_out": context.state.month - town.rebelling_since,
+		"how": String(how),
+	}, WorldPhase.COLONY_MONTH)
+	town.rebelling_since = -1
 
 
 ## 🔒 **Whether a garrison holds the town** (#230): a Crown company quartered

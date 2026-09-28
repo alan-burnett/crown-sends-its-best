@@ -114,6 +114,25 @@ static func foe_of(company: Company, home: Town, context: ColonyContext) -> Comp
 		if nearest_overall == null or away < _apart(from, nearest_overall.at):
 			nearest_overall = other
 
+	# 🔒 **Men sent to put down the rebellion march on rebel towns too** (#455,
+	# `battles.md` §9), not only on rebel companies, so a town with nobody in
+	# the field is still within their reach. The town is fought as its wall.
+	if rebels_only and context.colony != null:
+		for entry in context.colony.in_order():
+			var town: Town = entry
+			if not town.rebelling:
+				continue
+			var wall := TownCompany.of(town, company)
+			var faction := faction_of(wall, context)
+			var away := _apart(from, wall.at)
+			if away <= THREAT_WITHIN:
+				strength[faction] = float(strength.get(faction, 0.0)) + Force.of(wall, context.map, false)
+			var held: Company = nearest_of.get(faction, null)
+			if held == null or away < _apart(from, held.at):
+				nearest_of[faction] = wall
+			if nearest_overall == null or away < _apart(from, nearest_overall.at):
+				nearest_overall = wall
+
 	if nearest_overall == null:
 		return null
 	var chosen := faction_of(nearest_overall, context)
