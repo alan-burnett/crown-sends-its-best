@@ -1107,6 +1107,62 @@ func check_run_modifiers(content: ContentDatabase) -> void:
 						_problem("%s.%s" % [record, id], (
 							"names the knob '%s', which nothing turns — known: %s"
 						) % [modifier_id, ", ".join(RunModifiers.ids())])
+			_check_unlock(String(record), id, entry as Dictionary)
+
+
+## 🔒 **Every option but the first names what unlocks it** (#465,
+## `perks-and-quirks.md` §1): one condition, an id `UnlockConditions` knows, with
+## exactly the params it declares at the types it declares. An option with none
+## could never be offered; one unlocked at the start has nothing to unlock.
+func _check_unlock(record: String, id: String, entry: Dictionary) -> void:
+	var where := "%s.%s.%s" % [record, id, UnlockConditions.KEY]
+	var condition: Variant = entry.get(UnlockConditions.KEY, null)
+	if bool(entry.get(RunModifiers.UNLOCKED_AT_START, false)):
+		if condition != null:
+			_problem(where, "is unlocked at the start, so nothing unlocks it")
+		return
+	if typeof(condition) != TYPE_DICTIONARY or (condition as Dictionary).size() != 1:
+		_problem("%s.%s" % [record, id], (
+			"names no one condition that unlocks it, so no run ever could — known: %s"
+		) % ", ".join(UnlockConditions.ids()))
+		return
+	for condition_id in condition:
+		if not UnlockConditions.is_condition(String(condition_id)):
+			_problem(where, "names '%s', which is no condition — known: %s"
+				% [condition_id, ", ".join(UnlockConditions.ids())])
+			continue
+		var args: Variant = condition[condition_id]
+		if typeof(args) != TYPE_DICTIONARY:
+			_problem(where, "expected an object of params")
+			continue
+		var declared: Dictionary = UnlockConditions.PARAMS[String(condition_id)]
+		for name in args:
+			if not declared.has(String(name)):
+				_problem(where, "'%s' takes no param '%s'" % [condition_id, name])
+		for name in declared:
+			if not (args as Dictionary).has(name):
+				_problem(where, "'%s' is missing its '%s'" % [condition_id, name])
+			elif not _is_unlock_param(args[name], String(declared[name])):
+				_problem(where, "'%s.%s' should be a %s" % [condition_id, name, declared[name]])
+
+
+static func _is_unlock_param(value: Variant, kind: String) -> bool:
+	match kind:
+		"integer":
+			return (typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT) \
+				and is_equal_approx(float(value), roundf(float(value)))
+		"number":
+			return typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT
+		"string":
+			return typeof(value) == TYPE_STRING and not String(value).is_empty()
+		"strings":
+			if typeof(value) != TYPE_ARRAY or (value as Array).is_empty():
+				return false
+			for each in value:
+				if typeof(each) != TYPE_STRING:
+					return false
+			return true
+	return false
 
 
 ## 🔒 **Every patron is somebody, and every vice does something** (#282,

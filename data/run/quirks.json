@@ -5,6 +5,7 @@
     "entries": [
       {
         "id": "scarce_iron",
+        "unlocked_by": { "makes": { "resource": "guns" } },
         "name": "Scarce iron",
         "blurb": "The Crown's ironmongers name a shocking figure, and the hills here are miserly.",
         "offered": true,
@@ -30,6 +31,7 @@
       },
       {
         "id": "commando_commanders",
+        "unlocked_by": { "a_commander_reaches": { "level": 3 } },
         "name": "Commando commanders",
         "blurb": "The men the Marshal spares you have seen a great deal, and expect to see more.",
         "offered": true,
@@ -49,6 +51,7 @@
       },
       {
         "id": "busy_patrons",
+        "unlocked_by": { "a_patron_leaves_at": { "band": "high" } },
         "name": "Busy patrons",
         "blurb": "Word of the colony has got about at court, and everyone has a proposal.",
         "offered": true,
@@ -63,6 +66,7 @@
       },
       {
         "id": "a_pious_colony",
+        "unlocked_by": { "a_church_in_every_town": {} },
         "name": "A pious colony",
         "blurb": "They came for the freedom to worship, and they have not forgotten it.",
         "offered": true,
@@ -84,6 +88,7 @@
       },
       {
         "id": "it_could_be_worse",
+        "unlocked_by": { "a_town_goes_hungry": {} },
         "name": "It could be worse",
         "blurb": "Whatever befalls this colony, somebody here has seen worse and says so.",
         "offered": true,
@@ -98,6 +103,7 @@
       },
       {
         "id": "boom_town",
+        "unlocked_by": { "peak_population": { "at_least": 500000 } },
         "name": "Boom town",
         "blurb": "Every ship brings more of them, and they all mean to stay.",
         "offered": true,
@@ -117,6 +123,7 @@
       },
       {
         "id": "restless_country",
+        "unlocked_by": { "a_trade_agreement_with_a_tribe": {} },
         "name": "Restless country",
         "blurb": "The people here have met Europeans before, and they are ready for you.",
         "offered": true,
@@ -146,6 +153,7 @@
       },
       {
         "id": "distant_colony",
+        "unlocked_by": { "lasts_months": { "months": 96 } },
         "name": "Distant colony",
         "blurb": "Six weeks of open water, and every question you ask is answered by a man who has stopped waiting for it.",
         "offered": true,

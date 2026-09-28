@@ -37,15 +37,17 @@ const MANDATE_NOTES: Dictionary = {
 }
 
 const SPLIT_NAMES: Dictionary = {
+	RunSetup.SPLIT_BALANCED: "As it comes",
 	RunSetup.SPLIT_PEOPLE: "In people",
 	RunSetup.SPLIT_GOLD: "In gold",
 	RunSetup.SPLIT_STORES: "In stores",
 }
 
 const SPLIT_NOTES: Dictionary = {
-	RunSetup.SPLIT_PEOPLE: "More hands than the grant usually buys. They will want feeding.",
-	RunSetup.SPLIT_GOLD: "Coin in the town's coffers, to buy what the ground will not give.",
-	RunSetup.SPLIT_STORES: "Grain, timber and tools. The safe answer, and the dullest.",
+	RunSetup.SPLIT_BALANCED: "People, coin and stores in the usual measure. Nothing traded for anything.",
+	RunSetup.SPLIT_PEOPLE: "More hands than the grant usually buys, paid for in coin and stores. They will want feeding.",
+	RunSetup.SPLIT_GOLD: "Coin in the town's coffers, to buy what the ground will not give. Fewer hands and thinner stores.",
+	RunSetup.SPLIT_STORES: "Grain, timber and tools, at the cost of hands and coin. The safe answer, and the dullest.",
 }
 
 ## 🔒 **What the colony is for, not where it goes** (#273, `map.md` §4, §5).

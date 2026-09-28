@@ -27,12 +27,15 @@ const STARTING_WOOD: float = 30.0
 const STARTING_TOOLS: float = 8.0
 const STARTING_GOLD: float = 250.0
 
-## What taking the grant one way rather than another is worth.
+## 🔒 **Leaning one way costs the others** (#465, `map.md` §5). The pile the
+## grant leans toward gains `SPLIT_LEAN` of itself and each of the other two gives
+## up `SPLIT_GIVE` of itself; taken evenly, it is the grant as it comes.
 ##
-## **One grant, three ways to take it** (SPEC §6.1). Deliberately not a small
-## difference: the split has to be visible in the colony's opening position or
-## it is a question the player answers once and never thinks about again.
-const SPLIT_BONUS: float = 0.45
+## Deliberately not a small difference: the split has to be visible in the
+## colony's opening position or it is a question the player answers once and
+## never thinks about again. Placeholders.
+const SPLIT_LEAN: float = 0.45
+const SPLIT_GIVE: float = 0.225
 
 var version: int = SAVE_VERSION
 var run_seed: int = 0
@@ -306,15 +309,26 @@ static func from_setup(setup: RunSetup) -> RunState:
 ## A larger party eats more and works more ground; gold buys what the ground will
 ## not give; stores are the safe answer and the dullest.
 static func _apply_split(town: Town, split: StringName) -> void:
-	match split:
-		RunSetup.SPLIT_PEOPLE:
-			town.workers = int(roundf(float(STARTING_WORKERS) * (1.0 + SPLIT_BONUS)))
-		RunSetup.SPLIT_GOLD:
-			town.receive_gold(STARTING_GOLD * SPLIT_BONUS)
-		RunSetup.SPLIT_STORES:
-			town.store(&"food", STARTING_FOOD * SPLIT_BONUS)
-			town.store(&"wood", STARTING_WOOD * SPLIT_BONUS)
-			town.store(&"tools", STARTING_TOOLS * SPLIT_BONUS)
+	if split == RunSetup.SPLIT_BALANCED or not RunSetup.SPLITS.has(split):
+		return
+	town.workers = int(roundf(float(STARTING_WORKERS) * (1.0 + _leaning(split, RunSetup.SPLIT_PEOPLE))))
+	var gold := STARTING_GOLD * _leaning(split, RunSetup.SPLIT_GOLD)
+	if gold > 0.0:
+		town.receive_gold(gold)
+	else:
+		town.spend_gold(-gold)
+	var stores := _leaning(split, RunSetup.SPLIT_STORES)
+	for pile in [[&"food", STARTING_FOOD], [&"wood", STARTING_WOOD], [&"tools", STARTING_TOOLS]]:
+		var change := float(pile[1]) * stores
+		if change > 0.0:
+			town.store(pile[0], change)
+		else:
+			town.take(pile[0], -change)
+
+
+## What one pile gains or gives up when the grant leans toward `split`.
+static func _leaning(split: StringName, pile: StringName) -> float:
+	return SPLIT_LEAN if split == pile else -SPLIT_GIVE
 
 
 ## Start a run.

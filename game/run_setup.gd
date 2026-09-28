@@ -52,14 +52,16 @@ const MANDATES: Array[StringName] = [
 
 ## How the opening grant may be split.
 ##
-## **One grant, three ways to take it** (SPEC §6.1). A larger party eats more
-## and works more ground; gold buys what the ground will not give; stores are
-## the safe answer and the dullest.
+## 🔒 **One grant, split** (SPEC §6.1, `map.md` §5, #465): taken as it comes, or
+## leaning toward one pile at the cost of the other two. A larger party eats more
+## and works more ground; gold buys what the ground will not give; stores are the
+## safe answer and the dullest.
+const SPLIT_BALANCED: StringName = &"balanced"
 const SPLIT_PEOPLE: StringName = &"people"
 const SPLIT_GOLD: StringName = &"gold"
 const SPLIT_STORES: StringName = &"stores"
 
-const SPLITS: Array[StringName] = [SPLIT_PEOPLE, SPLIT_GOLD, SPLIT_STORES]
+const SPLITS: Array[StringName] = [SPLIT_BALANCED, SPLIT_PEOPLE, SPLIT_GOLD, SPLIT_STORES]
 
 # --- Flavour, and nothing but ----------------------------------------------
 
@@ -111,7 +113,7 @@ var seed_value: int = 0
 var perk: StringName = PERK_FIRST_DAY
 var quirks: PackedStringArray = PackedStringArray()
 var mandate: StringName = GovernorIntent.GET_RICH
-var split: StringName = SPLIT_STORES
+var split: StringName = SPLIT_BALANCED
 
 ## 🔒 **What the colony is for, not where it goes** (#273, `map.md` §4).
 ##
@@ -252,7 +254,7 @@ static func from_dict(data: Dictionary) -> RunSetup:
 	setup.perk = StringName(data.get("perk", PERK_FIRST_DAY))
 	setup.quirks = PackedStringArray(data.get("quirks", []))
 	setup.mandate = StringName(data.get("mandate", GovernorIntent.GET_RICH))
-	setup.split = StringName(data.get("split", SPLIT_STORES))
+	setup.split = StringName(data.get("split", SPLIT_BALANCED))
 	setup.request = StringName(data.get("request", SiteRequest.QUICK_GROWTH))
 	setup.proximity = StringName(data.get("proximity", Tribes.APART))
 	return setup

@@ -16,6 +16,7 @@
       },
       {
         "id": "righteous",
+        "unlocked_by": { "a_contact_of_kind_ends_at": { "kind": "clergyman", "band": "high" } },
         "name": "Righteous",
         "blurb": "The Church has decided, on balance, to be pleased with you.",
         "offered": true,
@@ -32,6 +33,7 @@
       },
       {
         "id": "good_first_impression",
+        "unlocked_by": { "founds_towns": { "count": 5 } },
         "name": "Good first impression",
         "blurb": "People tend to like you before they know why.",
         "offered": true,
@@ -46,6 +48,7 @@
       },
       {
         "id": "read_between_the_lines",
+        "unlocked_by": { "the_diplomat_lives": {} },
         "name": "Read between the lines",
         "blurb": "You have a good ear for what a man is not saying.",
         "offered": true,
@@ -60,6 +63,7 @@
       },
       {
         "id": "good_pr",
+        "unlocked_by": { "ends_in_prestige_band": { "band": "respectable" } },
         "name": "Good PR",
         "blurb": "The pamphlets are unusually kind to you.",
         "offered": true,
@@ -74,6 +78,7 @@
       },
       {
         "id": "my_boss_is_a_jerk",
+        "unlocked_by": { "survives_a_refusal_and_retires": {} },
         "name": "My boss is a jerk",
         "blurb": "Everyone knows whose treasury said no.",
         "offered": true,
@@ -88,6 +93,7 @@
       },
       {
         "id": "well_connected_at_court",
+        "unlocked_by": { "these_contacts_end_at": { "ids": ["steward", "marshal", "chancellor"], "band": "high" } },
         "name": "Well connected at court",
         "blurb": "A word from you goes further than it has any right to.",
         "offered": true,
@@ -104,6 +110,7 @@
       },
       {
         "id": "hard_to_say_no_to",
+        "unlocked_by": { "urgings_taken": { "count": 12 } },
         "name": "Hard to say no to",
         "blurb": "People find it difficult to disappoint you.",
         "offered": true,
