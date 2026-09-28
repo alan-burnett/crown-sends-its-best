@@ -19,7 +19,7 @@ extends RefCounted
 ## `crown` is the Crown's own dice: which axis its demands grow along each year
 ## (#69). Separate from `sim` so that the shape of a run's squeeze does not
 ## change because the colony sim threw one more die somewhere.
-const SYSTEM_STREAMS: PackedStringArray = ["mapgen", "letters", "sim", "contacts", "crown"]
+const SYSTEM_STREAMS: PackedStringArray = ["mapgen", "letters", "sim", "contacts", "crown", "natives"]
 
 const CONTACT_PREFIX: String = "contact:"
 

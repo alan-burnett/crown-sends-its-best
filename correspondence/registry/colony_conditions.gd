@@ -83,6 +83,15 @@ static func register_all() -> void:
 		"i_answered_a_tribe", {"answer": "string", "within": "integer"},
 		ColonyConditions.i_answered_a_tribe,
 	)
+	# A tribe asked him for help, and he asks the PC, or tells him after (#471).
+	ContentRegistry.register_condition(
+		"i_asked_how_to_answer_their_ask", {"within": "integer"},
+		ColonyConditions.i_asked_how_to_answer_their_ask,
+	)
+	ContentRegistry.register_condition(
+		"i_answered_their_ask", {"answer": "string", "within": "integer"},
+		ColonyConditions.i_answered_their_ask,
+	)
 	# A patron who could make a duke's year difficult (#395).
 	ContentRegistry.register_condition(
 		"he_could_trouble_a_duke", {}, ColonyConditions.he_could_trouble_a_duke
@@ -842,6 +851,18 @@ static func i_asked_how_to_answer_a_tribe(args: Dictionary, context: LetterConte
 	return _his_event(TribeGrievanceDriver.EVENT_ASKED, args, context, "") != null
 
 
+## 🔒 **The same, about a tribe's ask for help** (#471), which reads as a
+## different letter: they want something, rather than want something stopped.
+static func i_asked_how_to_answer_their_ask(args: Dictionary, context: LetterContext) -> bool:
+	return _his_event(TribeGrievanceDriver.EVENT_ASKED, args, context, "", true) != null
+
+
+static func i_answered_their_ask(args: Dictionary, context: LetterContext) -> bool:
+	var answered := _his_event(
+		TribeGrievanceDriver.EVENT_ANSWERED, args, context, String(args.get("answer", "")), true)
+	return answered != null and bool(answered.payload.get("tells", false))
+
+
 ## Whether this governor answered a tribe with `answer` and **means to tell the
 ## PC** (#436): below neutral and above the floor (§11).
 static func i_answered_a_tribe(args: Dictionary, context: LetterContext) -> bool:
@@ -850,7 +871,12 @@ static func i_answered_a_tribe(args: Dictionary, context: LetterContext) -> bool
 
 
 ## His latest event of this type within the window, answering `answer` if given.
-static func _his_event(type: StringName, args: Dictionary, context: LetterContext, answer: String) -> SimEvent:
+##
+## 🔒 **A tribe's grievance and its ask for help are two letters** (#471): `help`
+## says which this is about, and the other is never it.
+static func _his_event(
+	type: StringName, args: Dictionary, context: LetterContext, answer: String, help: bool = false,
+) -> SimEvent:
 	if context == null or context.log == null or context.sender == null:
 		return null
 	var within := maxi(1, int(args.get("within", 1)))
@@ -859,6 +885,8 @@ static func _his_event(type: StringName, args: Dictionary, context: LetterContex
 		if context.month - event.month >= within:
 			continue
 		if String(event.payload.get("governor", "")) != String(context.sender.id):
+			continue
+		if (StringName(event.payload.get("act", "")) == TribeGrievance.HELP_ABROAD) != help:
 			continue
 		if not answer.is_empty() and String(event.payload.get("answer", "")) != answer:
 			continue

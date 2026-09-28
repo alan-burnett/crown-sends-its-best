@@ -57,6 +57,10 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"the_tribe_that_wrote_to_me", {}, ColonyParamSources.the_tribe_that_wrote_to_me
 	)
+	# What a tribe asked him for (#471): `field` `resource` or `amount`.
+	ContentRegistry.register_param_source(
+		"what_the_tribe_asked", {"field": "string"}, ColonyParamSources.what_the_tribe_asked
+	)
 	# The duke a patron offers to trouble, as an id or by name (#395).
 	ContentRegistry.register_param_source(
 		"the_duke_to_trouble", {"field": "string"}, ColonyParamSources.the_duke_to_trouble
@@ -366,6 +370,22 @@ static func the_tribe_that_wrote_to_me(_args: Dictionary, context: LetterContext
 	var latest := context.natives.grievances.latest_to(context.sender.id)
 	var tribe: Tribe = context.natives.find(latest.tribe) if latest != null else null
 	return tribe.display_name if tribe != null else "the natives"
+
+
+## What the tribe that last asked him for help asked for (#471): the resource
+## or the amount.
+static func what_the_tribe_asked(args: Dictionary, context: LetterContext) -> Variant:
+	var amount := String(args.get("field", "")) == "amount"
+	if context.sender == null or context.natives == null:
+		return 0 if amount else ""
+	var asked: Dictionary = {}
+	for entry in context.natives.grievances.list:
+		var letter: TribeGrievance = entry
+		if letter.act == TribeGrievance.HELP_ABROAD and letter.governor == context.sender.id:
+			asked = letter.asked
+	if amount:
+		return int(roundf(float(asked.get("amount", 0.0))))
+	return String(asked.get("resource", ""))
 
 
 ## The duke a patron offers to trouble (#395): `field` `id` for the effect,

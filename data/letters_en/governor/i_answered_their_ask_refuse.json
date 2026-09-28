@@ -1,0 +1,43 @@
+{
+  "id": "governor.i_answered_their_ask_refuse",
+  "sender": "governor",
+  "type": "report",
+  "skippable": true,
+  "note": "Issue 471, natives.md sections 7 and 11. A governor below neutral and above the floor answers a tribe's ask for help himself and tells the PC afterwards. Placeholder prose.",
+  "params": {
+    "tribe": "tribe",
+    "resource": "resource"
+  },
+  "body": [
+    {
+      "text": "The {param:tribe} asked for {param:resource} for some trouble of theirs beyond the hills."
+    },
+    {
+      "text": "I have refused them, as civilly as I could. Their quarrels are not ours, and the town has no {param:resource} to spare for other men's wars."
+    },
+    {
+      "text": "I did not think the matter would keep for a letter to you and back."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the {param:tribe}, I am {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "obliged for the notice"
+        },
+        {
+          "tone": "annoyed",
+          "text": "sorry you did not write to me first"
+        }
+      ]
+    },
+    "steps": [],
+    "closing": [
+      {
+        "text": "I remain your servant,"
+      }
+    ]
+  }
+}

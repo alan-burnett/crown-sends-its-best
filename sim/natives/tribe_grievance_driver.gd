@@ -62,6 +62,7 @@ const ACT_WEIGHT: Dictionary = {
 	"improvement_built": 1.0,
 	"company_on_its_ground": 1.0,
 	"expedition_on_its_ground": 1.0,
+	"help_abroad": 4.0,
 	"land_worked": 0.5,
 	"we_will_drive_you_off": 0.0,
 }
@@ -86,6 +87,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		WorldPhase.RECKONING:
 			_take_the_answers(context)
 			_notice(context)
+			# **And now and then one asks for help** (#471, §7).
+			TribeAsks.ask(run, context)
 		WorldPhase.INTENT:
 			_answer(context)
 
@@ -123,6 +126,10 @@ func _take_the_answers(context: ColonyContext) -> void:
 ## What this answer does to the tribe's standing toward the colony.
 func _standing_for(grievance: TribeGrievance) -> float:
 	var weight := float(ACT_WEIGHT.get(String(grievance.act), 1.0))
+	if grievance.act == TribeGrievance.HELP_ABROAD:
+		# 🔒 **Given, their standing rises; refused, it stays where it was**
+		# (#471, §3, §7). An ask refused is not an offence.
+		return weight * float(ANSWER_MOVES["gift"]) if grievance.answer == TribeGrievance.GIFT else 0.0
 	if grievance.answer == TribeGrievance.THREATEN:
 		var town := run.colony.by_id(grievance.town)
 		if town != null and _men_near(grievance.tribe, town) < BACKS_DOWN_BELOW * float(TownCompany.of(town).size):

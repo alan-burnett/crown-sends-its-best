@@ -101,6 +101,7 @@ func reset_world() -> void:
 	CommanderExperience.reset()
 	CommanderFate.reset()
 	Muster.reset()
+	TribeAsks.reset()
 
 	# The neighbours.
 	Tribes.reset()
