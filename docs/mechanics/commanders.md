@@ -174,6 +174,23 @@ A commander scores every option open to him — attack, hold, march, explore,
 withdraw to the town and disband — and takes the best. *Refusing to attack* is simply **attack
 scoring below retreat**, and it needs no code of its own.
 
+### A Crown commander may make an example of a rebel town
+
+Author's ruling (#457). **A Crown commander putting down a rebellion has one
+option more: punish the rebel town.** For as long as he holds it, his company
+razes the town's improvements (`tiles-and-improvements.md` §7), strikes its
+expeditions (`founding-towns.md` §7), and occupies its tiles so they yield
+nothing, as a duke's men deny tiles (`rival-pressure.md` §5).
+
+**It is his choice, not the PC's order.** He scores it beside his other options,
+and either:
+
+- **writes to the PC first**, proposing it, and the PC's answer is an order like
+  any other (`contacts.md` §3); or
+- **does it on his own** and writes afterwards to say so.
+
+A town he punishes counts as *made an example of* (`rebel-sentiment.md` §4).
+
 **Keeping his army alive is one of his considerations**, weighted by personality.
 A cautious man weights it heavily and will not spend his men on a fort; a
 glory-seeker weights it low and will. Both are reading the same board.
