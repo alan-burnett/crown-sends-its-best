@@ -32,9 +32,8 @@ extends RefCounted
 ## month of a sabotaged year is sabotaged too, which is right: it is the duke's
 ## affairs that are in disarray, not one body of men.
 
-## Where a sabotaged year lives, per duke. Same shape as
-## `TributeExecutor.DEFERRED_PREFIX`, and for the same reason: a world value
-## saves and loads with everything else and appears in the diff when it moves.
+## Where a sabotaged year lives, per duke. A world value, because it saves and
+## loads with everything else and appears in the diff when it moves.
 const SABOTAGED_PREFIX: String = "rival.sabotaged_until."
 
 const EVENT_ARRANGED: StringName = &"rival_sabotaged"

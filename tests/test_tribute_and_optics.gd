@@ -563,12 +563,3 @@ func test_he_skips_the_next_demand_and_the_one_after_is_normal() -> void:
 	run.world.month = 5 + DeflectionExecutor.DEMAND_CYCLE
 	assert_true(ColonyConditions.he_is_free_to_demand({}, context),
 		"the demand after the skipped one never came")
-
-
-func test_a_skipped_demand_is_not_a_deferred_attack() -> void:
-	# 🔒 Two keys. `TributeExecutor` writes `quiet_until` when the PC **pays**,
-	# which is about whether he comes; this is about whether he writes. One name
-	# for two things is how paying a man quietly came to mean he had stopped
-	# asking.
-	assert_ne(DeflectionExecutor.SKIPPED_PREFIX, TributeExecutor.DEFERRED_PREFIX,
-		"a skipped demand and a deferred attack share a world value")

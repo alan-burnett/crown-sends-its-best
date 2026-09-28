@@ -15,15 +15,12 @@ extends IntentExecutor
 ## `tribute_paid` at the moment the PC agrees, and `OpticsRegister` — not this
 ## file — decides what the court makes of it. A mechanic emits; it never prices.
 ##
-## ## 🔒 It defers the risk. It never buys peace
+## ## 🔒 Regard is the whole of what it buys (#458, `rival-pressure.md` §4)
 ##
-## SPEC §8.4: they bully the PC into giving them gold, and accepting puts the
-## attack off without ever settling anything. So paying writes a date on the
-## world and nothing else; the rival comes back, and comes back asking for more.
-##
-## **Nothing reads that date yet** — rivals are M5 and their attacks M6. Writing
-## it here means the milestone that brings them reads a world value rather than
-## reopening this, the same seam shape as `crown.emigration` for #171.
+## SPEC §8.4's *may defer the risk of an attack* is the bands at work: paying
+## raises his regard, and a duke kept at High or Medium does not attack. **There
+## is no period of quiet after a payment.** He comes back, and comes back asking
+## for more. This used to write a quiet date on the world that nothing ever read.
 ##
 ## ## 🔒 The gold comes from the Crown, and no governor is asked
 ##
@@ -42,22 +39,7 @@ extends IntentExecutor
 ## purse (§10.3) breaks the promise, so a PC in financial trouble cannot buy a
 ## duke off at all. The machinery for every part of that already existed.
 
-## The world value being written — **not the optic**.
-##
-## 🔒 These were the same string until #210, so every payment emitted
-## `tribute_paid` twice and `OpticsRegister` charged the court a thousand gold
-## for a five-hundred-gold embarrassment. A state change and a thing the court
-## hears about are two different events and must never share a name.
-const EVENT_DEFERRED: StringName = &"tribute_quiet_bought"
-
 const KIND: StringName = &"pay_tribute"
-
-## Where the deferred risk lives, per rival. Nothing drives it yet (M6).
-const DEFERRED_PREFIX: String = "rival.quiet_until."
-
-## How long a payment buys. Tuning, and deliberately short: **it defers, it does
-## not settle**, so he must be back inside a year.
-const MONTHS_OF_QUIET: int = 9
 
 
 func handles(intent: Intent) -> bool:
@@ -66,14 +48,6 @@ func handles(intent: Intent) -> bool:
 
 func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	var to := String(intent.data.get("to", ""))
-	var months := maxi(1, int(intent.data.get("months", MONTHS_OF_QUIET)))
-	var quiet_until := state.month + months
-
-	# **Through `apply`, like any other world value** (Seam A). M6 reads this and
-	# decides whether he comes; nothing here knows what an attack is.
-	state.apply(log, EVENT_DEFERRED, StringName(to), {
-		DEFERRED_PREFIX + to: float(quiet_until),
-	}, WorldPhase.MOVEMENT)
 
 	# 🔒 **The optic, at the moment of agreeing** (`prestige.md` §4). The register
 	# prices it; this only says it happened, and says it with no figure on the
@@ -84,7 +58,6 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 		# log and the letters; `OpticsRegister` prices the optic and does not read
 		# it, because the court minds that he paid rather than how much.
 		"gold": float(intent.data.get("amount", 0.0)),
-		"quiet_until": quiet_until,
 		# **Not peace.** He will be back, and the payload says so rather than
 		# leaving a reader to assume the matter is closed.
 		"bought_peace": false,
