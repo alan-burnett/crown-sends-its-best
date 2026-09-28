@@ -128,6 +128,10 @@ func _enact_if_agreed(
 	var outcome := String(result.get("outcome", ""))
 	if outcome == String(Compliance.REFUSE) or outcome == String(Compliance.DELAY):
 		return
+	# 🔒 **Acting alone, a policy is not enacted** (#449); he carries on as he
+	# was. Troops are the exception, and land one strength less.
+	if outcome == String(Compliance.ACT_ALONE) and not Compliance.is_troops(order):
+		return
 	# **A dilatory man's policy takes effect late** (#444), when its Intent comes
 	# due, exactly as a delayed one does.
 	if PatronVices.months_late(contact) > 0:
@@ -138,15 +142,22 @@ func _enact_if_agreed(
 		push_error("Unknown policy effect '%s'. Add it to PolicyEffects." % effect)
 		return
 
+	# **Troops granted in part, or as his own decision, land one strength less**
+	# (#449, `contacts.md` §3). One less than a garrison is none, and nothing lands.
+	var intent: Variant = result.get("intent", null)
+	var params: Dictionary = order.params.duplicate()
+	if Compliance.is_troops(order) and (outcome == String(Compliance.PARTIAL) or outcome == String(Compliance.ACT_ALONE)):
+		params["strength"] = String(CrownTroops.one_less(StringName(params.get("strength", ""))))
+		if not CrownTroops.is_a_strength(StringName(params["strength"])):
+			return
 	policies.enact(Policy.new(
 		contact.id,
 		effect,
-		float(order.get_param("cost", 0.0)),
-		StringName(order.get_param("split", Policy.NONE)),
-		order.params,
+		float(params.get("cost", 0.0)),
+		StringName(params.get("split", Policy.NONE)),
+		params,
 	), log, state.month)
 	# Enacted once: the Intent this outcome made must not enact it again.
-	var intent: Variant = result.get("intent", null)
 	if intent is Intent:
 		(intent as Intent).data[PolicyEnactExecutor.ENACTED] = true
 

@@ -134,6 +134,19 @@ func lands_in() -> int:
 	return int(data.get(LANDS, 0))
 
 
+## 🔒 **What share of the order he carries out**, for a partial answer to an order
+## whose size is not an amount — the pull of an urging (#449, `contacts.md` §3).
+const SHARE: String = "share"
+
+## 🔒 **He went his own way** (#449): an Intent a contact carries out acting alone,
+## where what he does is his own judgement rather than the PC's parameters.
+const HIS_OWN_WAY: String = "his_own_way"
+
+
+func share() -> float:
+	return clampf(float(data.get(SHARE, 1.0)), 0.0, 1.0)
+
+
 func remaining() -> int:
 	return maxi(0, months_required - progress)
 

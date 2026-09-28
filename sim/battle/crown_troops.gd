@@ -92,6 +92,17 @@ func _init(p_run: RunState = null) -> void:
 	run = p_run
 
 
+## 🔒 **One strength less than this** (#449, `contacts.md` §3): what the Marshal
+## sends when he grants troops in part or decides for himself — *it is never as
+## bad as the PC says*. One less than a garrison is none.
+const ORDER: Array[StringName] = [NONE, A_GARRISON, A_FORCE, AN_ARMY]
+
+
+static func one_less(strength: StringName) -> StringName:
+	var at := ORDER.find(strength)
+	return ORDER[maxi(0, at - 1)] if at > 0 else NONE
+
+
 ## Whether a letter may ask for this strength: one of §2's, and not *none* — a
 ## policy for nobody would be charged every month and land no one.
 static func is_a_strength(value: StringName) -> bool:

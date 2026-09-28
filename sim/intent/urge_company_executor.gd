@@ -41,7 +41,10 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	# **As hard as the letter was written** (#262, `tone.md` §4), and the PC's,
 	# replacing his last and nobody else's (#405).
 	var tone := StringName(intent.data.get(Compliance.URGED_TONE, ""))
-	company.urge(wanted, tone, state.month)
+	# **A partial answer lands a share of its pull** (#449).
+	var urging := Urging.from_pc(wanted, state.month, tone)
+	urging.strength *= intent.share()
+	company.stand(urging)
 
 	log.emit(EVENT_URGED, intent.source, state.month, {
 		"intent": String(intent.id),

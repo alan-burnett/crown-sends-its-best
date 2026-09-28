@@ -118,16 +118,41 @@ func test_once_the_crown_honours_nothing_the_guarantee_goes() -> void:
 
 # --- 🔒 Whatever he agrees to, he enacts ------------------------------------------
 
-func test_every_answer_but_a_refusal_or_a_delay_enacts_the_policy_now() -> void:
+func test_what_he_agrees_to_he_enacts_now_and_troops_in_part_are_one_strength_less() -> void:
+	# 🔒 #449 (`contacts.md` §3): a policy agreed to, whole or in part, is enacted
+	# whole — but troops granted in part, or as the Marshal's own decision, land
+	# one strength less than asked.
 	var marshal := run.contact(CrownTroops.MARSHAL)
-	for outcome in [Compliance.COMPLY, Compliance.PARTIAL, Compliance.ACT_ALONE]:
+	var force := _troops()
+	force.params["strength"] = String(CrownTroops.A_FORCE)
+	var landed := {
+		Compliance.COMPLY: CrownTroops.A_FORCE,
+		Compliance.PARTIAL: CrownTroops.A_GARRISON,
+		Compliance.ACT_ALONE: CrownTroops.A_GARRISON,
+	}
+	for outcome in landed:
 		run.policies = PolicyBook.new()
-		var orders := _orders()
-		orders._enact_if_agreed(_troops(), marshal, {"outcome": String(outcome)}, run.world, run.log)
+		_orders()._enact_if_agreed(force, marshal, {"outcome": String(outcome)}, run.world, run.log)
 		assert_eq(_his_troops(), 1, "%s enacted nothing" % outcome)
+		assert_eq(String(run.policies.active()[0].params.get("strength", "")), String(landed[outcome]),
+			"%s landed the wrong strength" % outcome)
+	run.policies = PolicyBook.new()
+	_orders()._enact_if_agreed(_troops(), marshal, {"outcome": String(Compliance.PARTIAL)}, run.world, run.log)
+	assert_eq(_his_troops(), 0, "a garrison granted in part landed a garrison")
 	run.policies = PolicyBook.new()
 	_orders()._enact_if_agreed(_troops(), marshal, {"outcome": String(Compliance.REFUSE)}, run.world, run.log)
 	assert_eq(_his_troops(), 0, "a refusal enacted the policy")
+
+
+func test_acting_alone_a_policy_is_not_enacted() -> void:
+	# 🔒 #449: acting alone, he carries on as he was (c6fd0b5 enacted it).
+	var provost := run.contact(&"provost")
+	var policy := Order.new(M1Registrations.ORDER_ENACT_POLICY, &"provost", {
+		"to": "provost", "effect": String(PolicyEffects.IMMIGRATION), "cost": 50, "split": String(Policy.ALL),
+	}, run.world.month)
+	run.policies = PolicyBook.new()
+	_orders()._enact_if_agreed(policy, provost, {"outcome": String(Compliance.ACT_ALONE)}, run.world, run.log)
+	assert_empty(run.policies.held_by(&"provost"), "a man acting alone enacted the PC's policy")
 
 
 func test_a_delay_enacts_it_when_the_delay_is_up() -> void:

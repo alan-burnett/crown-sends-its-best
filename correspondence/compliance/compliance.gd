@@ -234,8 +234,12 @@ static func resolve(
 		PatronCredit.bank(contact, _deed_of(order), log, state.month)
 
 	var intent: Intent = null
-	if outcome != REFUSE:
+	# 🔒 **Acting alone, he does what he would have done had the PC not written**
+	# (#449, `contacts.md` §3). Where his judgement has nothing to put in the
+	# order's place, he carries on as he was, and there is nothing to carry out.
+	if outcome != REFUSE and not (outcome == ACT_ALONE and carries_on_as_he_was(order)):
 		intent = _intent_for(order, outcome, contact)
+		_shape(intent, order, outcome, state)
 		# 🔒 **A dilatory patron's side lands late** (#444, `patrons.md` §6): what
 		# he gives arrives this many months after the PC accepts it, where
 		# another man's lands the month after. Nothing warns the PC.
@@ -386,6 +390,65 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 	# are not mistaken for a later one contradicting it.
 	intent.letter = order.letter
 	return intent
+
+
+## 🔒 **Acting alone, whether he has anything to do instead** (#449,
+## `contacts.md` §3). An urging is never installed, a shipment not sent, a
+## policy not enacted, an embargo not laid, a preference ignored, a founding he
+## was asked to drop founded anyway, a tribe answered his own way, and a tax
+## order to the Steward — who acts alone on one only with standing lost and his
+## regard low — leaves the rate he would set himself where it stands. **Troops**
+## and **the Diplomat's move** are the two with something of his own to do.
+static func carries_on_as_he_was(order: Order) -> bool:
+	match order.kind:
+		M1Registrations.ORDER_URGE_INTENT, M1Registrations.ORDER_URGE_COMPANY, \
+				M1Registrations.ORDER_SHIP_RESOURCE, M1Registrations.ORDER_EMBARGO, \
+				M1Registrations.ORDER_PREFER_SITE, M1Registrations.ORDER_DISSUADE_FOUNDING, \
+				M1Registrations.ORDER_ANSWER_THE_TRIBE, M1Registrations.ORDER_SET_TAX_RATE:
+			return true
+		M1Registrations.ORDER_ENACT_POLICY:
+			return not is_troops(order)
+	return false
+
+
+## Whether this is the Marshal's troops rather than any other policy.
+static func is_troops(order: Order) -> bool:
+	return order != null and order.kind == M1Registrations.ORDER_ENACT_POLICY \
+		and StringName(order.get_param("effect", "")) == PolicyEffects.CROWN_TROOPS
+
+
+## 🔒 **One principle per outcome, order by order** (#449, `contacts.md` §3).
+##
+## | Order | Partial | Act alone |
+## | :--- | :--- | :--- |
+## | an urging, of a governor or a commander | a share of its pull | (never carried out) |
+## | a tax rate | the rate moves a share of the way | (never carried out) |
+## | a shipment | a share of the amount (`_intent_for`) | (never carried out) |
+## | troops | one strength less than asked | one strength less, as his decision |
+## | any other policy | enacted whole | (never carried out) |
+## | an embargo | a share of its months; a lifting in full | (never carried out) |
+## | the Diplomat's move | he moves | where he himself asked to go |
+static func _shape(intent: Intent, order: Order, outcome: StringName, state: WorldState) -> void:
+	match order.kind:
+		M1Registrations.ORDER_URGE_INTENT, M1Registrations.ORDER_URGE_COMPANY:
+			if outcome == PARTIAL:
+				intent.data[Intent.SHARE] = partial_share(order)
+		M1Registrations.ORDER_SET_TAX_RATE:
+			if outcome == PARTIAL and state != null:
+				var standing := TaxRates.rate_for(state, StringName(order.get_param("resource", "")))
+				var ordered := float(order.get_param("rate", standing))
+				intent.data["rate"] = standing + (ordered - standing) * partial_share(order)
+		M1Registrations.ORDER_EMBARGO:
+			var months := int(order.get_param("months", 0))
+			if outcome == PARTIAL and months > 0:
+				intent.data["months"] = maxi(1, int(roundf(float(months) * partial_share(order))))
+		M1Registrations.ORDER_ENACT_POLICY:
+			if is_troops(order) and (outcome == PARTIAL or outcome == ACT_ALONE):
+				intent.data["strength"] = String(CrownTroops.one_less(
+					StringName(order.get_param("strength", ""))))
+		M1Registrations.ORDER_MOVE_DIPLOMAT:
+			if outcome == ACT_ALONE:
+				intent.data[Intent.HIS_OWN_WAY] = true
 
 
 ## 🔒 **An Order he carries out of his own will** (#450): the Intent acting
