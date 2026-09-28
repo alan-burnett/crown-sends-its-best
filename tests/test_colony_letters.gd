@@ -287,17 +287,9 @@ func test_the_governor_says_so_when_he_is_going_his_own_way() -> void:
 
 
 # --- An intent is not vague --------------------------------------------------
-
-func test_urging_an_intent_is_a_specific_order() -> void:
-	# "See that the town grows" is one of exactly four things the PC can say and
-	# there is nothing in it to misread. Judging it vague made
-	# every governor reinterpret or refuse every priority he was ever sent, which
-	# read as a man who could not follow plain English.
-	var order := Order.new(
-		M1Registrations.ORDER_URGE_INTENT, &"governor_ashmere",
-		{"to": "governor_ashmere", "intent": String(GovernorIntent.GO_TALL)},
-	)
-	assert_almost_eq(Compliance.vagueness_of(order), 0.0, 0.001)
+#
+# Reinterpretation, and the vagueness that invited it, were cut (#449): an
+# intent is urged or it is not, and there is nothing in a letter to misread.
 
 
 func test_being_told_what_matters_costs_a_governor_nothing() -> void:

@@ -242,7 +242,6 @@ static func _asking_context(
 		"cost": Compliance.cost_of(asking),
 		"payment": Compliance.payment_in(asking) if honoured else 0.0,
 		"loyalty": marshal.loyalty(),
-		"vagueness": Compliance.vagueness_of(asking),
 		"harsh": false,
 		"tone": Tone.DUTIFUL,
 		"dissonance": 0.0,

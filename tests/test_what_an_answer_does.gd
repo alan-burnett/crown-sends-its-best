@@ -120,7 +120,7 @@ func test_once_the_crown_honours_nothing_the_guarantee_goes() -> void:
 
 func test_every_answer_but_a_refusal_or_a_delay_enacts_the_policy_now() -> void:
 	var marshal := run.contact(CrownTroops.MARSHAL)
-	for outcome in [Compliance.COMPLY, Compliance.PARTIAL, Compliance.REINTERPRET, Compliance.ACT_ALONE]:
+	for outcome in [Compliance.COMPLY, Compliance.PARTIAL, Compliance.ACT_ALONE]:
 		run.policies = PolicyBook.new()
 		var orders := _orders()
 		orders._enact_if_agreed(_troops(), marshal, {"outcome": String(outcome)}, run.world, run.log)

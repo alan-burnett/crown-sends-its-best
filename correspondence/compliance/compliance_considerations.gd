@@ -26,7 +26,6 @@ static func register_all() -> void:
 	Deliberation.register_consideration(CostConsideration.new(&"cost_of_request"), KINDS)
 	Deliberation.register_consideration(PaymentConsideration.new(&"payment_offered"), KINDS)
 	Deliberation.register_consideration(AutonomyConsideration.new(&"autonomy"), KINDS)
-	Deliberation.register_consideration(ClarityConsideration.new(&"order_clarity"), KINDS)
 	Deliberation.register_consideration(HarshnessConsideration.new(&"harshness"), KINDS)
 	Deliberation.register_consideration(DissonanceConsideration.new(&"against_his_judgement"), KINDS)
 	Deliberation.register_filter(FullPaymentIsAYes.new(&"full_payment_is_a_yes"), KINDS)
@@ -46,8 +45,8 @@ static func register_all() -> void:
 ##
 ## **A harsh order is the most likely thing to actually be obeyed**, which is the
 ## whole reason the PC would write one. It pushes hard towards compliance and
-## away from the sideways answers — a man told plainly does not quietly
-## reinterpret the instruction, and he does not put it off and hope.
+## away from the sideways answers — a man told plainly does not quietly go his
+## own way, and he does not put it off and hope.
 ##
 ## He may still refuse outright. That is the point of it being a consideration
 ## and not a filter: a governor who has had enough can still say no, and a harsh
@@ -77,7 +76,6 @@ class HarshnessConsideration:
 		Compliance.COMPLY: 1.0,
 		Compliance.PARTIAL: 0.4,
 		Compliance.DELAY: -0.8,
-		Compliance.REINTERPRET: -1.0,
 		Compliance.REFUSE: -0.3,
 		Compliance.ACT_ALONE: -0.9,
 	}
@@ -97,7 +95,6 @@ class LoyaltyConsideration:
 		Compliance.COMPLY: 1.0,
 		Compliance.PARTIAL: 0.2,
 		Compliance.DELAY: -0.3,
-		Compliance.REINTERPRET: -0.4,
 		Compliance.REFUSE: -1.0,
 		Compliance.ACT_ALONE: -1.0,
 	}
@@ -116,7 +113,6 @@ class CostConsideration:
 		Compliance.COMPLY: -1.0,
 		Compliance.PARTIAL: 0.6,
 		Compliance.DELAY: 0.5,
-		Compliance.REINTERPRET: 0.3,
 		Compliance.REFUSE: 0.8,
 		Compliance.ACT_ALONE: 0.2,
 	}
@@ -136,7 +132,6 @@ class PaymentConsideration:
 		Compliance.COMPLY: 1.0,
 		Compliance.PARTIAL: -0.5,
 		Compliance.DELAY: -0.4,
-		Compliance.REINTERPRET: -0.3,
 		Compliance.REFUSE: -1.0,
 		Compliance.ACT_ALONE: -0.5,
 	}
@@ -157,7 +152,6 @@ class AutonomyConsideration:
 
 	const PULL: Dictionary = {
 		Compliance.ACT_ALONE: 1.0,
-		Compliance.REINTERPRET: 0.6,
 		Compliance.REFUSE: 0.4,
 		Compliance.COMPLY: -0.5,
 	}
@@ -168,34 +162,6 @@ class AutonomyConsideration:
 	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
 		var disaffection: float = clampf((NEUTRAL - float(context.get_value("loyalty", NEUTRAL))) / NEUTRAL, 0.0, 1.0)
 		return clampf(disaffection * float(PULL.get(candidate.id, 0.0)), -1.0, 1.0)
-
-
-## **How they read vague orders** (SPEC §8).
-##
-## Reinterpretation needs an axis of its own. Without one it is dominated
-## everywhere — a disaffected contact acts alone instead, and a put-upon one
-## refuses — so it could never actually happen. What invites it is not dislike
-## but **ambiguity**: an order with no figure in it leaves room to decide what the
-## PC must have meant.
-##
-## Which is also why the PC saying exactly what he wants is a real choice, rather
-## than flavour.
-class ClarityConsideration:
-	extends Consideration
-
-	const PULL: Dictionary = {
-		Compliance.REINTERPRET: 1.0,
-		Compliance.COMPLY: -0.6,
-		Compliance.PARTIAL: 0.2,
-		Compliance.DELAY: 0.2,
-	}
-
-	func applies_to(candidate: Candidate) -> bool:
-		return PULL.has(candidate.id)
-
-	func score(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> float:
-		var vagueness: float = float(context.get_value("vagueness", 0.0))
-		return clampf(vagueness * float(PULL.get(candidate.id, 0.0)), -1.0, 1.0)
 
 
 ## Being told to do something he thinks is wrong (#213).
@@ -213,11 +179,8 @@ class ClarityConsideration:
 ## thing carrying the weight of an ask.
 ##
 ## 🔒 **It does not pull toward refusing.** Refusing is about regard — a man who
-## disagrees but likes the PC finds a way to do both, and the way he finds is
-## reinterpretation:
-##
-## > *I have read Your Grace's instruction regarding our profits, and have
-## > applied it to the timber we shall need for the palisade.*
+## disagrees but likes the PC finds a way to do both, and the way he finds is to
+## go his own way and say so (`contacts.md` §3; reinterpretation was cut, #449).
 ##
 ## Weighted by personality like every other, so a dutiful man swallows it and a
 ## proud one does not.
@@ -225,7 +188,6 @@ class DissonanceConsideration:
 	extends Consideration
 
 	const PULL: Dictionary = {
-		Compliance.REINTERPRET: 1.0,
 		Compliance.ACT_ALONE: 0.8,
 		Compliance.DELAY: 0.35,
 		Compliance.COMPLY: -0.9,
@@ -297,7 +259,7 @@ class FullPaymentIsAYes:
 ## A desperate letter that lands in a drawer one time in twenty is not the
 ## compliance tool §6 says it is, and the player cannot build a plan on it.
 ##
-## He may still refuse, reinterpret or act around it. What he cannot do is say
+## He may still refuse, or act around it. What he cannot do is say
 ## *presently*.
 ##
 ## **This is the whole of what makes desperation worth its price** — loyalty,

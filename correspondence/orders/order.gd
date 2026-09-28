@@ -5,8 +5,8 @@ extends RefCounted
 ##
 ## **Seam B: Orders are never writes.** A player letter never touches sim state
 ## (SPEC §8.5, §7). It creates an Order **addressed to a contact**. The contact
-## resolves it — comply, partly comply, delay, reinterpret, refuse, or act
-## unilaterally — into intents the sim consumes on the *next* step.
+## resolves it — comply, partly comply, delay, refuse, or act unilaterally —
+## into intents the sim consumes on the *next* step.
 ##
 ## **🔒 Your orders are requests.** Nothing here commands anything; this is a
 ## letter's worth of intent, waiting on somebody else's judgement.

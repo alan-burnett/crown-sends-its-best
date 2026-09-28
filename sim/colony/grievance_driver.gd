@@ -73,7 +73,6 @@ func _read(event: SimEvent, month: int, log: EventLog) -> void:
 		Compliance.OUTCOME_EVENTS[Compliance.COMPLY], \
 		Compliance.OUTCOME_EVENTS[Compliance.PARTIAL], \
 		Compliance.OUTCOME_EVENTS[Compliance.DELAY], \
-		Compliance.OUTCOME_EVENTS[Compliance.REINTERPRET], \
 		Compliance.OUTCOME_EVENTS[Compliance.REFUSE]:
 			var order: Dictionary = event.payload.get("order", {})
 			var kind := String(order.get("kind", ""))

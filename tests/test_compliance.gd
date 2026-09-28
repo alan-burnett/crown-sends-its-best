@@ -51,17 +51,16 @@ func _resolve(order: Order, contact: Contact) -> Dictionary:
 	return Compliance.resolve(order, contact, book, state, log, streams)
 
 
-# --- The six outcomes ------------------------------------------------------
+# --- The five outcomes -----------------------------------------------------
 
+## An order with no figure in it, priced at nothing (#451).
 func _vague_order() -> Order:
-	# No figure in it, so there is room to decide what the PC meant. Priced at
-	# nothing, as the `set_policy` it replaces was (#451).
 	return Order.new(M1Registrations.ORDER_MOVE_DIPLOMAT, &"marshal", {
 		"to": "marshal", "town": "ashmere",
 	}, state.month)
 
 
-func test_all_six_outcomes_are_reachable() -> void:
+func test_all_five_outcomes_are_reachable() -> void:
 	# Swept across loyalty, payment, personality, the tone of the letter and how
 	# specific the order was, which is the honest way to ask "can this happen"
 	# without asserting a balance number.
@@ -84,17 +83,12 @@ func test_all_six_outcomes_are_reachable() -> void:
 		assert_true(seen.has(String(outcome)), "%s was never reachable. Reached: %s" % [outcome, seen.keys()])
 
 
-func test_a_vague_order_invites_reinterpretation() -> void:
-	# SPEC §8: personality shows in how a contact reads vague orders. A figure in
-	# the letter is what closes the gap.
-	assert_almost_eq(Compliance.vagueness_of(_troop_request(500.0)), 0.0)
-	assert_almost_eq(Compliance.vagueness_of(_vague_order()), 1.0)
-
-	var reinterpreted := false
-	for loyalty in [20.0, 40.0, 60.0, 80.0]:
-		if String(_resolve(_vague_order(), _contact(loyalty))["outcome"]) == String(Compliance.REINTERPRET):
-			reinterpreted = true
-	assert_true(reinterpreted, "no vague order was ever reinterpreted")
+func test_reinterpretation_is_cut() -> void:
+	# 🔒 **Five outcomes** (#449, the Author's ruling, `contacts.md` §3), and
+	# nothing weighs the clarity that only ever pulled toward the sixth.
+	assert_eq(Compliance.OUTCOMES.size(), 5)
+	assert_false(Compliance.OUTCOMES.has(&"reinterpret"))
+	assert_false(Governor.weighted().has("order_clarity"), "a governor still weighs how clear an order is")
 
 
 func test_each_outcome_emits_a_distinguishable_event() -> void:

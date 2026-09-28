@@ -13,17 +13,19 @@ extends RefCounted
 ## That is the whole point of Seam C: "the contact complied with your order" and
 ## "the contact acted on his own and informed the PC afterward" are one mechanism.
 
-# --- The six outcomes ------------------------------------------------------
+# --- The five outcomes -----------------------------------------------------
 
+## 🔒 **Five, and reinterpretation is cut** (#449, the Author's ruling,
+## `contacts.md` §3). It existed as an outcome nothing read, and the clarity
+## consideration existed only to pull toward it.
 const COMPLY: StringName = &"comply"
 const PARTIAL: StringName = &"partial"
 const DELAY: StringName = &"delay"
-const REINTERPRET: StringName = &"reinterpret"
 const REFUSE: StringName = &"refuse"
 ## Especially at low loyalty: he does what he thinks best and tells the PC after.
 const ACT_ALONE: StringName = &"act_alone"
 
-const OUTCOMES: Array[StringName] = [COMPLY, PARTIAL, DELAY, REINTERPRET, REFUSE, ACT_ALONE]
+const OUTCOMES: Array[StringName] = [COMPLY, PARTIAL, DELAY, REFUSE, ACT_ALONE]
 
 ## Distinct event types, so next month's letters can key on what he did without
 ## unpacking a payload.
@@ -38,7 +40,6 @@ const OUTCOME_EVENTS: Dictionary = {
 	COMPLY: &"order_complied",
 	PARTIAL: &"order_partly_complied",
 	DELAY: &"order_delayed",
-	REINTERPRET: &"order_reinterpreted",
 	REFUSE: &"order_refused",
 	ACT_ALONE: &"contact_acted_alone",
 }
@@ -50,7 +51,6 @@ const MONTHS_FOR: Dictionary = {
 	COMPLY: 1,
 	PARTIAL: 1,
 	DELAY: 3,
-	REINTERPRET: 2,
 	ACT_ALONE: 2,
 }
 
@@ -132,7 +132,6 @@ static func resolve(
 		"payment": payment_in(order) if can_crown_pay else 0.0,
 		"can_crown_pay": can_crown_pay,
 		"loyalty": contact.loyalty(),
-		"vagueness": vagueness_of(order),
 		# **Leaning on a man works** (`rebel-sentiment.md` §4). It is the surest
 		# way to be obeyed and the PC pays for it twice — in the governor's regard
 		# below, and in what the town holds against the Crown afterwards.
@@ -145,11 +144,8 @@ static func resolve(
 		#
 		# 🔒 It changes the **manner** of his answer, never the decision. A
 		# governor whose town is threatened, told to chase profit, is markedly
-		# likelier to reinterpret the instruction into something he can live with
-		# — *"I have applied Your Grace's instruction regarding our profits to the
-		# timber we shall need for the palisade"* — and that letter is
-		# unreachable if compliance cannot tell an agreeable order from an
-		# unwelcome one.
+		# likelier to go his own way, and that is unreachable if compliance cannot
+		# tell an agreeable order from an unwelcome one.
 		#
 		# **Compliance still does not decide the intent.** `contacts.md` §3 locks
 		# the split: compliance decides whether he listens, phase 8's
@@ -344,9 +340,6 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 			if params.has("amount") and JsonTypes.is_int_like(params["amount"]):
 				params["amount"] = int(
 					JsonTypes.to_int(params["amount"], "amount") * partial_share(order))
-		REINTERPRET:
-			# He does what he thinks you meant, which is not what you wrote.
-			params["reinterpreted"] = true
 
 	if order.kind == M1Registrations.ORDER_SHIP_RESOURCE:
 		# **Compliance is a choice of priority tier, not a mood** (#69,
@@ -508,18 +501,6 @@ static func _priced(order: Order) -> Variant:
 	return null
 
 
-## How much room the order leaves to decide what the PC meant.
-##
-## An order carrying a figure is specific: send 200 of iron, pay 500 for troops.
-## One carrying only words — set this policy, grant this favour — is not, and
-## SPEC §8 expects personality to show in how a contact reads it.
-##
-## **An intent is specific without carrying a number.** "Your people's survival
-## must come first" is one of exactly five things the PC can say and there is
-## nothing in it to misread — so a governor who disagrees refuses honestly rather
-## than claiming your letter admitted of more than one reading. Judging it vague
-## made every governor reinterpret or refuse every priority he was ever sent,
-## which read as a man who could not follow plain English.
 ## How far an order cuts against what the contact currently wants (#213).
 ##
 ## **Zero where nothing applies**, exactly as harshness is zero for a mild
@@ -556,31 +537,14 @@ const DEEP_CUT_STEPS: float = 2.0
 ## down is as far against it as he gets.
 ##
 ## 🔒 **The manner of his answer, never the decision.** This feeds the same
-## `DissonanceConsideration` a governor's does, which pulls toward reinterpreting,
-## acting alone and delaying and deliberately not toward refusing — a Crown
-## officer who disagrees with the Crown's revenue policy finds the instruction
-## admitted of another reading. He never writes back *no*.
+## `DissonanceConsideration` a governor's does, which pulls toward acting alone
+## and delaying and deliberately not toward refusing. He never writes back *no*.
 static func _cut_below_his_rate(order: Order, state: WorldState) -> float:
 	if state == null:
 		return 0.0
 	var standing := TaxRates.rate_for(state, StringName(order.get_param("resource", "")))
 	var ordered := float(order.get_param("rate", standing))
 	return clampf((standing - ordered) / (TaxRates.STEP * DEEP_CUT_STEPS), 0.0, 1.0)
-
-
-static func vagueness_of(order: Order) -> float:
-	# One of a handful of things the PC can say, with nothing in it to misread.
-	if order.kind == M1Registrations.ORDER_URGE_INTENT or order.kind == M1Registrations.ORDER_URGE_COMPANY \
-			or order.kind == M1Registrations.ORDER_ANSWER_THE_TRIBE:
-		return 0.0
-	for key in order.params:
-		if key == "to":
-			continue
-		var value: Variant = order.params[key]
-		var kind := typeof(value)
-		if kind == TYPE_INT or kind == TYPE_FLOAT:
-			return 0.0
-	return 1.0
 
 
 static func payment_in(order: Order) -> float:

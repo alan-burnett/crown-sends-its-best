@@ -10,8 +10,8 @@ extends TestCase
 ## being an argument.
 ##
 ## 🔒 **It does not pull toward refusing.** Refusing is about regard — a man who
-## disagrees but likes the PC finds a way to do both, and the way he finds is
-## reinterpretation.
+## disagrees but likes the PC finds a way to do both, and the way he finds is to
+## go his own way and say so (reinterpretation was cut, #449).
 
 const SEED: int = 2255
 
@@ -122,18 +122,14 @@ func test_urging_a_man_against_himself_is_dissonance() -> void:
 
 # --- 🔒 It changes the manner, and never toward refusing --------------------
 
-func test_it_pulls_toward_reinterpreting_and_away_from_complying() -> void:
-	# **The letter this exists to make reachable**: *I have read Your Grace's
-	# instruction regarding our profits, and have applied it to the timber we
-	# shall need for the palisade.*
+func test_it_pulls_toward_going_his_own_way_and_away_from_complying() -> void:
 	var consideration := ComplianceConsiderations.DissonanceConsideration.new(&"x")
 	var pull: Dictionary = ComplianceConsiderations.DissonanceConsideration.PULL
-	assert_true(float(pull[Compliance.REINTERPRET]) > 0.0)
 	assert_true(float(pull[Compliance.ACT_ALONE]) > 0.0)
 	assert_true(float(pull[Compliance.COMPLY]) < 0.0)
 	assert_true(float(pull[Compliance.DELAY]) > 0.0
-			and float(pull[Compliance.DELAY]) < float(pull[Compliance.REINTERPRET]),
-		"delay should be pulled mildly, not as strongly as reinterpreting")
+			and float(pull[Compliance.DELAY]) < float(pull[Compliance.ACT_ALONE]),
+		"delay should be pulled mildly, not as strongly as going his own way")
 	assert_false(consideration.applies_to(_candidate(Compliance.REFUSE)),
 		"disagreement pulled toward refusing, which is about regard and not about being right")
 
@@ -144,8 +140,8 @@ func test_two_governors_alike_but_for_their_situation_answer_differently() -> vo
 	var contented := _resolve(GovernorIntent.GET_RICH, GovernorIntent.GET_RICH)
 	var affronted := _resolve(GovernorIntent.GET_RICH, GovernorIntent.SEDITION)
 
-	assert_true(_scored(affronted, Compliance.REINTERPRET)
-			> _scored(contented, Compliance.REINTERPRET),
+	assert_true(_scored(affronted, Compliance.ACT_ALONE)
+			> _scored(contented, Compliance.ACT_ALONE),
 		"a governor told to chase profit while his town starves read the letter as plainly as one who agreed with it")
 	assert_true(_scored(affronted, Compliance.COMPLY) < _scored(contented, Compliance.COMPLY),
 		"disagreeing made him no less likely to simply do as he was told")
@@ -156,7 +152,7 @@ func test_a_contented_governor_still_complies_plainly() -> void:
 	# replaced one flat answer with another.
 	var contented := _resolve(GovernorIntent.GET_RICH, GovernorIntent.GET_RICH)
 	assert_almost_eq(
-		_scored(contented, Compliance.REINTERPRET), 0.0, 0.0001,
+		_scored(contented, Compliance.ACT_ALONE), 0.0, 0.0001,
 		"a governor urged toward what he already wanted found something to read into it")
 
 
@@ -279,7 +275,6 @@ func _resolve(urged: StringName, holds: StringName) -> Dictionary:
 		"cost": 0.0,
 		"payment": 0.0,
 		"loyalty": contact.loyalty(),
-		"vagueness": Compliance.vagueness_of(order),
 		"harsh": false,
 		"dissonance": Compliance.dissonance_of(order, town),
 	}

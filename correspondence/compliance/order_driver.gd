@@ -109,7 +109,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 ##
 ## 🔒 **Whatever he agreed to, he enacts** (#449, `policy.md` §3). *The policy
 ## always works at full strength*, so there is no half of one to put in place:
-## comply, partial, reinterpret and act alone all enact it now, and only a
+## comply, partial and act alone all enact it now, and only a
 ## refusal enacts nothing. **A delay enacts it when the delay is up** — the
 ## Intent carries it, and `PolicyEnactExecutor` puts his name to it the month it
 ## completes, which is what makes the Marshal's *by the spring* true.

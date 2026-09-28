@@ -10,8 +10,7 @@
       "loyalty": 0.9,
       "payment_offered": 1.5,
       "cost_of_request": 0.4,
-      "autonomy": 0.5,
-      "order_clarity": 0.8
+      "autonomy": 0.5
     },
     "leans": {
       "colony_education": -0.28,

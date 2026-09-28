@@ -103,14 +103,6 @@
     "conditions": []
   },
   {
-    "id": "trigger.steward.ack_reinterpreted",
-    "letter": "steward.ack_reinterpreted",
-    "acknowledges": "reinterpret",
-    "urgency": 0.4,
-    "cooldown": 0,
-    "conditions": []
-  },
-  {
     "id": "trigger.steward.revenue_demand",
     "letter": "steward.revenue_demand",
     "urgency": 1.0,

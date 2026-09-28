@@ -20,8 +20,8 @@ extends RefCounted
 ## is an invitation to register a weight against it.
 const GOVERNOR_INTENT: StringName = &"governor_intent"
 
-## A contact complies, partly complies, delays, reinterprets, refuses, or acts
-## alone (SPEC §8.5).
+## A contact complies, partly complies, delays, refuses, or acts alone (SPEC
+## §8.5). Reinterpretation was cut (#449).
 const ORDER_COMPLIANCE: StringName = &"order_compliance"
 
 ## A contact decides for himself when the PC does not reply (SPEC §9.3).

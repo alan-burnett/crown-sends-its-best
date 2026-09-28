@@ -131,7 +131,6 @@ static func answer_to(contact: Contact, log: EventLog) -> StringName:
 		Compliance.OUTCOME_EVENTS[Compliance.COMPLY]: &"refused",
 		Compliance.OUTCOME_EVENTS[Compliance.PARTIAL]: &"refused",
 		Compliance.OUTCOME_EVENTS[Compliance.DELAY]: &"refused",
-		Compliance.OUTCOME_EVENTS[Compliance.REINTERPRET]: &"refused",
 		Compliance.OUTCOME_EVENTS[Compliance.ACT_ALONE]: &"refused",
 	}
 	var types: Array = seen.keys()

@@ -108,7 +108,6 @@ func _judgement(log: EventLog, month: int) -> float:
 			Compliance.OUTCOME_EVENTS[Compliance.COMPLY], \
 			Compliance.OUTCOME_EVENTS[Compliance.PARTIAL], \
 			Compliance.OUTCOME_EVENTS[Compliance.DELAY], \
-			Compliance.OUTCOME_EVENTS[Compliance.REINTERPRET], \
 			Compliance.OUTCOME_EVENTS[Compliance.REFUSE]:
 				# **The deed is the PC's, whatever the contact then does with it.**
 				# He declined the Crown; what the Steward makes of the letter is a
