@@ -55,7 +55,16 @@ func test_no_governor_reply_names_a_project_a_tile_or_a_month() -> void:
 	# `promise_gold_to_town` (#397) is the Crown's gold into his town's purse
 	# (#400's path), asked for on the strength of what his town sent. It names
 	# no project, tile or month, and the town spends it as it decides.
-	var allowed: PackedStringArray = ["urge_intent", "refuse", "answer_the_tribe", "promise_gold_to_town"]
+	#
+	# Three more from #368, none of which names a project, tile or month:
+	# `prefer_site` is SPEC §11.4's own instrument (*"states preferences:
+	# toward the coast, near the ore"*), answered in his first letter as
+	# `founding-towns.md` §5 has it; `apologise` is words; and `set_tax_rate` is
+	# addressed to the Steward and moves a Crown rate, not anything in his town.
+	var allowed: PackedStringArray = [
+		"urge_intent", "refuse", "answer_the_tribe", "promise_gold_to_town",
+		"prefer_site", "apologise", "set_tax_rate",
+	]
 	var letters := _governor_letters()
 	assert_not_empty(letters, "there are no governor letters to check")
 
