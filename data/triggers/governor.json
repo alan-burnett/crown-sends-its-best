@@ -156,7 +156,11 @@
       }
     },
     "conditions": [
-      { "the_colony_has_lived": { "months": 1 } },
+      {
+        "the_colony_has_lived": {
+          "months": 1
+        }
+      },
       {
         "town_measure_below": {
           "measure": "stockpile_health",
@@ -451,6 +455,15 @@
       "lacking": {
         "from": "town_lacks",
         "fallback": "food"
+      },
+      "ask": {
+        "from": "recalled",
+        "reach": "kindness",
+        "field": "ask"
+      },
+      "town": {
+        "from": "his_town",
+        "field": "name"
       }
     },
     "conditions": [
@@ -533,6 +546,9 @@
     "params": {
       "town": {
         "from": "town_name"
+      },
+      "governor": {
+        "from": "sender_id"
       }
     },
     "conditions": [
@@ -551,6 +567,9 @@
     "params": {
       "town": {
         "from": "town_name"
+      },
+      "governor": {
+        "from": "sender_id"
       }
     },
     "conditions": [
@@ -855,5 +874,337 @@
         }
       }
     ]
+  },
+  {
+    "urgency": 0.4,
+    "cooldown": 18,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "months_ago": {
+        "from": "recalled",
+        "reach": "slight",
+        "field": "months_ago"
+      },
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "remembers_a_slight": {}
+      },
+      {
+        "loyalty_below": {
+          "value": 50
+        }
+      }
+    ],
+    "id": "trigger.governor.you_refused_me",
+    "letter": "governor.you_refused_me"
+  },
+  {
+    "urgency": 0.5,
+    "cooldown": 18,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "months_ago": {
+        "from": "recalled",
+        "reach": "broken_word",
+        "field": "months_ago"
+      },
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "remembers_a_broken_word": {}
+      }
+    ],
+    "id": "trigger.governor.you_gave_your_word",
+    "letter": "governor.you_gave_your_word"
+  },
+  {
+    "urgency": 0.7,
+    "cooldown": 3,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      },
+      "lost": {
+        "from": "what_happened",
+        "event": "expedition_attacked",
+        "within": 2,
+        "concerning": "his_town",
+        "field": "lost_people"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "expedition_attacked",
+          "within": 2,
+          "concerning": "his_town"
+        }
+      }
+    ],
+    "id": "trigger.governor.our_people_were_struck",
+    "letter": "governor.our_people_were_struck"
+  },
+  {
+    "urgency": 0.6,
+    "cooldown": 3,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      },
+      "souls": {
+        "from": "what_happened",
+        "event": "expedition_turned_back",
+        "within": 2,
+        "concerning": "his_town",
+        "field": "souls"
+      },
+      "months": {
+        "from": "what_happened",
+        "event": "expedition_turned_back",
+        "within": 2,
+        "concerning": "his_town",
+        "field": "months_out"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "expedition_turned_back",
+          "within": 2,
+          "concerning": "his_town"
+        }
+      }
+    ],
+    "id": "trigger.governor.they_have_turned_back",
+    "letter": "governor.they_have_turned_back"
+  },
+  {
+    "urgency": 0.75,
+    "cooldown": 120,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "town_founded",
+          "within": 2,
+          "concerning": "him"
+        }
+      }
+    ],
+    "id": "trigger.governor.we_have_arrived",
+    "letter": "governor.we_have_arrived"
+  },
+  {
+    "urgency": 0.35,
+    "cooldown": 6,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "what_happened",
+        "event": "natives_gave",
+        "within": 2,
+        "concerning": "his_town",
+        "field": "tribe"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "natives_gave",
+          "within": 2,
+          "concerning": "his_town"
+        }
+      }
+    ],
+    "id": "trigger.governor.the_tribe_brought_us_food",
+    "letter": "governor.the_tribe_brought_us_food"
+  },
+  {
+    "urgency": 0.4,
+    "cooldown": 6,
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "what_happened",
+        "event": "natives_joined",
+        "within": 2,
+        "concerning": "his_town",
+        "field": "tribe"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "natives_joined",
+          "within": 2,
+          "concerning": "his_town"
+        }
+      }
+    ],
+    "id": "trigger.governor.they_have_joined_us",
+    "letter": "governor.they_have_joined_us"
+  },
+  {
+    "urgency": 0.6,
+    "cooldown": 6,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "what_happened",
+        "event": "native_trade_closed",
+        "within": 2,
+        "concerning": "his_town",
+        "field": "tribe"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "native_trade_closed",
+          "within": 2,
+          "concerning": "his_town"
+        }
+      }
+    ],
+    "id": "trigger.governor.they_have_stopped_trading",
+    "letter": "governor.they_have_stopped_trading"
+  },
+  {
+    "urgency": 0.65,
+    "cooldown": 12,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      },
+      "rebel": {
+        "from": "what_happened",
+        "event": "rebellion_backed",
+        "within": 2,
+        "concerning": "the_colony",
+        "field": "town"
+      },
+      "duke": {
+        "from": "what_happened",
+        "event": "rebellion_backed",
+        "within": 2,
+        "concerning": "the_colony",
+        "field": "duke"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "rebellion_backed",
+          "within": 2,
+          "concerning": "the_colony"
+        }
+      },
+      {
+        "he_governs_a_town": {}
+      },
+      {
+        "my_regard_is": {
+          "band": "high"
+        }
+      }
+    ],
+    "id": "trigger.governor.a_duke_is_in_the_rebel_town",
+    "letter": "governor.a_duke_is_in_the_rebel_town"
+  },
+  {
+    "urgency": 0.55,
+    "cooldown": 9,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "neighbour_tribe",
+        "fallback": "natives"
+      }
+    },
+    "conditions": [
+      {
+        "the_colony_has_lived": {
+          "months": 3
+        }
+      },
+      {
+        "i_have_neighbours": {}
+      },
+      {
+        "town_measure_below": {
+          "measure": "native_regard",
+          "value": 35
+        }
+      }
+    ],
+    "id": "trigger.governor.they_grow_cold",
+    "letter": "governor.they_grow_cold"
+  },
+  {
+    "urgency": 0.6,
+    "cooldown": 6,
+    "params": {
+      "governor": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "town_name"
+      }
+    },
+    "conditions": [
+      {
+        "my_town_declared": {
+          "within": 12
+        }
+      },
+      {
+        "the_colony_has_lived": {
+          "months": 3
+        }
+      }
+    ],
+    "id": "trigger.governor.our_terms",
+    "letter": "governor.our_terms"
   }
 ]

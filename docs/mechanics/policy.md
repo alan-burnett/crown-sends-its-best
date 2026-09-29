@@ -137,8 +137,27 @@ opinion he minds a great deal more than he minds the PC's.
 | A Crown officer | Military presence in the colony, immigration, education |
 | **The Diplomat** | **Cultivating the governor he lives with** — the one policy that buys another contact's loyalty (`the-diplomat.md` §7) |
 | A patron | Whatever his **specialty** is (§8) |
-| A governor | How his own town conducts itself — what it makes, how it treats a tribe |
+| A governor | **His good word** in his own town (below) |
 | A rival duke | **Never.** See below |
+
+### A governor's: his good word (#368)
+
+Author's ruling. **The governor puts his standing in the town behind the Crown.**
+While the policy runs, **every other contact whose home is his town** (a
+resident, the Diplomat if he lives there) **gains a flat amount of loyalty**. It
+is an ordinary policy: a monthly charge, the three splits, renegotiation when the
+Crown stops paying. **When it ends, the lift ends with it** and each man's
+loyalty returns to what it would otherwise have been.
+
+It is the governor's **high-loyalty special**: he offers it, and he agrees to be
+asked for it, only when he thinks well of the PC. It is the mirror of the
+Diplomat's policy, which buys a governor through the men around him; this buys
+the men around him through the governor.
+
+A governor's **low-loyalty** act is not a policy and has no letter of its own:
+it is his turn toward *prepare for rebellion* (`governor-agendas.md` §2), which
+the Diplomat reports and the PC answers with the Diplomat's policy
+(`the-diplomat.md` §7).
 
 ### Rivals never
 

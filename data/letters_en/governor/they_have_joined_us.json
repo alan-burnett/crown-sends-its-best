@@ -1,0 +1,22 @@
+{
+  "id": "governor.they_have_joined_us",
+  "sender": "governor",
+  "type": "report",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N7. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "town": "town",
+    "tribe": "tribe"
+  },
+  "body": [
+    {
+      "text": "Some of the {param:tribe} have come to live at {param:town}. Families, not a party of men, and they mean to stay."
+    },
+    {
+      "text": "They know the country better than we ever shall, and they work. There was talk in the hall when they came. There is less now."
+    },
+    {
+      "text": "I thought you should know the town is larger than the Crown sent it."
+    }
+  ]
+}

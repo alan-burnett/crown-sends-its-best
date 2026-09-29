@@ -1,0 +1,65 @@
+{
+  "id": "governor.you_gave_your_word",
+  "sender": "governor",
+  "type": "request",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N4. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "governor": "contact",
+    "months_ago": "integer",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "You gave {param:town} your word, {param:months_ago} months ago, and it was not kept."
+    },
+    {
+      "text": "I told the people it would come. They planned on it. I have had to stand in the hall since and explain why it did not, and I found I could not, because I did not know."
+    },
+    {
+      "text": "I should like to know. I should like, more than that, not to have to ask."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have read it with care"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would rather not have needed it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "answer",
+        "prompt": "What he is told",
+        "options": [
+          {
+            "id": "sorry",
+            "label": "apologise, and mean it",
+            "text": "It was not kept, and that is on me and not on you. I am sorry for it, and for the hall.",
+            "effect": {
+              "apologise": {
+                "to": "{governor}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

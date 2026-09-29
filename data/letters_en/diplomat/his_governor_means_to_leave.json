@@ -1,0 +1,94 @@
+{
+  "id": "diplomat.his_governor_means_to_leave",
+  "sender": "diplomat",
+  "type": "request",
+  "skippable": true,
+  "note": "Issue 368, governor sheet: the Author's ruling on a governor's low loyalty. His unilateral act is turning toward rebellion; the Diplomat writes, and the PC answers with the one policy that buys a governor back (the-diplomat.md section 7). This is the Diplomat's own town; a seditious governor elsewhere needs a colony-wide condition, on the audit's issue list. The monthly cost is a placeholder. Placeholder prose.",
+  "params": {
+    "town": "town",
+    "governor": "contact",
+    "cost": "gold"
+  },
+  "body": [
+    {
+      "text": "You should know that {param:governor} is not the Crown's man any longer, whatever he writes to you."
+    },
+    {
+      "text": "He has not said so. He has put the men to the walls and the powder store, and he is laying in grain beyond what {param:town} will eat, and he has stopped asking after you at table. I have dined with him often enough to know what that means."
+    },
+    {
+      "text": "It is not too late. He is proud rather than lost, and a proud man can be brought round by being made much of. I could see to that, at {param:cost} a month for his table and mine."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter about {param:governor} {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "desperate",
+          "text": "and fear you are right"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and wish I had heard it sooner"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "purse",
+        "prompt": "Whether he cultivates the governor",
+        "options": [
+          {
+            "id": "all",
+            "label": "cultivate him, at the Crown's charge",
+            "text": "Make much of him, at the Crown's charge. Whatever it costs, it is cheaper than the other thing.",
+            "effect": {
+              "enact_policy": {
+                "to": "diplomat",
+                "effect": "cultivate_governor",
+                "cost": "{cost}",
+                "split": "all"
+              }
+            }
+          },
+          {
+            "id": "half",
+            "label": "cultivate him, and bear half yourself",
+            "text": "Make much of him. The Crown will bear half of it; I must ask you to find the rest.",
+            "effect": {
+              "enact_policy": {
+                "to": "diplomat",
+                "effect": "cultivate_governor",
+                "cost": "{cost}",
+                "split": "half"
+              }
+            }
+          },
+          {
+            "id": "none",
+            "label": "cultivate him, at your own charge",
+            "text": "Make much of him, and forgive me that the Crown can send nothing towards it.",
+            "effect": {
+              "enact_policy": {
+                "to": "diplomat",
+                "effect": "cultivate_governor",
+                "cost": "{cost}",
+                "split": "none"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

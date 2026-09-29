@@ -1,0 +1,77 @@
+{
+  "id": "governor.our_people_were_struck",
+  "sender": "governor",
+  "type": "report",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N5. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "governor": "contact",
+    "town": "town",
+    "lost": "integer"
+  },
+  "body": [
+    {
+      "text": "The party we sent out from {param:town} was fallen on in the open. We have lost {param:lost} of them."
+    },
+    {
+      "text": "The rest go on, or so the man who brought the news believes. He did not stay to be certain and I do not blame him."
+    },
+    {
+      "text": "I write because you will hear of it, and because I sent them."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have read it with care"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would rather not have needed it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What the town should do now",
+        "options": [
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your defences, then. I had rather pay for walls than for another letter like this one.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "military"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "keep the people at home",
+            "text": "Keep the people at home and make the town worth staying in.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_tall"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

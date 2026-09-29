@@ -1,0 +1,77 @@
+{
+  "id": "governor.they_have_stopped_trading",
+  "sender": "governor",
+  "type": "warning",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N7. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "governor": "contact",
+    "town": "town",
+    "tribe": "tribe"
+  },
+  "body": [
+    {
+      "text": "The {param:tribe} have stopped coming to {param:town} to trade. Not one party this month, and they were regular as the tide."
+    },
+    {
+      "text": "Nobody has quarrelled with them that I know of. That is what worries me. When a man stops talking to you he has usually decided something."
+    },
+    {
+      "text": "I shall keep a watch. I should be glad to know what you would have me do beyond that."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have read it with care"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would rather not have needed it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What the town should do",
+        "options": [
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "Keep the watch and build on it. If they have decided something I would rather you were ready for it.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "military"
+              }
+            }
+          },
+          {
+            "id": "profit",
+            "label": "find the trade elsewhere",
+            "text": "Find the trade elsewhere. The town cannot live on one customer.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "get_rich"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

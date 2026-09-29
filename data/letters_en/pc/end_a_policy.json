@@ -1,0 +1,56 @@
+{
+  "id": "pc.end_a_policy",
+  "type": "request",
+  "purpose": "Call off a policy a contact holds",
+  "note": "Issue 368 (Author: 'make sure we have ways to cancel existing policies'), governor sheet N3. policy.md section 6: the PC may end a policy he asked for, and it costs the enactor's loyalty. Offered to anyone who holds one. end_policy ends every policy the man holds, so the prose speaks of 'the arrangement' rather than naming one. Placeholder prose.",
+  "to_roles": [],
+  "params": {
+    "to": "contact"
+  },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "on the arrangement between us"
+        },
+        {
+          "tone": "pleased",
+          "text": "with thanks for what the arrangement has done"
+        },
+        {
+          "tone": "annoyed",
+          "text": "because the arrangement has run long enough"
+        },
+        {
+          "tone": "desperate",
+          "text": "because the colony can no longer carry the arrangement"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "end",
+        "prompt": "What becomes of it",
+        "options": [
+          {
+            "id": "end",
+            "label": "bring it to an end",
+            "text": "I must ask you to bring it to an end. I know what that asks of you, and I would not ask it if there were another way.",
+            "effect": {
+              "end_policy": {
+                "to": "{to}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,"
+      }
+    ]
+  }
+}

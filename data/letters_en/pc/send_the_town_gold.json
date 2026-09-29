@@ -1,0 +1,86 @@
+{
+  "id": "pc.send_the_town_gold",
+  "type": "request",
+  "purpose": "Send gold to a governor's town",
+  "note": "Issue 368, governor sheet N2. town-economy.md section 4: the Crown can put gold in a town's purse (#400), and the town is richer for it in means, quality of life and patience. The three sums are placeholders for the tuning pass. Placeholder prose.",
+  "to_roles": [
+    "governor"
+  ],
+  "params": {
+    "to": "contact",
+    "town": "town"
+  },
+  "compose_defaults": {
+    "town": {
+      "from": "town_name"
+    }
+  },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "with something for {param:town}, and gladly"
+        },
+        {
+          "tone": "dutiful",
+          "text": "on a matter of the town's purse"
+        },
+        {
+          "tone": "desperate",
+          "text": "because {param:town} needs it more than the Treasury does"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "purse",
+        "prompt": "What the Crown sends",
+        "options": [
+          {
+            "id": "small",
+            "label": "a hundred, for what is most wanted",
+            "text": "I am sending a hundred to the town's purse. Spend it on whatever is most wanted; you will know better than I.",
+            "effect": {
+              "promise_gold_to_town": {
+                "to": "{to}",
+                "town": "{town}",
+                "amount": 100
+              }
+            }
+          },
+          {
+            "id": "middling",
+            "label": "two hundred and fifty, to put the town on its feet",
+            "text": "I am sending two hundred and fifty to the town's purse, to put it on its feet.",
+            "effect": {
+              "promise_gold_to_town": {
+                "to": "{to}",
+                "town": "{town}",
+                "amount": 250
+              }
+            }
+          },
+          {
+            "id": "large",
+            "label": "five hundred, and no questions",
+            "text": "I am sending five hundred to the town's purse. I do not want an account of it. I want a town that is glad to be the Crown's.",
+            "effect": {
+              "promise_gold_to_town": {
+                "to": "{to}",
+                "town": "{town}",
+                "amount": 500
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,"
+      }
+    ]
+  }
+}

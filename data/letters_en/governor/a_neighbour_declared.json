@@ -5,7 +5,8 @@
   "skippable": true,
   "speaks_to": 64,
   "params": {
-    "town": "town"
+    "town": "town",
+    "governor": "contact"
   },
   "body": [
     {
@@ -31,5 +32,72 @@
     {
       "text": "I should be glad of something to tell them. Almost anything would do."
     }
-  ]
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have thought about what you should tell them"
+        },
+        {
+          "tone": "pleased",
+          "text": "and am glad your town is still the Crown's"
+        },
+        {
+          "tone": "desperate",
+          "text": "and wish I had more to send than this"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "answer",
+        "prompt": "What {param:town} is told",
+        "options": [
+          {
+            "id": "duty",
+            "label": "tell them the duty will come down",
+            "text": "Tell them the duty will come down. I have written to the Steward today, and they may hold me to it.",
+            "effect": {
+              "set_tax_rate": {
+                "to": "steward",
+                "resource": "",
+                "steps": -1
+              }
+            }
+          },
+          {
+            "id": "comfort",
+            "label": "see that they want for nothing",
+            "text": "See that they want for nothing. A man who is comfortable does not go looking over the fence.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_tall"
+              }
+            }
+          },
+          {
+            "id": "walls",
+            "label": "see to your defences",
+            "text": "See to your walls. Whatever your neighbours mean to do, I had rather you were ready for it.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "military"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  },
+  "note": "Issue 368 D6: he asks for something to tell them; now he can be given it."
 }

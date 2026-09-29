@@ -266,8 +266,8 @@ purses in the shipment letter now read truly on the books:
 Which is the overpayment lever above, with its price made visible for the first
 time: before this, the Crown paid a shipment's gold and its books never showed it.
 
-**Gold shipped from a town** would follow the same rule, but nothing lets a town
-send the Crown gold yet. A patron's gold gift already lands as `given`.
+**Resources only** (Author). A town ships goods, never gold; a patron's gold
+gift already lands as `given` by its own road.
 
 ## 6. The four dimensions of growth
 

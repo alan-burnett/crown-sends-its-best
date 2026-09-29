@@ -222,5 +222,35 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.diplomat.his_governor_means_to_leave",
+    "letter": "diplomat.his_governor_means_to_leave",
+    "urgency": 0.7,
+    "cooldown": 6,
+    "params": {
+      "town": {
+        "from": "his_town",
+        "field": "name"
+      },
+      "governor": {
+        "from": "his_town",
+        "field": "governor"
+      },
+      "cost": {
+        "from": "literal",
+        "value": "60"
+      }
+    },
+    "conditions": [
+      {
+        "he_still_writes": {
+          "about": "colony"
+        }
+      },
+      {
+        "town_is_preparing_to_leave": {}
+      }
+    ]
   }
 ]

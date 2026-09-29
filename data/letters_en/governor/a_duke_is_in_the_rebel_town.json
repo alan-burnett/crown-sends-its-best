@@ -1,0 +1,78 @@
+{
+  "id": "governor.a_duke_is_in_the_rebel_town",
+  "sender": "governor",
+  "type": "warning",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N8. Placeholder prose in the default tone; the tone pass comes later. Only a governor who thinks well of the PC warns him; the Diplomat's a_duke_backs_the_rebels is the other voice.",
+  "params": {
+    "governor": "contact",
+    "town": "town",
+    "rebel": "town",
+    "duke": "rival"
+  },
+  "body": [
+    {
+      "text": "{param:duke}'s men are in {param:rebel}. They came with money and they came with muskets, and nobody there pretended to be surprised."
+    },
+    {
+      "text": "I write from {param:town} because we are nearer to it than you are, and because a town with a duke behind it is not the same trouble as a town with a grievance."
+    },
+    {
+      "text": "I do not know what they will do with him. I know what he will do with them, given time."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have read it with care"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would rather not have needed it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What {param:town} should do",
+        "options": [
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "See to your walls. If the duke is next door, he is next door to you.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "military"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "give your own people no cause",
+            "text": "Give your own people no reason to look over the fence. See that they want for nothing.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_tall"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

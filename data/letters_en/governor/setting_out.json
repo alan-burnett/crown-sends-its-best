@@ -3,20 +3,133 @@
   "sender": "governor",
   "type": "report",
   "skippable": false,
-  "params": { "town": "town" },
+  "params": {
+    "town": "town",
+    "governor": "contact"
+  },
   "body": [
-    { "text": "You will not know my name and I did not expect to be writing to you. The people who are leaving {param:town} chose me on Tuesday, in the yard, by a show of hands." },
-    { "text": "We are some ninety miles from anywhere by the time you read this. I shall write again when there is a town to write from.",
-      "only_tones": ["dutiful", "pleased"] },
-    { "text": "I am told I should write to you. So: I have written to you.",
-      "only_tones": ["annoyed", "hateful"] },
-    { "text": "I am given to understand you may have views about where we settle. I shall be glad of them if they arrive before we stop walking.",
-      "only_tones": ["dutiful", "pleased"] },
-    { "text": "I am given to understand you may have views about where we settle. They will find me on the road, or they will not.",
-      "only_tones": ["annoyed", "hateful"] },
-    { "text": "I have never governed anything. Neither, I am reliably informed, had the man who governs the place we are leaving.",
-      "only_tones": ["annoyed", "hateful"] },
-    { "text": "I have never governed anything, and I would rather you heard that from me than worked it out.",
-      "only_tones": ["dutiful", "pleased", "desperate"] }
-  ]
+    {
+      "text": "You will not know my name and I did not expect to be writing to you. The people who are leaving {param:town} chose me on Tuesday, in the yard, by a show of hands."
+    },
+    {
+      "text": "We are some ninety miles from anywhere by the time you read this. I shall write again when there is a town to write from.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    },
+    {
+      "text": "I am told I should write to you. So: I have written to you.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I am given to understand you may have views about where we settle. I shall be glad of them if they arrive before we stop walking.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    },
+    {
+      "text": "I am given to understand you may have views about where we settle. They will find me on the road, or they will not.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I have never governed anything. Neither, I am reliably informed, had the man who governs the place we are leaving.",
+      "only_tones": [
+        "annoyed",
+        "hateful"
+      ]
+    },
+    {
+      "text": "I have never governed anything, and I would rather you heard that from me than worked it out.",
+      "only_tones": [
+        "dutiful",
+        "pleased",
+        "desperate"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and wish you a good road"
+        },
+        {
+          "tone": "dutiful",
+          "text": "and have views, since you ask"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and will be brief, since you are walking"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "preference",
+        "prompt": "Where they should settle",
+        "options": [
+          {
+            "id": "ground",
+            "label": "the best ground he can find",
+            "text": "Settle on the best ground you can find, and do not stop short of it for the sake of your feet.",
+            "effect": {
+              "prefer_site": {
+                "to": "{governor}",
+                "preference": "good_ground"
+              }
+            }
+          },
+          {
+            "id": "coast",
+            "label": "toward the coast",
+            "text": "Keep toward the coast. What you make will have to reach a ship.",
+            "effect": {
+              "prefer_site": {
+                "to": "{governor}",
+                "preference": "the_coast"
+              }
+            }
+          },
+          {
+            "id": "ore",
+            "label": "near the ore",
+            "text": "Settle near the ore. The colony has hands enough and too little to put in them.",
+            "effect": {
+              "prefer_site": {
+                "to": "{governor}",
+                "preference": "the_ore"
+              }
+            }
+          },
+          {
+            "id": "tribes",
+            "label": "away from the tribes",
+            "text": "Keep away from the tribes. Whatever the ground is like, I had rather you were left alone on it.",
+            "effect": {
+              "prefer_site": {
+                "to": "{governor}",
+                "preference": "away_from_tribes"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  },
+  "note": "Issue 368: founding-towns.md section 5 has the PC's preference arrive in his reply to the governor's first letter; it had no reply. pc.state_a_preference remains for a later word while the party walks."
 }

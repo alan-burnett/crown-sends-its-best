@@ -446,6 +446,14 @@ code outside that contact's own definition may create one.
 Note what this is not: SPEC §12.5 lets a native tribe's *trust* break
 permanently. Trust is not loyalty and tribes are not contacts.
 
+### The appeal (#368)
+
+Author's ruling. **The PC may write to a governor to win him back, and it costs
+gold in proportion to his town's population**, paid into the town's purse.
+It is the PC's one direct lever on a governor's loyalty that is not an order,
+and the price keeps it from being a monthly ritual: a large town is expensive to
+flatter. The loyalty it buys and the gold per head are tuning.
+
 ## 10. Tuning targets
 
 - The loyalty bands in §4, and what each means in the compliance scoring.

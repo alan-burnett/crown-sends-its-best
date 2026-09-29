@@ -1,0 +1,87 @@
+{
+  "id": "governor.our_terms",
+  "sender": "governor",
+  "type": "request",
+  "skippable": true,
+  "note": "Issue 368, governor sheet A9. Placeholder prose in the default tone; the tone pass comes later. A rebel governor gives the Crown no cooperation (SPEC 12.3); the answer that moves anything is addressed to the Steward, whose duty is what makes life under the Crown worse than without it (rebel-sentiment.md section 5).",
+  "params": {
+    "governor": "contact",
+    "town": "town"
+  },
+  "perception": {
+    "burden": {
+      "measure": "tax_burden",
+      "ladder": [
+        "light enough",
+        "felt",
+        "heavy",
+        "insupportable"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "You will have had my last letter, and I said then it was my last. The hall has asked me to write one more, so I am writing it."
+    },
+    {
+      "text": "They would come back to the Crown on terms. The duty, first: it is {perception:burden}, and they will not pay it. After that they will talk."
+    },
+    {
+      "text": "I am not their envoy. I am the man with the pen. I pass it on because I would rather this ended with a letter than any other way."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have the hall's letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and answer it as I would any other"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and am not in the habit of being set terms"
+        },
+        {
+          "tone": "desperate",
+          "text": "and will meet them further than they think"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "answer",
+        "prompt": "What the hall is told",
+        "options": [
+          {
+            "id": "duty",
+            "label": "the duty will come down",
+            "text": "The duty will come down. I have written to the Steward today. I ask nothing in return but that you read his next letter.",
+            "effect": {
+              "set_tax_rate": {
+                "to": "steward",
+                "resource": "",
+                "steps": -1
+              }
+            }
+          },
+          {
+            "id": "no",
+            "label": "no terms, until they come back",
+            "text": "The Crown does not bargain with a town in arms against it. Come back, and then write to me about the duty.",
+            "effect": {
+              "refuse": {
+                "to": "{governor}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

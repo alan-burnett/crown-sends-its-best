@@ -1,0 +1,75 @@
+{
+  "id": "governor.you_refused_me",
+  "sender": "governor",
+  "type": "request",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N4. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "governor": "contact",
+    "months_ago": "integer",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "I asked you for something, {param:months_ago} months ago now, and you told me no."
+    },
+    {
+      "text": "I have not written about it since and I am not writing to ask again. I only mention it because {param:town} has not forgotten, and I had rather you heard that from me than from the returns."
+    },
+    {
+      "text": "A town remembers who helped it. It remembers the other thing longer."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have read it with care"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would rather not have needed it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "answer",
+        "prompt": "What he is told",
+        "options": [
+          {
+            "id": "sorry",
+            "label": "say you are sorry for it",
+            "text": "You are right to mention it, and I am sorry for it. It was not given lightly and I do not refuse lightly.",
+            "effect": {
+              "apologise": {
+                "to": "{governor}"
+              }
+            }
+          },
+          {
+            "id": "stands",
+            "label": "say the answer stands",
+            "text": "The answer was the right one then and I will not pretend otherwise now.",
+            "effect": {
+              "refuse": {
+                "to": "{governor}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

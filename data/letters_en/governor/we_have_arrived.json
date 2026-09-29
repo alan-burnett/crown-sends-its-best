@@ -1,0 +1,98 @@
+{
+  "id": "governor.we_have_arrived",
+  "sender": "governor",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 368, governor sheet N6. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "governor": "contact",
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "We have stopped walking. The place is called {param:town}, because somebody had to call it something and I was not quick enough to object."
+    },
+    {
+      "text": "There is water, and ground that will take a plough, and a great deal of work between here and anything you would call a town."
+    },
+    {
+      "text": "I have not decided what it is to be for. If you have a view, now is when it will weigh most."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter from {param:town} {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and am heartily glad of it"
+        },
+        {
+          "tone": "dutiful",
+          "text": "and note the founding"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and hope the name was the hardest part"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What the new town should be about",
+        "options": [
+          {
+            "id": "profit",
+            "label": "attend to the colony's profit",
+            "text": "Make it pay. A town that pays for itself is a town the Crown leaves alone.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "get_rich"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "see that the town grows",
+            "text": "Make it a place people will stay. The rest follows from that.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_tall"
+              }
+            }
+          },
+          {
+            "id": "defence",
+            "label": "see to your defences",
+            "text": "Build the stockade before the houses. You are further out than anyone.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "military"
+              }
+            }
+          },
+          {
+            "id": "settle",
+            "label": "plant a further settlement",
+            "text": "Do not stop at one. The land beyond you is there for whoever reaches it first.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_wide"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

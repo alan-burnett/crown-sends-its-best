@@ -1,0 +1,22 @@
+{
+  "id": "governor.the_tribe_brought_us_food",
+  "sender": "governor",
+  "type": "report",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N7. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "town": "town",
+    "tribe": "tribe"
+  },
+  "body": [
+    {
+      "text": "The {param:tribe} came to {param:town} this month with food, unasked, and would take nothing for it."
+    },
+    {
+      "text": "I do not pretend to know why. Our people had a hard season and theirs, apparently, had a good one, and they seem to think that settles the matter."
+    },
+    {
+      "text": "I record it because the returns will not."
+    }
+  ]
+}

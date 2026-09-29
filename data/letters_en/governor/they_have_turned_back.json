@@ -1,0 +1,78 @@
+{
+  "id": "governor.they_have_turned_back",
+  "sender": "governor",
+  "type": "report",
+  "skippable": true,
+  "note": "Issue 368, governor sheet N5. Placeholder prose in the default tone; the tone pass comes later.",
+  "params": {
+    "governor": "contact",
+    "town": "town",
+    "souls": "integer",
+    "months": "integer"
+  },
+  "body": [
+    {
+      "text": "The party we sent out has come back to {param:town}: {param:souls} of them, after {param:months} months on the road."
+    },
+    {
+      "text": "They found no place they could hold. They are thinner than they left, and they are sleeping in the barns until we find them room."
+    },
+    {
+      "text": "I do not know yet whether to send them out again or keep them. I should be glad of your view."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have read it with care"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would rather not have needed it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What becomes of them",
+        "options": [
+          {
+            "id": "settle",
+            "label": "send them out again",
+            "text": "Send them out again, and better found. The land is still there.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_wide"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "keep the people at home",
+            "text": "Keep the people at home and make the town worth staying in.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_tall"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}

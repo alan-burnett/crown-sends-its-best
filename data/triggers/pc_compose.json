@@ -32,7 +32,11 @@
     "offers_composition": true,
     "note": "Issue 451, immigration.md section 4: encouraging immigration is the Provost's policy, and no other Crown officer is asked.",
     "conditions": [
-      { "he_is": { "id": "provost" } }
+      {
+        "he_is": {
+          "id": "provost"
+        }
+      }
     ]
   },
   {
@@ -41,7 +45,9 @@
     "offers_composition": true,
     "note": "Issue 451: asked of a governor, encouraging immigration is an urging toward go tall.",
     "conditions": [
-      { "he_governs_a_town": {} }
+      {
+        "he_governs_a_town": {}
+      }
     ]
   },
   {
@@ -88,6 +94,28 @@
     "conditions": [
       {
         "the_diplomat_could_come_here": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.pc.send_the_town_gold",
+    "letter": "pc.send_the_town_gold",
+    "offers_composition": true,
+    "note": "Issue 368 N2. Any governor with a town to receive it.",
+    "conditions": [
+      {
+        "he_governs_a_town": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.pc.end_a_policy",
+    "letter": "pc.end_a_policy",
+    "offers_composition": true,
+    "note": "Issue 368 N3. Anyone who holds a standing policy.",
+    "conditions": [
+      {
+        "he_holds_a_policy": {}
       }
     ]
   }

@@ -1,0 +1,100 @@
+{
+  "id": "governor.they_grow_cold",
+  "sender": "governor",
+  "type": "question",
+  "skippable": true,
+  "note": "Issue 368, governor sheet A4. Placeholder prose in the default tone; the tone pass comes later. Reads the tribe's regard below 35 of 100 (neutral is 50); a condition that fires on the regard falling would be truer, and is on the audit's issue list.",
+  "params": {
+    "governor": "contact",
+    "town": "town",
+    "tribe": "tribe"
+  },
+  "perception": {
+    "their_humour": {
+      "measure": "native_regard",
+      "ladder": [
+        "settled on being rid of us",
+        "cold",
+        "wary",
+        "civil enough",
+        "friendly"
+      ]
+    }
+  },
+  "body": [
+    {
+      "text": "Something has changed with the {param:tribe}. I cannot put a date on it, but the men who go out to the edge of the fields come back quieter than they went."
+    },
+    {
+      "text": "They are {perception:their_humour}, as near as I can judge it. Nobody has been hurt. Nobody has been welcomed either, and they used to be."
+    },
+    {
+      "text": "I would rather ask you now what you would have me do than write to you after, when there is less choice in it."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "I have your letter {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "and have read it with care"
+        },
+        {
+          "tone": "pleased",
+          "text": "and thank you for it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would rather not have needed it"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "course",
+        "prompt": "What {param:town} should do",
+        "options": [
+          {
+            "id": "defence",
+            "label": "be ready for them",
+            "text": "Be ready for them. If it comes to nothing, you have a stockade and I have wasted some timber.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "military"
+              }
+            }
+          },
+          {
+            "id": "profit",
+            "label": "trade with them, and keep trading",
+            "text": "Trade with them. Men who are doing business are slow to do anything else.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "get_rich"
+              }
+            }
+          },
+          {
+            "id": "growth",
+            "label": "keep to your own ground",
+            "text": "Keep to your own ground and make the most of it. Give them nothing to point at.",
+            "effect": {
+              "urge_intent": {
+                "to": "{governor}",
+                "intent": "go_tall"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Yours,"
+      }
+    ]
+  }
+}
