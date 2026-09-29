@@ -38,7 +38,7 @@ For each contact, before sign-off:
 | 9 | Dukes (×3) | ⬜ | |
 | 10 | Diplomat | ⬜ | |
 | 11 | Marshal | ⬜ | |
-| 12 | Steward | ⬜ | |
+| 12 | Steward | ⬜ | Owes a thank-you letter for donations (#472) |
 | 13 | Chancellor | ⬜ | Last — needs #399 ruling |
 | — | Tribes | — | Speak only through others (SPEC §12.5), by PO recommendation |
 
@@ -65,7 +65,7 @@ For each contact, before sign-off:
 
 Carried so none is forgotten; the Author accepts or cuts each at that contact's turn.
 
-- **Governor:** ~~tribe war aid~~ (✖ Author deferred past M8 in #402); proposes a daughter town; the rebel's terms;
+- **Governor:** tribe war aid (built, #471); proposes a daughter town; the rebel's terms;
   loyal neighbour of a rebel; investment pitch; "the good ground is theirs";
   expedition mid-course; tall's pride; asks the Crown to fund a building;
   "defend us or let us defend ourselves"; spread made audible; two-voice month
@@ -112,7 +112,9 @@ Carried so none is forgotten; the Author accepts or cuts each at that contact's 
 
 ## Issues opened by this audit
 
-_(none yet)_
+| Issue | What | Content waiting on it |
+| :--- | :--- | :--- |
+| #472 | A shipment nobody asked for is a donation; the Crown books what it paid | Steward's thank-you letter (Steward sheet) |
 
 ---
 
@@ -158,6 +160,8 @@ Codes below (E, D, A, N) are how we refer to items in the session.
 | E29 | `we_are_coming_back` | his town returned | 3 no-ops |
 | **Founding** | | | |
 | E30 | `setting_out` | newly elected expedition governor | none |
+| E31 | `a_tribe_asks_for_help` | loyal: a tribe asks for goods for its troubles abroad (#471) | gift / refuse |
+| E32–33 | `i_answered_their_ask_gift` / `_refuse` | disloyal: tells after (#471) | none |
 
 #### What exists — the PC writes to him
 
@@ -165,20 +169,25 @@ Codes below (E, D, A, N) are how we refer to items in the session.
 | :--- | :--- | :--- | :--- |
 | P1 | `request_shipment` | any governor | `ship_resource`, double / fair / nothing (harsh) |
 | P2 | `lay_an_embargo` | any governor | `embargo` lay / lift |
-| P3 | `ask_for_a_policy` | any governor or Crown officer | `encourage_immigration` only |
+| P3 | `ask_for_a_policy` | ~~any governor~~ the Provost only since #451 | `encourage_immigration` |
 | P4 | `send_the_diplomat` | where the Diplomat could go | `move_diplomat` + 240 gold |
+| P5 | `urge_a_course` | any governor with a town (#454) | `urge_intent` ×4 |
+| P6 | `encourage_settlers` | any governor with a town | (landed on main; to review) |
+| P7 | `state_a_preference` | the governor of a marching party (#454) | `prefer_site` ×4 |
+| P8 | `demand_the_stores` | any governor (#454) | `ship_resource` |
+| P9 | `order_the_quota` | any governor (#454) | `ship_resource` |
 
-The PC **cannot** urge an intent unprompted, send gold to a town, appeal to a
-governor, or cancel a policy by composing. Urging exists only as a reply.
+The PC **cannot** send gold to a town, appeal to a governor, or cancel a policy
+by composing. (Urging unprompted landed in #454.)
 
 #### Defects found
 
 | Code | Defect |
 | :--- | :--- |
-| D1 | **`pc.state_a_preference` is unreachable in play.** Not composable, no sender, gated on sedition. The expedition preference (SPEC §11.4 lock, founding-towns §5) cannot be sent, and E30 has no reply to carry it. |
-| D2 | `pc.demand_the_stores` and `pc.order_the_quota` have no trigger — orphaned. |
+| D1 | ✅ fixed by #454. **`pc.state_a_preference` was unreachable in play.** Not composable, no sender, gated on sedition. The expedition preference (SPEC §11.4 lock, founding-towns §5) cannot be sent, and E30 has no reply to carry it. |
+| D2 | ✅ fixed by #454. `pc.demand_the_stores` and `pc.order_the_quota` have no trigger — orphaned. |
 | D3 | E24 `asking_again` can only refuse. `promise_gold_to_town` / `promise_resource` now exist to say yes. |
-| D4 | E29 `we_are_coming_back` — three options, none does anything. |
+| D4 | ✅ #451 removed the three no-op options from E29. |
 | D5 | E26 `nothing_to_report` — two of three options do nothing. |
 | D6 | E28 `a_neighbour_declared` asks for "something to tell them" and offers no reply. |
 | D7 | The governor holds **no policy of his own**; policy.md §7 says he can ("how his own town conducts itself"). |
@@ -205,13 +214,20 @@ governor, or cancel a policy by composing. Urging exists only as a reply.
 | A15 | "Defend us, or let us defend ourselves" (PO) | ⬜ — overlaps Commander |
 | A16 | Spread made audible (PO) | 🟡 E28 |
 | A17 | Two-voice month vs the Steward (PO) | ✅ E7 |
-| A18 | Tribe war aid (PO) | ✖ Author deferred past M8 (#402) |
+| A18 | Tribe war aid (PO) | ✅ built after all in #471 — E31–33 |
+
+#### Rulings made (2026-09-29)
+
+- **Shipments that arrive** settle an open demand for that resource, or are a
+  donation: the Steward thanks the colony, and standing rises by the goods' Crown
+  value. Written into `crown-demands.md` §5; engine is #472. Carried to the
+  Steward sheet: ⬜ **the thank-you letter**.
 
 #### New ideas (Claude)
 
 | Code | Idea | Plumbing |
 | :--- | :--- | :--- |
-| N1 | PC composes **an urging** at will: "see to your defences" | authorable |
+| N1 | PC composes **an urging** at will: "see to your defences" | ✅ already built, `pc.urge_a_course` (#454) |
 | N2 | PC composes **gold to a town** | authorable |
 | N3 | PC composes **cancel a policy** (all holders) | authorable (`he_holds_a_policy`, `end_policy`) |
 | N4 | "You will remember you refused me" / "you promised us grain" | authorable |
@@ -221,7 +237,7 @@ governor, or cancel a policy by composing. Urging exists only as a reply.
 | N8 | A duke's men are in the rebel town next door | authorable (`rebellion_backed`) |
 | N9 | His town began a trade protest — the governor explains | authorable |
 | N10 | A successor governor introduces himself | issue (no arrival condition for governors) |
-| N11 | "We cannot finish it" — an objective stalled | issue (no stall condition) |
+| N11 | "We cannot finish it" — an objective stalled | #467 built stalling; check for a condition |
 | N12 | Low-loyalty unilateral: the town short-weights the Crown's customs | issue (driver) |
 | N13 | High-loyalty policy: a standing contribution to the Crown | issue (new policy effect) |
 | N14 | Tall's pride keyed to a great building (college, cathedral) | issue (filter on what finished) |

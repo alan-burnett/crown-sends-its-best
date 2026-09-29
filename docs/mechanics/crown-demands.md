@@ -231,6 +231,44 @@ demands the exception**, or every turn becomes a logistics exercise and SPEC
 Resource demands are for when the Marshal's war genuinely needs a thing the
 colony makes.
 
+### Where the goods go when they arrive (#368)
+
+Author's ruling. **Every crate that reaches the Crown lands somewhere.** A
+shipment is not only the second half of a demand: the PC may order one from any
+governor at any time (`pc.request_shipment`, `pc.order_the_quota`,
+`pc.demand_the_stores`), and until now goods nobody had asked for simply left
+the colony.
+
+As each month's goods arrive (`shipment_sent`), in this order:
+
+1. **They settle an open demand for that resource.** A promise the PC made the
+   Marshal, or a patron's need (`patrons.md` §4), counts them exactly as it does
+   today. Oldest promise first.
+2. **Whatever no demand wants is a donation to the Crown.** The Crown credits it
+   at **its own price for that resource that month** (`town-economy.md` §1, the
+   Crown's dictionary), as `given` in `CrownAccounts`, beside a patron's gold
+   gift: it moves `net_position` and so Crown Standing, it shows in the Ledger
+   as a line of its own, and **it is not duty**, so a revenue target is still
+   judged on trade.
+3. **The Steward writes to thank the colony** once the shipment is done,
+   naming what arrived and what it was worth. Once per shipment, not monthly.
+
+**What the PC paid is the Crown's spending**, booked as `paid` the month the
+goods start moving, as every other gold the Crown pays on his word. So the three
+purses in the shipment letter now read truly on the books:
+
+| The PC pays | The Crown's books |
+| :--- | :--- |
+| Nothing | Gains the goods' whole value. The governor's town bears the cost |
+| A fair price | Roughly even. The town is paid for what it gave up |
+| Double | Loses about one value. The town is richer by it |
+
+Which is the overpayment lever above, with its price made visible for the first
+time: before this, the Crown paid a shipment's gold and its books never showed it.
+
+**Gold shipped from a town** would follow the same rule, but nothing lets a town
+send the Crown gold yet. A patron's gold gift already lands as `given`.
+
 ## 6. The four dimensions of growth
 
 | # | Dimension | What grows |
