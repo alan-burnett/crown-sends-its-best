@@ -108,9 +108,10 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 
 		var resource := StringName(best["resource"])
 		var key: String = best["key"]
-		var got := _shop(
+		var bought := _shop(
 			town, resource, float(best["step"]), context, spent_on, StringName(best["tier"])
 		)
+		var got := float(bought["got"])
 		if got <= 0.0:
 			# It could not be had at all — the town is out of gold, or the Crown
 			# will not deal. Taking it off the list stops the loop asking again.
@@ -123,7 +124,11 @@ func run(town: Town, before: ColonySnapshot, context: ColonyContext) -> void:
 				* (1.0 + context.tax_rate(resource))
 			continue
 		var entry: Dictionary = outstanding.get(key, {})
-		var left := float(entry.get("left", 0.0)) - got
+		# 🔒 **A need's budget is spent once** (#453, SPEC §10.2). What comes off
+		# the want is what the gold would have bought without the duty, not what
+		# arrived — so a dearer month carries home less for the same money, rather
+		# than going back for the rest and spending more.
+		var left := float(entry.get("left", 0.0)) - float(bought["covered"])
 		if left > float(entry.get("step", 0.0)) * 0.5:
 			entry["left"] = left
 		else:
@@ -370,7 +375,11 @@ func _worth_it(
 	return Valuation.worth_buying(resource, desired, before.held(town.id, resource), context)
 
 
-## Buy up to `wanted`, natives first. Returns what was actually obtained.
+## Buy up to `wanted`, natives first.
+##
+## Returns `{got, covered}`: what was actually obtained, and how much of the want
+## the gold laid out would have bought **before the duty**. The two agree for
+## natives, who charge none, and part by exactly the duty for the Crown.
 func _shop(
 	town: Town,
 	resource: StringName,
@@ -378,14 +387,16 @@ func _shop(
 	context: ColonyContext,
 	into: Dictionary,
 	tier: StringName = Trade.TIER_WANT,
-) -> float:
+) -> Dictionary:
 	var got := _buy_from_natives(town, resource, wanted, context)
+	var covered := got
 	if wanted - got > 0.0:
 		var deal := Trade.buy(town, resource, wanted - got, context, tier)
 		got += float(deal["received"])
+		covered += float(deal["received"]) * (1.0 + float(deal["rate"]))
 	if got > 0.0:
 		into[String(resource)] = float(into.get(String(resource), 0.0)) + got
-	return got
+	return {"got": got, "covered": covered}
 
 
 ## 🔒 **Natives ahead of the Crown** (SPEC §11.3), and **no duty** (§10.1).

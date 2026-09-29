@@ -86,6 +86,16 @@ great deal. They map onto this section and §6 and §7 directly.
 bound for the colony supplies and gold, which costs somebody money every month
 and **moves both dials**: more come, and each brings more.
 
+**The PC's letter to encourage immigration** (Author's ruling, #451):
+
+- **It is the Provost's policy, and colony-wide.** Asked of him, it raises the
+  volume knob one step. No other Crown officer is asked.
+- **Asked of a governor, it is an urging toward go tall.** A governor has no say
+  over who leaves the Crown's empire. What he controls is whether his town is
+  somewhere people want to come, which is its quality of life, and go tall is
+  the intent that puts comfort first (`governor-agendas.md` §2). The letter is an
+  ordinary `urge_intent`, through compliance like any other.
+
 ## 5. Crown flow rises as the Crown declines
 
 §12.1 makes arrivals depend on "the crown's circumstances," and

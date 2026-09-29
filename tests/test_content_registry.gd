@@ -34,7 +34,7 @@ func test_an_effect_produces_an_order() -> void:
 
 func test_every_m1_effect_is_registered() -> void:
 	for id in ["promise_gold", "promise_resource", "refuse", "grant_favor",
-			"set_policy", "station_troops", "adjust_loyalty"]:
+			"promise_to_retrench", "station_troops", "adjust_loyalty"]:
 		assert_true(ContentRegistry.has_effect(id), "missing effect '%s'" % id)
 
 
@@ -45,7 +45,7 @@ func test_every_m1_effect_produces_an_order() -> void:
 		"promise_resource": {"to": "marshal", "resource": "iron", "amount": 10},
 		"refuse": {"to": "marshal"},
 		"grant_favor": {"to": "marshal", "favor": "a commission for his nephew"},
-		"set_policy": {"policy": "tax.tea", "value": "lower"},
+		"promise_to_retrench": {"to": "chancellor", "months": 6},
 		"station_troops": {"to": "marshal", "strength": "a_force", "posture": "hold_the_towns", "cost": 350, "split": "all"},
 		"adjust_loyalty": {"to": "marshal", "amount": 5},
 	}
@@ -60,8 +60,10 @@ func test_an_order_carries_the_letters_tone() -> void:
 
 
 func test_an_effect_addressed_to_nobody_goes_to_the_sender() -> void:
-	# A reply is addressed to the person who wrote.
-	var order := ContentRegistry.run_effect("set_policy", {"policy": "tax.tea", "value": "lower"}, context)
+	# A reply is addressed to the person who wrote. No shipped effect lacks a
+	# `to` since `set_policy` went (#451), so this one is the test's own.
+	ContentRegistry.register_effect("a_word_with_nobody_named", {}, M1Registrations.ORDER_REFUSE)
+	var order := ContentRegistry.run_effect("a_word_with_nobody_named", {}, context)
 	assert_eq(order.addressed_to, &"marshal")
 
 

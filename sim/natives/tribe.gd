@@ -120,19 +120,16 @@ func is_irreconcilable_with(faction: StringName) -> bool:
 ## destroyed does not move** — not up and not down, because there is nothing left
 ## to discuss and a figure that kept sliding would imply there was.
 ##
-## 🔒 **`can_conclude` is the whole of the asymmetry** (#204, `natives.md` §3).
-## Aggression by a colonist is the *only* thing that reaches the point of no
-## return. Intrusion, exploitation and a governor set against them grind a people
-## down to the edge of that conclusion and stop there, however long they run —
-## which is why they clamp rather than skipping the latch. A tribe sitting at
-## three with no conclusion behind it would be a people who had decided nothing
-## while every system treated them as though they had.
+## 🔒 **One score, and any offence can latch it** (#456, `natives.md` §2). The
+## Author's ruling: towns pressing onto their land, expeditions crossing it and
+## blood spilled all count toward the same point of no return. There is no second
+## measure of aggression and no floor that only an attack may break — a people
+## ground down by encroachment alone concludes as surely as one that was struck.
 func move(
 	faction: StringName,
 	by: float,
 	why: String,
 	context: ColonyContext,
-	can_conclude: bool = true,
 ) -> float:
 	var key := String(faction)
 	if is_irreconcilable_with(faction):
@@ -140,11 +137,6 @@ func move(
 
 	var before := standing_toward(faction)
 	var after := clampf(before + by, MINIMUM, MAXIMUM)
-	if not can_conclude and before >= IRRECONCILABLE_BELOW:
-		# Down to the edge of the conclusion and not one step past it. Guarded on
-		# `before` so this can only ever hold a people up, never lift one who is
-		# already under the line back over it.
-		after = maxf(after, IRRECONCILABLE_BELOW)
 	standing[key] = after
 
 	if not is_equal_approx(after, before):

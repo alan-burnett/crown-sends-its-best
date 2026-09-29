@@ -182,7 +182,10 @@ func conversion_terms(recipe: StringName) -> Dictionary:
 	# for everything ungated, the gunsmith for guns. Anything better is an
 	# improvement, and an improvement doubles the throughput.
 	var batches := 2.0 if is_equal_approx(ratio, base) else 4.0
-	return {"ratio": ratio, "throughput": batches * base}
+	var out := {"ratio": ratio, "throughput": batches * base}
+	if terms.has(WHILE_LIT):
+		out[WHILE_LIT] = String(terms[WHILE_LIT])
+	return out
 
 
 ## The worst terms anything in the tree offers for a conversion.
@@ -237,7 +240,7 @@ static func terms_for(town: Town, recipe: StringName) -> Dictionary:
 			if building == null or not is_lit(town, StringName(id)):
 				continue
 			var terms := building.conversion_terms(recipe)
-			if terms.is_empty():
+			if terms.is_empty() or not _its_master_is_lit(town, terms):
 				continue
 			if best.is_empty() or _better(terms, best):
 				best = terms
@@ -249,6 +252,19 @@ static func terms_for(town: Town, recipe: StringName) -> Dictionary:
 		"throughput": maxf(0.0, float(best.get("throughput", 0.0))),
 		"from": from,
 	}
+
+
+## 🔒 **Terms that work only while another building does** (#438,
+## `institutional-contacts.md` §3). The armoury extends the gunsmith: while the
+## gunsmith is dark the town makes no guns at all, the armoury's included, so
+## the armoury's terms for guns name the gunsmith under `while_lit`. Data rather
+## than a check on an id, as the gate on guns itself is.
+const WHILE_LIT: String = "while_lit"
+
+
+static func _its_master_is_lit(town: Town, terms: Dictionary) -> bool:
+	var master := StringName(terms.get(WHILE_LIT, ""))
+	return String(master).is_empty() or (town.has_building(master) and is_lit(town, master))
 
 
 ## Whether any building in the data defines terms for a recipe (#150).

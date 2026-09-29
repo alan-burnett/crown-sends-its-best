@@ -302,6 +302,11 @@ var specialty_bonus: String = ""
 ## bundle of mechanical behaviour on top of it, and the two words must not merge.
 var vice: StringName = &""
 
+## 🔒 **What a Doctrinaire patron will not touch** (#444, `patrons.md` §6): one
+## resource drawn at arrival, which his need and specialty never name. Empty on
+## everybody else.
+var disapproves: String = ""
+
 ## The month a patron goes home, or `-1` while he has not settled on one (#283,
 ## `patrons.md` §8).
 ##
@@ -319,6 +324,17 @@ var leaves_month: int = -1
 ## `rival-pressure.md` §8), or empty. Set the month his backing lands; a duke who
 ## has backed a rebellion never rolls again. Empty on everybody who is not a duke.
 var backed_rebellion: String = ""
+
+## 🔒 **When his machines last broke** (#438), for the year that must pass
+## before they can again; -1 if never. A quartermaster's only.
+var machines_broke: int = -1
+
+## And whether the Crown has yet to answer about them (#438).
+var machines_waiting: bool = false
+
+## 🔒 **His next ask is skipped** (#399, relief 1: a targeted break). Consumed
+## by the director the next time an ask of his would be sent.
+var skips_next_ask: bool = false
 
 var relationship: Relationship = null
 
@@ -390,8 +406,12 @@ static func from_data(record: Dictionary) -> Contact:
 	contact.need_kind = String(record.get("need_kind", ""))
 	contact.specialty_bonus = String(record.get("specialty_bonus", ""))
 	contact.vice = StringName(record.get("vice", ""))
+	contact.disapproves = String(record.get("disapproves", ""))
 	contact.leaves_month = int(record.get("leaves_month", -1))
 	contact.backed_rebellion = String(record.get("backed_rebellion", ""))
+	contact.machines_broke = int(record.get("machines_broke", -1))
+	contact.machines_waiting = bool(record.get("machines_waiting", false))
+	contact.skips_next_ask = bool(record.get("skips_next_ask", false))
 	contact.known_since = int(record.get("known_since", 0))
 	contact.relationship = Relationship.new(
 		contact.id,
@@ -494,8 +514,12 @@ func to_dict() -> Dictionary:
 		"need_kind": need_kind,
 		"specialty_bonus": specialty_bonus,
 		"vice": String(vice),
+		"disapproves": disapproves,
 		"leaves_month": leaves_month,
 		"backed_rebellion": backed_rebellion,
+		"machines_broke": machines_broke,
+		"machines_waiting": machines_waiting,
+		"skips_next_ask": skips_next_ask,
 		"known_since": known_since,
 		"relationship": relationship.to_dict(),
 	}

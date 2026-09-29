@@ -204,6 +204,23 @@ month has a great deal to say about towns and there are none — putting both
 questions in the run-start menu beside mandate and supplies is fine. **The letter
 is better and it is not worth a fortnight.**
 
+### The grant's split
+
+Author's ruling (#465). SPEC §6.1: the PC chooses *how the initial grant is split
+between the town's population, the town's gold, and the town's resources.* **It is
+one grant, so leaning one way costs the others:**
+
+| The PC chooses | People | Gold | Stores |
+| :--- | --: | --: | --: |
+| **balanced** | the grant | the grant | the grant |
+| **lean toward people** | +45% | −22.5% | −22.5% |
+| **lean toward gold** | −22.5% | +45% | −22.5% |
+| **lean toward stores** | −22.5% | −22.5% | +45% |
+
+Shares are placeholders. With the grant at 12,000 people and 250 gold, leaning
+toward people gives 17,400 people, about 190 gold, and three-quarters of the
+stores.
+
 ## 6. 🔒 Every starting town has sea within reach
 
 **Not negotiable, whatever was asked for.**

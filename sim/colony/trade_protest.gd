@@ -260,7 +260,7 @@ static func familiar_rate(state: WorldState, resource: StringName) -> float:
 		return 0.0
 	var key := FAMILIAR_PREFIX + String(resource)
 	if not state.has_value(key):
-		return TaxRates.rate_for(state, resource)
+		return TaxRates.colony_rate(state, resource)
 	return float(state.get_value(key, 0.0))
 
 
@@ -343,7 +343,8 @@ static func settle_familiarity(context: ColonyContext) -> void:
 	var changes: Dictionary = {}
 	for id in ResourceCatalogue.ids():
 		var key := FAMILIAR_PREFIX + id
-		var rate := TaxRates.rate_for(context.state, StringName(id))
+		# The rate the town pays, forgiveness taken off (#399).
+		var rate := TaxRates.colony_rate(context.state, StringName(id))
 		if not context.state.has_value(key):
 			# **A town starts used to what it is already paying.** Without this
 			# first write the fallback would keep returning the live rate, and a

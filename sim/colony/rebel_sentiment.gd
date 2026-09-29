@@ -191,8 +191,8 @@ const NEIGHBOUR_WEIGHT: float = 18.0
 const NEIGHBOUR_FALLOFF: float = 0.6
 
 ## What is left of a rebel town's argument once the Crown is visibly punishing
-## it. **A town being ground down is an argument against rebellion**, and should
-## read as one.
+## it — by embargo, or by making an example of it (#457). **A town being ground
+## down is an argument against rebellion**, and should read as one.
 const PUNISHED_SHARE: float = 0.25
 
 ## What an embargo does to the town it is laid on.
@@ -261,7 +261,9 @@ static func _tax(town: Town, context: ColonyContext) -> float:
 				tier = "sale"
 			_:
 				continue
-		weighted += float(event.payload.get("tax", 0.0)) \
+		# 🔒 **What the town paid, not what the Crown booked** (#399): a
+		# forgiven duty is resented at the rate the town sees.
+		weighted += float(event.payload.get("colony_tax", event.payload.get("tax", 0.0))) \
 			* float(TIER_WEIGHT.get(tier, TIER_WEIGHT["want"]))
 
 	# 🔒 **What the town believes it paid** (#279, the journalist's *Crown
@@ -404,4 +406,5 @@ static func _neighbours(town: Town, context: ColonyContext) -> float:
 ## the two terms here.
 static func argument_of(rebel: Town) -> float:
 	var persuasive := clampf(rebel.quality_of_life, 0.0, 1.0)
-	return persuasive * PUNISHED_SHARE if rebel.is_embargoed() else persuasive
+	var punished := rebel.is_embargoed() or rebel.is_made_an_example()
+	return persuasive * PUNISHED_SHARE if punished else persuasive

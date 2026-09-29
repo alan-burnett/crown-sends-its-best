@@ -1,0 +1,89 @@
+{
+  "id": "quartermaster.machines_broken",
+  "sender": "quartermaster",
+  "type": "request",
+  "skippable": false,
+  "note": "Issue 438, institutional-contacts.md section 3 'His machines break'. Placeholder prose: the Author writes the real lines. The gunsmith's machines have broken, and he asks the sum the break named to mend them. Agreeing is a promise of gold to the TOWN (town-economy.md section 4): kept, the town's purse holds it and the machines are mended. Refused, ignored, or promised and then broken because the Crown refuses payments, and the gunsmith is dark for six months: the town makes no guns, the armoury's included. Unskippable: the consequence of silence is the whole of the letter, so the PC must see it.",
+  "params": {
+    "quartermaster": "contact",
+    "town": "town",
+    "amount": "gold"
+  },
+  "body": [
+    {
+      "text": "The machines in the gunsmith's shop at {param:town} have broken, and the men cannot mend them from what we have."
+    },
+    {
+      "text": "{param:amount} would see them repaired. Without it the shop stands idle, and so does the armoury, for it works from the gunsmith's bored barrels and has nothing to finish without them."
+    },
+    {
+      "text": "It is to go to the town, which pays the smiths. I shall know within the month whether it has come.",
+      "only_tones": [
+        "dutiful",
+        "pleased"
+      ]
+    },
+    {
+      "text": "I set down plainly what it costs to say no: half a year with no muskets made in {param:town}, whatever else happens in it.",
+      "only_tones": [
+        "desperate",
+        "annoyed",
+        "hateful"
+      ]
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — as to the machines at {param:town}, I write {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "gladly"
+        },
+        {
+          "tone": "dutiful",
+          "text": "having considered it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "having considered the figure"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "machines",
+        "prompt": "The machines at {param:town}",
+        "options": [
+          {
+            "id": "mend",
+            "label": "the Crown will pay to mend them",
+            "text": "The Crown will send it, to the town, for the machines.",
+            "effect": {
+              "promise_gold_to_town": {
+                "to": "{quartermaster}",
+                "town": "{town}",
+                "amount": "{amount}"
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "the shop must wait",
+            "text": "The Crown cannot find it now. The shop must stand until it can.",
+            "effect": {
+              "refuse": {
+                "to": "{quartermaster}"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain, sir, yours,"
+      }
+    ]
+  }
+}

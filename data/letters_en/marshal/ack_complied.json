@@ -3,12 +3,16 @@
   "sender": "marshal",
   "type": "report",
   "skippable": false,
-  "params": { "what": "resource" },
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out. A promise of goods is acknowledged when it is made; the goods have not arrived yet.",
+  "params": {
+    "what": "resource"
+  },
   "body": [
-    { "text": "Your {param:what} reached the quartermasters, and is already gone again into the wagons." },
-    { "text": "It was well done, and I have said so where it will be heard.",
-      "only_tones": ["pleased", "dutiful"] },
-    { "text": "It was late, and less than was asked, but it came.",
-      "only_tones": ["annoyed", "hateful", "desperate"] }
+    {
+      "text": "Your word on the {param:what} is noted, and the quartermasters are expecting it."
+    },
+    {
+      "text": "It was well done, and I have said so where it will be heard."
+    }
   ]
 }

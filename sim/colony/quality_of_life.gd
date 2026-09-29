@@ -113,6 +113,9 @@ const VARIETY_FLOOR: float = 0.6
 ## church is finished.
 const INTENT_SHARE: float = 0.7
 
+## What a town in rebellion adds to its quality of life (#230, §3). A placeholder.
+const REBELLION_LIFT: float = 0.2
+
 
 ## Every component and the value they make, for one town.
 ##
@@ -130,7 +133,14 @@ static func of(town: Town, context: ColonyContext) -> Dictionary:
 		"pleasure": pleasure_of(wellbeing),
 	}
 	parts["substance"] = substance_of(parts)
-	parts["quality_of_life"] = combine(float(parts["substance"]), float(parts["pleasure"]))
+	var headline := combine(float(parts["substance"]), float(parts["pleasure"]))
+	# 🔒 **In rebellion, a lift** (#230, §3): free of the Crown's duty and glad of
+	# it, for as long as the town is out. On the whole figure, clamped to one, and
+	# stored as the town's quality of life, so every reader sees it — the
+	# neighbours a prosperous rebellion persuades included.
+	if town.rebelling:
+		headline = minf(1.0, headline + REBELLION_LIFT)
+	parts["quality_of_life"] = headline
 	return parts
 
 

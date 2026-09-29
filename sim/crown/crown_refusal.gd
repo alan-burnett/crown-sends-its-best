@@ -178,7 +178,7 @@ func _close_the_faucet(month: int) -> Dictionary:
 
 
 func _maybe_restore(standing: CrownStanding, month: int) -> Dictionary:
-	if standing.standing < restore_threshold:
+	if standing.value() < restore_threshold:
 		return {}
 	return _restore(month, false)
 

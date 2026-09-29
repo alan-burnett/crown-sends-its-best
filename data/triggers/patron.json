@@ -21,6 +21,7 @@
   {
     "id": "trigger.patron.request_gold",
     "letter": "patron.request_gold",
+    "an_ask": true,
     "urgency": 0.6,
     "cooldown": 14,
     "note": "Issue 388, patrons.md sections 4 and 10: every patron has this letter. Any patron may send it, at any regard - the gate it always had, since the offer model it once asked (PatronOffer, retired by #439) made a bare request unconditional. Cooldown 14, as the duke's is: a man who asked twice a year would be a tax rather than a character. Urgency below a duke's 0.7, because a patron is asking a favour and a duke is describing a difficulty he has.",
@@ -69,6 +70,8 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
+      { "the_pc_is_not_ruinous": {} },
       {
         "his_barony_has_a_market": {}
       }
@@ -94,6 +97,8 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_trouble_a_duke": {}
       }
@@ -127,6 +132,7 @@
   {
     "id": "trigger.patron.his_need",
     "letter": "patron.his_need",
+    "an_ask": true,
     "urgency": 0.55,
     "cooldown": 12,
     "note": "Issue 441, patrons.md section 4. Every patron asks for his need, a resource or livestock kind that is never his specialty's. Not while anything the PC promised him is still outstanding: a man waiting on a ship does not write for another. Cooldown 12: a year's shipment is a year's favour, and asked for more often it would be a levy. Urgency just under his gold letter's, because a need met through two letters is the slower favour.",
@@ -168,6 +174,8 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_bring_more": {
           "of": "resources"
@@ -190,6 +198,8 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_bring_more": {
           "of": "livestock"
@@ -212,6 +222,8 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_send_an_expert": {}
       }
@@ -232,6 +244,8 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_give_gold": {}
       }
@@ -249,8 +263,66 @@
       }
     },
     "conditions": [
+      { "he_may_offer_his_specialty": {} },
+      { "the_pc_is_not_ruinous": {} },
       {
         "he_could_send_troops": {}
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.no_longer_associated",
+    "letter": "patron.no_longer_associated",
+    "urgency": 0.9,
+    "cooldown": 1,
+    "note": "Issue 444, patrons.md section 6. A Respectable patron the month after a town declares; his policies end with this letter. Cooldown 1: every declaration does it again.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "what_happened",
+        "event": "patron_withdrew",
+        "within": 1,
+        "concerning": "him",
+        "field": "town"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "patron_withdrew",
+          "within": 1,
+          "concerning": "him"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.patron.he_will_not_touch_it",
+    "letter": "patron.he_will_not_touch_it",
+    "urgency": 0.4,
+    "cooldown": 12,
+    "note": "Issue 444, patrons.md section 6. A Doctrinaire patron in a month the colony sold the Crown what he disapproves of. His regard falls every such month; he writes about it now and then, which is the cooldown.",
+    "params": {
+      "patron": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "what_happened",
+        "event": "patron_objected",
+        "within": 1,
+        "concerning": "him",
+        "field": "resource"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "patron_objected",
+          "within": 1,
+          "concerning": "him"
+        }
       }
     ]
   }

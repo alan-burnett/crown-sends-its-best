@@ -132,8 +132,8 @@ func test_it_works_at_full_strength_however_little_is_paid() -> void:
 	unfunded.enact(Policy.new(&"steward", PolicyEffects.IMMIGRATION, 100.0, Policy.NONE), log, 3)
 
 	assert_almost_eq(
-		float(PolicyEffects.pressure(funded).get(WorldValues.IMMIGRATION, 0.0)),
-		float(PolicyEffects.pressure(unfunded).get(WorldValues.IMMIGRATION, 0.0)),
+		float(PolicyEffects.pressure(funded).get(PolicyEffects.VOLUME_KEY, 0.0)),
+		float(PolicyEffects.pressure(unfunded).get(PolicyEffects.VOLUME_KEY, 0.0)),
 		0.0001,
 		"paying nothing quietly weakened the policy instead of costing a man his regard")
 
@@ -254,9 +254,9 @@ func test_pressure_is_recomputed_rather_than_accumulated() -> void:
 	# that had been added to would have to be subtracted from by somebody who
 	# remembered to.
 	var policy := _enact(Policy.ALL)
-	assert_true(PolicyEffects.pressure(book).has(WorldValues.IMMIGRATION))
+	assert_true(PolicyEffects.pressure(book).has(PolicyEffects.VOLUME_KEY))
 	book.lapse(policy.id, log, 6)
-	assert_false(PolicyEffects.pressure(book).has(WorldValues.IMMIGRATION),
+	assert_false(PolicyEffects.pressure(book).has(PolicyEffects.VOLUME_KEY),
 		"a policy that had ended went on pressing")
 
 

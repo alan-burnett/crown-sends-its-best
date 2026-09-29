@@ -42,7 +42,10 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	var told := false
 	# Sorted by id, so which party hears first cannot depend on launch order.
 	for party in _in_order():
-		if party.parent != intent.target and party.parent != intent.source:
+		# 🔒 **To the man leading it, or to the town that sent it** (#454). The
+		# composed letter goes to the governor the party elected, whose id is
+		# neither town's; matching the town alone meant it always came too late.
+		if not _concerns(party, intent.target) and not _concerns(party, intent.source):
 			continue
 		if party.turning_back or party.is_empty():
 			continue
@@ -59,6 +62,10 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 		"preference": String(wanted),
 	}, WorldPhase.MOVEMENT)
 	return Intent.OVERTAKEN_BY_EVENTS
+
+
+static func _concerns(party: ExpeditionParty, who: StringName) -> bool:
+	return not String(who).is_empty() and (party.parent == who or party.governor == who)
 
 
 func _in_order() -> Array:

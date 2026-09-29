@@ -142,8 +142,12 @@ const STRIKE: StringName = &"strike"
 ## 🔒 **Raise a fort where he stands** (#419, `tiles-and-improvements.md` §6):
 ## a commander can build one, and a duke will. A tribe never does.
 const FORTIFY: StringName = &"fortify"
+## 🔒 **Make an example of a rebel town** (#457, §5): burn its fields, strike
+## its expeditions, sit on its ground. Only a Crown commander putting down the
+## rebellion has it, and it takes his month (`MakingAnExample`).
+const PUNISH: StringName = &"punish"
 
-const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, STRIKE, FORTIFY, WITHDRAW, DISBAND]
+const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, STRIKE, FORTIFY, PUNISH, WITHDRAW, DISBAND]
 
 
 ## Everything this commander could do this month.
@@ -157,7 +161,7 @@ const OPTIONS: Array[StringName] = [ATTACK, HOLD, MARCH, EXPLORE, RAZE, STRIKE, 
 static func options_for(
 	company: Company, enemy: Company, has_somewhere_to_go: bool, has_land_to_find: bool = false,
 	has_something_to_burn: bool = false, has_a_party_in_reach: bool = false,
-	has_ground_to_fortify: bool = false,
+	has_ground_to_fortify: bool = false, has_a_town_to_punish: bool = false,
 ) -> Array:
 	var out: Array = []
 	var board := {"company": company, "enemy": enemy}
@@ -185,6 +189,10 @@ static func options_for(
 	# **Not in the face of an enemy**: walls are raised before the fight.
 	if has_ground_to_fortify and enemy == null:
 		out.append(Candidate.new(FORTIFY, board))
+	# **In contact or not**, as razing is: punishing a town he will not storm is
+	# the choice.
+	if has_a_town_to_punish:
+		out.append(Candidate.new(PUNISH, board))
 	out.append(Candidate.new(WITHDRAW, board))
 	out.append(Candidate.new(DISBAND, board))
 	return out
@@ -250,7 +258,8 @@ class StayingAliveConsideration:
 				return clampf(
 					(0.5 - CommanderConsiderations._odds(candidate, context)) * 2.0,
 					0.0, 1.0)
-			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE, CommanderConsiderations.RAZE, 					CommanderConsiderations.FORTIFY:
+			CommanderConsiderations.MARCH, CommanderConsiderations.EXPLORE, CommanderConsiderations.RAZE, \
+					CommanderConsiderations.FORTIFY, CommanderConsiderations.PUNISH:
 				# Fortifying is never on offer with an enemy in front of him, so a
 				# wall's safety is against somebody who has not come: no more an
 				# argument for staying alive than marching is. Scored higher, a man
@@ -341,6 +350,12 @@ class OrdersConsideration:
 				# standing about. A man told to hold his town has no business burning
 				# anybody's fields.
 				asked = 0.6 if sent and not exploring else -0.2
+			CommanderConsiderations.PUNISH:
+				# 🔒 **What a man sent to put down a rebellion does to a town he
+				# will not storm** (#457): more than burning a field, because it is
+				# the whole of what he was sent for short of an assault; less than
+				# pressing on.
+				asked = 0.7 if sent and not exploring else -0.2
 			CommanderConsiderations.HOLD:
 				asked = -0.2 if sent else 1.0
 			CommanderConsiderations.WITHDRAW:

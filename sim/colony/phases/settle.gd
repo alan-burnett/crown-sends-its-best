@@ -145,6 +145,11 @@ func _take_the_temperature(town: Town, context: ColonyContext) -> void:
 	# **An embargo runs down whether anybody remembers it or not.** A punishment
 	# with no end is a punishment the PC cannot take back, and SPEC §12.3's
 	# reward-and-punish pair only works if both are things he can stop doing.
+	# **And an example is forgotten** (#457), a month at a time from the last month
+	# the Crown's men punished it.
+	if town.example_months > 0:
+		town.example_months -= 1
+
 	if town.embargo_months > 0:
 		town.embargo_months -= 1
 		if town.embargo_months == 0:
@@ -322,6 +327,9 @@ func _reconsider(town: Town, context: ColonyContext) -> void:
 	var verdict := Reconsideration.verdict(town)
 	if verdict == Reconsideration.NONE:
 		return
+
+	if verdict == Reconsideration.STALLED:
+		Reconsideration.stall(town, context)
 
 	if verdict == Reconsideration.INTENT_CHANGED:
 		# **The new intent may want the very same thing.** Go wide and go tall

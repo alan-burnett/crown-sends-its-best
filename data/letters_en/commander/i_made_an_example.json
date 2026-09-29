@@ -1,0 +1,44 @@
+{
+  "id": "commander.i_made_an_example",
+  "sender": "commander",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 457, commanders.md section 5: a Crown commander began making an example of a rebel town on his own (Seam C), and writes afterwards to say so. Placeholder prose.",
+  "params": {
+    "town": "town"
+  },
+  "body": [
+    {
+      "text": "I write to tell you what I have already begun, since you would hear it from somebody."
+    },
+    {
+      "text": "{param:town} would not come out, and I would not waste men on its walls. So I have burnt what they planted, fallen on whoever they sent out, and put my men on their fields. They will be hungry by the time you read this, and their neighbours will have noticed."
+    },
+    {
+      "text": "I did not wait for your word. A campaign does not keep for the post."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "{sender:name} — I have your report {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "and it is well done"
+        },
+        {
+          "tone": "dutiful",
+          "text": "and I note it"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and I should have liked to be asked"
+        },
+        {
+          "tone": "hateful",
+          "text": "and I will remember that you did not ask"
+        }
+      ]
+    }
+  }
+}

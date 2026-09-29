@@ -31,7 +31,7 @@
         { "id": "retrench", "label": "promise economy, and mean it",
           "text": "The colony will retrench. You may tell the Treasury as much over your own name{insert:barb}.",
           "insert": { "barb": { "hateful": ", since you are so fond of carrying news" } },
-          "effect": { "set_policy": { "policy": "spending", "value": "retrench" } } },
+          "effect": { "promise_to_retrench": { "to": "chancellor", "months": 6 } } },
         { "id": "favour", "label": "grant the Chancellor a favour for his trouble",
           "text": "Your trouble on my account is noted, and shall be repaid in kind.",
           "effect": { "grant_favor": { "to": "chancellor", "favor": "a word in the right ear" } } },

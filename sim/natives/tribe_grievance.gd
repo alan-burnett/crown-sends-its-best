@@ -21,13 +21,20 @@ extends RefCounted
 const LAND_WORKED: StringName = &"land_worked"
 const IMPROVEMENT_BUILT: StringName = &"improvement_built"
 const COMPANY_ON_ITS_GROUND: StringName = &"company_on_its_ground"
+## 🔒 **An expedition crossing their country** (#456, §11). `company` holds the
+## expedition's id. It moves on of its own accord, so there is nothing to yield.
+const EXPEDITION_ON_ITS_GROUND: StringName = &"expedition_on_its_ground"
 const TOWN_FOUNDED: StringName = &"town_founded"
 ## 🔒 **What it will do, said before it does it** (§11: *"writes again first,
 ## saying what it will do"*). The letter every hostile objective follows.
 const WE_WILL_DRIVE_YOU_OFF: StringName = &"we_will_drive_you_off"
+## 🔒 **Not an act at all: an ask** (#471, `natives.md` §7). Help for troubles
+## abroad, which the governor gives or refuses (`TribeAsks`).
+const HELP_ABROAD: StringName = &"help_abroad"
 
 const ACTS: Array[StringName] = [
-	COMPANY_ON_ITS_GROUND, IMPROVEMENT_BUILT, LAND_WORKED, TOWN_FOUNDED, WE_WILL_DRIVE_YOU_OFF,
+	COMPANY_ON_ITS_GROUND, EXPEDITION_ON_ITS_GROUND, HELP_ABROAD, IMPROVEMENT_BUILT, LAND_WORKED,
+	TOWN_FOUNDED, WE_WILL_DRIVE_YOU_OFF,
 ]
 
 # --- The governor's four answers (§11) --------------------------------------------
@@ -50,6 +57,10 @@ var at: Vector2i = Vector2i(-1, -1)
 var company: StringName = &""
 ## The month the tribe wrote.
 var month: int = 0
+
+## What a tribe asking for help asked for (#471): `{resource, amount}`. Empty for
+## every other letter.
+var asked: Dictionary = {}
 
 ## What he said, or empty while he has not answered.
 var answer: StringName = &""
@@ -94,6 +105,7 @@ func to_dict() -> Dictionary:
 		"asked_month": asked_month,
 		"urged": String(urged),
 		"urged_tone": String(urged_tone),
+		"asked": asked.duplicate(),
 	}
 
 
@@ -104,6 +116,7 @@ static func from_dict(data: Dictionary) -> TribeGrievance:
 	grievance.town = StringName(data.get("town", ""))
 	grievance.governor = StringName(data.get("governor", ""))
 	grievance.act = StringName(data.get("act", ""))
+	grievance.asked = (data.get("asked", {}) as Dictionary).duplicate()
 	var place: Array = data.get("at", [-1, -1])
 	grievance.at = Vector2i(int(place[0]), int(place[1])) if place.size() >= 2 else Vector2i(-1, -1)
 	grievance.company = StringName(data.get("company", ""))

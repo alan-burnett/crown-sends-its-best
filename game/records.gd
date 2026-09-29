@@ -49,7 +49,14 @@ const FIELD_YEAR: String = "year"
 const FIELD_EPITAPH: String = "epitaph"
 const FIELD_ID: String = "id"
 
+## 🔒 **What past runs have unlocked** (#465, SPEC §14.3): perk and quirk ids.
+## Read here so the setup screen offers only what is unlocked, and written by
+## `remember` from each option's own condition (`UnlockConditions`).
+const UNLOCKS_SECTION: String = "unlocks"
+const UNLOCKS_KEY: String = "ids"
+
 static var _entries: Array = []
+static var _unlocks: PackedStringArray = PackedStringArray()
 static var _loaded: bool = false
 
 
@@ -60,6 +67,9 @@ static func ensure_loaded(path: String = PATH) -> void:
 	var file := ConfigFile.new()
 	if file.load(path) != OK:
 		return
+	var unlocked: Variant = file.get_value(UNLOCKS_SECTION, UNLOCKS_KEY, [])
+	if typeof(unlocked) == TYPE_ARRAY or typeof(unlocked) == TYPE_PACKED_STRING_ARRAY:
+		_unlocks = PackedStringArray(unlocked)
 	var stored: Variant = file.get_value(SECTION, KEY, [])
 	if typeof(stored) != TYPE_ARRAY:
 		return
@@ -70,12 +80,14 @@ static func ensure_loaded(path: String = PATH) -> void:
 
 static func reset() -> void:
 	_entries = []
+	_unlocks = PackedStringArray()
 	_loaded = false
 
 
 static func save_records(path: String = PATH) -> bool:
 	var file := ConfigFile.new()
 	file.set_value(SECTION, KEY, _entries.duplicate(true))
+	file.set_value(UNLOCKS_SECTION, UNLOCKS_KEY, _unlocks.duplicate())
 	var wrote := file.save(path)
 	if wrote != OK:
 		push_warning("Could not write the hall of records: %s" % error_string(wrote))
@@ -88,6 +100,14 @@ static func all(path: String = PATH) -> Array:
 	ensure_loaded(path)
 	var out := _entries.duplicate()
 	out.reverse()
+	return out
+
+
+## The perk and quirk ids past runs have unlocked, sorted.
+static func unlocks(path: String = PATH) -> PackedStringArray:
+	ensure_loaded(path)
+	var out := _unlocks.duplicate()
+	out.sort()
 	return out
 
 
@@ -128,6 +148,12 @@ static func remember(
 		FIELD_YEAR: int(run.ending.month / WorldState.MONTHS_PER_YEAR) + 1,
 		FIELD_EPITAPH: _epitaph_for(run.ending, content),
 	})
+	# 🔒 **What this run unlocks for the runs after it** (#465,
+	# `perks-and-quirks.md` §1), however it ended, and kept for good. An option
+	# already unlocked is unlocked once.
+	for unlocked in UnlockConditions.unlocked_by(run, content):
+		if not _unlocks.has(unlocked):
+			_unlocks.append(unlocked)
 	save_records(path)
 	return true
 

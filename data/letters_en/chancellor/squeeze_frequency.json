@@ -60,34 +60,6 @@
         }
       ]
     },
-    "steps": [
-      {
-        "id": "answer",
-        "prompt": "Your reply to the Chancellor",
-        "options": [
-          {
-            "id": "accept",
-            "label": "acknowledge it, and say nothing more",
-            "text": "The colony has heard the Crown{insert:barb}. It will do what it can.",
-            "insert": {
-              "barb": {
-                "hateful": ", as it always does, at length"
-              }
-            }
-          },
-          {
-            "id": "protest",
-            "label": "protest that the post is already heavy",
-            "text": "The post from London is the one crop this colony has never wanted for. I ask you to consider what a man can read in a month."
-          },
-          {
-            "id": "ask",
-            "label": "ask what else is coming",
-            "text": "You have told me what changes this year. Tell me what changes next, and I will build for it."
-          }
-        ]
-      }
-    ],
     "closing": [
       {
         "text": "Your servant,",

@@ -1,0 +1,123 @@
+{
+  "id": "provost.begin_again",
+  "sender": "provost",
+  "type": "offer",
+  "skippable": false,
+  "params": {
+    "amount": "gold"
+  },
+  "body": [
+    {
+      "text": "You will have had the Chancellor's letter. Everybody has had the Chancellor's letter; he read it aloud at dinner."
+    },
+    {
+      "text": "I will not pretend the ground can be held from here, because there is nothing left on it to hold. But ground can be settled twice. I can have a company of settlers aboard the Crown's ships within the season — guards, stores, a surgeon, the whole business — and in five months they will be on the coast where your towns were, with nothing done to them on the way."
+    },
+    {
+      "text": "The Crown will carry them as long as it is still honouring your word. It will not carry them on anything less, and it will not ask twice."
+    },
+    {
+      "text": "What they arrive as depends on what you put behind them. {param:amount} for the handsome version: stores enough, tools, and a granary standing before the first winter. Less for less. Or you may let it go, and I will understand, and I will think less of the arrangement."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "On a second landing I am {choice}.",
+      "options": [
+        {
+          "tone": "pleased",
+          "text": "grateful beyond what I can easily say"
+        },
+        {
+          "tone": "dutiful",
+          "text": "ready to begin again"
+        },
+        {
+          "tone": "desperate",
+          "text": "in your hands entirely"
+        },
+        {
+          "tone": "annoyed",
+          "text": "conscious that it comes late"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "founding",
+        "prompt": "A second landing",
+        "options": [
+          {
+            "id": "handsomely",
+            "label": "equip it handsomely",
+            "text": "Send them properly found. If the colony is to begin again, it will not begin poor.",
+            "effect": {
+              "fund_founding": {
+                "to": "provost",
+                "equipped": "handsomely",
+                "expert": "",
+                "building": "granary",
+                "intent": ""
+              },
+              "promise_gold": {
+                "to": "provost",
+                "amount": 1600
+              }
+            }
+          },
+          {
+            "id": "adequately",
+            "label": "equip it adequately",
+            "text": "Enough to stand it up, and no more. They may earn the rest.",
+            "effect": {
+              "fund_founding": {
+                "to": "provost",
+                "equipped": "adequately",
+                "expert": "",
+                "building": "",
+                "intent": ""
+              },
+              "promise_gold": {
+                "to": "provost",
+                "amount": 900
+              }
+            }
+          },
+          {
+            "id": "meanly",
+            "label": "send them with what you can spare",
+            "text": "Send them. I cannot furnish them, and I will not pretend it is generous, but I will not let it end here.",
+            "effect": {
+              "fund_founding": {
+                "to": "provost",
+                "equipped": "meanly",
+                "expert": "",
+                "building": "",
+                "intent": ""
+              },
+              "promise_gold": {
+                "to": "provost",
+                "amount": 300
+              }
+            }
+          },
+          {
+            "id": "let_it_go",
+            "label": "let it go",
+            "text": "Let it go. I will not send more people to a coast that has already taken everyone we sent.",
+            "effect": {
+              "dissuade_founding": {
+                "to": "provost"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I am, sir, your obedient servant,"
+      }
+    ]
+  }
+}

@@ -257,6 +257,25 @@ func _somewhere_to_live(map: WorldMap, away_from: Vector2i, rng: RandomNumberGen
 	return Vector2i(-1, -1)
 
 
+## 🔒 **A village emptied of people is gone, and its land is free** (#456,
+## `natives.md` §3). Its land is read from the villages that stand, so there is
+## nothing else to clear. **The one way their number changes**: no village is
+## ever founded (§4).
+const EVENT_VILLAGE_GONE: StringName = &"village_destroyed"
+
+
+func lose(village: Village, by: StringName, context: ColonyContext) -> void:
+	if village == null or not villages.has(village):
+		return
+	villages.erase(village)
+	context.log.emit(EVENT_VILLAGE_GONE, village.id, context.state.month, {
+		"village": String(village.id),
+		"tribe": String(village.tribe),
+		"by": String(by),
+		"at": [village.at.x, village.at.y],
+	}, WorldPhase.MOVEMENT)
+
+
 ## Every village, in id order.
 func villages_in_order() -> Array:
 	var out: Array = villages.duplicate()

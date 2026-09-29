@@ -51,41 +51,44 @@ func _resolve(order: Order, contact: Contact) -> Dictionary:
 	return Compliance.resolve(order, contact, book, state, log, streams)
 
 
-# --- The six outcomes ------------------------------------------------------
+# --- The five outcomes -----------------------------------------------------
 
+## An order with no figure in it, priced at nothing (#451).
 func _vague_order() -> Order:
-	# No figure in it, so there is room to decide what the PC meant.
-	return Order.new(M1Registrations.ORDER_SET_POLICY, &"marshal", {
-		"to": "marshal", "policy": "tax.tea", "value": "lower",
+	return Order.new(M1Registrations.ORDER_MOVE_DIPLOMAT, &"marshal", {
+		"to": "marshal", "town": "ashmere",
 	}, state.month)
 
 
-func test_all_six_outcomes_are_reachable() -> void:
-	# Swept across loyalty, payment, personality and how specific the order was,
-	# which is the honest way to ask "can this happen" without asserting a
-	# balance number.
+func test_all_five_outcomes_are_reachable() -> void:
+	# Swept across loyalty, payment, personality, the tone of the letter and how
+	# specific the order was, which is the honest way to ask "can this happen"
+	# without asserting a balance number.
+	#
+	# **The tone is in the sweep since #449.** A delay used to be reached only
+	# by a man paid in full, whom the old guarantee stopped from refusing and
+	# nothing else; paid in full he now complies, and a delay is what a man paid
+	# most of it does when he is asked kindly.
 	var seen: Dictionary = {}
 	for loyalty in [0.0, 15.0, 30.0, 50.0, 70.0, 85.0, 100.0]:
 		for autonomy in [0.4, 1.0, 1.8]:
 			for payment in [0.0, 250.0, 500.0, 900.0, 1000.0]:
-				var contact := _contact(loyalty, {"autonomy": autonomy})
-				seen[String(_resolve(_troop_request(payment), contact)["outcome"])] = true
+				for tone in [&"", Tone.PLEASED]:
+					var contact := _contact(loyalty, {"autonomy": autonomy})
+					var order := _troop_request(payment)
+					order.tone = tone
+					seen[String(_resolve(order, contact)["outcome"])] = true
 			seen[String(_resolve(_vague_order(), _contact(loyalty, {"autonomy": autonomy}))["outcome"])] = true
 	for outcome in Compliance.OUTCOMES:
 		assert_true(seen.has(String(outcome)), "%s was never reachable. Reached: %s" % [outcome, seen.keys()])
 
 
-func test_a_vague_order_invites_reinterpretation() -> void:
-	# SPEC §8: personality shows in how a contact reads vague orders. A figure in
-	# the letter is what closes the gap.
-	assert_almost_eq(Compliance.vagueness_of(_troop_request(500.0)), 0.0)
-	assert_almost_eq(Compliance.vagueness_of(_vague_order()), 1.0)
-
-	var reinterpreted := false
-	for loyalty in [20.0, 40.0, 60.0, 80.0]:
-		if String(_resolve(_vague_order(), _contact(loyalty))["outcome"]) == String(Compliance.REINTERPRET):
-			reinterpreted = true
-	assert_true(reinterpreted, "no vague order was ever reinterpreted")
+func test_reinterpretation_is_cut() -> void:
+	# 🔒 **Five outcomes** (#449, the Author's ruling, `contacts.md` §3), and
+	# nothing weighs the clarity that only ever pulled toward the sixth.
+	assert_eq(Compliance.OUTCOMES.size(), 5)
+	assert_false(Compliance.OUTCOMES.has(&"reinterpret"))
+	assert_false(Governor.weighted().has("order_clarity"), "a governor still weighs how clear an order is")
 
 
 func test_each_outcome_emits_a_distinguishable_event() -> void:
@@ -201,8 +204,38 @@ func test_a_partial_compliance_delivers_less() -> void:
 	assert_eq(intent.data["amount"], 100)
 
 
-func test_a_delay_takes_longer_than_compliance() -> void:
-	assert_true(int(Compliance.MONTHS_FOR[Compliance.DELAY]) > int(Compliance.MONTHS_FOR[Compliance.COMPLY]))
+func test_a_delay_is_the_comply_result_three_months_later() -> void:
+	# 🔒 **Exactly what comply would do, three months later** (#449,
+	# `contacts.md` §3), held on the Intent so every executor honours it.
+	var delayed: Intent = null
+	for loyalty in [30.0, 50.0, 70.0, 85.0]:
+		for payment in [500.0, 900.0, 1000.0]:
+			if delayed != null:
+				break
+			var order := _troop_request(payment)
+			order.tone = Tone.PLEASED
+			var result := _resolve(order, _contact(loyalty))
+			if String(result["outcome"]) == String(Compliance.DELAY):
+				delayed = result["intent"]
+	assert_true(delayed != null, "no delay was reached to prove anything with")
+	if delayed == null:
+		return
+	assert_eq(delayed.months_required, int(Compliance.MONTHS_FOR[Compliance.COMPLY]),
+		"a delay was a longer piece of work rather than the same work later")
+	var lands := state.month + 1 + Compliance.DELAY_MONTHS
+	assert_eq(delayed.lands_in(), lands)
+	for month in range(state.month + 1, lands):
+		assert_false(delayed.may_advance_in(month), "a delayed order was carried out in month %d" % month)
+	assert_true(delayed.may_advance_in(lands), "a delayed order never landed")
+
+
+func test_accepting_an_offer_a_waiver_or_a_deflection_is_never_deliberated() -> void:
+	# 🔒 **He offered it; he does it** (#449, `contacts.md` §3). The clergyman
+	# asked for his waiver, and deflecting a duke's demand is its third answer.
+	for kind in [M1Registrations.ORDER_TROUBLE_A_DUKE, M1Registrations.ORDER_SEND_AN_EXPERT,
+			M1Registrations.ORDER_GIVE_THE_CROWN_GOLD, M1Registrations.ORDER_WAIVE_DUTY,
+			M1Registrations.ORDER_DEFLECT_TRIBUTE]:
+		assert_false(LetterKind.deliberates(kind), "%s was weighed as though it were an order" % kind)
 
 
 # --- Costly requests -------------------------------------------------------
@@ -243,7 +276,7 @@ func test_tone_moves_loyalty_far_less_than_the_deed() -> void:
 	Compliance.resolve(deed_order, by_deed, book, state, log, streams)
 
 	var by_tone := _contact(50.0)
-	var tone_order := Order.new(M1Registrations.ORDER_SET_POLICY, &"marshal", {"policy": "x", "value": "y"}, state.month)
+	var tone_order := Order.new(M1Registrations.ORDER_URGE_INTENT, &"marshal", {"intent": "military"}, state.month)
 	tone_order.tone = Tone.PLEASED
 	Compliance.resolve(tone_order, by_tone, book, state, log, streams)
 
@@ -371,9 +404,9 @@ func test_a_rate_costs_the_colony_and_not_the_man_who_sets_it() -> void:
 	# and *prefers high taxes*. Priced at the old fall-through, against a man whose
 	# heaviest weight is `cost_of_request`, the Steward of the Revenue refused an
 	# order to raise the revenue on turn one.
-	for kind in [M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY]:
+	for kind in [M1Registrations.ORDER_SET_TAX_RATE]:
 		var order := Order.new(kind, &"steward", {
-			"resource": "tea", "rate": 0.15, "policy": "x", "value": "y",
+			"resource": "tea", "rate": 0.15,
 		}, 0)
 		assert_eq(Compliance.cost_of(order), 0.0,
 			"being told to set %s was priced against him personally" % kind)

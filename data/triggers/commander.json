@@ -52,5 +52,59 @@
         }
       }
     ]
+  },
+  {
+    "id": "trigger.commander.may_i_make_an_example",
+    "letter": "commander.may_i_make_an_example",
+    "urgency": 0.8,
+    "cooldown": 1,
+    "always_asks": true,
+    "note": "Issue 457, commanders.md section 5. He chose to punish a rebel town and to ask the PC first; whether he still asks was drawn when he chose, so the director does not draw it again.",
+    "params": {
+      "commander": {
+        "from": "sender_id"
+      },
+      "town": {
+        "from": "what_happened",
+        "event": "punishment_proposed",
+        "within": 1,
+        "concerning": "him",
+        "field": "town"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "punishment_proposed",
+          "within": 1,
+          "concerning": "him"
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.commander.i_made_an_example",
+    "letter": "commander.i_made_an_example",
+    "urgency": 0.8,
+    "cooldown": 1,
+    "note": "Issue 457, commanders.md section 5. He began punishing a rebel town without asking (Seam C), and writes afterwards to say so - once, when he begins.",
+    "params": {
+      "town": {
+        "from": "what_happened",
+        "event": "made_an_example_unasked",
+        "within": 1,
+        "concerning": "him",
+        "field": "town"
+      }
+    },
+    "conditions": [
+      {
+        "it_happened": {
+          "event": "made_an_example_unasked",
+          "within": 1,
+          "concerning": "him"
+        }
+      }
+    ]
   }
 ]

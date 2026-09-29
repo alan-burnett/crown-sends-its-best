@@ -163,26 +163,29 @@ func test_the_expert_knob_shifts_the_composition() -> void:
 	assert_true(sought > plain, "the expert knob at its top drew no more skilled men")
 
 
-func test_livestock_comes_over_only_when_it_is_paid_for() -> void:
-	# **Only by policy**, so a colony whose Provost buys none never sees a cow it
-	# did not pay for.
-	var bare := _town()
-	bare.arrivals_accrued = 20.0
-	Immigration.arrive(bare, _context(bare))
+func _beasts_of(town: Town) -> int:
 	var head := 0
 	for id in ResourceCatalogue.livestock():
-		head += bare.livestock_head(StringName(id))
-	assert_eq(head, 0, "beasts arrived that nobody had paid for")
+		head += town.livestock_head(StringName(id))
+	return head
+
+
+func test_livestock_comes_over_by_default_and_more_when_paid_for() -> void:
+	# 🔒 *Livestock occasionally, shifted by policy* (#461, `immigration.md` §7):
+	# some without the Provost, and more with him. With the knob off there was
+	# no source of livestock in the colony at all.
+	var bare := _town()
+	bare.arrivals_accrued = 200.0
+	Immigration.arrive(bare, _context(bare))
+	assert_true(_beasts_of(bare) > 0, "settlers brought no beasts with the knob at nothing")
 
 	var stocked := _town(&"brackwater")
-	stocked.arrivals_accrued = 20.0
+	stocked.arrivals_accrued = 200.0
 	Immigration.arrive(
 		stocked,
 		_context(stocked, _pressure_of(PolicyEffects.LIVESTOCK, PolicyEffects.A_GREAT_DEAL)))
-	var arrived := 0
-	for id in ResourceCatalogue.livestock():
-		arrived += stocked.livestock_head(StringName(id))
-	assert_true(arrived > 0, "the livestock knob at its top sent no beasts at all")
+	assert_true(_beasts_of(stocked) > _beasts_of(bare),
+		"the livestock knob at its top sent no more beasts than none at all")
 
 
 # --- 🔒 Curriculum reaches every town, buildings or none --------------------

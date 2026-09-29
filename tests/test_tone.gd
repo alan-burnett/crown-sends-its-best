@@ -42,7 +42,6 @@ func _man(traits: Dictionary, loyalty: float = 55.0) -> Contact:
 		"cost_of_request": 1.0,
 		"payment_offered": 1.0,
 		"autonomy": 1.0,
-		"order_clarity": 1.0,
 		"against_his_judgement": 1.0,
 	})
 	contact.role = Contact.ROLE_GOVERNOR

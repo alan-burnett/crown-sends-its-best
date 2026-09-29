@@ -17,12 +17,13 @@ The spec asks an actor to weigh a situation and choose in at least six places:
 | Decision | Spec |
 | :--- | :--- |
 | A governor picks a town objective | §11.3 |
-| A contact complies, partly complies, delays, reinterprets, refuses, or acts alone | §8.5 |
+| A contact complies, partly complies, delays, refuses, or acts alone (`contacts.md` §3) | §8.5 |
 | A contact decides for himself when the PC does not reply | §9.3 |
 | The director decides who writes to the PC and about what | §9.6 |
 | A town decides to hold a trade protest | §10.2 |
 | A tribe decides its diplomacy; a rival decides to demand or attack | §12.5, §8.4 |
 | A governor answers a tribe's grievance (`natives.md` §11) | §12.5 |
+| The Steward raises a duty unasked, standing lost and his regard low (`the-steward.md` §3) | §10.2 |
 
 These are one mechanism. Building it once means a system added later extends
 every decision point at the same time, instead of each one growing a branch.

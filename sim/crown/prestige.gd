@@ -151,6 +151,14 @@ static func band_of(score: float) -> StringName:
 
 
 ## Every band's name, for a validator to check content against.
+## The band the court puts him in as of the last settled month.
+func band() -> StringName:
+	return band_of(value)
+
+
+const RUINOUS: StringName = &"ruinous"
+
+
 static func band_names() -> PackedStringArray:
 	var out: PackedStringArray = PackedStringArray()
 	for entry in BANDS:

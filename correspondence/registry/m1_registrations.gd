@@ -29,7 +29,10 @@ const ORDER_GRANT_FAVOR: StringName = &"grant_favor"
 ## the tone of a letter does, and never more than the broken promise it answers
 ## cost him.
 const ORDER_APOLOGISE: StringName = &"apologise"
-const ORDER_SET_POLICY: StringName = &"set_policy"
+## 🔒 **The colony will retrench** (#451, `crown-standing.md` §3): a promise to
+## the Chancellor that for the months named the Crown pays out on the PC's word
+## no more than it takes in from the colony.
+const ORDER_PROMISE_TO_RETRENCH: StringName = &"promise_to_retrench"
 
 ## **Paying a foreigner to leave you alone** (#69, `crown-demands.md` §4).
 ##
@@ -205,6 +208,7 @@ static func register_all() -> void:
 static func register_considerations() -> void:
 	ComplianceConsiderations.register_all()
 	UnansweredConsiderations.register_all()
+	StewardRaise.register_all()
 	IntentConsiderations.register_all()
 	# **A milestone that adds a system ships that system's considerations with
 	# it** (#221). A commander scores every option open to him, and refusal is
@@ -360,6 +364,15 @@ static func register_effects() -> void:
 		{"to": "contact", "resource": "resource", "amount": "integer", "payment": "gold"},
 		ORDER_SHIP_RESOURCE,
 	)
+	# 🔒 **Pay double pays twice what fair pays** (#451, SPEC §9.2). The same
+	# Order with the fair price the letter carries doubled here, so the two
+	# options are one figure and cannot drift apart.
+	ContentRegistry.register_effect(
+		"ship_resource_paying_double",
+		{"to": "contact", "resource": "resource", "amount": "integer", "payment": "gold"},
+		ORDER_SHIP_RESOURCE,
+		M1Registrations.build_double_shipment,
+	)
 	ContentRegistry.register_effect(
 		"grant_favor", {"to": "contact", "favor": "string"}, ORDER_GRANT_FAVOR
 	)
@@ -386,7 +399,7 @@ static func register_effects() -> void:
 		"deflect_tribute", {"to": "contact"}, ORDER_DEFLECT_TRIBUTE
 	)
 	ContentRegistry.register_effect(
-		"set_policy", {"policy": "string", "value": "string"}, ORDER_SET_POLICY
+		"promise_to_retrench", {"to": "contact", "months": "integer"}, ORDER_PROMISE_TO_RETRENCH
 	)
 	# The payment level is chosen in the letter. It drives the loyalty cost and
 	# then the refusal probability (SPEC §8.5, §12.6, #16).
@@ -491,6 +504,13 @@ static func build_tax_order(args: Dictionary, context: LetterContext) -> Order:
 ## its params. **Which strengths and postures a letter may name is the content
 ## validator's** (`check_troop_requests`), so a bad one is refused when the data
 ## loads rather than when the player sends it.
+static func build_double_shipment(args: Dictionary, context: LetterContext) -> Order:
+	var params := args.duplicate()
+	# Whole gold, as every figure the PC pays is (#460).
+	params["payment"] = 2 * int(roundf(float(args.get("payment", 0))))
+	return Order.new(ORDER_SHIP_RESOURCE, StringName(args.get("to", "")), params, context.month)
+
+
 static func build_troops_order(args: Dictionary, context: LetterContext) -> Order:
 	var params := args.duplicate()
 	params["effect"] = String(PolicyEffects.CROWN_TROOPS)

@@ -49,6 +49,39 @@ static func rate_for(state: WorldState, resource: StringName) -> float:
 	return base_rate(state)
 
 
+## 🔒 **Tax forgiveness** (#399, `crown-demands.md` §10 relief 5): a contact
+## pays part of the colony's duty on one resource himself, for ever. **The colony
+## pays and feels the forgiven rate; the Crown books the full one**, and the gap
+## is his purse, which nothing tracks. Forgivenesses on a resource stack, and the
+## colony never sees below nought.
+const FORGIVEN_PREFIX: String = "tax_forgiven."
+
+## What one forgiveness takes off the colony's rate. A placeholder.
+const FORGIVENESS: float = 0.05
+
+
+static func forgiven(state: WorldState, resource: StringName) -> float:
+	if state == null:
+		return 0.0
+	return maxf(0.0, float(state.get_value(FORGIVEN_PREFIX + String(resource), 0.0)))
+
+
+const EVENT_FORGIVEN: StringName = &"duty_forgiven"
+
+
+## Forgive `by` of the colony's duty on a resource, for ever (#399). One event,
+## through `apply` (Seam A). Returns what is now forgiven.
+static func forgive(state: WorldState, log: EventLog, resource: StringName, by: float = FORGIVENESS) -> float:
+	var now := forgiven(state, resource) + maxf(0.0, by)
+	state.apply(log, EVENT_FORGIVEN, &"crown", {FORGIVEN_PREFIX + String(resource): now})
+	return now
+
+
+## The rate the colony pays on a resource: the Crown's, less what is forgiven.
+static func colony_rate(state: WorldState, resource: StringName) -> float:
+	return maxf(0.0, rate_for(state, resource) - forgiven(state, resource))
+
+
 static func has_override(state: WorldState, resource: StringName) -> bool:
 	return state.has_value(key_for(resource))
 

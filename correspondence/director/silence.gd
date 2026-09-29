@@ -128,12 +128,59 @@ static func decide_alone(
 	}
 
 	var decision := Deliberation.choose(contact, candidates, context)
+	var done := carry_out(contact, candidates, inbound, run, decision)
 
 	run.log.emit(EVENT_DECIDED_ALONE, contact.id, run.world.month, {
 		"letter": letter.id,
 		"chose": String(decision.chosen_id()),
 		"was_ignored": was_ignored,
 		"inbound": String(inbound.id),
+		# What he set in motion, by kind: the Intents carry the rest.
+		"did": done,
 	}, WorldPhase.RECKONING)
 
 	return decision
+
+
+## 🔒 **What he decided, he does** (#450, SPEC §9.3, `contacts.md` §3).
+##
+## The option he chose is carried out as his own will: each of its effects
+## becomes the Order it would have been had the PC chosen it, and each Order the
+## Intent a contact acting alone commits (Seam C). The same path as *acting
+## alone* with a different origin, which is what §8.5 asks of the two. It used to
+## end at the event: nothing read the choice, and a decision left to him changed
+## nothing at all.
+##
+## Returns the kinds of what he set in motion, in effect-id order.
+static func carry_out(
+	contact: Contact,
+	candidates: Array,
+	inbound: InboundLetter,
+	run: RunState,
+	decision: Decision,
+) -> Array:
+	var done: Array = []
+	if decision == null or not decision.has_choice() or run.intents == null:
+		return done
+	var chosen: Candidate = null
+	for entry in candidates:
+		if (entry as Candidate).id == decision.chosen_id():
+			chosen = entry
+	if chosen == null:
+		return done
+	var effects: Variant = chosen.get_value("effect", {})
+	if typeof(effects) != TYPE_DICTIONARY:
+		return done
+
+	var context := LetterContext.new(run.world, contact, &"")
+	context.month = run.world.month
+	context.params = inbound.params
+	var ids: Array = (effects as Dictionary).keys()
+	ids.sort()
+	for effect_id in ids:
+		var order := ContentRegistry.run_effect(String(effect_id), effects[effect_id], context)
+		if order == null:
+			continue
+		run.intents.commit(Compliance.as_his_own_will(order, contact), run.log, run.world.month)
+		done.append(String(order.kind))
+	return done

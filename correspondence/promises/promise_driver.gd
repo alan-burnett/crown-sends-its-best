@@ -79,8 +79,15 @@ func _wagers_won(log: EventLog, month: int) -> Dictionary:
 		if accounts == null:
 			accounts = CrownAccounts.of(log)
 		var earned := 0.0
+		var spent := 0.0
 		for at in range(promise.made_month + 1, month + 1):
 			earned += accounts.received_in(at)
+			spent += accounts.paid_in(at)
+		# 🔒 **Retrenching is kept by the Ledger's two columns** (#451): no more
+		# paid out on his word than the colony brought in, over its months.
+		if promise.kind == Promise.KIND_RETRENCH:
+			verdicts[String(promise.id)] = spent <= earned
+			continue
 		verdicts[String(promise.id)] = earned >= promise.amount()
 	return verdicts
 

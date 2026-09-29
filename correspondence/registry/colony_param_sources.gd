@@ -28,6 +28,18 @@ static func register_all() -> void:
 	ContentRegistry.register_param_source(
 		"treasury_honoured_this_year", {}, ColonyParamSources.treasury_honoured_this_year
 	)
+	# The duty the Crown took in the month just run, and what the colony paid it
+	# for one resource lately (#407).
+	ContentRegistry.register_param_source(
+		"duty_last_month", {}, ColonyParamSources.duty_last_month
+	)
+	ContentRegistry.register_param_source(
+		"most_traded_resource", {}, ColonyParamSources.most_traded_resource
+	)
+	ContentRegistry.register_param_source(
+		"paid_the_crown_for", {"resource": "resource", "months": "integer"},
+		ColonyParamSources.paid_the_crown_for,
+	)
 	# What the reported event carried, as a name or a number (#398).
 	ContentRegistry.register_param_source(
 		"what_happened",
@@ -44,6 +56,19 @@ static func register_all() -> void:
 	# The tribe whose letter a governor passes on (#436).
 	ContentRegistry.register_param_source(
 		"the_tribe_that_wrote_to_me", {}, ColonyParamSources.the_tribe_that_wrote_to_me
+	)
+	# 🔒 **What an acknowledgement may say happened** (#449): the intent the PC
+	# urged, when a delayed order lands, and what share of it was carried out.
+	ContentRegistry.register_param_source("the_intent_urged", {}, ColonyParamSources.the_intent_urged)
+	ContentRegistry.register_param_source(
+		"months_until_it_lands", {}, ColonyParamSources.months_until_it_lands
+	)
+	ContentRegistry.register_param_source(
+		"the_share_carried_out", {}, ColonyParamSources.the_share_carried_out
+	)
+	# What a tribe asked him for (#471): `field` `resource` or `amount`.
+	ContentRegistry.register_param_source(
+		"what_the_tribe_asked", {"field": "string"}, ColonyParamSources.what_the_tribe_asked
 	)
 	# The duke a patron offers to trouble, as an id or by name (#395).
 	ContentRegistry.register_param_source(
@@ -181,6 +206,60 @@ static func treasury_honoured_this_year(_args: Dictionary, context: LetterContex
 	return int(roundf(CrownAccounts.of(context.log).paid_in_year_of(context.month)))
 
 
+## 🔒 **The duty the Crown took in the month just run** (#407, SPEC §9.1): the
+## Ledger's *in* column for it, less a patron's gift, which is not duty.
+##
+## The Steward's report said *{amount} in duties* and printed a fifth of colony
+## revenue, floored at ten; a player checking it against the Ledger got another
+## figure. **The month just run is `context.month`**: the world advances the
+## month before its phases run, so the events a letter reads carry the month it
+## is composed in.
+static func duty_last_month(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null:
+		return 0
+	return int(roundf(CrownAccounts.of(context.log).received_in(context.month)))
+
+
+## 🔒 **The resource with the most gold changing hands in the month just run**
+## (#452, `the-steward.md` §4), bought and sold together, at its value before the
+## duty — where one rise brings the most duty, whichever way the colony trades
+## it. Ties to the resource first in id order; empty when nothing was traded.
+static func most_traded_resource(_args: Dictionary, context: LetterContext) -> Variant:
+	if context == null or context.log == null:
+		return ""
+	var value: Dictionary = {}
+	for type in [Trade.EVENT_BOUGHT, Trade.EVENT_SOLD]:
+		for entry in context.log.of_type(type):
+			var traded: SimEvent = entry
+			if traded.month != context.month:
+				continue
+			var resource := String(traded.payload.get("resource", ""))
+			value[resource] = float(value.get(resource, 0.0)) + float(traded.payload.get("gross", 0.0))
+	var best := ""
+	var ids: Array = value.keys()
+	ids.sort()
+	for id in ids:
+		if float(value[id]) > 0.0 and (best.is_empty() or float(value[id]) > float(value[best])):
+			best = String(id)
+	return best
+
+
+## 🔒 **What the colony paid the Crown for `resource` over the last `months`**
+## (#407), duty included, from the purchases themselves. What natives sold it
+## is not the Crown's and is not counted.
+static func paid_the_crown_for(args: Dictionary, context: LetterContext) -> Variant:
+	if context == null or context.log == null:
+		return 0
+	var resource := String(args.get("resource", ""))
+	var since := context.month - maxi(1, int(args.get("months", 1)))
+	var paid := 0.0
+	for entry in context.log.of_type(Trade.EVENT_BOUGHT):
+		var bought: SimEvent = entry
+		if bought.month > since and String(bought.payload.get("resource", "")) == resource:
+			paid += float(bought.payload.get("spent", 0.0))
+	return int(roundf(paid))
+
+
 ## How many years the PC has held the post.
 ##
 ## Exact and truthful, so it belongs in a `{param:}` rather than a
@@ -300,6 +379,44 @@ static func the_tribe_that_wrote_to_me(_args: Dictionary, context: LetterContext
 	var latest := context.natives.grievances.latest_to(context.sender.id)
 	var tribe: Tribe = context.natives.find(latest.tribe) if latest != null else null
 	return tribe.display_name if tribe != null else "the natives"
+
+
+## 🔒 **The intent the PC urged**, named (#449): not the one the town holds, which
+## is `intent_name`'s, and which an acknowledgement is not about.
+static func the_intent_urged(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.data_order == null:
+		return "the colony's good"
+	return Objective.intent_name(StringName(context.data_order.get_param("intent", "")))
+
+
+## 🔒 **When a delayed order lands**, in months from the post that says so
+## (#449): the month complying would have, and `Compliance.DELAY_MONTHS` more.
+static func months_until_it_lands(_args: Dictionary, _context: LetterContext) -> Variant:
+	return Compliance.DELAY_MONTHS + 1
+
+
+## 🔒 **What share of the order a partial answer carried out**, in hundredths
+## (#449), from the same figure the answer was shaped by.
+static func the_share_carried_out(_args: Dictionary, context: LetterContext) -> Variant:
+	if context.data_order == null:
+		return 0
+	return int(roundf(Compliance.partial_share(context.data_order) * 100.0))
+
+
+## What the tribe that last asked him for help asked for (#471): the resource
+## or the amount.
+static func what_the_tribe_asked(args: Dictionary, context: LetterContext) -> Variant:
+	var amount := String(args.get("field", "")) == "amount"
+	if context.sender == null or context.natives == null:
+		return 0 if amount else ""
+	var asked: Dictionary = {}
+	for entry in context.natives.grievances.list:
+		var letter: TribeGrievance = entry
+		if letter.act == TribeGrievance.HELP_ABROAD and letter.governor == context.sender.id:
+			asked = letter.asked
+	if amount:
+		return int(roundf(float(asked.get("amount", 0.0))))
+	return String(asked.get("resource", ""))
 
 
 ## The duke a patron offers to trouble (#395): `field` `id` for the effect,

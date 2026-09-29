@@ -126,6 +126,10 @@ So the prize for a patron well handled is a policy kept standing until he goes.
 An expert, a sum of gold, a word against a duke: **he may offer any of them
 again** while his regard stays high enough.
 
+**A refused offer may come again too.** A patron whose specialty offer is
+declined or ignored may offer it again later, while his regard stays high enough
+and its prerequisite still holds. The Impatient vice is the exception (§6).
+
 ## 5. The rival specialty, and the third door
 
 **He interferes with a rival. He never touches the PC's relationship with that
@@ -184,10 +188,10 @@ Most of a vice is data on machinery that already exists. One is not.
 | **Credulous** | he reads the colony as richer than it is — **so his asks grow** | perception leans |
 | **Loudmouth** | he talks. Granting banks more prestige; refusing costs it outright | the prestige term |
 | **Pragmatic** | his regard follows **the colony's net contribution to the Crown** | `cares_about` |
-| **Respectable** | he watches rebel sentiment, and **a rebellion ends his business** | `cares_about`, plus cancellation |
-| **Doctrinaire** | he will not touch certain resources, and objects when the colony trades them | a catalogue filter |
-| **Dilatory** | his side of a bargain arrives late, or short | the promise machinery, aimed at him |
-| **Impatient** | his offers expire within the turn — silence is refusal, not delay | §9.3 |
+| **Respectable** | he watches rebel sentiment, and **a rebellion ends his business** | `cares_about`, plus withdrawal (below) |
+| **Doctrinaire** | he will not touch one resource, and objects when the colony sells it | the draw, and a regard drift (below) |
+| **Dilatory** | everything he gives lands late | a delay on his side (below) |
+| **Impatient** | he offers his specialty only once | a latch on his offer (below) |
 | **Well-connected** | **his displeasure spreads** — see below | new |
 
 Most of these are a per-contact override on machinery that already exists.
@@ -224,9 +228,32 @@ colony. He writes about rebel sentiment because he cares about it (§6 of
 when a town actually declares, his regard collapses and **his standing
 arrangements are cancelled.**
 
+Author's ruling (#444), exactly: **the month after any town declares, his regard
+falls by 30** (a placeholder) **and he writes that he can no longer be associated
+with the colony. His policies end with that letter**, and the letter is the
+warning `policy.md` §4 requires. Anything the PC promised *him* still stands.
+Every declaration does it again.
+
 That makes him the one patron whose value evaporates exactly when the PC needs
 help most, which is both the correct behaviour for a careful man and the worst
 possible timing.
+
+### Doctrinaire, Dilatory and Impatient
+
+Author's rulings (#444).
+
+**Doctrinaire.** At arrival he draws **one resource he disapproves of**, from rum,
+beer, tobacco and cigars. His need and his specialty never name it. **Each month
+the colony sells it to the Crown, his regard falls by 2** (a placeholder), and now
+and then he writes to say so.
+
+**Dilatory.** **Everything he gives lands late**: his one-offs arrive, and his
+policies take effect, three months (a placeholder) after the PC accepts them,
+where any other patron's land the month after. Nothing warns the PC. He learns
+it.
+
+**Impatient.** **He offers his specialty only once.** Declined or ignored, it is
+never offered again for his stay, where an ordinary patron may offer again (§4).
 
 ### Well-connected is a new mechanic
 
@@ -257,6 +284,20 @@ source a run meets may be a patron. §6 has the reasoning, and the measurement
 that forced it.
 
 Nothing here adds a clock.
+
+### He has heard what the court says of the PC
+
+Author's ruling (#466), and SPEC §14.1's *especially patrons*. A patron reads the
+PC's prestige band (`prestige.md` §7) twice:
+
+- **On arrival, his regard starts warmer or colder by it.** Against his usual
+  start: ruinous −10, obscure ±0, respectable +10, handsome +20, celebrated +30
+  (placeholders). The band is read the month he arrives.
+- **While the PC is ruinous, he makes no offers.** He still introduces himself,
+  asks for his need and for gold, renegotiates a policy he already holds, and
+  takes his leave, but he offers nothing: no specialty, no one-off. The band is
+  read each month, so an offer he would make returns when the PC's name
+  recovers.
 
 ## 8. Departure, and the window that closes
 

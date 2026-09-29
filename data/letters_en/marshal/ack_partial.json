@@ -1,0 +1,16 @@
+{
+  "id": "marshal.ack_partial",
+  "sender": "marshal",
+  "type": "report",
+  "skippable": false,
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out. Troops granted in part land one strength less than asked.",
+  "params": {},
+  "body": [
+    {
+      "text": "I cannot spare all you asked for."
+    },
+    {
+      "text": "You shall have fewer men than that, the next strength down, but you shall have men."
+    }
+  ]
+}

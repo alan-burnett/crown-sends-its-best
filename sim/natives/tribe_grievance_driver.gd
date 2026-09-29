@@ -61,6 +61,8 @@ const ACT_WEIGHT: Dictionary = {
 	"town_founded": 3.0,
 	"improvement_built": 1.0,
 	"company_on_its_ground": 1.0,
+	"expedition_on_its_ground": 1.0,
+	"help_abroad": 4.0,
 	"land_worked": 0.5,
 	"we_will_drive_you_off": 0.0,
 }
@@ -85,6 +87,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 		WorldPhase.RECKONING:
 			_take_the_answers(context)
 			_notice(context)
+			# **And now and then one asks for help** (#471, §7).
+			TribeAsks.ask(run, context)
 		WorldPhase.INTENT:
 			_answer(context)
 
@@ -108,7 +112,7 @@ func _take_the_answers(context: ColonyContext) -> void:
 			continue
 		var moved := _standing_for(grievance)
 		if not is_zero_approx(moved):
-			tribe.move(Tribe.COLONY, moved, "the governor's answer to our letter", context, false)
+			tribe.move(Tribe.COLONY, moved, "the governor's answer to our letter", context)
 		grievance.taken_month = month
 		context.log.emit(EVENT_TOOK, tribe.id, month, {
 			"grievance": String(grievance.id),
@@ -122,6 +126,10 @@ func _take_the_answers(context: ColonyContext) -> void:
 ## What this answer does to the tribe's standing toward the colony.
 func _standing_for(grievance: TribeGrievance) -> float:
 	var weight := float(ACT_WEIGHT.get(String(grievance.act), 1.0))
+	if grievance.act == TribeGrievance.HELP_ABROAD:
+		# 🔒 **Given, their standing rises; refused, it stays where it was**
+		# (#471, §3, §7). An ask refused is not an offence.
+		return weight * float(ANSWER_MOVES["gift"]) if grievance.answer == TribeGrievance.GIFT else 0.0
 	if grievance.answer == TribeGrievance.THREATEN:
 		var town := run.colony.by_id(grievance.town)
 		if town != null and _men_near(grievance.tribe, town) < BACKS_DOWN_BELOW * float(TownCompany.of(town).size):
@@ -197,11 +205,28 @@ func _notice(context: ColonyContext) -> void:
 			if town != null:
 				_seen(now, order, TribeGrievance.COMPANY_ON_ITS_GROUND, company.at, town, company.id)
 
+	# **An expedition on its ground** (#456): the first month a travelling
+	# expedition stands there. Its town is the one that sent it.
+	for entry in run.parties:
+		var party: ExpeditionParty = entry
+		if party.is_empty() or party.at == Vector2i(-1, -1):
+			continue
+		var from := run.colony.by_id(party.parent)
+		if from == null:
+			from = _nearest_town(party.at)
+		if from != null:
+			_seen(now, order, TribeGrievance.EXPEDITION_ON_ITS_GROUND, party.at, from, party.id)
+
 	for key in order:
 		var entry: Dictionary = now[key]
 		if bool(entry["once"]) or not book.ongoing.has(key):
 			book.write(entry["tribe"], entry["town"], entry["act"], entry["at"], entry["company"],
 				context.log, month)
+			# 🔒 **It costs them by how deep it goes**, the month it is noticed
+			# (#456, §3), as a founding does.
+			if entry["act"] == TribeGrievance.EXPEDITION_ON_ITS_GROUND:
+				TribeStanding.expedition(run.tribes.find(entry["tribe"]), float(entry["depth"]),
+					entry["at"], entry["company"], context)
 	book.ongoing = {}
 	for key in order:
 		if not bool(now[key]["once"]):
@@ -217,14 +242,14 @@ func _seen(
 	if float(whose["depth"]) <= 0.0 or String(whose["tribe"]).is_empty():
 		return
 	var key := "%s|%s|%s|%d,%d|%s" % [act, String(whose["tribe"]), String(town.id), at.x, at.y, String(company)]
-	if act == TribeGrievance.COMPANY_ON_ITS_GROUND:
-		# Noticed per company, wherever on their ground it stands.
+	if act == TribeGrievance.COMPANY_ON_ITS_GROUND or act == TribeGrievance.EXPEDITION_ON_ITS_GROUND:
+		# Noticed per company, or per expedition, wherever on their ground it stands.
 		key = "%s|%s|%s" % [act, String(whose["tribe"]), String(company)]
 	if now.has(key):
 		return
 	now[key] = {
 		"tribe": StringName(whose["tribe"]), "town": town, "act": act, "at": at,
-		"company": company, "once": once,
+		"company": company, "once": once, "depth": float(whose["depth"]),
 	}
 	order.append(key)
 

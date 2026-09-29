@@ -1,8 +1,10 @@
 {
   "id": "pc.ask_for_a_policy",
   "type": "request",
-  "purpose": "Ask a contact to put his name to a standing policy",
-  "to_roles": ["crown_officer", "governor"],
+  "purpose": "Ask the Provost to encourage settlers to come",
+  "to_roles": [
+    "crown_officer"
+  ],
   "params": { "to": "contact", "cost": "gold" },
   "compose_defaults": {
 	"cost": { "from": "scaled_world_value", "key": "colony_revenue", "factor": 0.35, "minimum": 40, "maximum": 1200 }

@@ -36,6 +36,11 @@ monthly_net    this month's revenue minus this month's spending
 ```
 
 Revenue is tax income from colony trade (§10.2, both buying and selling).
+
+**And one term that is not money: goodwill.** Favours done for people high up
+bank goodwill, which is added on top of the standing these produce, capped at
+100, and never decays (`crown-demands.md` §10, *Goodwill*; #399). It never
+touches `net_position`.
 Spending is what the Crown pays to honor the PC's promises (§9.5), gold
 promised to a town included (`town-economy.md` §4).
 
@@ -132,6 +137,23 @@ full countdown has elapsed.** If standing plummets from 60 to 0 in one month, th
 cutoff waits. This is the mechanism that satisfies §10.3's lock, and it is a
 **gate, not a threshold** — a naive threshold check violates the invariant the
 first time a catastrophic promise lands.
+
+### Answering a warning: *the colony will retrench*
+
+Author's ruling (#451). Both of the Chancellor's warnings offer the PC three
+answers: retrench, repay him in kind (a favour), or nothing. **Retrenching is a
+promise the Crown holds him to**:
+
+- **For the next six months, the Crown pays out on the PC's word no more than it
+  takes in from the colony.** Measured as the sum of those months' spending
+  against the sum of their revenue, the Ledger's two columns.
+- **Kept**, it is a promise delivered, and the Chancellor's regard rises for it.
+- **Broken**, it is a promise broken, and the Chancellor remembers it
+  (`contacts.md` §7). Nothing stops the PC spending; the promise is what it
+  costs him.
+
+It is the same machinery a revenue target uses: a statement about what the
+colony will do, judged by what it does.
 
 ### The window is the point
 

@@ -31,8 +31,18 @@ extends RefCounted
 const EVENT_PARKED: StringName = &"rival_parked_on_our_ground"
 const EVENT_WITHDREW: StringName = &"rival_withdrew"
 
+## 🔒 **Crown troops sit on a rebel town's fields the same way** (#457,
+## `commanders.md` §5), while their commander makes an example of it. Their own
+## events, because the governor's letter about a duke's men is about a duke.
+const EVENT_OCCUPIED: StringName = &"crown_troops_on_our_ground"
+const EVENT_LEFT: StringName = &"crown_troops_left_our_ground"
+
 ## Tile key -> the duke sitting on it.
 var held: Dictionary = {}
+
+## Tile key -> the Crown company sitting on it (#457). Kept apart from `held` so
+## nothing that counts a duke's tiles counts a company's.
+var occupied: Dictionary = {}
 
 
 static func key_of(at: Vector2i) -> String:
@@ -40,7 +50,12 @@ static func key_of(at: Vector2i) -> String:
 
 
 func is_denied(at: Vector2i) -> bool:
-	return held.has(key_of(at))
+	return held.has(key_of(at)) or occupied.has(key_of(at))
+
+
+## Whether nobody is sitting on anything.
+func is_empty() -> bool:
+	return held.is_empty() and occupied.is_empty()
 
 
 func denied_by(at: Vector2i) -> StringName:
@@ -85,6 +100,42 @@ func park(duke: StringName, at: Vector2i, town: StringName, context: ColonyConte
 	return true
 
 
+## A Crown company sits on a rebel town's field (#457, Seam A). Returns whether it
+## was not already there.
+func occupy(company: StringName, at: Vector2i, town: StringName, context: ColonyContext) -> bool:
+	var key := key_of(at)
+	if held.has(key) or String(occupied.get(key, "")) == String(company):
+		return false
+	occupied[key] = String(company)
+	context.log.emit(EVENT_OCCUPIED, town, context.state.month, {
+		"company": String(company),
+		"town": String(town),
+		"at": [at.x, at.y],
+	}, WorldPhase.MOVEMENT)
+	return true
+
+
+## Every company not in `staying` leaves the fields it sat on (#457, Seam A). A
+## commander holds them only for as long as he goes on punishing the town.
+func leave_unless(staying: Dictionary, context: ColonyContext) -> void:
+	var leaving: Dictionary = {}
+	var keys: PackedStringArray = PackedStringArray(occupied.keys())
+	keys.sort()
+	for key in keys:
+		var company := String(occupied[key])
+		if staying.has(company):
+			continue
+		occupied.erase(key)
+		leaving[company] = int(leaving.get(company, 0)) + 1
+	var companies: Array = leaving.keys()
+	companies.sort()
+	for company in companies:
+		context.log.emit(EVENT_LEFT, StringName(company), context.state.month, {
+			"company": String(company),
+			"tiles": int(leaving[company]),
+		}, WorldPhase.MOVEMENT)
+
+
 ## And they leave (Seam A). Returns how many tiles he gave up.
 func withdraw(duke: StringName, context: ColonyContext) -> int:
 	var going := of_duke(duke)
@@ -110,10 +161,16 @@ func to_dict() -> Dictionary:
 	var out: Dictionary = {}
 	for key in in_order():
 		out[String(key)] = held[key]
-	return {"held": out}
+	var sitting: Dictionary = {}
+	var keys: PackedStringArray = PackedStringArray(occupied.keys())
+	keys.sort()
+	for key in keys:
+		sitting[String(key)] = occupied[key]
+	return {"held": out, "occupied": sitting}
 
 
 static func from_dict(data: Dictionary) -> DeniedTiles:
 	var book := DeniedTiles.new()
 	book.held = data.get("held", {}).duplicate()
+	book.occupied = data.get("occupied", {}).duplicate()
 	return book

@@ -152,6 +152,13 @@ disposition has no opinion about whether the Diplomat is rehomed.
 
 ---
 
+### A choice with no effect is not a choice
+
+Author's ruling (#451). **A reply step whose options all carry no effect is not
+offered**: the letter is a tone-only reply, and the PC's manner is his answer.
+The content validator fails such a step. A letter that wants a choice gives each
+option the effect its words promise.
+
 ## 5. 🔒 The validator is the part that makes this stick
 
 The vocabulary is not a convention. Conventions decay, and this one already did.

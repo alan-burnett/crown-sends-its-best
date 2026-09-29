@@ -68,7 +68,7 @@
 	  },
 	  {
 		"id": "respectable",
-		"note": "He watches how the colony is governed and cannot be seen doing business with a man who is losing his. His standing arrangements end when a town declares.",
+		"note": "He watches how the colony is governed and cannot be seen doing business with a man who is losing his. The month after any town declares, his regard falls and he writes that he can no longer be associated with the colony; his policies end with that letter (issue 444, patrons.md section 6). Every declaration does it again.",
 		"knobs": [
 		  {
 			"cares_about": {
@@ -76,40 +76,41 @@
 			}
 		  },
 		  {
-			"cancels_on_rebellion": {}
+			"cancels_on_rebellion": {
+			  "regard": 30.0
+			}
 		  }
 		]
 	  },
 	  {
 		"id": "doctrinaire",
-		"note": "He will not touch certain goods. A filter on the catalogue, so it needs no behaviour of its own.",
+		"note": "He draws one resource he disapproves of at arrival, which his need and specialty never name; each month the colony sells it to the Crown his regard falls, and now and then he writes to say so (issue 444, patrons.md section 6).",
 		"knobs": [
 		  {
 			"will_not_touch": {
-			  "resource": "rum"
+			  "from": ["rum", "beer", "tobacco", "cigars"],
+			  "regard": 2.0
 			}
 		  }
 		]
 	  },
 	  {
 		"id": "dilatory",
-		"note": "His side of a bargain arrives late. The promise machinery, aimed at him.",
+		"note": "Everything he gives lands late: his one-offs arrive and his policies take effect this many months after the PC accepts them, where another patron's land the month after. Nothing warns the PC (issue 444, patrons.md section 6).",
 		"knobs": [
 		  {
 			"delivers_late": {
-			  "months": 2
+			  "months": 3
 			}
 		  }
 		]
 	  },
 	  {
 		"id": "impatient",
-		"note": "His offers expire within the turn: silence is a refusal, not a delay.",
+		"note": "He offers his specialty only once. Declined or ignored, it is never offered again for his stay, where an ordinary patron may offer again (issue 444, patrons.md sections 4 and 6).",
 		"knobs": [
 		  {
-			"offer_expires_in": {
-			  "months": 0
-			}
+			"offers_once": {}
 		  }
 		]
 	  },

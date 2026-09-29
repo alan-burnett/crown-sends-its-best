@@ -41,6 +41,14 @@ const EVENT_TURN_BEGAN: StringName = &"turn_began"
 const EVENT_POST_SENT: StringName = &"post_sent"
 const EVENT_ORDER_ISSUED: StringName = &"order_issued"
 
+## A letter the PC left unanswered when the post went (#470). The silence is read
+## next month, in the phase a reply would have been; this is the record, in the
+## month it went, that the post carried none.
+const EVENT_SET_ASIDE: StringName = &"letter_set_aside"
+
+## Which letter an issued Order answers, in `EVENT_ORDER_ISSUED` (#470).
+const ANSWERS_KEY: String = "answers"
+
 var run: RunState = null
 var month_runner: WorldMonth = null
 
@@ -92,6 +100,8 @@ func _init(p_run: RunState) -> void:
 
 	orders = OrderDriver.new(run.intents, run.promises)
 	orders.contacts = run.contacts
+	# Whether a full payment is still real (#449).
+	orders.refusal = run.refusal
 	# The run's own bag, so an Order still at sea under *Distant colony* is in the
 	# save and back in the driver when the game is loaded (#390).
 	orders.pending = run.orders_at_sea
@@ -119,6 +129,12 @@ func _init(p_run: RunState) -> void:
 	# A duke backs a rebel town, the month after he decides to (#403).
 	var rebel_backings := BackRebellionExecutor.new()
 	rebel_backings.run = run
+	# The gunsmith goes dark, the month after the Crown did not pay (#438).
+	var shut_buildings := ShutBuildingExecutor.new()
+	shut_buildings.run = run
+	# A policy agreed to after a delay is enacted when the delay is up (#449).
+	var policy_enactments := PolicyEnactExecutor.new()
+	policy_enactments.policies = run.policies
 	# What a governor's answer to a tribe does, the month after (#435).
 	var tribe_answers := TribeAnswerExecutor.new()
 	tribe_answers.run = run
@@ -238,6 +254,12 @@ func _init(p_run: RunState) -> void:
 	# Phase 8. Dukes roll to back a rebellion, and a backed town's men go home
 	# when it comes back to the Crown (#403).
 	var backing := RebelBacking.new(run)
+	# Phase 7, last: the gunsmith's machines break, and what came of the Crown's
+	# answer is read once promises have settled and silence has been counted (#438).
+	var machines := GunsmithMachines.new(run)
+	# Phase 8. The Steward raises a duty himself, once standing is lost and his
+	# regard with it (#452).
+	var steward_raise := StewardRaise.new(run)
 
 	# Phase 1. Settlers land before the colony works its month, so the people who
 	# arrived are counted in it — and they are drawn by the quality of life last
@@ -313,6 +335,8 @@ func _init(p_run: RunState) -> void:
 	companies.natives = run.tribes
 	# The expeditions a war party may fall on (#417).
 	companies.parties = run.parties
+	# The ground a company making an example of a rebel town sits on (#457).
+	companies.denied = run.denied
 
 	# **After `crown_standing` and before Reckoning** (#76, `prestige.md` §6).
 	# Both settle in phase 6; the order inside a phase is the order here, and
@@ -376,12 +400,12 @@ func _init(p_run: RunState) -> void:
 		expert_travel, cultivation, sabotage,
 		companies,
 		orders, silence, provost, governors,
-		grievances, favours, backing,
+		grievances, favours, backing, machines, steward_raise,
 	]
 	# The specific executor is asked first; the table-driven one answers for
 	# everything else.
 	month_runner.executors = [
-		urging, company_urging, sabotage_by_letter, expert_gifts, gold_gifts, rebel_backings, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
+		urging, company_urging, sabotage_by_letter, expert_gifts, gold_gifts, rebel_backings, shut_buildings, policy_enactments, tribe_answers, shipments, embargoes, tribute, deflection, preferences, foundings,
 		diplomat_moves, executor,
 	]
 
@@ -431,7 +455,7 @@ static func order_effects() -> Dictionary:
 		String(M1Registrations.ORDER_MOVE_DIPLOMAT): {"target": ""},
 		String(M1Registrations.ORDER_WAIVE_DUTY):
 			{"target_from_data": "key", "set_from_data": "months_left"},
-		String(M1Registrations.ORDER_SET_POLICY): {"target": ""},
+		String(M1Registrations.ORDER_PROMISE_TO_RETRENCH): {"target": ""},
 		String(M1Registrations.ORDER_GRANT_FAVOR): {"target": ""},
 		# A word, and nothing in the world moves (#459).
 		String(M1Registrations.ORDER_APOLOGISE): {"target": ""},
@@ -665,6 +689,9 @@ func send_post() -> bool:
 	for inbound in run.inbox:
 		if inbound.status == InboundLetter.SET_ASIDE:
 			silence.pending.append(inbound)
+			run.log.emit(EVENT_SET_ASIDE, inbound.sender, run.world.month, {
+				"letter": inbound.letter_id,
+			}, WorldPhase.DISPATCH)
 
 	issued_orders = _build_orders()
 	# **The Crown stops waiting once he has answered.** A demand for goods stands
@@ -801,8 +828,10 @@ func _build_orders() -> Array[Order]:
 				order.harsh = outgoing.harsh \
 					or bool(option.get(LetterSchema.KEY_HARSH, false))
 				orders.append(order)
+				var issued := order.to_dict()
+				issued[ANSWERS_KEY] = outgoing.letter_id
 				run.log.emit(EVENT_ORDER_ISSUED, order.addressed_to, run.world.month,
-					order.to_dict(), WorldPhase.DISPATCH)
+					issued, WorldPhase.DISPATCH)
 	return orders
 
 

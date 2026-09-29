@@ -14,16 +14,12 @@ extends RefCounted
 ## trade to hold level. `immigration.md` §9's chain reaches a second system here:
 ## growth costs you with the neighbours too.
 ##
-## ## 🔒 Only aggression reaches the point of no return
+## ## 🔒 Any of them can carry a people over (#456)
 ##
-## Founding on their doorstep, working their fields and a governor set on driving
-## them off all grind a people down **to the edge of the conclusion and stop**.
-## However many years they run, they never carry a tribe over.
-##
-## What carries them over is what a colonist *does* to them. That is
-## `Tribe.move`'s `can_conclude`, and it is why three of the four movers here
-## pass `false`: the difference between being resented and being hated is not a
-## quantity of grievance, it is a kind of act.
+## One score (`natives.md` §2): a town founded among their fields, a month of
+## working them, an expedition crossing their country and blood spilled all count
+## toward the same point of no return, and any of them can be the one that
+## carries a people past it. Blood counts most, and fastest.
 ##
 ## 🔒 **Every mover names the tribe and the cause**, in its own event. A standing
 ## that moved for reasons the log could not account for would be a standing the
@@ -33,6 +29,7 @@ extends RefCounted
 const EVENT_FOUNDING: StringName = &"tribe_offended_by_founding"
 const EVENT_EXPLOITATION: StringName = &"tribe_lost_land_to_a_town"
 const EVENT_AGGRESSION: StringName = &"tribe_attacked_by_colonists"
+const EVENT_EXPEDITION: StringName = &"tribe_offended_by_an_expedition"
 const EVENT_LEFT_ALONE: StringName = &"tribe_left_alone"
 
 # --- Tuning ----------------------------------------------------------------
@@ -51,6 +48,14 @@ const PER_WORKED_TILE: float = 0.22
 ## The most one town's fields can cost a tribe in a month, however many it works.
 ## A town cannot grind a people down faster by being enormous.
 const EXPLOITATION_CAP: float = 2.4
+
+## What an expedition crossing the middle of their country costs (#456). **A
+## passing, not a settling**: about a quarter of a founding. A placeholder.
+const EXPEDITION_OFFENCE: float = 6.0
+
+## 🔒 **Points of standing per percent of the tribe killed** (#456, §3): twice the
+## share, so a tenth of the tribe costs 20. A placeholder.
+const BLOOD_PER_PERCENT: float = 2.0
 
 ## What the colony recovers in a month nobody did anything to them.
 ##
@@ -75,7 +80,7 @@ static func founding(at: Vector2i, natives: Tribes, context: ColonyContext) -> v
 			continue
 		(tribe as Tribe).move(
 			Tribe.COLONY, -FOUNDING_OFFENCE * depth, "a town founded on our country",
-			context, false)
+			context)
 		context.log.emit(EVENT_FOUNDING, (tribe as Tribe).id, context.state.month, {
 			"tribe": String((tribe as Tribe).id),
 			"at": [at.x, at.y],
@@ -118,7 +123,7 @@ static func exploitation(
 				continue
 			var worked := int(fields[id])
 			var cost := minf(EXPLOITATION_CAP, PER_WORKED_TILE * float(worked))
-			tribe.move(Tribe.COLONY, -cost, "a town working our fields", context, false)
+			tribe.move(Tribe.COLONY, -cost, "a town working our fields", context)
 			taken[id] = true
 			context.log.emit(EVENT_EXPLOITATION, tribe.id, context.state.month, {
 				"tribe": id,
@@ -128,28 +133,103 @@ static func exploitation(
 	return taken
 
 
-## Colonists attacked them (Seam A).
+## Somebody attacked them (Seam A): the colony's men, or the Crown's.
 ##
-## 🔒 **The only route to the point of no return**, which is why it is the one
-## mover here that may conclude. Everything else stops at the edge.
-##
-## M6 is the caller: raids, a town's militia, a company in the field (#225).
-## Until then nothing in the game reaches this, and that is the honest state of
-## it rather than a gap — a colony cannot yet do the one thing that is
-## unforgivable, because it cannot yet fight.
+## 🔒 **Toward whoever did it** (#456, §3): the colony for colonial companies,
+## the Crown's troops for theirs. Its caller is `blood_spilled`.
 static func aggression(
 	tribe: Tribe,
 	severity: float,
 	why: String,
 	context: ColonyContext,
+	toward: StringName = Tribe.COLONY,
 ) -> void:
 	if tribe == null:
 		return
-	tribe.move(Tribe.COLONY, -absf(severity), why, context, true)
+	tribe.move(toward, -absf(severity), why, context)
 	context.log.emit(EVENT_AGGRESSION, tribe.id, context.state.month, {
 		"tribe": String(tribe.id),
+		"toward": String(toward),
 		"why": why,
-		"concluded": tribe.is_irreconcilable_with(Tribe.COLONY),
+		"concluded": tribe.is_irreconcilable_with(toward),
+	}, WorldPhase.RECKONING)
+
+
+## 🔒 **By the blood spilled** (#456, `natives.md` §3): an attack on a tribe's
+## people — a village or a war party — costs standing toward whoever did it,
+## **twice the share of the tribe killed, in points**. A tenth of the tribe
+## killed costs 20. A skirmish barely registers; a village put to the sword
+## latches at once.
+##
+## `lost` is how many of `victim`'s people fell to `killer`'s men. Asked after
+## the losses, so the tribe it is a share of is the tribe as it stood before them.
+static func blood_spilled(killer: Company, victim: Company, lost: int, context: ColonyContext) -> void:
+	if killer == null or victim == null or lost <= 0 or context == null or context.natives == null:
+		return
+	if victim.allegiance != Company.NATIVE:
+		return
+	var toward := StringName()
+	match killer.allegiance:
+		Company.COLONIAL, Company.REBEL:
+			# ⚠ assumed: a rebel is still a colonist to them (SPEC §13.1 counts a
+			# rebel town as the colony's).
+			toward = Tribe.COLONY
+		Company.CROWN:
+			toward = Tribe.CROWN_TROOPS
+		_:
+			return
+	var village := _village_of(victim, context.natives)
+	if village == null:
+		return
+	var tribe := context.natives.find(village.tribe)
+	if tribe == null:
+		return
+	var before := people_of(tribe.id, context) + lost
+	if before <= 0:
+		return
+	var share := float(lost) / float(before)
+	aggression(tribe, BLOOD_PER_PERCENT * share * 100.0,
+		"our people killed by the %s" % ("Crown's soldiers" if toward == Tribe.CROWN_TROOPS else "colonists"),
+		context, toward)
+
+
+## Everybody a tribe has: in its villages and in the field.
+static func people_of(tribe: StringName, context: ColonyContext) -> int:
+	var people := 0
+	var theirs: Dictionary = {}
+	for entry in context.natives.villages_of(tribe):
+		var village: Village = entry
+		people += village.people
+		theirs[String(village.id)] = true
+	if context.companies != null:
+		for entry in context.companies.in_resolution_order():
+			var company: Company = entry
+			if company.allegiance == Company.NATIVE and theirs.has(String(company.raised_by)):
+				people += company.size
+	return people
+
+
+static func _village_of(victim: Company, natives: Tribes) -> Village:
+	if victim is VillageCompany:
+		return (victim as VillageCompany).village
+	for entry in natives.villages_in_order():
+		if (entry as Village).id == victim.raised_by:
+			return entry
+	return null
+
+
+## 🔒 **An expedition on their ground** (#456, `natives.md` §3, §11): the first
+## month a travelling expedition stands on or within `Intrusion`'s margin of
+## their land, **by how deep it goes**, as a founding is.
+static func expedition(tribe: Tribe, depth: float, at: Vector2i, party: StringName, context: ColonyContext) -> void:
+	if tribe == null or depth <= 0.0001:
+		return
+	tribe.move(Tribe.COLONY, -EXPEDITION_OFFENCE * depth, "an expedition crossing our country", context)
+	context.log.emit(EVENT_EXPEDITION, tribe.id, context.state.month, {
+		"tribe": String(tribe.id),
+		"party": String(party),
+		"at": [at.x, at.y],
+		"depth": depth,
 	}, WorldPhase.RECKONING)
 
 
@@ -174,7 +254,7 @@ static func left_alone(
 			continue
 		var before := (tribe as Tribe).trust()
 		var after := (tribe as Tribe).move(
-			Tribe.COLONY, LEFT_ALONE, "a quiet month", context, false)
+			Tribe.COLONY, LEFT_ALONE, "a quiet month", context)
 		if after > before + 0.0001:
 			context.log.emit(EVENT_LEFT_ALONE, (tribe as Tribe).id, context.state.month, {
 				"tribe": id,

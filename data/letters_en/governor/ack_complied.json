@@ -4,16 +4,17 @@
   "type": "report",
   "skippable": true,
   "speaks_to": 0,
+  "note": "Issue 449, contacts.md section 3: every acknowledgement says what happened, and none describes an outcome the sim did not carry out. Complying with an urging installs it at its full pull; whether he then agrees is his own deliberation's, so he says he has taken it to heart, not that the town has turned.",
   "params": {
     "what": "intent",
     "town": "town"
   },
   "body": [
     {
-      "text": "It shall be as you say. I have turned {param:town} to {param:what}, and the men know it."
+      "text": "I have your letter about {param:what}, and I have taken it to heart. {param:town} shall hear of it from me."
     },
     {
-      "text": "I had my own view and I have set it aside. That is what the office is.",
+      "text": "I had my own view. I shall weigh yours beside it honestly, which is what the office is.",
       "only_tones": [
         "dutiful",
         "annoyed"

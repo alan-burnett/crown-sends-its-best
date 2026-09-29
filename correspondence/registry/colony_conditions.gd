@@ -83,6 +83,15 @@ static func register_all() -> void:
 		"i_answered_a_tribe", {"answer": "string", "within": "integer"},
 		ColonyConditions.i_answered_a_tribe,
 	)
+	# A tribe asked him for help, and he asks the PC, or tells him after (#471).
+	ContentRegistry.register_condition(
+		"i_asked_how_to_answer_their_ask", {"within": "integer"},
+		ColonyConditions.i_asked_how_to_answer_their_ask,
+	)
+	ContentRegistry.register_condition(
+		"i_answered_their_ask", {"answer": "string", "within": "integer"},
+		ColonyConditions.i_answered_their_ask,
+	)
 	# A patron who could make a duke's year difficult (#395).
 	ContentRegistry.register_condition(
 		"he_could_trouble_a_duke", {}, ColonyConditions.he_could_trouble_a_duke
@@ -134,6 +143,45 @@ static func register_all() -> void:
 	)
 	ContentRegistry.register_condition(
 		"crown_closed_the_faucet", {}, ColonyConditions.crown_closed_the_faucet
+	)
+	# 🔒 An Impatient patron offers his specialty once (#444).
+	ContentRegistry.register_condition(
+		"he_may_offer_his_specialty", {}, ColonyConditions.he_may_offer_his_specialty
+	)
+	# Whether the Crown is honouring payments at all, so a recovery can be funded
+	# (#470).
+	ContentRegistry.register_condition(
+		"the_crown_is_paying", {}, ColonyConditions.the_crown_is_paying
+	)
+	# Whether the colony holds a town, loyal or rebel (#470).
+	ContentRegistry.register_condition(
+		"the_colony_holds_a_town", {}, ColonyConditions.the_colony_holds_a_town
+	)
+	# While the PC is ruinous, no patron offers him anything (#466).
+	ContentRegistry.register_condition(
+		"the_pc_is_not_ruinous", {}, ColonyConditions.the_pc_is_not_ruinous
+	)
+	# Which man a composed letter goes to, by id (#452).
+	ContentRegistry.register_condition("he_is", {"id": "string"}, ColonyConditions.he_is)
+	# The Steward pushes only on something the colony trades (#452).
+	ContentRegistry.register_condition(
+		"the_colony_traded_last_month", {}, ColonyConditions.the_colony_traded_last_month
+	)
+	# Who a composed letter may go to (#454).
+	ContentRegistry.register_condition(
+		"his_expedition_is_travelling", {}, ColonyConditions.his_expedition_is_travelling
+	)
+	ContentRegistry.register_condition("he_governs_a_town", {}, ColonyConditions.he_governs_a_town)
+	# 🔒 **A duke asks tribute once he himself has arrived, and only in the bands
+	# that ask** (#458, `rival-pressure.md` §3, §6).
+	ContentRegistry.register_condition("he_has_arrived", {}, ColonyConditions.he_has_arrived)
+	ContentRegistry.register_condition(
+		"he_asks_for_tribute", {}, ColonyConditions.he_asks_for_tribute
+	)
+	# Whether the colony has bought this from the Crown lately (#407).
+	ContentRegistry.register_condition(
+		"the_colony_paid_the_crown_for", {"resource": "resource", "months": "integer"},
+		ColonyConditions.the_colony_paid_the_crown_for,
 	)
 	ContentRegistry.register_condition(
 		"crown_reopened_the_faucet", {}, ColonyConditions.crown_reopened_the_faucet
@@ -542,6 +590,24 @@ static func _his_town(context: LetterContext, him: Contact) -> Town:
 ## 🔒 **The direction, never the figure** (`prestige.md` §7). A letter may notice
 ## that the wind has changed; it may not read the number, and there is no
 ## condition here that would let it compare the number to anything.
+## 🔒 **A patron offers nothing while the PC is ruinous** (#466, `patrons.md`
+## §7). Read each month, so an offer returns when his name recovers. **The band,
+## never the figure**, like the two conditions below it.
+## Whether the letter's man is this one (#452).
+static func he_is(args: Dictionary, context: LetterContext) -> bool:
+	return context != null and context.sender != null \
+		and String(context.sender.id) == String(args.get("id", ""))
+
+
+static func the_colony_traded_last_month(_args: Dictionary, context: LetterContext) -> bool:
+	return not String(ColonyParamSources.most_traded_resource({}, context)).is_empty()
+
+
+static func the_pc_is_not_ruinous(_args: Dictionary, context: LetterContext) -> bool:
+	return context == null or context.prestige == null \
+		or context.prestige.band() != Prestige.RUINOUS
+
+
 static func the_court_is_cooling(_args: Dictionary, context: LetterContext) -> bool:
 	return context != null and context.prestige != null \
 		and context.prestige.direction() == "falling"
@@ -785,6 +851,18 @@ static func i_asked_how_to_answer_a_tribe(args: Dictionary, context: LetterConte
 	return _his_event(TribeGrievanceDriver.EVENT_ASKED, args, context, "") != null
 
 
+## 🔒 **The same, about a tribe's ask for help** (#471), which reads as a
+## different letter: they want something, rather than want something stopped.
+static func i_asked_how_to_answer_their_ask(args: Dictionary, context: LetterContext) -> bool:
+	return _his_event(TribeGrievanceDriver.EVENT_ASKED, args, context, "", true) != null
+
+
+static func i_answered_their_ask(args: Dictionary, context: LetterContext) -> bool:
+	var answered := _his_event(
+		TribeGrievanceDriver.EVENT_ANSWERED, args, context, String(args.get("answer", "")), true)
+	return answered != null and bool(answered.payload.get("tells", false))
+
+
 ## Whether this governor answered a tribe with `answer` and **means to tell the
 ## PC** (#436): below neutral and above the floor (§11).
 static func i_answered_a_tribe(args: Dictionary, context: LetterContext) -> bool:
@@ -793,7 +871,12 @@ static func i_answered_a_tribe(args: Dictionary, context: LetterContext) -> bool
 
 
 ## His latest event of this type within the window, answering `answer` if given.
-static func _his_event(type: StringName, args: Dictionary, context: LetterContext, answer: String) -> SimEvent:
+##
+## 🔒 **A tribe's grievance and its ask for help are two letters** (#471): `help`
+## says which this is about, and the other is never it.
+static func _his_event(
+	type: StringName, args: Dictionary, context: LetterContext, answer: String, help: bool = false,
+) -> SimEvent:
 	if context == null or context.log == null or context.sender == null:
 		return null
 	var within := maxi(1, int(args.get("within", 1)))
@@ -802,6 +885,8 @@ static func _his_event(type: StringName, args: Dictionary, context: LetterContex
 		if context.month - event.month >= within:
 			continue
 		if String(event.payload.get("governor", "")) != String(context.sender.id):
+			continue
+		if (StringName(event.payload.get("act", "")) == TribeGrievance.HELP_ABROAD) != help:
 			continue
 		if not answer.is_empty() and String(event.payload.get("answer", "")) != answer:
 			continue
@@ -1257,6 +1342,13 @@ static func treasury_honoured_this_year(args: Dictionary, context: LetterContext
 	return float(ColonyParamSources.treasury_honoured_this_year({}, context)) >= at_least
 
 
+## 🔒 **The colony paid the Crown for it lately, by a whole gold at least**
+## (#407). Asked of the figure the letter prints, so the Steward never writes
+## about a duty on something nobody buys, nor prints a price of nought.
+static func the_colony_paid_the_crown_for(args: Dictionary, context: LetterContext) -> bool:
+	return int(ColonyParamSources.paid_the_crown_for(args, context)) >= 1
+
+
 static func crown_opened_the_window(_args: Dictionary, context: LetterContext) -> bool:
 	var refusal := context.refusal
 	return (
@@ -1264,6 +1356,26 @@ static func crown_opened_the_window(_args: Dictionary, context: LetterContext) -
 		and refusal.state == CrownRefusal.WARNED
 		and refusal.countdown == CrownRefusal.WARNING_TURNS
 	)
+
+
+## 🔒 **Whether this patron may offer his specialty** (#444, `patrons.md` §4,
+## §6): always, unless he is Impatient and has offered it already.
+static func he_may_offer_his_specialty(_args: Dictionary, context: LetterContext) -> bool:
+	return PatronVices.may_offer_his_specialty(context.sender, context.log)
+
+
+## 🔒 **Whether the Crown is honouring payments** (#470, `crown-standing.md`
+## §3). Not refusing: warned is still paying. The Provost's last-chance offer is
+## made only while it is, because a recovery the Crown will not fund is not one.
+static func the_crown_is_paying(_args: Dictionary, context: LetterContext) -> bool:
+	return context.refusal == null or context.refusal.pays()
+
+
+## Whether the colony holds any town, loyal or rebel (#470). A colony that holds
+## none has fallen, and the Provost's ordinary proposal gives way to his offer of
+## a town by sea.
+static func the_colony_holds_a_town(_args: Dictionary, context: LetterContext) -> bool:
+	return context.colony != null and not context.colony.is_empty()
 
 
 ## Whether the faucet shut this month.
@@ -1390,8 +1502,53 @@ static func bargain_arms_them(context: LetterContext) -> bool:
 ## first growth of *any* dimension — so a run whose first draw was `size` had a
 ## foreign power writing for tribute as its reward for the Steward asking for
 ## slightly more gold.
+## 🔒 **Whether he leads a party on the march** (#454, `founding-towns.md` §5):
+## the governor it elected, while it is still travelling and not turning back.
+## The window in which a preference about the site can still reach him.
+static func his_expedition_is_travelling(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null:
+		return false
+	for entry in context.parties:
+		var party: ExpeditionParty = entry
+		if party.governor == context.sender.id and not party.turning_back and not party.is_empty():
+			return true
+	return false
+
+
+## Whether he has a town to direct (#454). A governor still on the march does not.
+static func he_governs_a_town(_args: Dictionary, context: LetterContext) -> bool:
+	return context != null and context.town != null
+
+
 static func a_rival_has_a_hand_out(_args: Dictionary, context: LetterContext) -> bool:
 	return DemandSchedule.rivals_are_asking(context.demands)
+
+
+## 🔒 **Whether this duke is among those who have arrived** (#458). All three
+## are on the roster from the first month; the first arrival used to qualify
+## every duke's tribute letter, because the only gate asked whether *any* had.
+static func he_has_arrived(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null:
+		return false
+	for entry in RivalDuke.arrived_among(context.contacts, context.demands):
+		if (entry as Contact).id == context.sender.id:
+			return true
+	return false
+
+
+## 🔒 **Whether his band asks for tribute** (#458, §3): High asks reasonable
+## tribute and Medium dearer; at Low he attacks improvements and at Minimum makes
+## war, and neither asks. **Minimum is a latch**, read off the log, so a duke
+## whose loyalty has climbed back does not start asking again. A Low duke used
+## to ask 1 gold: a multiple of nought, floored at one.
+static func he_asks_for_tribute(_args: Dictionary, context: LetterContext) -> bool:
+	if context == null or context.sender == null:
+		return false
+	if context.log != null:
+		for event in context.log.of_type(RivalBook.EVENT_LATCHED):
+			if event.subject == context.sender.id:
+				return false
+	return RivalDuke.tribute_multiple(RivalDuke.band_of(context.sender.loyalty())) > 0.0
 
 
 ## 🔒 Whether somebody's men are standing on this governor's fields (#188).

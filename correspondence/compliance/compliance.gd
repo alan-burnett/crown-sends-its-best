@@ -13,17 +13,19 @@ extends RefCounted
 ## That is the whole point of Seam C: "the contact complied with your order" and
 ## "the contact acted on his own and informed the PC afterward" are one mechanism.
 
-# --- The six outcomes ------------------------------------------------------
+# --- The five outcomes -----------------------------------------------------
 
+## 🔒 **Five, and reinterpretation is cut** (#449, the Author's ruling,
+## `contacts.md` §3). It existed as an outcome nothing read, and the clarity
+## consideration existed only to pull toward it.
 const COMPLY: StringName = &"comply"
 const PARTIAL: StringName = &"partial"
 const DELAY: StringName = &"delay"
-const REINTERPRET: StringName = &"reinterpret"
 const REFUSE: StringName = &"refuse"
 ## Especially at low loyalty: he does what he thinks best and tells the PC after.
 const ACT_ALONE: StringName = &"act_alone"
 
-const OUTCOMES: Array[StringName] = [COMPLY, PARTIAL, DELAY, REINTERPRET, REFUSE, ACT_ALONE]
+const OUTCOMES: Array[StringName] = [COMPLY, PARTIAL, DELAY, REFUSE, ACT_ALONE]
 
 ## Distinct event types, so next month's letters can key on what he did without
 ## unpacking a payload.
@@ -38,21 +40,28 @@ const OUTCOME_EVENTS: Dictionary = {
 	COMPLY: &"order_complied",
 	PARTIAL: &"order_partly_complied",
 	DELAY: &"order_delayed",
-	REINTERPRET: &"order_reinterpreted",
 	REFUSE: &"order_refused",
 	ACT_ALONE: &"contact_acted_alone",
 }
 
 ## How long each outcome takes to carry out. **Consequential actions are
 ## multi-month so a letter can interrupt them**
-## (`docs/mechanics/world-month.md` §3); a delay is simply a longer one.
+## (`docs/mechanics/world-month.md` §3).
+##
+## 🔒 **A delay takes as long as complying does** (#449): it is the same work,
+## started later (`DELAY_MONTHS`), not a longer piece of work.
 const MONTHS_FOR: Dictionary = {
 	COMPLY: 1,
 	PARTIAL: 1,
-	DELAY: 3,
-	REINTERPRET: 2,
+	DELAY: 1,
 	ACT_ALONE: 2,
 }
+
+## 🔒 **Delay is exactly the comply result, this many months later** (#449,
+## `contacts.md` §3; a placeholder). Held on the Intent as the month it may land
+## (`Intent.LANDS`), so every executor honours it, and a later letter may still
+## overtake it as it may any Intent.
+const DELAY_MONTHS: int = 3
 
 ## The key the manner of the letter travels under, from the desk to the
 ## deliberation months later (#262).
@@ -117,6 +126,7 @@ static func resolve(
 	log: EventLog,
 	streams: RngStreams,
 	rebel: Town = null,
+	can_crown_pay: bool = true,
 ) -> Dictionary:
 	var context := DeliberationContext.new(DecisionKind.ORDER_COMPLIANCE, state, log)
 	context.phase = WorldPhase.RECKONING
@@ -124,9 +134,13 @@ static func resolve(
 	context.data = {
 		"order": order,
 		"cost": cost_of(order),
-		"payment": payment_in(order),
+		# 🔒 **Once the Crown honours nothing, the money is not there** (#449,
+		# SPEC §12.6). What the PC offered reaches him as nothing, and the
+		# guarantee full payment carries goes with it — the same two changes the
+		# Marshal's hypothetical makes (`RunEndCheck`).
+		"payment": payment_in(order) if can_crown_pay else 0.0,
+		"can_crown_pay": can_crown_pay,
 		"loyalty": contact.loyalty(),
-		"vagueness": vagueness_of(order),
 		# **Leaning on a man works** (`rebel-sentiment.md` §4). It is the surest
 		# way to be obeyed and the PC pays for it twice — in the governor's regard
 		# below, and in what the town holds against the Crown afterwards.
@@ -139,11 +153,8 @@ static func resolve(
 		#
 		# 🔒 It changes the **manner** of his answer, never the decision. A
 		# governor whose town is threatened, told to chase profit, is markedly
-		# likelier to reinterpret the instruction into something he can live with
-		# — *"I have applied Your Grace's instruction regarding our profits to the
-		# timber we shall need for the palisade"* — and that letter is
-		# unreachable if compliance cannot tell an agreeable order from an
-		# unwelcome one.
+		# likelier to go his own way, and that is unreachable if compliance cannot
+		# tell an agreeable order from an unwelcome one.
 		#
 		# **Compliance still does not decide the intent.** `contacts.md` §3 locks
 		# the split: compliance decides whether he listens, phase 8's
@@ -223,8 +234,20 @@ static func resolve(
 		PatronCredit.bank(contact, _deed_of(order), log, state.month)
 
 	var intent: Intent = null
-	if outcome != REFUSE:
+	# 🔒 **Acting alone, he does what he would have done had the PC not written**
+	# (#449, `contacts.md` §3). Where his judgement has nothing to put in the
+	# order's place, he carries on as he was, and there is nothing to carry out.
+	if outcome != REFUSE and not (outcome == ACT_ALONE and carries_on_as_he_was(order)):
 		intent = _intent_for(order, outcome, contact)
+		_shape(intent, order, outcome, state)
+		# 🔒 **A dilatory patron's side lands late** (#444, `patrons.md` §6): what
+		# he gives arrives this many months after the PC accepts it, where
+		# another man's lands the month after. Nothing warns the PC.
+		if PatronVices.GIVES.has(StringName(order.kind)):
+			intent.months_required = maxi(intent.months_required, PatronVices.months_late(contact))
+		if outcome == DELAY:
+			# The month complying would have landed, and three more.
+			intent.data[Intent.LANDS] = state.month + 1 + DELAY_MONTHS
 		book.commit(intent, log, state.month)
 
 	return {"outcome": outcome, "decision": decision, "intent": intent}
@@ -239,7 +262,7 @@ static func _deed_of(order: Order) -> StringName:
 	match order.kind:
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
 		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
-		M1Registrations.ORDER_GRANT_FAVOR:
+		M1Registrations.ORDER_PROMISE_TO_RETRENCH, M1Registrations.ORDER_GRANT_FAVOR:
 			return Relationship.GRANTED
 		M1Registrations.ORDER_TROUBLE_A_DUKE, M1Registrations.ORDER_SEND_AN_EXPERT, \
 		M1Registrations.ORDER_GIVE_THE_CROWN_GOLD:
@@ -333,9 +356,6 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 			if params.has("amount") and JsonTypes.is_int_like(params["amount"]):
 				params["amount"] = int(
 					JsonTypes.to_int(params["amount"], "amount") * partial_share(order))
-		REINTERPRET:
-			# He does what he thinks you meant, which is not what you wrote.
-			params["reinterpreted"] = true
 
 	if order.kind == M1Registrations.ORDER_SHIP_RESOURCE:
 		# **Compliance is a choice of priority tier, not a mood** (#69,
@@ -370,6 +390,71 @@ static func _intent_for(order: Order, outcome: StringName, contact: Contact) -> 
 	# are not mistaken for a later one contradicting it.
 	intent.letter = order.letter
 	return intent
+
+
+## 🔒 **Acting alone, whether he has anything to do instead** (#449,
+## `contacts.md` §3). An urging is never installed, a shipment not sent, a
+## policy not enacted, an embargo not laid, a preference ignored, a founding he
+## was asked to drop founded anyway, a tribe answered his own way, and a tax
+## order to the Steward — who acts alone on one only with standing lost and his
+## regard low — leaves the rate he would set himself where it stands. **Troops**
+## and **the Diplomat's move** are the two with something of his own to do.
+static func carries_on_as_he_was(order: Order) -> bool:
+	match order.kind:
+		M1Registrations.ORDER_URGE_INTENT, M1Registrations.ORDER_URGE_COMPANY, \
+				M1Registrations.ORDER_SHIP_RESOURCE, M1Registrations.ORDER_EMBARGO, \
+				M1Registrations.ORDER_PREFER_SITE, M1Registrations.ORDER_DISSUADE_FOUNDING, \
+				M1Registrations.ORDER_ANSWER_THE_TRIBE, M1Registrations.ORDER_SET_TAX_RATE:
+			return true
+		M1Registrations.ORDER_ENACT_POLICY:
+			return not is_troops(order)
+	return false
+
+
+## Whether this is the Marshal's troops rather than any other policy.
+static func is_troops(order: Order) -> bool:
+	return order != null and order.kind == M1Registrations.ORDER_ENACT_POLICY \
+		and StringName(order.get_param("effect", "")) == PolicyEffects.CROWN_TROOPS
+
+
+## 🔒 **One principle per outcome, order by order** (#449, `contacts.md` §3).
+##
+## | Order | Partial | Act alone |
+## | :--- | :--- | :--- |
+## | an urging, of a governor or a commander | a share of its pull | (never carried out) |
+## | a tax rate | the rate moves a share of the way | (never carried out) |
+## | a shipment | a share of the amount (`_intent_for`) | (never carried out) |
+## | troops | one strength less than asked | one strength less, as his decision |
+## | any other policy | enacted whole | (never carried out) |
+## | an embargo | a share of its months; a lifting in full | (never carried out) |
+## | the Diplomat's move | he moves | where he himself asked to go |
+static func _shape(intent: Intent, order: Order, outcome: StringName, state: WorldState) -> void:
+	match order.kind:
+		M1Registrations.ORDER_URGE_INTENT, M1Registrations.ORDER_URGE_COMPANY:
+			if outcome == PARTIAL:
+				intent.data[Intent.SHARE] = partial_share(order)
+		M1Registrations.ORDER_SET_TAX_RATE:
+			if outcome == PARTIAL and state != null:
+				var standing := TaxRates.rate_for(state, StringName(order.get_param("resource", "")))
+				var ordered := float(order.get_param("rate", standing))
+				intent.data["rate"] = standing + (ordered - standing) * partial_share(order)
+		M1Registrations.ORDER_EMBARGO:
+			var months := int(order.get_param("months", 0))
+			if outcome == PARTIAL and months > 0:
+				intent.data["months"] = maxi(1, int(roundf(float(months) * partial_share(order))))
+		M1Registrations.ORDER_ENACT_POLICY:
+			if is_troops(order) and (outcome == PARTIAL or outcome == ACT_ALONE):
+				intent.data["strength"] = String(CrownTroops.one_less(
+					StringName(order.get_param("strength", ""))))
+		M1Registrations.ORDER_MOVE_DIPLOMAT:
+			if outcome == ACT_ALONE:
+				intent.data[Intent.HIS_OWN_WAY] = true
+
+
+## 🔒 **An Order he carries out of his own will** (#450): the Intent acting
+## alone produces, for a decision the PC left to him.
+static func as_his_own_will(order: Order, contact: Contact) -> Intent:
+	return _intent_for(order, ACT_ALONE, contact)
 
 
 ## What the request costs the contact, roughly, in the same units as payment.
@@ -418,7 +503,8 @@ static func _priced(order: Order) -> Variant:
 			return float(order.get_param("amount", 0)) \
 				* ResourceCatalogue.price_of(StringName(order.get_param("resource", "")))
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
-		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT:
+		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
+		M1Registrations.ORDER_PROMISE_TO_RETRENCH:
 			# Being given something costs the recipient nothing.
 			return 0.0
 		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND, \
@@ -460,7 +546,7 @@ static func _priced(order: Order) -> Variant:
 			# actually costs him is his own judgement, and that is the `autonomy`
 			# consideration's business rather than a price.
 			return 0.0
-		M1Registrations.ORDER_SET_TAX_RATE, M1Registrations.ORDER_SET_POLICY, \
+		M1Registrations.ORDER_SET_TAX_RATE, \
 		M1Registrations.ORDER_WAIVE_DUTY, M1Registrations.ORDER_MOVE_DIPLOMAT:
 			# 🔒 **A rate costs the colony, not the man who sets it** (#302, SPEC
 			# §8.1). The Steward is being asked to do his job, in the direction he
@@ -490,18 +576,6 @@ static func _priced(order: Order) -> Variant:
 	return null
 
 
-## How much room the order leaves to decide what the PC meant.
-##
-## An order carrying a figure is specific: send 200 of iron, pay 500 for troops.
-## One carrying only words — set this policy, grant this favour — is not, and
-## SPEC §8 expects personality to show in how a contact reads it.
-##
-## **An intent is specific without carrying a number.** "Your people's survival
-## must come first" is one of exactly five things the PC can say and there is
-## nothing in it to misread — so a governor who disagrees refuses honestly rather
-## than claiming your letter admitted of more than one reading. Judging it vague
-## made every governor reinterpret or refuse every priority he was ever sent,
-## which read as a man who could not follow plain English.
 ## How far an order cuts against what the contact currently wants (#213).
 ##
 ## **Zero where nothing applies**, exactly as harshness is zero for a mild
@@ -538,31 +612,14 @@ const DEEP_CUT_STEPS: float = 2.0
 ## down is as far against it as he gets.
 ##
 ## 🔒 **The manner of his answer, never the decision.** This feeds the same
-## `DissonanceConsideration` a governor's does, which pulls toward reinterpreting,
-## acting alone and delaying and deliberately not toward refusing — a Crown
-## officer who disagrees with the Crown's revenue policy finds the instruction
-## admitted of another reading. He never writes back *no*.
+## `DissonanceConsideration` a governor's does, which pulls toward acting alone
+## and delaying and deliberately not toward refusing. He never writes back *no*.
 static func _cut_below_his_rate(order: Order, state: WorldState) -> float:
 	if state == null:
 		return 0.0
 	var standing := TaxRates.rate_for(state, StringName(order.get_param("resource", "")))
 	var ordered := float(order.get_param("rate", standing))
 	return clampf((standing - ordered) / (TaxRates.STEP * DEEP_CUT_STEPS), 0.0, 1.0)
-
-
-static func vagueness_of(order: Order) -> float:
-	# One of a handful of things the PC can say, with nothing in it to misread.
-	if order.kind == M1Registrations.ORDER_URGE_INTENT or order.kind == M1Registrations.ORDER_URGE_COMPANY \
-			or order.kind == M1Registrations.ORDER_ANSWER_THE_TRIBE:
-		return 0.0
-	for key in order.params:
-		if key == "to":
-			continue
-		var value: Variant = order.params[key]
-		var kind := typeof(value)
-		if kind == TYPE_INT or kind == TYPE_FLOAT:
-			return 0.0
-	return 1.0
 
 
 static func payment_in(order: Order) -> float:
@@ -614,7 +671,7 @@ static func _settle_loyalty(order: Order, contact: Contact, _outcome: StringName
 	match order.kind:
 		M1Registrations.ORDER_PROMISE_GOLD, M1Registrations.ORDER_PROMISE_RESOURCE, \
 		M1Registrations.ORDER_PROMISE_REVENUE, M1Registrations.ORDER_PROMISE_SHIPMENT, \
-		M1Registrations.ORDER_GRANT_FAVOR:
+		M1Registrations.ORDER_PROMISE_TO_RETRENCH, M1Registrations.ORDER_GRANT_FAVOR:
 			contact.relationship.record_deed(Relationship.GRANTED)
 		M1Registrations.ORDER_REFUSE, M1Registrations.ORDER_DECLINE_DEMAND:
 			contact.relationship.record_deed(Relationship.REFUSED)

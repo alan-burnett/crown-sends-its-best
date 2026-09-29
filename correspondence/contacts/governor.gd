@@ -33,7 +33,7 @@ const ROLE: StringName = &"governor"
 ## and kept drawing `revenue`, `native_threat` and `native_land` after the kernel
 ## retired them. See `weighted()`.
 const COMPLIANCE_WEIGHTED: PackedStringArray = [
-	"loyalty", "cost_of_request", "payment_offered", "autonomy", "order_clarity",
+	"loyalty", "cost_of_request", "payment_offered", "autonomy",
 ]
 
 

@@ -34,7 +34,9 @@ var at: Vector2i = Vector2i(-1, -1)
 ## traded and pastured. Experts and livestock grow in M4.
 var workers: int = 0
 var experts: Dictionary = {}    ## resource id -> how many experts of it
-var livestock: Dictionary = {}  ## livestock resource id -> head
+## Livestock resource id -> head, with any part-bought beast carried as a
+## fraction (#461). `livestock_head` is the whole beasts; `held` is the lot.
+var livestock: Dictionary = {}
 
 ## Resource id -> how much is held.
 var stockpile: Dictionary = {}
@@ -188,8 +190,17 @@ var objective_since: int = 0
 
 ## Months in a row the build has put in no labour. **Kept by Build, read by
 ## hope** (`QualityOfLife.progress_of`): only Build knows whether a month moved the
-## project on. Nothing ends an objective for it (#429).
+## project on. Three of them stall a building or an improvement (#467).
 var objective_idle_months: int = 0
+
+## 🔒 **Buildings the town may not pay for** (#438): building id -> the month
+## it may again. Dark until then whatever is in the purse, as the gunsmith is
+## when his machines break and the Crown does not pay to mend them.
+var shut_until: Dictionary = {}
+
+## 🔒 **What a stall set aside** (#467): objective id -> the month the menu walk
+## may take it again. Bounded by the objectives there are, so nothing prunes it.
+var passed_over: Dictionary = {}
 
 ## What the town's tiles gave last month, by resource (#429). Written by Work;
 ## read by the menus' `harvested_at_least`, which asks what the ground actually
@@ -215,8 +226,8 @@ var objective_progress: int = 0
 ## Resource id -> how much has gone into the build.
 ##
 ## **Invested is spent.** It has left the stockpile, so it cannot be eaten, sold
-## or given away, and a town that stalls for want of the rest does not get it
-## back (#49).
+## or given away, and a town waiting on the rest does not get it back (#49) —
+## until three idle months stall the build, which returns it (#467).
 var objective_invested: Dictionary = {}
 
 ## Months in a row the town has gone meaningfully without food.
@@ -262,6 +273,11 @@ var rebelling: bool = false
 ## return event can report it. `-1` while the town is loyal.
 var rebelling_since: int = -1
 
+## 🔒 **Its quality of life the month it declared** (#230,
+## `rebel-sentiment.md` §5): it comes back the month its life, lift included,
+## falls below this. -1 when it has never declared.
+var declared_quality: float = -1.0
+
 ## Months of embargo left to run (SPEC §12.3, #73, #74).
 ##
 ## **The Crown's one punishment before it has troops.** Its neighbours are
@@ -275,6 +291,16 @@ var embargo_months: int = 0
 ## Whether the colony is currently forbidden to help this town.
 func is_embargoed() -> bool:
 	return embargo_months > 0
+
+
+## Months left in which this town counts as made an example of (#457,
+## `rebel-sentiment.md` §4): a Crown commander punished it, and its rebellion
+## persuades nobody much while that is remembered.
+var example_months: int = 0
+
+
+func is_made_an_example() -> bool:
+	return example_months > 0
 
 ## **The sum of its citizens' private wealth plus the town's coffers.** Rises
 ## selling to the Crown, falls buying from it, and never moves between towns or
@@ -321,12 +347,14 @@ func add_experts(resource: StringName, count: int) -> void:
 	experts[String(resource)] = expert_count(resource) + count
 
 
+## Whole beasts. A part-bought one is in `held` and not here, so nothing grazes,
+## breeds or is slaughtered that the town does not wholly own.
 func livestock_head(kind: StringName) -> int:
-	return int(livestock.get(String(kind), 0))
+	return int(floorf(float(livestock.get(String(kind), 0.0))))
 
 
 func add_livestock(kind: StringName, head: int) -> void:
-	livestock[String(kind)] = maxi(0, livestock_head(kind) + head)
+	livestock[String(kind)] = maxf(0.0, float(livestock.get(String(kind), 0.0)) + float(head))
 
 
 func population() -> int:
@@ -407,28 +435,39 @@ func has_yielded(at: Vector2i) -> bool:
 	return yielded_tiles.has("%d,%d" % [at.x, at.y])
 
 
+## 🔒 **Livestock is the herd, however it came** (#461, `population.md` §2:
+## *horses bought or sold are counted the same way*). Stored, taken and held
+## through the one `livestock` count, so a horse the Crown sold grazes, breeds,
+## eats and can be slaughtered like one the town bred, and a company is horsed
+## from that same herd. A warehouse of horses beside the herd was two counts of
+## one thing, and the bought one never ate.
+func _pen_of(resource: StringName) -> Dictionary:
+	return livestock if ResourceCatalogue.is_livestock(resource) else stockpile
+
+
 func held(resource: StringName) -> float:
-	return float(stockpile.get(String(resource), 0.0))
+	return float(_pen_of(resource).get(String(resource), 0.0))
 
 
 func store(resource: StringName, amount: float) -> void:
-	stockpile[String(resource)] = maxf(0.0, held(resource) + amount)
+	_pen_of(resource)[String(resource)] = maxf(0.0, held(resource) + amount)
 
 
 ## Take what is there, up to `amount`. Returns how much was actually taken, so a
 ## caller never has to check first and act second.
 func take(resource: StringName, amount: float) -> float:
 	var taken := minf(held(resource), maxf(0.0, amount))
-	stockpile[String(resource)] = held(resource) - taken
+	_pen_of(resource)[String(resource)] = held(resource) - taken
 	return taken
 
 
-## Resource ids held in any quantity, sorted.
+## Resource ids held in any quantity, sorted. Herds included.
 func stocked() -> PackedStringArray:
 	var out: PackedStringArray = PackedStringArray()
-	for resource in stockpile:
-		if float(stockpile[resource]) > 0.0:
-			out.append(String(resource))
+	for pen in [stockpile, livestock]:
+		for resource in pen:
+			if float(pen[resource]) > 0.0:
+				out.append(String(resource))
 	out.sort()
 	return out
 
@@ -509,6 +548,24 @@ func invest(resource: StringName, amount: float) -> float:
 	return moved
 
 
+## Forbid paying for a building until `until_month` (#438).
+func shut(building: StringName, until_month: int) -> void:
+	shut_until[String(building)] = until_month
+
+
+func is_shut(building: StringName, month: int) -> bool:
+	return month < int(shut_until.get(String(building), month))
+
+
+## Set a stalled objective aside until `until_month` (#467).
+func pass_over(objective_id: StringName, until_month: int) -> void:
+	passed_over[String(objective_id)] = until_month
+
+
+func is_passing_over(objective_id: StringName, month: int) -> bool:
+	return month < int(passed_over.get(String(objective_id), month))
+
+
 ## Start again on something else. **Whatever was invested is gone** — the timber
 ## is already cut and standing in the half-built frame.
 func clear_objective() -> void:
@@ -572,13 +629,17 @@ func to_dict() -> Dictionary:
 		"expeditions_launched": expeditions_launched,
 		"objective_progress": objective_progress,
 		"objective_invested": objective_invested.duplicate(),
+		"passed_over": passed_over.duplicate(),
+		"shut_until": shut_until.duplicate(),
 		"months_hungry": months_hungry,
 		"battle_owed": battle_owed,
 		"relief_balance": relief_balance,
 		"governor": String(governor_id),
 		"rebelling": rebelling,
 		"rebelling_since": rebelling_since,
+		"declared_quality": declared_quality,
 		"embargo_months": embargo_months,
+		"example_months": example_months,
 		"gold": _gold,
 	}
 
@@ -604,7 +665,9 @@ static func from_dict(data: Dictionary) -> Town:
 	town.experts_accrued = float(data.get("experts_accrued", 0.0))
 	town.rebelling = bool(data.get("rebelling", false))
 	town.rebelling_since = int(data.get("rebelling_since", -1))
+	town.declared_quality = float(data.get("declared_quality", -1.0))
 	town.embargo_months = int(data.get("embargo_months", 0))
+	town.example_months = int(data.get("example_months", 0))
 	town.rebel_sentiment = float(data.get("rebel_sentiment", 0.0))
 	town.growth_accrued = float(data.get("growth_accrued", 0.0))
 	town.livestock_accrued = data.get("livestock_accrued", {}).duplicate()
@@ -626,6 +689,8 @@ static func from_dict(data: Dictionary) -> Town:
 	town.expeditions_launched = int(data.get("expeditions_launched", 0))
 	town.objective_progress = int(data.get("objective_progress", 0))
 	town.objective_invested = data.get("objective_invested", {}).duplicate()
+	town.passed_over = data.get("passed_over", {}).duplicate()
+	town.shut_until = data.get("shut_until", {}).duplicate()
 	town.months_hungry = int(data.get("months_hungry", 0))
 	town.battle_owed = float(data.get("battle_owed", 0.0))
 	town.relief_balance = float(data.get("relief_balance", 0.0))

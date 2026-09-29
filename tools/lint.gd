@@ -323,7 +323,7 @@ func _check(path: String) -> void:
 			_match(path, index, line, VILLAGE_BIRTH,
 				"makes a Village — a tribe never founds one, and their number is fixed at generation (natives.md 4)")
 			_match(path, index, line, VILLAGE_APPEND,
-				"adds to a list of villages — their number never changes by any path (natives.md 4)")
+				"adds to a list of villages — no village is ever founded, and their number only falls (natives.md 4)")
 
 		if not HASH_EXEMPT.has(path):
 			_match(path, index, line, HASH_PATTERN, "calls the built-in hash(), which is not stable across versions or platforms — use StableHash")

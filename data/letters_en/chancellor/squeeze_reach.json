@@ -49,34 +49,6 @@
         }
       ]
     },
-    "steps": [
-      {
-        "id": "answer",
-        "prompt": "Your reply to the Chancellor",
-        "options": [
-          {
-            "id": "accept",
-            "label": "acknowledge it, and say nothing more",
-            "text": "The colony has heard the Crown{insert:barb}. It will do what it can.",
-            "insert": {
-              "barb": {
-                "hateful": ", as it always does, at length"
-              }
-            }
-          },
-          {
-            "id": "protest",
-            "label": "protest that the Crown should defend its own",
-            "text": "If men outside His Majesty's service may write to His Majesty's governor and expect an answer, I should like to know what His Majesty's service is for."
-          },
-          {
-            "id": "ask",
-            "label": "ask who exactly is coming",
-            "text": "You have told me that others will write. Name them, and I shall know a demand from an introduction."
-          }
-        ]
-      }
-    ],
     "closing": [
       {
         "text": "Your servant,",

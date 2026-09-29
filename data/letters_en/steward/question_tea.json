@@ -74,6 +74,18 @@
                 "amount": -2
               }
             }
+          },
+          {
+            "id": "lower",
+            "label": "lower the duty on tea",
+            "text": "Lower it. If the colony is to write to me about its tea, I had rather it wrote to thank me.",
+            "effect": {
+              "set_tax_rate": {
+                "to": "steward",
+                "resource": "tea",
+                "steps": -1
+              }
+            }
           }
         ]
       }

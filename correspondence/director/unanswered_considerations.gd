@@ -15,6 +15,49 @@ const KINDS: Array[StringName] = [DecisionKind.UNANSWERED]
 static func register_all() -> void:
 	Deliberation.register_consideration(SelfInterestConsideration.new(&"self_interest"), KINDS)
 	Deliberation.register_consideration(CapriceConsideration.new(&"caprice"), KINDS)
+	# 🔒 He never spends the Crown's purse (#450, `contacts.md` §3) — see the class.
+	Deliberation.register_filter(NotOnTheCrownsPurse.new(&"not_on_the_crowns_purse"), KINDS)
+
+
+## 🔒 **A man deciding alone never spends the Crown's purse** (#450,
+## `contacts.md` §3, the PO's ruling).
+##
+## A decision left to him is carried out, and `SelfInterestConsideration` values
+## a promise of gold highest — so a man left alone would pick the option that
+## pays him from the Crown's purse. SPEC §10.3 has the Crown paying the PC's
+## promises, and a man the PC did not answer has none of the PC's to make.
+##
+## A filter and not a weight, because it is a rule (`deliberation.md` §5).
+class NotOnTheCrownsPurse:
+	extends DeliberationFilter
+
+	## Effects that pay out of the Crown's purse whatever their arguments.
+	const CROWN_PAID: Array = [
+		"promise_gold", "promise_gold_to_town", "fund_policy", "ship_resource_paying_double",
+	]
+
+	func permits(_actor: DeliberationActor, candidate: Candidate, _context: DeliberationContext) -> bool:
+		var effects: Variant = candidate.get_value("effect", {})
+		if typeof(effects) != TYPE_DICTIONARY:
+			return true
+		for effect_id in effects:
+			if spends_the_crowns_money(String(effect_id), effects[effect_id]):
+				return false
+		return true
+
+	## A policy the Crown pays some of, or a payment that is not nought.
+	static func spends_the_crowns_money(effect_id: String, args: Variant) -> bool:
+		if CROWN_PAID.has(effect_id):
+			return true
+		if typeof(args) != TYPE_DICTIONARY:
+			return false
+		var split := String(args.get("split", Policy.NONE))
+		if split != String(Policy.NONE):
+			return true
+		var payment: Variant = args.get("payment", 0)
+		if typeof(payment) == TYPE_STRING:
+			return not String(payment).is_empty() and String(payment) != "0"
+		return float(payment) > 0.0
 
 
 ## **In his own interest.** An option that grants him something looks good; one
@@ -29,7 +72,6 @@ class SelfInterestConsideration:
 		"grant_favor": 0.7,
 		"station_troops": -0.4,
 		"adjust_loyalty": 0.2,
-		"set_policy": 0.0,
 		"refuse": -1.0,
 	}
 

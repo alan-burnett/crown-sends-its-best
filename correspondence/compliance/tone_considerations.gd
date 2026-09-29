@@ -100,7 +100,6 @@ class Pleased:
 			Compliance.COMPLY: 0.5,
 			Compliance.PARTIAL: 0.4,
 			Compliance.DELAY: 0.9,
-			Compliance.REINTERPRET: 0.0,
 			Compliance.REFUSE: -0.3,
 			Compliance.ACT_ALONE: -0.2,
 		}
@@ -122,7 +121,6 @@ class Dutiful:
 			Compliance.COMPLY: 0.0,
 			Compliance.PARTIAL: 0.0,
 			Compliance.DELAY: 0.0,
-			Compliance.REINTERPRET: -0.4,
 			Compliance.REFUSE: -0.4,
 			Compliance.ACT_ALONE: -0.4,
 		}
@@ -143,7 +141,6 @@ class Annoyed:
 			Compliance.COMPLY: 0.1,
 			Compliance.PARTIAL: 0.9,
 			Compliance.DELAY: -0.7,
-			Compliance.REINTERPRET: 0.2,
 			Compliance.REFUSE: 0.1,
 			Compliance.ACT_ALONE: 0.0,
 		}
@@ -172,7 +169,6 @@ class Desperate:
 		return {
 			Compliance.COMPLY: 0.6,
 			Compliance.PARTIAL: 0.3,
-			Compliance.REINTERPRET: -0.1,
 			Compliance.REFUSE: -0.6,
 			Compliance.ACT_ALONE: 0.0,
 		}
@@ -193,7 +189,6 @@ class Hateful:
 			Compliance.COMPLY: -0.6,
 			Compliance.PARTIAL: -0.2,
 			Compliance.DELAY: 0.1,
-			Compliance.REINTERPRET: 0.3,
 			Compliance.REFUSE: 1.0,
 			Compliance.ACT_ALONE: 0.8,
 		}

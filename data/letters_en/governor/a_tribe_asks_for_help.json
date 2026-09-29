@@ -1,0 +1,79 @@
+{
+  "id": "governor.a_tribe_asks_for_help",
+  "sender": "governor",
+  "type": "request",
+  "skippable": false,
+  "note": "Issue 471, natives.md sections 7 and 11, SPEC 12.5. A tribe at civil standing or better asks the governor whose town borders it for guns, tools or horses, for troubles beyond the map that are never named. A governor at or above neutral passes it on and asks how to answer. The reply is an Order to him, resolved by compliance into an urging on his answer. Given, the goods leave his town and the tribe's standing rises; refused, it stays where it was. Placeholder prose.",
+  "params": {
+    "town": "town",
+    "tribe": "tribe",
+    "governor": "contact",
+    "resource": "resource",
+    "amount": "integer"
+  },
+  "body": [
+    {
+      "text": "The {param:tribe} have written to me. They have troubles of their own somewhere beyond the hills, and they ask whether {param:town} can spare them {param:amount} of {param:resource}."
+    },
+    {
+      "text": "They did not say whose quarrel it is, and I did not think it my place to ask. They have been decent neighbours, and they asked civilly."
+    },
+    {
+      "text": "I have not answered them. I would rather answer as you would have me answer, and I think they will wait a month for it."
+    }
+  ],
+  "reply": {
+    "tone": {
+      "text": "As to the {param:tribe}, I write {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "having considered it"
+        },
+        {
+          "tone": "pleased",
+          "text": "glad they thought to ask us"
+        },
+        {
+          "tone": "annoyed",
+          "text": "and would sooner not have been asked"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "answer",
+        "prompt": "What {param:town} should send them",
+        "options": [
+          {
+            "id": "give",
+            "label": "give them what they ask",
+            "text": "Give it to them. A neighbour who asks civilly is worth keeping civil.",
+            "effect": {
+              "answer_the_tribe": {
+                "to": "{governor}",
+                "answer": "gift"
+              }
+            }
+          },
+          {
+            "id": "refuse",
+            "label": "refuse them",
+            "text": "Refuse them, politely. Their quarrels are not the colony's.",
+            "effect": {
+              "answer_the_tribe": {
+                "to": "{governor}",
+                "answer": "refuse"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "I remain your servant,"
+      }
+    ]
+  }
+}

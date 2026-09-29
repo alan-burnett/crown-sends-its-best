@@ -110,6 +110,11 @@ var ends_month: int = -1
 ## the run.** Nobody is left to carry it, to warn, or to be written to.
 var permanent: bool = false
 
+## 🔒 **The month it ends of itself** (#230), or -1. A garrison quartered on a
+## town that came back serves a year and sails home: a term, not a lapse, so no
+## warning comes first — nobody is refusing to carry it.
+var expires_month: int = -1
+
 
 ## Whether he has said he will not go on.
 func is_warning() -> bool:
@@ -184,6 +189,7 @@ func to_dict() -> Dictionary:
 		"warned_month": warned_month,
 		"ends_month": ends_month,
 		"permanent": permanent,
+		"expires_month": expires_month,
 	}
 
 
@@ -202,4 +208,5 @@ static func from_dict(data: Dictionary) -> Policy:
 	restored.warned_month = int(data.get("warned_month", -1))
 	restored.ends_month = int(data.get("ends_month", -1))
 	restored.permanent = bool(data.get("permanent", false))
+	restored.expires_month = int(data.get("expires_month", -1))
 	return restored

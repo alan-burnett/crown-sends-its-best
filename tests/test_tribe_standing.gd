@@ -256,12 +256,12 @@ func test_the_pc_may_ask_for_it_and_the_governor_decides_what_it_means() -> void
 						"%s makes an intent happen instead of asking for it" % id)
 
 
-# --- 🔒 Only aggression reaches the point of no return ----------------------
+# --- 🔒 One score, and any offence can latch it (#456) ------------------------
 
-func test_a_lifetime_of_intrusion_never_carries_them_over() -> void:
-	# 🔒 The acceptance, and the design. Forty years of being crowded, farmed over
-	# and glowered at by a hostile governor, and they are still a people who could
-	# in principle be talked round.
+func test_a_lifetime_of_intrusion_carries_them_over() -> void:
+	# 🔒 The Author's ruling (#456, `natives.md` §2): there is no floor that only
+	# an attack may break. Crowded and farmed over for long enough, a people
+	# concludes the colony means it destroyed as surely as one that was struck.
 	var map := _map()
 	var natives := _natives([Vector2i(5, 5)], 60.0)
 	var town := _town(Vector2i(5, 5))
@@ -275,13 +275,11 @@ func test_a_lifetime_of_intrusion_never_carries_them_over() -> void:
 		TribeStanding.exploitation(colony, natives, territory, context)
 
 	var tribe: Tribe = natives.in_order()[0]
-	assert_false(tribe.is_irreconcilable_with(Tribe.COLONY),
-		"being crowded off their land for forty years was treated as being attacked")
-	assert_almost_eq(tribe.trust(), Tribe.IRRECONCILABLE_BELOW, 0.0001,
-		"they stopped somewhere other than the edge of the conclusion")
+	assert_true(tribe.is_irreconcilable_with(Tribe.COLONY),
+		"forty years crowded off their land and they concluded nothing")
 
 
-func test_aggression_is_the_one_thing_that_does() -> void:
+func test_aggression_does_it_too() -> void:
 	var natives := _natives([Vector2i(5, 5)], Tribe.IRRECONCILABLE_BELOW + 1.0)
 	var tribe: Tribe = natives.in_order()[0]
 	var context := _context()
@@ -296,14 +294,14 @@ func test_aggression_is_the_one_thing_that_does() -> void:
 		"the event did not say the people had reached a conclusion")
 
 
-func test_the_clamp_holds_at_the_line_rather_than_at_the_floor() -> void:
-	# 🔒 A latch at zero would be a floor with a different name. The point is that
-	# there is a stretch of very bad standing a people can still be talked out of.
+func test_no_mover_stops_at_the_edge() -> void:
+	# 🔒 **No floor that only an attack may break** (#456): whatever carried them
+	# there, a people past the line has concluded.
 	var natives := _natives([Vector2i(5, 5)], 40.0)
 	var tribe: Tribe = natives.in_order()[0]
-	tribe.move(Tribe.COLONY, -400.0, "everything at once", _context(), false)
-	assert_almost_eq(tribe.trust(), Tribe.IRRECONCILABLE_BELOW, 0.0001,
-		"a mover that may not conclude took them to the floor")
+	tribe.move(Tribe.COLONY, -400.0, "everything at once", _context())
+	assert_true(tribe.is_irreconcilable_with(Tribe.COLONY),
+		"a people driven to the floor concluded nothing")
 	assert_true(Tribe.IRRECONCILABLE_BELOW > Tribe.MINIMUM,
 		"the line and the floor are the same place, so the latch means nothing")
 

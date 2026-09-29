@@ -57,10 +57,13 @@ const APPLIES: Dictionary = {
 const READ_BY: Dictionary = {
 	"prestige_voice": "PatronCredit.voice_of",
 	"displeasure_spreads": "PatronGossip.share_of",
-	"cancels_on_rebellion": "Patron cancellation, #283",
-	"will_not_touch": "the offer catalogue filter, #283",
-	"delivers_late": "the promise machinery, #283",
-	"offer_expires_in": "offer expiry, #283",
+	# 🔒 **Each names the function that reads it** (#444), as `Class.method`, so
+	# a test can find every one and a knob can never again claim a reader that
+	# does not exist.
+	"cancels_on_rebellion": "PatronVices.respectable_withdraws",
+	"will_not_touch": "PatronVices.disapproved_of",
+	"delivers_late": "PatronVices.months_late",
+	"offers_once": "PatronVices.may_offer_his_specialty",
 }
 
 static var _vices: Dictionary = {}
@@ -117,6 +120,108 @@ static func knob_of(contact: Contact, knob: String) -> Dictionary:
 		if (entry as Dictionary).has(knob):
 			return (entry as Dictionary)[knob]
 	return {}
+
+
+# --- 🔒 The four read where they are needed (#444, `patrons.md` §6) -----------
+
+## He withdrew from the colony: the month after a town declared.
+const EVENT_WITHDREW: StringName = &"patron_withdrew"
+## The colony sold what he will not touch, and he minds.
+const EVENT_OBJECTED: StringName = &"patron_objected"
+
+## What a patron of each kind of gift hands over, which a dilatory man hands over
+## late: his one-offs and his policies (§6, §4).
+const GIVES: Array[StringName] = [
+	&"send_an_expert", &"give_the_crown_gold", &"trouble_a_duke", &"enact_policy",
+]
+
+
+## 🔒 **Respectable** (§6): the month after any town declares, his regard falls,
+## he writes that he can no longer be associated with the colony, and **his
+## policies end with that letter**, which is `policy.md` §4's warning. What the PC
+## promised him stands. **Every declaration does it again.**
+static func respectable_withdraws(run: RunState, log: EventLog, month: int) -> void:
+	if run == null or run.contacts == null:
+		return
+	var declared: Array = []
+	for event in log.of_type(Rebellion.EVENT_DECLARED):
+		if event.month == month - 1:
+			declared.append(event)
+	if declared.is_empty():
+		return
+	for entry in Patron.all_in(run):
+		var patron: Contact = entry
+		var knob := knob_of(patron, "cancels_on_rebellion")
+		if patron.is_dead or knob.is_empty():
+			continue
+		for event in declared:
+			patron.relationship.drift(-absf(float(knob.get("regard", 30.0))))
+			var ended := PackedStringArray()
+			if run.policies != null:
+				for policy in run.policies.held_by(patron.id):
+					run.policies.lapse(policy.id, log, month, "withdrew")
+					ended.append(String(policy.id))
+			log.emit(EVENT_WITHDREW, patron.id, month, {
+				"patron": String(patron.id),
+				"town": String(event.payload.get("town", event.subject)),
+				"policies": ended,
+			}, WorldPhase.RECKONING)
+
+
+## 🔒 **Doctrinaire** (§6): the resource he disapproves of, drawn at arrival from
+## the knob's list, or empty for anybody else.
+static func disapproved_of(contact: Contact, rng: RandomNumberGenerator) -> String:
+	var knob := knob_of(contact, "will_not_touch")
+	var choices: Array = knob.get("from", [])
+	if choices.is_empty() or rng == null:
+		return ""
+	return String(choices[rng.randi_range(0, choices.size() - 1)])
+
+
+## 🔒 **Each month the colony sells it to the Crown, his regard falls** (§6).
+static func doctrinaire_objects(run: RunState, log: EventLog, month: int) -> void:
+	if run == null:
+		return
+	for entry in Patron.all_in(run):
+		var patron: Contact = entry
+		if patron.is_dead or String(patron.disapproves).is_empty():
+			continue
+		var sold := 0.0
+		for event in log.of_type(Trade.EVENT_SOLD):
+			if event.month == month and String(event.payload.get("resource", "")) == patron.disapproves:
+				sold += float(event.payload.get("quantity", 0.0))
+		if sold <= 0.0:
+			continue
+		patron.relationship.drift(-absf(float(knob_of(patron, "will_not_touch").get("regard", 2.0))))
+		log.emit(EVENT_OBJECTED, patron.id, month, {
+			"patron": String(patron.id),
+			"resource": patron.disapproves,
+		}, WorldPhase.RECKONING)
+
+
+## 🔒 **Dilatory** (§6): how many months after the PC accepts it what he gives
+## lands. Nought for everybody else, whose land the month after.
+static func months_late(contact: Contact) -> int:
+	return maxi(0, int(knob_of(contact, "delivers_late").get("months", 0)))
+
+
+## 🔒 **Impatient** (§6): he offers his specialty once. After any offer of it,
+## whatever the answer, he never offers it again for his stay; an ordinary patron
+## may (§4).
+static func may_offer_his_specialty(contact: Contact, log: EventLog) -> bool:
+	if contact == null or log == null or not _has_knob(contact, "offers_once"):
+		return true
+	for event in log.of_type(Director.EVENT_DISPATCHED):
+		if event.subject == contact.id and Patron.SPECIALTY_OFFERS.has(String(event.payload.get("letter", ""))):
+			return false
+	return true
+
+
+static func _has_knob(contact: Contact, knob: String) -> bool:
+	for entry in knobs_of(contact.vice):
+		if (entry as Dictionary).has(knob):
+			return true
+	return false
 
 
 ## Turn every knob this man's vice names that is turned at arrival.

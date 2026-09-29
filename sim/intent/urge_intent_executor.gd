@@ -77,7 +77,10 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 		# letter rather than read off the man, because the urging outlives the
 		# month it arrived in and it is the letter that was emphatic, not the
 		# reader. **The PC's**, replacing his last and nobody else's (#405).
-		town.urge(Urging.from_pc(wanted, state.month, tone))
+		# **A partial answer lands a share of its pull** (#449).
+		var urging := Urging.from_pc(wanted, state.month, tone)
+		urging.strength *= intent.share()
+		town.urge(urging)
 	else:
 		# **Another hand's, as hard as his act was** (#401), replacing his own
 		# last and nobody else's.

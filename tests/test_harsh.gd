@@ -183,8 +183,7 @@ func test_it_pulls_toward_comply_and_toward_partial() -> void:
 	assert_true(float(pull[Compliance.COMPLY]) > 0.0, "a threat does not ask for the thing")
 	assert_true(float(pull[Compliance.PARTIAL]) > 0.0,
 		"leaning on a man pushed him away from doing part of it")
-	for sideways in [Compliance.DELAY, Compliance.REINTERPRET,
-			Compliance.REFUSE, Compliance.ACT_ALONE]:
+	for sideways in [Compliance.DELAY, Compliance.REFUSE, Compliance.ACT_ALONE]:
 		assert_true(float(pull[sideways]) < 0.0,
 			"a threat invited him to answer %s" % sideways)
 
@@ -253,7 +252,7 @@ func test_the_town_holds_it_against_the_crown_only_if_it_bore_the_order() -> voi
 
 	assert_true(bool(borne[String(Compliance.COMPLY)]), "doing it is not bearing it")
 	assert_true(bool(borne[String(Compliance.PARTIAL)]), "doing part of it is not bearing it")
-	for spared in [Compliance.DELAY, Compliance.REINTERPRET, Compliance.REFUSE]:
+	for spared in [Compliance.DELAY, Compliance.REFUSE]:
 		assert_false(bool(borne[String(spared)]),
 			"a town that never carried the order resented it anyway: %s" % spared)
 

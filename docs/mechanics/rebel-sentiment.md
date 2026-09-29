@@ -124,7 +124,8 @@ Timed contributors raised by discrete events. §12.3 and §11.3 between them nam
 - A refused request — the Crown did not help when asked
 - A broken promise, including one broken by Crown Standing (§10.3)
 - **Harsh orders**, with two rules of their own — below
-- Military abuses, which are M6 and authored but unraised
+- Military abuses: **dropped** (Author's ruling, #457). Nothing in the game is
+  one, so the grievance goes
 - Giving more in Relief than the town receives, repeatedly (§11.3)
 
 **Grievances decay rather than expiring flat.** A sentiment that drops several
@@ -178,6 +179,25 @@ to the town's mood; the other is organising it.
 Punishment (§12.3) raises the sentiment of the town it falls on, as its own
 standing part — and lowers a rebel town's persuasiveness elsewhere while it is
 being punished (§5). Both halves are the same instrument seen from two sides.
+
+### Made an example of
+
+Author's ruling (#457). SPEC §12.3 (v3.1): punishment is *"discouraging
+rebellion by hurting the town's quality of life to compel them toward crown
+loyalty."* The embargo is one way. Making an example is the other: the Crown's
+troops punishing a rebel town
+(`commanders.md` §5): its improvements razed, its expeditions struck, its tiles
+occupied so they yield nothing.
+
+**A town made an example of counts as punished** for 12 months (a placeholder):
+its example persuades its neighbours only a quarter as much, as an embargoed
+town's does (§4, *A rebelling neighbour*). What the punishment does to the town
+itself needs no term here: its quality of life falls, and that is what brings
+it back (§5).
+
+**Defeat at the Crown's hands has no term of its own either.** SPEC §12.3 has it
+lowering sentiment; since #230 the losses lower the rebel town's quality of
+life, which is the same thing said once.
 
 ### Quality of life
 

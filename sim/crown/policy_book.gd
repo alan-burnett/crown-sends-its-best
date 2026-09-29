@@ -132,8 +132,13 @@ func take_stock(log: EventLog, month: int) -> Dictionary:
 	var warned: Array[Policy] = []
 	var ended: Array[Policy] = []
 
+	var served: Array[Policy] = []
 	for policy in _policies.duplicate():
 		if policy.permanent:
+			continue
+		# A term served ends it, whatever else is true of it (#230).
+		if policy.expires_month >= 0 and month >= policy.expires_month:
+			served.append(policy)
 			continue
 		if policy.is_warning():
 			if month >= policy.ends_month:
@@ -154,6 +159,8 @@ func take_stock(log: EventLog, month: int) -> Dictionary:
 
 	for policy in ended:
 		lapse(policy.id, log, month)
+	for policy in served:
+		lapse(policy.id, log, month, "served_its_term")
 	return {"warned": warned, "ended": ended}
 
 
@@ -256,7 +263,7 @@ func cancel(id: StringName, contacts: Dictionary, log: EventLog, month: int) -> 
 
 
 ## An enactor will carry it no further.
-func lapse(id: StringName, log: EventLog, month: int) -> bool:
+func lapse(id: StringName, log: EventLog, month: int, reason: String = "lapsed") -> bool:
 	var policy := by_id(id)
 	if policy == null:
 		return false
@@ -265,7 +272,7 @@ func lapse(id: StringName, log: EventLog, month: int) -> bool:
 		log.emit(EVENT_ENDED, policy.enactor, month, {
 			"policy": String(policy.id),
 			"effect": String(policy.effect),
-			"reason": "lapsed",
+			"reason": reason,
 		}, WorldPhase.CROWNS_MONTH)
 	return true
 

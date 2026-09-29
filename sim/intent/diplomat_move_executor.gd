@@ -42,6 +42,11 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 		return Intent.OVERTAKEN_BY_EVENTS
 
 	var to := town_named(colony, String(intent.data.get("town", "")))
+	# 🔒 **Acting alone, he goes where he himself asked to go** (#449,
+	# `the-diplomat.md` §3), which is the town he would ask for from where he is.
+	if bool(intent.data.get(Intent.HIS_OWN_WAY, false)):
+		var home := town_named(colony, him.town)
+		to = Diplomat.destination_for(home, colony) if home != null else null
 	if to == null:
 		# The town was lost while the letter crossed.
 		return Intent.OVERTAKEN_BY_EVENTS

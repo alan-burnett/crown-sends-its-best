@@ -64,34 +64,6 @@
 		}
 	  ]
 	},
-	"steps": [
-	  {
-		"id": "terms",
-		"prompt": "How the town is received",
-		"options": [
-		  {
-			"id": "clemency",
-			"label": "let the matter rest there",
-			"text": "The matter is closed{insert:warmth}. I have no interest in punishing men for a hunger I did not relieve, and if the convoys are still stopped I shall write and stop the stopping of them.",
-			"insert": {
-			  "warmth": {
-				"pleased": ", and gladly"
-			  }
-			}
-		  },
-		  {
-			"id": "conditions",
-			"label": "receive them back, and say what it cost",
-			"text": "You are received back. I will not pretend the year did not happen, and neither should you when your people ask why the Crown is slow to trust them."
-		  },
-		  {
-			"id": "future",
-			"label": "ask what would keep them",
-			"text": "Tell me plainly what would keep this town in the Crown's peace, and I will tell you plainly which of it I can get."
-		  }
-		]
-	  }
-	],
 	"closing": [
 	  {
 		"text": "Yours,",

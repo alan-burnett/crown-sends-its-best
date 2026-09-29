@@ -43,6 +43,7 @@ static func register_all() -> void:
 	Deliberation.register_consideration(AsTheCrownUrged.new(), kinds)
 	Deliberation.register_filter(OnlyWhatCanBeYielded.new(), kinds)
 	Deliberation.register_filter(OnlyWhatHeHasToGive.new(), kinds)
+	Deliberation.register_filter(AnAskIsGivenOrRefused.new(), kinds)
 
 
 # --- What a gift is ---------------------------------------------------------------
@@ -56,6 +57,13 @@ static func register_all() -> void:
 static func gift_for(grievance: TribeGrievance, town: Town, village: Village, map: WorldMap) -> Dictionary:
 	if grievance == null or town == null:
 		return {}
+	if grievance.act == TribeGrievance.HELP_ABROAD:
+		# 🔒 **What they asked for, as much of it as the town holds** (#471).
+		var resource := String(grievance.asked.get("resource", ""))
+		var held := town.held(StringName(resource)) if not resource.is_empty() else 0.0
+		if held <= 0.0:
+			return {}
+		return {"resource": resource, "amount": minf(held, float(grievance.asked.get("amount", 0.0)))}
 	var worth := month_of_the_tile(grievance.at, map)
 	var appetite := NativeTrade.appetite_of(village)
 	var wanted: Array = appetite.keys()
@@ -223,6 +231,19 @@ class OnlyWhatCanBeYielded extends DeliberationFilter:
 			return true
 		var grievance := GrievanceConsiderations._grievance(context)
 		return grievance != null and grievance.may_be_yielded()
+
+
+## 🔒 **An ask is given or refused** (#471, `natives.md` §7): there is no
+## field to yield and no threat to make over a request for help.
+class AnAskIsGivenOrRefused extends DeliberationFilter:
+	func _init() -> void:
+		super(&"an_ask_is_given_or_refused")
+
+	func permits(_actor: DeliberationActor, candidate: Candidate, context: DeliberationContext) -> bool:
+		var grievance := GrievanceConsiderations._grievance(context)
+		if grievance == null or grievance.act != TribeGrievance.HELP_ABROAD:
+			return true
+		return candidate.id == TribeGrievance.GIFT or candidate.id == TribeGrievance.REFUSE
 
 
 ## 🔒 **Nobody gives what his town does not hold.**

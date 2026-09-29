@@ -254,7 +254,8 @@ func test_a_rate_change_can_be_delayed_by_the_steward() -> void:
 	# SPEC §10.2: at low loyalty, doing something he advised against, he may
 	# delay — the outcome already exists in the compliance system.
 	assert_true(Compliance.OUTCOMES.has(Compliance.DELAY))
-	assert_true(int(Compliance.MONTHS_FOR[Compliance.DELAY]) > int(Compliance.MONTHS_FOR[Compliance.COMPLY]))
+	# **The comply result, later** (#449): a delay is held back, not lengthened.
+	assert_true(Compliance.DELAY_MONTHS > 0)
 
 
 func test_the_unilateral_path_is_behind_the_crown_standing_seam() -> void:

@@ -40,6 +40,11 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 			_arrive(state, log)
 		WorldPhase.RECKONING:
 			PatronGossip.spread(run, log, state.month)
+			# 🔒 **Two vices read the month just run** (#444, `patrons.md` §6): a
+			# declaration last month, and a sale this month of what a man will
+			# not touch.
+			PatronVices.respectable_withdraws(run, log, state.month)
+			PatronVices.doctrinaire_objects(run, log, state.month)
 			# 🔒 **Terms before the regard is read** (#283). A man who goes this
 			# month has his final loyalty banked and is gone from the roster, so
 			# the live figure below is the men who are still here — which is what
@@ -59,6 +64,9 @@ func _arrive(state: WorldState, log: EventLog) -> void:
 	var here := Patron.all_in(run).size()
 	while here < wanted:
 		var patron := Patron.generate(run.patrons.next_id(), run.streams, state.month, run.patrons)
+		# 🔒 **He has heard what the court says of the PC** (#466, §7): his
+		# regard starts warmer or colder by the band, read the month he arrives.
+		Patron.hear_of_the_pc(patron, run.prestige)
 		run.add_contact(patron)
 		here += 1
 		# Seam A. What he is, said once, so the letters and the map read the same

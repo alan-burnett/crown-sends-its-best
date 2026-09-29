@@ -1,5 +1,9 @@
 [
   { "id": "portrait.marshal", "path": "res://icon.svg" },
   { "id": "portrait.chancellor", "path": "res://icon.svg" },
-  { "id": "portrait.steward", "path": "res://icon.svg" }
+  { "id": "portrait.steward", "path": "res://icon.svg" },
+  { "id": "portrait.pc_1", "path": "res://icon.svg" },
+  { "id": "portrait.pc_2", "path": "res://icon.svg" },
+  { "id": "portrait.pc_3", "path": "res://icon.svg" },
+  { "id": "portrait.pc_4", "path": "res://icon.svg" }
 ]

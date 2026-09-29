@@ -65,8 +65,7 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, _streams: Rng
 func _keys_to_clear(state: WorldState) -> PackedStringArray:
 	var keys: PackedStringArray = PackedStringArray()
 	for key in state.value_keys():
-		if String(key).begins_with(POLICY_PREFIX) \
-				or String(key) == WorldValues.IMMIGRATION:
+		if String(key).begins_with(POLICY_PREFIX):
 			keys.append(String(key))
 	keys.sort()
 	return keys

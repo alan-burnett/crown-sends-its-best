@@ -25,13 +25,11 @@ extends IntentExecutor
 ## A dev who adds an optic here has made the third door cost something, and the
 ## whole mechanic is that it does not.
 ##
-## ## 🔒 A skipped demand is not a deferred attack
+## ## 🔒 A skipped demand is not a bought peace
 ##
-## `TributeExecutor` writes `rival.quiet_until.` when the PC **pays**, which is
-## about whether the duke comes for the colony. This is about whether he writes
-## again. **Two keys**, for the same reason #210 split the state change from the
-## optic: one name for two things is how paying a man quietly came to mean he had
-## also stopped asking.
+## This is about whether he writes again, and nothing else. Paying him buys
+## regard and no quiet at all (#458); being sent to collect elsewhere buys a
+## skipped demand and no regard at all.
 
 const KIND: StringName = &"deflect_tribute"
 

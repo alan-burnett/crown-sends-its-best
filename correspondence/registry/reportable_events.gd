@@ -81,6 +81,47 @@ const TABLE: Dictionary = {
 		"man": "duke",
 		"fields": {"town": "town", "duke": "rival", "men": "integer", "gold": "gold"},
 	},
+	# The gunsmith's machines have broken, and the quartermaster asks what it
+	# costs to mend them (#438).
+	# The Steward raised a duty over the PC's head, and says so after (#452).
+	"steward_raised_the_duty": {
+		"man": "steward",
+		"fields": {"resource": "resource"},
+	},
+	"gunsmith_machines_broke": {
+		"town": "town",
+		"man": "quartermaster",
+		"fields": {"town": "town", "amount": "gold"},
+	},
+	# 🔒 **A Crown commander asked to make an example of a rebel town, or did it
+	# without asking** (#457, `commanders.md` §5). His letter either way.
+	"punishment_proposed": {
+		"town": "town",
+		"man": "commander",
+		"fields": {"town": "town"},
+	},
+	"made_an_example_unasked": {
+		"town": "town",
+		"man": "commander",
+		"fields": {"town": "town"},
+	},
+	# 🔒 **A Respectable patron withdrew, or a Doctrinaire one minds a sale**
+	# (#444, `patrons.md` §6). His letter either way.
+	"patron_withdrew": {
+		"town": "town",
+		"man": "patron",
+		"fields": {"town": "town"},
+	},
+	"patron_objected": {
+		"man": "patron",
+		"fields": {"resource": "resource"},
+	},
+	# 🔒 **The colony has fallen** (#470, `endings.md` §1): no town and nobody
+	# walking. The last chance hangs off it — the Chancellor's formal warning and
+	# the Provost's offer of a town by sea, both in the month it falls.
+	"colony_fell": {
+		"fields": {},
+	},
 }
 
 
@@ -152,6 +193,9 @@ static func read(happened: SimEvent, event: String, field: String, context: Lett
 		"contact", "rival":
 			var contact: Contact = context.contacts.get(String(raw))
 			return "" if contact == null else contact.display_name
+		"resource":
+			# A resource param carries its id, as every other letter's does.
+			return String(raw) if ResourceCatalogue.has(StringName(raw)) else ""
 	return ""
 
 

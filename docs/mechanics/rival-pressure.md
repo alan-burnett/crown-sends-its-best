@@ -76,6 +76,11 @@ Appeasement is **genuinely effective**. Paying raises loyalty, which keeps the
 duke in the band where his demands are cheap and his patience is long. A player
 who pays promptly can hold a rival at High for decades.
 
+**Regard is the whole of what it buys** (Author's ruling, #458). SPEC §8.4's
+*"may defer the risk of an attack"* is the bands doing their work: a duke kept at
+High or Medium does not attack. There is no separate period of quiet after a
+payment.
+
 It also costs twice, and both costs are permanent:
 
 - **The gold leaves `net_position`**, which lowers Crown Standing *and* prestige

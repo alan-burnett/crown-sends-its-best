@@ -1,6 +1,6 @@
 # SPEC — *The Crown Sends Its Best*
 
-> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v3.0: Under Author ownership, actively being read by PO and Dev
+> **Owner:** Alan (Author). This file is the source of truth for the game's design. **Status:** v3.1: Under Author ownership, actively being read by PO and Dev
 
 ---
 
@@ -217,12 +217,12 @@ These five contacts are the same in every run and are **not randomized**. Each o
 
 - Each of the three rivals has a ‘duke’ who will be your only contact.  
 - The relationship is purely adversarial, they covet the land your colony is on, especially if your colony prospers. They will bully you into giving them gold, attack your colony, and mislead you about their intentions.   
-- Rivals will not ask for help with other rivals or with natives. They will not offer any of their own resources to you. They will either ignore you, make demands, or attack. Accepting their demands may defer the risk of an attack but will never create a peaceful or mutually beneficial relationship. 
+- Rivals will not ask for help with other rivals or with natives. They will not offer any of their own resources to you or loyal towns (they may assist rebel towns). They will either ignore you, make demands, or attack. Accepting their demands may defer the risk of an attack but will never create a peaceful or mutually beneficial relationship. 
 
 ### 8.5 Loyalty and Compliance
 
 - **🔒 Your orders are requests.** Whether and how a contact carries out a letter depends on their **loyalty**, **personality**, and **circumstances**.  
-- Possible outcomes range from full compliance through partial compliance, delay, and reinterpretation to outright refusal. Contacts may also act on their own and simply inform the PC afterward, especially if their loyalty is low.  
+- Possible outcomes range from full compliance through partial compliance, delay, and outright refusal. Contacts may also act on their own and simply inform the PC afterward, especially if their loyalty is low.  
   - Examples: a town close to rebellion ignores an order to stop making guns. A Crown officer ignores a request to lower taxes and announces a decision "on your behalf."  
 - The PC's letters raise or lower loyalty over time, so goodwill works like a currency.  
 - Costly requests will reduce the contact’s loyalty unless you make it up to them. If you request troops from the Marshal and pay generously, his loyalty will not shrink. If you make a smaller payment or don’t pay anything, it will cost you loyalty.   
@@ -278,7 +278,7 @@ Choosing not to reply is always an option. Its effect depends on what the letter
 
 ### 9.4 Composing New Letters
 
-- The player picks a **contact** and a **purpose**, such as requesting troops, changing a tax, ordering construction, proposing a trade, or encouraging immigration. The letter is then built the same way as a reply.  
+- The player picks a **contact** and a **purpose**, such as requesting troops, changing a tax, swaying a governor’s intent for his town, or encouraging immigration. The letter is then built the same way as a reply.  
 - The purposes available depend on the recipient's role and the current game state.
 
 ### 9.5 Promises
@@ -312,7 +312,7 @@ A typical run will only have so many letters per turn, increasing as the game go
 
 ### 10.1 Resources
 
-- Towns produce, consume, stockpile, buy, and sell resources. Buying or selling resources is a transaction with the crown, and pays the tax rate for that resource. Towns trade resources with other towns and natives, never rivals, with no tax.   
+- Towns produce, consume, stockpile, buy, and sell resources. Buying or selling resources is a transaction with the crown, and the town pays the tax rate for that resource (unless an active policy forgives the taxes). Towns trade resources with other towns and natives, never rivals, with no tax.   
 - Raw Resources:   
   - Food. Consumed by town population every month. Stockpiled food contributes positively to a town’s quality of life. Not having enough food to meet the town’s demand negatively impacts quality of life and can reduce population. Towns convert food into ‘beer’   
   - Wood. Consumed by buildings and improvements.   
@@ -338,13 +338,13 @@ A typical run will only have so many letters per turn, increasing as the game go
 
 - **🔒 The player’s gold is not a simple wallet.** The player never manages a single balance that just has to stay positive. The crown spends gold to honor the player’s promises. (§10.3).   
 - Towns **buy from and sell to the Crown**, and both kinds of trade **generate tax income** for the crown.  
-- Towns have a balance of gold hidden from the player, representing the sum of all its population’s wealth. The town never trades gold with natives or other towns. The town will spend gold to buy resources from the crown to meet its objectives and improve its quality of life. Towns earn gold by selling resources to the crown.   
+- Towns have a balance of gold hidden from the player, representing the sum of all its population’s wealth. The town never trades gold with natives or other towns. The town will spend gold to buy resources from the crown to meet its objectives and improve its quality of life. Towns earn gold by selling resources to the crown, or through interactions with the crown. Rebel towns can be given gold from Dukes.   
 - **Tax structure:**  
   - **One base rate** applies to all resources across the whole colony.  
   - **Per-resource rates** can override the base rate for specific resources, also colony-wide.  
   - There are **no per-town rates**.  
   - The steward will follow your instruction about adjusting tax rates, and offer his advice with his bias (he prefers high taxes)  
-  - When loyalty is low and you are doing something he does not advice, he may delay, but he will not outright refuse to follow your instruction while your crown standing is still paying your debts.  
+  - When loyalty is low and you are doing something he does not advise, he will not outright refuse to follow your instruction while your crown standing is still paying your debts.  
   - If your crown standing is lost and the steward’s loyalty is low, he may unilaterally raise taxes and inform you after the fact, ignoring your input.   
 - When non-luxury resources are taxed, colonists will spend the same amount of money, and receive less of the resource, which gives the town fewer resources to work with. Towns increase rebel sentiment as they pay taxes on these resources. When **luxury resources** are taxed, there is much less rebel sentiment as a result, but the town will spend less money on the resources. This reflects that they can more easily go without luxury resources than other resources.  
 - When a town decides to do so, they will hold a trade protest. They decide based on  
@@ -363,7 +363,7 @@ A typical run will only have so many letters per turn, increasing as the game go
 ### 10.3 Crown Standing ("a bottomless pit until it isn't")
 
 - Early in a run, the Crown pays whatever the PC promises, and the treasury looks limitless.  
-- Behind the scenes, **Crown Standing** tracks the colony's financial record: revenue against spending, and demands met against demands missed.  
+- Behind the scenes, **Crown Standing** tracks the trust the crown has that the colony will repay its debts.  
 - When standing begins to fall, the **Steward** warns the PC and makes suggestions to help. When it has reached a breaking point, the **Chancellor** will issue a final warning to the PC. If it falls further, the Crown **refuses all payments**, and promises made in the PC's letters get broken. The Crown resumes honoring payments once standing recovers.  
 - **🔒 The player always gets the Chancellor’s warning before the Crown first refuses to honor the player’s promised gold.** The player has many chances to promise gold through letters (accepting a clergyman’s request for charity, requesting troops from the marshal, enacting an expensive policy through the provost, etc), and these all affect your crown standing the same way. 
 
@@ -422,7 +422,7 @@ Each town has:
 - An intent of "increase economic output" might produce a plantation this year and a dock the next. The intent did not change; the best way to serve it did.  
 - **🔒 An intent might not serve the town's welfare.** A governor bent on driving off a tribe will pursue that at his people's expense. This is his to judge and the PC's to argue with.
 
-**Reconsideration.** A town holds its objective until it completes or **stalls** — the governor judges it can no longer be advanced, as when a militia needs guns the town can no longer forge. The stall check runs every month and is deterministic, not a matter of temperament: a governor who has not stalled does not waver.
+**Reconsideration.** A town holds its objective until it completes or **stalls** — the governor judges it can no longer be advanced, as when the town has no access to the tools it needs to complete a building. The stall check runs every month and is deterministic, not a matter of temperament: a governor who has not stalled does not waver.
 
 The Colony Month. The month resolves in nine phases. 🔒 Every town completes a phase before any town begins the next, and every choice in a phase is made from the colony's state as it stood when that phase began. No town benefits from being simulated first, and ties are broken by a rule fixed by the seed.
 
@@ -481,7 +481,7 @@ A town tracks three distinct types of population
 ### 12.3 Rebel Sentiment and Rebellion
 
 - **Rebel sentiment is tracked for each town.**  
-- **Raised by:** taxes (especially on non-luxuries), shortages, harsh orders, broken promises, military abuses, neglect, and **development itself** — a town with more buildings, more trade, and more people of standing carries more sentiment than a hamlet.  
+- **Raised by:** taxes (especially on non-luxuries), shortages, harsh orders, broken promises, neglect, and **development itself** — a town with more buildings, more trade, and more people of standing carries more sentiment than a hamlet.  
 - **Lowered by:** meeting needs, lower taxes, investment, favors to loyal contacts, and defeats suffered at the hands of crown troops.  
 - **Individual towns rebel.** Past a threshold, a single town declares rebellion and stops obeying the PC.  
 - **A rebel town is still part of the colony.** In the Crown's eyes it still belongs to the PC. Its people are misbehaving, and the PC's job is to bring them back into line. This is different from a **lost town**, which rivals or natives have destroyed or taken and which no longer belongs to the colony.  
@@ -496,10 +496,10 @@ A town tracks three distinct types of population
   - Loyal colonists will pay taxes, but they **will not take up arms against other colonists**. Suppressing a rebellion by force therefore depends on **Crown troops**, supplied by the Marshal.  
 - **Winning towns back.** The PC has three broad approaches:  
   - **Force:** retaking the town with Crown troops.  
-  - **Punishment:** discouraging rebellion with embargoes, penalties, and making an example of the town.  
+  - **Punishment:** discouraging rebellion by hurting the town’s quality of life to compel them toward crown loyalty.   
   - **Reward and persuasion:** encouraging loyalty with concessions, investment, favors, and public relations.  
 - **🔒 Rebel towns can return peacefully.** A rebel town goes back to the Crown on its own once its people believe life was better under the Crown, or would be better if they returned.  
-- **🔒 Sentiment measures who is blamed, not how bad life is.** Suffering the Crown caused raises it; suffering the rebellion caused lowers it. Battle losses at the hands of the Crown is damage only a rebelling town can incur, so the people blame the rebellion.   
+- **🔒 Sentiment measures who is blamed, not how bad life is.** Suffering the Crown caused raises it; suffering the rebellion caused lowers it. Battle losses at the hands of the Crown is damage only a rebelling town can incur, so the people blame the rebellion. This is achieved by a low quality of life being able to ‘flip’ a town in either direction.  
 - If every town rebels and the Crown will send no more troops, the result is the **Independence** fail condition (§13.1).
 
 ### 12.4 Rivals
@@ -515,10 +515,10 @@ A town tracks three distinct types of population
 - They hold land and act on their own interests. They trade, ally, resist, and retaliate.  
 - **Confrontation is inevitable**, and how it plays out is decided by the governors of the towns that interact with them. Your letters to these governors can influence these interactions.   
 - **🔒 Natives are full actors in the simulation** with their own goals, not obstacles on the map.  
-- Each of the three native tribes has an invisible ‘trust’ value representing their attitude toward the colony as a whole. They generally want a peaceful coexistence with your colony, but will be offended by your continued expansion and exploitation of the land, and trust can be permanently broken by aggressive behavior from any colonists.   
+- Each of the three native tribes has an invisible ‘trust’ value representing their attitude toward the colony as a whole. They generally want a peaceful coexistence with your colony, but will be offended by your continued expansion and exploitation of the land, and trust can be permanently broken if it reaches a certain threshold.   
 - Colony contacts will report about the native's behavior from their own lens, leaving the inner workings of the tribe mostly invisible to the player.   
 - Tribes with high trust may provide experts, resources, or troops to the colony.   
-- Native tribes manage their own diplomacy with your rivals and with other native tribes, and they may ask governors for resources to assist in their war efforts. Governors may ask you how to respond to these requests  
+- Native tribes may ask governors for resources to assist in their war efforts. Governors may ask you how to respond to these requests  
 - Natives have their own ‘towns’ called ‘villages’. They do not build buildings, but they do work the land, feed their population, and have the potential to grow in population and influence. 
 
 ### 12.6 Military

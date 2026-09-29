@@ -47,6 +47,7 @@ const ANSWERS: Array[StringName] = [
 	M1Registrations.ORDER_PROMISE_RESOURCE,
 	M1Registrations.ORDER_PROMISE_REVENUE,
 	M1Registrations.ORDER_PROMISE_SHIPMENT,
+	M1Registrations.ORDER_PROMISE_TO_RETRENCH,
 	M1Registrations.ORDER_DECLINE_DEMAND,
 	M1Registrations.ORDER_FUND_POLICY,
 	M1Registrations.ORDER_END_POLICY,
@@ -56,6 +57,15 @@ const ANSWERS: Array[StringName] = [
 	M1Registrations.ORDER_PAY_TRIBUTE,
 	M1Registrations.ORDER_FUND_FOUNDING,
 	M1Registrations.ORDER_ADJUST_LOYALTY,
+	# 🔒 **Accepting what he offered, and the waiver and deflection asked for**
+	# (#449, `contacts.md` §3): he offered it, so he does it; the clergyman asked
+	# for his waiver; deflecting a duke's tribute is the third answer to his
+	# demand, beside paying and declining.
+	M1Registrations.ORDER_TROUBLE_A_DUKE,
+	M1Registrations.ORDER_SEND_AN_EXPERT,
+	M1Registrations.ORDER_GIVE_THE_CROWN_GOLD,
+	M1Registrations.ORDER_WAIVE_DUTY,
+	M1Registrations.ORDER_DEFLECT_TRIBUTE,
 ]
 
 ## **You want something from him**, and how much of it he does is a question with

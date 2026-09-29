@@ -17,6 +17,12 @@
 		"a_rival_has_a_hand_out": {}
 	  },
 	  {
+		"he_has_arrived": {}
+	  },
+	  {
+		"he_asks_for_tribute": {}
+	  },
+	  {
 		"he_is_free_to_demand": {}
 	  }
 	]
@@ -39,6 +45,12 @@
 		"a_rival_has_a_hand_out": {}
 	  },
 	  {
+		"he_has_arrived": {}
+	  },
+	  {
+		"he_asks_for_tribute": {}
+	  },
+	  {
 		"he_is_free_to_demand": {}
 	  }
 	]
@@ -59,6 +71,12 @@
 	"conditions": [
 	  {
 		"a_rival_has_a_hand_out": {}
+	  },
+	  {
+		"he_has_arrived": {}
+	  },
+	  {
+		"he_asks_for_tribute": {}
 	  },
 	  {
 		"he_is_free_to_demand": {}

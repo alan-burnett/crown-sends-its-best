@@ -180,7 +180,8 @@ He sees it in **the tone and content of letters from Crown contacts, and above
 all from patrons.** §14.1 says some contacts change what they ask of the PC based
 on it, and names patrons as the clearest case: a well-regarded PC is offered
 ventures and treated as a peer, a laughing-stock is condescended to or not
-written to at all.
+written to at all. How, is `patrons.md` §7 (#466): a patron arrives warmer or
+colder by the PC's band, and offers nothing while it is ruinous.
 
 ### Prestige is not loyalty, and the two must not be confused
 

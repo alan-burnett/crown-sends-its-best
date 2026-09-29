@@ -20,8 +20,8 @@ extends RefCounted
 ## is an invitation to register a weight against it.
 const GOVERNOR_INTENT: StringName = &"governor_intent"
 
-## A contact complies, partly complies, delays, reinterprets, refuses, or acts
-## alone (SPEC §8.5).
+## A contact complies, partly complies, delays, refuses, or acts alone (SPEC
+## §8.5). Reinterpretation was cut (#449).
 const ORDER_COMPLIANCE: StringName = &"order_compliance"
 
 ## A contact decides for himself when the PC does not reply (SPEC §9.3).
@@ -29,6 +29,11 @@ const UNANSWERED: StringName = &"unanswered"
 
 ## The director decides who writes to the PC and about what (SPEC §9.6).
 const DIRECTOR_URGENCY: StringName = &"director_urgency"
+
+## 🔒 **The Steward raises a duty over the PC's head** (#452, SPEC §10.2,
+## `the-steward.md` §3): raise or hold, with standing lost and his regard low as
+## a filter. §8.5's *act alone*, for the one man the spec says does it unasked.
+const STEWARD_RAISES: StringName = &"steward_raises"
 
 ## **A trade protest is not here, and must not be added** (#131).
 ##
@@ -93,6 +98,7 @@ const ALL: Array[StringName] = [
 	COMMANDER_ORDERS,
 	COMMANDER_OBJECTIVE,
 	TRIBE_GRIEVANCE,
+	STEWARD_RAISES,
 ]
 
 

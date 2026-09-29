@@ -32,6 +32,10 @@ func before_each() -> void:
 	machine.use_content(content)
 	machine.saves_on_send = false
 	run.world.month = 2
+	# His push names the most-traded resource (#452), so the month has trade in
+	# it — in another town, so what this governor's town trades is each test's.
+	run.log.emit(Trade.EVENT_SOLD, &"elsewhere", run.world.month,
+		{"town": "elsewhere", "resource": "clothing", "gross": 100.0}, WorldPhase.COLONY_MONTH)
 
 
 func after_each() -> void:

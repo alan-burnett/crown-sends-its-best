@@ -294,12 +294,12 @@ func test_an_order_with_no_world_effect_completes_rather_than_stalling() -> void
 	# A stall means "nothing could carry this out", which is a much louder claim
 	# than "there was nothing to do".
 	var effects := TurnMachine.order_effects()
-	assert_eq(String(effects[String(M1Registrations.ORDER_SET_POLICY)]["target"]), "",
-		"set_policy has no world effect in M1")
+	assert_eq(String(effects[String(M1Registrations.ORDER_PROMISE_TO_RETRENCH)]["target"]), "",
+		"a promise to retrench has no world effect of its own")
 
 	var executor := WorldValueExecutor.new()
 	executor.table = effects
-	var intent := Intent.new(&"", M1Registrations.ORDER_SET_POLICY, &"steward", &"", 1, {})
+	var intent := Intent.new(&"", M1Registrations.ORDER_PROMISE_TO_RETRENCH, &"chancellor", &"", 1, {})
 	run.intents.commit(intent, run.log, run.world.month)
 	run.world.advance_month(run.log)
 	IntentExecutor.run_month([executor], run.intents, run.world, run.log)

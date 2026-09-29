@@ -30,24 +30,6 @@
 				{ "tone": "annoyed", "text": "with the contempt your stationery deserves" },
 				{ "tone": "hateful", "text": "knowing precisely how much you have enjoyed writing it" }
 			]
-		},
-		"steps": [
-			{
-				"id": "answer",
-				"prompt": "What the Chancellor is to carry back",
-				"options": [
-					{
-						"id": "fight",
-						"label": "that the colony is not finished",
-						"text": "You may tell the court that the colony stands, and that I intend it to go on standing."
-					},
-					{
-						"id": "silence",
-						"label": "nothing at all",
-						"text": "You may tell the court nothing. It has heard quite enough from you."
-					}
-				]
-			}
-		]
+		}
 	}
 }

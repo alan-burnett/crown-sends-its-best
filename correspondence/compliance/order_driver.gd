@@ -47,6 +47,11 @@ var results: Array[Dictionary] = []
 ## The seam crown standing (M3) plugs into. For M1 the Crown always pays.
 var can_crown_pay: bool = true
 
+## 🔒 **Whether the Crown is still honouring what the PC pledges** (#449). Read
+## as each order is resolved, so a full payment is a guarantee only while it is
+## real.
+var refusal: CrownRefusal = null
+
 
 func _init(p_intents: IntentBook = null, p_promises: PromiseBook = null) -> void:
 	intents = p_intents
@@ -88,7 +93,8 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 			promises.make(promise, contact, log, state.month)
 
 		var rebel: Town = null if colony == null else colony.governed_by(contact.id)
-		var result := Compliance.resolve(order, contact, intents, state, log, streams, rebel)
+		var pays := can_crown_pay and (refusal == null or refusal.pays())
+		var result := Compliance.resolve(order, contact, intents, state, log, streams, rebel, pays)
 		result["order"] = order
 		results.append(result)
 		_enact_if_agreed(order, contact, result, state, log)
@@ -101,10 +107,15 @@ func on_phase(phase: StringName, state: WorldState, log: EventLog, streams: RngS
 
 ## A policy stands from the month its enactor agrees to it.
 ##
-## **Only on a full compliance.** A policy half-agreed to is not a thing: he
-## either puts his name to it or he does not, and a delay or a reinterpretation
-## is the same as a no. That is the one place a policy differs from an ordinary
-## Order, and it is because it is a standing commitment rather than a task.
+## 🔒 **Whatever he agreed to, he enacts** (#449, `policy.md` §3). *The policy
+## always works at full strength*, so there is no half of one to put in place:
+## comply, partial and act alone all enact it now, and only a
+## refusal enacts nothing. **A delay enacts it when the delay is up** — the
+## Intent carries it, and `PolicyEnactExecutor` puts his name to it the month it
+## completes, which is what makes the Marshal's *by the spring* true.
+##
+## This used to enact on compliance alone, so a troop request paid in full and
+## delayed produced no troops while his letter promised them.
 func _enact_if_agreed(
 	order: Order,
 	contact: Contact,
@@ -114,7 +125,16 @@ func _enact_if_agreed(
 ) -> void:
 	if policies == null or order.kind != M1Registrations.ORDER_ENACT_POLICY:
 		return
-	if String(result.get("outcome", "")) != String(Compliance.COMPLY):
+	var outcome := String(result.get("outcome", ""))
+	if outcome == String(Compliance.REFUSE) or outcome == String(Compliance.DELAY):
+		return
+	# 🔒 **Acting alone, a policy is not enacted** (#449); he carries on as he
+	# was. Troops are the exception, and land one strength less.
+	if outcome == String(Compliance.ACT_ALONE) and not Compliance.is_troops(order):
+		return
+	# **A dilatory man's policy takes effect late** (#444), when its Intent comes
+	# due, exactly as a delayed one does.
+	if PatronVices.months_late(contact) > 0:
 		return
 
 	var effect := StringName(order.get_param("effect", ""))
@@ -122,13 +142,24 @@ func _enact_if_agreed(
 		push_error("Unknown policy effect '%s'. Add it to PolicyEffects." % effect)
 		return
 
+	# **Troops granted in part, or as his own decision, land one strength less**
+	# (#449, `contacts.md` §3). One less than a garrison is none, and nothing lands.
+	var intent: Variant = result.get("intent", null)
+	var params: Dictionary = order.params.duplicate()
+	if Compliance.is_troops(order) and (outcome == String(Compliance.PARTIAL) or outcome == String(Compliance.ACT_ALONE)):
+		params["strength"] = String(CrownTroops.one_less(StringName(params.get("strength", ""))))
+		if not CrownTroops.is_a_strength(StringName(params["strength"])):
+			return
 	policies.enact(Policy.new(
 		contact.id,
 		effect,
-		float(order.get_param("cost", 0.0)),
-		StringName(order.get_param("split", Policy.NONE)),
-		order.params,
+		float(params.get("cost", 0.0)),
+		StringName(params.get("split", Policy.NONE)),
+		params,
 	), log, state.month)
+	# Enacted once: the Intent this outcome made must not enact it again.
+	if intent is Intent:
+		(intent as Intent).data[PolicyEnactExecutor.ENACTED] = true
 
 
 ## 🔒 **The PC's word on how to answer a tribe reaches the letter he asked about**

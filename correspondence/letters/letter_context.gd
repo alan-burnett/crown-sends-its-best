@@ -108,6 +108,9 @@ var colony: Colony = null
 ## The companies in the field (#394), so a commander's letter can read his own.
 var companies: Companies = null
 
+## The parties in the open (#454), so a letter can find the governor on the march.
+var parties: Array = []
+
 ## The peoples already here (#208, `natives.md` §1).
 ##
 ## 🔒 **Nothing about a tribe reaches the PC except through his own people.**

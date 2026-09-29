@@ -55,6 +55,13 @@ behaviour," and it is a better rule than a trigger: **it is not one massacre, it
 is a pattern that finally convinces them.** A tribe reaches a conclusion about
 what the colony is for, and once it has, there is nothing left to discuss.
 
+**One score, and everything counts toward it.** Author's ruling (#456). Every
+act in §3 that lowers standing can carry it past the point of no return:
+towns pressing onto their land, expeditions crossing it, and blood spilled alike.
+There is no second measure of aggression, and no floor that only an attack may
+break. When the score falls low enough the tribe is hostile, and it cannot be
+turned back.
+
 It is held **per faction**, so a tribe may conclude that the Crown's soldiers
 mean it destroyed while still dealing with the colonists, or the reverse.
 
@@ -64,17 +71,34 @@ Downward, per §12.5 and §11.4:
 
 - **Founding near or beyond their land**, in proportion to the intrusion.
 - **Working land they hold** — the exploitation §12.5 names.
-- **Aggression by any colonist**, which is the only thing that reaches the point
-  of no return.
-- A **military** governor whose company marches on them (§11.3) — the clearest
-  route to that point, and one the PC can argue against but not forbid. What a
-  tribe notices of the colony's acts, and how it answers, is §11.
+- **An expedition crossing their land**, in proportion to how deep it goes, the
+  first month it stands there (§11).
+- **Attacking their people**, by the blood spilled (below). A **military**
+  governor's company marching on them (`commanders.md` §3) is the clearest route
+  to the point of no return, and one the PC can argue against but not forbid.
+
+Every one of these can carry them past the point of no return (§2). What a tribe
+notices of the colony's acts, and how it answers, is §11.
+
+### By the blood spilled
+
+Author's ruling (#456). **An attack on a tribe's people costs standing in
+proportion to the share of the tribe killed that month**: twice the share, in
+points (a placeholder), so a tenth of the tribe killed costs 20. A skirmish barely
+registers; a village put to the sword latches at once. The standing lost is
+toward whoever did it: the colony for colonial companies, the Crown's troops for
+theirs (§2).
+
+**A village can be attacked.** A colonial or Crown company whose foe it is
+(`commanders.md` §3) fights it as it would a town (`battles.md` §9), but with no
+wall: a village fortifies nothing (§4). A village emptied of people is gone, and
+its land is free.
 
 Upward:
 
 - **Trade**, kept up over time.
 - **Meeting their requests** for resources when they ask a governor for help with
-  their own wars (§12.5).
+  troubles abroad (§12.5, and *They ask for help*, below).
 - Time, and being left alone.
 
 ## 4. The village
@@ -174,9 +198,22 @@ tribes: no trade, no combat.** A native war party and a duke's company pass each
 other by, and two tribes never fight. Whatever a tribe has decided about the
 colony, it settles with the colony.
 
-SPEC §12.5's diplomacy with rivals and between tribes, with tribes at war with
-one another and asking governors to help their war effort, is **deferred past
-M8**, as a consideration for a future feature.
+SPEC v3.1 drops §12.5's diplomacy with rivals and between tribes: tribes at war
+with one another is a consideration for a future feature, not this game.
+
+### They ask for help with troubles abroad
+
+Author's ruling (v3.1). SPEC §12.5 keeps *"native tribes may ask governors for
+resources to assist in their war efforts."* With no wars on the map, **those wars
+are beyond it, and never named.**
+
+- **Now and then a tribe asks a governor for guns, tools or horses** for its
+  troubles: at most once a year per tribe, and only while its standing toward the
+  colony is civil or better (placeholders).
+- **The governor may ask the PC how to answer**, as a loyal one does with a
+  grievance (§11).
+- **Meeting the ask raises the tribe's standing** (§3). Refusing it leaves the
+  standing where it was.
 
 ## 8. The player sees almost none of it
 
@@ -190,8 +227,8 @@ movement on the map — and only if he is paying attention.
 
 Native affairs reach the desk directly in two places, both through a governor:
 
-- §12.5's last line: a tribe asks a governor for resources for its own war, and
-  **the governor asks the PC how to answer.**
+- §12.5's last line: a tribe asks a governor for resources for its troubles
+  abroad (§7), and **the governor asks the PC how to answer.**
 - **A tribe's grievance** (§11), which a loyal governor passes on before he
   answers it.
 
@@ -242,7 +279,7 @@ see is men in their fields.
 
 ### What a tribe notices
 
-Four acts, each on ground that lies **in its land or within `Intrusion`'s
+Five acts, each on ground that lies **in its land or within `Intrusion`'s
 margin** of it. How much each offends is `Intrusion`'s depth, as founding
 already is (§3).
 
@@ -251,6 +288,7 @@ already is (§3).
 | **Land worked** | the first month a town works the tile |
 | **An improvement built** | the month it is completed |
 | **A company on its ground** | the first month a colonial or Crown company stands there — an exploring party included (`commanders.md` §3) |
+| **An expedition on its ground** | the first month a travelling expedition stands there (#456) |
 | **A town founded** | the month it is founded, as today |
 
 Each is read from the event log (Seam A), as `StandingDriver` already reads

@@ -98,6 +98,10 @@ const PURSE_PER_HEAD: float = 12.0
 ## Beasts per settler at the top of the Provost's livestock knob. Tuning.
 const BEASTS_PER_HEAD: float = 0.08
 
+## What settlers bring with the knob at nothing, as a share of the knob's top:
+## *livestock occasionally* (§7). Tuning.
+const LIVESTOCK_SHARE: float = 0.25
+
 
 ## How many people a town would draw this month, and of what kind.
 ##
@@ -228,16 +232,18 @@ static func _knob(context: ColonyContext, key: String) -> float:
 
 ## The beasts that come over with them (#173, `immigration.md` §7).
 ##
-## **Livestock occasionally, shifted by policy** — and only by policy, so a
-## colony whose Provost buys none never sees a cow it did not pay for. The
-## fraction is carried like everything else here: a knob worth a tenth of a beast
-## a month lands one in the tenth month rather than never.
+## 🔒 **Livestock occasionally, shifted by policy** (#461). Settlers bring a few
+## beasts whatever the Provost does, and his knob adds to them, as the expert
+## knob adds to `EXPERT_SHARE`. Before #461 they came only by policy, and with the
+## knob off — the default — a colony had no source of livestock at all. The
+## fraction is carried like everything else here: a tenth of a beast a month
+## lands one in the tenth month rather than never.
 static func _livestock_with_them(town: Town, people: int, context: ColonyContext) -> int:
-	var knob := _knob(context, PolicyEffects.LIVESTOCK_KEY)
-	if knob <= 0.0 or people <= 0:
+	if people <= 0:
 		return 0
+	var share := LIVESTOCK_SHARE + _knob(context, PolicyEffects.LIVESTOCK_KEY)
 	var owed := float(town.livestock_accrued.get("arriving", 0.0)) \
-		+ float(people) * knob * BEASTS_PER_HEAD
+		+ float(people) * share * BEASTS_PER_HEAD
 	var landed := int(floorf(owed))
 	town.livestock_accrued["arriving"] = owed - float(landed)
 	if landed <= 0:

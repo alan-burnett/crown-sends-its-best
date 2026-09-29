@@ -34,6 +34,9 @@ func execute(intent: Intent, state: WorldState, log: EventLog) -> StringName:
 	var duke: Contact = contacts.get(String(intent.data.get("duke", "")))
 	if duke == null or duke.role != RivalDuke.ROLE:
 		return Intent.STALLED
+	# **When it is due, not before** (#444): a dilatory patron's word is late.
+	if not intent.advance():
+		return Intent.IN_PROGRESS
 	if not SabotageDriver.arrange(duke, state, log, state.month):
 		return Intent.STALLED
 	intent.progress = intent.months_required

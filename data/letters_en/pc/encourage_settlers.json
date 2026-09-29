@@ -1,0 +1,59 @@
+{
+  "id": "pc.encourage_settlers",
+  "type": "request",
+  "purpose": "Ask a governor to make his town somewhere people want to come",
+  "note": "Issue 451, immigration.md section 4: a governor has no say over who leaves the Crown's empire, only over whether his town is somewhere people want to come, so asking him to encourage immigration is an urging toward go tall, through compliance like any other. Placeholder prose: the Author writes the real lines.",
+  "to_roles": [
+    "governor"
+  ],
+  "params": {
+    "to": "contact"
+  },
+  "reply": {
+    "tone": {
+      "text": "I write to you {choice}.",
+      "options": [
+        {
+          "tone": "dutiful",
+          "text": "about the people the colony needs"
+        },
+        {
+          "tone": "pleased",
+          "text": "because your town could draw settlers, and I would see it do so"
+        },
+        {
+          "tone": "annoyed",
+          "text": "because nobody chooses your town, and they should"
+        },
+        {
+          "tone": "desperate",
+          "text": "because the colony needs people more than anything else it lacks"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "settlers",
+        "prompt": "What the town should be",
+        "options": [
+          {
+            "id": "draw_them",
+            "label": "make the town somewhere people want to come",
+            "text": "Make your town somewhere people want to come: fed, housed and a little comfortable. Settlers go where they are told life is good, and they write home.",
+            "effect": {
+              "urge_intent": {
+                "to": "{to}",
+                "intent": "go_tall"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "closing": [
+      {
+        "text": "Your servant,"
+      }
+    ]
+  }
+}

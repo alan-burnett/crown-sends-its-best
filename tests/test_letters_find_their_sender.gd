@@ -202,7 +202,9 @@ func test_every_letter_that_ships_has_somebody_who_could_send_it() -> void:
 	# later, which is most of them.
 	var run := _run()
 	_a_patron(run)
-	_a_clergyman(run)
+	# Every resident a building brings, not only the clergyman: the
+	# quartermaster writes too (#438).
+	_every_resident(run)
 	_a_commander(run)
 	var orphaned := PackedStringArray()
 	for id in content.ids("letters"):

@@ -52,14 +52,16 @@ const MANDATES: Array[StringName] = [
 
 ## How the opening grant may be split.
 ##
-## **One grant, three ways to take it** (SPEC §6.1). A larger party eats more
-## and works more ground; gold buys what the ground will not give; stores are
-## the safe answer and the dullest.
+## 🔒 **One grant, split** (SPEC §6.1, `map.md` §5, #465): taken as it comes, or
+## leaning toward one pile at the cost of the other two. A larger party eats more
+## and works more ground; gold buys what the ground will not give; stores are the
+## safe answer and the dullest.
+const SPLIT_BALANCED: StringName = &"balanced"
 const SPLIT_PEOPLE: StringName = &"people"
 const SPLIT_GOLD: StringName = &"gold"
 const SPLIT_STORES: StringName = &"stores"
 
-const SPLITS: Array[StringName] = [SPLIT_PEOPLE, SPLIT_GOLD, SPLIT_STORES]
+const SPLITS: Array[StringName] = [SPLIT_BALANCED, SPLIT_PEOPLE, SPLIT_GOLD, SPLIT_STORES]
 
 # --- Flavour, and nothing but ----------------------------------------------
 
@@ -90,8 +92,20 @@ const TITLE_MIN: int = 1
 const TITLE_MAX: int = 20
 const NAME_MIN: int = 1
 const NAME_MAX: int = 48
-var portrait: String = "portrait_default"
-var colour: Color = Color(0.42, 0.29, 0.20)
+## 🔒 **The PC's likeness and colours are his to choose** (#465, SPEC §6.1).
+## Asset ids, never paths (§16.3): the files behind them are placeholders, and
+## the final art replaces them with no change here.
+const PORTRAITS: Array[String] = ["portrait.pc_1", "portrait.pc_2", "portrait.pc_3", "portrait.pc_4"]
+const COLOURS: Array[Color] = [
+	Color(0.42, 0.29, 0.20),
+	Color(0.55, 0.12, 0.14),
+	Color(0.14, 0.24, 0.45),
+	Color(0.18, 0.36, 0.22),
+	Color(0.36, 0.22, 0.42),
+]
+
+var portrait: String = PORTRAITS[0]
+var colour: Color = COLOURS[0]
 
 # --- Everything that shapes the colony -------------------------------------
 
@@ -99,7 +113,7 @@ var seed_value: int = 0
 var perk: StringName = PERK_FIRST_DAY
 var quirks: PackedStringArray = PackedStringArray()
 var mandate: StringName = GovernorIntent.GET_RICH
-var split: StringName = SPLIT_STORES
+var split: StringName = SPLIT_BALANCED
 
 ## 🔒 **What the colony is for, not where it goes** (#273, `map.md` §4).
 ##
@@ -240,7 +254,7 @@ static func from_dict(data: Dictionary) -> RunSetup:
 	setup.perk = StringName(data.get("perk", PERK_FIRST_DAY))
 	setup.quirks = PackedStringArray(data.get("quirks", []))
 	setup.mandate = StringName(data.get("mandate", GovernorIntent.GET_RICH))
-	setup.split = StringName(data.get("split", SPLIT_STORES))
+	setup.split = StringName(data.get("split", SPLIT_BALANCED))
 	setup.request = StringName(data.get("request", SiteRequest.QUICK_GROWTH))
 	setup.proximity = StringName(data.get("proximity", Tribes.APART))
 	return setup

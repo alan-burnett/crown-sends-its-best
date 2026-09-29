@@ -34,20 +34,25 @@ So two rules, and they are not the same rule:
 
 The kernel already has the consideration this needs.
 `DissonanceConsideration` — *against his judgement* — pulls toward
-**reinterpret**, **act alone** and **delay**, away from **comply**, and
-**deliberately not toward refuse**, with a lock in the code saying so.
+**act alone** and **delay**, away from **comply**, and **deliberately not toward
+refuse**, with a lock in the code saying so. (It also pulled toward reinterpret,
+until reinterpretation was cut, #449.)
 
 That is the right shape for him without changing anything:
 
 | The PC orders | Dissonance | He |
 | :--- | :--- | :--- |
 | a **rise** | none | does it, and says something pleased about it |
-| a **small cut** | some | does it slowly, or reads it generously |
-| a **deep cut** | high | reinterprets it, or does it his way and tells you after |
+| a **small cut** | some | does it, or does part of it |
+| a **deep cut** | high | puts it off, or does part of it |
 
-**He never flatly refuses**, which is correct for a Crown officer and is what the
-spec describes. A man who disagrees with the Crown's revenue policy does not
-write back *"no"*; he finds that the instruction admitted of another reading.
+**🔒 While standing holds, he never refuses and never ignores the PC.** SPEC
+§10.2: *"he will not outright refuse to follow your instruction while your crown standing is still paying your debts."* On a tax order his
+answers are comply, partial and delay; refuse and act alone are filtered out.
+**Only once standing is lost and his regard is low** may he act alone, which is
+§3's unilateral raise: the rate he would set himself, reported afterwards. A man
+who disagrees with the Crown's revenue policy does not write back *"no"*; he puts
+it off.
 
 ### What has to change to reach it
 
@@ -97,13 +102,30 @@ document's, and are listed here so they are not lost:
 the only contact who reacts to a number the player set directly, and a pleased
 letter after a rise is how a player learns the lever exists.
 
+### What his push names
+
+Author's ruling (#452). **He asks for a higher duty on the most-traded resource:
+the one with the most gold changing hands last month, bought and sold together.**
+He goes where one rise brings the most duty, whichever way the colony trades it.
+When he raises a rate unasked (§3), it is this one.
+
+### The PC's tax letter
+
+Author's ruling (#452). SPEC §10.2 has one base rate and per-resource overrides,
+and the PC sets them by writing to the Steward. **The letter names a rate and a
+figure:** the base rate or one resource, and the new rate from a ladder of 0%, 5%,
+10%, 15%, 20%, 30% and 50% (placeholders). It goes through the Steward's
+compliance (§2 and `contacts.md` §3): a deep cut against his judgement may be
+delayed or partly done, and he never refuses it. Only with standing lost and his
+regard low may he set the rate he would set himself instead (§3).
+
 ---
 
 ## 5. Tuning targets
 
 - The rate he would set — a function of standing pressure and the colony's
   revenue, and the reference point everything in §2 measures against.
-- How far below it a cut has to be before he reinterprets rather than delays.
+- How far below it a cut has to be before he acts alone rather than delays.
 - The loyalty threshold on §3's gate.
 
 ## 6. Open items

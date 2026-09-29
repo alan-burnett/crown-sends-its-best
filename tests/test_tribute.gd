@@ -71,27 +71,21 @@ func test_paying_costs_prestige_and_not_standing() -> void:
 		"tribute landed on the Crown's books, where standing would answer for it")
 
 
-func test_it_defers_and_does_not_settle() -> void:
-	# SPEC §8.4: accepting puts the attack off **without ever buying peace**. He
-	# comes back, and comes back asking for more.
+func test_it_buys_regard_and_no_quiet() -> void:
+	# 🔒 #458, `rival-pressure.md` §4: **regard is the whole of what it buys.**
+	# SPEC §8.4's *may defer the risk of an attack* is the bands at work; there is
+	# no period of quiet after a payment, so paying writes nothing on the world.
+	var before := WorldValues.initial_state()
 	var run := _paid(4, 9)
 	var state: WorldState = run["state"]
-	var key := TributeExecutor.DEFERRED_PREFIX + "rival_duke"
-	assert_true(state.has_value(key), "paying bought nothing at all")
-	assert_eq(int(float(state.get_value(key, 0.0))), 13,
-		"the quiet he bought does not run out")
+	for key in state.value_keys():
+		assert_false(String(key).begins_with("rival.quiet_until"), "paying bought a quiet date: %s" % key)
+		assert_true(before.has_value(String(key)), "paying wrote %s on the world" % key)
 
 	var paid: Array = run["log"].of_type(OpticsRegister.EVENT_TRIBUTE_PAID)
 	assert_false(bool(paid[0].payload["bought_peace"]),
 		"the record says the matter is closed, and it is not")
-
-
-func test_the_deferral_goes_through_apply_like_any_world_value() -> void:
-	# Seam A. A value written around `apply` is a change to the world nothing
-	# else can see happen.
-	var run := _paid()
-	assert_not_empty(run["log"].of_type(TributeExecutor.EVENT_DEFERRED),
-		"the world moved and nothing said so")
+	assert_false(paid[0].payload.has("quiet_until"), "the record names a quiet he did not buy")
 
 
 func test_the_intent_completes_rather_than_stalling() -> void:

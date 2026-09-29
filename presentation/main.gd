@@ -165,7 +165,7 @@ func _ask_for_the_commission() -> void:
 	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(screen)
 	screen.begun.connect(_on_commission_signed.bind(screen))
-	screen.begin(opening)
+	screen.begin(opening, content)
 
 
 func _on_commission_signed(setup: RunSetup, screen: SetupScreen) -> void:

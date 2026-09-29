@@ -308,12 +308,24 @@ func _check_reply(letter: Letter) -> void:
 		var options: Array = step.get(LetterSchema.KEY_OPTIONS, [])
 		if options.is_empty():
 			_problem(step_path, "a step needs at least one option")
+		# 🔒 **A choice with no effect is not a choice** (#451,
+		# `reply-vocabulary.md` §4, SPEC §9.2). A step whose options all do
+		# nothing is a tone-only reply dressed as a decision.
+		elif not options.any(_does_something):
+			_problem(step_path, "every option here does nothing; make it a tone-only reply, or give each option the effect its words promise")
 		for option_index in options.size():
 			_check_option(options[option_index], letter, "%s.options[%d]" % [step_path, option_index])
 
 	var closing: Array = letter.closing()
 	for index in closing.size():
 		_check_line(closing[index], letter, "reply.closing[%d]" % index)
+
+
+static func _does_something(option: Variant) -> bool:
+	if typeof(option) != TYPE_DICTIONARY:
+		return false
+	var effect: Variant = (option as Dictionary).get(LetterSchema.KEY_EFFECT, {})
+	return typeof(effect) == TYPE_DICTIONARY and not (effect as Dictionary).is_empty()
 
 
 func _check_option(option: Variant, letter: Letter, path: String) -> void:
@@ -668,6 +680,65 @@ func check_tile_yield_bonuses(content: ContentDatabase) -> void:
 			for improvement in rule.get("improvement", []):
 				if not Improvement.has(StringName(improvement)):
 					_problem("effects.tile_yield_bonus", "'%s' is not an improvement" % improvement)
+
+
+## 🔒 **A scaled world value printed in prose is about that value itself**
+## (#407, SPEC §9.1). `scaled_world_value` takes a world figure, multiplies it,
+## clamps it and hands it over as though it were some other fact; six letters
+## printed one that way — *in arrears*, *in duties*, *laid out on your word* —
+## and none of them was true. **Listed, not open**: whether a sentence is about
+## the value itself is a judgement, made once here, and an unlisted use fails.
+const SCALED_FIGURES_ALLOWED: Dictionary = {
+	# The Crown's war is off the map, and its intensity is the whole of its
+	# simulation: a figure scaled off it is the war's size, not a fact about the
+	# colony.
+	"trigger.marshal.request_supplies.amount": "the war's appetite",
+	"trigger.marshal.demand_gold.amount": "the war's appetite",
+	"trigger.marshal.news_victory.amount": "the war's dead",
+	"trigger.chancellor.news_defeat.amount": "the war's dead",
+	# A projection, hedged *perhaps*, of what a rise would bring on the colony's
+	# revenue. Not in #407's list; left to the PO there.
+	"trigger.steward.request_tax_rise.amount": "a projection on revenue",
+}
+
+
+func check_scaled_figures(content: ContentDatabase) -> void:
+	for id in content.ids("triggers"):
+		var trigger: Dictionary = content.collection("triggers")[id]
+		_file = "triggers/%s" % id
+		var letter_id := String(trigger.get("letter", ""))
+		if not content.has_record("letters", letter_id):
+			continue
+		var prose := JSON.stringify(content.record("letters", letter_id))
+		var params: Dictionary = trigger.get("params", {})
+		for name in params:
+			var source: Variant = params[name]
+			if typeof(source) != TYPE_DICTIONARY or String(source.get("from", "")) != "scaled_world_value":
+				continue
+			if not prose.contains("{param:%s}" % name):
+				continue
+			if not SCALED_FIGURES_ALLOWED.has("%s.%s" % [id, name]):
+				_problem("params.%s" % name,
+					"prints a scaled '%s' as though it were a fact about the colony" % source.get("key", ""))
+
+
+## 🔒 **Terms that work while another building does name a real one** (#438).
+## A misspelt master would never be lit, and the terms would quietly never
+## apply — the armoury would stop making guns for good and nothing would say so.
+func check_conversion_gates(content: ContentDatabase) -> void:
+	for id in content.ids("buildings"):
+		_file = "buildings/%s" % id
+		var effects: Dictionary = content.collection("buildings")[id].get("effects", {})
+		var conversions: Dictionary = effects.get("conversions", {})
+		for recipe in conversions:
+			var terms: Dictionary = conversions[recipe]
+			if not terms.has(Building.WHILE_LIT):
+				continue
+			var master := String(terms[Building.WHILE_LIT])
+			if master == String(id):
+				_problem("effects.conversions.%s" % recipe, "works only while it is itself lit")
+			elif not content.has_record("buildings", master):
+				_problem("effects.conversions.%s" % recipe, "works while '%s' is lit, and there is no such building" % master)
 
 
 ## 🔒 **Every building does something** (#416). Thirteen buildings once sat in
@@ -1036,6 +1107,62 @@ func check_run_modifiers(content: ContentDatabase) -> void:
 						_problem("%s.%s" % [record, id], (
 							"names the knob '%s', which nothing turns — known: %s"
 						) % [modifier_id, ", ".join(RunModifiers.ids())])
+			_check_unlock(String(record), id, entry as Dictionary)
+
+
+## 🔒 **Every option but the first names what unlocks it** (#465,
+## `perks-and-quirks.md` §1): one condition, an id `UnlockConditions` knows, with
+## exactly the params it declares at the types it declares. An option with none
+## could never be offered; one unlocked at the start has nothing to unlock.
+func _check_unlock(record: String, id: String, entry: Dictionary) -> void:
+	var where := "%s.%s.%s" % [record, id, UnlockConditions.KEY]
+	var condition: Variant = entry.get(UnlockConditions.KEY, null)
+	if bool(entry.get(RunModifiers.UNLOCKED_AT_START, false)):
+		if condition != null:
+			_problem(where, "is unlocked at the start, so nothing unlocks it")
+		return
+	if typeof(condition) != TYPE_DICTIONARY or (condition as Dictionary).size() != 1:
+		_problem("%s.%s" % [record, id], (
+			"names no one condition that unlocks it, so no run ever could — known: %s"
+		) % ", ".join(UnlockConditions.ids()))
+		return
+	for condition_id in condition:
+		if not UnlockConditions.is_condition(String(condition_id)):
+			_problem(where, "names '%s', which is no condition — known: %s"
+				% [condition_id, ", ".join(UnlockConditions.ids())])
+			continue
+		var args: Variant = condition[condition_id]
+		if typeof(args) != TYPE_DICTIONARY:
+			_problem(where, "expected an object of params")
+			continue
+		var declared: Dictionary = UnlockConditions.PARAMS[String(condition_id)]
+		for name in args:
+			if not declared.has(String(name)):
+				_problem(where, "'%s' takes no param '%s'" % [condition_id, name])
+		for name in declared:
+			if not (args as Dictionary).has(name):
+				_problem(where, "'%s' is missing its '%s'" % [condition_id, name])
+			elif not _is_unlock_param(args[name], String(declared[name])):
+				_problem(where, "'%s.%s' should be a %s" % [condition_id, name, declared[name]])
+
+
+static func _is_unlock_param(value: Variant, kind: String) -> bool:
+	match kind:
+		"integer":
+			return (typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT) \
+				and is_equal_approx(float(value), roundf(float(value)))
+		"number":
+			return typeof(value) == TYPE_INT or typeof(value) == TYPE_FLOAT
+		"string":
+			return typeof(value) == TYPE_STRING and not String(value).is_empty()
+		"strings":
+			if typeof(value) != TYPE_ARRAY or (value as Array).is_empty():
+				return false
+			for each in value:
+				if typeof(each) != TYPE_STRING:
+					return false
+			return true
+	return false
 
 
 ## 🔒 **Every patron is somebody, and every vice does something** (#282,

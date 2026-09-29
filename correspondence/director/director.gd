@@ -44,6 +44,17 @@ const COMPANION_KEY: String = "companion"
 const COMPANION_OF_KEY: String = "companion_of"
 const EVENT_DISPATCHED: StringName = &"letter_dispatched"
 
+## 🔒 **A trigger that asks the PC for something** (#399): gold, goods, a need
+## met. What a targeted break skips.
+const AN_ASK_KEY: String = "an_ask"
+
+## 🔒 **A letter the run's ending waits on is always put to the PC** (#470). The
+## Provost's last-chance offer is SPEC §13.1's guarantee — Overrun cannot come
+## before the player has had it — so a man past consulting does not settle it
+## for him. He asks, whatever his regard.
+const ALWAYS_ASKS_KEY: String = "always_asks"
+const EVENT_ASK_SKIPPED: StringName = &"ask_skipped"
+
 var content: ContentDatabase = null
 
 ## Letters the director could not acknowledge because no content exists for it
@@ -126,6 +137,15 @@ func _fired_triggers(run: RunState) -> Array[InboundLetter]:
 			# *true*; pressure says whether he *bothers*. A letter that is not
 			# true is never a candidate whatever he feels about the world.
 			if not _conditions_hold(trigger, context):
+				continue
+			# 🔒 **A break skips his next ask** (#399, relief 1). It counts as
+			# sent, so the one after it arrives when it would have.
+			if bool(trigger.get(AN_ASK_KEY, false)) and contact.skips_next_ask:
+				contact.skips_next_ask = false
+				run.letters_sent[sent_key(letter_id, contact.id)] = run.world.month
+				run.log.emit(EVENT_ASK_SKIPPED, contact.id, run.world.month, {
+					"letter": letter_id,
+				}, WorldPhase.DISPATCH)
 				continue
 
 			fired.append(_inbound(trigger, letter, contact, context, run))
@@ -217,7 +237,7 @@ func _still_consulting(fired: Array[InboundLetter], run: RunState) -> Array[Inbo
 		for index in fired.size():
 			if String(fired[index].sender) != sender:
 				continue
-			if Consultation.is_consultative(_type_of(fired[index])):
+			if Consultation.is_consultative(_type_of(fired[index])) and not _always_asked(fired[index]):
 				his.append(fired[index])
 				withheld[index] = true
 		_settles_it_himself(contact, his, run)
@@ -230,6 +250,11 @@ func _still_consulting(fired: Array[InboundLetter], run: RunState) -> Array[Inbo
 		if not withheld.has(index):
 			asking.append(fired[index])
 	return asking
+
+
+func _always_asked(inbound: InboundLetter) -> bool:
+	var trigger: Dictionary = content.collection("triggers").get(inbound.trigger_id, {})
+	return bool(trigger.get(ALWAYS_ASKS_KEY, false))
 
 
 ## The one he would have raised, settled without the PC.
@@ -446,6 +471,7 @@ func _context(run: RunState, contact: Contact) -> LetterContext:
 	context.colony = run.colony
 	context.contacts = run.contacts
 	context.companies = run.companies
+	context.parties = run.parties
 	context.natives = run.tribes
 	context.demands = run.demands
 	context.demand_book = run.demand_book

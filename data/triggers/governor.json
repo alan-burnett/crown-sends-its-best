@@ -311,13 +311,19 @@
         "from": "town_name"
       },
       "what": {
-        "from": "intent_name"
+        "from": "the_intent_urged"
       },
       "governor": {
         "from": "sender_id"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.ack_delayed",
@@ -330,13 +336,22 @@
         "from": "town_name"
       },
       "what": {
-        "from": "intent_name"
+        "from": "the_intent_urged"
       },
       "governor": {
         "from": "sender_id"
+      },
+      "months": {
+        "from": "months_until_it_lands"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.ack_refused",
@@ -349,13 +364,19 @@
         "from": "town_name"
       },
       "what": {
-        "from": "intent_name"
+        "from": "the_intent_urged"
       },
       "governor": {
         "from": "sender_id"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.ack_acted_alone",
@@ -368,13 +389,22 @@
         "from": "town_name"
       },
       "what": {
+        "from": "the_intent_urged"
+      },
+      "own": {
         "from": "intent_name"
       },
       "governor": {
         "from": "sender_id"
       }
     },
-    "conditions": [{ "the_order_was": { "kind": "urge_intent" } }]
+    "conditions": [
+      {
+        "the_order_was": {
+          "kind": "urge_intent"
+        }
+      }
+    ]
   },
   {
     "id": "trigger.governor.we_are_coming_back",
@@ -741,6 +771,87 @@
         "his_town_trades": {
           "lead_param": "resource",
           "within": 3
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.a_tribe_asks_for_help",
+    "letter": "governor.a_tribe_asks_for_help",
+    "urgency": 0.7,
+    "cooldown": 1,
+    "note": "Issue 471, natives.md sections 7 and 11. A governor at or above neutral passes a tribe's ask for help abroad on and asks how to answer; he holds his answer a month for the reply.",
+    "params": {
+      "town": {
+        "from": "town_name"
+      },
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      },
+      "governor": {
+        "from": "sender_id"
+      },
+      "resource": {
+        "from": "what_the_tribe_asked",
+        "field": "resource"
+      },
+      "amount": {
+        "from": "what_the_tribe_asked",
+        "field": "amount"
+      }
+    },
+    "conditions": [
+      {
+        "i_asked_how_to_answer_their_ask": {
+          "within": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.i_answered_their_ask_gift",
+    "letter": "governor.i_answered_their_ask_gift",
+    "urgency": 0.35,
+    "cooldown": 1,
+    "note": "Issue 471, natives.md sections 7 and 11. A governor below neutral and above the floor answers a tribe's ask for help himself and tells the PC afterwards.",
+    "params": {
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      },
+      "resource": {
+        "from": "what_the_tribe_asked",
+        "field": "resource"
+      }
+    },
+    "conditions": [
+      {
+        "i_answered_their_ask": {
+          "answer": "gift",
+          "within": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "trigger.governor.i_answered_their_ask_refuse",
+    "letter": "governor.i_answered_their_ask_refuse",
+    "urgency": 0.35,
+    "cooldown": 1,
+    "note": "Issue 471, natives.md sections 7 and 11. A governor below neutral and above the floor answers a tribe's ask for help himself and tells the PC afterwards.",
+    "params": {
+      "tribe": {
+        "from": "the_tribe_that_wrote_to_me"
+      },
+      "resource": {
+        "from": "what_the_tribe_asked",
+        "field": "resource"
+      }
+    },
+    "conditions": [
+      {
+        "i_answered_their_ask": {
+          "answer": "refuse",
+          "within": 1
         }
       }
     ]

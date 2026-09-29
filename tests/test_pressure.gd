@@ -304,6 +304,9 @@ func test_a_colony_where_nothing_is_wrong_brings_no_complaints() -> void:
 	# true yet, and this passed by asserting nothing.
 	for town in run.colony.in_order():
 		run.log.emit(SettlePhase.EVENT_LIVED, town.id, run.world.month, {"town": String(town.id)})
+		# And traded, since the Steward pushes on what the colony trades (#452).
+		run.log.emit(Trade.EVENT_SOLD, town.id, run.world.month,
+			{"town": String(town.id), "resource": "clothing", "gross": 100.0})
 	var director := machine.director
 	assert_true(director._conditions_hold(
 		content.collection("triggers")["trigger.steward.request_tax_rise"],

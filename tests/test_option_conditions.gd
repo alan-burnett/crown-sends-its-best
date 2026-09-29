@@ -191,6 +191,8 @@ func _check(conditions: Variant) -> ContentValidator:
 				"options": [{
 					"id": "third_door", "label": "a door", "text": "A door.",
 					"conditions": conditions,
+					# It must do something, or the step is refused for that (#451).
+					"effect": {"refuse": {"to": "marshal"}},
 				}],
 			}],
 			"closing": [{"text": "Yours,"}],

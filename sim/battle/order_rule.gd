@@ -114,6 +114,43 @@ static func foe_of(company: Company, home: Town, context: ColonyContext) -> Comp
 		if nearest_overall == null or away < _apart(from, nearest_overall.at):
 			nearest_overall = other
 
+	# 🔒 **Men sent to put down the rebellion march on rebel towns too** (#455,
+	# `battles.md` §9), not only on rebel companies, so a town with nobody in
+	# the field is still within their reach. The town is fought as its wall.
+	if rebels_only and context.colony != null:
+		for entry in context.colony.in_order():
+			var town: Town = entry
+			if not town.rebelling:
+				continue
+			var wall := TownCompany.of(town, company)
+			var faction := faction_of(wall, context)
+			var away := _apart(from, wall.at)
+			if away <= THREAT_WITHIN:
+				strength[faction] = float(strength.get(faction, 0.0)) + Force.of(wall, context.map, false)
+			var held: Company = nearest_of.get(faction, null)
+			if held == null or away < _apart(from, held.at):
+				nearest_of[faction] = wall
+			if nearest_overall == null or away < _apart(from, nearest_overall.at):
+				nearest_overall = wall
+
+	# 🔒 **A tribe at war is fought at its villages too** (#456, `natives.md` §3,
+	# §3 *Its foe*): a colonial or Crown company whose foe is a tribe marches on
+	# its nearest village, fought as a town with no wall. Only a tribe at war with
+	# the company's side — never a village at peace.
+	if context.natives != null and not rebels_only and not crown_only:
+		for entry in context.natives.villages_in_order():
+			var village: Village = entry
+			if village.people <= 0 or not VillageCompany.is_a_foe(village, company, context):
+				continue
+			var view := VillageCompany.of(village, company)
+			var faction := faction_of(view, context)
+			var away := _apart(from, view.at)
+			var held: Company = nearest_of.get(faction, null)
+			if held == null or away < _apart(from, held.at):
+				nearest_of[faction] = view
+			if nearest_overall == null or away < _apart(from, nearest_overall.at):
+				nearest_overall = view
+
 	if nearest_overall == null:
 		return null
 	var chosen := faction_of(nearest_overall, context)

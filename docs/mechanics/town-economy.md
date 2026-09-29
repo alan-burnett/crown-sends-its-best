@@ -175,6 +175,10 @@ to him at length.
 
 ## 2. The duty is squared across a round trip
 
+**A forgiven rate** (`crown-demands.md` §10, *Tax forgiveness*; #399): where a
+contact has taken on part of the duty on a resource, every town pays and feels
+the forgiven rate, and the Crown still books the full one.
+
 Rates are a share of the transaction, so a town is skimmed on **both** legs of
 any trade. A fur town selling to buy iron, at a 20% duty:
 

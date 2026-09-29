@@ -64,7 +64,7 @@
               }
             },
             "effect": {
-              "ship_resource": {
+              "ship_resource_paying_double": {
                 "to": "{to}",
                 "resource": "{resource}",
                 "amount": "{amount}",
