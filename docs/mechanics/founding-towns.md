@@ -214,6 +214,25 @@ against. The PC's letter still bends the pick within the region as it does now.
 - Candidates are explored land tiles outside every town's influence. The
   region is centred on the best of them.
 
+### The site is scored again on arrival (#368)
+
+Author's ruling. **The ground may have changed while they walked**: a tribe has
+pressed its claim, a town has risen within four tiles, a tile has been taken.
+
+The party remembers the score its chosen site had **when it set out**. On
+reaching it, the site is scored again by the same formula. **If the new score is
+below 80% of the old one** (placeholder), the party **does not found yet**. Its
+governor writes to the PC, and the PC answers:
+
+- **find a new site**: the party picks again from the ground it can now reach,
+  by the same scoring and the PC's standing preference, and walks on; or
+- **keep to the original site**: it founds where it stands.
+
+⚠ assumed, for the Author to strike: while the letter crosses the ocean the
+party waits on the site, eating its stores as it would on the road; a governor
+who has no answer when it is due (a month there and a month back) picks again,
+since the site he came for is no longer the one he chose.
+
 ## 6. Travel
 
 A town-launched expedition behaves as a **unit on the map**, crossing to its

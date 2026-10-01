@@ -58,7 +58,7 @@ For each contact, before sign-off:
 | Unique policies per contact, some needing high loyalty | all | ⬜ |
 | Governor: tension is rising with the natives, what should we do | Governor | ✅ `they_grow_cold` (#476 to sharpen) |
 | Commander: we need resupply — gold, guns, horses, tools, people | Commander | ⬜ |
-| Expedition: we've reached the destination but things have changed | Governor (of expedition) | ❓ needs ruling |
+| Expedition: we've reached the destination but things have changed | Governor (of expedition) | 🔧 #477 |
 | Ways to cancel existing policies | PC compose + all policy holders | ✅ `pc.end_a_policy` |
 
 ## PO suggestions in #368 (comment 2026-09-23) — by contact
@@ -108,7 +108,6 @@ Carried so none is forgotten; the Author accepts or cuts each at that contact's 
 ## Rulings pending with the Author
 
 - ~~#399~~ ruled and built (`crown-demands.md` §10): the five reliefs are content now.
-- A5 — what "the expedition arrived and things have changed" means.
 - the-marshal.md §8 — whether any letter may move the Marshal's war.
 
 ## Issues opened by this audit
@@ -120,6 +119,7 @@ Carried so none is forgotten; the Author accepts or cuts each at that contact's 
 | #474 | A governor's good word | the offer and `pc.ask_for_his_good_word` |
 | #475 | The Diplomat hears of a seditious governor in another town | extend `diplomat.his_governor_means_to_leave` |
 | #476 | Governor letters: six things the sim knows and no letter can read | N9, N11, N14, A10, A11, A4 retarget |
+| #477 | An expedition rescores its site on arrival | `governor.the_ground_has_changed` (A5) |
 
 ---
 
@@ -132,7 +132,7 @@ Status: 🟡 content written 2026-09-29; waiting on #473–#476 and the A5 rulin
 **To finish the governor:** after #473 write `pc.an_appeal` and the D5 option;
 after #474 write his good-word offer and `pc.ask_for_his_good_word`; after #475
 extend the Diplomat's sedition letter to other towns; after #476 write N9, N11,
-N14, A10, A11 and retarget A4; A5 once ruled.
+N14, A10, A11 and retarget A4; after #477 write A5.
 Codes below (E, D, A, N) are how we refer to items in the session.
 
 #### What exists — inbound, 30 letters
@@ -211,7 +211,7 @@ by composing. (Urging unprompted landed in #454.)
 | A2 | Provost library push — governor's side (Author) | ✅ E11 exists; the 100 gold not paid |
 | A3 | "Remember when I did you a favour, can I have gold" (Author) | ✅ E25; sour half ✅ N4 |
 | A4 | Tension rising with the natives, what should we do (Author) | ✅ `they_grow_cold` (reads a level); 🔧 #476 row 5 for a true fall |
-| A5 | Expedition reached the site and things have changed (Author) | ❓ needs the Author: what "changed" means, and what he may do |
+| A5 | Expedition reached the site and things have changed (Author) | 🔧 #477: ruled — rescored below 80% on arrival; find a new site or keep it |
 | A6 | High-loyalty special / unique policy (Author) | 🔧 #474 his good word |
 | A7 | Low-loyalty unilateral (Author) | ✅ ruled: his turn to sedition. Diplomat's letter for his own town ✅; for another town 🔧 #475 |
 | A8 | Proposes a daughter town (PO) | ✅ covered by E8/E9 (an intent change to go wide) and N6 |
