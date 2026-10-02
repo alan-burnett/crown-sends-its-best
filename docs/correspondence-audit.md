@@ -25,6 +25,9 @@ For each contact, before sign-off:
 
 ## Contacts
 
+Each contact's four-point brief (who he is, what he wants, what loyalty buys,
+when he turns) is in [`contact-briefs.md`](contact-briefs.md).
+
 | # | Contact | Status | Notes |
 | --: | :--- | :--- | :--- |
 | 1 | Governor | 🟡 | Started 2026-09-26 |
