@@ -162,6 +162,30 @@ already inclined to listen.
 **And the first letter shows it.** A daughter of a disloyal parent may write
 sarcastically, and there will be nothing the PC can do to direct him.
 
+### What he writes, and when (#368)
+
+Author's ruling. **Every new town's governor writes the same way, whoever paid
+for the expedition.** The Crown funds a Crown founding, but its people are
+settlers who become colonists the day they have a town; they do not belong to the
+Crown any more than a town's own expedition does.
+
+1. **While the party travels** he writes **about the party** and nothing else:
+   setting out, then the road (or the sea), its people and its stores. He has no
+   town, so he sends no town's report.
+2. **When the town is founded** he writes once: we have arrived, this is what I
+   mean it to be for, and what would you have of it. **That one letter is both
+   the arrival and his first course**; the letters about a change of intent wait
+   until the town has lived a while, so the two never arrive together.
+3. **From then on** he writes as any governor: finished projects, the tribes, the
+   dukes, more than one letter in a month if more than one thing has happened to
+   him. His **seasonal report**, every three months, begins in the town's third
+   month.
+
+**A Crown founding elects its governor when it sails**, not when it lands, so the
+PC hears from him on the voyage as he would from a party on the road. There is
+still no ground travel (§3) and so no site preference to state: the Crown's
+ships choose the coast.
+
 ## 5. The site, and the window in which preferences still matter
 
 **🔒 The PC never chooses a tile** (§11.4). He approves, refuses, or states

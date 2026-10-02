@@ -23,9 +23,10 @@
     },
     "conditions": [
       {
-        "always": {}
+        "he_governs_a_town": {}
       }
-    ]
+    ],
+    "note": "Issue 368: only from a governor with a town; a governor-elect on the march writes about his party (founding-towns.md section 4)."
   },
   {
     "id": "trigger.governor.announce_objective",
@@ -279,8 +280,12 @@
           "key": "tax.base",
           "value": 0.12
         }
+      },
+      {
+        "he_governs_a_town": {}
       }
-    ]
+    ],
+    "note": "Issue 368: only from a governor with a town; a governor-elect on the march writes about his party (founding-towns.md section 4)."
   },
   {
     "id": "trigger.governor.report_disagreement",
@@ -734,7 +739,7 @@
     "letter": "governor.remember_what_i_sent",
     "urgency": 0.5,
     "cooldown": 24,
-    "note": "Issue 397. A governor reaches for the most valuable thing he did for the PC, as it weighs now, and asks a share of it back in gold for his town. Gated on remembers_his_kindness, asked of the same memory the params read, so the favour he names is real. Cooldown 24: a man who reminded the PC of the same shipment every year would be dunning him, not asking a favour.",
+    "note": "Issue 397. A governor reaches for the most valuable thing he did for the PC, as it weighs now, and asks a share of it back in gold for his town. Gated on remembers_his_kindness, asked of the same memory the params read, so the favour he names is real. Cooldown 24: a man who reminded the PC of the same shipment every year would be dunning him, not asking a favour. Issue 368: only from a governor with a town; a governor-elect on the march writes about his party (founding-towns.md section 4).",
     "params": {
       "governor": {
         "from": "sender_id"
@@ -767,6 +772,9 @@
     "conditions": [
       {
         "remembers_his_kindness": {}
+      },
+      {
+        "he_governs_a_town": {}
       }
     ]
   },
@@ -899,10 +907,14 @@
         "loyalty_below": {
           "value": 50
         }
+      },
+      {
+        "he_governs_a_town": {}
       }
     ],
     "id": "trigger.governor.you_refused_me",
-    "letter": "governor.you_refused_me"
+    "letter": "governor.you_refused_me",
+    "note": "Issue 368: only from a governor with a town; a governor-elect on the march writes about his party (founding-towns.md section 4)."
   },
   {
     "urgency": 0.5,
@@ -923,10 +935,14 @@
     "conditions": [
       {
         "remembers_a_broken_word": {}
+      },
+      {
+        "he_governs_a_town": {}
       }
     ],
     "id": "trigger.governor.you_gave_your_word",
-    "letter": "governor.you_gave_your_word"
+    "letter": "governor.you_gave_your_word",
+    "note": "Issue 368: only from a governor with a town; a governor-elect on the march writes about his party (founding-towns.md section 4)."
   },
   {
     "urgency": 0.7,
@@ -1004,6 +1020,9 @@
       },
       "town": {
         "from": "town_name"
+      },
+      "intent": {
+        "from": "intent_name"
       }
     },
     "conditions": [

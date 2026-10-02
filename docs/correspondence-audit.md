@@ -120,6 +120,7 @@ Carried so none is forgotten; the Author accepts or cuts each at that contact's 
 | #475 | The Diplomat hears of a seditious governor in another town | extend `diplomat.his_governor_means_to_leave` |
 | #476 | Governor letters: six things the sim knows and no letter can read | N9, N11, N14, A10, A11, A4 retarget |
 | #477 | An expedition rescores its site on arrival | `governor.the_ground_has_changed` (A5) |
+| #478 | A new governor writes from his party, then from his town's founding | seasonal report from town month 3; course letters held past arrival; a report from the road and the sea; Crown founding's `setting_out` |
 
 ---
 
@@ -132,7 +133,7 @@ Status: 🟡 content written 2026-09-29; waiting on #473–#476 and the A5 rulin
 **To finish the governor:** after #473 write `pc.an_appeal` and the D5 option;
 after #474 write his good-word offer and `pc.ask_for_his_good_word`; after #475
 extend the Diplomat's sedition letter to other towns; after #476 write N9, N11,
-N14, A10, A11 and retarget A4; after #477 write A5.
+N14, A10, A11 and retarget A4; after #477 write A5; after #478 the items in its row.
 Codes below (E, D, A, N) are how we refer to items in the session.
 
 #### What exists — inbound, 30 letters
@@ -239,6 +240,24 @@ by composing. (Urging unprompted landed in #454.)
   contact in his town (`policy.md` §7, #474).
 - **Low-loyalty** — only his turn to *prepare for rebellion*; the Diplomat
   writes, the PC answers with `cultivate_governor` (#475 for other towns).
+- **A5** — rescored below 80% on arrival: find a new site, or keep it (#477).
+- **What a new governor writes, and when** (`founding-towns.md` §4, #478): the
+  party only while travelling; one arrival letter that is also his first course;
+  then as any governor, the seasonal report every 3 months from the town's third
+  month. A Crown founding's governor is elected when it sails and writes the same
+  way.
+- **Tuning, not content** (Author): a letter for every finished project stays;
+  how often projects finish and shortages bite is the economy's tuning (#373).
+  The Steward's tax-rise letter and its governor companion are timed on the
+  Steward's sheet.
+
+#### Simulated (2026-10-02, `tools/post_calendar.gd`)
+
+Three seeds × 36 months. Months 2–4 are the crowded ones (5, 5, 6 letters, up
+to three must-answer); the governor sends about one or two of them. Fixed now:
+a marching governor sent his town's report (`he_governs_a_town` on five
+triggers). Waiting on #478: the arrival-month double letter, the seasonal
+report's town-month-3 start, the Crown founding's silent governor.
 
 #### Written 2026-09-29
 

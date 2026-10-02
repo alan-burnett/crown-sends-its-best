@@ -3,10 +3,11 @@
   "sender": "governor",
   "type": "report",
   "skippable": false,
-  "note": "Issue 368, governor sheet N6. Placeholder prose in the default tone; the tone pass comes later.",
+  "note": "Issue 368, governor sheet N6. Placeholder prose in the default tone; the tone pass comes later. founding-towns.md section 4: this one letter is both the arrival and his first course; the intent-change letters wait until the town has lived a while (#478).",
   "params": {
     "governor": "contact",
-    "town": "town"
+    "town": "town",
+    "intent": "intent"
   },
   "body": [
     {
@@ -16,7 +17,7 @@
       "text": "There is water, and ground that will take a plough, and a great deal of work between here and anything you would call a town."
     },
     {
-      "text": "I have not decided what it is to be for. If you have a view, now is when it will weigh most."
+      "text": "I mean it to be {param:intent}. That is my judgement of the ground and the people I have, and I have not had long to form it. If you would have it otherwise, now is when a letter from you will weigh most."
     }
   ],
   "reply": {
