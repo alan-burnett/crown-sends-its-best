@@ -128,175 +128,215 @@ Carried so none is forgotten; the Author accepts or cuts each at that contact's 
 
 ### 1. Governor
 
-Status: 🟡 content written 2026-09-29; waiting on #473–#476 and the A5 ruling.
+**Status: 🟡 written as far as the engine allows (2026-10-02).** 44 letters from
+him, 10 the PC can compose to him, one from the Diplomat about him. Waiting on
+#473–#478. Not signed off.
 
-**To finish the governor:** after #473 write `pc.an_appeal` and the D5 option;
-after #474 write his good-word offer and `pc.ask_for_his_good_word`; after #475
-extend the Diplomat's sedition letter to other towns; after #476 write N9, N11,
-N14, A10, A11 and retarget A4; after #477 write A5; after #478 the items in its row.
-Codes below (E, D, A, N) are how we refer to items in the session.
+Codes (E, P, D, A, N) are how the session refers to items. E-codes from the
+first inventory are kept, and new letters continue from E34.
 
-#### What exists — inbound, 30 letters
+#### What finishing him takes
+
+| When this lands | Write |
+| :--- | :--- |
+| #473 the appeal's population-scaled figure | `pc.an_appeal` (A1); the "not forgotten" reply in E26 becomes it (D5) |
+| #474 his good word | his offer at high regard; `pc.ask_for_his_good_word` (A6) |
+| #475 a seditious governor elsewhere | extend E45 to towns other than the Diplomat's own (A7) |
+| #476 six hooks | N9 his town's protest; N11 a project abandoned; N14 pride in a great building; A10 the loyal neighbour; A11 the investment pitch; retarget E43 to a *fall* in regard (A4) |
+| #477 rescoring a site on arrival | `governor.the_ground_has_changed`: find a new site, or keep it (A5) |
+| #478 town age, party params, the Crown founding's governor | E1 from the town's month 3; E8/E9 held past the arrival; a report from the road and the sea; E30 for a Crown founding |
+
+Then re-run `tools/post_calendar.gd` over three seeds, and sign off.
+
+#### Rulings (Author)
+
+- **Shipments** settle an open demand for that resource first. The rest is a
+  donation, credited at the Crown's price, and the Steward thanks the colony.
+  Resources only, never gold (`crown-demands.md` §5, #472). The Steward sheet
+  owes ⬜ the thank-you letter.
+- **The appeal (A1)** costs gold in proportion to the town's population, paid
+  into its purse (`contacts.md` §9, #473).
+- **High loyalty (A6): his good word.** A policy that lifts every other contact
+  in his town by a flat amount, and ends when the policy ends
+  (`policy.md` §7, #474).
+- **Low loyalty (A7)** is only his turn to *prepare for rebellion*. The
+  Diplomat writes, and the PC answers with `cultivate_governor`. There is no
+  other low-loyalty letter (#475).
+- **A5: the site is rescored on arrival.** Below 80% of its setting-out score,
+  he asks whether to find a new site or keep it (`founding-towns.md` §5, #477).
+- **What a new governor writes, and when** (`founding-towns.md` §4, #478):
+  - while travelling, only about his party;
+  - one arrival letter, which is also his first course;
+  - then as any governor, with more than one letter a month if more than one
+    thing happens to him;
+  - his **seasonal report** every 3 months, from the town's third month.
+
+  A Crown founding elects its governor when it sails and writes the same way.
+- **Tuning, not content:** a letter for every finished project stays. How often
+  projects finish and shortages bite is the economy's tuning (#373). The
+  Steward's tax-rise letter and its governor companion (E7) are timed on the
+  Steward's sheet.
+
+#### 1. He writes to the PC — 44 letters
+
+✱ marks a letter added or changed in this audit.
 
 | Code | Letter | Fires when | Replies |
 | :--- | :--- | :--- | :--- |
-| **Town reports** | | | |
-| E1 | `report_month` | always (cd 3) | urge ×4 |
-| E2 | `announce_objective` | new objective that can finish | urge ×4 |
-| E3 | `report_completed` | town finished something | urge ×4 |
-| E4 | `report_shortage` | stores < 0.34, after month 1 | urge ×4 |
-| E5 | `report_idle_building` | a building dark for upkeep | urge get_rich / go_tall |
-| E6 | `question_duty` | base tax > 0.12 | none |
-| E7 | `a_rise_would_be_felt` | two-voice companion to the Steward's tax-rise letter | none |
+| **His party, before there is a town** | | | |
+| E30 ✱ | `setting_out` (must answer) | elected as his party sets out | where to settle: best ground / coast / ore / away from the tribes |
+| E34 ✱ | `our_people_were_struck` | his town's expedition was attacked | defences / keep the people home |
+| E35 ✱ | `they_have_turned_back` | his town's expedition came home | send them out again / keep them home |
+| E36 ✱ | `we_have_arrived` (must answer) | his town was founded; names the intent he has chosen | the four courses |
+| **The town's reports** | | | |
+| E1 ✱ | `report_month`, the seasonal report | every 3 months, governor with a town | the four courses |
+| E2 | `announce_objective` | a new project | the four courses |
+| E3 | `report_completed` | a project finished | the four courses |
+| E4 | `report_shortage` | stores below a third | the four courses |
+| E5 | `report_idle_building` | a building shut for upkeep | profit / grow |
+| E6 ✱ | `question_duty` | base duty above 12%, governor with a town | — |
+| E7 | `a_rise_would_be_felt` | rides with the Steward's tax-rise letter | — |
 | **His intent** | | | |
-| E8 | `i_have_settled_on_a_course` | intent changed, regard high | carry on / urge ×3 |
-| E9 | `the_course_i_must_take` | intent changed, regard medium | none |
-| E10 | `report_disagreement` | PC's urging ≠ his intent | urge ×4 |
-| E11 | `i_have_been_pressed` | Provost urged his town, intent now education | none |
-| E12–15 | `ack_complied` / `ack_delayed` / `ack_refused` / `ack_acted_alone` | answering a PC urging | none |
-| **Natives** | | | |
-| E16 | `the_people_next_door` | native pressure ≥ 0.12 (cd 12) | urge ×3 + "be rid of them" |
-| E17 | `a_tribe_has_written` | loyal: asks how to answer a tribe | yield / gift / refuse / threaten |
-| E18–21 | `i_answered_the_tribe_*` ×4 | disloyal: tells after | none |
-| E22 | `i_have_made_a_bargain` | native trade agreement struck | urge ×3 |
+| E8 | `i_have_settled_on_a_course` (must answer) | intent changed, regard high | carry on / three courses |
+| E9 | `the_course_i_must_take` (must answer) | intent changed, regard medium | — |
+| E10 | `report_disagreement` | the PC's urging ≠ his intent | the four courses |
+| E11 | `i_have_been_pressed` | the Provost pushed his town to education | — |
+| E12–15 | `ack_complied` / `_delayed` / `_refused` / `_acted_alone` | answering a PC urging | — |
+| **The tribes** | | | |
+| E16 | `the_people_next_door` | native pressure on his fields | profit / defences / settle further off / be rid of them |
+| E43 ✱ | `they_grow_cold` | the tribe's regard below 35 of 100 | be ready / trade with them / keep to your ground |
+| E17 | `a_tribe_has_written` (must answer) | loyal: asks how to answer a tribe's grievance | yield / gift / refuse / threaten |
+| E18–21 | `i_answered_the_tribe_*` | disloyal: answered it himself | — |
+| E31 | `a_tribe_asks_for_help` (must answer) | loyal: a tribe asks for goods for its troubles abroad | give / refuse |
+| E32–33 | `i_answered_their_ask_*` | disloyal: answered it himself | — |
+| E22 | `i_have_made_a_bargain` | a trade agreement with a tribe | three courses |
+| E37 ✱ | `the_tribe_brought_us_food` | a tribe gave his town food | — |
+| E38 ✱ | `they_have_joined_us` | tribesfolk settled in his town | — |
+| E39 ✱ | `they_have_stopped_trading` | a tribe ended its trade | defences / find the trade elsewhere |
 | **Enemies** | | | |
-| E23 | `they_are_on_my_fields` | foreign men on his tiles | urge get_rich / military |
+| E23 | `they_are_on_my_fields` (must answer) | foreign men on his tiles | profit / defences |
+| E40 ✱ | `a_duke_is_in_the_rebel_town` | a duke backed a rebel town, regard high | defences / give your people no cause |
 | **Remember when** | | | |
-| E24 | `asking_again` | remembers the PC's kindness, stores < 0.5 | refuse only |
-| E25 | `remember_what_i_sent` | remembers **his** kindness (cd 24) | send gold to town / refuse |
+| E24 ✱ | `asking_again` | remembers the PC's kindness, stores below half | **send the price of it** / refuse |
+| E25 ✱ | `remember_what_i_sent` | remembers **his** kindness to the PC | send gold to the town / refuse |
+| E41 ✱ | `you_refused_me` | remembers a refusal, loyalty below 50 | apologise / the answer stands |
+| E42 ✱ | `you_gave_your_word` | remembers a broken promise | apologise |
 | **Rebellion** | | | |
-| E26 | `nothing_to_report` | his intent is sedition | urge get_rich / 2 no-ops |
-| E27 | `town_has_declared` | his town declared | none |
-| E28 | `a_neighbour_declared` | another town declared | none |
-| E29 | `we_are_coming_back` | his town returned | 3 no-ops |
-| **Founding** | | | |
-| E30 | `setting_out` | newly elected expedition governor | none |
-| E31 | `a_tribe_asks_for_help` | loyal: a tribe asks for goods for its troubles abroad (#471) | gift / refuse |
-| E32–33 | `i_answered_their_ask_gift` / `_refuse` | disloyal: tells after (#471) | none |
+| E26 ✱ | `nothing_to_report` | his intent is sedition | profit / "not forgotten" (becomes the appeal, #473) |
+| E27 | `town_has_declared` (must answer) | his town declared | — |
+| E44 ✱ | `our_terms` | his town is in rebellion: the hall's terms | the duty down (to the Steward) / no terms |
+| E28 ✱ | `a_neighbour_declared` | another town declared | the duty down (to the Steward) / comfort / walls |
+| E29 | `we_are_coming_back` (must answer) | his town returned | — |
 
-#### What exists — the PC writes to him
+#### 2. The PC writes to him — 10 letters
 
-| Code | Letter | Offered | Effect |
+| Code | Letter | Offered to | Does |
 | :--- | :--- | :--- | :--- |
-| P1 | `request_shipment` | any governor | `ship_resource`, double / fair / nothing (harsh) |
-| P2 | `lay_an_embargo` | any governor | `embargo` lay / lift |
-| P3 | `ask_for_a_policy` | ~~any governor~~ the Provost only since #451 | `encourage_immigration` |
-| P4 | `send_the_diplomat` | where the Diplomat could go | `move_diplomat` + 240 gold |
-| P5 | `urge_a_course` | any governor with a town (#454) | `urge_intent` ×4 |
-| P6 | `encourage_settlers` | any governor with a town | (landed on main; to review) |
-| P7 | `state_a_preference` | the governor of a marching party (#454) | `prefer_site` ×4 |
-| P8 | `demand_the_stores` | any governor (#454) | `ship_resource` |
-| P9 | `order_the_quota` | any governor (#454) | `ship_resource` |
+| P5 | `urge_a_course` | any governor with a town | the four courses |
+| P6 | `encourage_settlers` | any governor with a town | urges go tall |
+| P10 ✱ | `send_the_town_gold` | any governor with a town | 100 / 250 / 500 to the town's purse (placeholders) |
+| P11 ✱ | `end_a_policy` | anyone holding a policy | ends it, at the cost of his loyalty |
+| P1 | `request_shipment` | any governor | goods to the Crown: double / fair / nothing |
+| P8 | `demand_the_stores` | any governor | goods to the Crown, buy / part-pay / take |
+| P9 | `order_the_quota` | any governor | goods to the Crown, ask / expect / command |
+| P2 | `lay_an_embargo` | any governor | the colony stops relieving a rebel town, or lifts it |
+| P4 | `send_the_diplomat` | where the Diplomat could go | moves the Diplomat there, 240 gold |
+| P7 | `state_a_preference` | the governor of a party on the march | where to settle |
+| — | `an_appeal` | — | 🔧 #473 |
+| — | `ask_for_his_good_word` | — | 🔧 #474 |
 
-The PC **cannot** send gold to a town, appeal to a governor, or cancel a policy
-by composing. (Urging unprompted landed in #454.)
+#### 3. What investing in him unlocks
 
-#### Defects found
+- **Compliance** with urgings and shipments, through regard (`contacts.md` §3).
+- **He asks before he acts.** A loyal governor asks how to answer a tribe
+  (E17, E31). A disloyal one tells the PC afterwards (E18–21, E32–33).
+- **He warns.** A duke in the rebel town next door comes only from a governor
+  who thinks well of the PC (E40). He tells the PC his course rather than just
+  taking it (E8 against E9).
+- **His good word**, the high-loyalty policy: 🔧 #474.
 
-| Code | Defect |
-| :--- | :--- |
-| D1 | ✅ fixed by #454. **`pc.state_a_preference` was unreachable in play.** Not composable, no sender, gated on sedition. The expedition preference (SPEC §11.4 lock, founding-towns §5) cannot be sent, and E30 has no reply to carry it. |
-| D2 | ✅ fixed by #454. `pc.demand_the_stores` and `pc.order_the_quota` have no trigger — orphaned. |
-| D3 | ✅ `asking_again` can say yes: gold to the town, sized as E25 sizes its ask. |
-| D4 | ✅ #451 removed the three no-op options from E29. |
-| D5 | 🟡 `nothing_to_report`: dead "say nothing" option removed. "Not forgotten" becomes the appeal once #473 lands. |
-| D6 | ✅ `a_neighbour_declared` replies: the duty down (to the Steward), comfort, or walls. |
-| D7 | 🔧 #474: his good word (Author's ruling, `policy.md` §7). |
-| D8 | ⬜ `idle_building` param declares `field`, reads `fallback` (dev nit; not yet ticketed). |
+#### 4. What he does at low loyalty
 
-#### #368 asks for the governor
+He turns to *prepare for rebellion* (E26). Then:
 
-| Code | Ask | Today |
+- his own town's Diplomat writes, `diplomat.his_governor_means_to_leave` (E45 ✱),
+  and the PC can answer with `cultivate_governor`;
+- for a governor in a town the Diplomat does not live in: 🔧 #475;
+- the appeal: 🔧 #473.
+
+#### 5. Remember when
+
+- **His kindness to the PC:** E25 asks a share of it back.
+- **The PC's kindness to him:** E24 asks again, and can now be answered yes.
+- **The sour half:** a refusal (E41) and a broken word (E42).
+
+#### 6. Defects found
+
+| Code | Defect | |
 | :--- | :--- | :--- |
-| A1 | Win back a disloyal governor, CTJ (Author) | 🔧 #473: the appeal, gold ∝ population (`contacts.md` §9) |
-| A2 | Provost library push — governor's side (Author) | ✅ E11 exists; the 100 gold not paid |
-| A3 | "Remember when I did you a favour, can I have gold" (Author) | ✅ E25; sour half ✅ N4 |
-| A4 | Tension rising with the natives, what should we do (Author) | ✅ `they_grow_cold` (reads a level); 🔧 #476 row 5 for a true fall |
-| A5 | Expedition reached the site and things have changed (Author) | 🔧 #477: ruled — rescored below 80% on arrival; find a new site or keep it |
-| A6 | High-loyalty special / unique policy (Author) | 🔧 #474 his good word |
-| A7 | Low-loyalty unilateral (Author) | ✅ ruled: his turn to sedition. Diplomat's letter for his own town ✅; for another town 🔧 #475 |
-| A8 | Proposes a daughter town (PO) | ✅ covered by E8/E9 (an intent change to go wide) and N6 |
-| A9 | Rebel governor states terms (PO) | ✅ `our_terms` |
-| A10 | Loyal neighbour: "they ask us for grain, do we send it" (PO) | 🔧 #476 row 4 |
-| A11 | Investment pitch / fund a building he cannot (PO) | 🔧 #476 row 6 |
-| A12 | "The good ground is theirs" (PO) | ✅ E16 covers it |
-| A13 | Expedition mid-course (PO) | ✅ E30 `setting_out` now carries the preference; P7 for a later word |
-| A14 | Tall's pride (PO) | 🔧 #476 row 3 (N14) |
-| A15 | "Defend us, or let us defend ourselves" (PO) | ➡ moved to the Commander sheet |
-| A16 | Spread made audible (PO) | ✅ E28, now with replies (D6) |
-| A17 | Two-voice month vs the Steward (PO) | ✅ E7 |
-| A18 | Tribe war aid (PO) | ✅ built after all in #471 — E31–33 |
+| D1 | The site preference could never be sent | ✅ #454; it also rides E30 now |
+| D2 | Two PC shipment letters were never offered | ✅ #454 |
+| D3 | E24 could only refuse | ✅ |
+| D4 | E29 offered three replies that did nothing | ✅ #451 |
+| D5 | E26 had two replies that did nothing | 🟡 one removed; the other becomes the appeal (#473) |
+| D6 | E28 asked for "something to tell them" and had no reply | ✅ |
+| D7 | A governor could hold no policy | 🔧 #474 |
+| D8 | `idle_building` param declares `field`, reads `fallback` | ⬜ dev nit, not ticketed |
+| D9 | A governor on the march sent his town's seasonal report | ✅ five triggers need a town |
+| D10 | A new town's arrival and its first intent arrived together, both must-answer | 🔧 #478 |
+| D11 | A Crown-founded town's governor never introduced himself | 🔧 #478 |
+| D12 | The Crown's books never showed what it paid for a shipment | 🔧 #472 |
 
-#### Rulings made (2026-09-29)
+#### 7. Every idea, and where it went
 
-- **Shipments that arrive** settle an open demand for that resource, or are a
-  donation: the Steward thanks the colony, and standing rises by the goods' Crown
-  value. Written into `crown-demands.md` §5; engine is #472. Carried to the
-  Steward sheet: ⬜ **the thank-you letter**.
-- **Resources only** — no town ships gold (`crown-demands.md` §5).
-- **A1** — the appeal costs gold in proportion to the town's population
-  (`contacts.md` §9, #473).
-- **High-loyalty special** — his good word: a policy lifting every other
-  contact in his town (`policy.md` §7, #474).
-- **Low-loyalty** — only his turn to *prepare for rebellion*; the Diplomat
-  writes, the PC answers with `cultivate_governor` (#475 for other towns).
-- **A5** — rescored below 80% on arrival: find a new site, or keep it (#477).
-- **What a new governor writes, and when** (`founding-towns.md` §4, #478): the
-  party only while travelling; one arrival letter that is also his first course;
-  then as any governor, the seasonal report every 3 months from the town's third
-  month. A Crown founding's governor is elected when it sails and writes the same
-  way.
-- **Tuning, not content** (Author): a letter for every finished project stays;
-  how often projects finish and shortages bite is the economy's tuning (#373).
-  The Steward's tax-rise letter and its governor companion are timed on the
-  Steward's sheet.
-
-#### Simulated (2026-10-02, `tools/post_calendar.gd`)
-
-Three seeds × 36 months. Months 2–4 are the crowded ones (5, 5, 6 letters, up
-to three must-answer); the governor sends about one or two of them. Fixed now:
-a marching governor sent his town's report (`he_governs_a_town` on five
-triggers). Waiting on #478: the arrival-month double letter, the seasonal
-report's town-month-3 start, the Crown founding's silent governor.
-
-#### Written 2026-09-29
-
-| Letter | Covers |
-| :--- | :--- |
-| `governor.you_refused_me` | N4, sour memory: a refusal. Apologise, or stand by it |
-| `governor.you_gave_your_word` | N4, sour memory: a broken promise. Apologise |
-| `governor.our_people_were_struck` | N5, his expedition attacked |
-| `governor.they_have_turned_back` | N5, his expedition came home |
-| `governor.we_have_arrived` | N6, the new town's first letter, with the four courses |
-| `governor.the_tribe_brought_us_food` | N7 |
-| `governor.they_have_joined_us` | N7 |
-| `governor.they_have_stopped_trading` | N7 |
-| `governor.a_duke_is_in_the_rebel_town` | N8, loyal governors only |
-| `governor.they_grow_cold` | A4, the tribe's regard below 35 |
-| `governor.our_terms` | A9, the rebel hall's terms; the answer goes to the Steward |
-| `governor.asking_again` (fix) | D3, a yes |
-| `governor.a_neighbour_declared` (fix) | D6, A16 |
-| `governor.nothing_to_report` (fix) | D5, dead option removed |
-| `governor.setting_out` (fix) | A13: the site preference rides his first letter (`founding-towns.md` §5) |
-| `pc.send_the_town_gold` | N2: 100, 250 or 500, placeholders |
-| `pc.end_a_policy` | N3, to anyone holding a policy |
-| `diplomat.his_governor_means_to_leave` | A7: the governor of his own town turns seditious, and he offers `cultivate_governor` |
-
-#### New ideas (Claude)
-
-| Code | Idea | Plumbing |
+| Code | Idea | Outcome |
 | :--- | :--- | :--- |
-| N1 | PC composes **an urging** at will: "see to your defences" | ✅ already built, `pc.urge_a_course` (#454) |
-| N2 | PC composes **gold to a town** | ✅ `pc.send_the_town_gold` |
-| N3 | PC composes **cancel a policy** (all holders) | ✅ `pc.end_a_policy` |
-| N4 | "You will remember you refused me" / "you promised us grain" | ✅ `you_refused_me`, `you_gave_your_word` |
-| N5 | Expedition struck / turned back — the governor's account | ✅ `our_people_were_struck`, `they_have_turned_back` |
-| N6 | "We have arrived" — the new town's first letter | ✅ `we_have_arrived` |
-| N7 | The tribe brought corn / sent men to join us / stopped trading | ✅ three letters |
-| N8 | A duke's men are in the rebel town next door | ✅ `a_duke_is_in_the_rebel_town` |
-| N9 | His town began a trade protest — the governor explains | 🔧 #476 row 2 |
-| N10 | A successor governor introduces himself | ✖ `contacts.md` §8: there are no successors |
-| N11 | "We cannot finish it" — an objective stalled | 🔧 #476 row 1 |
-| N12 | Low-loyalty unilateral: short-weights the customs | ✖ superseded by the Author's ruling (A7) |
-| N13 | High-loyalty policy: a standing contribution | ✖ superseded by the Author's ruling (his good word) |
-| N14 | Tall's pride keyed to a great building | 🔧 #476 row 3 |
+| A1 | Win back a disloyal governor, CTJ (Author) | 🔧 #473 |
+| A2 | The Provost's library push, the governor's side (Author) | ✅ E11 |
+| A3 | "Remember when I did you a favour" (Author) | ✅ E25; sour half E41–42 |
+| A4 | Tension rising with the natives (Author) | ✅ E43; 🔧 #476 to fire on a fall |
+| A5 | The expedition has arrived and things have changed (Author) | 🔧 #477 |
+| A6 | High-loyalty special (Author) | 🔧 #474 his good word |
+| A7 | Low-loyalty act (Author) | ✅ ruled; E45 for his own town; 🔧 #475 elsewhere |
+| A8 | He proposes a daughter town (PO) | ✅ E8/E9 on a change to go wide |
+| A9 | The rebel governor's terms (PO) | ✅ E44 |
+| A10 | The loyal neighbour: "do we send them grain?" (PO) | 🔧 #476 |
+| A11 | The investment pitch (PO) | 🔧 #476 |
+| A12 | "The good ground is theirs" (PO) | ✅ E16 |
+| A13 | The expedition mid-course (PO) | ✅ E30 reply and P7; the road report 🔧 #478 |
+| A14 | Tall's pride (PO) | 🔧 #476 |
+| A15 | "Defend us, or let us defend ourselves" (PO) | ➡ Commander sheet |
+| A16 | Unrest spreading from a rebel town, made audible (PO) | ✅ E28 |
+| A17 | The two-voice month against the Steward (PO) | ✅ E7 |
+| A18 | Tribe war aid (PO) | ✅ #471, E31–33 |
+| N1 | The PC urges unprompted | ✅ P5 (#454) |
+| N2 | The PC sends a town gold | ✅ P10 |
+| N3 | The PC cancels a policy | ✅ P11 |
+| N4 | The sour memories | ✅ E41, E42 |
+| N5 | His expedition struck or turned back | ✅ E34, E35 |
+| N6 | We have arrived | ✅ E36 |
+| N7 | The tribe gives, joins, stops trading | ✅ E37–39 |
+| N8 | A duke in the rebel town next door | ✅ E40 |
+| N9 | His town's trade protest | 🔧 #476 |
+| N10 | A successor introduces himself | ✖ `contacts.md` §8: no successors |
+| N11 | We cannot finish it | 🔧 #476 |
+| N12 | Short-weighting the customs | ✖ superseded by A7 |
+| N13 | A standing contribution | ✖ superseded by A6 |
+| N14 | Pride in a great building | 🔧 #476 |
+
+#### 8. Simulated post (2026-10-02, `tools/post_calendar.gd`)
+
+Three seeds × 36 months, run once replying to every letter with its first option
+and once replying to nothing.
+
+- **Whole colony:** about 3–5 letters a month in years 1–2, and 6–11 in year 3,
+  which is inside SPEC §9.6.
+- **Months 2–4 are the crowded ones:** 5, 5 and 6 letters, with up to three that
+  must be answered. Most come from the Crown officers, and those are timed on
+  their own sheets.
+- **From the governor:**
+  - **month 1:** the seasonal report, from month 3 of the town once #478 lands;
+  - **month 2:** a new project;
+  - **month 3:** a shortage, plus his companion to the Steward's tax-rise letter;
+  - **after that:** roughly one or two a month while there is one town, and more
+    as towns are founded.

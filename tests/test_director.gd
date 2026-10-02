@@ -120,10 +120,17 @@ func test_selection_is_deterministic() -> void:
 # --- 🔒 The opening post is the governor's (#365) ----------------------
 
 ## Whether a trigger holds whatever the world looks like.
+## `he_governs_a_town` says who may write, not that anything is wrong: #368 put it
+## on the seasonal report so that a governor still on the march does not send
+## one. It cannot make a bad colony's opening post any worse, which is what #365
+## guards.
+const NOT_A_HARDSHIP: PackedStringArray = ["always", "he_governs_a_town"]
+
+
 func _unconditional(trigger: Dictionary) -> bool:
 	for entry in trigger.get("conditions", []):
 		for condition_id in entry:
-			if String(condition_id) != "always":
+			if not NOT_A_HARDSHIP.has(String(condition_id)):
 				return false
 	return true
 
